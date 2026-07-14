@@ -48,10 +48,10 @@ implements Runnable {
     int mapWidth;
     int mapHeight;
     int hj = (this.mapWidth - 1) * 8;
-    int eV = (this.mapWidth + this.mapHeight) * 16;
-    int bQ = (this.mapWidth + this.mapHeight) * 8;
-    int gU = this.eV / 2;
-    int fO = this.bQ / 2;
+    int mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
+    int mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
+    int gU = this.mapScreenWidth / 2;
+    int fO = this.mapScreenHeight / 2;
     int dQ;
     int hf;
     int ab;
@@ -145,10 +145,10 @@ implements Runnable {
     int O = 0;
     int dh = 0;
     int bV = 0;
-    int db = this.gU;
-    int aR = this.fO;
-    int t = this.gU * 2;
-    int fj = this.fO * 2;
+    int viewportBaseX = this.gU;
+    int viewportBaseY = this.fO;
+    int mapScaleX = this.gU * 2;
+    int mapScaleY = this.fO * 2;
     int bk = 0;
     int ej = 0;
     int hh = 3;
@@ -189,14 +189,14 @@ implements Runnable {
     int confirmCounter = 0;
     int confirmTargetState = -1;
     boolean flagsA = true;
-    byte gL = 0;
+    byte junctionDirCursor = 0;
     byte numSelectedTrains = 0;
     byte[] dC = new byte[64];
     short[] gN = new short[64];
     short[] di = new short[64];
     short[] trainY2 = new short[64];
     short[] trainX2 = new short[64];
-    byte du = 0;
+    byte stationDirCursor = 0;
     byte aE = 0;
     byte[] da = new byte[48];
     byte[] cV = new byte[48];
@@ -240,17 +240,17 @@ implements Runnable {
     int et = 0;
     int[] dk = new int[]{-1, 1, 0, 0, -1, 1, 0};
     int[] j = new int[]{0, 0, -1, 1, 0, 0, -1};
-    int fD = 0;
-    int gY = 0;
-    int hg = 0;
-    int[] gC = new int[5];
-    int[] U = new int[5];
-    int s = 0;
+    int aiWagonsLastSeen = 0;
+    int wagonType = 0;
+    int wagonDiscountType = 0;
+    int[] wagonOptionSlots = new int[5];
+    int[] wagonCountMatch = new int[5];
+    int unitCost = 0;
     int cfr_renamed_0 = 0;
-    int eS = 100;
-    byte[] hv = new byte[250];
-    byte[] aj = new byte[250];
-    byte[] eq = new byte[250];
+    int difficultyPct = 100;
+    byte[] vehicleFlags = new byte[250];
+    byte[] wagonAJ = new byte[250];
+    byte[] wagonEQ = new byte[250];
     short[][] cO = new short[250][5];
     byte[] hq = new byte[250];
     byte[] gW = new byte[250];
@@ -261,14 +261,14 @@ implements Runnable {
     byte[] trainFlags = new byte[500];
     byte[] g = new byte[500];
     byte[] aw = new byte[500];
-    byte[] eT = new byte[500];
+    byte[] wagonEnergyRemaining = new byte[500];
     byte[] trainEnergyOrCount = new byte[500];
-    byte[] aI = new byte[500];
+    byte[] wagonIorHost = new byte[500];
     byte[] A = new byte[500];
     short[] nextCar = new short[500];
     int[] eL = new int[500];
     byte[] bz = new byte[500];
-    int aN;
+    int trainAtCursor;
     int era = 1;
     byte[][] eR = new byte[][]{{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}};
     byte[][] aH = new byte[][]{{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}};
@@ -291,7 +291,7 @@ implements Runnable {
     boolean bR = false;
     boolean dS = false;
     int totalSpent = 0;
-    int gE = 0;
+    int aiMoneySpent = 0;
     int cF = 0;
     int ho = 0;
     int totalRevenue = 0;
@@ -382,7 +382,7 @@ implements Runnable {
     int dV = 0;
     int fu = 0;
     int cT = 0;
-    int gu = 0;
+    int aiWagonsBought = 0;
     boolean en;
     boolean musicPlaying = false;
     boolean ay = false;
@@ -402,7 +402,7 @@ implements Runnable {
     static byte[] l = new byte[]{-21, 54, -29, 35, -30, 42, -60, -40, 40, 76, 28, 100, -23, 62, -42, 56, -59, -39};
     static byte[] ag = new byte[]{23, 98, -57, -57, -11, 61, -29, 55, 51, 72, -2, 18};
     static byte[] i = new byte[]{40, 123, 39, 28, 9, 15, 65, 127, -35, -58, 3, 6, -59, -29, 18, 6, -21, -45, 41, 17, 31, 24};
-    static byte[] G = new byte[]{-53, -63, -55, 57, 13, 124, -53, -50, -65, 45, 26, 29};
+    static byte[] viewportZoomStep = new byte[]{-53, -63, -55, 57, 13, 124, -53, -50, -65, 45, 26, 29};
     static byte[] cQ = new byte[]{-30, 61, -6, 10, -3, 53, 20, 122, 57, 93, 44, 127, -2, 12, -31, 56, -58, 40};
     static byte[] ec = new byte[]{18, 1, -28, -57, -10, 41, -37, -62, -40, 53, 12, 116, 53, -83, 36, 19, 38, 20, -33, -33, 36, 19, 68, 120, -25, 43, 6, 62, 29, 2, -25, 41, -68, 37, 66, 125, 0, 62, 62, 127, -54, -52, 17, 49, 17, 3, -59, -54, -30, 28, 5, 51, 24, 1, -65, -30, -8, 58, -6, 47, 11, 1, 17, 5, 47, 18, 53, 99, 42, 27, 57, 123, -9, 96, -54, -50, 17, 9, 34, 28, -41, 15, 3, 39, 46, 100, 64, 97, -44, -58, -19, 22, -38, -63, 18, 1, 8, 63};
     byte[] tileOffsetX = new byte[1];
@@ -544,7 +544,7 @@ implements Runnable {
                         this.update();
                     }
                     if (!this.cP[this.buildMenuMode][this.buildMenuIndex]) continue;
-                    this.B();
+                    this.viewportZoomKey();
                 }
             } else {
                 this.update();
@@ -1148,10 +1148,10 @@ implements Runnable {
             n8 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
             n7 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
             n6 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
-            n9 = (short)((by & 8) == 8 ? this.n(this.Q, n9) : n9);
-            n8 = (short)((by & 0x10) == 16 ? this.n(this.Q, n8) : n8);
-            n7 = (short)((by & 0x20) == 32 ? this.n(this.Q, n7) : n7);
-            n6 = (short)((by & 0x40) == 64 ? this.n(this.Q, n6) : n6);
+            n9 = (short)((by & 8) == 8 ? this.neighboursMask(this.Q, n9) : n9);
+            n8 = (short)((by & 0x10) == 16 ? this.neighboursMask(this.Q, n8) : n8);
+            n7 = (short)((by & 0x20) == 32 ? this.neighboursMask(this.Q, n7) : n7);
+            n6 = (short)((by & 0x40) == 64 ? this.neighboursMask(this.Q, n6) : n6);
             n5 = (by & 0x80) == 128 ? 1 : 0;
             n4 = n5 != 0 ? this.gz[n25++] : 0;
             n3 = n12 + n8;
@@ -1472,7 +1472,7 @@ implements Runnable {
                         this.ho += this.as;
                         this.smoothHeightMap(true);
                     } else {
-                        this.M();
+                        this.enterOutOfMoneyState();
                     }
                 } else {
                     this.smoothHeightMap(true);
@@ -2024,7 +2024,7 @@ implements Runnable {
         return this.bk / 3;
     }
 
-    void k() {
+    void viewportPanKey() {
         if (this.ej == 56 || this.ej == 6) {
             this.viewportCenterY += 30;
         }
@@ -2059,78 +2059,78 @@ implements Runnable {
         if (this.viewportCenterY < 0) {
             this.viewportCenterY = 0;
         }
-        if (this.viewportCenterX > this.eV - e) {
-            this.viewportCenterX = this.eV - e;
+        if (this.viewportCenterX > this.mapScreenWidth - e) {
+            this.viewportCenterX = this.mapScreenWidth - e;
         }
-        if (this.viewportCenterY > this.bQ - eN) {
-            this.viewportCenterY = this.bQ - eN;
+        if (this.viewportCenterY > this.mapScreenHeight - eN) {
+            this.viewportCenterY = this.mapScreenHeight - eN;
         }
-        this.db = this.viewportCenterX + e / 2;
-        this.aR = this.viewportCenterY + eN / 2;
-        this.t = this.db * 2;
-        this.fj = this.aR * 2;
+        this.viewportBaseX = this.viewportCenterX + e / 2;
+        this.viewportBaseY = this.viewportCenterY + eN / 2;
+        this.mapScaleX = this.viewportBaseX * 2;
+        this.mapScaleY = this.viewportBaseY * 2;
     }
 
-    void B() {
+    void viewportZoomKey() {
         int n = this.G();
         if (this.ej == 56 || this.ej == 6) {
-            this.fj += n * 2;
+            this.mapScaleY += n * 2;
         }
         if (this.ej == 50 || this.ej == 1) {
-            this.fj -= n * 2;
+            this.mapScaleY -= n * 2;
         }
         if (this.ej == 54 || this.ej == 5) {
-            this.t += n * 2;
+            this.mapScaleX += n * 2;
         }
         if (this.ej == 52 || this.ej == 2) {
-            this.t -= n * 2;
+            this.mapScaleX -= n * 2;
         }
         if (this.ej == 49) {
-            this.fj -= n;
-            this.t -= n * 2;
+            this.mapScaleY -= n;
+            this.mapScaleX -= n * 2;
         }
         if (this.ej == 51) {
-            this.fj -= n;
-            this.t += n * 2;
+            this.mapScaleY -= n;
+            this.mapScaleX += n * 2;
         }
         if (this.ej == 55) {
-            this.fj += n;
-            this.t -= n * 2;
+            this.mapScaleY += n;
+            this.mapScaleX -= n * 2;
         }
         if (this.ej == 57) {
-            this.fj += n;
-            this.t += n * 2;
+            this.mapScaleY += n;
+            this.mapScaleX += n * 2;
         }
-        this.db = this.t / 2;
-        this.aR = this.fj / 2;
-        if (this.db > this.eV - 8) {
-            this.db = this.eV - 8;
+        this.viewportBaseX = this.mapScaleX / 2;
+        this.viewportBaseY = this.mapScaleY / 2;
+        if (this.viewportBaseX > this.mapScreenWidth - 8) {
+            this.viewportBaseX = this.mapScreenWidth - 8;
         }
-        if (this.aR > this.bQ - 4) {
-            this.aR = this.bQ - 4;
+        if (this.viewportBaseY > this.mapScreenHeight - 4) {
+            this.viewportBaseY = this.mapScreenHeight - 4;
         }
         boolean bl = false;
-        if (this.viewportCenterX > 0 && this.db - this.viewportCenterX <= 10) {
+        if (this.viewportCenterX > 0 && this.viewportBaseX - this.viewportCenterX <= 10) {
             bl = true;
-            this.viewportCenterX = this.db - 11;
+            this.viewportCenterX = this.viewportBaseX - 11;
         }
-        if (this.viewportCenterY > 0 && this.aR - this.viewportCenterY <= 10) {
+        if (this.viewportCenterY > 0 && this.viewportBaseY - this.viewportCenterY <= 10) {
             bl = true;
-            this.viewportCenterY = this.aR - 11;
+            this.viewportCenterY = this.viewportBaseY - 11;
         }
-        if (this.db - this.viewportCenterX >= e - 20) {
+        if (this.viewportBaseX - this.viewportCenterX >= e - 20) {
             bl = true;
-            this.viewportCenterX = this.db - e + 21;
+            this.viewportCenterX = this.viewportBaseX - e + 21;
         }
-        if (this.aR - this.viewportCenterY >= eN - 20) {
+        if (this.viewportBaseY - this.viewportCenterY >= eN - 20) {
             bl = true;
-            this.viewportCenterY = this.aR - eN + 21;
+            this.viewportCenterY = this.viewportBaseY - eN + 21;
         }
-        if (this.db < 0) {
-            this.db = 0;
+        if (this.viewportBaseX < 0) {
+            this.viewportBaseX = 0;
         }
-        if (this.aR < 0) {
-            this.aR = 0;
+        if (this.viewportBaseY < 0) {
+            this.viewportBaseY = 0;
         }
         if (this.viewportCenterX < 0) {
             this.viewportCenterX = 0;
@@ -2140,20 +2140,20 @@ implements Runnable {
             this.viewportCenterY = 0;
             bl = false;
         }
-        if (this.viewportCenterX > this.eV - e) {
-            this.viewportCenterX = this.eV - e;
+        if (this.viewportCenterX > this.mapScreenWidth - e) {
+            this.viewportCenterX = this.mapScreenWidth - e;
             bl = false;
         }
-        if (this.viewportCenterY > this.bQ - eN) {
-            this.viewportCenterY = this.bQ - eN;
+        if (this.viewportCenterY > this.mapScreenHeight - eN) {
+            this.viewportCenterY = this.mapScreenHeight - eN;
             bl = false;
         }
         if (bl) {
             this.bk = 80;
         }
         this.i();
-        this.t = this.db * 2;
-        this.fj = this.aR * 2;
+        this.mapScaleX = this.viewportBaseX * 2;
+        this.mapScaleY = this.viewportBaseY * 2;
     }
 
     int a(int n, int n2, int n3, int n4, int n5, int n6) {
@@ -2189,8 +2189,8 @@ implements Runnable {
         int n4;
         int n5 = 0;
         int n6 = 0;
-        int n7 = this.db - 2 * this.aR + 16 + 2 * this.hj;
-        int n8 = this.db + 2 * this.aR - 16 - 2 * this.hj;
+        int n7 = this.viewportBaseX - 2 * this.viewportBaseY + 16 + 2 * this.hj;
+        int n8 = this.viewportBaseX + 2 * this.viewportBaseY - 16 - 2 * this.hj;
         n8 /= 32;
         this.blockBuildMenu = true;
         block0: for (n4 = (n7 /= 32) - 1; n4 <= n7 + 1; ++n4) {
@@ -2199,8 +2199,8 @@ implements Runnable {
                 n5 = n3 * 16 + n4 * 16 + 16;
                 n6 = this.hj - n4 * 8 + n3 * 8 + 8;
                 this.a(n4, n3, this.w, this.dz, false);
-                n2 = this.a(this.db, this.aR, this.w[0], this.dz[0], this.w[1], this.dz[1]) * this.a(this.db, this.aR, this.w[2], this.dz[2], this.w[3], this.dz[3]);
-                n = this.a(this.db, this.aR, this.w[0], this.dz[0], this.w[2], this.dz[2]) * this.a(this.db, this.aR, this.w[1], this.dz[1], this.w[3], this.dz[3]);
+                n2 = this.a(this.viewportBaseX, this.viewportBaseY, this.w[0], this.dz[0], this.w[1], this.dz[1]) * this.a(this.viewportBaseX, this.viewportBaseY, this.w[2], this.dz[2], this.w[3], this.dz[3]);
+                n = this.a(this.viewportBaseX, this.viewportBaseY, this.w[0], this.dz[0], this.w[2], this.dz[2]) * this.a(this.viewportBaseX, this.viewportBaseY, this.w[1], this.dz[1], this.w[3], this.dz[3]);
                 if (n2 > 0 || n > 0) continue;
                 n7 = n4;
                 n8 = n3;
@@ -2213,10 +2213,10 @@ implements Runnable {
             this.swapMapY = n8;
             this.tileCursorX = n7;
             this.tileCursorY = n8;
-            n4 = Math.abs((this.db - this.w[0]) * (this.db - this.w[0]) + (this.aR - this.dz[0]) * (this.aR - this.dz[0]));
-            n3 = Math.abs((this.db - this.w[1]) * (this.db - this.w[1]) + (this.aR - this.dz[1]) * (this.aR - this.dz[1]));
-            n2 = Math.abs((this.db - this.w[2]) * (this.db - this.w[2]) + (this.aR - this.dz[2]) * (this.aR - this.dz[2]));
-            n = Math.abs((this.db - this.w[3]) * (this.db - this.w[3]) + (this.aR - this.dz[3]) * (this.aR - this.dz[3]));
+            n4 = Math.abs((this.viewportBaseX - this.w[0]) * (this.viewportBaseX - this.w[0]) + (this.viewportBaseY - this.dz[0]) * (this.viewportBaseY - this.dz[0]));
+            n3 = Math.abs((this.viewportBaseX - this.w[1]) * (this.viewportBaseX - this.w[1]) + (this.viewportBaseY - this.dz[1]) * (this.viewportBaseY - this.dz[1]));
+            n2 = Math.abs((this.viewportBaseX - this.w[2]) * (this.viewportBaseX - this.w[2]) + (this.viewportBaseY - this.dz[2]) * (this.viewportBaseY - this.dz[2]));
+            n = Math.abs((this.viewportBaseX - this.w[3]) * (this.viewportBaseX - this.w[3]) + (this.viewportBaseY - this.dz[3]) * (this.viewportBaseY - this.dz[3]));
             int n9 = Math.min(n4, Math.min(n3, Math.min(n2, n)));
             this.vehicleMenuSelectIndex = n4 < n;
             boolean bl = this.trainMenuSelectIndex = n3 < n2;
@@ -2385,8 +2385,8 @@ implements Runnable {
 
     void e(Graphics graphics) {
         if (this.cP[this.buildMenuMode][this.buildMenuIndex]) {
-            int n = this.db - this.viewportCenterX;
-            int n2 = this.aR - this.viewportCenterY;
+            int n = this.viewportBaseX - this.viewportCenterX;
+            int n2 = this.viewportBaseY - this.viewportCenterY;
             if (this.blockBuildMenu) {
                 this.a(graphics, 200, n, n2 + 15, 20);
                 graphics.setColor(0xFF0000);
@@ -2473,7 +2473,7 @@ implements Runnable {
         }
     }
 
-    void H() {
+    void demolishAtCursor() {
         if (!this.blockBuildMenu && this.r(this.tileCursorX, this.tileCursorY)) {
             this.bg = 0;
             if (this.tileMap[this.tileCursorX][this.tileCursorY] >= 81 && this.tileMap[this.tileCursorX][this.tileCursorY] <= 86) {
@@ -2498,12 +2498,12 @@ implements Runnable {
                     }
                 }
             } else if (this.tileMap[this.tileCursorX][this.tileCursorY] >= 87 && this.tileMap[this.tileCursorX][this.tileCursorY] <= 90) {
-                int n = this.s(this.tileCursorX, this.tileCursorY);
+                int n = this.spawnOrFindAt(this.tileCursorX, this.tileCursorY);
                 if (n != 5000) {
-                    int n5 = this.c(this.aj[n]);
-                    int n6 = this.c(this.eq[n]);
-                    if ((this.hv[n] & 0x20) == 32) {
-                        if ((this.hv[n] & 0x40) == 0) {
+                    int n5 = this.c(this.wagonAJ[n]);
+                    int n6 = this.c(this.wagonEQ[n]);
+                    if ((this.vehicleFlags[n] & 0x20) == 32) {
+                        if ((this.vehicleFlags[n] & 0x40) == 0) {
                             this.trackMap[n5][n6 - 1] = 0;
                             this.trackMap[n5][n6 + 1] = 0;
                             this.a(n5, n6 - 1, true, false);
@@ -2518,7 +2518,7 @@ implements Runnable {
                     this.a(n5, n6, true, false);
                     this.d(n5, n6, -6);
                     this.trackMap[n5][n6] = 0;
-                    this.hv[n] = 0;
+                    this.vehicleFlags[n] = 0;
                 }
             } else {
                 this.a(this.tileCursorX, this.tileCursorY, true, false);
@@ -2528,75 +2528,75 @@ implements Runnable {
         }
     }
 
-    void I() {
+    void pickTrainsAtCursor() {
         if (!this.blockBuildMenu) {
             byte by = this.trackMap[this.tileCursorX][this.tileCursorY];
             if ((by & 0xC0) == 128) {
-                this.gL = (byte)(this.trackMap[this.tileCursorX][this.tileCursorY] & 0x3F);
+                this.junctionDirCursor = (byte)(this.trackMap[this.tileCursorX][this.tileCursorY] & 0x3F);
                 this.ready = false;
                 this.transitionCode = 20;
                 this.setState(20);
             }
             if ((by & 0xC0) == 192) {
-                this.du = (byte)(this.trackMap[this.tileCursorX][this.tileCursorY] & 0x3F);
+                this.stationDirCursor = (byte)(this.trackMap[this.tileCursorX][this.tileCursorY] & 0x3F);
                 this.ready = false;
                 this.transitionCode = 21;
                 this.setState(20);
             }
             if (by == 65) {
-                this.aN = this.c(this.tileCursorX, this.tileCursorY);
-                if (this.aN != 5000) {
+                this.trainAtCursor = this.cPosLookup(this.tileCursorX, this.tileCursorY);
+                if (this.trainAtCursor != 5000) {
                     int n;
                     int n2;
-                    this.gY = this.g[this.aN];
+                    this.wagonType = this.g[this.trainAtCursor];
                     for (n2 = 0; n2 < 5; ++n2) {
-                        this.gC[n2] = -1;
+                        this.wagonOptionSlots[n2] = -1;
                     }
-                    n2 = this.nextCar[this.aN];
+                    n2 = this.nextCar[this.trainAtCursor];
                     for (n = 0; n < 5 && n2 != -1; ++n) {
                         switch (this.trainFlags[n2] & 0xF) {
                             case 2: {
-                                this.gC[n] = 0;
+                                this.wagonOptionSlots[n] = 0;
                                 break;
                             }
                             case 3: {
-                                this.gC[n] = 1;
+                                this.wagonOptionSlots[n] = 1;
                                 break;
                             }
                             case 4: {
-                                this.gC[n] = 2;
+                                this.wagonOptionSlots[n] = 2;
                                 break;
                             }
                             case 5: {
-                                this.gC[n] = 2;
+                                this.wagonOptionSlots[n] = 2;
                                 break;
                             }
                             case 6: {
-                                this.gC[n] = 3;
+                                this.wagonOptionSlots[n] = 3;
                                 break;
                             }
                             case 7: {
-                                this.gC[n] = 3;
+                                this.wagonOptionSlots[n] = 3;
                             }
                         }
                         n2 = this.nextCar[n2];
                     }
                     for (n = 0; n < 5; ++n) {
-                        this.U[n] = this.gC[n];
+                        this.wagonCountMatch[n] = this.wagonOptionSlots[n];
                     }
-                    this.hg = this.gY;
-                    this.eS = 100;
-                    this.af();
-                    this.gv = this.s;
-                    this.eS = 100 - 3 * this.aw[this.aN];
-                    this.af();
-                    this.cfr_renamed_0 = this.s;
+                    this.wagonDiscountType = this.wagonType;
+                    this.difficultyPct = 100;
+                    this.computeTrainCost();
+                    this.gv = this.unitCost;
+                    this.difficultyPct = 100 - 3 * this.aw[this.trainAtCursor];
+                    this.computeTrainCost();
+                    this.cfr_renamed_0 = this.unitCost;
                     this.ready = false;
                     this.transitionCode = 26;
                     this.setState(20);
                 } else {
-                    this.fD = this.s(this.tileCursorX, this.tileCursorY);
-                    if (this.fD != 5000) {
+                    this.aiWagonsLastSeen = this.spawnOrFindAt(this.tileCursorX, this.tileCursorY);
+                    if (this.aiWagonsLastSeen != 5000) {
                         this.ready = false;
                         this.transitionCode = 22;
                         this.setState(20);
@@ -2606,7 +2606,7 @@ implements Runnable {
         }
     }
 
-    void E(int n) {
+    void buildPlaceTrackPiece(int n) {
         switch (n) {
             case 0: {
                 int n2;
@@ -2665,7 +2665,7 @@ implements Runnable {
             case 0: {
                 switch (by) {
                     case 0: {
-                        this.I();
+                        this.pickTrainsAtCursor();
                         break;
                     }
                     case 1: {
@@ -2757,7 +2757,7 @@ implements Runnable {
                         break;
                     }
                     case 4: {
-                        this.H();
+                        this.demolishAtCursor();
                         break;
                     }
                     case 5: {
@@ -2789,13 +2789,13 @@ implements Runnable {
                             this.x(this.selectionCost);
                             break;
                         }
-                        this.J();
-                        this.M();
+                        this.normalizeTrackBits();
+                        this.enterOutOfMoneyState();
                         break;
                     }
                     case 9: {
                         if (this.aC) {
-                            this.J();
+                            this.normalizeTrackBits();
                             break;
                         }
                         this.r();
@@ -2810,7 +2810,7 @@ implements Runnable {
             case 3: {
                 switch (by) {
                     default: {
-                        this.E(by);
+                        this.buildPlaceTrackPiece(by);
                         break block0;
                     }
                     case 9: 
@@ -2875,7 +2875,7 @@ implements Runnable {
             this.p(-n);
             return true;
         }
-        this.M();
+        this.enterOutOfMoneyState();
         return false;
     }
 
@@ -2960,7 +2960,7 @@ implements Runnable {
                     this.x(n8);
                     this.d(this.tileCursorX, this.tileCursorY, -4);
                 } else {
-                    this.M();
+                    this.enterOutOfMoneyState();
                 }
             } else if (n8 <= this.money) {
                 this.tileMap[this.tileCursorX][this.tileCursorY] = this.tileMap[this.tileCursorX][this.tileCursorY] == n3 ? (byte)n5 : (this.tileMap[this.tileCursorX][this.tileCursorY] == n4 ? (byte)n6 : (byte)(bl ? n : n2));
@@ -2972,7 +2972,7 @@ implements Runnable {
                 this.x(n8);
                 this.d(this.tileCursorX, this.tileCursorY, -4);
             } else {
-                this.M();
+                this.enterOutOfMoneyState();
             }
         }
     }
@@ -3018,7 +3018,7 @@ implements Runnable {
             this.money -= this.bg;
             this.p(-this.bg);
         } else {
-            this.M();
+            this.enterOutOfMoneyState();
         }
     }
 
@@ -3600,14 +3600,14 @@ implements Runnable {
 
     Image u(int n, int n2) {
         if (n == 23) {
-            if (n2 == 0 && this.gY >= 0 && this.gY < 3) {
+            if (n2 == 0 && this.wagonType >= 0 && this.wagonType < 3) {
                 return this.tileSprites[this.c(this.tileSpriteIndex[136])];
             }
-            if (n2 == 0 && this.gY >= 3 && this.gY < 6) {
+            if (n2 == 0 && this.wagonType >= 3 && this.wagonType < 6) {
                 return this.tileSprites[this.c(this.tileSpriteIndex[146])];
             }
             if (n2 > 0) {
-                switch (this.gC[n2 - 1]) {
+                switch (this.wagonOptionSlots[n2 - 1]) {
                     case -1: {
                         return null;
                     }
@@ -3626,9 +3626,9 @@ implements Runnable {
                 }
             }
         }
-        if (n == 26 && this.A(this.aN) > n2) {
+        if (n == 26 && this.A(this.trainAtCursor) > n2) {
             int n3;
-            int n4 = this.aN;
+            int n4 = this.trainAtCursor;
             for (n3 = 0; n3 < n2; ++n3) {
                 n4 = this.nextCar[n4];
             }
@@ -3689,51 +3689,51 @@ implements Runnable {
             return true;
         }
         if (n == 21) {
-            if (n2 == 0 && this.da[this.du] % 2 == 0) {
+            if (n2 == 0 && this.da[this.stationDirCursor] % 2 == 0) {
                 return true;
             }
-            if (n2 == 1 && this.da[this.du] % 2 == 1) {
+            if (n2 == 1 && this.da[this.stationDirCursor] % 2 == 1) {
                 return true;
             }
-            if (n2 == 2 && this.da[this.du] % 2 == 1) {
+            if (n2 == 2 && this.da[this.stationDirCursor] % 2 == 1) {
                 return true;
             }
         }
         if (n == 22) {
-            if (n2 == 0 && this.cO[this.fD][0] == 0 && this.cO[this.fD][1] == 0 && this.cO[this.fD][2] == 0 && this.cO[this.fD][3] == 0) {
+            if (n2 == 0 && this.cO[this.aiWagonsLastSeen][0] == 0 && this.cO[this.aiWagonsLastSeen][1] == 0 && this.cO[this.aiWagonsLastSeen][2] == 0 && this.cO[this.aiWagonsLastSeen][3] == 0) {
                 return true;
             }
-            if (n2 == 1 && this.cO[this.fD][0] > 0) {
+            if (n2 == 1 && this.cO[this.aiWagonsLastSeen][0] > 0) {
                 return true;
             }
-            if (n2 == 2 && this.cO[this.fD][1] > 0) {
+            if (n2 == 2 && this.cO[this.aiWagonsLastSeen][1] > 0) {
                 return true;
             }
-            if (n2 == 3 && this.cO[this.fD][2] > 0) {
+            if (n2 == 3 && this.cO[this.aiWagonsLastSeen][2] > 0) {
                 return true;
             }
-            if (n2 == 4 && this.cO[this.fD][3] > 0) {
+            if (n2 == 4 && this.cO[this.aiWagonsLastSeen][3] > 0) {
                 return true;
             }
-            if (n2 == 5 && this.cO[this.fD][4] > 0) {
+            if (n2 == 5 && this.cO[this.aiWagonsLastSeen][4] > 0) {
                 return true;
             }
-            if (n2 == 6 && this.hq[this.fD] == 0) {
+            if (n2 == 6 && this.hq[this.aiWagonsLastSeen] == 0) {
                 return true;
             }
-            if (n2 == 7 && (this.hq[this.fD] & 1) == 1) {
+            if (n2 == 7 && (this.hq[this.aiWagonsLastSeen] & 1) == 1) {
                 return true;
             }
-            if (n2 == 8 && (this.hq[this.fD] & 2) == 2) {
+            if (n2 == 8 && (this.hq[this.aiWagonsLastSeen] & 2) == 2) {
                 return true;
             }
-            if (n2 == 9 && (this.hq[this.fD] & 4) == 4) {
+            if (n2 == 9 && (this.hq[this.aiWagonsLastSeen] & 4) == 4) {
                 return true;
             }
-            if (n2 == 10 && (this.hq[this.fD] & 8) == 8) {
+            if (n2 == 10 && (this.hq[this.aiWagonsLastSeen] & 8) == 8) {
                 return true;
             }
-            if (n2 == 11 && (this.hq[this.fD] & 0x10) == 16) {
+            if (n2 == 11 && (this.hq[this.aiWagonsLastSeen] & 0x10) == 16) {
                 return true;
             }
         }
@@ -3741,23 +3741,23 @@ implements Runnable {
             return true;
         }
         if (n == 26) {
-            if (n2 < 6 && this.A(this.aN) > n2) {
+            if (n2 < 6 && this.A(this.trainAtCursor) > n2) {
                 return true;
             }
-            if (n2 == 6 && this.eL[this.aN] == 7) {
+            if (n2 == 6 && this.eL[this.trainAtCursor] == 7) {
                 return true;
             }
-            if (n2 == 7 && this.eL[this.aN] != 7) {
+            if (n2 == 7 && this.eL[this.trainAtCursor] != 7) {
                 return true;
             }
-            if (n2 == 8 && this.aw[this.aN] > 0) {
+            if (n2 == 8 && this.aw[this.trainAtCursor] > 0) {
                 return true;
             }
         }
         return n == 60 && (n2 != 0 ? n2 <= this.aO : this.aO == 0);
     }
 
-    int n(int n, int n2) {
+    int neighboursMask(int n, int n2) {
         if (n == 34) {
             if (this.W == 0 || this.W == 2) {
                 if (n2 == 65) {
@@ -3827,18 +3827,18 @@ implements Runnable {
             case 20: {
                 switch (n2) {
                     case 0: {
-                        byte[] byArray = this.n[this.ds[80 + (this.di[this.gL] >> 8 & 0xFF)]];
-                        byte[] byArray2 = this.n[this.ds[86 + (this.di[this.gL] & 0xFF)]];
+                        byte[] byArray = this.n[this.ds[80 + (this.di[this.junctionDirCursor] >> 8 & 0xFF)]];
+                        byte[] byArray2 = this.n[this.ds[86 + (this.di[this.junctionDirCursor] & 0xFF)]];
                         byte[] byArray3 = new byte[byArray2.length + byArray.length];
                         System.arraycopy(byArray2, 0, byArray3, 0, byArray2.length);
                         System.arraycopy(byArray, 0, byArray3, byArray2.length, byArray.length);
                         return byArray3;
                     }
                     case 1: {
-                        return this.p(this.gN[this.gL] * 13, 0);
+                        return this.p(this.gN[this.junctionDirCursor] * 13, 0);
                     }
                     case 2: {
-                        return this.p(this.dC[this.gL], 29);
+                        return this.p(this.dC[this.junctionDirCursor], 29);
                     }
                 }
                 break;
@@ -3846,13 +3846,13 @@ implements Runnable {
             case 21: {
                 switch (n2) {
                     case 0: {
-                        return this.n[this.ds[100 + this.da[this.du]]];
+                        return this.n[this.ds[100 + this.da[this.stationDirCursor]]];
                     }
                     case 1: {
-                        return this.n[this.ds[106 + this.da[this.du] / 2]];
+                        return this.n[this.ds[106 + this.da[this.stationDirCursor] / 2]];
                     }
                     case 2: {
-                        return this.p(this.fs[this.du], 0);
+                        return this.p(this.fs[this.stationDirCursor], 0);
                     }
                 }
                 break;
@@ -3907,24 +3907,24 @@ implements Runnable {
                 break;
             }
             case 23: {
-                return this.b(this.s - this.cfr_renamed_0);
+                return this.b(this.unitCost - this.cfr_renamed_0);
             }
             case 22: {
-                return this.p(this.cO[this.fD][n2], 0);
+                return this.p(this.cO[this.aiWagonsLastSeen][n2], 0);
             }
             case 26: {
                 int n3;
                 if (n2 == 0) {
-                    return this.n[this.ds[60 + this.g[this.aN]]];
+                    return this.n[this.ds[60 + this.g[this.trainAtCursor]]];
                 }
                 if (n2 == 6) {
-                    return this.b(this.trainRevenue[this.aN]);
+                    return this.b(this.trainRevenue[this.trainAtCursor]);
                 }
                 if (n2 == 7) {
-                    return this.b(this.fS[this.aN]);
+                    return this.b(this.fS[this.trainAtCursor]);
                 }
                 if (n2 == 8) {
-                    return this.p(this.aw[this.aN], 0);
+                    return this.p(this.aw[this.trainAtCursor], 0);
                 }
                 if (n2 == 9) {
                     return this.b(this.cfr_renamed_0 * 70 / 100);
@@ -3933,12 +3933,12 @@ implements Runnable {
                     return this.b(this.gv - this.cfr_renamed_0);
                 }
                 if (n2 == 20) {
-                    return this.bz[this.aN] == 0 ? this.n[this.ds[21]] : this.n[this.ds[20]];
+                    return this.bz[this.trainAtCursor] == 0 ? this.n[this.ds[21]] : this.n[this.ds[20]];
                 }
                 if (n2 <= 0 || n2 >= 6) break;
                 int n4 = 0;
-                if (this.A(this.aN) > n2) {
-                    n4 = this.aN;
+                if (this.A(this.trainAtCursor) > n2) {
+                    n4 = this.trainAtCursor;
                     for (n3 = 0; n3 < n2; ++n3) {
                         n4 = this.nextCar[n4];
                     }
@@ -3946,7 +3946,7 @@ implements Runnable {
                 n3 = this.trainFlags[n4] & 0xF;
                 String string = String.valueOf(this.trainEnergyOrCount[n4]);
                 if (n3 == 2) {
-                    string = string + "/" + this.eT[n4];
+                    string = string + "/" + this.wagonEnergyRemaining[n4];
                 }
                 return this.d(string);
             }
@@ -3970,7 +3970,7 @@ implements Runnable {
                         return this.b(this.y ? this.gx : this.totalSpent);
                     }
                     case 1: {
-                        return this.b(this.y ? this.eM : this.gE);
+                        return this.b(this.y ? this.eM : this.aiMoneySpent);
                     }
                     case 2: {
                         return this.b(this.y ? this.V : this.cF);
@@ -4295,13 +4295,13 @@ implements Runnable {
                     }
                     case 4: {
                         this.money += this.cfr_renamed_0 * 70 / 100;
-                        this.gE -= this.cfr_renamed_0 * 70 / 100;
+                        this.aiMoneySpent -= this.cfr_renamed_0 * 70 / 100;
                         if (this.cfr_renamed_0 != 0) {
                             this.p(this.cfr_renamed_0 * 70 / 100);
                         }
-                        short s = this.nextCar[this.aN];
+                        short s = this.nextCar[this.trainAtCursor];
                         this.o(s);
-                        this.trainFlags[this.aN] = 0;
+                        this.trainFlags[this.trainAtCursor] = 0;
                         while (s != -1) {
                             this.trainFlags[s] = 0;
                             s = this.nextCar[s];
@@ -4441,18 +4441,18 @@ implements Runnable {
                 switch (n2) {
                     case 1: {
                         int n3;
-                        this.gY = 0;
+                        this.wagonType = 0;
                         this.cfr_renamed_0 = 0;
-                        this.hg = this.gY;
+                        this.wagonDiscountType = this.wagonType;
                         for (n3 = 0; n3 < 5; ++n3) {
-                            this.gC[n3] = -1;
+                            this.wagonOptionSlots[n3] = -1;
                         }
                         for (n3 = 0; n3 < 5; ++n3) {
-                            this.U[n3] = -1;
+                            this.wagonCountMatch[n3] = -1;
                         }
-                        this.eS = 100;
+                        this.difficultyPct = 100;
                         this.fq = false;
-                        this.af();
+                        this.computeTrainCost();
                         this.gH = 23;
                         this.setState(30);
                         break block0;
@@ -4478,7 +4478,7 @@ implements Runnable {
                         this.setState(30);
                         break;
                     }
-                    if (!this.a(this.aN, this.gY, this.gC)) break;
+                    if (!this.a(this.trainAtCursor, this.wagonType, this.wagonOptionSlots)) break;
                     this.gH = 26;
                     this.setState(30);
                     break;
@@ -4489,8 +4489,8 @@ implements Runnable {
             }
             case 24: {
                 if (n2 >= 0 && n2 < 6) {
-                    this.gY = n2;
-                    this.af();
+                    this.wagonType = n2;
+                    this.computeTrainCost();
                 }
                 this.gH = 23;
                 this.setState(30);
@@ -4498,17 +4498,17 @@ implements Runnable {
             }
             case 25: {
                 if (n2 == 3) {
-                    this.r(0);
+                    this.addSelectedOption(0);
                 } else if (n2 == 1) {
-                    this.r(1);
+                    this.addSelectedOption(1);
                 } else if (n2 == 0) {
-                    this.r(2);
+                    this.addSelectedOption(2);
                 } else if (n2 == 2) {
-                    this.r(3);
+                    this.addSelectedOption(3);
                 } else if (n2 == 9) {
-                    this.V();
+                    this.popSelectedOption();
                 }
-                this.af();
+                this.computeTrainCost();
                 this.gH = 23;
                 this.setState(30);
                 break;
@@ -4521,17 +4521,17 @@ implements Runnable {
                 } else if (n2 == 2) {
                     int n4 = this.gv - this.cfr_renamed_0;
                     if (n4 <= this.money) {
-                        this.aw[this.aN] = 0;
+                        this.aw[this.trainAtCursor] = 0;
                         this.money -= n4;
                         this.p(-n4);
-                        this.gE += n4;
-                        this.eS = 100 - 3 * this.aw[this.aN];
-                        this.af();
-                        this.cfr_renamed_0 = this.s;
+                        this.aiMoneySpent += n4;
+                        this.difficultyPct = 100 - 3 * this.aw[this.trainAtCursor];
+                        this.computeTrainCost();
+                        this.cfr_renamed_0 = this.unitCost;
                         this.gH = 26;
                         this.setState(30);
                     } else {
-                        this.M();
+                        this.enterOutOfMoneyState();
                     }
                 } else if (n2 == 3) {
                     this.screenParam = 4;
@@ -4539,7 +4539,7 @@ implements Runnable {
                     this.setState(30);
                 }
                 if (n2 == 4) {
-                    this.bz[this.aN] = (byte)(this.bz[this.aN] == 0 ? 1 : 0);
+                    this.bz[this.trainAtCursor] = (byte)(this.bz[this.trainAtCursor] == 0 ? 1 : 0);
                     break;
                 }
                 this.setState(30);
@@ -5143,28 +5143,28 @@ implements Runnable {
             bl = false;
             for (n3 = this.placementX; n3 >= 0; --n3) {
                 for (n2 = this.placementY; n2 >= 0; --n2) {
-                    n = this.h(n3, n2);
+                    n = this.hPath(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
             }
             for (n3 = this.placementX; n3 < this.mapWidth; ++n3) {
                 for (n2 = this.placementY; n2 < this.mapHeight; ++n2) {
-                    n = this.h(n3, n2);
+                    n = this.hPath(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
             }
             for (n3 = this.placementX; n3 >= 0; --n3) {
                 for (n2 = this.placementY; n2 < this.mapHeight; ++n2) {
-                    n = this.h(n3, n2);
+                    n = this.hPath(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
             }
             for (n3 = this.placementX; n3 < this.mapWidth; ++n3) {
                 for (n2 = this.placementY; n2 >= 0; --n2) {
-                    n = this.h(n3, n2);
+                    n = this.hPath(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
@@ -5172,7 +5172,7 @@ implements Runnable {
         }
     }
 
-    int h(int n, int n2) {
+    int hPath(int n, int n2) {
         boolean bl = false;
         if (this.aQ[n][n2] > 0 && this.aQ[n][n2] != 3 && this.aQ[n][n2] != 7) {
             int n3;
@@ -5224,7 +5224,7 @@ implements Runnable {
         return s;
     }
 
-    void J() {
+    void normalizeTrackBits() {
         for (int i = 0; i < this.mapWidth; ++i) {
             for (int j = 0; j < this.mapHeight; ++j) {
                 if (this.trackMap[i][j] == 64) {
@@ -5415,7 +5415,7 @@ implements Runnable {
 
     boolean r(int n, int n2) {
         if (this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33 || this.tileMap[n][n2] >= 70 && this.tileMap[n][n2] <= 80 && this.trackMap[n][n2] == 65 || this.tileMap[n][n2] == 76 && (this.trackMap[n][n2] & 0x47) == 65 || this.tileMap[n][n2] == 76 && (this.trackMap[n][n2] & 0x78) == 72 || (this.tileMap[n][n2] == 87 || this.tileMap[n][n2] == 88 || this.tileMap[n][n2] == 89 || this.tileMap[n][n2] == 90) && this.trackMap[n][n2] == 65) {
-            int n3 = this.s(n, n2);
+            int n3 = this.spawnOrFindAt(n, n2);
             for (int i = 0; i < 500; ++i) {
                 if ((this.trainFlags[i] & 0x80) != 128) continue;
                 int n4 = this.c(this.trainX[i]);
@@ -5423,7 +5423,7 @@ implements Runnable {
                 if (n == n4 && n2 == n5) {
                     return false;
                 }
-                if (n3 == 5000 || n3 != this.s(n4, n5)) continue;
+                if (n3 == 5000 || n3 != this.spawnOrFindAt(n4, n5)) continue;
                 return false;
             }
             return true;
@@ -5481,16 +5481,16 @@ implements Runnable {
         return bl;
     }
 
-    int s(int n, int n2) {
+    int spawnOrFindAt(int n, int n2) {
         for (int i = 0; i < 250; ++i) {
-            if ((this.hv[i] & 0x80) != 128) continue;
-            if (this.c(this.aj[i]) == n && this.c(this.eq[i]) == n2) {
+            if ((this.vehicleFlags[i] & 0x80) != 128) continue;
+            if (this.c(this.wagonAJ[i]) == n && this.c(this.wagonEQ[i]) == n2) {
                 return i;
             }
-            if ((this.c(this.aj[i]) == n - 1 || this.c(this.aj[i]) == n + 1) && this.c(this.eq[i]) == n2 && (this.hv[i] & 0xE0) == 224) {
+            if ((this.c(this.wagonAJ[i]) == n - 1 || this.c(this.wagonAJ[i]) == n + 1) && this.c(this.wagonEQ[i]) == n2 && (this.vehicleFlags[i] & 0xE0) == 224) {
                 return i;
             }
-            if (this.c(this.eq[i]) != n2 - 1 && this.c(this.eq[i]) != n2 + 1 || this.c(this.aj[i]) != n || (this.hv[i] & 0xE0) != 160) continue;
+            if (this.c(this.wagonEQ[i]) != n2 - 1 && this.c(this.wagonEQ[i]) != n2 + 1 || this.c(this.wagonAJ[i]) != n || (this.vehicleFlags[i] & 0xE0) != 160) continue;
             return i;
         }
         return 5000;
@@ -5500,22 +5500,22 @@ implements Runnable {
         int n4;
         int n5 = 5000;
         for (n4 = 0; n4 < 250; ++n4) {
-            if ((this.hv[n4] & 0x80) != 0) continue;
+            if ((this.vehicleFlags[n4] & 0x80) != 0) continue;
             n5 = n4;
             break;
         }
         if (n5 != 5000) {
-            this.hv[n5] = 0;
+            this.vehicleFlags[n5] = 0;
             int n6 = n5;
-            this.hv[n6] = (byte)(this.hv[n6] | 0x80);
+            this.vehicleFlags[n6] = (byte)(this.vehicleFlags[n6] | 0x80);
             int n7 = n5;
-            this.hv[n7] = (byte)(this.hv[n7] | (bl ? 64 : 0));
+            this.vehicleFlags[n7] = (byte)(this.vehicleFlags[n7] | (bl ? 64 : 0));
             int n8 = n5;
-            this.hv[n8] = (byte)(this.hv[n8] | (bl2 ? 32 : 0));
+            this.vehicleFlags[n8] = (byte)(this.vehicleFlags[n8] | (bl2 ? 32 : 0));
             int n9 = n5;
-            this.hv[n9] = (byte)(this.hv[n9] | n);
-            this.aj[n5] = (byte)n2;
-            this.eq[n5] = (byte)n3;
+            this.vehicleFlags[n9] = (byte)(this.vehicleFlags[n9] | n);
+            this.wagonAJ[n5] = (byte)n2;
+            this.wagonEQ[n5] = (byte)n3;
             this.hq[n5] = 0;
             for (n4 = 0; n4 < 5; ++n4) {
                 this.cO[n5][n4] = 0;
@@ -5524,91 +5524,91 @@ implements Runnable {
         return n5;
     }
 
-    void af() {
-        switch (this.gY) {
+    void computeTrainCost() {
+        switch (this.wagonType) {
             case 0: {
-                this.s = this.gWagonCost;
+                this.unitCost = this.gWagonCost;
                 break;
             }
             case 1: {
-                this.s = this.gWagonCost2;
+                this.unitCost = this.gWagonCost2;
                 break;
             }
             case 2: {
-                this.s = this.gWagonCost3;
+                this.unitCost = this.gWagonCost3;
                 break;
             }
             case 3: {
-                this.s = this.gWagonCost4;
+                this.unitCost = this.gWagonCost4;
                 break;
             }
             case 4: {
-                this.s = this.gWagonCost5;
+                this.unitCost = this.gWagonCost5;
                 break;
             }
             case 5: {
-                this.s = this.gWagonCost6;
+                this.unitCost = this.gWagonCost6;
             }
         }
-        if (this.gY == this.hg) {
-            this.s = this.s * this.eS / 100;
+        if (this.wagonType == this.wagonDiscountType) {
+            this.unitCost = this.unitCost * this.difficultyPct / 100;
         }
         block14: for (int i = 0; i < 5; ++i) {
-            switch (this.gC[i]) {
+            switch (this.wagonOptionSlots[i]) {
                 case 0: {
-                    this.s += this.costGroupC1 * (this.gC[i] == this.U[i] ? this.eS : 1) / (this.gC[i] == this.U[i] ? 100 : 1);
+                    this.unitCost += this.costGroupC1 * (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? this.difficultyPct : 1) / (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? 100 : 1);
                     continue block14;
                 }
                 case 1: {
-                    this.s += this.costGroupC2 * (this.gC[i] == this.U[i] ? this.eS : 1) / (this.gC[i] == this.U[i] ? 100 : 1);
+                    this.unitCost += this.costGroupC2 * (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? this.difficultyPct : 1) / (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? 100 : 1);
                     continue block14;
                 }
                 case 2: {
-                    this.s += this.costGroupC3 * (this.gC[i] == this.U[i] ? this.eS : 1) / (this.gC[i] == this.U[i] ? 100 : 1);
+                    this.unitCost += this.costGroupC3 * (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? this.difficultyPct : 1) / (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? 100 : 1);
                     continue block14;
                 }
                 case 3: {
-                    this.s += this.costGroupC4 * (this.gC[i] == this.U[i] ? this.eS : 1) / (this.gC[i] == this.U[i] ? 100 : 1);
+                    this.unitCost += this.costGroupC4 * (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? this.difficultyPct : 1) / (this.wagonOptionSlots[i] == this.wagonCountMatch[i] ? 100 : 1);
                 }
             }
         }
     }
 
-    void r(int n) {
+    void addSelectedOption(int n) {
         for (int i = 0; i < 5; ++i) {
-            if (this.gC[i] != -1) continue;
-            this.gC[i] = n;
+            if (this.wagonOptionSlots[i] != -1) continue;
+            this.wagonOptionSlots[i] = n;
             break;
         }
     }
 
-    void V() {
+    void popSelectedOption() {
         for (int i = 4; i >= 0; --i) {
-            if (this.gC[i] == -1) continue;
-            this.gC[i] = -1;
+            if (this.wagonOptionSlots[i] == -1) continue;
+            this.wagonOptionSlots[i] = -1;
             break;
         }
     }
 
     boolean y() {
-        if (this.money >= this.s) {
-            int n = this.b(this.tileCursorX, this.tileCursorY, this.gY < 3 ? 0 : 1, this.gY, (this.hv[this.fD] & 0x40) == 64 ? 2 : 0, 8 - this.gY);
+        if (this.money >= this.unitCost) {
+            int n = this.b(this.tileCursorX, this.tileCursorY, this.wagonType < 3 ? 0 : 1, this.wagonType, (this.vehicleFlags[this.aiWagonsLastSeen] & 0x40) == 64 ? 2 : 0, 8 - this.wagonType);
             for (int i = 0; i < 5; ++i) {
-                if (this.gC[i] < 0) continue;
-                int n2 = 2 + this.gC[i];
+                if (this.wagonOptionSlots[i] < 0) continue;
+                int n2 = 2 + this.wagonOptionSlots[i];
                 if (n2 == 5) {
                     ++n2;
                 }
-                n = this.l(n, n2);
+                n = this.spawnTrainCar(n, n2);
                 this.w(n2);
             }
-            this.money -= this.s;
-            this.gE += this.s;
-            this.p(-this.s);
-            ++this.gu;
+            this.money -= this.unitCost;
+            this.aiMoneySpent += this.unitCost;
+            this.p(-this.unitCost);
+            ++this.aiWagonsBought;
             return true;
         }
-        this.M();
+        this.enterOutOfMoneyState();
         return false;
     }
 
@@ -5616,9 +5616,9 @@ implements Runnable {
         for (int i = 0; i < 250; ++i) {
             int n;
             int n2;
-            if ((this.hv[i] & 0x80) != 128) continue;
-            int n3 = this.c(this.aj[i]);
-            int n4 = this.c(this.eq[i]);
+            if ((this.vehicleFlags[i] & 0x80) != 128) continue;
+            int n3 = this.c(this.wagonAJ[i]);
+            int n4 = this.c(this.wagonEQ[i]);
             int n5 = n3 - 3;
             int n6 = n4 - 3;
             int n7 = n3 + 3;
@@ -5721,7 +5721,7 @@ implements Runnable {
                 int n25 = i;
                 this.gW[n25] = (byte)(this.gW[n25] | 0x10);
             }
-            n2 = (this.hv[i] & 0x20) == 32 ? 1 : 0;
+            n2 = (this.vehicleFlags[i] & 0x20) == 32 ? 1 : 0;
             for (n = 0; n < 5; ++n) {
                 if (n2 != 0) {
                     if (n == 0) {
@@ -5754,7 +5754,7 @@ implements Runnable {
         }
     }
 
-    int l(int n, int n2) {
+    int spawnTrainCar(int n, int n2) {
         int n3 = 500;
         for (int i = 0; i < 500; ++i) {
             if ((this.trainFlags[i] & 0x80) != 0) continue;
@@ -5772,8 +5772,8 @@ implements Runnable {
             this.trainDir[n3] = this.trainDir[n];
             this.trainPhase[n3] = (byte)(this.trainPhase[n] - 8);
             this.trainEnergyOrCount[n3] = 0;
-            this.eT[n3] = 0;
-            this.aI[n3] = -1;
+            this.wagonEnergyRemaining[n3] = 0;
+            this.wagonIorHost[n3] = -1;
         }
         this.bH = -1;
         return n3;
@@ -5794,10 +5794,10 @@ implements Runnable {
             this.trainX[n7] = (byte)n;
             this.trainY[n7] = (byte)n2;
             this.trainDir[n7] = (byte)n5;
-            this.eT[n7] = (byte)n6;
+            this.wagonEnergyRemaining[n7] = (byte)n6;
             this.trainPhase[n7] = 0;
             this.trainEnergyOrCount[n7] = 1;
-            this.aI[n7] = -1;
+            this.wagonIorHost[n7] = -1;
             this.g[n7] = (byte)n4;
             this.aw[n7] = 0;
             this.eL[n7] = 7;
@@ -5845,7 +5845,7 @@ implements Runnable {
                         if ((this.gW[n2] & 1) == 1 && this.trainEnergyOrCount[s] < 25) {
                             return true;
                         }
-                        if ((this.gW[n2] & 0x10) != 16 || this.eT[s] >= 15) break;
+                        if ((this.gW[n2] & 0x10) != 16 || this.wagonEnergyRemaining[s] >= 15) break;
                         return true;
                     }
                     case 3: {
@@ -5884,21 +5884,21 @@ implements Runnable {
             int n9 = n;
             this.trainFlags[n9] = (byte)(this.trainFlags[n9] & 0xEF);
             if ((this.trainFlags[n] & 0x40) == 64) {
-                this.trainEnergyOrCount[n] = (byte)(this.eT[n] + this.B(n) / 2 + this.A(n) / 2 + this.aw[n] / 3);
+                this.trainEnergyOrCount[n] = (byte)(this.wagonEnergyRemaining[n] + this.B(n) / 2 + this.A(n) / 2 + this.aw[n] / 3);
             }
             int n10 = this.c(this.trainX[n]);
             int n11 = this.c(this.trainY[n]);
             if ((this.trainFlags[n] & 0x40) == 64 && this.trainPhase[n] == 4 && (this.tileMap[n10][n11] == 87 || this.tileMap[n10][n11] == 88) && this.trackMap[n10][n11] == 65) {
-                n8 = this.s(n10, n11);
+                n8 = this.spawnOrFindAt(n10, n11);
                 n7 = 0;
-                if (n8 != this.aI[n]) {
-                    n7 = this.x(n, n8);
+                if (n8 != this.wagonIorHost[n]) {
+                    n7 = this.xPlaceSpawn(n, n8);
                 }
                 if (this.eL[n] != 7) {
                     this.trainFlags[n] = -64;
                     int n12 = n;
                     this.trainFlags[n12] = (byte)(this.trainFlags[n12] | (byte)((this.eL[n] & 7) >= 3 ? 1 : 0));
-                    this.eT[n] = (byte)(8 - (this.eL[n] & 7));
+                    this.wagonEnergyRemaining[n] = (byte)(8 - (this.eL[n] & 7));
                     this.g[n] = (byte)(this.eL[n] & 7);
                     this.aw[n] = 0;
                     n6 = this.nextCar[n];
@@ -5914,7 +5914,7 @@ implements Runnable {
                         if (n13 == 5) {
                             ++n13;
                         }
-                        n5 = this.l(n5, n13);
+                        n5 = this.spawnTrainCar(n5, n13);
                     }
                     this.eL[n] = 7;
                     this.bH = -1;
@@ -5924,7 +5924,7 @@ implements Runnable {
                     this.trainPhase[n] = 3;
                     n2 = 1;
                 }
-                if (n8 != this.aI[n]) {
+                if (n8 != this.wagonIorHost[n]) {
                     if (n7 > 0) {
                         this.money += n7;
                         this.p(n7);
@@ -5935,7 +5935,7 @@ implements Runnable {
                     }
                     this.trainEnergyOrCount[n] = (byte)(this.A(n) * 40);
                 }
-                this.aI[n] = (byte)n8;
+                this.wagonIorHost[n] = (byte)n8;
                 int n15 = n;
                 this.trainFlags[n15] = (byte)(this.trainFlags[n15] | 0x10);
             }
@@ -6334,7 +6334,7 @@ implements Runnable {
         return false;
     }
 
-    int c(int n, int n2) {
+    int cPosLookup(int n, int n2) {
         for (int i = 0; i < 500; ++i) {
             if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.i(i, n, n2)) continue;
             return i;
@@ -6342,12 +6342,12 @@ implements Runnable {
         return 5000;
     }
 
-    int x(int n, int n2) {
+    int xPlaceSpawn(int n, int n2) {
         if (n != -1) {
             int n3 = 0;
             if ((this.trainFlags[n] & 0x40) == 0) {
                 int n4 = this.trainFlags[n] & 0xF;
-                if (this.aI[n] != n2 && (this.trainEnergyOrCount[n] > 0 || this.eT[n] > 0)) {
+                if (this.wagonIorHost[n] != n2 && (this.trainEnergyOrCount[n] > 0 || this.wagonEnergyRemaining[n] > 0)) {
                     switch (n4) {
                         case 2: {
                             int n5;
@@ -6361,13 +6361,13 @@ implements Runnable {
                                 this.trainEnergyOrCount[n] = 0;
                             }
                             if ((this.hq[n2] & 0x10) != 16) break;
-                            n5 = this.eT[n] * 8 * (this.c(this.A[n]) / 15 + 1);
+                            n5 = this.wagonEnergyRemaining[n] * 8 * (this.c(this.A[n]) / 15 + 1);
                             if (this.eA[5] > 0) {
                                 n5 *= 2;
                             }
                             n3 += n5;
-                            this.t(5, this.eT[n]);
-                            this.eT[n] = 0;
+                            this.t(5, this.wagonEnergyRemaining[n]);
+                            this.wagonEnergyRemaining[n] = 0;
                             break;
                         }
                         case 3: {
@@ -6407,7 +6407,7 @@ implements Runnable {
                     }
                 }
             }
-            return this.x(this.nextCar[n], n2) + n3;
+            return this.xPlaceSpawn(this.nextCar[n], n2) + n3;
         }
         return 0;
     }
@@ -6423,7 +6423,7 @@ implements Runnable {
     int c(int n, int n2, int n3) {
         int n4 = this.g(n, n2, n3);
         for (int i = 0; i < 250; ++i) {
-            if (n == i || (this.hv[i] & 0x80) != 128 || (this.hv[i] & 7) != (this.hv[n] & 7) || Math.abs(this.aj[n] - this.aj[i]) >= 3 || Math.abs(this.eq[n] - this.eq[i]) >= 3) continue;
+            if (n == i || (this.vehicleFlags[i] & 0x80) != 128 || (this.vehicleFlags[i] & 7) != (this.vehicleFlags[n] & 7) || Math.abs(this.wagonAJ[n] - this.wagonAJ[i]) >= 3 || Math.abs(this.wagonEQ[n] - this.wagonEQ[i]) >= 3) continue;
             n4 += this.g(i, n2, n3 - n4);
         }
         return n4;
@@ -6440,9 +6440,9 @@ implements Runnable {
                         int n4 = n;
                         this.trainEnergyOrCount[n4] = (byte)(this.trainEnergyOrCount[n4] + this.c(n2, 0, 25 - this.trainEnergyOrCount[n]));
                         int n5 = n;
-                        this.eT[n5] = (byte)(this.eT[n5] + this.c(n2, 4, 15 - this.eT[n]));
+                        this.wagonEnergyRemaining[n5] = (byte)(this.wagonEnergyRemaining[n5] + this.c(n2, 4, 15 - this.wagonEnergyRemaining[n]));
                         this.A[n] = 0;
-                        if (n2 == this.aI[n] || bl2) break;
+                        if (n2 == this.wagonIorHost[n] || bl2) break;
                         this.d(this.c(this.trainX[n]), this.c(this.trainY[n]), 4);
                         bl2 = true;
                         break;
@@ -6473,7 +6473,7 @@ implements Runnable {
                 if (n3 == 6 || n3 == 7) {
                     this.trainFlags[n] = this.trainEnergyOrCount[n] >= 10 ? (byte)(this.trainFlags[n] & 0xF0 | 7) : (byte)(this.trainFlags[n] & 0xF0 | 6);
                 }
-                this.aI[n] = (byte)n2;
+                this.wagonIorHost[n] = (byte)n2;
             } else {
                 this.A[n] = 0;
             }
@@ -6483,13 +6483,13 @@ implements Runnable {
 
     void o(int n) {
         if (n != -1) {
-            this.l(this.trainFlags[n] & 7);
+            this.decCountsForOption(this.trainFlags[n] & 7);
             this.o(this.nextCar[n]);
         }
     }
 
     boolean a(int n, int n2, int[] nArray) {
-        if (this.money >= this.s - this.cfr_renamed_0) {
+        if (this.money >= this.unitCost - this.cfr_renamed_0) {
             this.eL[n] = (short)n2;
             this.o(this.nextCar[n]);
             for (int i = 0; i < 5; ++i) {
@@ -6503,14 +6503,14 @@ implements Runnable {
                 int n4 = n;
                 this.eL[n4] = this.eL[n4] | (nArray[i] & 7) << 3 + 3 * i;
             }
-            this.money -= this.s - this.cfr_renamed_0;
-            this.gE += this.s - this.cfr_renamed_0;
-            if (this.s - this.cfr_renamed_0 != 0) {
-                this.p(-(this.s - this.cfr_renamed_0));
+            this.money -= this.unitCost - this.cfr_renamed_0;
+            this.aiMoneySpent += this.unitCost - this.cfr_renamed_0;
+            if (this.unitCost - this.cfr_renamed_0 != 0) {
+                this.p(-(this.unitCost - this.cfr_renamed_0));
             }
             return true;
         }
-        this.M();
+        this.enterOutOfMoneyState();
         return false;
     }
 
@@ -6804,10 +6804,10 @@ implements Runnable {
         this.monthOfYear = this.s(this.monthOfYear);
         this.year = this.s(this.year);
         this.bI = this.s(this.bI);
-        this.db = this.s(this.db);
-        this.aR = this.s(this.aR);
-        this.t = this.s(this.t);
-        this.fj = this.s(this.fj);
+        this.viewportBaseX = this.s(this.viewportBaseX);
+        this.viewportBaseY = this.s(this.viewportBaseY);
+        this.mapScaleX = this.s(this.mapScaleX);
+        this.mapScaleY = this.s(this.mapScaleY);
         this.a(this.visibleTrains);
         this.visibleTrainCount = this.s(this.visibleTrainCount);
         this.viewportX0 = this.s(this.viewportX0);
@@ -6831,7 +6831,7 @@ implements Runnable {
         this.fe = this.s(this.fe);
         this.eh = this.s(this.eh);
         this.totalSpent = this.s(this.totalSpent);
-        this.gE = this.s(this.gE);
+        this.aiMoneySpent = this.s(this.aiMoneySpent);
         this.cF = this.s(this.cF);
         this.ho = this.s(this.ho);
         this.totalRevenue = this.s(this.totalRevenue);
@@ -6866,9 +6866,9 @@ implements Runnable {
         this.a(this.da);
         this.a(this.cV);
         this.a(this.be);
-        this.a(this.hv);
-        this.a(this.aj);
-        this.a(this.eq);
+        this.a(this.vehicleFlags);
+        this.a(this.wagonAJ);
+        this.a(this.wagonEQ);
         this.a(this.hq);
         this.a(this.cO);
         this.numSelectedTrains = this.b(this.numSelectedTrains);
@@ -6884,9 +6884,9 @@ implements Runnable {
         this.a(this.trainDir);
         this.a(this.trainPhase);
         this.a(this.trainFlags);
-        this.a(this.eT);
+        this.a(this.wagonEnergyRemaining);
         this.a(this.trainEnergyOrCount);
-        this.a(this.aI);
+        this.a(this.wagonIorHost);
         this.a(this.A);
         this.a(this.nextCar);
         this.a(this.g);
@@ -6932,7 +6932,7 @@ implements Runnable {
         this.dV = this.s(this.dV);
         this.fu = this.s(this.fu);
         this.cT = this.s(this.cT);
-        this.gu = this.s(this.gu);
+        this.aiWagonsBought = this.s(this.aiWagonsBought);
         this.by = this.s(this.by);
         this.eF = this.s(this.eF);
         this.ao = this.s(this.ao);
@@ -7025,10 +7025,10 @@ implements Runnable {
         this.tileElevation = new byte[this.mapWidth + 1][this.mapHeight + 1];
         this.heightMap = new byte[this.mapWidth + 2][this.mapHeight + 2];
         this.hj = (this.mapWidth - 1) * 8;
-        this.eV = (this.mapWidth + this.mapHeight) * 16;
-        this.bQ = (this.mapWidth + this.mapHeight) * 8;
-        this.gU = this.eV / 2;
-        this.fO = this.bQ / 2;
+        this.mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
+        this.mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
+        this.gU = this.mapScreenWidth / 2;
+        this.fO = this.mapScreenHeight / 2;
         this.v(-1);
         this.loadGame(1, 1);
         this.j();
@@ -7057,7 +7057,7 @@ implements Runnable {
         this.dG[0] = this.eh + this.eX;
         this.ef[0] = this.fe + this.totalRevenue;
         this.br = this.h + this.totalSpent;
-        this.gV = this.B + this.gE;
+        this.gV = this.B + this.aiMoneySpent;
         this.cj = this.hn + this.cF;
         this.aA = this.ep + this.ho;
         this.dg = this.bo + this.totalRevenue;
@@ -7077,7 +7077,7 @@ implements Runnable {
         }
         this.ab();
         this.gx = this.totalSpent;
-        this.eM = this.gE;
+        this.eM = this.aiMoneySpent;
         this.V = this.cF;
         this.f = this.ho;
         this.eu = this.totalRevenue;
@@ -7093,7 +7093,7 @@ implements Runnable {
         this.cx[0] = 0;
         this.Z[0] = 0;
         this.h += this.totalSpent;
-        this.B += this.gE;
+        this.B += this.aiMoneySpent;
         this.hn += this.cF;
         this.ep += this.ho;
         this.bo += this.totalRevenue;
@@ -7138,7 +7138,7 @@ implements Runnable {
             this.p(-this.eJ);
         }
         this.totalSpent = 0;
-        this.gE = 0;
+        this.aiMoneySpent = 0;
         this.cF = 0;
         this.ho = 0;
         this.totalRevenue = 0;
@@ -7163,7 +7163,7 @@ implements Runnable {
     void ab() {
         this.eg = this.hk * this.aD / 1200;
         this.eJ = this.totalRevenue * this.eC / 100;
-        this.eX = this.totalRevenue - this.eg - this.totalSpent - this.gE - this.cF - this.ho - this.eJ;
+        this.eX = this.totalRevenue - this.eg - this.totalSpent - this.aiMoneySpent - this.cF - this.ho - this.eJ;
     }
 
     int h() {
@@ -7376,7 +7376,7 @@ implements Runnable {
             this.trainFlags[i] = -64;
             int n3 = i;
             this.trainFlags[n3] = (byte)(this.trainFlags[n3] | this.era / 3);
-            this.eT[i] = (byte)(8 - this.era);
+            this.wagonEnergyRemaining[i] = (byte)(8 - this.era);
             break;
         }
     }
@@ -7409,7 +7409,7 @@ implements Runnable {
         }
         int n7 = this.b(n, n2, n3, n4, this.tileMap[n][n2] == 87 ? 0 : 2, 8 - n4);
         for (int i = 0; i < n5; ++i) {
-            n7 = this.l(n7, n6);
+            n7 = this.spawnTrainCar(n7, n6);
         }
     }
 
@@ -7585,7 +7585,7 @@ implements Runnable {
                 break;
             }
             case 15: {
-                n2 = this.gu;
+                n2 = this.aiWagonsBought;
                 break;
             }
             case 14: {
@@ -7707,7 +7707,7 @@ implements Runnable {
                     break;
                 }
                 case 15: {
-                    if (this.bs > this.gu) break;
+                    if (this.bs > this.aiWagonsBought) break;
                     bl = true;
                 }
             }
@@ -8110,7 +8110,7 @@ implements Runnable {
         }
     }
 
-    void l(int n) {
+    void decCountsForOption(int n) {
         for (int i = 0; i < 5; ++i) {
             if (n == 7 && this.hm[i] == 9) {
                 int n2 = i;
@@ -8298,7 +8298,7 @@ implements Runnable {
             HttpConnection httpConnection = (HttpConnection)Connector.open((String)this.decodeString(ec));
             httpConnection.setRequestMethod("GET");
             httpConnection.setRequestProperty(this.decodeString(dO), this.decodeString(i));
-            httpConnection.setRequestProperty(this.decodeString(el), this.decodeString(G));
+            httpConnection.setRequestProperty(this.decodeString(el), this.decodeString(viewportZoomStep));
             httpConnection.setRequestProperty(this.decodeString(fz), "en");
             httpConnection.setRequestProperty(this.decodeString(dM), this.n());
             httpConnection.setRequestProperty(this.decodeString(cQ), bl ? "S" : "D");
@@ -8444,7 +8444,7 @@ implements Runnable {
         this.a(graphics, n + 4, n2 + 5, byArray, false);
     }
 
-    void M() {
+    void enterOutOfMoneyState() {
         this.ready = false;
         this.transitionCode = 11;
         this.setState(20);
@@ -8921,16 +8921,16 @@ implements Runnable {
                             this.eF = n2;
                             this.mapWidth = this.mapHeight = n3;
                             this.hj = (this.mapWidth - 1) * 8;
-                            this.eV = (this.mapWidth + this.mapHeight) * 16;
-                            this.bQ = (this.mapWidth + this.mapHeight) * 8;
-                            this.gU = this.eV / 2;
-                            this.fO = this.bQ / 2;
+                            this.mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
+                            this.mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
+                            this.gU = this.mapScreenWidth / 2;
+                            this.fO = this.mapScreenHeight / 2;
                             this.viewportCenterX = this.gU;
                             this.viewportCenterY = this.fO;
-                            this.db = this.viewportCenterX;
-                            this.aR = this.viewportCenterY;
-                            this.t = this.db * 2;
-                            this.fj = this.aR * 2;
+                            this.viewportBaseX = this.viewportCenterX;
+                            this.viewportBaseY = this.viewportCenterY;
+                            this.mapScaleX = this.viewportBaseX * 2;
+                            this.mapScaleY = this.viewportBaseY * 2;
                             this.dQ = n6;
                             this.hf = n4;
                             this.ab = n5;
@@ -9433,7 +9433,7 @@ implements Runnable {
                 break;
             }
             case 40: {
-                this.k();
+                this.viewportPanKey();
                 break;
             }
             case 45: {

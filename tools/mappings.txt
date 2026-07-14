@@ -240,3 +240,51 @@ field  a eK   snapshotSize         # int; byte length of the save snapshot
 field  a dv   saveBuffer           # byte[]; the snapshot (re-used across save/load)
 field  a dl   saveReadOffset       # int; pointer used while applying snapshot to state
 field  a dd   snapshotLoaded       # boolean; true after loadGame has filled dv
+
+# ---- Batch 8: wagon-cost + AI buy + cursor-track ops + viewport pan/zoom ----
+# Wagon-cost machinery (af() = computeTrainCost; reads gY/gC/U/eS/hg into s)
+field  a gY   wagonType            # int; 0..5 — selects gWagonCost1..6 in af()
+field  a hg   wagonDiscountType    # int; when == gY, scale by eS (rare/wagon tier)
+field  a eS   difficultyPct        # int; percentage multiplier (>=100 normal)
+field  a gC   wagonOptionSlots     # int[5]; -1 empty / 0..3 indices into costGroupC*
+field  a U    wagonCountMatch      # int[5]; per-slot multiplier when gC[i] matches U[i]
+field  a s    unitCost             # long; price of one wagon (output of af())
+# AI buy loop fields (read by y())
+field  a gu   aiWagonsBought       # int; count of wagons purchased by AI
+field  a gE   aiMoneySpent         # long; AI running total alongside money
+field  a hv   vehicleFlags         # byte[500]; bit 0x40 active, 0x20 retreating
+field  a fD   aiWagonsLastSeen     # byte[]; per-wagon-id seen count (read in y())
+# Cursor + track-mutation reads (I() picks trains at cursor, J normalises track bits)
+field  a du   stationDirCursor     # byte; read when trackMap cursor & 0xC0==192
+field  a gL   junctionDirCursor    # byte; read when trackMap cursor & 0xC0==128
+field  a aN   trainAtCursor        # int; entity index found at cursor in I()
+field  a eT   wagonEnergyRemaining # byte[500]; remaining life/decay per car (s/l set to 0 on spawn)
+field  a aI   wagonIorHost         # byte[500]; per-car target/host entity (-1 freshly spawned)
+field  a aj   wagonAJ              # byte[500]; car coord 1 (read in H)
+field  a eq   wagonEQ              # byte[500]; car coord 2 (read in H)
+# Viewport key handlers (k=pan, B=zoom) and the related scaling fields
+field  a db   viewportBaseX        # long; t/2 = the map region's screen X center
+field  a aR   viewportBaseY        # long; fj/2 = the map region's screen Y center
+field  a G    viewportZoomStep     # int helper for B()
+field  a eV   mapScreenWidth       # long; (mapWidth + mapHeight) * 16 -- bounds
+field  a bQ   mapScreenHeight      # long; (mapWidth + mapHeight) * 8
+field  a t    mapScaleX            # long; affects X-direction placement & B()
+field  a fj   mapScaleY            # long; affects Y-direction placement & B()
+# Methods discovered (Batch 8 naming pass)
+method a I ()V                     pickTrainsAtCursor
+method a J ()V                     normalizeTrackBits
+method a M ()V                     enterOutOfMoneyState
+method a H ()V                     demolishAtCursor
+method a k ()V                     viewportPanKey
+method a B ()V                     viewportZoomKey
+method a r (I)V                    addSelectedOption
+method a V ()V                     popSelectedOption
+method a af ()V                    computeTrainCost
+method a l (I)V                    decCountsForOption
+method a E (I)V                    buildPlaceTrackPiece
+method a l (II)I                   spawnTrainCar   # int return: slot, or 500
+method a n (II)I                   neighboursMask    # int neighbours query (W,x used)
+method a s (II)I                   spawnOrFindAt     # int loop through 250 to find/place
+method a h (II)I                   hPath             # int path over aQ[][] grid
+method a c (II)I                   cPosLookup        # int trained-position lookup
+method a x (II)I                   xPlaceSpawn       # int place spawn helper
