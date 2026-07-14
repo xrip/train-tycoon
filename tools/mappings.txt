@@ -406,3 +406,22 @@ field  a gX   cursorScreenY         # int; iso-projected screen Y (with elevatio
 # 4-corner selection rectangle in map-tile coordinates; used for viewport-intersection tests.
 field  a w    selectionTileX        # int[4]; map X of selection rect corners
 field  a dz   selectionTileY        # int[4]; map Y of selection rect corners
+
+# ---- Batch 14: loan economy + per-train/per-wagon state + per-menu-row tables ----
+# Loan balance / ceiling: case 1 in update() takes a loan (hk += 20000);
+# case 2 repays (hk -= 20000). Interest = hk * aD / 1200.
+field  a hk   loanBalance           # int; outstanding loan principal
+field  a cY   loanCeiling           # int; max allowed loan (initially 600000)
+# Per-train byte[] state (size 500 = trains + cars combined)
+field  a A    trainServiceCounter   # byte[500]; ticks up to 200, gates energy-formula scaling
+# Per-train short[][] option slots (5 slots; matches wagonOptionSlots/wagonCountMatch arrays)
+field  a cO   trainOptionSlots      # short[250][5]; per-train option availability per slot
+field  a hq   trainFlagBits         # byte[250]; bitfield (low bits = available option flags)
+field  a gW   wagonServiceCounter   # byte[250]; per-wagon service interval counter
+# Per-menu-row tables (6 rows, indexed by cZ = build menu index)
+field  a hm   menuRowType           # byte[6]; 0=hidden, 1=cost%, 2=money-vs-cost, 4-14=other formulas
+field  a fa   menuRowAltType        # byte[6]; pendingTransitionCode = fa[cZ] + 60
+field  a aV   menuRowCost           # int[6]; cost denominator in menu row formula
+field  a M    menuRowValue          # int[6]; cost numerator for type-1 (100 * M / aV)
+field  a X    menuRowEra            # byte[6]; used as era/code parameter in formula
+field  a cJ   menuRowRevenue        # int[6]; used in formula b(this.cJ[cZ])
