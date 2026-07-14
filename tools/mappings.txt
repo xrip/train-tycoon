@@ -378,3 +378,31 @@ field  a bl   clipWidth             # int; setClip width
 field  a r    clipHeight            # int; setClip height
 # Running content-height for the current dialog; capped at hs - 20.
 field  a eZ   dialogContentHeight   # int; max y used by current dialog's rendered elements
+
+# ---- Batch 13: map-generation pipeline + terrain edit + selection rects ----
+# loadState25Setup(1) is an async map generator; dr is the stage, O is the
+# tile counter inside the stage; dh is the sum of all stage thresholds.
+field  a dr   mapGenStage           # int; 1..N stages (cities, resources, mountains, rivers, ...)
+field  a O    tilesGeneratedInStage # int; tiles placed so far in current stage
+field  a dh   totalTilesToGenerate  # int; = hf+archiveOrRecallMethod+gG*(gG-1)+co+wAccel2+wAccel+bX+dK+wAccel4+wAccel3+1
+field  a bV   mapGenTilesDone       # int; bV * (e-20)/(n11-1) drives the loading bar; ++O/bV each step
+# Initial-feature placement: gates cost-payment; false during gen, true after industry tiles placed.
+field  a hl   initialIndustryPlaced # boolean; gates whether terrain smoothing charges the player
+# 10x10 heightmap window: snapshot of selection area, edited, then written back.
+field  a dt   terrainEditBuffer     # byte[10][10]; scratch for heightmap smoothing in selection window
+# Per-call terrain-smoothing cost accumulator; reset in loadHeightMap(), accumulated in a(int,int,int,boolean).
+field  a as   terrainSmoothCost     # int; += costOverhead + (costCrew or costMaintenance) per tile
+# Key-handler state in handleKey(); 'ej' is the last key code, 'bk' is the input sub-state.
+field  a ej   lastKeyCode           # int; n parameter of last handleKey call
+field  a bk   keySubState           # int; 0/40 sub-state selector in handleKey (case 30 vs case 40)
+# Saved parameters of current track-build line (set in a(int*8) so cost projection can be recomputed).
+field  a an   trackStartX           # int; start tile X of track-build operation
+field  a am   trackStartY           # int; start tile Y of track-build operation
+field  a fg   trackStepX            # int; per-tile X step (direction) of track-build
+field  a aL   trackStepY            # int; per-tile Y step (direction) of track-build
+# Iso-projected screen coordinates of the current cursor; used for distance checks vs viewport center.
+field  a de   cursorScreenX         # int; iso-projected screen X (before viewport-center subtraction)
+field  a gX   cursorScreenY         # int; iso-projected screen Y (with elevation adjustment)
+# 4-corner selection rectangle in map-tile coordinates; used for viewport-intersection tests.
+field  a w    selectionTileX        # int[4]; map X of selection rect corners
+field  a dz   selectionTileY        # int[4]; map Y of selection rect corners
