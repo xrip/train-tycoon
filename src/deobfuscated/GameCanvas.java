@@ -2617,7 +2617,7 @@ implements Runnable {
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -8);
-                this.x(this.costPower);
+                this.incrementRowValueType13(this.costPower);
                 break;
             }
             case 1: {
@@ -2626,7 +2626,7 @@ implements Runnable {
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -8);
-                this.x(this.costPower);
+                this.incrementRowValueType13(this.costPower);
                 break;
             }
             case 2: {
@@ -2639,7 +2639,7 @@ implements Runnable {
                 this.trackMap[this.tileCursorX][this.tileCursorY - 1] = 65;
                 this.trackMap[this.tileCursorX][this.tileCursorY + 1] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -11);
-                this.x(this.costStruct);
+                this.incrementRowValueType13(this.costStruct);
                 break;
             }
             case 3: {
@@ -2652,7 +2652,7 @@ implements Runnable {
                 this.trackMap[this.tileCursorX - 1][this.tileCursorY] = 65;
                 this.trackMap[this.tileCursorX + 1][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -11);
-                this.x(this.costStruct);
+                this.incrementRowValueType13(this.costStruct);
             }
         }
         this.tickInputOrAi(true);
@@ -2707,7 +2707,7 @@ implements Runnable {
                         break;
                     }
                     case 9: {
-                        this.c(this.scenarioStep - 2);
+                        this.computeMapTrainMetric(this.scenarioStep - 2);
                         this.bC = false;
                         this.ready = false;
                         this.transitionCode = 1;
@@ -2789,7 +2789,7 @@ implements Runnable {
                             this.money -= this.selectionCost;
                             this.totalSpent += this.selectionCost;
                             this.pushMoneyHistory(-this.selectionCost);
-                            this.x(this.selectionCost);
+                            this.incrementRowValueType13(this.selectionCost);
                             break;
                         }
                         this.normalizeTrackBits();
@@ -2960,7 +2960,7 @@ implements Runnable {
                     this.lastViewportCenterX = -1;
                     this.pushMoneyHistory(-n8);
                     this.totalSpent += n8;
-                    this.x(n8);
+                    this.incrementRowValueType13(n8);
                     this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -4);
                 } else {
                     this.enterOutOfMoneyState();
@@ -2972,7 +2972,7 @@ implements Runnable {
                 this.totalSpent += n8;
                 this.lastViewportCenterX = -1;
                 this.pushMoneyHistory(-n8);
-                this.x(n8);
+                this.incrementRowValueType13(n8);
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -4);
             } else {
                 this.enterOutOfMoneyState();
@@ -4640,14 +4640,14 @@ implements Runnable {
                         if (this.loanCeiling - 20000 < this.loanBalance) break;
                         this.loanBalance += 20000;
                         this.money += 20000;
-                        this.z(-20000);
+                        this.incrementRowValueType14(-20000);
                         break;
                     }
                     case 2: {
                         if (this.loanBalance < 20000 || this.money < 20000) break;
                         this.loanBalance -= 20000;
                         this.money -= 20000;
-                        this.z(20000);
+                        this.incrementRowValueType14(20000);
                         break;
                     }
                     default: {
@@ -6157,7 +6157,7 @@ implements Runnable {
 
     void a(int n, boolean bl) {
         if (n != -1) {
-            this.a((int)this.nextCar[n], bl);
+            this.a(this.nextCar[n], bl);
             int n2 = n;
             this.trainFlags[n2] = (byte)(this.trainFlags[n2] | 0xE0);
             this.nextCar[n] = -1;
@@ -6679,7 +6679,7 @@ implements Runnable {
         return by2;
     }
 
-    int s(int n) {
+    int saveIntToBuffer(int n) {
         if (this.savePendingMode == 2) {
             return 0;
         }
@@ -6798,29 +6798,29 @@ implements Runnable {
         if (n == 1) {
             this.j();
         }
-        this.mapWidth = this.s(this.mapWidth);
-        this.mapHeight = this.s(this.mapHeight);
-        this.viewportCenterX = this.s(this.viewportCenterX);
-        this.viewportCenterY = this.s(this.viewportCenterY);
-        this.money = this.s(this.money);
-        this.dayOfMonth = this.s(this.dayOfMonth);
-        this.monthOfYear = this.s(this.monthOfYear);
-        this.year = this.s(this.year);
-        this.bI = this.s(this.bI);
-        this.viewportBaseX = this.s(this.viewportBaseX);
-        this.viewportBaseY = this.s(this.viewportBaseY);
-        this.mapScaleX = this.s(this.mapScaleX);
-        this.mapScaleY = this.s(this.mapScaleY);
+        this.mapWidth = this.saveIntToBuffer(this.mapWidth);
+        this.mapHeight = this.saveIntToBuffer(this.mapHeight);
+        this.viewportCenterX = this.saveIntToBuffer(this.viewportCenterX);
+        this.viewportCenterY = this.saveIntToBuffer(this.viewportCenterY);
+        this.money = this.saveIntToBuffer(this.money);
+        this.dayOfMonth = this.saveIntToBuffer(this.dayOfMonth);
+        this.monthOfYear = this.saveIntToBuffer(this.monthOfYear);
+        this.year = this.saveIntToBuffer(this.year);
+        this.bI = this.saveIntToBuffer(this.bI);
+        this.viewportBaseX = this.saveIntToBuffer(this.viewportBaseX);
+        this.viewportBaseY = this.saveIntToBuffer(this.viewportBaseY);
+        this.mapScaleX = this.saveIntToBuffer(this.mapScaleX);
+        this.mapScaleY = this.saveIntToBuffer(this.mapScaleY);
         this.a(this.visibleTrains);
-        this.visibleTrainCount = this.s(this.visibleTrainCount);
-        this.viewportX0 = this.s(this.viewportX0);
-        this.viewportY0 = this.s(this.viewportY0);
-        this.viewportX1 = this.s(this.viewportX1);
-        this.viewportY1 = this.s(this.viewportY1);
-        this.loanBalance = this.s(this.loanBalance);
-        this.loanCeiling = this.s(this.loanCeiling);
+        this.visibleTrainCount = this.saveIntToBuffer(this.visibleTrainCount);
+        this.viewportX0 = this.saveIntToBuffer(this.viewportX0);
+        this.viewportY0 = this.saveIntToBuffer(this.viewportY0);
+        this.viewportX1 = this.saveIntToBuffer(this.viewportX1);
+        this.viewportY1 = this.saveIntToBuffer(this.viewportY1);
+        this.loanBalance = this.saveIntToBuffer(this.loanBalance);
+        this.loanCeiling = this.saveIntToBuffer(this.loanCeiling);
         this.aD = this.b(this.aD);
-        this.eC = this.s(this.eC);
+        this.eC = this.saveIntToBuffer(this.eC);
         this.a(this.yrN);
         this.a(this.yrCx);
         this.a(this.yrZ);
@@ -6831,40 +6831,40 @@ implements Runnable {
         this.a(this.prevTrainRevenue);
         this.a(this.bb);
         this.a(this.prevStationRevenue);
-        this.fe = this.s(this.fe);
-        this.decadeOtherXTotal = this.s(this.decadeOtherXTotal);
-        this.totalSpent = this.s(this.totalSpent);
-        this.aiMoneySpent = this.s(this.aiMoneySpent);
-        this.fuelCostAccrued = this.s(this.fuelCostAccrued);
-        this.ho = this.s(this.ho);
-        this.totalRevenue = this.s(this.totalRevenue);
-        this.eg = this.s(this.eg);
-        this.eJ = this.s(this.eJ);
-        this.eX = this.s(this.eX);
-        this.prevTotalSpent = this.s(this.prevTotalSpent);
-        this.prevAiMoneySpent = this.s(this.prevAiMoneySpent);
-        this.prevFuelCost = this.s(this.prevFuelCost);
-        this.prevSubsidyCost = this.s(this.prevSubsidyCost);
-        this.prevTotalRevenue = this.s(this.prevTotalRevenue);
-        this.prevTerrainTotal = this.s(this.prevTerrainTotal);
-        this.prevEnterpriseTotal = this.s(this.prevEnterpriseTotal);
-        this.prevXIndicator = this.s(this.prevXIndicator);
-        this.prevDecadeSpent = this.s(this.prevDecadeSpent);
-        this.prevDecadeAiSpent = this.s(this.prevDecadeAiSpent);
-        this.prevDecadeFuel = this.s(this.prevDecadeFuel);
-        this.prevDecadeSubsidy = this.s(this.prevDecadeSubsidy);
-        this.prevDecadeRevenue = this.s(this.prevDecadeRevenue);
-        this.prevDecadeGs = this.s(this.prevDecadeGs);
-        this.prevDecadeDq = this.s(this.prevDecadeDq);
-        this.prevDecadeBm = this.s(this.prevDecadeBm);
-        this.decadeCostTotal = this.s(this.decadeCostTotal);
-        this.decadeSpentTotal = this.s(this.decadeSpentTotal);
-        this.decadeFuelCost = this.s(this.decadeFuelCost);
-        this.decadeSubsidyTotal = this.s(this.decadeSubsidyTotal);
-        this.decadeRevenueTotal = this.s(this.decadeRevenueTotal);
-        this.eb = this.s(this.eb);
-        this.decadeEnterpriseTotal = this.s(this.decadeEnterpriseTotal);
-        this.decadeXTotal = this.s(this.decadeXTotal);
+        this.fe = this.saveIntToBuffer(this.fe);
+        this.decadeOtherXTotal = this.saveIntToBuffer(this.decadeOtherXTotal);
+        this.totalSpent = this.saveIntToBuffer(this.totalSpent);
+        this.aiMoneySpent = this.saveIntToBuffer(this.aiMoneySpent);
+        this.fuelCostAccrued = this.saveIntToBuffer(this.fuelCostAccrued);
+        this.ho = this.saveIntToBuffer(this.ho);
+        this.totalRevenue = this.saveIntToBuffer(this.totalRevenue);
+        this.eg = this.saveIntToBuffer(this.eg);
+        this.eJ = this.saveIntToBuffer(this.eJ);
+        this.eX = this.saveIntToBuffer(this.eX);
+        this.prevTotalSpent = this.saveIntToBuffer(this.prevTotalSpent);
+        this.prevAiMoneySpent = this.saveIntToBuffer(this.prevAiMoneySpent);
+        this.prevFuelCost = this.saveIntToBuffer(this.prevFuelCost);
+        this.prevSubsidyCost = this.saveIntToBuffer(this.prevSubsidyCost);
+        this.prevTotalRevenue = this.saveIntToBuffer(this.prevTotalRevenue);
+        this.prevTerrainTotal = this.saveIntToBuffer(this.prevTerrainTotal);
+        this.prevEnterpriseTotal = this.saveIntToBuffer(this.prevEnterpriseTotal);
+        this.prevXIndicator = this.saveIntToBuffer(this.prevXIndicator);
+        this.prevDecadeSpent = this.saveIntToBuffer(this.prevDecadeSpent);
+        this.prevDecadeAiSpent = this.saveIntToBuffer(this.prevDecadeAiSpent);
+        this.prevDecadeFuel = this.saveIntToBuffer(this.prevDecadeFuel);
+        this.prevDecadeSubsidy = this.saveIntToBuffer(this.prevDecadeSubsidy);
+        this.prevDecadeRevenue = this.saveIntToBuffer(this.prevDecadeRevenue);
+        this.prevDecadeGs = this.saveIntToBuffer(this.prevDecadeGs);
+        this.prevDecadeDq = this.saveIntToBuffer(this.prevDecadeDq);
+        this.prevDecadeBm = this.saveIntToBuffer(this.prevDecadeBm);
+        this.decadeCostTotal = this.saveIntToBuffer(this.decadeCostTotal);
+        this.decadeSpentTotal = this.saveIntToBuffer(this.decadeSpentTotal);
+        this.decadeFuelCost = this.saveIntToBuffer(this.decadeFuelCost);
+        this.decadeSubsidyTotal = this.saveIntToBuffer(this.decadeSubsidyTotal);
+        this.decadeRevenueTotal = this.saveIntToBuffer(this.decadeRevenueTotal);
+        this.eb = this.saveIntToBuffer(this.eb);
+        this.decadeEnterpriseTotal = this.saveIntToBuffer(this.decadeEnterpriseTotal);
+        this.decadeXTotal = this.saveIntToBuffer(this.decadeXTotal);
         this.aE = this.b(this.aE);
         this.a(this.stationDirectionCode);
         this.a(this.cityPopulation);
@@ -6881,7 +6881,7 @@ implements Runnable {
         this.a(this.trainSelectionIndex);
         this.a(this.trainSelectionY);
         this.a(this.trainSelectionX);
-        this.era = this.s(this.era);
+        this.era = this.saveIntToBuffer(this.era);
         this.a(this.trainX);
         this.a(this.trainY);
         this.a(this.trainDir);
@@ -6896,9 +6896,9 @@ implements Runnable {
         this.a(this.trainAgeOrTimer);
         this.a(this.trainStateCode);
         this.a(this.trainAiOverride);
-        this.industryCategory = this.s(this.industryCategory);
+        this.industryCategory = this.saveIntToBuffer(this.industryCategory);
         this.aY = this.d(this.aY);
-        this.hu = this.s(this.hu);
+        this.hu = this.saveIntToBuffer(this.hu);
         if (this.hu == 0) {
             this.hu = 66;
         }
@@ -6920,47 +6920,47 @@ implements Runnable {
         this.a(this.menuRowEra);
         this.a(this.menuRowRevenue);
         this.a(this.dU);
-        this.er = this.s(this.er);
-        this.bq = this.s(this.bq);
-        this.bv = this.s(this.bv);
+        this.er = this.saveIntToBuffer(this.er);
+        this.bq = this.saveIntToBuffer(this.bq);
+        this.bv = this.saveIntToBuffer(this.bv);
         this.flagsB = this.d(this.flagsB);
         this.scenarioBits = this.b(this.scenarioBits);
         this.scenarioMilestoneIndex = this.b(this.scenarioMilestoneIndex);
         this.milestonesEnabled = this.d(this.milestonesEnabled);
-        this.currentMilestoneScore = this.s(this.currentMilestoneScore);
-        this.milestoneCoThreshold2 = this.s(this.milestoneCoThreshold2);
-        this.bD = this.s(this.bD);
-        this.milestoneThreshold1 = this.s(this.milestoneThreshold1);
-        this.milestoneThreshold2 = this.s(this.milestoneThreshold2);
-        this.milestoneThreshold3 = this.s(this.milestoneThreshold3);
-        this.milestoneThreshold4 = this.s(this.milestoneThreshold4);
-        this.milestoneThreshold5 = this.s(this.milestoneThreshold5);
-        this.aiWagonsBought = this.s(this.aiWagonsBought);
-        this.by = this.s(this.by);
-        this.scenarioStep = this.s(this.scenarioStep);
-        this.ao = this.s(this.ao);
-        this.moneyBaseA = this.s(this.moneyBaseA);
-        this.moneyBaseB = this.s(this.moneyBaseB);
-        this.baseTrainSpeed = this.s(this.baseTrainSpeed);
-        this.accel1 = this.s(this.accel1);
-        this.brake1 = this.s(this.brake1);
-        this.baseTrainSpeed2 = this.s(this.baseTrainSpeed2);
-        this.accel2 = this.s(this.accel2);
-        this.costPower = this.s(this.costPower);
-        this.costStruct = this.s(this.costStruct);
-        this.costOverhead = this.s(this.costOverhead);
-        this.costMaintenance = this.s(this.costMaintenance);
-        this.costCrew = this.s(this.costCrew);
-        this.gWagonCost = this.s(this.gWagonCost);
-        this.gWagonCost2 = this.s(this.gWagonCost2);
-        this.gWagonCost3 = this.s(this.gWagonCost3);
-        this.gWagonCost4 = this.s(this.gWagonCost4);
-        this.gWagonCost5 = this.s(this.gWagonCost5);
-        this.gWagonCost6 = this.s(this.gWagonCost6);
-        this.costGroupC1 = this.s(this.costGroupC1);
-        this.costGroupC2 = this.s(this.costGroupC2);
-        this.costGroupC3 = this.s(this.costGroupC3);
-        this.costGroupC4 = this.s(this.costGroupC4);
+        this.currentMilestoneScore = this.saveIntToBuffer(this.currentMilestoneScore);
+        this.milestoneCoThreshold2 = this.saveIntToBuffer(this.milestoneCoThreshold2);
+        this.bD = this.saveIntToBuffer(this.bD);
+        this.milestoneThreshold1 = this.saveIntToBuffer(this.milestoneThreshold1);
+        this.milestoneThreshold2 = this.saveIntToBuffer(this.milestoneThreshold2);
+        this.milestoneThreshold3 = this.saveIntToBuffer(this.milestoneThreshold3);
+        this.milestoneThreshold4 = this.saveIntToBuffer(this.milestoneThreshold4);
+        this.milestoneThreshold5 = this.saveIntToBuffer(this.milestoneThreshold5);
+        this.aiWagonsBought = this.saveIntToBuffer(this.aiWagonsBought);
+        this.by = this.saveIntToBuffer(this.by);
+        this.scenarioStep = this.saveIntToBuffer(this.scenarioStep);
+        this.ao = this.saveIntToBuffer(this.ao);
+        this.moneyBaseA = this.saveIntToBuffer(this.moneyBaseA);
+        this.moneyBaseB = this.saveIntToBuffer(this.moneyBaseB);
+        this.baseTrainSpeed = this.saveIntToBuffer(this.baseTrainSpeed);
+        this.accel1 = this.saveIntToBuffer(this.accel1);
+        this.brake1 = this.saveIntToBuffer(this.brake1);
+        this.baseTrainSpeed2 = this.saveIntToBuffer(this.baseTrainSpeed2);
+        this.accel2 = this.saveIntToBuffer(this.accel2);
+        this.costPower = this.saveIntToBuffer(this.costPower);
+        this.costStruct = this.saveIntToBuffer(this.costStruct);
+        this.costOverhead = this.saveIntToBuffer(this.costOverhead);
+        this.costMaintenance = this.saveIntToBuffer(this.costMaintenance);
+        this.costCrew = this.saveIntToBuffer(this.costCrew);
+        this.gWagonCost = this.saveIntToBuffer(this.gWagonCost);
+        this.gWagonCost2 = this.saveIntToBuffer(this.gWagonCost2);
+        this.gWagonCost3 = this.saveIntToBuffer(this.gWagonCost3);
+        this.gWagonCost4 = this.saveIntToBuffer(this.gWagonCost4);
+        this.gWagonCost5 = this.saveIntToBuffer(this.gWagonCost5);
+        this.gWagonCost6 = this.saveIntToBuffer(this.gWagonCost6);
+        this.costGroupC1 = this.saveIntToBuffer(this.costGroupC1);
+        this.costGroupC2 = this.saveIntToBuffer(this.costGroupC2);
+        this.costGroupC3 = this.saveIntToBuffer(this.costGroupC3);
+        this.costGroupC4 = this.saveIntToBuffer(this.costGroupC4);
         if (n == 0) {
             this.compressSaveBuffer();
             this.saveGame();
@@ -6972,9 +6972,9 @@ implements Runnable {
         selectionHidden = this.d(selectionHidden);
         cc = this.d(cc);
         q = this.d(q);
-        this.aM = this.s(this.aM);
-        this.H = this.s(this.H);
-        this.gh = this.s(this.gh);
+        this.aM = this.saveIntToBuffer(this.aM);
+        this.H = this.saveIntToBuffer(this.H);
+        this.gh = this.saveIntToBuffer(this.gh);
         this.a(this.gk);
         this.a(this.bd);
         this.a(this.bE);
@@ -7724,7 +7724,7 @@ implements Runnable {
                     this.aM = this.scenarioStep;
                 }
                 this.persistSnapshotMode0();
-                this.gJ = this.c(this.scenarioStep - 2);
+                this.gJ = this.computeMapTrainMetric(this.scenarioStep - 2);
             }
             this.setState(20);
         }
@@ -8141,7 +8141,7 @@ implements Runnable {
         }
     }
 
-    void x(int n) {
+    void incrementRowValueType13(int n) {
         for (int i = 0; i < 5; ++i) {
             if (this.menuRowType[i] != 13) continue;
             int n2 = i;
@@ -8149,7 +8149,7 @@ implements Runnable {
         }
     }
 
-    void z(int n) {
+    void incrementRowValueType14(int n) {
         for (int i = 0; i < 5; ++i) {
             if (this.menuRowType[i] != 14) continue;
             int n2 = i;
@@ -8218,7 +8218,7 @@ implements Runnable {
         }
     }
 
-    int c(int n) {
+    int computeMapTrainMetric(int n) {
         int n2 = this.by;
         for (int i = 0; i < this.mapWidth; ++i) {
             for (int j = 0; j < this.mapHeight; ++j) {
@@ -8453,7 +8453,7 @@ implements Runnable {
         this.setState(20);
     }
 
-    void a(Graphics graphics, int n, int n2, byte by) {
+    void drawRouteSpritePreview(Graphics graphics, int n, int n2, byte by) {
         byte[] byArray = this.n[this.ds[80 + (this.trainSelectionIndex[by] >> 8 & 0xFF)]];
         byte[] byArray2 = this.n[this.ds[86 + (this.trainSelectionIndex[by] & 0xFF)]];
         byte[] byArray3 = new byte[byArray2.length + byArray.length];
@@ -8478,7 +8478,7 @@ implements Runnable {
         this.a(graphics, n + 4, n2 + 3, byArray3, true);
     }
 
-    void a(int n, int n2) {
+    void setCanvasSize(int n, int n2) {
         if (this.eD != n || this.aJ != n2) {
             e = n;
             hs = n2;
@@ -8509,7 +8509,7 @@ implements Runnable {
         int n = this.getWidth();
         int n2 = this.getHeight();
         if (!this.ce) {
-            this.a(n, n2);
+            this.setCanvasSize(n, n2);
             if (this.gameState != 40 && this.gameState != 35 && this.gameState != 45 && this.gameState != 55 && this.gameState != 65 && this.gameState != 105 && this.gameState != 120 && (this.gameState != 20 || this.ready)) {
                 graphics.setColor(0);
                 graphics.fillRect(0, 0, n, n2);
@@ -9697,7 +9697,7 @@ implements Runnable {
                     if (this.trainSelectionY[n3] != n5 || this.trainSelectionX[n3] != n4) continue;
                     n2 = n4 * 16 + n5 * 16 + 16 - this.viewportCenterX;
                     n = this.hj - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
-                    this.a(graphics, n2, n - 16, (byte)n3);
+                    this.drawRouteSpritePreview(graphics, n2, n - 16, (byte)n3);
                 }
             }
         }

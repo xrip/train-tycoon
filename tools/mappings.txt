@@ -582,3 +582,11 @@ method a e (I)V                 duplicateMenuRow          # copies menuRowType[n
 method a h (I)V                 incrementRowValueType1    # menuRowValue[i] += n for type==1 rows
 method a t (II)V                incrementRowValueTypeN    # menuRowValue[i] += n2 for type==3+n
 method a w (I)V                 adjustRowValueByCode      # code 4 -> +1 to type 10, code 6 -> +1 to type 9
+
+# ---- Batch 22: more menu + save helpers + canvas resize ----
+method a x (I)V                 incrementRowValueType13   # menuRowValue[i] += n for type==13
+method a z (I)V                 incrementRowValueType14   # menuRowValue[i] += n for type==14
+method a c (I)I                 computeMapTrainMetric     # iterates trackMap+trainFlags, adds to this.by
+method a a (Ljavax/microedition/lcdui/Graphics;IIB)V  drawRouteSpritePreview # composes two sprite bitmaps via trainSelectionIndex
+method a a (II)V                setCanvasSize             # recreates backbuffer if e/hs changed
+method a s (I)I                 saveIntToBuffer           # writes 4-byte int to saveBuffer (savePendingMode aware)
