@@ -4580,7 +4580,7 @@ implements Runnable {
                         if (this.gameStateCounter == 6) {
                             this.gameStateCounter = 1;
                         }
-                        this.C(this.gameStateCounter);
+                        this.setMusicVolume(this.gameStateCounter);
                         break block0;
                     }
                 }
@@ -4944,7 +4944,7 @@ implements Runnable {
         this.pathDistanceGrid = new short[this.mapWidth][this.mapHeight];
         this.fl = 10;
         this.selectionCost = 0;
-        this.b();
+        this.clearPathDistanceGrid();
         this.pathDistanceGrid[this.placementX][this.placementY] = 20;
         this.floodFillPath();
         if (this.pathDistanceGrid[this.demolishX][this.demolishY] < 20) {
@@ -5296,7 +5296,7 @@ implements Runnable {
         }
     }
 
-    void b() {
+    void clearPathDistanceGrid() {
         int n;
         int n2;
         for (n2 = 0; n2 < this.mapWidth; ++n2) {
@@ -6635,7 +6635,7 @@ implements Runnable {
         this.crcSum("Compress post");
     }
 
-    void j() {
+    void decompressSaveBuffer() {
         this.crcSum("Decompress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (int i = 0; i < this.snapshotSize; ++i) {
@@ -6661,11 +6661,11 @@ implements Runnable {
         this.crcSum("Decompress post");
     }
 
-    boolean d(boolean bl) {
-        return this.b((byte)(bl ? 1 : 0)) == 1;
+    boolean saveOrLoadBool(boolean bl) {
+        return this.saveOrLoadByte((byte)(bl ? 1 : 0)) == 1;
     }
 
-    byte b(byte by) {
+    byte saveOrLoadByte(byte by) {
         if (this.savePendingMode == 2) {
             return 0;
         }
@@ -6796,7 +6796,7 @@ implements Runnable {
             this.snapshotLoaded = true;
         }
         if (n == 1) {
-            this.j();
+            this.decompressSaveBuffer();
         }
         this.mapWidth = this.saveIntToBuffer(this.mapWidth);
         this.mapHeight = this.saveIntToBuffer(this.mapHeight);
@@ -6819,7 +6819,7 @@ implements Runnable {
         this.viewportY1 = this.saveIntToBuffer(this.viewportY1);
         this.loanBalance = this.saveIntToBuffer(this.loanBalance);
         this.loanCeiling = this.saveIntToBuffer(this.loanCeiling);
-        this.interestRate = this.b(this.interestRate);
+        this.interestRate = this.saveOrLoadByte(this.interestRate);
         this.enterpriseTaxPct = this.saveIntToBuffer(this.enterpriseTaxPct);
         this.saveOrLoadIntArray(this.yrN);
         this.saveOrLoadIntArray(this.yrCx);
@@ -6865,7 +6865,7 @@ implements Runnable {
         this.eb = this.saveIntToBuffer(this.eb);
         this.decadeEnterpriseTotal = this.saveIntToBuffer(this.decadeEnterpriseTotal);
         this.decadeXTotal = this.saveIntToBuffer(this.decadeXTotal);
-        this.cityListIndex = this.b(this.cityListIndex);
+        this.cityListIndex = this.saveOrLoadByte(this.cityListIndex);
         this.saveOrLoadByteArray(this.stationDirectionCode);
         this.saveOrLoadByteArray(this.cityPopulation);
         this.saveOrLoadByteArray(this.cityIndex);
@@ -6874,8 +6874,8 @@ implements Runnable {
         this.saveOrLoadByteArray(this.wagonEQ);
         this.saveOrLoadByteArray(this.trainFlagBits);
         this.saveOrLoadShortMatrix(this.trainOptionSlots);
-        this.numSelectedTrains = this.b(this.numSelectedTrains);
-        this.flagsA = this.d(this.flagsA);
+        this.numSelectedTrains = this.saveOrLoadByte(this.numSelectedTrains);
+        this.flagsA = this.saveOrLoadBool(this.flagsA);
         this.saveOrLoadByteArray(this.constructionTimers);
         this.saveOrLoadShortArray(this.zonePopulation);
         this.saveOrLoadShortArray(this.trainSelectionIndex);
@@ -6897,15 +6897,15 @@ implements Runnable {
         this.saveOrLoadIntArray(this.trainStateCode);
         this.saveOrLoadByteArray(this.trainAiOverride);
         this.industryCategory = this.saveIntToBuffer(this.industryCategory);
-        this.industrySiteFound = this.d(this.industrySiteFound);
+        this.industrySiteFound = this.saveOrLoadBool(this.industrySiteFound);
         this.nextTrackPieceCode = this.saveIntToBuffer(this.nextTrackPieceCode);
         if (this.nextTrackPieceCode == 0) {
             this.nextTrackPieceCode = 66;
         }
-        this.aiFrequency = this.b(this.aiFrequency);
-        this.aiThreshold = this.b(this.aiThreshold);
+        this.aiFrequency = this.saveOrLoadByte(this.aiFrequency);
+        this.aiThreshold = this.saveOrLoadByte(this.aiThreshold);
         if (n != 2) {
-            this.difficultyCycle = this.b(this.difficultyCycle);
+            this.difficultyCycle = this.saveOrLoadByte(this.difficultyCycle);
         }
         this.saveOrLoadByteArray(this.menuRowType);
         this.saveOrLoadByteArray(this.placeTrainDay);
@@ -6923,10 +6923,10 @@ implements Runnable {
         this.trackBuildCost = this.saveIntToBuffer(this.trackBuildCost);
         this.bq = this.saveIntToBuffer(this.bq);
         this.bv = this.saveIntToBuffer(this.bv);
-        this.flagsB = this.d(this.flagsB);
-        this.scenarioBits = this.b(this.scenarioBits);
-        this.scenarioMilestoneIndex = this.b(this.scenarioMilestoneIndex);
-        this.milestonesEnabled = this.d(this.milestonesEnabled);
+        this.flagsB = this.saveOrLoadBool(this.flagsB);
+        this.scenarioBits = this.saveOrLoadByte(this.scenarioBits);
+        this.scenarioMilestoneIndex = this.saveOrLoadByte(this.scenarioMilestoneIndex);
+        this.milestonesEnabled = this.saveOrLoadBool(this.milestonesEnabled);
         this.currentMilestoneScore = this.saveIntToBuffer(this.currentMilestoneScore);
         this.milestoneCoThreshold2 = this.saveIntToBuffer(this.milestoneCoThreshold2);
         this.counterB = this.saveIntToBuffer(this.counterB);
@@ -6968,10 +6968,10 @@ implements Runnable {
     }
 
     void writeSaveSnapshot() {
-        ch = this.d(ch);
-        selectionHidden = this.d(selectionHidden);
-        cc = this.d(cc);
-        q = this.d(q);
+        ch = this.saveOrLoadBool(ch);
+        selectionHidden = this.saveOrLoadBool(selectionHidden);
+        cc = this.saveOrLoadBool(cc);
+        q = this.saveOrLoadBool(q);
         this.scenarioStepCompare = this.saveIntToBuffer(this.scenarioStepCompare);
         this.transientH = this.saveIntToBuffer(this.transientH);
         this.gameStateCounter = this.saveIntToBuffer(this.gameStateCounter);
@@ -6989,7 +6989,7 @@ implements Runnable {
     void persistSnapshotMode1() {
         this.loadGame(5, 1);
         this.writeSaveSnapshot();
-        this.C(this.gameStateCounter);
+        this.setMusicVolume(this.gameStateCounter);
     }
 
     void saveAllMapArrays() {
@@ -7034,16 +7034,16 @@ implements Runnable {
         this.viewportHalfHeight = this.mapScreenHeight / 2;
         this.initBuildMenuForScenario(-1);
         this.loadGame(1, 1);
-        this.j();
+        this.decompressSaveBuffer();
         this.saveOrLoadByteMatrix(this.tileMap);
         this.loadGame(2, 1);
-        this.j();
+        this.decompressSaveBuffer();
         this.saveOrLoadByteMatrix(this.trackMap);
         this.loadGame(3, 1);
-        this.j();
+        this.decompressSaveBuffer();
         this.saveOrLoadByteMatrix(this.tileElevation);
         this.loadGame(4, 1);
-        this.j();
+        this.decompressSaveBuffer();
         this.saveOrLoadByteMatrix(this.heightMap);
         this.lastViewportCenterX = -1;
     }
@@ -7335,7 +7335,7 @@ implements Runnable {
         }
     }
 
-    void g() {
+    void maybeAiTakeTurn() {
         if (this.buildMenuMode != 2 && this.buildMenuMode != 4 && this.rng.nextInt() % this.aiFrequency > this.aiThreshold) {
             this.setState(105);
         }
@@ -7794,7 +7794,7 @@ implements Runnable {
         this.menuRowParamC[n2] = (byte)n6;
     }
 
-    void D(int n) {
+    void applyMenuRowEffect(int n) {
         if (this.menuRowAltType[n] == 1 || this.menuRowAltType[n] == 2) {
             this.money += this.menuRowRevenue[n];
             this.pushMoneyHistory(this.menuRowRevenue[n]);
@@ -7876,7 +7876,7 @@ implements Runnable {
         this.setState(20);
     }
 
-    void Q() {
+    void everyMonthlyTick() {
         int n;
         if (!this.flagsB) {
             return;
@@ -7888,11 +7888,11 @@ implements Runnable {
         }
         for (n = 0; n < 5; ++n) {
             if ((this.menuRowType[n] == 1 || this.menuRowType[n] >= 4 && this.menuRowType[n] <= 14) && this.menuRowCost[n] <= this.menuRowValue[n]) {
-                this.D(n);
+                this.applyMenuRowEffect(n);
             }
             if (this.menuRowParamA[n] != this.dayOfMonth || this.menuRowParamB[n] != this.monthOfYear || this.menuRowParamC[n] != this.year - 1950) continue;
             if (this.menuRowType[n] == 2 && this.menuRowCost[n] <= this.money) {
-                this.D(n);
+                this.applyMenuRowEffect(n);
             }
             if (this.menuRowType[n] == 0) continue;
             this.duplicateMenuRow(n);
@@ -8195,7 +8195,7 @@ implements Runnable {
         }
     }
 
-    void C(int n) {
+    void setMusicVolume(int n) {
         try {
             if (this.volumeControl != null) {
                 this.volumeControl.setLevel(n * 20);
@@ -9147,9 +9147,9 @@ implements Runnable {
                     }
                     this.counterA = 0;
                     ++this.dayOfMonth;
-                    this.Q();
+                    this.everyMonthlyTick();
                     if (this.dayOfMonth % 4 == 0) {
-                        this.g();
+                        this.maybeAiTakeTurn();
                     }
                     if (this.dayOfMonth % 2 == 0) {
                         if (this.dayOfMonth % 10 == 0) {

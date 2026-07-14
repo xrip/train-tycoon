@@ -749,3 +749,13 @@ method a a (Ljava/io/ByteArrayOutputStream;II)V  writeRlePairToStream  # RLE pai
 method a a ([I)V                     saveOrLoadIntArray      # int[] save/load (savePendingMode dispatch)
 method a a (Ljavax/microedition/lcdui/Graphics;IIII[B)V  drawTextBox  # renders textbox with byArray chars
 method a c (Ljava/lang/String;)V     crcSum                  # computes CRC sum over saveBuffer
+
+# ---- Batch 32: monthly/every-tick handlers + save/load primitives + AI trigger ----
+method a Q ()V                      everyMonthlyTick         # monthly: applies menu row effects; decrements route flags
+method a D (I)V                     applyMenuRowEffect      # handles menu-row payment/era/loan/resource effects
+method a C (I)V                     setMusicVolume          # volumeControl.setLevel(n * 20)
+method a b ()V                      clearPathDistanceGrid    # clears + initializes pathDistanceGrid
+method a j ()V                      decompressSaveBuffer     # RLE decompress saveBuffer (paired with compressSaveBuffer)
+method a d (Z)Z                     saveOrLoadBool          # wraps saveOrLoadByte
+method a b (B)B                     saveOrLoadByte          # single-byte save/load (savePendingMode dispatch)
+method a g ()V                      maybeAiTakeTurn         # setState(105) if AI should take a turn
