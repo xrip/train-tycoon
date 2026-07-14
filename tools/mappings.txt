@@ -537,3 +537,33 @@ method a a (IIIII)Z             findLineIntersection      # walks (n,n2) steppin
 method a b (II)Z                isCurveTile               # tile 7-10, follows direction to next curve
 method a j (II)Z                isPlaceableTerrain        # elevation>=0, no track, no obstacle
 method a r (II)Z                isCityOrStationTile       # 29-33/70-80/76/87-90 with track bits
+
+# ---- Batch 20: rendering pipeline + terrain editing + AI train registration ----
+# AI train registration + selection arrays (size 64 = zone count)
+field  a di   trainSelectionIndex   # short[64]; per-slot 256*by2+by3 unique key
+field  a gi   trainSelectionY       # short[64]; per-slot Y coordinate (was CFR-emitted 'trainY2')
+field  a bL   trainSelectionX       # short[64]; per-slot X coordinate (was CFR-emitted 'trainX2')
+# Method renderers and game-state mutators
+method a a (Ljavax/microedition/lcdui/Graphics;IIII)V  drawTileSprite          # tileSprites[index] at (x,y)
+method a d (I)V                                       resetKeyState           # clears input state
+method a z (II)V                                      setSelectionStart       # centers selection around (n,n2)
+method a a (IIII)V                                    flattenHeightArea       # flattens heights in (n..n+n3, n2..n2+n4)
+method a b (IIII)V                                    placeTrackTile          # tileMap=n3, trackMap=0xC0|n4
+method a u (I)V                                       placeTerrainFeature     # u(int) — feature placement pass (dr=u(n))
+method a a (IIIIII)I                                  crossProduct2D          # 2D vector cross product (a,b,c,d,e,f)
+method a a (II[I[IZ)V                                 computeIsoCorners       # 4-corner iso transform from (n,n2)
+method a i ()V                                        computeViewportBounds   # sets viewport extent 4 directions
+method a a (Ljavax/microedition/lcdui/Graphics;IIIZ)I drawMenuRow             # renders row n2; sets gj if selected
+method a b (Ljavax/microedition/lcdui/Graphics;)V      drawConfirmBar          # bottom confirm toggle bar
+method a h (Ljavax/microedition/lcdui/Graphics;)V      drawHeaderBar           # day/month/year/money header
+method a a (Ljavax/microedition/lcdui/Graphics;)V      paintMain               # main redraw into backbuffer
+method a p (I)V                                       pushMoneyHistory        # 3-frame sliding window K[0..2], fJ[0..2]
+method a a (Ljavax/microedition/lcdui/Graphics;II)I    drawNumber              # renders number to graphics
+method a g (Ljavax/microedition/lcdui/Graphics;)V      drawMoneyTicker         # red K[0..2] deltas with fJ fade
+method a d (Ljavax/microedition/lcdui/Graphics;)V      drawConfirmDialog       # confirmCounter countdown overlay
+method a a (BII)B                                     registerTrain           # allocates train slot, returns index
+method a d (II)V                                      initBuildMenuRow        # creates 6 row tables for menu n
+method a v (I)V                                       initBuildMenuForScenario # scenarioBits=n, builds 6-row menus
+method a r ()V                                        revertTrackTiles        # walks from trackStartX/Y replacing 81-86 with curves
+method a f ()V                                        applyBackgroundCost     # money -= bg if ck else enterOutOfMoneyState
+method a d (III)V                                     advanceConstructionTimers # updates 5x5 zone timers by n3 (positive/negative)
