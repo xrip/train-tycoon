@@ -188,3 +188,44 @@ field  a bw   numSelectedTrains        # int; upper bound of selection arrays
 field  a aP   selectionHidden          # boolean; toggles selection markers
 # Methods discovered by the map renderer
 method a f (Ljavax/microedition/lcdui/Graphics;)V  renderMap   # main in-game map renderer
+
+# ---- Batch 6: input dispatch + build-menu (handleKey / ah / c(boolean)) ----
+# Build-menu state machine (key 53 in play opens it)
+field  a bt   buildMenuMode      # int; 0=main, 1=build, 2=buy, 3=train-shop, 4=demolish, 5=buy-vehicle
+field  a aT   buildMenuIndex     # int; selection within az[bt]
+field  a bu   menuDirty          # boolean; true means re-render menu state
+field  a az   buildMenuItems     # byte[][]; menu labels by mode
+field  a gp   buildMenuResultCodes  # int[][]; transition code after select
+field  a cR   confirmToggle      # int; 0/1, used in case 40 confirmation flow
+field  a cb   confirmTargetState # int; posted via dB timer -> t(state) ?? - read in paint()
+field  a dB   confirmCounter      # int; 20-frame delay before state transition
+field  a fk   cursorSelectX      # int; -2 sentinel in a(byte).1
+field  a x    cursorSelectY      # int; -1 sentinel
+field  a gF   cursorDragY        # int; -3 sentinel y or stored drag target
+field  a cE   cursorDragX        # int; -1 sentinel x or stored drag origin
+field  a gZ   cursorOverUI       # boolean; menu-hover guard
+field  a eB   cursorScale        # int; +/-10 zoom in a(byte).1/.2
+field  a hd   cursorAllowZoomOut # boolean; gates eB+10 only on !hd
+field  a fI   pauseMenuOpen      # boolean; -42 in case 20 (replaces pause dialog)
+field  a fV   placementX         # int; track placement X (case 1.0 in ah)
+field  a bN   placementY         # int; track placement Y
+field  a fm   demolishX          # int; vehicle demolition X
+field  a ax   demolishY          # int; vehicle demolition Y
+field  a ek   tileCursorX        # int; selected tile X (heavily used, 94 refs)
+field  a I    tileCursorY        # int; selected tile Y (95 refs)
+field  a fv   selectionStartX    # int; drag-select start X
+field  a bn   selectionStartY    # int; drag-select start Y
+field  a fn   blockBuildMenu     # boolean; gates sub-action calls in ah()
+field  a bA   swapMapX           # int; from a(false) map-swap call
+field  a fQ   swapMapY           # int; from a(false) map-swap call
+field  a cN   trainMenuSelectIndex  # int; train menu selector (case 5.1)
+field  a fM   vehicleMenuSelectIndex  # int; vehicle menu selector (case 5.0)
+field  a cL   heightMap          # byte[][]; input to a(boolean) terrain smoother
+field  a dx   selectionCost      # int; cost of the current action choice
+field  a gK   totalSpent         # int; running total of money spent
+field  a bJ   pauseFlag          # boolean; toggled by ah() case 11 -> !pauseFlag
+# Methods discovered: ah() is the build-menu dispatcher; a(boolean) smooths heightmap
+method a ah ()V                  openBuildMenu        # entry point from key 53
+method a a (Z)V                  smoothHeightMap      # a(boolean): 4-corner heightmap -> tileMap
+method a c (Z)V                  cycleBuildMenuIndex  # a(boolean) overload #2: scroll select
+method a a (B)V                  handleMenuAction     # a(byte): the 1/2/3 actions in handleKey case 20
