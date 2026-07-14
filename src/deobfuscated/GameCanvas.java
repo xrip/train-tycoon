@@ -1089,7 +1089,7 @@ implements Runnable {
                 if (this.needsRepaint && n12 + n10 + 6 + by2 >= this.clipY + this.clipHeight) {
                     this.cursorAllowZoomOut = true;
                 }
-                if (n9 != 0 && (n9 == 0 || !this.e(this.currentSpriteId, n7))) continue;
+                if (n9 != 0 && (n9 == 0 || !this.isResourceTile(this.currentSpriteId, n7))) continue;
                 if (n12 + n10 - n3 - 3 <= this.clipY + this.clipHeight && n12 + n10 + 8 + by2 >= this.clipY) {
                     if ((by & 0x10) == 16) {
                         if (this.cursorDragY == -3) {
@@ -1132,7 +1132,7 @@ implements Runnable {
             if (image == null) continue;
             n5 = image.getWidth();
             n4 = image.getHeight();
-            if (n11 != 0 && (n11 == 0 || !this.e(this.currentSpriteId, n7))) continue;
+            if (n11 != 0 && (n11 == 0 || !this.isResourceTile(this.currentSpriteId, n7))) continue;
             if (this.needsRepaint && n12 + n8 <= this.clipY + this.clipHeight && n12 + n8 + n4 >= this.clipY) {
                 graphics.drawImage(image, n26 + n9, n12 + n8, 20);
             }
@@ -1159,7 +1159,7 @@ implements Runnable {
             n4 = n5 != 0 ? this.spriteData[n25++] : 0;
             n3 = n12 + n8;
             n2 = n3 + n6;
-            if (!this.needsRepaint || n5 != 0 && (n5 == 0 || !this.e(this.currentSpriteId, n4))) continue;
+            if (!this.needsRepaint || n5 != 0 && (n5 == 0 || !this.isResourceTile(this.currentSpriteId, n4))) continue;
             switch (n11) {
                 case 0: {
                     graphics.setColor(n10);
@@ -1642,7 +1642,7 @@ implements Runnable {
         }
     }
 
-    byte p() {
+    byte randomCityTile() {
         int n = Math.abs(this.rng.nextInt() % 22);
         if (n < 6) {
             return 34;
@@ -1784,7 +1784,7 @@ implements Runnable {
                     byArray[n5][by4] = 42;
                 }
                 if (by3 == 0) continue;
-                byArray[n5][by4] = this.p();
+                byArray[n5][by4] = this.randomCityTile();
             }
         }
         n5 = -2;
@@ -2335,14 +2335,14 @@ implements Runnable {
                 }
             }
             if (by == 8) {
-                if (this.j(this.tileCursorX, this.tileCursorY)) {
+                if (this.isPlaceableTerrain(this.tileCursorX, this.tileCursorY)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
                 }
             }
             if (by == 9) {
-                if (this.r(this.tileCursorX, this.tileCursorY)) {
+                if (this.isCityOrStationTile(this.tileCursorX, this.tileCursorY)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
@@ -2352,7 +2352,7 @@ implements Runnable {
                 graphics.setColor(0xFFFFFF);
             }
             if (by == 11) {
-                if (this.b(this.tileCursorX, this.tileCursorY)) {
+                if (this.isCurveTile(this.tileCursorX, this.tileCursorY)) {
                     int n = this.tileCursorX;
                     int n2 = this.tileCursorY;
                     int n3 = 0;
@@ -2477,7 +2477,7 @@ implements Runnable {
     }
 
     void demolishAtCursor() {
-        if (!this.blockBuildMenu && this.r(this.tileCursorX, this.tileCursorY)) {
+        if (!this.blockBuildMenu && this.isCityOrStationTile(this.tileCursorX, this.tileCursorY)) {
             this.bg = 0;
             if (this.tileMap[this.tileCursorX][this.tileCursorY] >= 81 && this.tileMap[this.tileCursorX][this.tileCursorY] <= 86) {
                 int n = this.tileCursorX;
@@ -2613,7 +2613,7 @@ implements Runnable {
         switch (n) {
             case 0: {
                 int n2;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 0) || (n2 = this.a(1, this.tileCursorX, this.tileCursorY, false, false)) == 5000 || !this.q(this.costPower)) break;
+                if (!this.e(this.tileCursorX, this.tileCursorY, 0) || (n2 = this.a(1, this.tileCursorX, this.tileCursorY, false, false)) == 5000 || !this.spendMoney(this.costPower)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.d(this.tileCursorX, this.tileCursorY, -8);
@@ -2622,7 +2622,7 @@ implements Runnable {
             }
             case 1: {
                 int n3;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 0) || (n3 = this.a(1, this.tileCursorX, this.tileCursorY, true, false)) == 5000 || !this.q(this.costPower)) break;
+                if (!this.e(this.tileCursorX, this.tileCursorY, 0) || (n3 = this.a(1, this.tileCursorX, this.tileCursorY, true, false)) == 5000 || !this.spendMoney(this.costPower)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.d(this.tileCursorX, this.tileCursorY, -8);
@@ -2631,7 +2631,7 @@ implements Runnable {
             }
             case 2: {
                 int n4;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 5) || (n4 = this.a(1, this.tileCursorX, this.tileCursorY, false, true)) == 5000 || !this.q(this.costStruct)) break;
+                if (!this.e(this.tileCursorX, this.tileCursorY, 5) || (n4 = this.a(1, this.tileCursorX, this.tileCursorY, false, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.tileMap[this.tileCursorX][this.tileCursorY - 1] = 89;
                 this.tileMap[this.tileCursorX][this.tileCursorY + 1] = 89;
@@ -2644,7 +2644,7 @@ implements Runnable {
             }
             case 3: {
                 int n5;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 6) || (n5 = this.a(1, this.tileCursorX, this.tileCursorY, true, true)) == 5000 || !this.q(this.costStruct)) break;
+                if (!this.e(this.tileCursorX, this.tileCursorY, 6) || (n5 = this.a(1, this.tileCursorX, this.tileCursorY, true, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.tileMap[this.tileCursorX - 1][this.tileCursorY] = 90;
                 this.tileMap[this.tileCursorX + 1][this.tileCursorY] = 90;
@@ -2723,7 +2723,7 @@ implements Runnable {
             case 1: {
                 switch (by) {
                     case 0: {
-                        if (this.blockBuildMenu || !this.j(this.tileCursorX, this.tileCursorY)) break;
+                        if (this.blockBuildMenu || !this.isPlaceableTerrain(this.tileCursorX, this.tileCursorY)) break;
                         this.placementX = this.tileCursorX;
                         this.placementY = this.tileCursorY;
                         this.tileMap[this.placementX][this.placementY] = 127;
@@ -2826,7 +2826,7 @@ implements Runnable {
             case 4: {
                 switch (by) {
                     case 0: {
-                        if (this.blockBuildMenu || !this.j(this.tileCursorX, this.tileCursorY)) break;
+                        if (this.blockBuildMenu || !this.isPlaceableTerrain(this.tileCursorX, this.tileCursorY)) break;
                         this.demolishX = this.tileCursorX;
                         this.demolishY = this.tileCursorY;
                         this.tileMap[this.placementX][this.placementY] = 0;
@@ -2870,7 +2870,7 @@ implements Runnable {
         }
     }
 
-    boolean q(int n) {
+    boolean spendMoney(int n) {
         if (n <= this.money) {
             this.money -= n;
             this.lastViewportCenterX = -1;
@@ -3374,12 +3374,12 @@ implements Runnable {
 
     void a(int n, int n2, int n3) {
         if (this.tileMap[n][n2] == 0 || this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33) {
-            this.tileMap[n][n2] = this.p();
+            this.tileMap[n][n2] = this.randomCityTile();
             this.trackMap[n][n2] = (byte)n3;
         }
     }
 
-    boolean v() {
+    boolean pickValidForestTile() {
         int n;
         int n2 = Math.abs(this.rng.nextInt() % (this.mapWidth - 2)) + 1;
         if (this.tileMap[n2][n = Math.abs(this.rng.nextInt() % (this.mapHeight - 2)) + 1] == 0 || this.tileMap[n2][n] >= 29 && this.tileMap[n2][n] <= 33) {
@@ -3669,7 +3669,7 @@ implements Runnable {
         return null;
     }
 
-    boolean e(int n, int n2) {
+    boolean isResourceTile(int n, int n2) {
         if (n != 1) {
             this.S = false;
         }
@@ -4974,21 +4974,21 @@ implements Runnable {
             this.gO = n5;
             n3 = this.tileMap[n4][n5];
             if (n3 == 7 || n3 == 10 || n3 == 21 || n3 == 23 || n3 == 71) {
-                this.o(n4 - 1, n5);
-                this.o(n4 + 1, n5);
+                this.clearBuildPathTile(n4 - 1, n5);
+                this.clearBuildPathTile(n4 + 1, n5);
             }
             if (n3 == 8 || n3 == 9 || n3 == 22 || n3 == 24 || n3 == 70) {
-                this.o(n4, n5 - 1);
-                this.o(n4, n5 + 1);
+                this.clearBuildPathTile(n4, n5 - 1);
+                this.clearBuildPathTile(n4, n5 + 1);
             }
             if (n4 == this.placementX && n5 == this.placementY) {
                 bl = false;
             } else if (this.ed % 2 == 0) {
-                if (!(this.b(n4 + 1, n5, this.aQ[n4][n5]) || this.b(n4 - 1, n5, this.aQ[n4][n5]) || this.b(n4, n5 + 1, this.aQ[n4][n5]) || this.b(n4, n5 - 1, this.aQ[n4][n5]))) {
+                if (!(this.findPathStep(n4 + 1, n5, this.aQ[n4][n5]) || this.findPathStep(n4 - 1, n5, this.aQ[n4][n5]) || this.findPathStep(n4, n5 + 1, this.aQ[n4][n5]) || this.findPathStep(n4, n5 - 1, this.aQ[n4][n5]))) {
                     bl = false;
                     bl2 = false;
                 }
-            } else if (!(this.b(n4, n5 + 1, this.aQ[n4][n5]) || this.b(n4, n5 - 1, this.aQ[n4][n5]) || this.b(n4 + 1, n5, this.aQ[n4][n5]) || this.b(n4 - 1, n5, this.aQ[n4][n5]))) {
+            } else if (!(this.findPathStep(n4, n5 + 1, this.aQ[n4][n5]) || this.findPathStep(n4, n5 - 1, this.aQ[n4][n5]) || this.findPathStep(n4 + 1, n5, this.aQ[n4][n5]) || this.findPathStep(n4 - 1, n5, this.aQ[n4][n5]))) {
                 bl = false;
                 bl2 = false;
             }
@@ -5120,7 +5120,7 @@ implements Runnable {
         return bl;
     }
 
-    boolean b(int n, int n2, int n3) {
+    boolean findPathStep(int n, int n2, int n3) {
         boolean bl = false;
         if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.aQ[n][n2] >= 20 && this.aQ[n][n2] < n3) {
             bl = true;
@@ -5130,7 +5130,7 @@ implements Runnable {
         return bl;
     }
 
-    void o(int n, int n2) {
+    void clearBuildPathTile(int n, int n2) {
         if (n > 0 && n < this.mapWidth && n2 > 0 && n2 < this.mapHeight && (this.tileMap[n][n2] >= 7 && this.tileMap[n][n2] <= 10 || this.tileMap[n][n2] >= 21 && this.tileMap[n][n2] <= 24 || this.tileMap[n][n2] == 70 || this.tileMap[n][n2] == 71) && this.aQ[n][n2] > 0) {
             this.aQ[n][n2] = 0;
         }
@@ -5379,7 +5379,7 @@ implements Runnable {
         }
     }
 
-    boolean a(int n, int n2, int n3, int n4, int n5) {
+    boolean findLineIntersection(int n, int n2, int n3, int n4, int n5) {
         boolean bl = false;
         while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < this.mapWidth && n2 < this.mapHeight) {
             if (this.tileMap[n][n2] == n5) {
@@ -5391,32 +5391,32 @@ implements Runnable {
         return bl;
     }
 
-    boolean b(int n, int n2) {
+    boolean isCurveTile(int n, int n2) {
         byte by = this.tileMap[n][n2];
         if (by < 7 || by > 10) {
             return false;
         }
         boolean bl = false;
         if (by == 7) {
-            bl |= this.a(n, n2, 0, -1, 10);
+            bl |= this.findLineIntersection(n, n2, 0, -1, 10);
         }
         if (by == 10) {
-            bl |= this.a(n, n2, 0, 1, 7);
+            bl |= this.findLineIntersection(n, n2, 0, 1, 7);
         }
         if (by == 8) {
-            bl |= this.a(n, n2, -1, 0, 9);
+            bl |= this.findLineIntersection(n, n2, -1, 0, 9);
         }
         if (by == 9) {
-            bl |= this.a(n, n2, 1, 0, 8);
+            bl |= this.findLineIntersection(n, n2, 1, 0, 8);
         }
         return bl;
     }
 
-    boolean j(int n, int n2) {
+    boolean isPlaceableTerrain(int n, int n2) {
         return this.tileElevation[n][n2] >= 0 && (this.tileMap[n][n2] == 0 || this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33) && this.trackMap[n][n2] == 0;
     }
 
-    boolean r(int n, int n2) {
+    boolean isCityOrStationTile(int n, int n2) {
         if (this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33 || this.tileMap[n][n2] >= 70 && this.tileMap[n][n2] <= 80 && this.trackMap[n][n2] == 65 || this.tileMap[n][n2] == 76 && (this.trackMap[n][n2] & 0x47) == 65 || this.tileMap[n][n2] == 76 && (this.trackMap[n][n2] & 0x78) == 72 || (this.tileMap[n][n2] == 87 || this.tileMap[n][n2] == 88 || this.tileMap[n][n2] == 89 || this.tileMap[n][n2] == 90) && this.trackMap[n][n2] == 65) {
             int n3 = this.spawnOrFindAt(n, n2);
             for (int i = 0; i < 500; ++i) {
@@ -6480,7 +6480,7 @@ implements Runnable {
             } else {
                 this.trainServiceCounter[n] = 0;
             }
-            this.b((int)this.nextCar[n], n2, bl2);
+            this.b(this.nextCar[n], n2, bl2);
         }
     }
 
@@ -9160,7 +9160,7 @@ implements Runnable {
                         if (this.flagsA) {
                             n27 = 0;
                             for (n = 0; n < 30; ++n) {
-                                n27 = n27 != 0 || this.v() ? 1 : 0;
+                                n27 = n27 != 0 || this.pickValidForestTile() ? 1 : 0;
                             }
                             if (n27 != 0) {
                                 this.maybeAITick();

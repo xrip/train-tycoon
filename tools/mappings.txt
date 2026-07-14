@@ -524,3 +524,16 @@ field  a bH   lastViewportCenterX   # int; -1 sentinel OR previous viewportCente
 # Build-menu index (0..5)
 field  a cZ   buildMenuIndex        # byte; current row index in the build menu (was cZ, kept)
 # Note: ch/q static debug flags deferred — they appear only in case 10 debug menu.
+
+# ---- Batch 19: terrain/path/placeability query methods ----
+# Boolean queries used by track-build validation, tile placement, money deduction.
+method a p ()B                  randomCityTile            # weighted random tile id 34-40 or 0
+method a q (I)Z                 spendMoney                # money -= n; returns true if affordable
+method a v ()Z                  pickValidForestTile       # random walkable tile near forest (43-48)
+method a e (II)Z                isResourceTile            # n==1: load snapshot; n2 selects what to query
+method a b (III)Z               findPathStep              # path-finding helper; sets dX/gO
+method a o (II)V                clearBuildPathTile        # clears build-path tile if specific kind
+method a a (IIIII)Z             findLineIntersection      # walks (n,n2) stepping by (n3,n4); checks for tile==n5
+method a b (II)Z                isCurveTile               # tile 7-10, follows direction to next curve
+method a j (II)Z                isPlaceableTerrain        # elevation>=0, no track, no obstacle
+method a r (II)Z                isCityOrStationTile       # 29-33/70-80/76/87-90 with track bits
