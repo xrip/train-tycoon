@@ -1907,7 +1907,7 @@ implements Runnable {
         } while (!bl);
         if (!this.trackBuildInProgress) {
             this.flattenHeightArea(n7, n6, n5, n4);
-            n3 = this.f(n);
+            n3 = this.addCityEntry(n);
             switch (n) {
                 case 0: {
                     if (n5 == 2 && n4 == 2) {
@@ -2249,7 +2249,7 @@ implements Runnable {
         }
     }
 
-    void a(Graphics graphics, int[] nArray, int[] nArray2) {
+    void drawSelectionQuad(Graphics graphics, int[] nArray, int[] nArray2) {
         graphics.drawLine(nArray[0], nArray2[0] + 15, nArray[1], nArray2[1] + 15);
         graphics.drawLine(nArray[0] + 1, nArray2[0] + 15, nArray[1] + 1, nArray2[1] + 15);
         graphics.drawLine(nArray[0], nArray2[0] + 15, nArray[2], nArray2[2] + 15);
@@ -2266,42 +2266,42 @@ implements Runnable {
             int[] nArray;
             int[] nArray2;
             if (by == 1) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 0)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
                 }
             }
             if (by == 2) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 1)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 1)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
                 }
             }
             if (by == 3) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 2)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 2)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
                 }
             }
             if (by == 4) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 3)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 3)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
                 }
             }
             if (by == 5) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 4)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 4)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
                 }
             }
             if (by == 6) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 5)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 5)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
@@ -2310,15 +2310,15 @@ implements Runnable {
                 nArray = new int[4];
                 if (this.tileCursorY > 0) {
                     this.computeIsoCorners(this.tileCursorX, this.tileCursorY - 1, nArray2, nArray, true);
-                    this.a(graphics, nArray2, nArray);
+                    this.drawSelectionQuad(graphics, nArray2, nArray);
                 }
                 if (this.tileCursorY < this.mapWidth - 1) {
                     this.computeIsoCorners(this.tileCursorX, this.tileCursorY + 1, nArray2, nArray, true);
-                    this.a(graphics, nArray2, nArray);
+                    this.drawSelectionQuad(graphics, nArray2, nArray);
                 }
             }
             if (by == 7) {
-                if (this.e(this.tileCursorX, this.tileCursorY, 6)) {
+                if (this.isTileBuildable(this.tileCursorX, this.tileCursorY, 6)) {
                     graphics.setColor(65280);
                 } else {
                     graphics.setColor(0xFF0000);
@@ -2327,11 +2327,11 @@ implements Runnable {
                 nArray = new int[4];
                 if (this.tileCursorX > 0) {
                     this.computeIsoCorners(this.tileCursorX - 1, this.tileCursorY, nArray2, nArray, true);
-                    this.a(graphics, nArray2, nArray);
+                    this.drawSelectionQuad(graphics, nArray2, nArray);
                 }
                 if (this.tileCursorX < this.mapWidth - 1) {
                     this.computeIsoCorners(this.tileCursorX + 1, this.tileCursorY, nArray2, nArray, true);
-                    this.a(graphics, nArray2, nArray);
+                    this.drawSelectionQuad(graphics, nArray2, nArray);
                 }
             }
             if (by == 8) {
@@ -2374,7 +2374,7 @@ implements Runnable {
                     int[] nArray4 = new int[4];
                     while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < this.mapWidth && n2 < this.mapHeight) {
                         this.computeIsoCorners(n, n2, nArray3, nArray4, true);
-                        this.a(graphics, nArray3, nArray4);
+                        this.drawSelectionQuad(graphics, nArray3, nArray4);
                         if (this.tileMap[n][n2] == 0 && this.trackMap[n][n2] == 0) continue;
                         break;
                     }
@@ -2382,7 +2382,7 @@ implements Runnable {
                     graphics.setColor(0xFF0000);
                 }
             }
-            this.a(graphics, this.selectionTileX, this.selectionTileY);
+            this.drawSelectionQuad(graphics, this.selectionTileX, this.selectionTileY);
         }
     }
 
@@ -2613,7 +2613,7 @@ implements Runnable {
         switch (n) {
             case 0: {
                 int n2;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 0) || (n2 = this.a(1, this.tileCursorX, this.tileCursorY, false, false)) == 5000 || !this.spendMoney(this.costPower)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0) || (n2 = this.spawnWagonSlot(1, this.tileCursorX, this.tileCursorY, false, false)) == 5000 || !this.spendMoney(this.costPower)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -8);
@@ -2622,7 +2622,7 @@ implements Runnable {
             }
             case 1: {
                 int n3;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 0) || (n3 = this.a(1, this.tileCursorX, this.tileCursorY, true, false)) == 5000 || !this.spendMoney(this.costPower)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0) || (n3 = this.spawnWagonSlot(1, this.tileCursorX, this.tileCursorY, true, false)) == 5000 || !this.spendMoney(this.costPower)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -8);
@@ -2631,7 +2631,7 @@ implements Runnable {
             }
             case 2: {
                 int n4;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 5) || (n4 = this.a(1, this.tileCursorX, this.tileCursorY, false, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 5) || (n4 = this.spawnWagonSlot(1, this.tileCursorX, this.tileCursorY, false, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.tileMap[this.tileCursorX][this.tileCursorY - 1] = 89;
                 this.tileMap[this.tileCursorX][this.tileCursorY + 1] = 89;
@@ -2644,7 +2644,7 @@ implements Runnable {
             }
             case 3: {
                 int n5;
-                if (!this.e(this.tileCursorX, this.tileCursorY, 6) || (n5 = this.a(1, this.tileCursorX, this.tileCursorY, true, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 6) || (n5 = this.spawnWagonSlot(1, this.tileCursorX, this.tileCursorY, true, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.tileMap[this.tileCursorX - 1][this.tileCursorY] = 90;
                 this.tileMap[this.tileCursorX + 1][this.tileCursorY] = 90;
@@ -2785,7 +2785,7 @@ implements Runnable {
                 switch (by) {
                     case 0: {
                         if (this.selectionCost <= this.money) {
-                            this.n(1);
+                            this.setTrackOwnerCode(1);
                             this.money -= this.selectionCost;
                             this.totalSpent += this.selectionCost;
                             this.pushMoneyHistory(-this.selectionCost);
@@ -3372,7 +3372,7 @@ implements Runnable {
         }
     }
 
-    void a(int n, int n2, int n3) {
+    void placeCityTile(int n, int n2, int n3) {
         if (this.tileMap[n][n2] == 0 || this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33) {
             this.tileMap[n][n2] = this.randomCityTile();
             this.trackMap[n][n2] = (byte)n3;
@@ -3466,37 +3466,37 @@ implements Runnable {
                     n5 = this.tileMap[n2][n];
                     switch (n5) {
                         case 42: {
-                            this.a(n2 - 1, n, n3);
-                            this.a(n2 + 1, n, n3);
+                            this.placeCityTile(n2 - 1, n, n3);
+                            this.placeCityTile(n2 + 1, n, n3);
                             break;
                         }
                         case 43: {
-                            this.a(n2, n - 1, n3);
-                            this.a(n2, n + 1, n3);
+                            this.placeCityTile(n2, n - 1, n3);
+                            this.placeCityTile(n2, n + 1, n3);
                             break;
                         }
                         case 45: {
-                            this.a(n2 - 1, n, n3);
-                            this.a(n2, n + 1, n3);
-                            this.a(n2 - 1, n + 1, n3);
+                            this.placeCityTile(n2 - 1, n, n3);
+                            this.placeCityTile(n2, n + 1, n3);
+                            this.placeCityTile(n2 - 1, n + 1, n3);
                             break;
                         }
                         case 46: {
-                            this.a(n2 - 1, n, n3);
-                            this.a(n2, n - 1, n3);
-                            this.a(n2 - 1, n - 1, n3);
+                            this.placeCityTile(n2 - 1, n, n3);
+                            this.placeCityTile(n2, n - 1, n3);
+                            this.placeCityTile(n2 - 1, n - 1, n3);
                             break;
                         }
                         case 47: {
-                            this.a(n2 + 1, n, n3);
-                            this.a(n2, n - 1, n3);
-                            this.a(n2 + 1, n - 1, n3);
+                            this.placeCityTile(n2 + 1, n, n3);
+                            this.placeCityTile(n2, n - 1, n3);
+                            this.placeCityTile(n2 + 1, n - 1, n3);
                             break;
                         }
                         case 48: {
-                            this.a(n2 + 1, n, n3);
-                            this.a(n2, n + 1, n3);
-                            this.a(n2 + 1, n + 1, n3);
+                            this.placeCityTile(n2 + 1, n, n3);
+                            this.placeCityTile(n2, n + 1, n3);
+                            this.placeCityTile(n2 + 1, n + 1, n3);
                         }
                     }
                     this.trackMap[n2][n] = (byte)n3;
@@ -3507,7 +3507,7 @@ implements Runnable {
         return false;
     }
 
-    byte f(int n) {
+    byte addCityEntry(int n) {
         this.stationDirectionCode[this.cityListIndex] = (byte)n;
         this.cityPopulation[this.cityListIndex] = (byte)(50 + this.rng.nextInt() % 20);
         this.cityIndex[this.cityListIndex] = 0;
@@ -4303,7 +4303,7 @@ implements Runnable {
                             this.pushMoneyHistory(this.currentTrainCostSnapshot * 70 / 100);
                         }
                         short s = this.nextCar[this.trainAtCursor];
-                        this.o(s);
+                        this.decrementOptionCounts(s);
                         this.trainFlags[this.trainAtCursor] = 0;
                         while (s != -1) {
                             this.trainFlags[s] = 0;
@@ -4477,11 +4477,11 @@ implements Runnable {
                 }
                 if (n2 == 2) {
                     if (!this.discountApplied) {
-                        if (!this.y()) break;
+                        if (!this.buyTrainAtCursor()) break;
                         this.setState(30);
                         break;
                     }
-                    if (!this.a(this.trainAtCursor, this.wagonType, this.wagonOptionSlots)) break;
+                    if (!this.applyTrainUpgrade(this.trainAtCursor, this.wagonType, this.wagonOptionSlots)) break;
                     this.pendingTransitionCode = 26;
                     this.setState(30);
                     break;
@@ -5033,10 +5033,10 @@ implements Runnable {
                     boolean bl7 = n2 > 0 ? this.pathDistanceGrid[n3][n2 - 1] == 9 : (bl4 = false);
                     boolean bl8 = n2 < this.mapHeight - 1 ? this.pathDistanceGrid[n3][n2 + 1] == 9 : (bl3 = false);
                     if ((n != 0 ? 1 : 0) + (bl5 ? 1 : 0) + (bl4 ? 1 : 0) + (bl3 ? 1 : 0) == 1) {
-                        n = this.a(n != 0, n3 - 1, n2, 71, 72, 74, 78, 80, 84, 88, 90, true);
-                        bl5 = this.a(bl5, n3 + 1, n2, 71, 73, 75, 78, 80, 85, 88, 90, true);
-                        bl4 = this.a(bl4, n3, n2 - 1, 70, 73, 74, 77, 79, 83, 87, 89, false);
-                        bl3 = this.a(bl3, n3, n2 + 1, 70, 72, 75, 77, 79, 86, 87, 89, false);
+                        n = this.isTileMatchForPath(n != 0, n3 - 1, n2, 71, 72, 74, 78, 80, 84, 88, 90, true);
+                        bl5 = this.isTileMatchForPath(bl5, n3 + 1, n2, 71, 73, 75, 78, 80, 85, 88, 90, true);
+                        bl4 = this.isTileMatchForPath(bl4, n3, n2 - 1, 70, 73, 74, 77, 79, 83, 87, 89, false);
+                        bl3 = this.isTileMatchForPath(bl3, n3, n2 + 1, 70, 72, 75, 77, 79, 86, 87, 89, false);
                     }
                     byte by = this.tileMap[n3][n2];
                     boolean bl9 = false;
@@ -5108,7 +5108,7 @@ implements Runnable {
         }
     }
 
-    boolean a(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8, int n9, int n10, boolean bl2) {
+    boolean isTileMatchForPath(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8, int n9, int n10, boolean bl2) {
         if (!bl && n >= 0 && n <= this.mapWidth - 1 && n2 >= 0 && n2 <= this.mapHeight - 1) {
             byte by = this.tileMap[n][n2];
             int n11 = this.trackMap[n][n2] & 0x3F;
@@ -5180,10 +5180,10 @@ implements Runnable {
         if (this.pathDistanceGrid[n][n2] > 0 && this.pathDistanceGrid[n][n2] != 3 && this.pathDistanceGrid[n][n2] != 7) {
             int n3;
             int n4 = n3 = this.pathDistanceGrid[n][n2] < 20 ? Short.MAX_VALUE : this.pathDistanceGrid[n][n2];
-            n4 = this.h(n - 1, n2, n4);
-            n4 = this.h(n + 1, n2, n4);
-            n4 = this.h(n, n2 - 1, n4);
-            if ((n4 = (int)this.h(n, n2 + 1, n4)) < n3) {
+            n4 = this.pathDistanceMin(n - 1, n2, n4);
+            n4 = this.pathDistanceMin(n + 1, n2, n4);
+            n4 = this.pathDistanceMin(n, n2 - 1, n4);
+            if ((n4 = (int)this.pathDistanceMin(n, n2 + 1, n4)) < n3) {
                 n4 = (short)(n4 + 1);
                 if (this.pathDistanceGrid[n][n2] == 2) {
                     int n5 = 0;
@@ -5219,7 +5219,7 @@ implements Runnable {
         return this.pathDistanceGrid[this.demolishX][this.demolishY] >= 20 ? 2 : (bl ? 0 : 1);
     }
 
-    short h(int n, int n2, int n3) {
+    short pathDistanceMin(int n, int n2, int n3) {
         short s = (short)n3;
         if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.pathDistanceGrid[n][n2] >= 20 && this.pathDistanceGrid[n][n2] < s) {
             s = this.pathDistanceGrid[n][n2];
@@ -5273,7 +5273,7 @@ implements Runnable {
         }
     }
 
-    void n(int n) {
+    void setTrackOwnerCode(int n) {
         for (int i = 0; i < this.mapWidth; ++i) {
             for (int j = 0; j < this.mapHeight; ++j) {
                 if (this.trackMap[i][j] == 64) {
@@ -5460,12 +5460,12 @@ implements Runnable {
         return false;
     }
 
-    boolean e(int n, int n2, int n3) {
+    boolean isTileBuildable(int n, int n2, int n3) {
         if (n3 == 5) {
-            return this.e(n, n2, 0) && this.e(n, n2 - 1, 0) && this.e(n, n2 + 1, 0);
+            return this.isTileBuildable(n, n2, 0) && this.isTileBuildable(n, n2 - 1, 0) && this.isTileBuildable(n, n2 + 1, 0);
         }
         if (n3 == 6) {
-            return this.e(n, n2, 0) && this.e(n - 1, n2, 0) && this.e(n + 1, n2, 0);
+            return this.isTileBuildable(n, n2, 0) && this.isTileBuildable(n - 1, n2, 0) && this.isTileBuildable(n + 1, n2, 0);
         }
         if (n < 0 || n2 < 0 || n >= this.mapWidth || n2 >= this.mapHeight) {
             return false;
@@ -5499,7 +5499,7 @@ implements Runnable {
         return 5000;
     }
 
-    int a(int n, int n2, int n3, boolean bl, boolean bl2) {
+    int spawnWagonSlot(int n, int n2, int n3, boolean bl, boolean bl2) {
         int n4;
         int n5 = 5000;
         for (n4 = 0; n4 < 250; ++n4) {
@@ -5593,9 +5593,9 @@ implements Runnable {
         }
     }
 
-    boolean y() {
+    boolean buyTrainAtCursor() {
         if (this.money >= this.unitCost) {
-            int n = this.b(this.tileCursorX, this.tileCursorY, this.wagonType < 3 ? 0 : 1, this.wagonType, (this.vehicleFlags[this.aiWagonsLastSeen] & 0x40) == 64 ? 2 : 0, 8 - this.wagonType);
+            int n = this.allocateTrainSlot(this.tileCursorX, this.tileCursorY, this.wagonType < 3 ? 0 : 1, this.wagonType, (this.vehicleFlags[this.aiWagonsLastSeen] & 0x40) == 64 ? 2 : 0, 8 - this.wagonType);
             for (int i = 0; i < 5; ++i) {
                 if (this.wagonOptionSlots[i] < 0) continue;
                 int n2 = 2 + this.wagonOptionSlots[i];
@@ -5782,7 +5782,7 @@ implements Runnable {
         return n3;
     }
 
-    int b(int n, int n2, int n3, int n4, int n5, int n6) {
+    int allocateTrainSlot(int n, int n2, int n3, int n4, int n5, int n6) {
         int n7 = 500;
         for (int i = 0; i < 500; ++i) {
             if ((this.trainFlags[i] & 0x80) != 0) continue;
@@ -5838,7 +5838,7 @@ implements Runnable {
         }
     }
 
-    boolean i(int n, int n2) {
+    boolean canRefuelAtTile(int n, int n2) {
         short s = this.nextCar[n];
         if (s != -1) {
             if ((this.trainFlags[s] & 0x40) == 0) {
@@ -5867,7 +5867,7 @@ implements Runnable {
                     }
                 }
             }
-            if (this.i(s, n2)) {
+            if (this.canRefuelAtTile(s, n2)) {
                 return true;
             }
         }
@@ -5923,7 +5923,7 @@ implements Runnable {
                     this.lastViewportCenterX = -1;
                 }
                 this.applyTrainStateTick(n, n8, false);
-                if (this.trainAiOverride[n] == 1 && this.i(n, n8)) {
+                if (this.trainAiOverride[n] == 1 && this.canRefuelAtTile(n, n8)) {
                     this.trainPhase[n] = 3;
                     n2 = 1;
                 }
@@ -6172,7 +6172,7 @@ implements Runnable {
         }
     }
 
-    void b(Graphics graphics, int n) {
+    void drawTrainAtCursor(Graphics graphics, int n) {
         int n2;
         int n3;
         int n4;
@@ -6306,31 +6306,31 @@ implements Runnable {
         }
     }
 
-    boolean j(int n, int n2, int n3) {
+    boolean isTrainHeadCarAt(int n, int n2, int n3) {
         if (n != -1) {
             if (this.c(this.trainX[n]) == n2 && this.c(this.trainY[n]) == n3) {
                 return true;
             }
-            return this.j(this.nextCar[n], n2, n3);
+            return this.isTrainHeadCarAt(this.nextCar[n], n2, n3);
         }
         return false;
     }
 
-    void i(int n) {
+    void mergeTrainAt(int n) {
         int n2 = -1;
         for (int i = 0; i < 500; ++i) {
-            if (n == i || (this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.j(i, this.c(this.trainX[n]), this.c(this.trainY[n]))) continue;
+            if (n == i || (this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.isTrainHeadCarAt(i, this.c(this.trainX[n]), this.c(this.trainY[n]))) continue;
             this.removeTrainFromMap(i, true);
             this.removeTrainFromMap(n, true);
         }
     }
 
-    boolean i(int n, int n2, int n3) {
+    boolean isAnyTrainCarAt(int n, int n2, int n3) {
         if (n != -1) {
             if (this.c(this.trainX[n]) == n2 && this.c(this.trainY[n]) == n3) {
                 return true;
             }
-            if (this.i(this.nextCar[n], n2, n3)) {
+            if (this.isAnyTrainCarAt(this.nextCar[n], n2, n3)) {
                 return true;
             }
         }
@@ -6339,7 +6339,7 @@ implements Runnable {
 
     int cPosLookup(int n, int n2) {
         for (int i = 0; i < 500; ++i) {
-            if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.i(i, n, n2)) continue;
+            if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.isAnyTrainCarAt(i, n, n2)) continue;
             return i;
         }
         return 5000;
@@ -6415,7 +6415,7 @@ implements Runnable {
         return 0;
     }
 
-    int g(int n, int n2, int n3) {
+    int consumeWagonOption(int n, int n2, int n3) {
         int n4 = this.trainOptionSlots[n][n2] > n3 ? n3 : this.trainOptionSlots[n][n2];
         short[] sArray = this.trainOptionSlots[n];
         int n5 = n2;
@@ -6423,11 +6423,11 @@ implements Runnable {
         return n4;
     }
 
-    int c(int n, int n2, int n3) {
-        int n4 = this.g(n, n2, n3);
+    int computeWagonOptionCount(int n, int n2, int n3) {
+        int n4 = this.consumeWagonOption(n, n2, n3);
         for (int i = 0; i < 250; ++i) {
             if (n == i || (this.vehicleFlags[i] & 0x80) != 128 || (this.vehicleFlags[i] & 7) != (this.vehicleFlags[n] & 7) || Math.abs(this.wagonAJ[n] - this.wagonAJ[i]) >= 3 || Math.abs(this.wagonEQ[n] - this.wagonEQ[i]) >= 3) continue;
-            n4 += this.g(i, n2, n3 - n4);
+            n4 += this.consumeWagonOption(i, n2, n3 - n4);
         }
         return n4;
     }
@@ -6441,9 +6441,9 @@ implements Runnable {
                 switch (n3) {
                     case 2: {
                         int n4 = n;
-                        this.trainEnergyOrCount[n4] = (byte)(this.trainEnergyOrCount[n4] + this.c(n2, 0, 25 - this.trainEnergyOrCount[n]));
+                        this.trainEnergyOrCount[n4] = (byte)(this.trainEnergyOrCount[n4] + this.computeWagonOptionCount(n2, 0, 25 - this.trainEnergyOrCount[n]));
                         int n5 = n;
-                        this.wagonEnergyRemaining[n5] = (byte)(this.wagonEnergyRemaining[n5] + this.c(n2, 4, 15 - this.wagonEnergyRemaining[n]));
+                        this.wagonEnergyRemaining[n5] = (byte)(this.wagonEnergyRemaining[n5] + this.computeWagonOptionCount(n2, 4, 15 - this.wagonEnergyRemaining[n]));
                         this.trainServiceCounter[n] = 0;
                         if (n2 == this.wagonIorHost[n] || bl2) break;
                         this.advanceConstructionTimers(this.c(this.trainX[n]), this.c(this.trainY[n]), 4);
@@ -6452,21 +6452,21 @@ implements Runnable {
                     }
                     case 3: {
                         int n6 = n;
-                        this.trainEnergyOrCount[n6] = (byte)(this.trainEnergyOrCount[n6] + this.c(n2, 1, 25 - this.trainEnergyOrCount[n]));
+                        this.trainEnergyOrCount[n6] = (byte)(this.trainEnergyOrCount[n6] + this.computeWagonOptionCount(n2, 1, 25 - this.trainEnergyOrCount[n]));
                         this.trainServiceCounter[n] = 0;
                         break;
                     }
                     case 4: 
                     case 5: {
                         int n7 = n;
-                        this.trainEnergyOrCount[n7] = (byte)(this.trainEnergyOrCount[n7] + this.c(n2, 2, 30 - this.trainEnergyOrCount[n]));
+                        this.trainEnergyOrCount[n7] = (byte)(this.trainEnergyOrCount[n7] + this.computeWagonOptionCount(n2, 2, 30 - this.trainEnergyOrCount[n]));
                         this.trainServiceCounter[n] = 0;
                         break;
                     }
                     case 6: 
                     case 7: {
                         int n8 = n;
-                        this.trainEnergyOrCount[n8] = (byte)(this.trainEnergyOrCount[n8] + this.c(n2, 3, 30 - this.trainEnergyOrCount[n]));
+                        this.trainEnergyOrCount[n8] = (byte)(this.trainEnergyOrCount[n8] + this.computeWagonOptionCount(n2, 3, 30 - this.trainEnergyOrCount[n]));
                         this.trainServiceCounter[n] = 0;
                     }
                 }
@@ -6484,17 +6484,17 @@ implements Runnable {
         }
     }
 
-    void o(int n) {
+    void decrementOptionCounts(int n) {
         if (n != -1) {
             this.decCountsForOption(this.trainFlags[n] & 7);
-            this.o(this.nextCar[n]);
+            this.decrementOptionCounts(this.nextCar[n]);
         }
     }
 
-    boolean a(int n, int n2, int[] nArray) {
+    boolean applyTrainUpgrade(int n, int n2, int[] nArray) {
         if (this.money >= this.unitCost - this.currentTrainCostSnapshot) {
             this.trainStateCode[n] = (short)n2;
-            this.o(this.nextCar[n]);
+            this.decrementOptionCounts(this.nextCar[n]);
             for (int i = 0; i < 5; ++i) {
                 if (nArray[i] > -1) {
                     int n3 = nArray[i] + 2;
@@ -6545,7 +6545,7 @@ implements Runnable {
         }
     }
 
-    void k(int n) {
+    void ensureSaveBufferCapacity(int n) {
         if (this.snapshotSize > 0) {
             byte[] byArray = new byte[this.snapshotSize + n];
             System.arraycopy(this.saveBuffer, 0, byArray, 0, this.snapshotSize);
@@ -6558,7 +6558,7 @@ implements Runnable {
         }
     }
 
-    private int s() {
+    private int readShortFromBuffer() {
         return this.saveBuffer[this.saveReadOffset] >= 0 ? this.saveBuffer[this.saveReadOffset++] : 256 + this.saveBuffer[this.saveReadOffset++];
     }
 
@@ -6671,7 +6671,7 @@ implements Runnable {
         }
         byte by2 = by;
         if (this.savePendingMode == 0) {
-            this.k(1);
+            this.ensureSaveBufferCapacity(1);
             this.saveBuffer[this.saveReadOffset++] = by;
         } else if (this.snapshotLoaded) {
             by2 = this.saveBuffer[this.saveReadOffset++];
@@ -6685,13 +6685,13 @@ implements Runnable {
         }
         int n2 = n;
         if (this.savePendingMode == 0) {
-            this.k(4);
+            this.ensureSaveBufferCapacity(4);
             this.saveBuffer[this.saveReadOffset++] = (byte)(n & 0xFF);
             this.saveBuffer[this.saveReadOffset++] = (byte)(n >> 8 & 0xFF);
             this.saveBuffer[this.saveReadOffset++] = (byte)(n >> 16 & 0xFF);
             this.saveBuffer[this.saveReadOffset++] = (byte)(n >> 24 & 0xFF);
         } else if (this.snapshotLoaded) {
-            n2 = this.s() + 256 * this.s() + 65536 * this.s() + 0x1000000 * this.s();
+            n2 = this.readShortFromBuffer() + 256 * this.readShortFromBuffer() + 65536 * this.readShortFromBuffer() + 0x1000000 * this.readShortFromBuffer();
         }
         return n2;
     }
@@ -6714,7 +6714,7 @@ implements Runnable {
                 byArray[i] = 0;
             }
         } else if (this.savePendingMode == 0) {
-            this.k(byArray.length);
+            this.ensureSaveBufferCapacity(byArray.length);
             System.arraycopy(byArray, 0, this.saveBuffer, this.saveReadOffset, byArray.length);
             this.saveReadOffset += byArray.length;
         } else if (this.snapshotLoaded) {
@@ -6734,7 +6734,7 @@ implements Runnable {
                     break block4;
                 }
                 if (this.savePendingMode != 0) break block5;
-                this.k(2 * sArray.length);
+                this.ensureSaveBufferCapacity(2 * sArray.length);
                 for (int i = 0; i < sArray.length; ++i) {
                     this.saveBuffer[this.saveReadOffset++] = (byte)(sArray[i] & 0xFF);
                     this.saveBuffer[this.saveReadOffset++] = (byte)(sArray[i] >> 8 & 0xFF);
@@ -6743,7 +6743,7 @@ implements Runnable {
             }
             if (!this.snapshotLoaded) break block4;
             for (int i = 0; i < sArray.length; ++i) {
-                sArray[i] = (short)(this.s() + 256 * this.s());
+                sArray[i] = (short)(this.readShortFromBuffer() + 256 * this.readShortFromBuffer());
             }
         }
     }
@@ -6759,7 +6759,7 @@ implements Runnable {
                     break block4;
                 }
                 if (this.savePendingMode != 0) break block5;
-                this.k(4 * nArray.length);
+                this.ensureSaveBufferCapacity(4 * nArray.length);
                 for (int i = 0; i < nArray.length; ++i) {
                     this.saveBuffer[this.saveReadOffset++] = (byte)(nArray[i] & 0xFF);
                     this.saveBuffer[this.saveReadOffset++] = (byte)(nArray[i] >> 8 & 0xFF);
@@ -6770,12 +6770,12 @@ implements Runnable {
             }
             if (!this.snapshotLoaded) break block4;
             for (int i = 0; i < nArray.length; ++i) {
-                nArray[i] = this.s() + 256 * this.s() + 65536 * this.s() + 0x1000000 * this.s();
+                nArray[i] = this.readShortFromBuffer() + 256 * this.readShortFromBuffer() + 65536 * this.readShortFromBuffer() + 0x1000000 * this.readShortFromBuffer();
             }
         }
     }
 
-    void g(int n) {
+    void initSaveOrLoad(int n) {
         if (n == 0) {
             this.loadGame(0, 0);
         }
@@ -6995,7 +6995,7 @@ implements Runnable {
     void saveAllMapArrays() {
         this.bytesUncompressed = 0;
         this.bytesCompressed = 0;
-        this.g(0);
+        this.initSaveOrLoad(0);
         this.loadGame(1, 0);
         this.saveOrLoadByteMatrix(this.tileMap);
         this.compressSaveBuffer();
@@ -7022,7 +7022,7 @@ implements Runnable {
     void restoreAllMapArrays() {
         this.bytesUncompressed = 0;
         this.bytesCompressed = 0;
-        this.g(1);
+        this.initSaveOrLoad(1);
         this.tileMap = new byte[this.mapWidth + 1][this.mapHeight + 1];
         this.trackMap = new byte[this.mapWidth + 1][this.mapHeight + 1];
         this.tileElevation = new byte[this.mapWidth + 1][this.mapHeight + 1];
@@ -7360,7 +7360,7 @@ implements Runnable {
                     this.autoExtendTrackStation(this.gS, this.bp);
                     this.autoExtendTrackStation(this.dD, this.industryTileY);
                     this.spawnTrainAt(this.gS, this.bp);
-                    this.n(this.nextTrackPieceCode - 64);
+                    this.setTrackOwnerCode(this.nextTrackPieceCode - 64);
                     ++this.nextTrackPieceCode;
                     if (this.nextTrackPieceCode == 69) {
                         this.nextTrackPieceCode = 66;
@@ -7410,7 +7410,7 @@ implements Runnable {
         if (this.industryCategory == 3) {
             n6 = 6;
         }
-        int n7 = this.b(n, n2, n3, n4, this.tileMap[n][n2] == 87 ? 0 : 2, 8 - n4);
+        int n7 = this.allocateTrainSlot(n, n2, n3, n4, this.tileMap[n][n2] == 87 ? 0 : 2, 8 - n4);
         for (int i = 0; i < n5; ++i) {
             n7 = this.spawnTrainCar(n7, n6);
         }
@@ -8862,7 +8862,7 @@ implements Runnable {
             case 25: {
                 ++this.loadStep;
                 if (this.loadStep == 2) {
-                    this.g(2);
+                    this.initSaveOrLoad(2);
                     this.dayOfMonth = 1;
                     this.monthOfYear = 1;
                     this.year = 1950;
@@ -9138,7 +9138,7 @@ implements Runnable {
                     this.updateTrain(n27);
                     this.updateTrain(n27);
                     if (this.trainPhase[n27] != 0) continue;
-                    this.i(n27);
+                    this.mergeTrainAt(n27);
                 }
                 if (this.counterA >= this.dH) {
                     this.computeYearEndMetrics();
@@ -9675,7 +9675,7 @@ implements Runnable {
                 for (n = 0; n < this.visibleTrainCount; ++n) {
                     n12 = this.visibleTrains[n];
                     if ((this.trainFlags[n12] & 0x80) != 128 || n5 != this.c(this.trainX[n12]) || n4 != this.c(this.trainY[n12])) continue;
-                    this.b(graphics, n12);
+                    this.drawTrainAtCursor(graphics, n12);
                 }
             }
             if (n3 < 128) continue;

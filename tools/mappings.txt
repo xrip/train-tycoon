@@ -769,3 +769,28 @@ method a a (IIZZ)V                   handleCursorClick      # money deduct; sets
 method a a (IIIZZI)V                 addMenuItem             # builds the menu row tables (sets buildMenuItemCode += 15)
 method a b (IIZ)V                    applyTrainStateTick     # train state tick: updates energy/counters/service
 method a m (II)V                     spawnTrainAt            # spawns a train at (n, n2) — uses spawnTrainCar
+
+# ---- Batch 34: city/track/train allocation + save-buffer helpers ----
+method a a (Ljavax/microedition/lcdui/Graphics;[I[I)V  drawSelectionQuad # 4-corner selection rectangle
+method a a (III)V                     placeCityTile           # places random city tile with track bits
+method a a (ZIIIIIIIIIIZ)Z            isTileMatchForPath      # path-validation: tile matches df + track bits
+method a b (IIIIII)I                  allocateTrainSlot       # allocates train entry in trainFlags[]/trainX/etc.
+method a i (II)Z                      canRefuelAtTile         # refuel check via wagonServiceCounter bits
+method a b (Ljavax/microedition/lcdui/Graphics;I)V  drawTrainAtCursor # renders train sprite at cursor
+method a i (I)V                       mergeTrainAt            # merges colliding trains at (trainX[n], trainY[n])
+method a i (III)Z                     isTrainCarAtRecursive   # recursive: check if any car is at (n2,n3)
+method a o (I)V                       decrementOptionCounts   # recursive via nextCar
+method a a (II[I)Z                    applyTrainUpgrade       # sets trainStateCode with new options, charges money
+method a k (I)V                       ensureSaveBufferCapacity # allocates/grows saveBuffer
+method a s ()I                        readShortFromBuffer     # signed-byte extension helper
+method a g (I)V                       initSaveOrLoad          # sets savePendingMode based on n
+method a f (I)B                       addCityEntry            # adds city to stationDirectionCode/cityPopulation/cityIndex
+method a n (I)V                       setTrackOwnerCode       # sets trackMap code based on tileMap
+method a e (III)Z                     isTileBuildable         # placement validity (tileElevation>=0, etc.)
+method a a (IIIZZ)I                   spawnWagonSlot          # allocates wagon slot in vehicleFlags[]/wagonAJ/etc.
+method a y ()Z                        buyTrainAtCursor        # player-triggered train purchase
+method a c (III)I                     computeWagonOptionCount # counts matching wagons across vehicleFlags
+method a j (III)Z                     isTrainHeadCarAt        # only checks this car, returns directly
+method a i (III)Z                     isAnyTrainCarAt         # recursive check through entire chain (used by cPosLookup)
+method a g (III)I                     consumeWagonOption      # decrements trainOptionSlots and returns count
+method a h (III)S                     pathDistanceMin         # min path-distance at (n,n2)
