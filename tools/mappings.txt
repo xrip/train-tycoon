@@ -288,3 +288,49 @@ method a s (II)I                   spawnOrFindAt     # int loop through 250 to f
 method a h (II)I                   hPath             # int path over aQ[][] grid
 method a c (II)I                   cPosLookup        # int trained-position lookup
 method a x (II)I                   xPlaceSpawn       # int place spawn helper
+
+# ---- Batch 9: tick economy + scenario milestones + year-end sheet ----
+# Per-tick fuel / running costs (everyTwoTick: 250 trains deducted per second)
+field  a cF   fuelCostAccrued      # int; running fuel cost (cF += n3 everyTwoTick)
+# Scenario milestones (everyTwoTickZ compares bs vs thresholds)
+field  a bs   currentMilestoneScore   # int; current score; compared with thresholds
+field  a ap   scenarioMilestoneIndex  # byte; 1..7 — current milestone target
+field  a cC   milestoneThreshold1   # int; threshold for milestone 1
+field  a hb   milestoneThreshold2
+field  a dV   milestoneThreshold3
+field  a fu   milestoneThreshold4
+field  a cT   milestoneThreshold5
+field  a fT   milestoneCoThreshold2   # int; secondary comparison in milestone 6/7
+field  a en   milestonesEnabled     # boolean; gates everyTwoTickZ
+# Year-end balance-sheet (newYearNotify shifts 11-year sliding windows)
+field  a fS   prevTrainRevenue   # int[500]; last year's per-train revenue (slid each Jan)
+field  a fs   prevStationRevenue  # short[48]; last year's per-station revenue
+field  a N    yrN                # int[11]; 11-year sliding window N
+field  a cx   yrCx               # int[11]; 11-year sliding window cx
+field  a Z    yrZ                # int[11]; 11-year sliding window Z
+field  a V    prevFuelCost       # int; snapshot of cF at year start
+field  a f    prevSubsidyCost    # int; snapshot of ho at year start
+field  a eu   prevTotalRevenue   # int; snapshot of totalRevenue at year start
+field  a dA   prevTerrainTotal   # int; snapshot of eg at year start
+field  a v    prevEnterpriseTotal # int; snapshot of eJ at year start
+field  a cM   prevXIndicator     # int; snapshot of eX at year start
+field  a h    decadeCostTotal    # int; +=totalSpent each year (running total)
+field  a B    decadeSpentTotal   # int; +=aiMoneySpent each year
+field  a hn   decadeFuelCost     # int; +=cF each year
+field  a ep   decadeSubsidyTotal # int; +=ho each year
+field  a bo   decadeRevenueTotal # int; +=totalRevenue each year
+field  a aq   decadeXTotal       # int; +=eX each year
+field  a dF   decadeEnterpriseTotal   # int; +=eJ each year
+field  a eh   decadeOtherXTotal  # int; +=eX/eJ/running duplicate
+field  a ab   archiveOrRecallMethod   # int; called once a year from newYearNotify
+# Per-train state from dayResetAd
+field  a aw   trainAgeOrTimer    # byte[500]; per-train aging counter (incremented by revenueOrYear)
+field  a g    trainEraOrStage    # byte[500]; era-progress per train (compare to era; advance on station)
+# Construction timers (dayResetP, decremented quarterly)
+field  a dC   constructionTimers  # byte[64]; --dC[i] when monthOfYear % 4 == 0
+# City population (dayResetAg adds noise)
+field  a cV   cityPopulation     # byte[48]; clamped 10..90
+# Zone population counters (maybeAITick counts tileMap 34..40 by zone id)
+field  a gN   zonePopulation     # short[64]; per-zone populated-tile count
+# Methods: tight re-name with direct body read
+method a ab ()V                    archiveOrRecall   # body from newYearNotify call
