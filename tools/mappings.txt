@@ -606,3 +606,11 @@ field  a hu   nextTrackPieceCode      # byte; cycles 66..68 for new track placem
 # Display statics (canvas dimensions)
 field  a e    screenWidth             # static int; canvas width in pixels (was 'e')
 field  a hj   mapHalfWidth            # int; = (mapWidth - 1) * 8 — half-width for iso projection
+
+# ---- Batch 24: year-graph alt data arrays + history frames ----
+# Parallel to yrN/yrCx/yrZ but used when yearGraphAlt=true.
+field  a dG   altDecadeOtherXTotal   # int[12]; = decadeOtherXTotal + eX
+field  a ef   altDecadeRevenueTotal  # int[12]; = fe + totalRevenue
+field  a L    altDecadeTotalCost     # int[12]; = yrZ[0] (alias for total-cost when alt)
+# fJ is the 3-frame counter array used by drawMoneyTicker (drawn with K[0..2]).
+field  a fJ   moneyTickerFrames      # byte[3]; countdown per money-history frame

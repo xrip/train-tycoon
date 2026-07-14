@@ -188,7 +188,7 @@ implements Runnable {
     byte scenarioBits;
     int confirmToggle = 0;
     int[] K = new int[3];
-    byte[] fJ = new byte[3];
+    byte[] moneyTickerFrames = new byte[3];
     int confirmCounter = 0;
     int confirmTargetState = -1;
     boolean flagsA = true;
@@ -338,9 +338,9 @@ implements Runnable {
     int[] yrN = new int[12];
     int[] yrCx = new int[12];
     int[] yrZ = new int[12];
-    int[] dG = new int[12];
-    int[] ef = new int[12];
-    int[] L = new int[12];
+    int[] altDecadeOtherXTotal = new int[12];
+    int[] altDecadeRevenueTotal = new int[12];
+    int[] altDecadeTotalCost = new int[12];
     byte[] yearGraphOffsets = new byte[12];
     byte[] dm = new byte[12];
     byte[] fA = new byte[12];
@@ -3254,9 +3254,9 @@ implements Runnable {
         this.K[2] = this.K[1];
         this.K[1] = this.K[0];
         this.K[0] = n;
-        this.fJ[2] = this.fJ[1];
-        this.fJ[1] = this.fJ[0];
-        this.fJ[0] = 80;
+        this.moneyTickerFrames[2] = this.moneyTickerFrames[1];
+        this.moneyTickerFrames[1] = this.moneyTickerFrames[0];
+        this.moneyTickerFrames[0] = 80;
     }
 
     int drawNumber(Graphics graphics, int n, int n2) {
@@ -3273,16 +3273,16 @@ implements Runnable {
     void drawMoneyTicker(Graphics graphics) {
         graphics.setColor(0xFF0000);
         int n = 0;
-        if (this.fJ[2] > 0) {
-            this.fJ[2] = (byte)(this.fJ[2] - 1);
+        if (this.moneyTickerFrames[2] > 0) {
+            this.moneyTickerFrames[2] = (byte)(this.moneyTickerFrames[2] - 1);
             n = this.drawNumber(graphics, this.K[2], n);
         }
-        if (this.fJ[1] > 0) {
-            this.fJ[1] = (byte)(this.fJ[1] - 1);
+        if (this.moneyTickerFrames[1] > 0) {
+            this.moneyTickerFrames[1] = (byte)(this.moneyTickerFrames[1] - 1);
             n = this.drawNumber(graphics, this.K[1], n);
         }
-        if (this.fJ[0] > 0) {
-            this.fJ[0] = (byte)(this.fJ[0] - 1);
+        if (this.moneyTickerFrames[0] > 0) {
+            this.moneyTickerFrames[0] = (byte)(this.moneyTickerFrames[0] - 1);
             this.drawNumber(graphics, this.K[0], n);
         }
     }
@@ -4042,13 +4042,13 @@ implements Runnable {
                         }
                     } else {
                         if (this.yearGraphMode == 0) {
-                            return this.b(this.dG[n2 - 40]);
+                            return this.b(this.altDecadeOtherXTotal[n2 - 40]);
                         }
                         if (this.yearGraphMode == 1) {
-                            return this.b(this.ef[n2 - 40]);
+                            return this.b(this.altDecadeRevenueTotal[n2 - 40]);
                         }
                         if (this.yearGraphMode == 2) {
-                            return this.b(this.L[n2 - 40]);
+                            return this.b(this.altDecadeTotalCost[n2 - 40]);
                         }
                     }
                 } else {
@@ -6824,9 +6824,9 @@ implements Runnable {
         this.a(this.yrN);
         this.a(this.yrCx);
         this.a(this.yrZ);
-        this.a(this.dG);
-        this.a(this.ef);
-        this.a(this.L);
+        this.a(this.altDecadeOtherXTotal);
+        this.a(this.altDecadeRevenueTotal);
+        this.a(this.altDecadeTotalCost);
         this.a(this.trainRevenue);
         this.a(this.prevTrainRevenue);
         this.a(this.bb);
@@ -7050,15 +7050,15 @@ implements Runnable {
 
     void everyTenTick() {
         this.yrZ[0] = this.scanMapForMetric();
-        this.L[0] = this.yrZ[0];
+        this.altDecadeTotalCost[0] = this.yrZ[0];
     }
 
     void computeYearEndMetrics() {
         this.archiveOrRecall();
         this.yrN[0] = this.eX;
         this.yrCx[0] = this.totalRevenue;
-        this.dG[0] = this.decadeOtherXTotal + this.eX;
-        this.ef[0] = this.fe + this.totalRevenue;
+        this.altDecadeOtherXTotal[0] = this.decadeOtherXTotal + this.eX;
+        this.altDecadeRevenueTotal[0] = this.fe + this.totalRevenue;
         this.decadeSpentWithCurrent = this.decadeCostTotal + this.totalSpent;
         this.decadeAiSpentWithCurrent = this.decadeSpentTotal + this.aiMoneySpent;
         this.decadeFuelWithCurrent = this.decadeFuelCost + this.fuelCostAccrued;
@@ -7121,17 +7121,17 @@ implements Runnable {
             this.decadeXTotal = 0;
             this.decadeEnterpriseTotal = 0;
             for (n = 10; n >= 0; --n) {
-                this.dG[n + 1] = this.dG[n];
-                this.ef[n + 1] = this.ef[n];
-                this.L[n + 1] = this.L[n];
+                this.altDecadeOtherXTotal[n + 1] = this.altDecadeOtherXTotal[n];
+                this.altDecadeRevenueTotal[n + 1] = this.altDecadeRevenueTotal[n];
+                this.altDecadeTotalCost[n + 1] = this.altDecadeTotalCost[n];
             }
             this.decadeOtherXTotal = 0;
             this.fe = 0;
-            this.dG[0] = 0;
-            this.ef[0] = 0;
-            this.L[0] = 0;
+            this.altDecadeOtherXTotal[0] = 0;
+            this.altDecadeRevenueTotal[0] = 0;
+            this.altDecadeTotalCost[0] = 0;
         }
-        this.L[0] = this.scanMapForMetric();
+        this.altDecadeTotalCost[0] = this.scanMapForMetric();
         this.money -= this.eg;
         if (this.eg > 0) {
             this.pushMoneyHistory(-this.eg);
@@ -7277,27 +7277,27 @@ implements Runnable {
                     }
                     this.dm[n3] = (byte)(this.year - n3 - 1940);
                     if (n == 0) {
-                        if (this.dG[n3] > n6) {
-                            n6 = this.dG[n3];
+                        if (this.altDecadeOtherXTotal[n3] > n6) {
+                            n6 = this.altDecadeOtherXTotal[n3];
                         }
-                        if (this.dG[n3] < n5) {
-                            n5 = this.dG[n3];
+                        if (this.altDecadeOtherXTotal[n3] < n5) {
+                            n5 = this.altDecadeOtherXTotal[n3];
                         }
                     }
                     if (n == 1) {
-                        if (this.ef[n3] > n6) {
-                            n6 = this.ef[n3];
+                        if (this.altDecadeRevenueTotal[n3] > n6) {
+                            n6 = this.altDecadeRevenueTotal[n3];
                         }
-                        if (this.ef[n3] < n5) {
-                            n5 = this.ef[n3];
+                        if (this.altDecadeRevenueTotal[n3] < n5) {
+                            n5 = this.altDecadeRevenueTotal[n3];
                         }
                     }
                     if (n != 2) continue;
-                    if (this.L[n3] > n6) {
-                        n6 = this.L[n3];
+                    if (this.altDecadeTotalCost[n3] > n6) {
+                        n6 = this.altDecadeTotalCost[n3];
                     }
-                    if (this.L[n3] >= n5) continue;
-                    n5 = this.L[n3];
+                    if (this.altDecadeTotalCost[n3] >= n5) continue;
+                    n5 = this.altDecadeTotalCost[n3];
                 }
                 n3 = Math.max(n6, -n5);
                 if (bl) break block28;
@@ -7319,17 +7319,17 @@ implements Runnable {
             }
             if (n == 0) {
                 for (n2 = 0; n2 < 12; ++n2) {
-                    this.fA[n2] = this.dG[n2] == 0 ? (byte)0 : (byte)(30 * this.dG[n2] / n3);
+                    this.fA[n2] = this.altDecadeOtherXTotal[n2] == 0 ? (byte)0 : (byte)(30 * this.altDecadeOtherXTotal[n2] / n3);
                 }
             }
             if (n == 1) {
                 for (n2 = 0; n2 < 12; ++n2) {
-                    this.fA[n2] = this.ef[n2] == 0 ? (byte)0 : (byte)(60 * this.ef[n2] / n3);
+                    this.fA[n2] = this.altDecadeRevenueTotal[n2] == 0 ? (byte)0 : (byte)(60 * this.altDecadeRevenueTotal[n2] / n3);
                 }
             }
             if (n == 2) {
                 for (n2 = 0; n2 < 12; ++n2) {
-                    this.fA[n2] = this.dG[n2] == 0 ? (byte)0 : (byte)(30 * this.L[n2] / n3);
+                    this.fA[n2] = this.altDecadeOtherXTotal[n2] == 0 ? (byte)0 : (byte)(30 * this.altDecadeTotalCost[n2] / n3);
                 }
             }
         }
