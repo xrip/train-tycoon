@@ -794,3 +794,44 @@ method a j (III)Z                     isTrainHeadCarAt        # only checks this
 method a i (III)Z                     isAnyTrainCarAt         # recursive check through entire chain (used by cPosLookup)
 method a g (III)I                     consumeWagonOption      # decrements trainOptionSlots and returns count
 method a h (III)S                     pathDistanceMin         # min path-distance at (n,n2)
+
+# ---- Batch 35: visible-source methods + inlined Graphics overloads ----
+# Methods visible in CFR-decompiled source (must be named):
+method a a (Ljava/lang/String;)V     loadSpriteStream        # new XorResourceInput(string)
+method a a (Ljavax/microedition/lcdui/Graphics;I)V  renderPackedSprite # packed sprite decoder
+method a a (Ljavax/microedition/lcdui/Graphics;II[BZ)V  renderFontString # renders font glyph string
+method a aa ()Ljavax/microedition/lcdui/Image;  decodePngFromSpriteStream  # decodes PNG from spriteStream
+# Inlined/duplicate a overloads (CFR folded these into larger methods; bytecode still has them)
+# We name them anyway so the bytecode stays clean even if CFR's emission changes.
+method a a (Ljavax/microedition/lcdui/Graphics;IIII)V  drawSpriteQuad   # inlined variant
+method a a (Ljavax/microedition/lcdui/Graphics;IIZ)I   drawMenuRowAlt   # inlined variant
+method a a (Ljavax/microedition/lcdui/Graphics;II[I)V  drawIsoQuad      # inlined variant
+method a a (Ljavax/microedition/lcdui/Graphics;III)V   drawLineTriple   # inlined variant
+method a a (Ljavax/microedition/lcdui/Graphics;II[Z)V  drawIsoQuadAlt   # inlined variant
+method a a (Ljavax/microedition/lcdui/Graphics;IIIII[B)V  drawTextBoxAlt  # inlined variant
+method a a (Ljavax/microedition/lcdui/Graphics;IIB)V   drawRectFill     # inlined variant
+method a b (Ljavax/microedition/lcdui/Graphics;I)V    drawSpriteSingle # inlined variant
+# Other inlined a overloads (int,int variants)
+method a a (III)V                    placeCityTileInlined    # already-named placeCityTile inlined variant
+method a a (IIZ)V                    smoothTileAtInlined     # already-named smoothTileAt inlined variant
+method a a (IIII)V                   trackBuildStepInlined   # inlined
+method a a (IIIIII)V                 allocateTrainSlotInlined # inlined
+method a a (II[I[IZ)V                computeIsoCornersInlined # inlined
+method a a (IIIIIIII)V               computeTrackBuildInlined # inlined
+method a a (ZIIIIIIZI)V              placeTrackAtCursorInlined # inlined
+method a a (IIZZ)V                   handleCursorClickInlined # inlined
+method a a (IIIZZI)V                 addMenuItemInlined      # inlined
+method a a (ZIIIIIIIIIIZ)Z           isTileMatchForPathInlined # inlined
+method a a (IIIII)Z                  isTrackStepInlined      # inlined
+method a a (IIIZZ)I                  spawnWagonSlotInlined   # inlined
+method a a (II[I)Z                   applyTrainUpgradeInlined # inlined
+method a a (IZ)V                     removeTrainFromMapInlined # inlined
+method a a (I)V                      resetFlagInlined        # inlined
+method a a (B)V                      registerCityEntryInlined # inlined
+method a a (Z)V                      toggleFlagInlined       # inlined
+method a a ([B)V                     saveOrLoadByteArrayInlined # inlined
+method a a ([S)V                     saveOrLoadShortArrayInlined # inlined
+method a a ([[B)V                   saveOrLoadByteMatrixInlined # inlined
+method a a ([[S)V                   saveOrLoadShortMatrixInlined # inlined
+method a a ([I)V                     saveOrLoadIntArrayInlined # inlined
+method a a (Ljava/io/ByteArrayOutputStream;II)V  writeRlePairInlined # inlined
