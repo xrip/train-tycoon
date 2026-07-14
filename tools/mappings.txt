@@ -1,0 +1,80 @@
+# Train Tycoon deobfuscation mappings.
+# Format:
+#   class  <oldInternal>          <newInternal>
+#   field  <owner> <name>         <newName>
+#   method <owner> <name> <descr> <newName>
+# Keys use ORIGINAL (obfuscated) owner/name; descriptors use original types.
+# This is a pure, descriptor-aware rename: behaviour is preserved.
+
+# ---- classes ----
+class a GameCanvas
+class b XorResourceInput
+
+# ---- b / XorResourceInput (fully understood) ----
+field  b a               in
+field  b b               key
+method b b ()I           readByte
+method b a ()V           close
+
+# ---- GameMIDlet ----
+field  GameMIDlet a       canvas
+field  GameMIDlet b       started
+
+# ---- a / GameCanvas (high-confidence entry points) ----
+field  a ex                          midlet
+method a a (LGameMIDlet;)V           start
+
+# ---- Batch 1: core state (verified in loops S()/g() and train step y(int)) ----
+# map grid
+field  a hw   mapWidth      # outer loop bound, 1st array index
+field  a hr   mapHeight     # inner loop bound, 2nd array index
+field  a cI   tileMap       # byte[][], tile codes 70..90
+field  a ea   trackMap      # byte[][], track dir bits, values 64/65
+field  a gm   rng           # java.util.Random
+# economy
+field  a eU   money         # revenue added (eU += n7); heavily mutated
+field  a gr   totalRevenue  # gr += n7 alongside money
+field  a dT   trainRevenue  # per-train revenue accumulator dT[n] += n7
+# per-train arrays (from y(int))
+field  a ak   trainFlags    # byte[]; 0x40 active, 0x80 exists
+field  a eo   trainX        # byte[]; decoded via c() -> map col
+field  a af   trainY        # byte[]; decoded via c() -> map row
+field  a ey   trainDir      # direction, indexes turn tables eR/aH
+field  a Y    nextCar       # short[]; consist linked list, -1 = end
+field  a u    trainPhase    # byte[]; movement sub-step 0..8
+# methods
+method a y (I)V   updateTrain   # steps one train + recurses over cars
+
+# ---- Batch 2: audio, save/RMS, high-score net (read via xref + show) ----
+# audio
+field  a bi   musicPlayer     # javax...media.Player
+field  a E    volumeControl   # javax...media.control.VolumeControl (field; E() is a method)
+field  a cG   musicPlaying     # boolean toggled by play/stop
+method a x  ()V   loadMusic     # createPlayer from /6, audio/midi
+method a ae ()V   playMusic     # prefetch + setLoopCount + start
+method a E  ()V   stopMusic     # Player.stop
+# save / RMS ("TTStore")
+method a W ()V    saveGame      # openRecordStore + addRecord
+method a y (II)V  loadGame      # getRecord -> game state
+# high-score HTTP client
+method a b (Z)Z                  syncHighScores   # GET; bl ? submit "S" : fetch "D"
+method a b ([B)Ljava/lang/String; decodeString    # decode byte[] -> URL/header string
+
+# ---- Batch 3: main loop / frame timing / input / state machine (run()) ----
+field  a bF   gameState          # int; switched on 10/20/30/40 across loop+paint
+field  a gQ   stopRequested      # boolean; while(!stopRequested) loop guard
+field  a cv   paused             # boolean; skips frame + repaint
+field  a gn   gameThread         # java.lang.Thread
+field  a cX   frameStartTime     # long; currentTimeMillis() at frame top
+field  a dL   frameTime          # long; elapsed = now - frameStartTime
+field  a cS   sleepMillis        # int; 35 - elapsed (target ~28.6 fps)
+field  a cp   sleepStart         # long; sleep-loop start time
+field  a ge   frameCount         # int; ++ every frame
+field  a gy   displayInitialized  # boolean; one-time setCurrent guard
+field  a aS   currentKey         # int; key code being processed
+field  a z    heldKey            # int; key held for auto-repeat
+field  a aF   keyRepeatDelay     # int; frames until repeat
+field  a ev   inputPending       # boolean; drives extra update() passes
+field  a aZ   simSpeed           # int; sim steps per frame in play state
+method a m ()V   update          # per-frame update/step
+method a j (I)V  handleKey       # dispatch a key code

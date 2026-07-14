@@ -1,0 +1,50 @@
+public class GameMIDlet extends javax.microedition.midlet.MIDlet {
+  a a;
+    descriptor: La;
+
+  boolean b;
+    descriptor: Z
+
+  public GameMIDlet();
+    descriptor: ()V
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method javax/microedition/midlet/MIDlet."<init>":()V
+       4: aload_0
+       5: iconst_0
+       6: putfield      #2                  // Field b:Z
+       9: return
+
+  public void startApp();
+    descriptor: ()V
+    Code:
+       0: aload_0
+       1: getfield      #2                  // Field b:Z
+       4: ifne          31
+       7: aload_0
+       8: iconst_1
+       9: putfield      #2                  // Field b:Z
+      12: aload_0
+      13: new           #3                  // class a
+      16: dup
+      17: invokespecial #4                  // Method a."<init>":()V
+      20: putfield      #5                  // Field a:La;
+      23: aload_0
+      24: getfield      #5                  // Field a:La;
+      27: aload_0
+      28: invokevirtual #6                  // Method a.a:(LGameMIDlet;)V
+      31: return
+
+  public void pauseApp();
+    descriptor: ()V
+    Code:
+       0: aload_0
+       1: getfield      #5                  // Field a:La;
+       4: invokevirtual #7                  // Method a.hideNotify:()V
+       7: return
+
+  public void destroyApp(boolean);
+    descriptor: (Z)V
+    Code:
+       0: return
+}
