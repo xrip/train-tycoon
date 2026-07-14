@@ -198,9 +198,9 @@ implements Runnable {
     short[] trainX2 = new short[64];
     byte stationDirCursor = 0;
     byte aE = 0;
-    byte[] da = new byte[48];
+    byte[] stationDirectionCode = new byte[48];
     byte[] cityPopulation = new byte[48];
-    byte[] be = new byte[48];
+    byte[] cityIndex = new byte[48];
     int pendingTransitionCode = -1;
     boolean discountApplied = false;
     int baseTrainCostSnapshot = 0;
@@ -266,8 +266,8 @@ implements Runnable {
     byte[] wagonIorHost = new byte[500];
     byte[] trainServiceCounter = new byte[500];
     short[] nextCar = new short[500];
-    int[] eL = new int[500];
-    byte[] bz = new byte[500];
+    int[] trainStateCode = new int[500];
+    byte[] trainAiOverride = new byte[500];
     int trainAtCursor;
     int era = 1;
     byte[][] eR = new byte[][]{{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}};
@@ -280,16 +280,16 @@ implements Runnable {
     int savePendingMode = 0;
     int snapshotSize = 0;
     boolean snapshotLoaded = false;
-    int bm = 0;
-    int fw = 0;
+    int bytesUncompressed = 0;
+    int bytesCompressed = 0;
     int[] trainRevenue = new int[500];
     int[] prevTrainRevenue = new int[500];
     short[] bb = new short[48];
     short[] prevStationRevenue = new short[48];
     boolean y = false;
-    int W = 0;
-    boolean bR = false;
-    boolean dS = false;
+    int yearGraphMode = 0;
+    boolean yearGraphAlt = false;
+    boolean monthRolloverFlag = false;
     int totalSpent = 0;
     int aiMoneySpent = 0;
     int fuelCostAccrued = 0;
@@ -347,7 +347,7 @@ implements Runnable {
     int bp;
     int dD;
     int k;
-    byte T = 1;
+    byte difficultyCycle = 1;
     int hu = 66;
     byte cd = (byte)15;
     byte fP = (byte)12;
@@ -3505,9 +3505,9 @@ implements Runnable {
     }
 
     byte f(int n) {
-        this.da[this.aE] = (byte)n;
+        this.stationDirectionCode[this.aE] = (byte)n;
         this.cityPopulation[this.aE] = (byte)(50 + this.rng.nextInt() % 20);
-        this.be[this.aE] = 0;
+        this.cityIndex[this.aE] = 0;
         this.aE = (byte)(this.aE + 1);
         return (byte)(this.aE - 1);
     }
@@ -3526,7 +3526,7 @@ implements Runnable {
 
     void rebuildCityList() {
         for (int i = 0; i < 48; ++i) {
-            this.be[i] = 0;
+            this.cityIndex[i] = 0;
         }
         Vector<String> vector = new Vector<String>();
         for (int i = 0; i < this.mapWidth; ++i) {
@@ -3555,7 +3555,7 @@ implements Runnable {
                         if (this.tileMap[k][i2] != 87 && this.tileMap[k][i2] != 88 || vector.indexOf(n + "_" + k + "_" + i2) != -1) continue;
                         vector.addElement(n + "_" + k + "_" + i2);
                         int n6 = n;
-                        this.be[n6] = (byte)(this.be[n6] + 1);
+                        this.cityIndex[n6] = (byte)(this.cityIndex[n6] + 1);
                     }
                 }
             }
@@ -3689,13 +3689,13 @@ implements Runnable {
             return true;
         }
         if (n == 21) {
-            if (n2 == 0 && this.da[this.stationDirCursor] % 2 == 0) {
+            if (n2 == 0 && this.stationDirectionCode[this.stationDirCursor] % 2 == 0) {
                 return true;
             }
-            if (n2 == 1 && this.da[this.stationDirCursor] % 2 == 1) {
+            if (n2 == 1 && this.stationDirectionCode[this.stationDirCursor] % 2 == 1) {
                 return true;
             }
-            if (n2 == 2 && this.da[this.stationDirCursor] % 2 == 1) {
+            if (n2 == 2 && this.stationDirectionCode[this.stationDirCursor] % 2 == 1) {
                 return true;
             }
         }
@@ -3744,10 +3744,10 @@ implements Runnable {
             if (n2 < 6 && this.countCarsInTrain(this.trainAtCursor) > n2) {
                 return true;
             }
-            if (n2 == 6 && this.eL[this.trainAtCursor] == 7) {
+            if (n2 == 6 && this.trainStateCode[this.trainAtCursor] == 7) {
                 return true;
             }
-            if (n2 == 7 && this.eL[this.trainAtCursor] != 7) {
+            if (n2 == 7 && this.trainStateCode[this.trainAtCursor] != 7) {
                 return true;
             }
             if (n2 == 8 && this.trainAgeOrTimer[this.trainAtCursor] > 0) {
@@ -3759,7 +3759,7 @@ implements Runnable {
 
     int neighboursMask(int n, int n2) {
         if (n == 34) {
-            if (this.W == 0 || this.W == 2) {
+            if (this.yearGraphMode == 0 || this.yearGraphMode == 2) {
                 if (n2 == 65) {
                     return 65;
                 }
@@ -3819,7 +3819,7 @@ implements Runnable {
                         return this.n[this.ds[40 + this.difficultyC]];
                     }
                     case 6: {
-                        return this.p(this.T, 0);
+                        return this.p(this.difficultyCycle, 0);
                     }
                 }
                 break;
@@ -3846,10 +3846,10 @@ implements Runnable {
             case 21: {
                 switch (n2) {
                     case 0: {
-                        return this.n[this.ds[100 + this.da[this.stationDirCursor]]];
+                        return this.n[this.ds[100 + this.stationDirectionCode[this.stationDirCursor]]];
                     }
                     case 1: {
-                        return this.n[this.ds[106 + this.da[this.stationDirCursor] / 2]];
+                        return this.n[this.ds[106 + this.stationDirectionCode[this.stationDirCursor] / 2]];
                     }
                     case 2: {
                         return this.p(this.prevStationRevenue[this.stationDirCursor], 0);
@@ -3933,7 +3933,7 @@ implements Runnable {
                     return this.b(this.baseTrainCostSnapshot - this.currentTrainCostSnapshot);
                 }
                 if (n2 == 20) {
-                    return this.bz[this.trainAtCursor] == 0 ? this.n[this.ds[21]] : this.n[this.ds[20]];
+                    return this.trainAiOverride[this.trainAtCursor] == 0 ? this.n[this.ds[21]] : this.n[this.ds[20]];
                 }
                 if (n2 <= 0 || n2 >= 6) break;
                 int n4 = 0;
@@ -4024,45 +4024,45 @@ implements Runnable {
             }
             case 33: {
                 if (n2 == 65) {
-                    return this.n[this.ds[57 + this.W]];
+                    return this.n[this.ds[57 + this.yearGraphMode]];
                 }
                 if (n2 >= 40) {
-                    if (!this.bR) {
-                        if (this.W == 0) {
+                    if (!this.yearGraphAlt) {
+                        if (this.yearGraphMode == 0) {
                             return this.b(this.yrN[n2 - 40]);
                         }
-                        if (this.W == 1) {
+                        if (this.yearGraphMode == 1) {
                             return this.b(this.yrCx[n2 - 40]);
                         }
-                        if (this.W == 2) {
+                        if (this.yearGraphMode == 2) {
                             return this.b(this.yrZ[n2 - 40]);
                         }
                     } else {
-                        if (this.W == 0) {
+                        if (this.yearGraphMode == 0) {
                             return this.b(this.dG[n2 - 40]);
                         }
-                        if (this.W == 1) {
+                        if (this.yearGraphMode == 1) {
                             return this.b(this.ef[n2 - 40]);
                         }
-                        if (this.W == 2) {
+                        if (this.yearGraphMode == 2) {
                             return this.b(this.L[n2 - 40]);
                         }
                     }
                 } else {
                     if (n2 >= 20) {
-                        return !this.bR ? this.p(this.dm[n2 - 20], 0) : null;
+                        return !this.yearGraphAlt ? this.p(this.dm[n2 - 20], 0) : null;
                     }
-                    return !this.bR ? this.p(this.o[n2] + 1940, 20) : this.p(this.dm[n2] + 1940, 0);
+                    return !this.yearGraphAlt ? this.p(this.o[n2] + 1940, 20) : this.p(this.dm[n2] + 1940, 0);
                 }
             }
             case 34: {
                 if (n2 == 65) {
-                    return this.n[this.ds[54 + this.W]];
+                    return this.n[this.ds[54 + this.yearGraphMode]];
                 }
                 if (n2 >= 20) {
-                    return !this.bR ? this.p(this.dm[n2 - 20], 0) : null;
+                    return !this.yearGraphAlt ? this.p(this.dm[n2 - 20], 0) : null;
                 }
-                return !this.bR ? this.p(this.o[n2] + 40, 20) : this.p(this.dm[n2] + 1940, 0);
+                return !this.yearGraphAlt ? this.p(this.o[n2] + 40, 20) : this.p(this.dm[n2] + 1940, 0);
             }
             case 41: 
             case 42: 
@@ -4403,9 +4403,9 @@ implements Runnable {
                         break block0;
                     }
                     case 6: {
-                        this.T = (byte)(this.T + 1);
-                        if (this.T != 4) break block0;
-                        this.T = 1;
+                        this.difficultyCycle = (byte)(this.difficultyCycle + 1);
+                        if (this.difficultyCycle != 4) break block0;
+                        this.difficultyCycle = 1;
                         break block0;
                     }
                     case 10: {
@@ -4539,7 +4539,7 @@ implements Runnable {
                     this.setState(30);
                 }
                 if (n2 == 4) {
-                    this.bz[this.trainAtCursor] = (byte)(this.bz[this.trainAtCursor] == 0 ? 1 : 0);
+                    this.trainAiOverride[this.trainAtCursor] = (byte)(this.trainAiOverride[this.trainAtCursor] == 0 ? 1 : 0);
                     break;
                 }
                 this.setState(30);
@@ -4656,7 +4656,7 @@ implements Runnable {
                 break;
             }
             case 31: {
-                this.dS = false;
+                this.monthRolloverFlag = false;
                 switch (n2) {
                     case 0: {
                         this.y = false;
@@ -4763,7 +4763,7 @@ implements Runnable {
             }
             case 32: 
             case 35: {
-                if (!this.dS) {
+                if (!this.monthRolloverFlag) {
                     this.pendingTransitionCode = 31;
                     this.setState(30);
                     break;
@@ -5666,7 +5666,7 @@ implements Runnable {
                     if (this.tileMap[n2][n] >= 65 && this.tileMap[n2][n] <= 68 && !bl && (this.trackMap[n2][n] & 0xC0) == 192 && vector2.indexOf(new Integer(n11 = this.trackMap[n2][n] & 0x3F)) == -1) {
                         vector2.addElement(new Integer(n11));
                         n10 = this.cityPopulation[n11] * 4 / 30;
-                        n10 = n10 / this.be[n11] == 0 ? 1 : n10 / this.be[n11];
+                        n10 = n10 / this.cityIndex[n11] == 0 ? 1 : n10 / this.cityIndex[n11];
                         short[] sArray = this.trainOptionSlots[i];
                         sArray[1] = (short)(sArray[1] + n10);
                         int n13 = n11;
@@ -5677,7 +5677,7 @@ implements Runnable {
                     if (this.tileMap[n2][n] >= 53 && this.tileMap[n2][n] <= 55 && !bl && (this.trackMap[n2][n] & 0xC0) == 192 && vector3.indexOf(new Integer(n11 = this.trackMap[n2][n] & 0x3F)) == -1) {
                         vector3.addElement(new Integer(n11));
                         n10 = this.cityPopulation[n11] * 4 / 30;
-                        n10 = n10 / this.be[n11] == 0 ? 1 : n10 / this.be[n11];
+                        n10 = n10 / this.cityIndex[n11] == 0 ? 1 : n10 / this.cityIndex[n11];
                         short[] sArray = this.trainOptionSlots[i];
                         sArray[2] = (short)(sArray[2] + n10);
                         int n15 = n11;
@@ -5688,7 +5688,7 @@ implements Runnable {
                     if (this.tileMap[n2][n] >= 59 && this.tileMap[n2][n] <= 61 && !bl && (this.trackMap[n2][n] & 0xC0) == 192 && vector4.indexOf(new Integer(n11 = this.trackMap[n2][n] & 0x3F)) == -1) {
                         vector4.addElement(new Integer(n11));
                         n10 = this.cityPopulation[n11] * 4 / 30;
-                        n10 = n10 / this.be[n11] == 0 ? 1 : n10 / this.be[n11];
+                        n10 = n10 / this.cityIndex[n11] == 0 ? 1 : n10 / this.cityIndex[n11];
                         short[] sArray = this.trainOptionSlots[i];
                         sArray[3] = (short)(sArray[3] + n10);
                         int n17 = n11;
@@ -5800,8 +5800,8 @@ implements Runnable {
             this.wagonIorHost[n7] = -1;
             this.trainEraOrStage[n7] = (byte)n4;
             this.trainAgeOrTimer[n7] = 0;
-            this.eL[n7] = 7;
-            this.bz[n7] = 0;
+            this.trainStateCode[n7] = 7;
+            this.trainAiOverride[n7] = 0;
         }
         this.bH = -1;
         return n7;
@@ -5894,12 +5894,12 @@ implements Runnable {
                 if (n8 != this.wagonIorHost[n]) {
                     n7 = this.xPlaceSpawn(n, n8);
                 }
-                if (this.eL[n] != 7) {
+                if (this.trainStateCode[n] != 7) {
                     this.trainFlags[n] = -64;
                     int n12 = n;
-                    this.trainFlags[n12] = (byte)(this.trainFlags[n12] | (byte)((this.eL[n] & 7) >= 3 ? 1 : 0));
-                    this.wagonEnergyRemaining[n] = (byte)(8 - (this.eL[n] & 7));
-                    this.trainEraOrStage[n] = (byte)(this.eL[n] & 7);
+                    this.trainFlags[n12] = (byte)(this.trainFlags[n12] | (byte)((this.trainStateCode[n] & 7) >= 3 ? 1 : 0));
+                    this.wagonEnergyRemaining[n] = (byte)(8 - (this.trainStateCode[n] & 7));
+                    this.trainEraOrStage[n] = (byte)(this.trainStateCode[n] & 7);
                     this.trainAgeOrTimer[n] = 0;
                     n6 = this.nextCar[n];
                     while (n6 != -1) {
@@ -5908,7 +5908,7 @@ implements Runnable {
                     }
                     n5 = n;
                     for (n4 = 0; n4 < 5; ++n4) {
-                        n3 = this.eL[n] >> 3 + 3 * n4 & 7;
+                        n3 = this.trainStateCode[n] >> 3 + 3 * n4 & 7;
                         if (n3 >= 7) continue;
                         int n13 = 2 + n3;
                         if (n13 == 5) {
@@ -5916,11 +5916,11 @@ implements Runnable {
                         }
                         n5 = this.spawnTrainCar(n5, n13);
                     }
-                    this.eL[n] = 7;
+                    this.trainStateCode[n] = 7;
                     this.bH = -1;
                 }
                 this.b(n, n8, false);
-                if (this.bz[n] == 1 && this.i(n, n8)) {
+                if (this.trainAiOverride[n] == 1 && this.i(n, n8)) {
                     this.trainPhase[n] = 3;
                     n2 = 1;
                 }
@@ -6490,7 +6490,7 @@ implements Runnable {
 
     boolean a(int n, int n2, int[] nArray) {
         if (this.money >= this.unitCost - this.currentTrainCostSnapshot) {
-            this.eL[n] = (short)n2;
+            this.trainStateCode[n] = (short)n2;
             this.o(this.nextCar[n]);
             for (int i = 0; i < 5; ++i) {
                 if (nArray[i] > -1) {
@@ -6501,7 +6501,7 @@ implements Runnable {
                     this.w(n3);
                 }
                 int n4 = n;
-                this.eL[n4] = this.eL[n4] | (nArray[i] & 7) << 3 + 3 * i;
+                this.trainStateCode[n4] = this.trainStateCode[n4] | (nArray[i] & 7) << 3 + 3 * i;
             }
             this.money -= this.unitCost - this.currentTrainCostSnapshot;
             this.aiMoneySpent += this.unitCost - this.currentTrainCostSnapshot;
@@ -6619,10 +6619,10 @@ implements Runnable {
             ++n;
         }
         this.a(byteArrayOutputStream, (int)by, n);
-        this.bm += this.snapshotSize;
+        this.bytesUncompressed += this.snapshotSize;
         this.saveBuffer = byteArrayOutputStream.toByteArray();
         this.snapshotSize = this.saveBuffer.length;
-        this.fw += this.snapshotSize;
+        this.bytesCompressed += this.snapshotSize;
         try {
             byteArrayOutputStream.close();
         }
@@ -6645,10 +6645,10 @@ implements Runnable {
             }
             byteArrayOutputStream.write(this.saveBuffer[i]);
         }
-        this.fw += this.snapshotSize;
+        this.bytesCompressed += this.snapshotSize;
         this.saveBuffer = byteArrayOutputStream.toByteArray();
         this.snapshotSize = this.saveBuffer.length;
-        this.bm += this.snapshotSize;
+        this.bytesUncompressed += this.snapshotSize;
         try {
             byteArrayOutputStream.close();
         }
@@ -6863,9 +6863,9 @@ implements Runnable {
         this.decadeEnterpriseTotal = this.s(this.decadeEnterpriseTotal);
         this.decadeXTotal = this.s(this.decadeXTotal);
         this.aE = this.b(this.aE);
-        this.a(this.da);
+        this.a(this.stationDirectionCode);
         this.a(this.cityPopulation);
-        this.a(this.be);
+        this.a(this.cityIndex);
         this.a(this.vehicleFlags);
         this.a(this.wagonAJ);
         this.a(this.wagonEQ);
@@ -6891,8 +6891,8 @@ implements Runnable {
         this.a(this.nextCar);
         this.a(this.trainEraOrStage);
         this.a(this.trainAgeOrTimer);
-        this.a(this.eL);
-        this.a(this.bz);
+        this.a(this.trainStateCode);
+        this.a(this.trainAiOverride);
         this.cA = this.s(this.cA);
         this.aY = this.d(this.aY);
         this.hu = this.s(this.hu);
@@ -6902,7 +6902,7 @@ implements Runnable {
         this.cd = this.b(this.cd);
         this.fP = this.b(this.fP);
         if (n != 2) {
-            this.T = this.b(this.T);
+            this.difficultyCycle = this.b(this.difficultyCycle);
         }
         this.a(this.menuRowType);
         this.a(this.bh);
@@ -6990,8 +6990,8 @@ implements Runnable {
     }
 
     void saveAllMapArrays() {
-        this.bm = 0;
-        this.fw = 0;
+        this.bytesUncompressed = 0;
+        this.bytesCompressed = 0;
         this.g(0);
         this.loadGame(1, 0);
         this.a(this.tileMap);
@@ -7017,8 +7017,8 @@ implements Runnable {
     }
 
     void u() {
-        this.bm = 0;
-        this.fw = 0;
+        this.bytesUncompressed = 0;
+        this.bytesCompressed = 0;
         this.g(1);
         this.tileMap = new byte[this.mapWidth + 1][this.mapHeight + 1];
         this.trackMap = new byte[this.mapWidth + 1][this.mapHeight + 1];
@@ -7146,7 +7146,7 @@ implements Runnable {
         this.eJ = 0;
         this.mapRedrawPending = true;
         this.y = true;
-        this.dS = true;
+        this.monthRolloverFlag = true;
         if (this.monthOfYear == 13) {
             if (q) {
                 this.ready = false;
@@ -7235,8 +7235,8 @@ implements Runnable {
             int n3;
             block28: {
                 int n4;
-                this.W = n;
-                this.bR = bl;
+                this.yearGraphMode = n;
+                this.yearGraphAlt = bl;
                 int n5 = 0;
                 int n6 = 0;
                 for (n3 = 0; n3 < 12; ++n3) {
@@ -9486,7 +9486,7 @@ implements Runnable {
                     --this.loadStep;
                 }
                 if (this.loadStep != 2) break;
-                if (this.hu - 66 < this.T) {
+                if (this.hu - 66 < this.difficultyCycle) {
                     this.c();
                     this.setState(30);
                     break;

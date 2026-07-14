@@ -486,3 +486,22 @@ method a D ()V                  pickIndustrySite
 method a U ()I                  computeMilestoneScore
 # void ac() writes terrainEditBuffer back into heightMap at selectionStart.
 method a ac ()V                 commitTerrainEdit
+
+# ---- Batch 17: snapshot state + per-city / per-train code arrays ----
+# Year-graph rendering: W selects which array (0=yrN, 1=yrCx, 2=yrZ) and bR
+# selects alternate (0=yrN, 1=yrCx, 2=L) data set.
+field  a W    yearGraphMode         # int; 0/1/2 selects which decade-graph array to render
+field  a bR   yearGraphAlt          # boolean; true = use alt decade data set
+# Difficulty cycle: T increments through 1..3 in case 6 of update().
+field  a T    difficultyCycle       # byte; 1..3 cycle, reset at 4
+# Month-rollover flag: set true in monthOfYear==13 path, gates some animation.
+field  a dS   monthRolloverFlag     # boolean; set on month-rollover
+# Save-buffer compression size tracking: bm = uncompressed total, fw = compressed total.
+field  a bm   bytesUncompressed     # int; cumulative uncompressed save bytes
+field  a fw   bytesCompressed       # int; cumulative compressed save bytes
+# Per-city arrays (size 48)
+field  a da   stationDirectionCode  # byte[48]; station direction index per city
+field  a be   cityIndex             # byte[48]; incremented in city-list rebuild
+# Per-train arrays (size 500)
+field  a eL   trainStateCode        # int[500]; compared to 7 in input handler (case 6/7)
+field  a bz   trainAiOverride       # byte[500]; toggled in input handler (case 4) — 0=auto, 1=manual
