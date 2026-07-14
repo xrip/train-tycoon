@@ -161,3 +161,30 @@ method a z ()V                   everyTwoTickZ    # called when bB%2==0
 method a v ()V                   aiVote           # returns bool via single-bit context
 method a w ()V                   revenueOrYear    # called when eQ==13 (year close)
 method a e ()V                   postRevenueReset # called right after w()
+
+# ---- Batch 5: map renderer (f(Graphics) = renderMap) ----
+# Per-tile animation state (offsets applied when drawing moving/demolishing tiles)
+field  a bS   numActiveTileAnimations  # int; length of active tiles
+field  a av   tileOffsetY              # int[]; per-active-tile Y offset
+field  a gl   tileOffsetX              # int[]; per-active-tile X offset
+field  a bK   tileElevation            # int[][]; height offset per tile (used in Y calc)
+# Viewport state (center + bounds, all tile units)
+field  a cU   viewportCenterX          # int; was already named; refined via f(Graphics)
+field  a hc   viewportCenterY
+field  a dW   viewportCenterYCached    # int; last drawn hc, to detect viewport move
+field  a cl   viewportX0               # int; min X rendered
+field  a gM   viewportY0               # int; min Y rendered
+field  a fE   viewportX1               # int; max X rendered
+field  a eO   viewportY1               # int; max Y rendered
+# Sprite infrastructure
+field  a fU   tileSprites              # javax.microedition.lcdui.Image[]; tile images
+field  a gt   tileSpriteIndex          # int[]; tile-code -> sprite index (~250)
+field  a gc   tileSpriteYOffsetByCode  # int[]; per-tile-code Y offset
+field  a es   visibleTrainCount        # int; reset to 0 at top of f(Graphics)
+field  a bU   visibleTrains            # short[]; train indices visible in viewport
+field  a bL   trainX2                  # short[]; cached/double train X for selection
+field  a gi   trainY2                  # short[]; cached/double train Y
+field  a bw   numSelectedTrains        # int; upper bound of selection arrays
+field  a aP   selectionHidden          # boolean; toggles selection markers
+# Methods discovered by the map renderer
+method a f (Ljavax/microedition/lcdui/Graphics;)V  renderMap   # main in-game map renderer
