@@ -2690,7 +2690,7 @@ implements Runnable {
                         break;
                     }
                     case 4: {
-                        this.a();
+                        this.rebuildMenuTypeIndexes();
                         this.ready = false;
                         this.transitionCode = 60;
                         this.setState(20);
@@ -4094,7 +4094,7 @@ implements Runnable {
                     return this.b(this.menuRowCost[this.buildMenuIndex]);
                 }
                 if (n2 == 3) {
-                    return this.p(this.a(this.buildMenuIndex), 29);
+                    return this.p(this.computeMenuRowDisplayValue(this.buildMenuIndex), 29);
                 }
                 if (n2 != 4) break;
                 return this.p(this.menuRowCost[this.buildMenuIndex], 0);
@@ -4105,7 +4105,7 @@ implements Runnable {
                     return this.n[this.c(this.ds[this.menuRowType[this.gP[n5]] + 160])];
                 }
                 int n6 = (n2 - 1) / 2;
-                return this.p(this.a(this.gP[n6]), 29);
+                return this.p(this.computeMenuRowDisplayValue(this.gP[n6]), 29);
             }
             case 61: 
             case 62: 
@@ -4675,73 +4675,73 @@ implements Runnable {
                         break block0;
                     }
                     case 2: {
-                        this.b(0, false);
+                        this.setYearGraphMode(0, false);
                         this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 3: {
-                        this.b(0, false);
+                        this.setYearGraphMode(0, false);
                         this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 4: {
-                        this.b(1, false);
+                        this.setYearGraphMode(1, false);
                         this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 5: {
-                        this.b(1, false);
+                        this.setYearGraphMode(1, false);
                         this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 6: {
-                        this.b(2, false);
+                        this.setYearGraphMode(2, false);
                         this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 7: {
-                        this.b(2, false);
+                        this.setYearGraphMode(2, false);
                         this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 8: {
-                        this.b(0, true);
+                        this.setYearGraphMode(0, true);
                         this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 9: {
-                        this.b(0, true);
+                        this.setYearGraphMode(0, true);
                         this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 10: {
-                        this.b(1, true);
+                        this.setYearGraphMode(1, true);
                         this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 11: {
-                        this.b(1, true);
+                        this.setYearGraphMode(1, true);
                         this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 12: {
-                        this.b(2, true);
+                        this.setYearGraphMode(2, true);
                         this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 13: {
-                        this.b(2, true);
+                        this.setYearGraphMode(2, true);
                         this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
@@ -5603,7 +5603,7 @@ implements Runnable {
                     ++n2;
                 }
                 n = this.spawnTrainCar(n, n2);
-                this.w(n2);
+                this.adjustRowValueByCode(n2);
             }
             this.money -= this.unitCost;
             this.aiMoneySpent += this.unitCost;
@@ -5934,7 +5934,7 @@ implements Runnable {
                         this.totalRevenue += n7;
                         int n14 = n;
                         this.trainRevenue[n14] = this.trainRevenue[n14] + n7;
-                        this.h(n7);
+                        this.incrementRowValueType1(n7);
                     }
                     this.trainEnergyOrCount[n] = (byte)(this.countCarsInTrain(n) * 40);
                 }
@@ -6360,7 +6360,7 @@ implements Runnable {
                                     n5 *= 2;
                                 }
                                 n3 += n5;
-                                this.t(4, this.trainEnergyOrCount[n]);
+                                this.incrementRowValueTypeN(4, this.trainEnergyOrCount[n]);
                                 this.trainEnergyOrCount[n] = 0;
                             }
                             if ((this.trainFlagBits[n2] & 0x10) != 16) break;
@@ -6369,7 +6369,7 @@ implements Runnable {
                                 n5 *= 2;
                             }
                             n3 += n5;
-                            this.t(5, this.wagonEnergyRemaining[n]);
+                            this.incrementRowValueTypeN(5, this.wagonEnergyRemaining[n]);
                             this.wagonEnergyRemaining[n] = 0;
                             break;
                         }
@@ -6380,7 +6380,7 @@ implements Runnable {
                                 n6 *= 2;
                             }
                             n3 += n6;
-                            this.t(3, this.trainEnergyOrCount[n]);
+                            this.incrementRowValueTypeN(3, this.trainEnergyOrCount[n]);
                             this.trainEnergyOrCount[n] = 0;
                             break;
                         }
@@ -6392,7 +6392,7 @@ implements Runnable {
                                 n7 *= 2;
                             }
                             n3 += n7;
-                            this.t(2, this.trainEnergyOrCount[n]);
+                            this.incrementRowValueTypeN(2, this.trainEnergyOrCount[n]);
                             this.trainEnergyOrCount[n] = 0;
                             break;
                         }
@@ -6404,7 +6404,7 @@ implements Runnable {
                                 n8 *= 2;
                             }
                             n3 += n8;
-                            this.t(1, this.trainEnergyOrCount[n]);
+                            this.incrementRowValueTypeN(1, this.trainEnergyOrCount[n]);
                             this.trainEnergyOrCount[n] = 0;
                         }
                     }
@@ -6501,7 +6501,7 @@ implements Runnable {
                     if (n3 == 5) {
                         ++n3;
                     }
-                    this.w(n3);
+                    this.adjustRowValueByCode(n3);
                 }
                 int n4 = n;
                 this.trainStateCode[n4] = this.trainStateCode[n4] | (nArray[i] & 7) << 3 + 3 * i;
@@ -7019,7 +7019,7 @@ implements Runnable {
         return this.snapshotLoaded;
     }
 
-    void u() {
+    void restoreAllMapArrays() {
         this.bytesUncompressed = 0;
         this.bytesCompressed = 0;
         this.g(1);
@@ -7049,11 +7049,11 @@ implements Runnable {
     }
 
     void everyTenTick() {
-        this.yrZ[0] = this.h();
+        this.yrZ[0] = this.scanMapForMetric();
         this.L[0] = this.yrZ[0];
     }
 
-    void l() {
+    void computeYearEndMetrics() {
         this.archiveOrRecall();
         this.yrN[0] = this.eX;
         this.yrCx[0] = this.totalRevenue;
@@ -7131,7 +7131,7 @@ implements Runnable {
             this.ef[0] = 0;
             this.L[0] = 0;
         }
-        this.L[0] = this.h();
+        this.L[0] = this.scanMapForMetric();
         this.money -= this.eg;
         if (this.eg > 0) {
             this.pushMoneyHistory(-this.eg);
@@ -7169,7 +7169,7 @@ implements Runnable {
         this.eX = this.totalRevenue - this.eg - this.totalSpent - this.aiMoneySpent - this.fuelCostAccrued - this.ho - this.eJ;
     }
 
-    int h() {
+    int scanMapForMetric() {
         int n;
         int n2;
         int n3;
@@ -7232,7 +7232,7 @@ implements Runnable {
         return n4 -= this.loanBalance;
     }
 
-    void b(int n, boolean bl) {
+    void setYearGraphMode(int n, boolean bl) {
         block29: {
             int n2;
             int n3;
@@ -7341,7 +7341,7 @@ implements Runnable {
         }
     }
 
-    void c() {
+    void placeCitiesAndIndustry() {
         int n = 0;
         int n2 = 0;
         do {
@@ -7357,8 +7357,8 @@ implements Runnable {
                 this.demolishX = this.dD;
                 this.demolishY = this.k;
                 if (this.tryBuildPath()) {
-                    this.g(this.gS, this.bp);
-                    this.g(this.dD, this.k);
+                    this.autoExtendTrackStation(this.gS, this.bp);
+                    this.autoExtendTrackStation(this.dD, this.k);
                     this.m(this.gS, this.bp);
                     this.n(this.hu - 64);
                     ++this.hu;
@@ -7416,7 +7416,7 @@ implements Runnable {
         }
     }
 
-    void g(int n, int n2) {
+    void autoExtendTrackStation(int n, int n2) {
         boolean bl;
         boolean bl2;
         boolean bl3;
@@ -7730,7 +7730,7 @@ implements Runnable {
         }
     }
 
-    void a() {
+    void rebuildMenuTypeIndexes() {
         this.aO = 0;
         for (int i = 0; i < 5; ++i) {
             if (this.menuRowType[i] == 0) continue;
@@ -7739,7 +7739,7 @@ implements Runnable {
         }
     }
 
-    byte a(int n) {
+    byte computeMenuRowDisplayValue(int n) {
         if (this.menuRowType[n] == 1) {
             int n2 = 100 * this.menuRowValue[n] / this.menuRowCost[n];
             if (n2 > 100) {
@@ -7773,7 +7773,7 @@ implements Runnable {
         return 0;
     }
 
-    void f(int n, int n2) {
+    void placeTrainAt(int n, int n2) {
         int n3 = n * 60 + 20 + this.rng.nextInt() % 20;
         int n4 = this.bh[n2] + n3;
         int n5 = this.dn[n2];
@@ -7848,7 +7848,7 @@ implements Runnable {
         this.setState(20);
     }
 
-    void e(int n) {
+    void duplicateMenuRow(int n) {
         this.fY = this.menuRowType[n] + 40;
         this.dR = this.menuRowAltType[n] + 60;
         this.cW = (byte)4;
@@ -7895,7 +7895,7 @@ implements Runnable {
                 this.D(n);
             }
             if (this.menuRowType[n] == 0) continue;
-            this.e(n);
+            this.duplicateMenuRow(n);
         }
         n = this.dayOfMonth + 32 * this.monthOfYear + 370 * (this.year - 1950);
         if (n - this.bv > 150 + this.rng.nextInt() % 20) {
@@ -7912,7 +7912,7 @@ implements Runnable {
                 this.dn[n4] = (byte)this.monthOfYear;
                 this.fW[n4] = (byte)(this.year - 1950);
                 n3 = 4 + Math.abs(this.rng.nextInt() % 12);
-                this.f(n3, n4);
+                this.placeTrainAt(n3, n4);
                 int n6 = Math.abs(this.rng.nextInt() % 16);
                 int n7 = 0;
                 int n8 = 0;
@@ -8054,7 +8054,7 @@ implements Runnable {
         }
     }
 
-    void h(int n) {
+    void incrementRowValueType1(int n) {
         for (int i = 0; i < 5; ++i) {
             if (this.menuRowType[i] != 1) continue;
             int n2 = i;
@@ -8064,7 +8064,7 @@ implements Runnable {
         this.by += n / 73;
     }
 
-    void t(int n, int n2) {
+    void incrementRowValueTypeN(int n, int n2) {
         for (int i = 0; i < 5; ++i) {
             if (this.menuRowType[i] != 3 + n) continue;
             int n3 = i;
@@ -8093,7 +8093,7 @@ implements Runnable {
         }
     }
 
-    void w(int n) {
+    void adjustRowValueByCode(int n) {
         for (int i = 0; i < 5; ++i) {
             if (n == 6 && this.menuRowType[i] == 9) {
                 int n2 = i;
@@ -9141,7 +9141,7 @@ implements Runnable {
                     this.i(n27);
                 }
                 if (this.bI >= this.dH) {
-                    this.l();
+                    this.computeYearEndMetrics();
                     if (this.gg > 0) {
                         --this.gg;
                     }
@@ -9477,7 +9477,7 @@ implements Runnable {
                     --this.loadStep;
                 }
                 if (this.loadStep != 2) break;
-                this.u();
+                this.restoreAllMapArrays();
                 this.pauseFlag = false;
                 this.buildMenuIndex = 0;
                 this.menuDirty = true;
@@ -9490,7 +9490,7 @@ implements Runnable {
                 }
                 if (this.loadStep != 2) break;
                 if (this.hu - 66 < this.difficultyCycle) {
-                    this.c();
+                    this.placeCitiesAndIndustry();
                     this.setState(30);
                     break;
                 }

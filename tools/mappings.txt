@@ -567,3 +567,18 @@ method a v (I)V                                       initBuildMenuForScenario #
 method a r ()V                                        revertTrackTiles        # walks from trackStartX/Y replacing 81-86 with curves
 method a f ()V                                        applyBackgroundCost     # money -= bg if ck else enterOutOfMoneyState
 method a d (III)V                                     advanceConstructionTimers # updates 5x5 zone timers by n3 (positive/negative)
+
+# ---- Batch 21: save/restore + year-graph + menu-build helpers ----
+method a u ()V                  restoreAllMapArrays       # snapshot -> 4 map arrays (tile/track/elev/height)
+method a l ()V                  computeYearEndMetrics     # yrN/yrCx/dG/ef/decadeXxx = X + current
+method a h ()I                  scanMapForMetric          # scans map (purpose varies)
+method a b (IZ)V                setYearGraphMode          # this.yearGraphMode = n
+method a c ()V                  placeCitiesAndIndustry    # do pickCitySite loop; place cities + industry
+method a g (II)V                autoExtendTrackStation    # adds 87/88/89/90 station tiles around track
+method a a ()V                  rebuildMenuTypeIndexes    # gP[] = indexes of non-zero menuRowType
+method a a (I)B                 computeMenuRowDisplayValue # 100*M/aV or 100*money/aV depending on type
+method a f (II)V                placeTrainAt              # writes bh/dn/fW per train
+method a e (I)V                 duplicateMenuRow          # copies menuRowType[n] into row 5
+method a h (I)V                 incrementRowValueType1    # menuRowValue[i] += n for type==1 rows
+method a t (II)V                incrementRowValueTypeN    # menuRowValue[i] += n2 for type==3+n
+method a w (I)V                 adjustRowValueByCode      # code 4 -> +1 to type 10, code 6 -> +1 to type 9
