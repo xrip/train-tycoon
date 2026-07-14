@@ -298,30 +298,30 @@ implements Runnable {
     int eg = 0;
     int eJ = 0;
     int eX = 0;
-    int br = 0;
-    int gV = 0;
-    int cj = 0;
-    int aA = 0;
-    int dg = 0;
+    int decadeSpentWithCurrent = 0;
+    int decadeAiSpentWithCurrent = 0;
+    int decadeFuelWithCurrent = 0;
+    int decadeSubsidyWithCurrent = 0;
+    int decadeRevenueWithCurrent = 0;
     int gs = 0;
-    int dq = 0;
-    int bM = 0;
-    int gx = 0;
-    int eM = 0;
+    int decadeEnterpriseWithCurrent = 0;
+    int decadeXWithCurrent = 0;
+    int prevTotalSpent = 0;
+    int prevAiMoneySpent = 0;
     int prevFuelCost = 0;
     int prevSubsidyCost = 0;
     int prevTotalRevenue = 0;
     int prevTerrainTotal = 0;
     int prevEnterpriseTotal = 0;
     int prevXIndicator = 0;
-    int bG = 0;
-    int he = 0;
-    int bP = 0;
-    int ht = 0;
-    int cr = 0;
-    int cg = 0;
-    int cm = 0;
-    int gq = 0;
+    int prevDecadeSpent = 0;
+    int prevDecadeAiSpent = 0;
+    int prevDecadeFuel = 0;
+    int prevDecadeSubsidy = 0;
+    int prevDecadeRevenue = 0;
+    int prevDecadeGs = 0;
+    int prevDecadeDq = 0;
+    int prevDecadeBm = 0;
     int decadeCostTotal = 0;
     int decadeSpentTotal = 0;
     int decadeFuelCost = 0;
@@ -3967,10 +3967,10 @@ implements Runnable {
             case 32: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.y ? this.gx : this.totalSpent);
+                        return this.b(this.y ? this.prevTotalSpent : this.totalSpent);
                     }
                     case 1: {
-                        return this.b(this.y ? this.eM : this.aiMoneySpent);
+                        return this.b(this.y ? this.prevAiMoneySpent : this.aiMoneySpent);
                     }
                     case 2: {
                         return this.b(this.y ? this.prevFuelCost : this.fuelCostAccrued);
@@ -3996,28 +3996,28 @@ implements Runnable {
             case 35: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.y ? this.bG : this.br);
+                        return this.b(this.y ? this.prevDecadeSpent : this.decadeSpentWithCurrent);
                     }
                     case 1: {
-                        return this.b(this.y ? this.he : this.gV);
+                        return this.b(this.y ? this.prevDecadeAiSpent : this.decadeAiSpentWithCurrent);
                     }
                     case 2: {
-                        return this.b(this.y ? this.bP : this.cj);
+                        return this.b(this.y ? this.prevDecadeFuel : this.decadeFuelWithCurrent);
                     }
                     case 3: {
-                        return this.b(this.y ? this.ht : this.aA);
+                        return this.b(this.y ? this.prevDecadeSubsidy : this.decadeSubsidyWithCurrent);
                     }
                     case 4: {
-                        return this.b(this.y ? this.cg : this.gs);
+                        return this.b(this.y ? this.prevDecadeGs : this.gs);
                     }
                     case 5: {
-                        return this.b(this.y ? this.cm : this.dq);
+                        return this.b(this.y ? this.prevDecadeDq : this.decadeEnterpriseWithCurrent);
                     }
                     case 6: {
-                        return this.b(this.y ? this.cr : this.dg);
+                        return this.b(this.y ? this.prevDecadeRevenue : this.decadeRevenueWithCurrent);
                     }
                     case 7: {
-                        return this.b(this.y ? this.gq : this.bM);
+                        return this.b(this.y ? this.prevDecadeBm : this.decadeXWithCurrent);
                     }
                 }
                 break;
@@ -6838,22 +6838,22 @@ implements Runnable {
         this.eg = this.s(this.eg);
         this.eJ = this.s(this.eJ);
         this.eX = this.s(this.eX);
-        this.gx = this.s(this.gx);
-        this.eM = this.s(this.eM);
+        this.prevTotalSpent = this.s(this.prevTotalSpent);
+        this.prevAiMoneySpent = this.s(this.prevAiMoneySpent);
         this.prevFuelCost = this.s(this.prevFuelCost);
         this.prevSubsidyCost = this.s(this.prevSubsidyCost);
         this.prevTotalRevenue = this.s(this.prevTotalRevenue);
         this.prevTerrainTotal = this.s(this.prevTerrainTotal);
         this.prevEnterpriseTotal = this.s(this.prevEnterpriseTotal);
         this.prevXIndicator = this.s(this.prevXIndicator);
-        this.bG = this.s(this.bG);
-        this.he = this.s(this.he);
-        this.bP = this.s(this.bP);
-        this.ht = this.s(this.ht);
-        this.cr = this.s(this.cr);
-        this.cg = this.s(this.cg);
-        this.cm = this.s(this.cm);
-        this.gq = this.s(this.gq);
+        this.prevDecadeSpent = this.s(this.prevDecadeSpent);
+        this.prevDecadeAiSpent = this.s(this.prevDecadeAiSpent);
+        this.prevDecadeFuel = this.s(this.prevDecadeFuel);
+        this.prevDecadeSubsidy = this.s(this.prevDecadeSubsidy);
+        this.prevDecadeRevenue = this.s(this.prevDecadeRevenue);
+        this.prevDecadeGs = this.s(this.prevDecadeGs);
+        this.prevDecadeDq = this.s(this.prevDecadeDq);
+        this.prevDecadeBm = this.s(this.prevDecadeBm);
         this.decadeCostTotal = this.s(this.decadeCostTotal);
         this.decadeSpentTotal = this.s(this.decadeSpentTotal);
         this.decadeFuelCost = this.s(this.decadeFuelCost);
@@ -7056,13 +7056,13 @@ implements Runnable {
         this.yrCx[0] = this.totalRevenue;
         this.dG[0] = this.decadeOtherXTotal + this.eX;
         this.ef[0] = this.fe + this.totalRevenue;
-        this.br = this.decadeCostTotal + this.totalSpent;
-        this.gV = this.decadeSpentTotal + this.aiMoneySpent;
-        this.cj = this.decadeFuelCost + this.fuelCostAccrued;
-        this.aA = this.decadeSubsidyTotal + this.ho;
-        this.dg = this.decadeRevenueTotal + this.totalRevenue;
-        this.bM = this.decadeXTotal + this.eX;
-        this.dq = this.decadeEnterpriseTotal + this.eJ;
+        this.decadeSpentWithCurrent = this.decadeCostTotal + this.totalSpent;
+        this.decadeAiSpentWithCurrent = this.decadeSpentTotal + this.aiMoneySpent;
+        this.decadeFuelWithCurrent = this.decadeFuelCost + this.fuelCostAccrued;
+        this.decadeSubsidyWithCurrent = this.decadeSubsidyTotal + this.ho;
+        this.decadeRevenueWithCurrent = this.decadeRevenueTotal + this.totalRevenue;
+        this.decadeXWithCurrent = this.decadeXTotal + this.eX;
+        this.decadeEnterpriseWithCurrent = this.decadeEnterpriseTotal + this.eJ;
     }
 
     void newYearNotify() {
@@ -7076,8 +7076,8 @@ implements Runnable {
             this.bb[n] = 0;
         }
         this.archiveOrRecall();
-        this.gx = this.totalSpent;
-        this.eM = this.aiMoneySpent;
+        this.prevTotalSpent = this.totalSpent;
+        this.prevAiMoneySpent = this.aiMoneySpent;
         this.prevFuelCost = this.fuelCostAccrued;
         this.prevSubsidyCost = this.ho;
         this.prevTotalRevenue = this.totalRevenue;
@@ -7102,14 +7102,14 @@ implements Runnable {
         this.decadeOtherXTotal += this.eX;
         this.fe += this.totalRevenue;
         if (this.monthOfYear == 13) {
-            this.bG = this.br;
-            this.he = this.gV;
-            this.bP = this.cj;
-            this.ht = this.aA;
-            this.cr = this.dg;
-            this.cg = this.gs;
-            this.cm = this.dq;
-            this.gq = this.bM;
+            this.prevDecadeSpent = this.decadeSpentWithCurrent;
+            this.prevDecadeAiSpent = this.decadeAiSpentWithCurrent;
+            this.prevDecadeFuel = this.decadeFuelWithCurrent;
+            this.prevDecadeSubsidy = this.decadeSubsidyWithCurrent;
+            this.prevDecadeRevenue = this.decadeRevenueWithCurrent;
+            this.prevDecadeGs = this.gs;
+            this.prevDecadeDq = this.decadeEnterpriseWithCurrent;
+            this.prevDecadeBm = this.decadeXWithCurrent;
             this.decadeCostTotal = 0;
             this.decadeSpentTotal = 0;
             this.decadeFuelCost = 0;

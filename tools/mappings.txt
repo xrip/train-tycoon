@@ -425,3 +425,26 @@ field  a aV   menuRowCost           # int[6]; cost denominator in menu row formu
 field  a M    menuRowValue          # int[6]; cost numerator for type-1 (100 * M / aV)
 field  a X    menuRowEra            # byte[6]; used as era/code parameter in formula
 field  a cJ   menuRowRevenue        # int[6]; used in formula b(this.cJ[cZ])
+
+# ---- Batch 15: previous-year + previous-decade snapshots ----
+# Each year's roll-over (archiveOrRecall()) snapshots the running totals.
+# 'prev*' = previous year; 'prevDecade*' = previous decade (updated month=13).
+field  a gx   prevTotalSpent         # int; previous-year snapshot of totalSpent
+field  a eM   prevAiMoneySpent      # int; previous-year snapshot of aiMoneySpent
+# Running decade + current-year totals (8 categories for the decade view)
+field  a br   decadeSpentWithCurrent # int; decadeCostTotal + totalSpent
+field  a gV   decadeAiSpentWithCurrent # int; decadeSpentTotal + aiMoneySpent
+field  a cj   decadeFuelWithCurrent  # int; decadeFuelCost + fuelCostAccrued
+field  a aA   decadeSubsidyWithCurrent # int; decadeSubsidyTotal + ho
+field  a dg   decadeRevenueWithCurrent # int; decadeRevenueTotal + totalRevenue
+field  a dq   decadeEnterpriseWithCurrent # int; decadeEnterpriseTotal + eJ
+field  a bM   decadeXWithCurrent     # int; decadeXTotal + eX
+# Previous-decade snapshots of the running totals above (case 35 in update())
+field  a bG   prevDecadeSpent        # int; previous-decade snapshot of br
+field  a he   prevDecadeAiSpent      # int; previous-decade snapshot of gV
+field  a bP   prevDecadeFuel         # int; previous-decade snapshot of cj
+field  a ht   prevDecadeSubsidy      # int; previous-decade snapshot of aA
+field  a cr   prevDecadeRevenue      # int; previous-decade snapshot of dg
+field  a cg   prevDecadeGs           # int; previous-decade snapshot of gs (loaded from save)
+field  a cm   prevDecadeDq           # int; previous-decade snapshot of dq
+field  a gq   prevDecadeBm           # int; previous-decade snapshot of bM
