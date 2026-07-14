@@ -614,3 +614,41 @@ field  a ef   altDecadeRevenueTotal  # int[12]; = fe + totalRevenue
 field  a L    altDecadeTotalCost     # int[12]; = yrZ[0] (alias for total-cost when alt)
 # fJ is the 3-frame counter array used by drawMoneyTicker (drawn with K[0..2]).
 field  a fJ   moneyTickerFrames      # byte[3]; countdown per money-history frame
+
+# ---- Batch 25: state-machine counters + per-row metadata ----
+# State counter for the build-menu "duplicate row" feature (cW == 1..4).
+field  a cW   duplicateRowState      # byte; 1..4 state in duplicateRow logic
+# Decade enterprise tax: eJ = totalRevenue * eC / 100 (archived as prevEnterpriseTotal).
+field  a eJ   decadeEnterpriseTax    # int; enterprise tax revenue this year
+# Interest rate divisor: eg = hk * aD / 1200 (hk = loanBalance)
+field  a aD   interestRate           # byte; rate divisor for loan interest (initially 4)
+# X-indicator (financial health?) paired with prevXIndicator
+field  a eX   xIndicator             # int; current-year X indicator
+# Industry-site flag (set true when pickIndustrySite finds a match).
+field  a aY   industrySiteFound      # boolean; true when industry tile is selected
+# Subsidy cost accumulator (paired with prevSubsidyCost).
+field  a ho   subsidyCost            # int; current-year subsidy
+# Per-station revenue accumulator (paired with prevStationRevenue).
+field  a bb   stationRevenue         # short[48]; per-city accumulated revenue
+# Alt year array (12 entries; rendered in case 33/34 when yearGraphAlt=true).
+field  a dm   altYearArray           # byte[12]; alt year values for graph
+# Terrain total (paired with prevTerrainTotal) — sum of terrain-smoothing costs.
+field  a eg   terrainTotal           # int; current-year terrain total
+# Track-build flag (set true when building is in progress).
+field  a fx   trackBuildInProgress   # boolean; gates the build-menu render
+# Game-state index: related to the build menu animation cycle.
+field  a gh   gameStateCounter       # int; counter that drives state transitions (6 -> 1 reset)
+# Industry tile Y from pickIndustrySite.
+field  a k    industryTileY          # int; Y of the selected industry tile
+# Money-history sliding window (3 frames; paired with fJ[3]).
+field  a K    moneyHistory           # int[3]; recent money-delta values for ticker
+# Random-cycle flag (used in update()).
+field  a P    cycleFlag              # int; periodic cycle counter (every 3 ticks)
+# City-list index (counter for adding cities in rebuildCityList).
+field  a aE   cityListIndex          # byte; next slot in city list
+# Auto-music toggle (set/cleared by case 5 in update()).
+field  a ac   autoMusic              # boolean; true = play music automatically
+# Per-row metadata arrays (size 6, indexed by buildMenuIndex)
+field  a bY   menuRowParamA          # byte[6]; per-row parameter A
+field  a dE   menuRowParamB          # byte[6]; per-row parameter B
+field  a fF   menuRowParamC          # byte[6]; per-row parameter C

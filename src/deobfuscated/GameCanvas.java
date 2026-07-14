@@ -143,7 +143,7 @@ implements Runnable {
     byte[][] terrainEditBuffer;
     int selectionStartX;
     int selectionStartY;
-    boolean fx = false;
+    boolean trackBuildInProgress = false;
     int mapGenStage = 0;
     int tilesGeneratedInStage = 0;
     int totalTilesToGenerate = 0;
@@ -187,7 +187,7 @@ implements Runnable {
     int cf;
     byte scenarioBits;
     int confirmToggle = 0;
-    int[] K = new int[3];
+    int[] moneyHistory = new int[3];
     byte[] moneyTickerFrames = new byte[3];
     int confirmCounter = 0;
     int confirmTargetState = -1;
@@ -200,7 +200,7 @@ implements Runnable {
     short[] trainSelectionY = new short[64];
     short[] trainSelectionX = new short[64];
     byte stationDirCursor = 0;
-    byte aE = 0;
+    byte cityListIndex = 0;
     byte[] stationDirectionCode = new byte[48];
     byte[] cityPopulation = new byte[48];
     byte[] cityIndex = new byte[48];
@@ -213,7 +213,7 @@ implements Runnable {
     byte difficultyB = 0;
     byte difficultyC = 0;
     byte buildMenuIndex = 0;
-    byte cW = 0;
+    byte duplicateRowState = 0;
     int J;
     int fY;
     int dR;
@@ -287,7 +287,7 @@ implements Runnable {
     int bytesCompressed = 0;
     int[] trainRevenue = new int[500];
     int[] prevTrainRevenue = new int[500];
-    short[] bb = new short[48];
+    short[] stationRevenue = new short[48];
     short[] prevStationRevenue = new short[48];
     boolean compareToPrevious = false;
     int yearGraphMode = 0;
@@ -296,11 +296,11 @@ implements Runnable {
     int totalSpent = 0;
     int aiMoneySpent = 0;
     int fuelCostAccrued = 0;
-    int ho = 0;
+    int subsidyCost = 0;
     int totalRevenue = 0;
-    int eg = 0;
-    int eJ = 0;
-    int eX = 0;
+    int terrainTotal = 0;
+    int decadeEnterpriseTax = 0;
+    int xIndicator = 0;
     int decadeSpentWithCurrent = 0;
     int decadeAiSpentWithCurrent = 0;
     int decadeFuelWithCurrent = 0;
@@ -342,14 +342,14 @@ implements Runnable {
     int[] altDecadeRevenueTotal = new int[12];
     int[] altDecadeTotalCost = new int[12];
     byte[] yearGraphOffsets = new byte[12];
-    byte[] dm = new byte[12];
+    byte[] altYearArray = new byte[12];
     byte[] fA = new byte[12];
     int industryCategory;
-    boolean aY;
+    boolean industrySiteFound;
     int gS;
     int bp;
     int dD;
-    int k;
+    int industryTileY;
     byte difficultyCycle = 1;
     int nextTrackPieceCode = 66;
     byte cd = (byte)15;
@@ -359,11 +359,11 @@ implements Runnable {
     byte[][] trackPieceRequirements = new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}};
     byte[] menuRowType = new byte[6];
     byte[] bh = new byte[6];
-    byte[] bY = new byte[6];
+    byte[] menuRowParamA = new byte[6];
     byte[] dn = new byte[6];
-    byte[] dE = new byte[6];
+    byte[] menuRowParamB = new byte[6];
     byte[] fW = new byte[6];
-    byte[] fF = new byte[6];
+    byte[] menuRowParamC = new byte[6];
     int[] menuRowCost = new int[6];
     int[] menuRowValue = new int[6];
     byte[] menuRowAltType = new byte[6];
@@ -390,8 +390,8 @@ implements Runnable {
     boolean musicPlaying = false;
     boolean ay = false;
     boolean musicAutoStart = false;
-    boolean ac = false;
-    int gh = 2;
+    boolean autoMusic = false;
+    int gameStateCounter = 2;
     Player musicPlayer = null;
     VolumeControl volumeControl = null;
     int by = 0;
@@ -424,7 +424,7 @@ implements Runnable {
     int cy = 0;
     int loanBalance = 0;
     int loanCeiling = 600000;
-    byte aD = (byte)4;
+    byte interestRate = (byte)4;
     int dayOfMonth = 1;
     int monthOfYear = 1;
     int year = 1950;
@@ -441,7 +441,7 @@ implements Runnable {
     Graphics backbufferG = this.backbuffer.getGraphics();
     Image[] tileSprites;
     byte[] tileSpriteIndex = new byte[255];
-    Image P;
+    Image cycleFlag;
     long loadingStartTime;
     boolean loadingTimeout;
     int eW;
@@ -1472,7 +1472,7 @@ implements Runnable {
                     if (this.terrainSmoothCost <= this.money) {
                         this.money -= this.terrainSmoothCost;
                         this.pushMoneyHistory(-this.terrainSmoothCost);
-                        this.ho += this.terrainSmoothCost;
+                        this.subsidyCost += this.terrainSmoothCost;
                         this.smoothHeightMap(true);
                     } else {
                         this.enterOutOfMoneyState();
@@ -1594,7 +1594,7 @@ implements Runnable {
             if (this.mapGenStage == 2) {
                 this.b(Math.abs(this.rng.nextInt() % this.mapWidth), Math.abs(this.rng.nextInt() % this.mapHeight), Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 20) + 1, -1);
             }
-            this.fx = false;
+            this.trackBuildInProgress = false;
             if (this.mapGenStage == 3) {
                 block0: for (n4 = 0; n4 < this.gG; ++n4) {
                     for (n3 = 0; n3 < this.co; ++n3) {
@@ -1626,7 +1626,7 @@ implements Runnable {
             if (this.mapGenStage == 9) {
                 this.placeTerrainFeature(5);
             }
-            if (this.fx) {
+            if (this.trackBuildInProgress) {
                 this.loadStep = 0;
             }
             if (this.mapGenStage == 10) {
@@ -1798,28 +1798,28 @@ implements Runnable {
                 while (n5 != this.heightMap[n + by4][n2 + by3]) {
                     this.a(n + by4, n2 + by3, n5 > this.heightMap[n + by4][n2 + by3]);
                     if (System.currentTimeMillis() - l <= 1000L) continue;
-                    this.fx = true;
+                    this.trackBuildInProgress = true;
                     return;
                 }
                 l = System.currentTimeMillis();
                 while (n5 != this.heightMap[n + by4 + 1][n2 + by3]) {
                     this.a(n + by4 + 1, n2 + by3, n5 > this.heightMap[n + by4 + 1][n2 + by3]);
                     if (System.currentTimeMillis() - l <= 1000L) continue;
-                    this.fx = true;
+                    this.trackBuildInProgress = true;
                     return;
                 }
                 l = System.currentTimeMillis();
                 while (n5 != this.heightMap[n + by4][n2 + by3 + 1]) {
                     this.a(n + by4, n2 + by3 + 1, n5 > this.heightMap[n + by4][n2 + by3 + 1]);
                     if (System.currentTimeMillis() - l <= 1000L) continue;
-                    this.fx = true;
+                    this.trackBuildInProgress = true;
                     return;
                 }
                 l = System.currentTimeMillis();
                 while (n5 != this.heightMap[n + by4 + 1][n2 + by3 + 1]) {
                     this.a(n + by4 + 1, n2 + by3 + 1, n5 > this.heightMap[n + by4 + 1][n2 + by3 + 1]);
                     if (System.currentTimeMillis() - l <= 1000L) continue;
-                    this.fx = true;
+                    this.trackBuildInProgress = true;
                     return;
                 }
             }
@@ -1878,7 +1878,7 @@ implements Runnable {
         int n6;
         int n7;
         boolean bl;
-        if (this.fx) {
+        if (this.trackBuildInProgress) {
             return;
         }
         long l = System.currentTimeMillis();
@@ -1902,10 +1902,10 @@ implements Runnable {
                 }
             }
             if (System.currentTimeMillis() - l <= 1500L) continue;
-            this.fx = true;
+            this.trackBuildInProgress = true;
             break;
         } while (!bl);
-        if (!this.fx) {
+        if (!this.trackBuildInProgress) {
             this.flattenHeightArea(n7, n6, n5, n4);
             n3 = this.f(n);
             switch (n) {
@@ -3017,7 +3017,7 @@ implements Runnable {
 
     void applyBackgroundCost() {
         if (this.ck) {
-            this.ho += this.bg;
+            this.subsidyCost += this.bg;
             this.money -= this.bg;
             this.pushMoneyHistory(-this.bg);
         } else {
@@ -3251,9 +3251,9 @@ implements Runnable {
     }
 
     void pushMoneyHistory(int n) {
-        this.K[2] = this.K[1];
-        this.K[1] = this.K[0];
-        this.K[0] = n;
+        this.moneyHistory[2] = this.moneyHistory[1];
+        this.moneyHistory[1] = this.moneyHistory[0];
+        this.moneyHistory[0] = n;
         this.moneyTickerFrames[2] = this.moneyTickerFrames[1];
         this.moneyTickerFrames[1] = this.moneyTickerFrames[0];
         this.moneyTickerFrames[0] = 80;
@@ -3275,15 +3275,15 @@ implements Runnable {
         int n = 0;
         if (this.moneyTickerFrames[2] > 0) {
             this.moneyTickerFrames[2] = (byte)(this.moneyTickerFrames[2] - 1);
-            n = this.drawNumber(graphics, this.K[2], n);
+            n = this.drawNumber(graphics, this.moneyHistory[2], n);
         }
         if (this.moneyTickerFrames[1] > 0) {
             this.moneyTickerFrames[1] = (byte)(this.moneyTickerFrames[1] - 1);
-            n = this.drawNumber(graphics, this.K[1], n);
+            n = this.drawNumber(graphics, this.moneyHistory[1], n);
         }
         if (this.moneyTickerFrames[0] > 0) {
             this.moneyTickerFrames[0] = (byte)(this.moneyTickerFrames[0] - 1);
-            this.drawNumber(graphics, this.K[0], n);
+            this.drawNumber(graphics, this.moneyHistory[0], n);
         }
     }
 
@@ -3508,11 +3508,11 @@ implements Runnable {
     }
 
     byte f(int n) {
-        this.stationDirectionCode[this.aE] = (byte)n;
-        this.cityPopulation[this.aE] = (byte)(50 + this.rng.nextInt() % 20);
-        this.cityIndex[this.aE] = 0;
-        this.aE = (byte)(this.aE + 1);
-        return (byte)(this.aE - 1);
+        this.stationDirectionCode[this.cityListIndex] = (byte)n;
+        this.cityPopulation[this.cityListIndex] = (byte)(50 + this.rng.nextInt() % 20);
+        this.cityIndex[this.cityListIndex] = 0;
+        this.cityListIndex = (byte)(this.cityListIndex + 1);
+        return (byte)(this.cityListIndex - 1);
     }
 
     void dayResetAg() {
@@ -3878,10 +3878,10 @@ implements Runnable {
                         return q ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 5: {
-                        return this.ac ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
+                        return this.autoMusic ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 6: {
-                        return this.p(this.gh, 0);
+                        return this.p(this.gameStateCounter, 0);
                     }
                 }
                 break;
@@ -3962,7 +3962,7 @@ implements Runnable {
                         return this.b(this.loanCeiling);
                     }
                     case 2: {
-                        return this.p(this.aD, 29);
+                        return this.p(this.interestRate, 29);
                     }
                 }
                 break;
@@ -3979,19 +3979,19 @@ implements Runnable {
                         return this.b(this.compareToPrevious ? this.prevFuelCost : this.fuelCostAccrued);
                     }
                     case 3: {
-                        return this.b(this.compareToPrevious ? this.prevSubsidyCost : this.ho);
+                        return this.b(this.compareToPrevious ? this.prevSubsidyCost : this.subsidyCost);
                     }
                     case 4: {
-                        return this.b(this.compareToPrevious ? this.prevTerrainTotal : this.eg);
+                        return this.b(this.compareToPrevious ? this.prevTerrainTotal : this.terrainTotal);
                     }
                     case 5: {
-                        return this.b(this.compareToPrevious ? this.prevEnterpriseTotal : this.eJ);
+                        return this.b(this.compareToPrevious ? this.prevEnterpriseTotal : this.decadeEnterpriseTax);
                     }
                     case 6: {
                         return this.b(this.compareToPrevious ? this.prevTotalRevenue : this.totalRevenue);
                     }
                     case 7: {
-                        return this.b(this.compareToPrevious ? this.prevXIndicator : this.eX);
+                        return this.b(this.compareToPrevious ? this.prevXIndicator : this.xIndicator);
                     }
                 }
                 break;
@@ -4053,9 +4053,9 @@ implements Runnable {
                     }
                 } else {
                     if (n2 >= 20) {
-                        return !this.yearGraphAlt ? this.p(this.dm[n2 - 20], 0) : null;
+                        return !this.yearGraphAlt ? this.p(this.altYearArray[n2 - 20], 0) : null;
                     }
-                    return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 1940, 20) : this.p(this.dm[n2] + 1940, 0);
+                    return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 1940, 20) : this.p(this.altYearArray[n2] + 1940, 0);
                 }
             }
             case 34: {
@@ -4063,9 +4063,9 @@ implements Runnable {
                     return this.spriteBitmapTable[this.spriteIndexTable[54 + this.yearGraphMode]];
                 }
                 if (n2 >= 20) {
-                    return !this.yearGraphAlt ? this.p(this.dm[n2 - 20], 0) : null;
+                    return !this.yearGraphAlt ? this.p(this.altYearArray[n2 - 20], 0) : null;
                 }
-                return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 40, 20) : this.p(this.dm[n2] + 1940, 0);
+                return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 40, 20) : this.p(this.altYearArray[n2] + 1940, 0);
             }
             case 41: 
             case 42: 
@@ -4081,9 +4081,9 @@ implements Runnable {
             case 53: 
             case 54: {
                 if (n2 == 1) {
-                    byte[] byArray = this.p(this.bY[this.buildMenuIndex], 11);
-                    byte[] byArray4 = this.p(this.dE[this.buildMenuIndex], 11);
-                    byte[] byArray5 = this.p(this.fF[this.buildMenuIndex] + 1950, 0);
+                    byte[] byArray = this.p(this.menuRowParamA[this.buildMenuIndex], 11);
+                    byte[] byArray4 = this.p(this.menuRowParamB[this.buildMenuIndex], 11);
+                    byte[] byArray5 = this.p(this.menuRowParamC[this.buildMenuIndex] + 1950, 0);
                     byte[] byArray6 = new byte[byArray.length + byArray4.length + byArray5.length];
                     System.arraycopy(byArray, 0, byArray6, 0, byArray.length);
                     System.arraycopy(byArray4, 0, byArray6, byArray.length, byArray4.length);
@@ -4292,7 +4292,7 @@ implements Runnable {
                     }
                     case 3: {
                         this.musicAutoStart = true;
-                        this.ac = true;
+                        this.autoMusic = true;
                         this.setState(10);
                         break;
                     }
@@ -4567,8 +4567,8 @@ implements Runnable {
                         break block0;
                     }
                     case 5: {
-                        boolean bl = this.ac = !this.ac;
-                        if (this.ac) {
+                        boolean bl = this.autoMusic = !this.autoMusic;
+                        if (this.autoMusic) {
                             this.playMusic();
                             break block0;
                         }
@@ -4576,11 +4576,11 @@ implements Runnable {
                         break block0;
                     }
                     case 6: {
-                        ++this.gh;
-                        if (this.gh == 6) {
-                            this.gh = 1;
+                        ++this.gameStateCounter;
+                        if (this.gameStateCounter == 6) {
+                            this.gameStateCounter = 1;
                         }
-                        this.C(this.gh);
+                        this.C(this.gameStateCounter);
                         break block0;
                     }
                 }
@@ -4785,12 +4785,12 @@ implements Runnable {
                 switch (n2) {
                     case 1: {
                         this.pendingTransitionCode = this.menuRowType[this.buildMenuIndex] + 40;
-                        this.cW = (byte)2;
+                        this.duplicateRowState = (byte)2;
                         break;
                     }
                     case 2: {
                         this.pendingTransitionCode = this.menuRowAltType[this.buildMenuIndex] + 60;
-                        this.cW = (byte)2;
+                        this.duplicateRowState = (byte)2;
                     }
                 }
                 this.setState(30);
@@ -4809,16 +4809,16 @@ implements Runnable {
             case 52: 
             case 53: 
             case 54: {
-                if (this.cW == 1) {
+                if (this.duplicateRowState == 1) {
                     this.pendingTransitionCode = 60;
                 }
-                if (this.cW == 2) {
+                if (this.duplicateRowState == 2) {
                     this.pendingTransitionCode = 40;
                 }
-                if (this.cW == 3) {
+                if (this.duplicateRowState == 3) {
                     this.pendingTransitionCode = 9;
                 }
-                if (this.cW == 4) {
+                if (this.duplicateRowState == 4) {
                     this.pendingTransitionCode = 8;
                 }
                 this.setState(30);
@@ -4833,7 +4833,7 @@ implements Runnable {
                     this.buildMenuIndex = this.gP[(n2 - 1) / 2];
                     this.pendingTransitionCode = this.menuRowAltType[this.buildMenuIndex] + 60;
                 }
-                this.cW = 1;
+                this.duplicateRowState = 1;
                 this.setState(30);
                 break;
             }
@@ -4849,16 +4849,16 @@ implements Runnable {
             case 70: 
             case 71: 
             case 72: {
-                if (this.cW == 1) {
+                if (this.duplicateRowState == 1) {
                     this.pendingTransitionCode = 60;
                 }
-                if (this.cW == 2) {
+                if (this.duplicateRowState == 2) {
                     this.pendingTransitionCode = 40;
                 }
-                if (this.cW == 3) {
+                if (this.duplicateRowState == 3) {
                     this.pendingTransitionCode = 9;
                 }
-                if (this.cW == 4) {
+                if (this.duplicateRowState == 4) {
                     this.pendingTransitionCode = 8;
                 }
                 this.setState(30);
@@ -5673,7 +5673,7 @@ implements Runnable {
                         short[] sArray = this.trainOptionSlots[i];
                         sArray[1] = (short)(sArray[1] + n10);
                         int n13 = n11;
-                        this.bb[n13] = (short)(this.bb[n13] + n10);
+                        this.stationRevenue[n13] = (short)(this.stationRevenue[n13] + n10);
                         int n14 = i;
                         this.wagonServiceCounter[n14] = (byte)(this.wagonServiceCounter[n14] | 4);
                     }
@@ -5684,7 +5684,7 @@ implements Runnable {
                         short[] sArray = this.trainOptionSlots[i];
                         sArray[2] = (short)(sArray[2] + n10);
                         int n15 = n11;
-                        this.bb[n15] = (short)(this.bb[n15] + n10);
+                        this.stationRevenue[n15] = (short)(this.stationRevenue[n15] + n10);
                         int n16 = i;
                         this.wagonServiceCounter[n16] = (byte)(this.wagonServiceCounter[n16] | 8);
                     }
@@ -5695,7 +5695,7 @@ implements Runnable {
                         short[] sArray = this.trainOptionSlots[i];
                         sArray[3] = (short)(sArray[3] + n10);
                         int n17 = n11;
-                        this.bb[n17] = (short)(this.bb[n17] + n10);
+                        this.stationRevenue[n17] = (short)(this.stationRevenue[n17] + n10);
                         int n18 = i;
                         this.wagonServiceCounter[n18] = (byte)(this.wagonServiceCounter[n18] | 2);
                     }
@@ -6819,7 +6819,7 @@ implements Runnable {
         this.viewportY1 = this.saveIntToBuffer(this.viewportY1);
         this.loanBalance = this.saveIntToBuffer(this.loanBalance);
         this.loanCeiling = this.saveIntToBuffer(this.loanCeiling);
-        this.aD = this.b(this.aD);
+        this.interestRate = this.b(this.interestRate);
         this.eC = this.saveIntToBuffer(this.eC);
         this.a(this.yrN);
         this.a(this.yrCx);
@@ -6829,18 +6829,18 @@ implements Runnable {
         this.a(this.altDecadeTotalCost);
         this.a(this.trainRevenue);
         this.a(this.prevTrainRevenue);
-        this.a(this.bb);
+        this.a(this.stationRevenue);
         this.a(this.prevStationRevenue);
         this.fe = this.saveIntToBuffer(this.fe);
         this.decadeOtherXTotal = this.saveIntToBuffer(this.decadeOtherXTotal);
         this.totalSpent = this.saveIntToBuffer(this.totalSpent);
         this.aiMoneySpent = this.saveIntToBuffer(this.aiMoneySpent);
         this.fuelCostAccrued = this.saveIntToBuffer(this.fuelCostAccrued);
-        this.ho = this.saveIntToBuffer(this.ho);
+        this.subsidyCost = this.saveIntToBuffer(this.subsidyCost);
         this.totalRevenue = this.saveIntToBuffer(this.totalRevenue);
-        this.eg = this.saveIntToBuffer(this.eg);
-        this.eJ = this.saveIntToBuffer(this.eJ);
-        this.eX = this.saveIntToBuffer(this.eX);
+        this.terrainTotal = this.saveIntToBuffer(this.terrainTotal);
+        this.decadeEnterpriseTax = this.saveIntToBuffer(this.decadeEnterpriseTax);
+        this.xIndicator = this.saveIntToBuffer(this.xIndicator);
         this.prevTotalSpent = this.saveIntToBuffer(this.prevTotalSpent);
         this.prevAiMoneySpent = this.saveIntToBuffer(this.prevAiMoneySpent);
         this.prevFuelCost = this.saveIntToBuffer(this.prevFuelCost);
@@ -6865,7 +6865,7 @@ implements Runnable {
         this.eb = this.saveIntToBuffer(this.eb);
         this.decadeEnterpriseTotal = this.saveIntToBuffer(this.decadeEnterpriseTotal);
         this.decadeXTotal = this.saveIntToBuffer(this.decadeXTotal);
-        this.aE = this.b(this.aE);
+        this.cityListIndex = this.b(this.cityListIndex);
         this.a(this.stationDirectionCode);
         this.a(this.cityPopulation);
         this.a(this.cityIndex);
@@ -6897,7 +6897,7 @@ implements Runnable {
         this.a(this.trainStateCode);
         this.a(this.trainAiOverride);
         this.industryCategory = this.saveIntToBuffer(this.industryCategory);
-        this.aY = this.d(this.aY);
+        this.industrySiteFound = this.d(this.industrySiteFound);
         this.nextTrackPieceCode = this.saveIntToBuffer(this.nextTrackPieceCode);
         if (this.nextTrackPieceCode == 0) {
             this.nextTrackPieceCode = 66;
@@ -6909,11 +6909,11 @@ implements Runnable {
         }
         this.a(this.menuRowType);
         this.a(this.bh);
-        this.a(this.bY);
+        this.a(this.menuRowParamA);
         this.a(this.dn);
-        this.a(this.dE);
+        this.a(this.menuRowParamB);
         this.a(this.fW);
-        this.a(this.fF);
+        this.a(this.menuRowParamC);
         this.a(this.menuRowCost);
         this.a(this.menuRowValue);
         this.a(this.menuRowAltType);
@@ -6974,7 +6974,7 @@ implements Runnable {
         q = this.d(q);
         this.aM = this.saveIntToBuffer(this.aM);
         this.H = this.saveIntToBuffer(this.H);
-        this.gh = this.saveIntToBuffer(this.gh);
+        this.gameStateCounter = this.saveIntToBuffer(this.gameStateCounter);
         this.a(this.gk);
         this.a(this.bd);
         this.a(this.bE);
@@ -6989,7 +6989,7 @@ implements Runnable {
     void persistSnapshotMode1() {
         this.loadGame(5, 1);
         this.writeSaveSnapshot();
-        this.C(this.gh);
+        this.C(this.gameStateCounter);
     }
 
     void saveAllMapArrays() {
@@ -7055,17 +7055,17 @@ implements Runnable {
 
     void computeYearEndMetrics() {
         this.archiveOrRecall();
-        this.yrN[0] = this.eX;
+        this.yrN[0] = this.xIndicator;
         this.yrCx[0] = this.totalRevenue;
-        this.altDecadeOtherXTotal[0] = this.decadeOtherXTotal + this.eX;
+        this.altDecadeOtherXTotal[0] = this.decadeOtherXTotal + this.xIndicator;
         this.altDecadeRevenueTotal[0] = this.fe + this.totalRevenue;
         this.decadeSpentWithCurrent = this.decadeCostTotal + this.totalSpent;
         this.decadeAiSpentWithCurrent = this.decadeSpentTotal + this.aiMoneySpent;
         this.decadeFuelWithCurrent = this.decadeFuelCost + this.fuelCostAccrued;
-        this.decadeSubsidyWithCurrent = this.decadeSubsidyTotal + this.ho;
+        this.decadeSubsidyWithCurrent = this.decadeSubsidyTotal + this.subsidyCost;
         this.decadeRevenueWithCurrent = this.decadeRevenueTotal + this.totalRevenue;
-        this.decadeXWithCurrent = this.decadeXTotal + this.eX;
-        this.decadeEnterpriseWithCurrent = this.decadeEnterpriseTotal + this.eJ;
+        this.decadeXWithCurrent = this.decadeXTotal + this.xIndicator;
+        this.decadeEnterpriseWithCurrent = this.decadeEnterpriseTotal + this.decadeEnterpriseTax;
     }
 
     void newYearNotify() {
@@ -7075,18 +7075,18 @@ implements Runnable {
             this.trainRevenue[n] = 0;
         }
         for (n = 0; n < 48; ++n) {
-            this.prevStationRevenue[n] = this.bb[n];
-            this.bb[n] = 0;
+            this.prevStationRevenue[n] = this.stationRevenue[n];
+            this.stationRevenue[n] = 0;
         }
         this.archiveOrRecall();
         this.prevTotalSpent = this.totalSpent;
         this.prevAiMoneySpent = this.aiMoneySpent;
         this.prevFuelCost = this.fuelCostAccrued;
-        this.prevSubsidyCost = this.ho;
+        this.prevSubsidyCost = this.subsidyCost;
         this.prevTotalRevenue = this.totalRevenue;
-        this.prevTerrainTotal = this.eg;
-        this.prevEnterpriseTotal = this.eJ;
-        this.prevXIndicator = this.eX;
+        this.prevTerrainTotal = this.terrainTotal;
+        this.prevEnterpriseTotal = this.decadeEnterpriseTax;
+        this.prevXIndicator = this.xIndicator;
         for (n = 10; n >= 0; --n) {
             this.yrN[n + 1] = this.yrN[n];
             this.yrCx[n + 1] = this.yrCx[n];
@@ -7098,11 +7098,11 @@ implements Runnable {
         this.decadeCostTotal += this.totalSpent;
         this.decadeSpentTotal += this.aiMoneySpent;
         this.decadeFuelCost += this.fuelCostAccrued;
-        this.decadeSubsidyTotal += this.ho;
+        this.decadeSubsidyTotal += this.subsidyCost;
         this.decadeRevenueTotal += this.totalRevenue;
-        this.decadeXTotal += this.eX;
-        this.decadeEnterpriseTotal += this.eJ;
-        this.decadeOtherXTotal += this.eX;
+        this.decadeXTotal += this.xIndicator;
+        this.decadeEnterpriseTotal += this.decadeEnterpriseTax;
+        this.decadeOtherXTotal += this.xIndicator;
         this.fe += this.totalRevenue;
         if (this.monthOfYear == 13) {
             this.prevDecadeSpent = this.decadeSpentWithCurrent;
@@ -7132,21 +7132,21 @@ implements Runnable {
             this.altDecadeTotalCost[0] = 0;
         }
         this.altDecadeTotalCost[0] = this.scanMapForMetric();
-        this.money -= this.eg;
-        if (this.eg > 0) {
-            this.pushMoneyHistory(-this.eg);
+        this.money -= this.terrainTotal;
+        if (this.terrainTotal > 0) {
+            this.pushMoneyHistory(-this.terrainTotal);
         }
-        this.money -= this.eJ;
-        if (this.eJ > 0) {
-            this.pushMoneyHistory(-this.eJ);
+        this.money -= this.decadeEnterpriseTax;
+        if (this.decadeEnterpriseTax > 0) {
+            this.pushMoneyHistory(-this.decadeEnterpriseTax);
         }
         this.totalSpent = 0;
         this.aiMoneySpent = 0;
         this.fuelCostAccrued = 0;
-        this.ho = 0;
+        this.subsidyCost = 0;
         this.totalRevenue = 0;
-        this.eX = 0;
-        this.eJ = 0;
+        this.xIndicator = 0;
+        this.decadeEnterpriseTax = 0;
         this.mapRedrawPending = true;
         this.compareToPrevious = true;
         this.monthRolloverFlag = true;
@@ -7164,9 +7164,9 @@ implements Runnable {
     }
 
     void archiveOrRecall() {
-        this.eg = this.loanBalance * this.aD / 1200;
-        this.eJ = this.totalRevenue * this.eC / 100;
-        this.eX = this.totalRevenue - this.eg - this.totalSpent - this.aiMoneySpent - this.fuelCostAccrued - this.ho - this.eJ;
+        this.terrainTotal = this.loanBalance * this.interestRate / 1200;
+        this.decadeEnterpriseTax = this.totalRevenue * this.eC / 100;
+        this.xIndicator = this.totalRevenue - this.terrainTotal - this.totalSpent - this.aiMoneySpent - this.fuelCostAccrued - this.subsidyCost - this.decadeEnterpriseTax;
     }
 
     int scanMapForMetric() {
@@ -7245,9 +7245,9 @@ implements Runnable {
                 for (n3 = 0; n3 < 12; ++n3) {
                     if (!bl) {
                         this.yearGraphOffsets[n3] = (byte)(this.year - 1940);
-                        this.dm[n3] = (byte)(this.monthOfYear - n3);
-                        if (this.dm[n3] < 1) {
-                            this.dm[n3] = (byte)(12 + this.dm[n3]);
+                        this.altYearArray[n3] = (byte)(this.monthOfYear - n3);
+                        if (this.altYearArray[n3] < 1) {
+                            this.altYearArray[n3] = (byte)(12 + this.altYearArray[n3]);
                             int n7 = n3;
                             this.yearGraphOffsets[n7] = (byte)(this.yearGraphOffsets[n7] - 1);
                         }
@@ -7275,7 +7275,7 @@ implements Runnable {
                         n5 = this.yrZ[n3];
                         continue;
                     }
-                    this.dm[n3] = (byte)(this.year - n3 - 1940);
+                    this.altYearArray[n3] = (byte)(this.year - n3 - 1940);
                     if (n == 0) {
                         if (this.altDecadeOtherXTotal[n3] > n6) {
                             n6 = this.altDecadeOtherXTotal[n3];
@@ -7350,15 +7350,15 @@ implements Runnable {
         if (n < 50) {
             do {
                 this.pickIndustrySite();
-            } while (++n2 != 50 && !this.aY);
+            } while (++n2 != 50 && !this.industrySiteFound);
             if (n2 < 50) {
                 this.placementX = this.gS;
                 this.placementY = this.bp;
                 this.demolishX = this.dD;
-                this.demolishY = this.k;
+                this.demolishY = this.industryTileY;
                 if (this.tryBuildPath()) {
                     this.autoExtendTrackStation(this.gS, this.bp);
-                    this.autoExtendTrackStation(this.dD, this.k);
+                    this.autoExtendTrackStation(this.dD, this.industryTileY);
                     this.m(this.gS, this.bp);
                     this.n(this.nextTrackPieceCode - 64);
                     ++this.nextTrackPieceCode;
@@ -7512,7 +7512,7 @@ implements Runnable {
     void pickIndustrySite() {
         int n = Math.abs(this.rng.nextInt() % this.mapWidth);
         int n2 = Math.abs(this.rng.nextInt() % this.mapHeight);
-        this.aY = false;
+        this.industrySiteFound = false;
         if (this.tileMap[n][n2] == 0 || this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33) {
             int n3 = n - 2;
             int n4 = n2 - 2;
@@ -7534,23 +7534,23 @@ implements Runnable {
                 for (int j = n4; j <= n6; ++j) {
                     byte by = this.tileMap[i][j];
                     if (by >= 34 && by <= 40 && this.industryCategory == 0) {
-                        this.aY = true;
+                        this.industrySiteFound = true;
                     }
                     if (by >= 62 && by <= 64 && this.industryCategory == 1) {
-                        this.aY = true;
+                        this.industrySiteFound = true;
                     }
                     if (by >= 50 && by <= 52 && this.industryCategory == 2) {
-                        this.aY = true;
+                        this.industrySiteFound = true;
                     }
                     if (by >= 56 && by <= 58 && this.industryCategory == 3) {
-                        this.aY = true;
+                        this.industrySiteFound = true;
                     }
-                    if (this.aY) break block0;
+                    if (this.industrySiteFound) break block0;
                 }
             }
-            if (this.aY) {
+            if (this.industrySiteFound) {
                 this.dD = n;
-                this.k = n2;
+                this.industryTileY = n2;
             }
         }
     }
@@ -7789,9 +7789,9 @@ implements Runnable {
         if (n4 == 1) {
             ++n4;
         }
-        this.bY[n2] = (byte)n4;
-        this.dE[n2] = (byte)n5;
-        this.fF[n2] = (byte)n6;
+        this.menuRowParamA[n2] = (byte)n4;
+        this.menuRowParamB[n2] = (byte)n5;
+        this.menuRowParamC[n2] = (byte)n6;
     }
 
     void D(int n) {
@@ -7818,12 +7818,12 @@ implements Runnable {
                 this.loanBalance = this.loanBalance % 20000 < 10000 ? (this.loanBalance -= this.loanBalance % 20000) : (this.loanBalance += 20000 - this.loanBalance % 20000);
             }
         }
-        if (this.menuRowAltType[n] == 12 && this.aD > 1) {
-            this.aD = (byte)(this.aD - 1);
+        if (this.menuRowAltType[n] == 12 && this.interestRate > 1) {
+            this.interestRate = (byte)(this.interestRate - 1);
         }
         this.fY = this.menuRowType[n] + 40;
         this.dR = this.menuRowAltType[n] + 60;
-        this.cW = (byte)3;
+        this.duplicateRowState = (byte)3;
         this.buildMenuIndex = (byte)5;
         this.menuRowType[5] = this.menuRowType[n];
         this.menuRowCost[5] = this.menuRowCost[n];
@@ -7834,9 +7834,9 @@ implements Runnable {
         this.bh[5] = this.bh[n];
         this.dn[5] = this.dn[n];
         this.fW[5] = this.fW[n];
-        this.bY[5] = this.bY[n];
-        this.dE[5] = this.dE[n];
-        this.fF[5] = this.fF[n];
+        this.menuRowParamA[5] = this.menuRowParamA[n];
+        this.menuRowParamB[5] = this.menuRowParamB[n];
+        this.menuRowParamC[5] = this.menuRowParamC[n];
         this.menuRowType[n] = 0;
         this.menuRowCost[n] = 0;
         this.menuRowValue[n] = 0;
@@ -7851,7 +7851,7 @@ implements Runnable {
     void duplicateMenuRow(int n) {
         this.fY = this.menuRowType[n] + 40;
         this.dR = this.menuRowAltType[n] + 60;
-        this.cW = (byte)4;
+        this.duplicateRowState = (byte)4;
         this.buildMenuIndex = (byte)5;
         this.menuRowType[5] = this.menuRowType[n];
         this.menuRowCost[5] = this.menuRowCost[n];
@@ -7862,9 +7862,9 @@ implements Runnable {
         this.bh[5] = this.bh[n];
         this.dn[5] = this.dn[n];
         this.fW[5] = this.fW[n];
-        this.bY[5] = this.bY[n];
-        this.dE[5] = this.dE[n];
-        this.fF[5] = this.fF[n];
+        this.menuRowParamA[5] = this.menuRowParamA[n];
+        this.menuRowParamB[5] = this.menuRowParamB[n];
+        this.menuRowParamC[5] = this.menuRowParamC[n];
         this.menuRowType[n] = 0;
         this.menuRowCost[n] = 0;
         this.menuRowValue[n] = 0;
@@ -7890,7 +7890,7 @@ implements Runnable {
             if ((this.menuRowType[n] == 1 || this.menuRowType[n] >= 4 && this.menuRowType[n] <= 14) && this.menuRowCost[n] <= this.menuRowValue[n]) {
                 this.D(n);
             }
-            if (this.bY[n] != this.dayOfMonth || this.dE[n] != this.monthOfYear || this.fF[n] != this.year - 1950) continue;
+            if (this.menuRowParamA[n] != this.dayOfMonth || this.menuRowParamB[n] != this.monthOfYear || this.menuRowParamC[n] != this.year - 1950) continue;
             if (this.menuRowType[n] == 2 && this.menuRowCost[n] <= this.money) {
                 this.D(n);
             }
@@ -8004,7 +8004,7 @@ implements Runnable {
                             if (byArray[i] != n6) continue;
                             bl = true;
                         }
-                        if (n5 == 12 && this.aD <= 1) {
+                        if (n5 == 12 && this.interestRate <= 1) {
                             bl = false;
                         }
                         if (n5 == 3 && this.loanCeiling >= 1000000) {
@@ -8171,7 +8171,7 @@ implements Runnable {
                 if (!(controlArray[i] instanceof VolumeControl)) continue;
                 this.volumeControl = (VolumeControl)controlArray[i];
             }
-            this.volumeControl.setLevel(20 * this.gh);
+            this.volumeControl.setLevel(20 * this.gameStateCounter);
             this.musicPlaying = false;
             this.ay = true;
         }
@@ -8182,7 +8182,7 @@ implements Runnable {
 
     void playMusic() {
         try {
-            if (this.ay && this.musicPlayer != null && !this.musicPlaying && this.ac) {
+            if (this.ay && this.musicPlayer != null && !this.musicPlaying && this.autoMusic) {
                 this.musicPlayer.prefetch();
                 this.musicPlayer.setMediaTime(0L);
                 this.musicPlayer.setLoopCount(-1);
@@ -8527,8 +8527,8 @@ implements Runnable {
                     graphics.fillRect(0, 0, screenWidth, hs);
                     int n3 = screenWidth / 2;
                     int n4 = hs / 2;
-                    int n5 = this.P.getWidth() / 2;
-                    int n6 = this.P.getHeight();
+                    int n5 = this.cycleFlag.getWidth() / 2;
+                    int n6 = this.cycleFlag.getHeight();
                     int n7 = n6 / 10 + 1;
                     for (int i = 0; i < 10; ++i) {
                         int n8 = (n3 + n5 + 30) * (this.loadingTimer - 5 * (i / 2)) / 10;
@@ -8543,7 +8543,7 @@ implements Runnable {
                             n9 = n3 + (n3 + n5 + 30 - n8);
                         }
                         graphics.setClip(n9 - n5, n4 - n6 / 2 + i * n7, n5 * 2, n7);
-                        graphics.drawImage(this.P, n9, n4, 3);
+                        graphics.drawImage(this.cycleFlag, n9, n4, 3);
                     }
                     graphics.setClip(0, 0, screenWidth, hs);
                     break;
@@ -8551,7 +8551,7 @@ implements Runnable {
                 case 10: {
                     graphics.setColor(0xFFFFFF);
                     graphics.fillRect(0, 0, screenWidth, hs);
-                    graphics.drawImage(this.P, screenWidth / 2, hs / 2, 3);
+                    graphics.drawImage(this.cycleFlag, screenWidth / 2, hs / 2, 3);
                     graphics.setColor(215, 222, 238);
                     graphics.fillRect(10, hs - 13, screenWidth - 21, 9);
                     int n10 = this.eW * (screenWidth - 20) / (this.al - 1);
@@ -8565,8 +8565,8 @@ implements Runnable {
                     if (this.ready) {
                         graphics.setColor(0xFFFFFF);
                         graphics.fillRect(0, 0, screenWidth, hs);
-                        if (this.P != null) {
-                            graphics.drawImage(this.P, screenWidth / 2, hs / 2, 3);
+                        if (this.cycleFlag != null) {
+                            graphics.drawImage(this.cycleFlag, screenWidth / 2, hs / 2, 3);
                         }
                     }
                     if (this.transitionCode == 36) {
@@ -8706,7 +8706,7 @@ implements Runnable {
     public void setState(int n) {
         this.hx = this.gameState;
         if (!this.ready) {
-            this.P = null;
+            this.cycleFlag = null;
         }
         this.S = false;
         this.menuDirty = true;
@@ -8718,7 +8718,7 @@ implements Runnable {
             }
             case 1: 
             case 2: {
-                this.P = this.aa();
+                this.cycleFlag = this.aa();
                 this.loadingStartTime = System.currentTimeMillis();
                 this.loadingTimeout = false;
                 this.loadingTimer = 0;
@@ -8848,9 +8848,9 @@ implements Runnable {
                     this.loadMusic();
                     if (this.musicAutoStart) {
                         this.playMusic();
-                        this.ac = true;
+                        this.autoMusic = true;
                     } else {
-                        this.ac = false;
+                        this.autoMusic = false;
                     }
                 }
                 if (this.eW != this.al) break;
@@ -8949,7 +8949,7 @@ implements Runnable {
                             this.money = n16;
                             this.loanCeiling = n17;
                             this.loanBalance = n18;
-                            this.aD = (byte)n19;
+                            this.interestRate = (byte)n19;
                             this.era = n20 - 1;
                             this.scenarioMilestoneIndex = (byte)n22;
                             this.currentMilestoneScore = n23;
@@ -8988,11 +8988,11 @@ implements Runnable {
                             this.fP = (byte)22;
                         }
                         if (this.difficultyA == 0) {
-                            this.aD = (byte)4;
+                            this.interestRate = (byte)4;
                             this.eC = 2;
                         }
                         if (this.difficultyA == 1) {
-                            this.aD = (byte)8;
+                            this.interestRate = (byte)8;
                             this.eC = 5;
                         }
                         if (this.difficultyB == 0) {
