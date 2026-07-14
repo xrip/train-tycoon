@@ -494,7 +494,7 @@ implements Runnable {
 
     public void start(GameMIDlet gameMIDlet) {
         this.midlet = gameMIDlet;
-        this.Z();
+        this.persistSnapshotMode1();
         this.setState(0);
         Display.getDisplay((MIDlet)this.midlet).setCurrent((Displayable)this);
         this.gameThread = new Thread(this);
@@ -1350,7 +1350,7 @@ implements Runnable {
         return bl2;
     }
 
-    void ac() {
+    void commitTerrainEdit() {
         for (int i = 0; i < 10; ++i) {
             System.arraycopy(this.terrainEditBuffer[i], 0, this.heightMap[this.selectionStartX + i], this.selectionStartY, 10);
         }
@@ -1362,7 +1362,7 @@ implements Runnable {
         int n3;
         int n4;
         if (bl) {
-            this.ac();
+            this.commitTerrainEdit();
             this.terrainEditBuffer = null;
             n4 = this.selectionStartX;
             n3 = this.selectionStartY;
@@ -1500,7 +1500,7 @@ implements Runnable {
                 if (this.rng.nextInt() % 2 < 0 && j < this.mapHeight) {
                     this.a(i, j + 1, n5, true);
                 }
-                this.ac();
+                this.commitTerrainEdit();
             }
         }
     }
@@ -2016,7 +2016,7 @@ implements Runnable {
         }
     }
 
-    int G() {
+    int computeKeyRepeatDelay() {
         if (this.keySubState < 30) {
             this.keySubState += this.hh;
         }
@@ -2072,7 +2072,7 @@ implements Runnable {
     }
 
     void viewportZoomKey() {
-        int n = this.G();
+        int n = this.computeKeyRepeatDelay();
         if (this.lastKeyCode == 56 || this.lastKeyCode == 6) {
             this.mapScaleY += n * 2;
         }
@@ -2653,7 +2653,7 @@ implements Runnable {
             }
         }
         this.tickInputOrAi(true);
-        this.T();
+        this.rebuildCityList();
     }
 
     void openBuildMenu() {
@@ -3524,7 +3524,7 @@ implements Runnable {
         }
     }
 
-    void T() {
+    void rebuildCityList() {
         for (int i = 0; i < 48; ++i) {
             this.be[i] = 0;
         }
@@ -3626,7 +3626,7 @@ implements Runnable {
                 }
             }
         }
-        if (n == 26 && this.A(this.trainAtCursor) > n2) {
+        if (n == 26 && this.countCarsInTrain(this.trainAtCursor) > n2) {
             int n3;
             int n4 = this.trainAtCursor;
             for (n3 = 0; n3 < n2; ++n3) {
@@ -3672,7 +3672,7 @@ implements Runnable {
         }
         if (n == 1) {
             if (!this.S) {
-                this.cH = this.X();
+                this.cH = this.loadSnapshotAndReturn();
                 this.S = true;
             }
             if (n2 == 0 && this.dP) {
@@ -3741,7 +3741,7 @@ implements Runnable {
             return true;
         }
         if (n == 26) {
-            if (n2 < 6 && this.A(this.trainAtCursor) > n2) {
+            if (n2 < 6 && this.countCarsInTrain(this.trainAtCursor) > n2) {
                 return true;
             }
             if (n2 == 6 && this.eL[this.trainAtCursor] == 7) {
@@ -3858,7 +3858,7 @@ implements Runnable {
                 break;
             }
             case 17: {
-                return this.p(this.U(), 29);
+                return this.p(this.computeMilestoneScore(), 29);
             }
             case 10: {
                 switch (n2) {
@@ -3937,7 +3937,7 @@ implements Runnable {
                 }
                 if (n2 <= 0 || n2 >= 6) break;
                 int n4 = 0;
-                if (this.A(this.trainAtCursor) > n2) {
+                if (this.countCarsInTrain(this.trainAtCursor) > n2) {
                     n4 = this.trainAtCursor;
                     for (n3 = 0; n3 < n2; ++n3) {
                         n4 = this.nextCar[n4];
@@ -4581,7 +4581,7 @@ implements Runnable {
                         break block0;
                     }
                 }
-                this.O();
+                this.persistSnapshotMode0();
                 if (this.ready) {
                     this.transitionCode = 1;
                     this.o();
@@ -4922,7 +4922,7 @@ implements Runnable {
                     this.bE[this.cu] = this.fi;
                 }
                 if (n2 >= 0) break;
-                this.O();
+                this.persistSnapshotMode0();
                 if (this.ready) {
                     this.transitionCode = 28;
                     this.o();
@@ -4937,27 +4937,27 @@ implements Runnable {
         }
     }
 
-    boolean K() {
+    boolean tryBuildPath() {
         this.aQ = new short[this.mapWidth][this.mapHeight];
         this.fl = 10;
         this.selectionCost = 0;
         this.b();
         this.aQ[this.placementX][this.placementY] = 20;
-        this.C();
+        this.floodFillPath();
         if (this.aQ[this.demolishX][this.demolishY] < 20) {
             this.aQ = null;
             return false;
         }
-        this.S();
+        this.validatePathStep();
         this.aQ = null;
-        this.N();
+        this.scanTrackTiles();
         if (this.et == 0) {
             return false;
         }
         return this.selectionCost != 0;
     }
 
-    void S() {
+    void validatePathStep() {
         int n;
         int n2;
         int n3;
@@ -5133,7 +5133,7 @@ implements Runnable {
         }
     }
 
-    void C() {
+    void floodFillPath() {
         boolean bl = true;
         boolean bl2 = false;
         for (int i = 50; bl && !bl2 && i > 0; --i) {
@@ -5251,7 +5251,7 @@ implements Runnable {
         }
     }
 
-    void N() {
+    void scanTrackTiles() {
         this.et = 0;
         for (int i = 0; i < this.mapWidth; ++i) {
             for (int j = 0; j < this.mapHeight; ++j) {
@@ -5821,7 +5821,7 @@ implements Runnable {
                 int n;
                 int n2;
                 if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || this.trackMap[n2 = this.c(this.trainX[i])][n = this.c(this.trainY[i])] != 65) continue;
-                int n3 = this.A(i) * 2;
+                int n3 = this.countCarsInTrain(i) * 2;
                 if ((this.trainFlags[i] & 0xF) == 0) {
                     n3 += 3;
                 } else if ((this.trainFlags[i] & 0xF) == 1) {
@@ -5884,7 +5884,7 @@ implements Runnable {
             int n9 = n;
             this.trainFlags[n9] = (byte)(this.trainFlags[n9] & 0xEF);
             if ((this.trainFlags[n] & 0x40) == 64) {
-                this.trainEnergyOrCount[n] = (byte)(this.wagonEnergyRemaining[n] + this.B(n) / 2 + this.A(n) / 2 + this.trainAgeOrTimer[n] / 3);
+                this.trainEnergyOrCount[n] = (byte)(this.wagonEnergyRemaining[n] + this.accumulateTrainTurns(n) / 2 + this.countCarsInTrain(n) / 2 + this.trainAgeOrTimer[n] / 3);
             }
             int n10 = this.c(this.trainX[n]);
             int n11 = this.c(this.trainY[n]);
@@ -5933,14 +5933,14 @@ implements Runnable {
                         this.trainRevenue[n14] = this.trainRevenue[n14] + n7;
                         this.h(n7);
                     }
-                    this.trainEnergyOrCount[n] = (byte)(this.A(n) * 40);
+                    this.trainEnergyOrCount[n] = (byte)(this.countCarsInTrain(n) * 40);
                 }
                 this.wagonIorHost[n] = (byte)n8;
                 int n15 = n;
                 this.trainFlags[n15] = (byte)(this.trainFlags[n15] | 0x10);
             }
             if ((this.trainFlags[n] & 0x40) == 64 && this.trainPhase[n] == 4 && (this.tileMap[n10][n11] == 87 || this.tileMap[n10][n11] == 88) && this.trackMap[n10][n11] != 65) {
-                this.trainEnergyOrCount[n] = (byte)(this.A(n) * 40);
+                this.trainEnergyOrCount[n] = (byte)(this.countCarsInTrain(n) * 40);
             }
             n8 = 0;
             if (this.trainPhase[n] < 8) {
@@ -6124,14 +6124,14 @@ implements Runnable {
         }
     }
 
-    int A(int n) {
+    int countCarsInTrain(int n) {
         if (n != -1) {
-            return this.A(this.nextCar[n]) + 1;
+            return this.countCarsInTrain(this.nextCar[n]) + 1;
         }
         return 0;
     }
 
-    int B(int n) {
+    int accumulateTrainTurns(int n) {
         if (n != -1) {
             byte by = this.tileMap[this.c(this.trainX[n])][this.c(this.trainY[n])];
             int n2 = 0;
@@ -6147,7 +6147,7 @@ implements Runnable {
             if (by == 80) {
                 n2 = this.trainDir[n] == 2 ? -1 : 1;
             }
-            return this.B(this.nextCar[n]) + n2;
+            return this.accumulateTrainTurns(this.nextCar[n]) + n2;
         }
         return 0;
     }
@@ -6604,7 +6604,7 @@ implements Runnable {
         }
     }
 
-    void Y() {
+    void compressSaveBuffer() {
         this.c("Compress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte by = this.saveBuffer[0];
@@ -6959,12 +6959,12 @@ implements Runnable {
         this.costGroupC3 = this.s(this.costGroupC3);
         this.costGroupC4 = this.s(this.costGroupC4);
         if (n == 0) {
-            this.Y();
+            this.compressSaveBuffer();
             this.saveGame();
         }
     }
 
-    void A() {
+    void writeSaveSnapshot() {
         ch = this.d(ch);
         selectionHidden = this.d(selectionHidden);
         cc = this.d(cc);
@@ -6977,41 +6977,41 @@ implements Runnable {
         this.a(this.bE);
     }
 
-    void O() {
+    void persistSnapshotMode0() {
         this.loadGame(5, 0);
-        this.A();
+        this.writeSaveSnapshot();
         this.saveGame();
     }
 
-    void Z() {
+    void persistSnapshotMode1() {
         this.loadGame(5, 1);
-        this.A();
+        this.writeSaveSnapshot();
         this.C(this.gh);
     }
 
-    void t() {
+    void saveAllMapArrays() {
         this.bm = 0;
         this.fw = 0;
         this.g(0);
         this.loadGame(1, 0);
         this.a(this.tileMap);
-        this.Y();
+        this.compressSaveBuffer();
         this.saveGame();
         this.loadGame(2, 0);
         this.a(this.trackMap);
-        this.Y();
+        this.compressSaveBuffer();
         this.saveGame();
         this.loadGame(3, 0);
         this.a(this.tileElevation);
-        this.Y();
+        this.compressSaveBuffer();
         this.saveGame();
         this.loadGame(4, 0);
         this.a(this.heightMap);
-        this.Y();
+        this.compressSaveBuffer();
         this.saveGame();
     }
 
-    boolean X() {
+    boolean loadSnapshotAndReturn() {
         this.loadGame(0, 1);
         return this.snapshotLoaded;
     }
@@ -7342,18 +7342,18 @@ implements Runnable {
         int n = 0;
         int n2 = 0;
         do {
-            this.F();
+            this.pickCitySite();
         } while (++n != 50 && this.cA == -1);
         if (n < 50) {
             do {
-                this.D();
+                this.pickIndustrySite();
             } while (++n2 != 50 && !this.aY);
             if (n2 < 50) {
                 this.placementX = this.gS;
                 this.placementY = this.bp;
                 this.demolishX = this.dD;
                 this.demolishY = this.k;
-                if (this.K()) {
+                if (this.tryBuildPath()) {
                     this.g(this.gS, this.bp);
                     this.g(this.dD, this.k);
                     this.m(this.gS, this.bp);
@@ -7460,7 +7460,7 @@ implements Runnable {
         }
     }
 
-    void F() {
+    void pickCitySite() {
         int n = Math.abs(this.rng.nextInt() % this.mapWidth);
         int n2 = Math.abs(this.rng.nextInt() % this.mapHeight);
         this.cA = -1;
@@ -7506,7 +7506,7 @@ implements Runnable {
         }
     }
 
-    void D() {
+    void pickIndustrySite() {
         int n = Math.abs(this.rng.nextInt() % this.mapWidth);
         int n2 = Math.abs(this.rng.nextInt() % this.mapHeight);
         this.aY = false;
@@ -7552,7 +7552,7 @@ implements Runnable {
         }
     }
 
-    int U() {
+    int computeMilestoneScore() {
         int n = 0;
         int n2 = 0;
         int n3 = this.currentMilestoneScore;
@@ -7720,7 +7720,7 @@ implements Runnable {
                 if (this.aM < this.scenarioStep) {
                     this.aM = this.scenarioStep;
                 }
-                this.O();
+                this.persistSnapshotMode0();
                 this.gJ = this.c(this.scenarioStep - 2);
             }
             this.setState(20);
@@ -8239,7 +8239,7 @@ implements Runnable {
         } else {
             this.gk[n] = n2;
         }
-        this.O();
+        this.persistSnapshotMode0();
         return n2;
     }
 
@@ -8351,7 +8351,7 @@ implements Runnable {
         catch (Exception exception) {
             return false;
         }
-        this.O();
+        this.persistSnapshotMode0();
         return true;
     }
 
@@ -9441,7 +9441,7 @@ implements Runnable {
                     --this.loadStep;
                 }
                 if (this.loadStep != 2) break;
-                if (this.K()) {
+                if (this.tryBuildPath()) {
                     this.setState(30);
                     this.buildMenuIndex = 0;
                     this.aC = true;
@@ -9463,7 +9463,7 @@ implements Runnable {
                     --this.loadStep;
                 }
                 if (this.loadStep != 2) break;
-                this.t();
+                this.saveAllMapArrays();
                 this.buildMenuIndex = 0;
                 this.menuDirty = true;
                 this.setState(30);

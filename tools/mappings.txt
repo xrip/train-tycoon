@@ -448,3 +448,41 @@ field  a cr   prevDecadeRevenue      # int; previous-decade snapshot of dg
 field  a cg   prevDecadeGs           # int; previous-decade snapshot of gs (loaded from save)
 field  a cm   prevDecadeDq           # int; previous-decade snapshot of dq
 field  a gq   prevDecadeBm           # int; previous-decade snapshot of bM
+
+# ---- Batch 16: method names anchored on key algorithms and save pipeline ----
+# int G() returns key-repeat delay derived from keySubState + hh.
+method a G ()I                  computeKeyRepeatDelay
+# void T() scans/clears the be[] city list and rebuilds it from trackMap (64-mask).
+method a T ()V                  rebuildCityList
+# boolean K() initializes the build-path grid aQ[mapWidth][mapHeight], runs C(),
+# then validates against the demolish tile.
+method a K ()Z                  tryBuildPath
+# void S() walks the build path for validation; resets dX/demolish coords.
+method a S ()V                  validatePathStep
+# void C() runs the BFS/flood-fill from placementX/Y looking for the demolish tile.
+method a C ()V                  floodFillPath
+# void N() scans trackMap to count tiles of various types (64=station, 76=...).
+method a N ()V                  scanTrackTiles
+# int A(int) recursively counts cars in a train via nextCar.
+method a A (I)I                countCarsInTrain
+# int B(int) recursively accumulates turn count per car.
+method a B (I)I                accumulateTrainTurns
+# void Y() RLE-compresses saveBuffer into byteArrayOutputStream.
+method a Y ()V                  compressSaveBuffer
+# void A() writes the in-memory state snapshot into saveBuffer (for saveGame).
+method a A ()V                  writeSaveSnapshot
+# void O() / Z() trigger saveGame/saveMode 0 and 1 respectively, with prior snapshot load.
+method a O ()V                  persistSnapshotMode0
+method a Z ()V                  persistSnapshotMode1
+# void t() saves all four map arrays (tileMap, trackMap, tileElevation, heightMap).
+method a t ()V                  saveAllMapArrays
+# boolean X() loads a snapshot and returns snapshotLoaded.
+method a X ()Z                  loadSnapshotAndReturn
+# void F() picks a random tile and sets cA + gS/bp (city placement).
+method a F ()V                  pickCitySite
+# void D() picks a random tile matching cA category and sets aY + dD/k (industry placement).
+method a D ()V                  pickIndustrySite
+# int U() computes the current milestone score including milestoneCoThreshold2 if index in range.
+method a U ()I                  computeMilestoneScore
+# void ac() writes terrainEditBuffer back into heightMap at selectionStart.
+method a ac ()V                 commitTerrainEdit
