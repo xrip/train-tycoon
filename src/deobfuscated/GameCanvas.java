@@ -1289,7 +1289,7 @@ implements Runnable {
                 break;
             }
             case 3: {
-                this.v(this.currentSpriteId, this.cursorDragX);
+                this.handleBuildMenuState(this.currentSpriteId, this.cursorDragX);
             }
         }
     }
@@ -1485,7 +1485,7 @@ implements Runnable {
         this.lastViewportCenterX = -1;
     }
 
-    void c(int n, int n2, int n3, int n4, int n5) {
+    void raiseTerrainArea(int n, int n2, int n3, int n4, int n5) {
         for (int i = n; i < n + n3; ++i) {
             for (int j = n2; j < n2 + n4; ++j) {
                 if (i <= 0 || j <= 0 || i > this.mapWidth || j > this.mapHeight) continue;
@@ -1508,7 +1508,7 @@ implements Runnable {
         }
     }
 
-    void b(int n, int n2, int n3, int n4, int n5) {
+    void lowerTerrainArea(int n, int n2, int n3, int n4, int n5) {
         for (int i = n; i < n + n3; ++i) {
             for (int j = n2; j < n2 + n4; ++j) {
                 if (i <= 0 || j <= 0 || i > this.mapWidth || j > this.mapHeight) continue;
@@ -1589,10 +1589,10 @@ implements Runnable {
                 this.tilesGeneratedInStage = 0;
             }
             if (this.mapGenStage == 1) {
-                this.c(Math.abs(this.rng.nextInt() % this.mapWidth), Math.abs(this.rng.nextInt() % this.mapHeight), Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 2) + 1);
+                this.raiseTerrainArea(Math.abs(this.rng.nextInt() % this.mapWidth), Math.abs(this.rng.nextInt() % this.mapHeight), Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 2) + 1);
             }
             if (this.mapGenStage == 2) {
-                this.b(Math.abs(this.rng.nextInt() % this.mapWidth), Math.abs(this.rng.nextInt() % this.mapHeight), Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 20) + 1, -1);
+                this.lowerTerrainArea(Math.abs(this.rng.nextInt() % this.mapWidth), Math.abs(this.rng.nextInt() % this.mapHeight), Math.abs(this.rng.nextInt() % 20) + 1, Math.abs(this.rng.nextInt() % 20) + 1, -1);
             }
             this.trackBuildInProgress = false;
             if (this.mapGenStage == 3) {
@@ -1603,7 +1603,7 @@ implements Runnable {
                         int n5 = this.mapHeight / this.mapGenRows;
                         int n6 = n4 * n2 + Math.abs(this.rng.nextInt() % (n2 / 2));
                         int n7 = n3 * n5 + Math.abs(this.rng.nextInt() % (n5 / 2));
-                        this.w(n6, n7);
+                        this.placeTerrainPatch(n6, n7);
                         continue block0;
                     }
                 }
@@ -1668,7 +1668,7 @@ implements Runnable {
         return 0;
     }
 
-    void w(int n, int n2) {
+    void placeTerrainPatch(int n, int n2) {
         int n3;
         int n4;
         byte by;
@@ -2260,7 +2260,7 @@ implements Runnable {
         graphics.drawLine(nArray[2] + 1, nArray2[2] + 15, nArray[3] + 1, nArray2[3] + 15);
     }
 
-    void c(Graphics graphics) {
+    void drawBuildMenuCursor(Graphics graphics) {
         byte by;
         if (!this.blockBuildMenu && (by = this.menuTransitionCode[this.buildMenuMode][this.buildMenuIndex]) != 0) {
             int[] nArray;
@@ -2386,7 +2386,7 @@ implements Runnable {
         }
     }
 
-    void e(Graphics graphics) {
+    void drawBuildMenuRow(Graphics graphics) {
         if (this.menuRowEnabled[this.buildMenuMode][this.buildMenuIndex]) {
             int n = this.viewportBaseX - this.viewportCenterX;
             int n2 = this.viewportBaseY - this.viewportCenterY;
@@ -4154,7 +4154,7 @@ implements Runnable {
         return null;
     }
 
-    void v(int n, int n2) {
+    void handleBuildMenuState(int n, int n2) {
         block0 : switch (n) {
             case 1: {
                 switch (n2) {
@@ -6696,19 +6696,19 @@ implements Runnable {
         return n2;
     }
 
-    void a(byte[][] byArray) {
+    void saveOrLoadByteMatrix(byte[][] byArray) {
         for (int i = 0; i < byArray.length; ++i) {
-            this.a(byArray[i]);
+            this.saveOrLoadByteArray(byArray[i]);
         }
     }
 
-    void a(short[][] sArray) {
+    void saveOrLoadShortMatrix(short[][] sArray) {
         for (int i = 0; i < sArray.length; ++i) {
-            this.a(sArray[i]);
+            this.saveOrLoadShortArray(sArray[i]);
         }
     }
 
-    void a(byte[] byArray) {
+    void saveOrLoadByteArray(byte[] byArray) {
         if (this.savePendingMode == 2) {
             for (int i = 0; i < byArray.length; ++i) {
                 byArray[i] = 0;
@@ -6723,7 +6723,7 @@ implements Runnable {
         }
     }
 
-    void a(short[] sArray) {
+    void saveOrLoadShortArray(short[] sArray) {
         block4: {
             block5: {
                 block3: {
@@ -6811,7 +6811,7 @@ implements Runnable {
         this.viewportBaseY = this.saveIntToBuffer(this.viewportBaseY);
         this.mapScaleX = this.saveIntToBuffer(this.mapScaleX);
         this.mapScaleY = this.saveIntToBuffer(this.mapScaleY);
-        this.a(this.visibleTrains);
+        this.saveOrLoadShortArray(this.visibleTrains);
         this.visibleTrainCount = this.saveIntToBuffer(this.visibleTrainCount);
         this.viewportX0 = this.saveIntToBuffer(this.viewportX0);
         this.viewportY0 = this.saveIntToBuffer(this.viewportY0);
@@ -6829,8 +6829,8 @@ implements Runnable {
         this.a(this.altDecadeTotalCost);
         this.a(this.trainRevenue);
         this.a(this.prevTrainRevenue);
-        this.a(this.stationRevenue);
-        this.a(this.prevStationRevenue);
+        this.saveOrLoadShortArray(this.stationRevenue);
+        this.saveOrLoadShortArray(this.prevStationRevenue);
         this.revenueTotal = this.saveIntToBuffer(this.revenueTotal);
         this.decadeOtherXTotal = this.saveIntToBuffer(this.decadeOtherXTotal);
         this.totalSpent = this.saveIntToBuffer(this.totalSpent);
@@ -6866,36 +6866,36 @@ implements Runnable {
         this.decadeEnterpriseTotal = this.saveIntToBuffer(this.decadeEnterpriseTotal);
         this.decadeXTotal = this.saveIntToBuffer(this.decadeXTotal);
         this.cityListIndex = this.b(this.cityListIndex);
-        this.a(this.stationDirectionCode);
-        this.a(this.cityPopulation);
-        this.a(this.cityIndex);
-        this.a(this.vehicleFlags);
-        this.a(this.wagonAJ);
-        this.a(this.wagonEQ);
-        this.a(this.trainFlagBits);
-        this.a(this.trainOptionSlots);
+        this.saveOrLoadByteArray(this.stationDirectionCode);
+        this.saveOrLoadByteArray(this.cityPopulation);
+        this.saveOrLoadByteArray(this.cityIndex);
+        this.saveOrLoadByteArray(this.vehicleFlags);
+        this.saveOrLoadByteArray(this.wagonAJ);
+        this.saveOrLoadByteArray(this.wagonEQ);
+        this.saveOrLoadByteArray(this.trainFlagBits);
+        this.saveOrLoadShortMatrix(this.trainOptionSlots);
         this.numSelectedTrains = this.b(this.numSelectedTrains);
         this.flagsA = this.d(this.flagsA);
-        this.a(this.constructionTimers);
-        this.a(this.zonePopulation);
-        this.a(this.trainSelectionIndex);
-        this.a(this.trainSelectionY);
-        this.a(this.trainSelectionX);
+        this.saveOrLoadByteArray(this.constructionTimers);
+        this.saveOrLoadShortArray(this.zonePopulation);
+        this.saveOrLoadShortArray(this.trainSelectionIndex);
+        this.saveOrLoadShortArray(this.trainSelectionY);
+        this.saveOrLoadShortArray(this.trainSelectionX);
         this.era = this.saveIntToBuffer(this.era);
-        this.a(this.trainX);
-        this.a(this.trainY);
-        this.a(this.trainDir);
-        this.a(this.trainPhase);
-        this.a(this.trainFlags);
-        this.a(this.wagonEnergyRemaining);
-        this.a(this.trainEnergyOrCount);
-        this.a(this.wagonIorHost);
-        this.a(this.trainServiceCounter);
-        this.a(this.nextCar);
-        this.a(this.trainEraOrStage);
-        this.a(this.trainAgeOrTimer);
+        this.saveOrLoadByteArray(this.trainX);
+        this.saveOrLoadByteArray(this.trainY);
+        this.saveOrLoadByteArray(this.trainDir);
+        this.saveOrLoadByteArray(this.trainPhase);
+        this.saveOrLoadByteArray(this.trainFlags);
+        this.saveOrLoadByteArray(this.wagonEnergyRemaining);
+        this.saveOrLoadByteArray(this.trainEnergyOrCount);
+        this.saveOrLoadByteArray(this.wagonIorHost);
+        this.saveOrLoadByteArray(this.trainServiceCounter);
+        this.saveOrLoadShortArray(this.nextCar);
+        this.saveOrLoadByteArray(this.trainEraOrStage);
+        this.saveOrLoadByteArray(this.trainAgeOrTimer);
         this.a(this.trainStateCode);
-        this.a(this.trainAiOverride);
+        this.saveOrLoadByteArray(this.trainAiOverride);
         this.industryCategory = this.saveIntToBuffer(this.industryCategory);
         this.industrySiteFound = this.d(this.industrySiteFound);
         this.nextTrackPieceCode = this.saveIntToBuffer(this.nextTrackPieceCode);
@@ -6907,19 +6907,19 @@ implements Runnable {
         if (n != 2) {
             this.difficultyCycle = this.b(this.difficultyCycle);
         }
-        this.a(this.menuRowType);
-        this.a(this.placeTrainDay);
-        this.a(this.menuRowParamA);
-        this.a(this.placeTrainMonth);
-        this.a(this.menuRowParamB);
-        this.a(this.placeTrainYear);
-        this.a(this.menuRowParamC);
+        this.saveOrLoadByteArray(this.menuRowType);
+        this.saveOrLoadByteArray(this.placeTrainDay);
+        this.saveOrLoadByteArray(this.menuRowParamA);
+        this.saveOrLoadByteArray(this.placeTrainMonth);
+        this.saveOrLoadByteArray(this.menuRowParamB);
+        this.saveOrLoadByteArray(this.placeTrainYear);
+        this.saveOrLoadByteArray(this.menuRowParamC);
         this.a(this.menuRowCost);
         this.a(this.menuRowValue);
-        this.a(this.menuRowAltType);
-        this.a(this.menuRowEra);
+        this.saveOrLoadByteArray(this.menuRowAltType);
+        this.saveOrLoadByteArray(this.menuRowEra);
         this.a(this.menuRowRevenue);
-        this.a(this.dU);
+        this.saveOrLoadShortArray(this.dU);
         this.trackBuildCost = this.saveIntToBuffer(this.trackBuildCost);
         this.bq = this.saveIntToBuffer(this.bq);
         this.bv = this.saveIntToBuffer(this.bv);
@@ -6977,7 +6977,7 @@ implements Runnable {
         this.gameStateCounter = this.saveIntToBuffer(this.gameStateCounter);
         this.a(this.gk);
         this.a(this.bd);
-        this.a(this.bE);
+        this.saveOrLoadByteArray(this.bE);
     }
 
     void persistSnapshotMode0() {
@@ -6997,19 +6997,19 @@ implements Runnable {
         this.bytesCompressed = 0;
         this.g(0);
         this.loadGame(1, 0);
-        this.a(this.tileMap);
+        this.saveOrLoadByteMatrix(this.tileMap);
         this.compressSaveBuffer();
         this.saveGame();
         this.loadGame(2, 0);
-        this.a(this.trackMap);
+        this.saveOrLoadByteMatrix(this.trackMap);
         this.compressSaveBuffer();
         this.saveGame();
         this.loadGame(3, 0);
-        this.a(this.tileElevation);
+        this.saveOrLoadByteMatrix(this.tileElevation);
         this.compressSaveBuffer();
         this.saveGame();
         this.loadGame(4, 0);
-        this.a(this.heightMap);
+        this.saveOrLoadByteMatrix(this.heightMap);
         this.compressSaveBuffer();
         this.saveGame();
     }
@@ -7035,16 +7035,16 @@ implements Runnable {
         this.initBuildMenuForScenario(-1);
         this.loadGame(1, 1);
         this.j();
-        this.a(this.tileMap);
+        this.saveOrLoadByteMatrix(this.tileMap);
         this.loadGame(2, 1);
         this.j();
-        this.a(this.trackMap);
+        this.saveOrLoadByteMatrix(this.trackMap);
         this.loadGame(3, 1);
         this.j();
-        this.a(this.tileElevation);
+        this.saveOrLoadByteMatrix(this.tileElevation);
         this.loadGame(4, 1);
         this.j();
-        this.a(this.heightMap);
+        this.saveOrLoadByteMatrix(this.heightMap);
         this.lastViewportCenterX = -1;
     }
 
@@ -9612,7 +9612,7 @@ implements Runnable {
         this.paintMain(graphics);
         graphics.drawImage(this.backbuffer, 0, 0, 20);
         graphics.setClip(0, 15, screenWidth, eN);
-        this.c(graphics);
+        this.drawBuildMenuCursor(graphics);
         n8 = this.viewportX1 - this.viewportX0 + 1;
         n7 = this.viewportY1 - this.viewportY0 + 1;
         if (n8 < 1) {
@@ -9701,7 +9701,7 @@ implements Runnable {
                 }
             }
         }
-        this.e(graphics);
+        this.drawBuildMenuRow(graphics);
         graphics.setClip(0, 0, screenWidth, hs);
         this.drawConfirmDialog(graphics);
     }

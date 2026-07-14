@@ -724,3 +724,21 @@ field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name coll
 field  a ay   flagAy                 # boolean; flag toggled in case 23
 field  a ao   scenarioFlagAo         # int; scenario flag (n21 from scenario record)
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
+
+# ---- Batch 29: build-menu cursor / row render methods ----
+method a c (Ljavax/microedition/lcdui/Graphics;)V  drawBuildMenuCursor  # red/green tile-validity indicator
+method a e (Ljavax/microedition/lcdui/Graphics;)V  drawBuildMenuRow     # sprite 200/249 at cursor position
+
+# ---- Batch 30: save/load array I/O + remaining methods ----
+# Save/load record readers/writers (dispatch on savePendingMode: 0=save, 1=load, 2=clear).
+method a a ([[B)V                    saveOrLoadByteMatrix
+method a a ([[S)V                    saveOrLoadShortMatrix
+method a a ([B)V                     saveOrLoadByteArray
+method a a ([S)V                     saveOrLoadShortArray
+# Map-gen terrain patch placer: random dimensions, fills a byte[n7][by5] with terrain
+method a w (II)V                    placeTerrainPatch       # random terrain patch in (n, n2)
+# Build-menu state-dispatch handler: cases for transitionCode = 1..N
+method a v (II)V                    handleBuildMenuState    # block0 switch on (n, n2)
+# c(int*5) and b(int*5) are terrain-edit region loops
+method a c (IIIII)V                 raiseTerrainArea        # region raise (calls a(int,int,boolean))
+method a b (IIIII)V                 lowerTerrainArea        # region lower (calls a(int,int,boolean))
