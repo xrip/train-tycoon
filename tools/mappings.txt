@@ -652,3 +652,33 @@ field  a ac   autoMusic              # boolean; true = play music automatically
 field  a bY   menuRowParamA          # byte[6]; per-row parameter A
 field  a dE   menuRowParamB          # byte[6]; per-row parameter B
 field  a fF   menuRowParamC          # byte[6]; per-row parameter C
+
+# ---- Batch 26: AI + scenario + train placement + build-menu construction ----
+# Year-graph derived values (ratio of yrN/yrCx/yrZ/altXxx into 0..255)
+field  a fA   yearGraphValues        # byte[12]; derived from yrN/yrCx/yrZ/altDecadeXxx ratios
+# Per-train placement date components (day, month, year) for new trains
+field  a bh   placeTrainDay          # byte[6]; day-of-month for placed train
+field  a dn   placeTrainMonth        # byte[6]; month for placed train
+field  a fW   placeTrainYear         # byte[6]; year for placed train
+# AI play frequency/threshold: rng.nextInt() % aiFrequency > aiThreshold gates AI actions
+field  a cd   aiFrequency            # byte; AI play frequency divisor (25 or 32)
+field  a fP   aiThreshold            # byte; AI action threshold (100 or 29)
+# Transition debounce counter
+field  a fZ   transitionDebounce     # byte; countdown (5..0) preventing re-entry to transition state
+# Scenario resource count (sprite entries in /4)
+field  a al   scenarioResourceCount  # int; number of sprite entries in scenario file
+# Build-menu construction variables (used in initBuildMenuRow and rebuildMenuTypeIndexes)
+field  a fN   buildMenuModeIndex     # int; mode (0..5) for current menu being built
+field  a eY   buildMenuItemCursor    # int; row position within current menu
+field  a cf   buildMenuItemCode      # byte; menu item code during menu construction
+field  a aO   menuRowEnabledCount    # int; count of menu rows with type != 0
+# AI on/off flag
+field  a dP   aiEnabled              # boolean; true when AI is on
+# Input sub-state in handleKey (parallel to bk)
+field  a dw   inputSubState          # int; 0/1/7 input sub-state (paired with keySubState)
+# Per-frame sprite-loading counter
+field  a eW   spriteLoadCounter      # int; increments as sprites are loaded; triggers music at al/2
+# Scenario-step comparison (paired with scenarioStep)
+field  a aM   scenarioStepCompare    # int; current scenario-step comparator
+# Build-menu auto-cancel flag (set when build is cancelled)
+field  a aC   buildCancelled         # boolean; true when build is cancelled
