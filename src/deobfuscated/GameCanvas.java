@@ -112,8 +112,8 @@ implements Runnable {
     static int fX = hs - 15;
     XorResourceInput aU = null;
     Image[] ca = new Image[6];
-    short[] dY;
-    byte[] gz;
+    short[] spriteOffsetTable;
+    byte[] spriteData;
     int cursorScale = 0;
     int cursorDragY = -1;
     int cursorSelectY = -1;
@@ -121,18 +121,18 @@ implements Runnable {
     boolean cursorOverUI;
     boolean cursorAllowZoomOut;
     int cursorDragX = -1;
-    boolean ga = false;
+    boolean mapRedrawPending = false;
     boolean bC = true;
     boolean pauseMenuOpen = false;
-    int eZ;
-    boolean m = false;
-    int ft;
-    int bf;
-    int bl;
-    int r;
-    int Q;
-    int ci = -1;
-    int gA = 0;
+    int dialogContentHeight;
+    boolean needsRepaint = false;
+    int clipX;
+    int clipY;
+    int clipWidth;
+    int clipHeight;
+    int currentSpriteId;
+    int lastRenderedSpriteId = -1;
+    int spriteJustChanged = 0;
     byte[][] tileElevation;
     byte[][] heightMap;
     int as = 0;
@@ -897,8 +897,8 @@ implements Runnable {
         this.cursorSelectX = -1;
         this.cursorOverUI = false;
         this.cursorAllowZoomOut = false;
-        this.eZ = 0;
-        this.m = false;
+        this.dialogContentHeight = 0;
+        this.needsRepaint = false;
     }
 
     public void b(String string) {
@@ -908,14 +908,14 @@ implements Runnable {
             int n2 = xorResourceInput.readByte();
             int n3 = 256 * xorResourceInput.readByte() + xorResourceInput.readByte();
             int n4 = 0;
-            this.dY = new short[n2 + 1];
-            this.gz = new byte[n3];
+            this.spriteOffsetTable = new short[n2 + 1];
+            this.spriteData = new byte[n3];
             for (int i = 0; i < n; ++i) {
                 int n5 = xorResourceInput.readByte();
                 int n6 = 256 * xorResourceInput.readByte() + xorResourceInput.readByte();
-                this.dY[n5] = (short)n4;
+                this.spriteOffsetTable[n5] = (short)n4;
                 for (int j = 0; j < n6; ++j) {
-                    this.gz[n4] = (byte)xorResourceInput.readByte();
+                    this.spriteData[n4] = (byte)xorResourceInput.readByte();
                     ++n4;
                 }
             }
@@ -926,9 +926,9 @@ implements Runnable {
     }
 
     byte[] m(int n) {
-        byte by = this.gz[n];
+        byte by = this.spriteData[n];
         byte[] byArray = new byte[by];
-        System.arraycopy(this.gz, n + 1, byArray, 0, by);
+        System.arraycopy(this.spriteData, n + 1, byArray, 0, by);
         return byArray;
     }
 
@@ -946,40 +946,40 @@ implements Runnable {
         byte by;
         int n12;
         int n13;
-        if (this.ci != n) {
-            this.gA = 1;
-            this.ci = n;
+        if (this.lastRenderedSpriteId != n) {
+            this.spriteJustChanged = 1;
+            this.lastRenderedSpriteId = n;
         }
-        if (this.gA != 0) {
-            this.m = false;
+        if (this.spriteJustChanged != 0) {
+            this.needsRepaint = false;
         }
-        if (this.ga) {
+        if (this.mapRedrawPending) {
             this.menuDirty = true;
             this.renderMap(graphics);
-            this.ga = false;
+            this.mapRedrawPending = false;
         }
-        short s = this.dY[n];
-        int n14 = 65536 * this.c(this.gz[s + 1]) + 256 * this.c(this.gz[s + 2]) + this.c(this.gz[s + 3]);
-        int n15 = 65536 * this.c(this.gz[s + 4]) + 256 * this.c(this.gz[s + 5]) + this.c(this.gz[s + 6]);
-        int n16 = 65536 * this.c(this.gz[s + 7]) + 256 * this.c(this.gz[s + 8]) + this.c(this.gz[s + 9]);
-        int n17 = 65536 * this.c(this.gz[s + 10]) + 256 * this.c(this.gz[s + 11]) + this.c(this.gz[s + 12]);
-        int n18 = this.c(this.gz[s + 13]);
-        int n19 = this.c(this.gz[s + 14]);
-        if (this.eZ < n19) {
-            this.eZ = n19;
+        short s = this.spriteOffsetTable[n];
+        int n14 = 65536 * this.c(this.spriteData[s + 1]) + 256 * this.c(this.spriteData[s + 2]) + this.c(this.spriteData[s + 3]);
+        int n15 = 65536 * this.c(this.spriteData[s + 4]) + 256 * this.c(this.spriteData[s + 5]) + this.c(this.spriteData[s + 6]);
+        int n16 = 65536 * this.c(this.spriteData[s + 7]) + 256 * this.c(this.spriteData[s + 8]) + this.c(this.spriteData[s + 9]);
+        int n17 = 65536 * this.c(this.spriteData[s + 10]) + 256 * this.c(this.spriteData[s + 11]) + this.c(this.spriteData[s + 12]);
+        int n18 = this.c(this.spriteData[s + 13]);
+        int n19 = this.c(this.spriteData[s + 14]);
+        if (this.dialogContentHeight < n19) {
+            this.dialogContentHeight = n19;
         } else {
-            n19 = this.eZ;
+            n19 = this.dialogContentHeight;
         }
         if (this.cursorOverUI || this.cursorAllowZoomOut) {
             n18 += 6;
         }
-        this.Q = this.gz[s + 15];
+        this.currentSpriteId = this.spriteData[s + 15];
         int n20 = (e - n18) / 2;
         int n21 = (hs - n19) / 2;
         int n22 = 6;
         int n23 = 6;
         int n24 = 6;
-        if (this.m) {
+        if (this.needsRepaint) {
             graphics.setColor(n14);
             graphics.fillRect(n20, n21, n18, n19);
             graphics.setColor(n16);
@@ -989,12 +989,12 @@ implements Runnable {
             graphics.drawRect(n20, n21, n18, 0);
         }
         this.pauseMenuOpen = false;
-        if ((this.gz[s] & 1) == 1) {
-            if (this.m && this.cursorDragY == -1) {
+        if ((this.spriteData[s] & 1) == 1) {
+            if (this.needsRepaint && this.cursorDragY == -1) {
                 graphics.setColor(n17);
                 graphics.fillRect(n20 + n18 - 10, n21 + 3, 7, 7);
             }
-            if (this.m) {
+            if (this.needsRepaint) {
                 graphics.setColor(n16);
                 graphics.drawRect(n20 + n18 - 10, n21 + 3, 7, 7);
                 graphics.drawLine(n20 + n18 - 8, n21 + 5, n20 + n18 - 5, n21 + 8);
@@ -1006,38 +1006,38 @@ implements Runnable {
             this.cursorDragY = -3;
         }
         int n25 = s + 16;
-        if ((this.gz[s] & 2) == 2) {
-            if (this.m) {
+        if ((this.spriteData[s] & 2) == 2) {
+            if (this.needsRepaint) {
                 graphics.setColor(n16);
             }
-            if (this.m) {
+            if (this.needsRepaint) {
                 graphics.drawRect(n20 + 2, n21 + 13, n18 - 4, 0);
             }
-            this.ft = n20;
-            this.bf = n21;
-            this.bl = n18;
-            this.r = n19;
-            if (this.m) {
+            this.clipX = n20;
+            this.clipY = n21;
+            this.clipWidth = n18;
+            this.clipHeight = n19;
+            if (this.needsRepaint) {
                 this.a(graphics, n20 + 3, n21 + 5, this.m(s + 16), true);
             }
-            n25 += 1 + this.gz[s + 16];
+            n25 += 1 + this.spriteData[s + 16];
             n22 = 19;
             n23 = 19;
             n24 = 19;
         }
         int n26 = n20 + 4;
-        this.ft = n20 + 1;
-        this.bf = n21 + n22 - 4;
-        this.bl = n18 - 2;
-        this.r = n19 - n22 + 3;
-        graphics.setClip(this.ft, this.bf, this.bl, this.r);
-        if (this.m && this.cursorOverUI) {
+        this.clipX = n20 + 1;
+        this.clipY = n21 + n22 - 4;
+        this.clipWidth = n18 - 2;
+        this.clipHeight = n19 - n22 + 3;
+        graphics.setClip(this.clipX, this.clipY, this.clipWidth, this.clipHeight);
+        if (this.needsRepaint && this.cursorOverUI) {
             graphics.setColor(n16);
             graphics.drawRect(n20 + n18 - 6, n21 + n24 - 1, 4, 0);
             graphics.drawRect(n20 + n18 - 5, n21 + n24 - 2, 2, 0);
             graphics.drawRect(n20 + n18 - 4, n21 + n24 - 3, 0, 0);
         }
-        if (this.m && this.cursorAllowZoomOut) {
+        if (this.needsRepaint && this.cursorAllowZoomOut) {
             graphics.setColor(n16);
             graphics.drawRect(n20 + n18 - 6, n21 + n19 - 5, 4, 0);
             graphics.drawRect(n20 + n18 - 5, n21 + n19 - 4, 2, 0);
@@ -1048,23 +1048,23 @@ implements Runnable {
         this.cursorOverUI = false;
         this.cursorAllowZoomOut = false;
         this.cursorDragX = -1;
-        int n27 = this.gz[n25++];
+        int n27 = this.spriteData[n25++];
         for (n13 = 0; n13 < n27; ++n13) {
             n12 = n21 + n22 - this.cursorScale;
-            if (((by = this.gz[n25++]) & 0x80) == 0) {
+            if (((by = this.spriteData[n25++]) & 0x80) == 0) {
                 int n28;
-                n11 = (by & 4) == 4 ? 0 : this.gz[n25++];
-                n10 = (by & 2) == 2 ? 0 : this.gz[n25++];
+                n11 = (by & 4) == 4 ? 0 : this.spriteData[n25++];
+                n10 = (by & 2) == 2 ? 0 : this.spriteData[n25++];
                 n9 = (by & 0x40) == 64 ? 1 : 0;
                 n8 = (by & 0x20) == 32 ? 1 : 0;
-                n7 = n9 != 0 ? this.gz[n25++] : 0;
-                n6 = n8 != 0 ? this.gz[n25++] : 0;
-                n5 = (by & 0x10) == 16 ? this.gz[n25++] : 0;
-                n4 = (by & 0x10) == 16 ? this.gz[n25++] : 0;
-                n3 = (by & 0x10) == 16 ? this.gz[n25++] : 0;
-                n2 = (by & 0x10) == 16 ? this.gz[n25++] : 0;
-                byte by2 = (by & 0x10) == 16 ? this.gz[n25++] : (byte)0;
-                byte[] byArray = n8 != 0 ? this.q(this.Q, n6) : this.m(n25);
+                n7 = n9 != 0 ? this.spriteData[n25++] : 0;
+                n6 = n8 != 0 ? this.spriteData[n25++] : 0;
+                n5 = (by & 0x10) == 16 ? this.spriteData[n25++] : 0;
+                n4 = (by & 0x10) == 16 ? this.spriteData[n25++] : 0;
+                n3 = (by & 0x10) == 16 ? this.spriteData[n25++] : 0;
+                n2 = (by & 0x10) == 16 ? this.spriteData[n25++] : 0;
+                byte by2 = (by & 0x10) == 16 ? this.spriteData[n25++] : (byte)0;
+                byte[] byArray = n8 != 0 ? this.q(this.currentSpriteId, n6) : this.m(n25);
                 int n29 = 0;
                 if (byArray == null) continue;
                 for (n28 = 0; n28 < byArray.length; ++n28) {
@@ -1072,27 +1072,27 @@ implements Runnable {
                     ++n29;
                 }
                 if (n8 == 0) {
-                    n25 = n25 + this.gz[n25] + 1;
+                    n25 = n25 + this.spriteData[n25] + 1;
                 }
-                if (n12 + n10 + 6 + by2 >= this.bf + this.r) {
-                    n28 = n19 + (n12 + n10 + 6 + by2 + n3 + 3 - (this.r + this.bf));
-                    if (this.eZ < n28) {
-                        this.eZ = n28;
+                if (n12 + n10 + 6 + by2 >= this.clipY + this.clipHeight) {
+                    n28 = n19 + (n12 + n10 + 6 + by2 + n3 + 3 - (this.clipHeight + this.clipY));
+                    if (this.dialogContentHeight < n28) {
+                        this.dialogContentHeight = n28;
                     }
-                    if (this.eZ > hs - 20) {
-                        this.eZ = hs - 20;
+                    if (this.dialogContentHeight > hs - 20) {
+                        this.dialogContentHeight = hs - 20;
                     }
                 }
-                if (this.m && n12 + n10 + 6 + by2 >= this.bf + this.r) {
+                if (this.needsRepaint && n12 + n10 + 6 + by2 >= this.clipY + this.clipHeight) {
                     this.cursorAllowZoomOut = true;
                 }
-                if (n9 != 0 && (n9 == 0 || !this.e(this.Q, n7))) continue;
-                if (n12 + n10 - n3 - 3 <= this.bf + this.r && n12 + n10 + 8 + by2 >= this.bf) {
+                if (n9 != 0 && (n9 == 0 || !this.e(this.currentSpriteId, n7))) continue;
+                if (n12 + n10 - n3 - 3 <= this.clipY + this.clipHeight && n12 + n10 + 8 + by2 >= this.clipY) {
                     if ((by & 0x10) == 16) {
                         if (this.cursorDragY == -3) {
                             this.cursorDragY = n13;
                         }
-                        if (n12 + n10 + 8 + by2 <= this.bf + this.r && n12 + n10 - 3 - n3 >= this.bf) {
+                        if (n12 + n10 + 8 + by2 <= this.clipY + this.clipHeight && n12 + n10 - 3 - n3 >= this.clipY) {
                             if (n13 < this.cursorDragY) {
                                 this.cursorSelectY = n13;
                             }
@@ -1100,12 +1100,12 @@ implements Runnable {
                                 this.cursorSelectX = n13;
                             }
                         }
-                        if (this.m && this.cursorDragY == n13) {
+                        if (this.needsRepaint && this.cursorDragY == n13) {
                             graphics.setColor(n17);
                             graphics.fillRect(n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
                             this.cursorDragX = n5;
                         }
-                        if (this.m && (by & 8) == 8) {
+                        if (this.needsRepaint && (by & 8) == 8) {
                             graphics.setColor(n16);
                             graphics.drawRect(n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
                             graphics.setColor(n15);
@@ -1113,7 +1113,7 @@ implements Runnable {
                             graphics.drawRect(n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 0);
                         }
                     }
-                    if (this.m && this.m) {
+                    if (this.needsRepaint && this.needsRepaint) {
                         this.a(graphics, n26 + n11, n12 + n10, byArray, true);
                     }
                 }
@@ -1121,42 +1121,42 @@ implements Runnable {
                 continue;
             }
             n11 = (by & 0x40) == 64 ? 1 : 0;
-            n10 = this.gz[n25++];
-            n9 = (by & 0x20) == 32 ? 0 : this.gz[n25++];
-            n8 = (by & 0x10) == 16 ? 0 : this.gz[n25++];
-            n7 = n11 != 0 ? this.gz[n25++] : 0;
-            Image image = this.u(this.Q, n10);
+            n10 = this.spriteData[n25++];
+            n9 = (by & 0x20) == 32 ? 0 : this.spriteData[n25++];
+            n8 = (by & 0x10) == 16 ? 0 : this.spriteData[n25++];
+            n7 = n11 != 0 ? this.spriteData[n25++] : 0;
+            Image image = this.u(this.currentSpriteId, n10);
             if (image == null) continue;
             n5 = image.getWidth();
             n4 = image.getHeight();
-            if (n11 != 0 && (n11 == 0 || !this.e(this.Q, n7))) continue;
-            if (this.m && n12 + n8 <= this.bf + this.r && n12 + n8 + n4 >= this.bf) {
+            if (n11 != 0 && (n11 == 0 || !this.e(this.currentSpriteId, n7))) continue;
+            if (this.needsRepaint && n12 + n8 <= this.clipY + this.clipHeight && n12 + n8 + n4 >= this.clipY) {
                 graphics.drawImage(image, n26 + n9, n12 + n8, 20);
             }
-            if (this.m && n12 + n8 + n4 >= this.bf + this.r) {
+            if (this.needsRepaint && n12 + n8 + n4 >= this.clipY + this.clipHeight) {
                 this.cursorAllowZoomOut = true;
             }
             n22 += n4 + n8;
         }
-        n27 = this.gz[n25++];
+        n27 = this.spriteData[n25++];
         for (n13 = 0; n13 < n27; ++n13) {
             n12 = n21 + n23 - this.cursorScale;
-            by = this.gz[n25++];
+            by = this.spriteData[n25++];
             n11 = by & 7;
-            n10 = 65536 * this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]) + this.c(this.gz[n25++]);
-            n9 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
-            n8 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
-            n7 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
-            n6 = this.c(this.gz[n25++]) + 256 * this.c(this.gz[n25++]);
-            n9 = (short)((by & 8) == 8 ? this.neighboursMask(this.Q, n9) : n9);
-            n8 = (short)((by & 0x10) == 16 ? this.neighboursMask(this.Q, n8) : n8);
-            n7 = (short)((by & 0x20) == 32 ? this.neighboursMask(this.Q, n7) : n7);
-            n6 = (short)((by & 0x40) == 64 ? this.neighboursMask(this.Q, n6) : n6);
+            n10 = 65536 * this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]) + this.c(this.spriteData[n25++]);
+            n9 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
+            n8 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
+            n7 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
+            n6 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
+            n9 = (short)((by & 8) == 8 ? this.neighboursMask(this.currentSpriteId, n9) : n9);
+            n8 = (short)((by & 0x10) == 16 ? this.neighboursMask(this.currentSpriteId, n8) : n8);
+            n7 = (short)((by & 0x20) == 32 ? this.neighboursMask(this.currentSpriteId, n7) : n7);
+            n6 = (short)((by & 0x40) == 64 ? this.neighboursMask(this.currentSpriteId, n6) : n6);
             n5 = (by & 0x80) == 128 ? 1 : 0;
-            n4 = n5 != 0 ? this.gz[n25++] : 0;
+            n4 = n5 != 0 ? this.spriteData[n25++] : 0;
             n3 = n12 + n8;
             n2 = n3 + n6;
-            if (!this.m || n5 != 0 && (n5 == 0 || !this.e(this.Q, n4))) continue;
+            if (!this.needsRepaint || n5 != 0 && (n5 == 0 || !this.e(this.currentSpriteId, n4))) continue;
             switch (n11) {
                 case 0: {
                     graphics.setColor(n10);
@@ -1185,10 +1185,10 @@ implements Runnable {
                     graphics.fillArc(n26 + n9, n12 + n8, n7, n6, 0, 360);
                 }
             }
-            if (!this.m || n2 < this.bf + this.r) continue;
+            if (!this.needsRepaint || n2 < this.clipY + this.clipHeight) continue;
             this.cursorAllowZoomOut = true;
         }
-        if (this.m) {
+        if (this.needsRepaint) {
             if (this.cursorScale == 0 && this.cursorSelectY == -2) {
                 this.cursorSelectY = -1;
             }
@@ -1196,9 +1196,9 @@ implements Runnable {
                 this.cursorOverUI = true;
             }
         }
-        this.m = true;
-        if (this.gA > 0) {
-            --this.gA;
+        this.needsRepaint = true;
+        if (this.spriteJustChanged > 0) {
+            --this.spriteJustChanged;
         }
     }
 
@@ -1208,7 +1208,7 @@ implements Runnable {
         for (int i = 0; i < byArray.length; ++i) {
             byte by = byArray[i];
             if (bl) {
-                graphics.setClip(this.ft, this.bf, this.bl, this.r);
+                graphics.setClip(this.clipX, this.clipY, this.clipWidth, this.clipHeight);
                 graphics.clipRect(n3, n2 - 4, 5, 12);
             } else {
                 graphics.setClip(n3, n2 - 4, 5, 12);
@@ -1256,7 +1256,7 @@ implements Runnable {
             n3 += 6;
         }
         if (bl) {
-            graphics.setClip(this.ft, this.bf, this.bl, this.r);
+            graphics.setClip(this.clipX, this.clipY, this.clipWidth, this.clipHeight);
         } else {
             graphics.setClip(0, 0, e, hs);
         }
@@ -1286,7 +1286,7 @@ implements Runnable {
                 break;
             }
             case 3: {
-                this.v(this.Q, this.cursorDragX);
+                this.v(this.currentSpriteId, this.cursorDragX);
             }
         }
     }
@@ -4652,7 +4652,7 @@ implements Runnable {
                         this.menuDirty = true;
                     }
                 }
-                this.ga = true;
+                this.mapRedrawPending = true;
                 break;
             }
             case 31: {
@@ -7144,7 +7144,7 @@ implements Runnable {
         this.totalRevenue = 0;
         this.eX = 0;
         this.eJ = 0;
-        this.ga = true;
+        this.mapRedrawPending = true;
         this.y = true;
         this.dS = true;
         if (this.monthOfYear == 13) {
@@ -8468,10 +8468,10 @@ implements Runnable {
         graphics.setColor(255, 130, 0);
         graphics.drawRect(n, n2 + 11, n3 + 5, 0);
         graphics.drawRect(n + n3 + 5, n2, 0, 11);
-        this.ft = 0;
-        this.bf = 15;
-        this.bl = e;
-        this.r = eN;
+        this.clipX = 0;
+        this.clipY = 15;
+        this.clipWidth = e;
+        this.clipHeight = eN;
         this.a(graphics, n + 4, n2 + 3, byArray3, true);
     }
 

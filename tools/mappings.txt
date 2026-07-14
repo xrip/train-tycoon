@@ -356,3 +356,25 @@ field  a fq   discountApplied        # boolean; true when player picks the disco
 # pendingTransitionCode is set by build-menu case bodies (22..26) and consumed at
 # the end of the build-menu render loop: if > -1, transitionCode := gH and setState(20).
 field  a gH   pendingTransitionCode  # int; -1 = none pending, else next transitionCode
+
+# ---- Batch 12: packed-sprite renderer state ----
+# a(Graphics, int) decodes a packed sprite frame from gz/dY.
+# gz is a single big byte[] loaded by loadSprites(string); each sprite has
+# a 1-byte length + data block, optionally with per-line flag byte (gz[s] & 1/2).
+field  a gz   spriteData            # byte[]; packed sprite frames blob
+field  a dY   spriteOffsetTable     # short[]; per-sprite offset into spriteData
+# Each render-call tracks the current/last sprite id and a 1-frame cooldown.
+field  a Q    currentSpriteId       # int; sprite being rendered right now
+field  a ci   lastRenderedSpriteId  # int; sprite id of previous render call
+field  a gA   spriteJustChanged     # int; >0 when ci != currentSpriteId (suppresses repaint)
+# Repaint gate: set false when sprite changes, gates per-line draw calls.
+field  a m    needsRepaint          # boolean; if true, draw this frame's elements
+# Outer map-redraw flag: forces renderMap() before drawing sprite on top.
+field  a ga   mapRedrawPending      # boolean; set on month-rollover and menu close
+# Clipping rect for the current sprite render (x, y, width, height).
+field  a ft   clipX                 # int; setClip x
+field  a bf   clipY                 # int; setClip y
+field  a bl   clipWidth             # int; setClip width
+field  a r    clipHeight            # int; setClip height
+# Running content-height for the current dialog; capped at hs - 20.
+field  a eZ   dialogContentHeight   # int; max y used by current dialog's rendered elements
