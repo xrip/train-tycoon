@@ -78,3 +78,86 @@ field  a ev   inputPending       # boolean; drives extra update() passes
 field  a aZ   simSpeed           # int; sim steps per frame in play state
 method a m ()V   update          # per-frame update/step
 method a j (I)V  handleKey       # dispatch a key code
+
+# ---- Batch 4: state machine + per-frame simulation (update()) ----
+# Loading scenario (case 25). ct is the loading step counter (1..4).
+field  a ct   loadStep           # int; scenario load advance
+field  a gD   loadingStartTime   # long; 5000ms per-step timeout
+field  a gd   loadingTimer       # int; ++ per frame in case 0..2
+field  a dZ   loadingTimeout     # boolean; true on 5s timeout
+# Per-frame simulation (case 30) timing
+field  a em   tickStart          # long; currentTimeMillis() at top of case 30
+field  a ah   tickEnd            # long; mirror of em at bottom of case 30
+# Economy / year / month / era
+field  a bj   year               # int; starts 1950 (case 25 init), +=1 on eQ==13
+field  a eQ   monthOfYear        # int; cycles 1..13 (13 -> year++, ez milestones)
+field  a bB   dayOfMonth         # int; cycles 1..32 (drives money/tick events)
+field  a ez   era                # int; progresses 2..5 on (year, month) milestones
+field  a fp   flagsA             # boolean; bit 2 of n26 record (used as bool flag)
+field  a dy   flagsB             # boolean; bit 3 of n26 record
+# Frame counter helpers (count up to 2 or 3, phase index shifts when wrapping)
+field  a fy   timerA1            # int; 0..1 fast
+field  a fh   timerA2            # int; 0..2 fast (resets fy timer family)
+field  a gB   timerB1            # int; 0..1
+field  a gb   timerB2            # int; 0..2
+field  a ei   timerC1            # int; 0..2
+field  a bc   timerC2            # int; 0..2
+field  a eE   woodAgeTimer       # int; counts to 150 for tile wood ageing
+field  a dj   phaseTimer         # int; 0..9
+field  a eG   difficultyA        # int; 0/1 (affects aD and faction savings)
+field  a b    difficultyB        # int; 0/1 (divides money/cost per/train speed vars)
+field  a hy   difficultyC        # int; 0/1 (divides per-train acceleration vars)
+# Transition signals (set by update() before t(state))
+field  a cq   transitionCode     # int; 1=ready, 7=lost, 13=era advance, 14=scenario
+field  a d    ready              # boolean; set true after assets load
+field  a cn   screenParam        # int; 3 used with cq=14
+# Tile change queue (ha[50][3]) and tile-population bookkeeping
+field  a ha   tileQueue          # byte[50][3]; idx[0]=ticksLeft, idx[1..2]=coords
+field  a p    trainEnergyOrCount # byte[500]; per-entity counter (decrement in case 30)
+field  a aW   costPower          # long cost component
+field  a hi   costStruct         # long cost component
+field  a c    costOverhead       # int cost component
+field  a hp   costMaintenance   # int cost component
+field  a fK   costCrew           # int cost component
+field  a aG   gWagonCost        # long cost component (grouped payments)
+field  a eI   gWagonCost2        # long cost component
+field  a au   gWagonCost3        # long cost component
+field  a bZ   gWagonCost4        # long cost component
+field  a fC   gWagonCost5        # long cost component
+field  a ai   gWagonCost6        # long cost component
+field  a fH   costGroupC1        # int cost component
+field  a F    costGroupC2        # int cost component
+field  a eP   costGroupC3        # int cost component
+field  a fB   costGroupC4        # int cost component
+field  a cw   baseTrainSpeed     # int; base train speed
+field  a eH   accel1             # int; acceleration component
+field  a cz   brake1             # int; braking component
+field  a bO   baseTrainSpeed2    # int; secondary speed component
+field  a gT   accel2             # int; secondary acceleration component
+field  a fb   moneyBaseA         # long; money initialization (974)
+field  a ba   moneyBaseB         # long; money initialization (974)
+field  a gf   weightAccel        # int; /2 on hy==0
+field  a fo   weightAccel2       # int; /2 on hy==0
+field  a ew   weightAccel3       # int; /2 on hy==0
+field  a aB   weightAccel4       # int; /2 on hy==0
+field  a aZ   simSpeed           # repeated; annotated for clarity above
+# Music-start flag
+field  a gR   musicAutoStart     # boolean; played immediately when loaded (J==0)
+# Backbuffer / offscreen rendering (case 35)
+field  a fG   backbuffer         # javax.microedition.lcdui.Image (size = mapW+mapH)
+field  a C    backbufferG        # javax.microedition.lcdui.Graphics, for fG
+# Methods discovered in update() / dispatcher chain (may revisit names)
+method a t (I)V                  setState         # transition(t(gameState))
+method a F (I)V                  loadState25Setup # init after loading step advance
+method a d ()V                   maybeAITick      # called inside fp-driven aux loop
+method a e (Z)V                  tickInputOrAi    # called every other sim frame
+method a R ()V                   newYearNotify    # reset bB/R/P/ag/ad when eQ advances
+method a P ()V                   dayResetP        # part of newYearNotify family
+method a ag ()V                  dayResetAg       # part of newYearNotify family
+method a ad ()V                  dayResetAd       # part of newYearNotify family
+method a L ()V                   everyTenTick     # called when bB%10==0
+method a q ()V                   everyTwoTick     # called when bB%2==0
+method a z ()V                   everyTwoTickZ    # called when bB%2==0
+method a v ()V                   aiVote           # returns bool via single-bit context
+method a w ()V                   revenueOrYear    # called when eQ==13 (year close)
+method a e ()V                   postRevenueReset # called right after w()
