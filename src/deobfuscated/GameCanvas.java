@@ -274,12 +274,12 @@ implements Runnable {
     byte[][] aH = new byte[][]{{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}};
     int dI = 5;
     short[][] cs = new short[][]{{130, 131, 132, 133, 134, 135, 136, 137}, {140, 141, 142, 143, 144, 145, 146, 147}, {160, 161, 162, 163, 160, 161, 162, 163}, {165, 166, 167, 168, 165, 166, 167, 168}, {170, 171, 172, 173, 170, 171, 172, 173}, {175, 176, 177, 178, 175, 176, 177, 178}, {180, 181, 182, 183, 180, 181, 182, 183}, {185, 186, 187, 188, 185, 186, 187, 188}};
-    byte[] dv = null;
-    int dl = 0;
-    int fc = 0;
-    int fL = 0;
-    int eK = 0;
-    boolean dd = false;
+    byte[] saveBuffer = null;
+    int saveReadOffset = 0;
+    int saveSlot = 0;
+    int savePendingMode = 0;
+    int snapshotSize = 0;
+    boolean snapshotLoaded = false;
     int bm = 0;
     int fw = 0;
     int[] trainRevenue = new int[500];
@@ -6515,12 +6515,12 @@ implements Runnable {
     }
 
     void loadGame(int n, int n2) {
-        this.fc = n;
-        this.fL = n2;
-        this.dl = 0;
-        this.eK = 0;
-        this.dd = false;
-        if (this.fL == 1) {
+        this.saveSlot = n;
+        this.savePendingMode = n2;
+        this.saveReadOffset = 0;
+        this.snapshotSize = 0;
+        this.snapshotLoaded = false;
+        if (this.savePendingMode == 1) {
             try {
                 RecordStore recordStore = RecordStore.openRecordStore((String)"TTStore", (boolean)true);
                 RecordEnumeration recordEnumeration = recordStore.enumerateRecords(null, null, false);
@@ -6528,51 +6528,51 @@ implements Runnable {
                     int n3 = recordEnumeration.nextRecordId();
                     byte by = recordStore.getRecord(n3)[0];
                     if (by != n) continue;
-                    this.dv = new byte[recordStore.getRecordSize(n3) - 1];
-                    System.arraycopy(recordStore.getRecord(n3), 1, this.dv, 0, recordStore.getRecordSize(n3) - 1);
-                    this.eK = recordStore.getRecordSize(n3) - 1;
-                    this.dd = true;
+                    this.saveBuffer = new byte[recordStore.getRecordSize(n3) - 1];
+                    System.arraycopy(recordStore.getRecord(n3), 1, this.saveBuffer, 0, recordStore.getRecordSize(n3) - 1);
+                    this.snapshotSize = recordStore.getRecordSize(n3) - 1;
+                    this.snapshotLoaded = true;
                 }
                 recordEnumeration.destroy();
                 recordStore.closeRecordStore();
             }
             catch (Exception exception) {}
         } else {
-            this.dd = true;
+            this.snapshotLoaded = true;
         }
     }
 
     void k(int n) {
-        if (this.eK > 0) {
-            byte[] byArray = new byte[this.eK + n];
-            System.arraycopy(this.dv, 0, byArray, 0, this.eK);
-            this.eK += n;
-            this.dv = new byte[this.eK];
-            System.arraycopy(byArray, 0, this.dv, 0, this.eK);
+        if (this.snapshotSize > 0) {
+            byte[] byArray = new byte[this.snapshotSize + n];
+            System.arraycopy(this.saveBuffer, 0, byArray, 0, this.snapshotSize);
+            this.snapshotSize += n;
+            this.saveBuffer = new byte[this.snapshotSize];
+            System.arraycopy(byArray, 0, this.saveBuffer, 0, this.snapshotSize);
         } else {
-            this.dv = new byte[n];
-            this.eK += n;
+            this.saveBuffer = new byte[n];
+            this.snapshotSize += n;
         }
     }
 
     private int s() {
-        return this.dv[this.dl] >= 0 ? this.dv[this.dl++] : 256 + this.dv[this.dl++];
+        return this.saveBuffer[this.saveReadOffset] >= 0 ? this.saveBuffer[this.saveReadOffset++] : 256 + this.saveBuffer[this.saveReadOffset++];
     }
 
     public void saveGame() {
-        if (this.fL == 0) {
+        if (this.savePendingMode == 0) {
             try {
                 RecordStore recordStore = RecordStore.openRecordStore((String)"TTStore", (boolean)true);
                 RecordEnumeration recordEnumeration = recordStore.enumerateRecords(null, null, false);
                 for (int i = 0; i < recordEnumeration.numRecords(); ++i) {
                     int n = recordEnumeration.nextRecordId();
                     byte by = recordStore.getRecord(n)[0];
-                    if (by != this.fc) continue;
+                    if (by != this.saveSlot) continue;
                     recordStore.deleteRecord(n);
                 }
-                byte[] byArray = new byte[this.eK + 1];
-                byArray[0] = (byte)this.fc;
-                System.arraycopy(this.dv, 0, byArray, 1, this.eK);
+                byte[] byArray = new byte[this.snapshotSize + 1];
+                byArray[0] = (byte)this.saveSlot;
+                System.arraycopy(this.saveBuffer, 0, byArray, 1, this.snapshotSize);
                 recordStore.addRecord(byArray, 0, byArray.length);
                 recordEnumeration.destroy();
                 recordStore.closeRecordStore();
@@ -6599,30 +6599,30 @@ implements Runnable {
 
     void c(String string) {
         long l = 0L;
-        for (int i = 0; i < this.eK; ++i) {
-            l += (long)this.c(this.dv[i]);
+        for (int i = 0; i < this.snapshotSize; ++i) {
+            l += (long)this.c(this.saveBuffer[i]);
         }
     }
 
     void Y() {
         this.c("Compress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte by = this.dv[0];
+        byte by = this.saveBuffer[0];
         int n = 1;
-        for (int i = 1; i < this.eK; ++i) {
-            if (by != this.dv[i] || n == 254) {
+        for (int i = 1; i < this.snapshotSize; ++i) {
+            if (by != this.saveBuffer[i] || n == 254) {
                 this.a(byteArrayOutputStream, (int)by, n);
-                by = this.dv[i];
+                by = this.saveBuffer[i];
                 n = 1;
                 continue;
             }
             ++n;
         }
         this.a(byteArrayOutputStream, (int)by, n);
-        this.bm += this.eK;
-        this.dv = byteArrayOutputStream.toByteArray();
-        this.eK = this.dv.length;
-        this.fw += this.eK;
+        this.bm += this.snapshotSize;
+        this.saveBuffer = byteArrayOutputStream.toByteArray();
+        this.snapshotSize = this.saveBuffer.length;
+        this.fw += this.snapshotSize;
         try {
             byteArrayOutputStream.close();
         }
@@ -6635,20 +6635,20 @@ implements Runnable {
     void j() {
         this.c("Decompress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        for (int i = 0; i < this.eK; ++i) {
-            if (this.dv[i] == -1) {
-                for (int j = 0; j < this.c(this.dv[i + 1]); ++j) {
-                    byteArrayOutputStream.write(this.dv[i + 2]);
+        for (int i = 0; i < this.snapshotSize; ++i) {
+            if (this.saveBuffer[i] == -1) {
+                for (int j = 0; j < this.c(this.saveBuffer[i + 1]); ++j) {
+                    byteArrayOutputStream.write(this.saveBuffer[i + 2]);
                 }
                 i += 2;
                 continue;
             }
-            byteArrayOutputStream.write(this.dv[i]);
+            byteArrayOutputStream.write(this.saveBuffer[i]);
         }
-        this.fw += this.eK;
-        this.dv = byteArrayOutputStream.toByteArray();
-        this.eK = this.dv.length;
-        this.bm += this.eK;
+        this.fw += this.snapshotSize;
+        this.saveBuffer = byteArrayOutputStream.toByteArray();
+        this.snapshotSize = this.saveBuffer.length;
+        this.bm += this.snapshotSize;
         try {
             byteArrayOutputStream.close();
         }
@@ -6663,31 +6663,31 @@ implements Runnable {
     }
 
     byte b(byte by) {
-        if (this.fL == 2) {
+        if (this.savePendingMode == 2) {
             return 0;
         }
         byte by2 = by;
-        if (this.fL == 0) {
+        if (this.savePendingMode == 0) {
             this.k(1);
-            this.dv[this.dl++] = by;
-        } else if (this.dd) {
-            by2 = this.dv[this.dl++];
+            this.saveBuffer[this.saveReadOffset++] = by;
+        } else if (this.snapshotLoaded) {
+            by2 = this.saveBuffer[this.saveReadOffset++];
         }
         return by2;
     }
 
     int s(int n) {
-        if (this.fL == 2) {
+        if (this.savePendingMode == 2) {
             return 0;
         }
         int n2 = n;
-        if (this.fL == 0) {
+        if (this.savePendingMode == 0) {
             this.k(4);
-            this.dv[this.dl++] = (byte)(n & 0xFF);
-            this.dv[this.dl++] = (byte)(n >> 8 & 0xFF);
-            this.dv[this.dl++] = (byte)(n >> 16 & 0xFF);
-            this.dv[this.dl++] = (byte)(n >> 24 & 0xFF);
-        } else if (this.dd) {
+            this.saveBuffer[this.saveReadOffset++] = (byte)(n & 0xFF);
+            this.saveBuffer[this.saveReadOffset++] = (byte)(n >> 8 & 0xFF);
+            this.saveBuffer[this.saveReadOffset++] = (byte)(n >> 16 & 0xFF);
+            this.saveBuffer[this.saveReadOffset++] = (byte)(n >> 24 & 0xFF);
+        } else if (this.snapshotLoaded) {
             n2 = this.s() + 256 * this.s() + 65536 * this.s() + 0x1000000 * this.s();
         }
         return n2;
@@ -6706,17 +6706,17 @@ implements Runnable {
     }
 
     void a(byte[] byArray) {
-        if (this.fL == 2) {
+        if (this.savePendingMode == 2) {
             for (int i = 0; i < byArray.length; ++i) {
                 byArray[i] = 0;
             }
-        } else if (this.fL == 0) {
+        } else if (this.savePendingMode == 0) {
             this.k(byArray.length);
-            System.arraycopy(byArray, 0, this.dv, this.dl, byArray.length);
-            this.dl += byArray.length;
-        } else if (this.dd) {
-            System.arraycopy(this.dv, this.dl, byArray, 0, byArray.length);
-            this.dl += byArray.length;
+            System.arraycopy(byArray, 0, this.saveBuffer, this.saveReadOffset, byArray.length);
+            this.saveReadOffset += byArray.length;
+        } else if (this.snapshotLoaded) {
+            System.arraycopy(this.saveBuffer, this.saveReadOffset, byArray, 0, byArray.length);
+            this.saveReadOffset += byArray.length;
         }
     }
 
@@ -6724,21 +6724,21 @@ implements Runnable {
         block4: {
             block5: {
                 block3: {
-                    if (this.fL != 2) break block3;
+                    if (this.savePendingMode != 2) break block3;
                     for (int i = 0; i < sArray.length; ++i) {
                         sArray[i] = 0;
                     }
                     break block4;
                 }
-                if (this.fL != 0) break block5;
+                if (this.savePendingMode != 0) break block5;
                 this.k(2 * sArray.length);
                 for (int i = 0; i < sArray.length; ++i) {
-                    this.dv[this.dl++] = (byte)(sArray[i] & 0xFF);
-                    this.dv[this.dl++] = (byte)(sArray[i] >> 8 & 0xFF);
+                    this.saveBuffer[this.saveReadOffset++] = (byte)(sArray[i] & 0xFF);
+                    this.saveBuffer[this.saveReadOffset++] = (byte)(sArray[i] >> 8 & 0xFF);
                 }
                 break block4;
             }
-            if (!this.dd) break block4;
+            if (!this.snapshotLoaded) break block4;
             for (int i = 0; i < sArray.length; ++i) {
                 sArray[i] = (short)(this.s() + 256 * this.s());
             }
@@ -6749,23 +6749,23 @@ implements Runnable {
         block4: {
             block5: {
                 block3: {
-                    if (this.fL != 2) break block3;
+                    if (this.savePendingMode != 2) break block3;
                     for (int i = 0; i < nArray.length; ++i) {
                         nArray[i] = 0;
                     }
                     break block4;
                 }
-                if (this.fL != 0) break block5;
+                if (this.savePendingMode != 0) break block5;
                 this.k(4 * nArray.length);
                 for (int i = 0; i < nArray.length; ++i) {
-                    this.dv[this.dl++] = (byte)(nArray[i] & 0xFF);
-                    this.dv[this.dl++] = (byte)(nArray[i] >> 8 & 0xFF);
-                    this.dv[this.dl++] = (byte)(nArray[i] >> 16 & 0xFF);
-                    this.dv[this.dl++] = (byte)(nArray[i] >> 24 & 0xFF);
+                    this.saveBuffer[this.saveReadOffset++] = (byte)(nArray[i] & 0xFF);
+                    this.saveBuffer[this.saveReadOffset++] = (byte)(nArray[i] >> 8 & 0xFF);
+                    this.saveBuffer[this.saveReadOffset++] = (byte)(nArray[i] >> 16 & 0xFF);
+                    this.saveBuffer[this.saveReadOffset++] = (byte)(nArray[i] >> 24 & 0xFF);
                 }
                 break block4;
             }
-            if (!this.dd) break block4;
+            if (!this.snapshotLoaded) break block4;
             for (int i = 0; i < nArray.length; ++i) {
                 nArray[i] = this.s() + 256 * this.s() + 65536 * this.s() + 0x1000000 * this.s();
             }
@@ -6780,17 +6780,17 @@ implements Runnable {
             this.loadGame(0, 1);
         }
         if (n == 2) {
-            this.fL = 2;
+            this.savePendingMode = 2;
         }
         if (n == 4) {
-            this.eK = 0;
-            this.dv = null;
-            this.fL = 0;
+            this.snapshotSize = 0;
+            this.saveBuffer = null;
+            this.savePendingMode = 0;
         }
         if (n == 5) {
-            this.dl = 0;
-            this.fL = 1;
-            this.dd = true;
+            this.saveReadOffset = 0;
+            this.savePendingMode = 1;
+            this.snapshotLoaded = true;
         }
         if (n == 1) {
             this.j();
@@ -7013,7 +7013,7 @@ implements Runnable {
 
     boolean X() {
         this.loadGame(0, 1);
-        return this.dd;
+        return this.snapshotLoaded;
     }
 
     void u() {

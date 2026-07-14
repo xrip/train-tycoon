@@ -229,3 +229,14 @@ method a ah ()V                  openBuildMenu        # entry point from key 53
 method a a (Z)V                  smoothHeightMap      # a(boolean): 4-corner heightmap -> tileMap
 method a c (Z)V                  cycleBuildMenuIndex  # a(boolean) overload #2: scroll select
 method a a (B)V                  handleMenuAction     # a(byte): the 1/2/3 actions in handleKey case 20
+
+# ---- Batch 7: save / load region (saveGame + loadGame) ----
+# Save format: byte[fL?save-mode + 1] in "TTStore" record store.
+#   byte 0 = fc (slot id 0..5), bytes 1.. = snapshot (length eK).
+# fL is the load-source flag (0=save path, 1=read path).
+field  a fc   saveSlot             # int; 0..5, written as first record byte
+field  a fL   savePendingMode      # int; 0=save+write, 1=read, guards saveGame()
+field  a eK   snapshotSize         # int; byte length of the save snapshot
+field  a dv   saveBuffer           # byte[]; the snapshot (re-used across save/load)
+field  a dl   saveReadOffset       # int; pointer used while applying snapshot to state
+field  a dd   snapshotLoaded       # boolean; true after loadGame has filled dv
