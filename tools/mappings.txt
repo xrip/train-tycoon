@@ -334,3 +334,14 @@ field  a cV   cityPopulation     # byte[48]; clamped 10..90
 field  a gN   zonePopulation     # short[64]; per-zone populated-tile count
 # Methods: tight re-name with direct body read
 method a ab ()V                    archiveOrRecall   # body from newYearNotify call
+
+# ---- Batch 10: build-menu data tables + scenario modifier flags ----
+# Menu-row tables (built by v(int)): 6 rows per menu; cP[] gates availability
+field  a aa   menuItemCode         # byte[6][]; menu-icon code per row
+field  a gI   menuTextIndex        # byte[6][]; text/label index per row
+field  a R    menuTransitionCode   # byte[6][]; transitionCode per row (post-select)
+field  a cP   menuRowEnabled       # boolean[6][]; row availability gate per mode
+# Scenario modifier flags (read by v(int) and case 25 in update())
+field  a aX   scenarioBits         # byte; bit 1..3 each enables a menu row
+field  a eF   scenarioStep         # int; the active scenario; >=2 unlocks extra menu items
+field  a dJ   difficultySlot       # byte; 0/1 in case 25 (J<=1)

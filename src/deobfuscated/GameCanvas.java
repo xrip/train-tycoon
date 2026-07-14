@@ -175,14 +175,14 @@ implements Runnable {
     int gj = 0;
     byte[][] buildMenuItems;
     byte[][] buildMenuResultCodes;
-    byte[][] aa;
-    byte[][] gI;
-    byte[][] R;
-    boolean[][] cP;
+    byte[][] menuItemCode;
+    byte[][] menuTextIndex;
+    byte[][] menuTransitionCode;
+    boolean[][] menuRowEnabled;
     int eY;
     int fN;
     int cf;
-    byte aX;
+    byte scenarioBits;
     int confirmToggle = 0;
     int[] K = new int[3];
     byte[] fJ = new byte[3];
@@ -206,7 +206,7 @@ implements Runnable {
     int gv = 0;
     byte ae = 0;
     byte difficultyA = 0;
-    byte dJ = 0;
+    byte difficultySlot = 0;
     byte difficultyB = 0;
     byte difficultyC = 0;
     byte cZ = 0;
@@ -431,7 +431,7 @@ implements Runnable {
     int bI = 0;
     int eC = 2;
     int aM = 1;
-    int eF = 0;
+    int scenarioStep = 0;
     int ao = 0;
     Random rng = new Random(System.currentTimeMillis());
     Image backbuffer = Image.createImage((int)e, (int)hs);
@@ -543,7 +543,7 @@ implements Runnable {
                     if (!this.pauseFlag) {
                         this.update();
                     }
-                    if (!this.cP[this.buildMenuMode][this.buildMenuIndex]) continue;
+                    if (!this.menuRowEnabled[this.buildMenuMode][this.buildMenuIndex]) continue;
                     this.viewportZoomKey();
                 }
             } else {
@@ -2259,7 +2259,7 @@ implements Runnable {
 
     void c(Graphics graphics) {
         byte by;
-        if (!this.blockBuildMenu && (by = this.R[this.buildMenuMode][this.buildMenuIndex]) != 0) {
+        if (!this.blockBuildMenu && (by = this.menuTransitionCode[this.buildMenuMode][this.buildMenuIndex]) != 0) {
             int[] nArray;
             int[] nArray2;
             if (by == 1) {
@@ -2384,7 +2384,7 @@ implements Runnable {
     }
 
     void e(Graphics graphics) {
-        if (this.cP[this.buildMenuMode][this.buildMenuIndex]) {
+        if (this.menuRowEnabled[this.buildMenuMode][this.buildMenuIndex]) {
             int n = this.viewportBaseX - this.viewportCenterX;
             int n2 = this.viewportBaseY - this.viewportCenterY;
             if (this.blockBuildMenu) {
@@ -2398,7 +2398,7 @@ implements Runnable {
                 }
                 this.a(graphics, 200, n, n2 + 15, 20);
                 if (this.buildMenuMode != 0 || this.buildMenuIndex != 0) {
-                    this.a(graphics, this.c(this.gI[this.buildMenuMode][this.buildMenuIndex]), n + 5, n2 + 4 + 15, 20);
+                    this.a(graphics, this.c(this.menuTextIndex[this.buildMenuMode][this.buildMenuIndex]), n + 5, n2 + 4 + 15, 20);
                 }
                 if (this.buildMenuMode == 3 && this.buildMenuIndex < 4) {
                     int n3;
@@ -2704,7 +2704,7 @@ implements Runnable {
                         break;
                     }
                     case 9: {
-                        this.c(this.eF - 2);
+                        this.c(this.scenarioStep - 2);
                         this.bC = false;
                         this.ready = false;
                         this.transitionCode = 1;
@@ -3025,10 +3025,10 @@ implements Runnable {
     void d(int n, int n2) {
         this.buildMenuItems[n] = new byte[n2];
         this.buildMenuResultCodes[n] = new byte[n2];
-        this.aa[n] = new byte[n2];
-        this.gI[n] = new byte[n2];
-        this.R[n] = new byte[n2];
-        this.cP[n] = new boolean[n2];
+        this.menuItemCode[n] = new byte[n2];
+        this.menuTextIndex[n] = new byte[n2];
+        this.menuTransitionCode[n] = new byte[n2];
+        this.menuRowEnabled[n] = new boolean[n2];
         this.eY = 0;
         this.fN = n;
         this.cf = 0;
@@ -3037,79 +3037,79 @@ implements Runnable {
     void a(int n, int n2, int n3, boolean bl, boolean bl2, int n4) {
         this.buildMenuItems[this.fN][this.eY] = (byte)n2;
         this.buildMenuResultCodes[this.fN][this.eY] = (byte)n3;
-        this.aa[this.fN][this.eY] = (byte)this.cf;
-        this.gI[this.fN][this.eY] = (byte)n;
-        this.R[this.fN][this.eY] = (byte)n4;
-        this.cP[this.fN][this.eY] = bl2;
+        this.menuItemCode[this.fN][this.eY] = (byte)this.cf;
+        this.menuTextIndex[this.fN][this.eY] = (byte)n;
+        this.menuTransitionCode[this.fN][this.eY] = (byte)n4;
+        this.menuRowEnabled[this.fN][this.eY] = bl2;
         this.cf += 15 + (bl ? 2 : 0);
         ++this.eY;
     }
 
     void v(int n) {
         if (n != -1) {
-            this.aX = (byte)n;
+            this.scenarioBits = (byte)n;
         }
         this.buildMenuItems = new byte[6][];
         this.buildMenuResultCodes = new byte[6][];
-        this.aa = new byte[6][];
-        this.gI = new byte[6][];
-        this.R = new byte[6][];
-        this.cP = new boolean[6][];
+        this.menuItemCode = new byte[6][];
+        this.menuTextIndex = new byte[6][];
+        this.menuTransitionCode = new byte[6][];
+        this.menuRowEnabled = new boolean[6][];
         int n2 = 5;
-        if ((this.aX & 1) == 1) {
+        if ((this.scenarioBits & 1) == 1) {
             ++n2;
         }
-        if ((this.aX & 2) == 2) {
+        if ((this.scenarioBits & 2) == 2) {
             ++n2;
         }
-        if ((this.aX & 4) == 4) {
+        if ((this.scenarioBits & 4) == 4) {
             ++n2;
         }
-        if (this.eF >= 2) {
+        if (this.scenarioStep >= 2) {
             ++n2;
         }
         this.d(0, n2);
         this.a(202, 0, 0, true, true, 10);
         this.a(205, 1, 3, true, false, 0);
-        if ((this.aX & 1) == 1) {
+        if ((this.scenarioBits & 1) == 1) {
             this.a(208, 2, 25, false, false, 0);
         }
-        if ((this.aX & 2) == 2) {
+        if ((this.scenarioBits & 2) == 2) {
             this.a(218, 3, 26, false, false, 0);
         }
-        if (this.eF >= 2) {
-            this.a(207, 5, 28, (this.aX & 4) != 4, false, 0);
+        if (this.scenarioStep >= 2) {
+            this.a(207, 5, 28, (this.scenarioBits & 4) != 4, false, 0);
         }
-        if ((this.aX & 4) == 4) {
+        if ((this.scenarioBits & 4) == 4) {
             this.a(206, 4, 27, true, false, 0);
         }
         this.a(236, 11, 31, false, false, 0);
         this.a(234, 8, 29, true, false, 0);
         this.a(210, 9, 5, true, false, 0);
         n2 = 4;
-        if ((this.aX & 8) == 8) {
+        if ((this.scenarioBits & 8) == 8) {
             ++n2;
         }
-        if ((this.aX & 0x10) == 16) {
+        if ((this.scenarioBits & 0x10) == 16) {
             ++n2;
         }
-        if ((this.aX & 0x20) == 32) {
+        if ((this.scenarioBits & 0x20) == 32) {
             n2 += 2;
         }
         this.d(1, n2);
-        if ((this.aX & 8) == 8) {
+        if ((this.scenarioBits & 8) == 8) {
             this.a(211, 0, 8, true, true, 8);
         }
         this.a(205, 1, 3, false, false, 0);
-        if ((this.aX & 0x10) == 16) {
+        if ((this.scenarioBits & 0x10) == 16) {
             this.a(216, 2, 13, false, true, 11);
         }
         this.a(217, 3, 15, true, false, 0);
         this.a(219, 4, 14, true, true, 9);
-        if ((this.aX & 0x20) == 32) {
+        if ((this.scenarioBits & 0x20) == 32) {
             this.a(203, 5, 2, false, true, 0);
         }
-        if ((this.aX & 0x20) == 32) {
+        if ((this.scenarioBits & 0x20) == 32) {
             this.a(204, 6, 1, true, true, 0);
         }
         this.a(201, 9, 17, true, false, 0);
@@ -3117,16 +3117,16 @@ implements Runnable {
         this.a(225, 0, 18, true, true, 0);
         this.a(226, 9, 19, true, true, 0);
         n2 = 3;
-        if ((this.aX & 0x40) == 64) {
+        if ((this.scenarioBits & 0x40) == 64) {
             n2 += 2;
         }
         this.d(3, n2);
         this.a(230, 0, 20, false, true, 1);
         this.a(231, 1, 21, true, true, 1);
-        if ((this.aX & 0x40) == 64) {
+        if ((this.scenarioBits & 0x40) == 64) {
             this.a(232, 2, 22, false, true, 6);
         }
-        if ((this.aX & 0x40) == 64) {
+        if ((this.scenarioBits & 0x40) == 64) {
             this.a(233, 3, 23, true, true, 7);
         }
         this.a(201, 9, 17, true, false, 0);
@@ -3221,17 +3221,17 @@ implements Runnable {
             boolean bl = false;
             this.backbufferG.setColor(0x606060);
             this.backbufferG.fillRect(0, fX, e, 15);
-            int n = this.c(this.aa[this.buildMenuMode][this.buildMenuIndex]);
+            int n = this.c(this.menuItemCode[this.buildMenuMode][this.buildMenuIndex]);
             int n2 = n + 15 - e;
             if (n2 < 0) {
                 n2 = 0;
             }
             for (int i = 0; i < this.buildMenuItems[this.buildMenuMode].length; ++i) {
-                this.a(this.backbufferG, this.c(this.gI[this.buildMenuMode][i]), this.c(this.aa[this.buildMenuMode][i]) - n2, fX, 20);
+                this.a(this.backbufferG, this.c(this.menuTextIndex[this.buildMenuMode][i]), this.c(this.menuItemCode[this.buildMenuMode][i]) - n2, fX, 20);
                 if (i != this.buildMenuIndex) continue;
                 this.backbufferG.setColor(0xFFFFFF);
-                this.backbufferG.drawRect(this.c(this.aa[this.buildMenuMode][i]) - n2, fX, 14, 14);
-                this.backbufferG.drawRect(this.c(this.aa[this.buildMenuMode][i]) + 1 - n2, fX + 1, 12, 12);
+                this.backbufferG.drawRect(this.c(this.menuItemCode[this.buildMenuMode][i]) - n2, fX, 14, 14);
+                this.backbufferG.drawRect(this.c(this.menuItemCode[this.buildMenuMode][i]) + 1 - n2, fX + 1, 12, 12);
             }
             if (this.buildMenuMode == 2) {
                 String string = String.valueOf(Math.abs(this.selectionCost));
@@ -3810,7 +3810,7 @@ implements Runnable {
                         return this.n[this.ds[30 + this.difficultyA]];
                     }
                     case 3: {
-                        return this.n[this.ds[35 + this.dJ]];
+                        return this.n[this.ds[35 + this.difficultySlot]];
                     }
                     case 4: {
                         return this.n[this.ds[40 + this.difficultyB]];
@@ -4379,11 +4379,11 @@ implements Runnable {
                         break block0;
                     }
                     case 3: {
-                        if (this.dJ == 0) {
-                            this.dJ = 1;
+                        if (this.difficultySlot == 0) {
+                            this.difficultySlot = 1;
                             break block0;
                         }
-                        this.dJ = 0;
+                        this.difficultySlot = 0;
                         break block0;
                     }
                     case 4: {
@@ -6921,7 +6921,7 @@ implements Runnable {
         this.bq = this.s(this.bq);
         this.bv = this.s(this.bv);
         this.flagsB = this.d(this.flagsB);
-        this.aX = this.b(this.aX);
+        this.scenarioBits = this.b(this.scenarioBits);
         this.scenarioMilestoneIndex = this.b(this.scenarioMilestoneIndex);
         this.milestonesEnabled = this.d(this.milestonesEnabled);
         this.currentMilestoneScore = this.s(this.currentMilestoneScore);
@@ -6934,7 +6934,7 @@ implements Runnable {
         this.milestoneThreshold5 = this.s(this.milestoneThreshold5);
         this.aiWagonsBought = this.s(this.aiWagonsBought);
         this.by = this.s(this.by);
-        this.eF = this.s(this.eF);
+        this.scenarioStep = this.s(this.scenarioStep);
         this.ao = this.s(this.ao);
         this.moneyBaseA = this.s(this.moneyBaseA);
         this.moneyBaseB = this.s(this.moneyBaseB);
@@ -7716,12 +7716,12 @@ implements Runnable {
             this.ready = false;
             this.transitionCode = 6;
             this.milestonesEnabled = true;
-            if (this.eF >= 2) {
-                if (this.aM < this.eF) {
-                    this.aM = this.eF;
+            if (this.scenarioStep >= 2) {
+                if (this.aM < this.scenarioStep) {
+                    this.aM = this.scenarioStep;
                 }
                 this.O();
-                this.gJ = this.c(this.eF - 2);
+                this.gJ = this.c(this.scenarioStep - 2);
             }
             this.setState(20);
         }
@@ -8918,7 +8918,7 @@ implements Runnable {
                             int n25 = xorResourceInput.readByte();
                             int n26 = xorResourceInput.readByte();
                             if (n2 != this.J) continue;
-                            this.eF = n2;
+                            this.scenarioStep = n2;
                             this.mapWidth = this.mapHeight = n3;
                             this.hj = (this.mapWidth - 1) * 8;
                             this.mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
@@ -8976,11 +8976,11 @@ implements Runnable {
                         // empty catch block
                     }
                     if (this.J <= 1) {
-                        if (this.dJ == 0) {
+                        if (this.difficultySlot == 0) {
                             this.cd = (byte)32;
                             this.fP = (byte)29;
                         }
-                        if (this.dJ == 1) {
+                        if (this.difficultySlot == 1) {
                             this.cd = (byte)25;
                             this.fP = (byte)22;
                         }
