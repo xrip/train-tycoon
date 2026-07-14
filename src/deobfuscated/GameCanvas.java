@@ -3266,7 +3266,7 @@ implements Runnable {
             byArray[i + 1] = (byte)(string.charAt(i) - 47);
         }
         byArray[0] = 24;
-        this.a(graphics, screenWidth, 15 + n2, n < 0 ? 1 : 2, 4, byArray);
+        this.drawTextBox(graphics, screenWidth, 15 + n2, n < 0 ? 1 : 2, 4, byArray);
         return n2 + 15;
     }
 
@@ -3290,7 +3290,7 @@ implements Runnable {
     void drawConfirmDialog(Graphics graphics) {
         if (this.confirmCounter > 0) {
             if (this.confirmTargetState >= 0) {
-                this.a(graphics, 10, 10, 0, 37, this.spriteBitmapTable[this.spriteIndexTable[120 + this.confirmTargetState]]);
+                this.drawTextBox(graphics, 10, 10, 0, 37, this.spriteBitmapTable[this.spriteIndexTable[120 + this.confirmTargetState]]);
             }
             --this.confirmCounter;
         }
@@ -6155,9 +6155,9 @@ implements Runnable {
         return 0;
     }
 
-    void a(int n, boolean bl) {
+    void removeTrainFromMap(int n, boolean bl) {
         if (n != -1) {
-            this.a(this.nextCar[n], bl);
+            this.removeTrainFromMap(this.nextCar[n], bl);
             int n2 = n;
             this.trainFlags[n2] = (byte)(this.trainFlags[n2] | 0xE0);
             this.nextCar[n] = -1;
@@ -6320,8 +6320,8 @@ implements Runnable {
         int n2 = -1;
         for (int i = 0; i < 500; ++i) {
             if (n == i || (this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.j(i, this.c(this.trainX[n]), this.c(this.trainY[n]))) continue;
-            this.a(i, true);
-            this.a(n, true);
+            this.removeTrainFromMap(i, true);
+            this.removeTrainFromMap(n, true);
         }
     }
 
@@ -6586,7 +6586,7 @@ implements Runnable {
         }
     }
 
-    void a(ByteArrayOutputStream byteArrayOutputStream, int n, int n2) {
+    void writeRlePairToStream(ByteArrayOutputStream byteArrayOutputStream, int n, int n2) {
         if (n2 == 1) {
             if (n == -1) {
                 byteArrayOutputStream.write(255);
@@ -6600,7 +6600,7 @@ implements Runnable {
         }
     }
 
-    void c(String string) {
+    void crcSum(String string) {
         long l = 0L;
         for (int i = 0; i < this.snapshotSize; ++i) {
             l += (long)this.c(this.saveBuffer[i]);
@@ -6608,20 +6608,20 @@ implements Runnable {
     }
 
     void compressSaveBuffer() {
-        this.c("Compress pre");
+        this.crcSum("Compress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte by = this.saveBuffer[0];
         int n = 1;
         for (int i = 1; i < this.snapshotSize; ++i) {
             if (by != this.saveBuffer[i] || n == 254) {
-                this.a(byteArrayOutputStream, (int)by, n);
+                this.writeRlePairToStream(byteArrayOutputStream, by, n);
                 by = this.saveBuffer[i];
                 n = 1;
                 continue;
             }
             ++n;
         }
-        this.a(byteArrayOutputStream, (int)by, n);
+        this.writeRlePairToStream(byteArrayOutputStream, by, n);
         this.bytesUncompressed += this.snapshotSize;
         this.saveBuffer = byteArrayOutputStream.toByteArray();
         this.snapshotSize = this.saveBuffer.length;
@@ -6632,11 +6632,11 @@ implements Runnable {
         catch (Exception exception) {
             // empty catch block
         }
-        this.c("Compress post");
+        this.crcSum("Compress post");
     }
 
     void j() {
-        this.c("Decompress pre");
+        this.crcSum("Decompress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (int i = 0; i < this.snapshotSize; ++i) {
             if (this.saveBuffer[i] == -1) {
@@ -6658,7 +6658,7 @@ implements Runnable {
         catch (Exception exception) {
             // empty catch block
         }
-        this.c("Decompress post");
+        this.crcSum("Decompress post");
     }
 
     boolean d(boolean bl) {
@@ -6748,7 +6748,7 @@ implements Runnable {
         }
     }
 
-    void a(int[] nArray) {
+    void saveOrLoadIntArray(int[] nArray) {
         block4: {
             block5: {
                 block3: {
@@ -6821,14 +6821,14 @@ implements Runnable {
         this.loanCeiling = this.saveIntToBuffer(this.loanCeiling);
         this.interestRate = this.b(this.interestRate);
         this.enterpriseTaxPct = this.saveIntToBuffer(this.enterpriseTaxPct);
-        this.a(this.yrN);
-        this.a(this.yrCx);
-        this.a(this.yrZ);
-        this.a(this.altDecadeOtherXTotal);
-        this.a(this.altDecadeRevenueTotal);
-        this.a(this.altDecadeTotalCost);
-        this.a(this.trainRevenue);
-        this.a(this.prevTrainRevenue);
+        this.saveOrLoadIntArray(this.yrN);
+        this.saveOrLoadIntArray(this.yrCx);
+        this.saveOrLoadIntArray(this.yrZ);
+        this.saveOrLoadIntArray(this.altDecadeOtherXTotal);
+        this.saveOrLoadIntArray(this.altDecadeRevenueTotal);
+        this.saveOrLoadIntArray(this.altDecadeTotalCost);
+        this.saveOrLoadIntArray(this.trainRevenue);
+        this.saveOrLoadIntArray(this.prevTrainRevenue);
         this.saveOrLoadShortArray(this.stationRevenue);
         this.saveOrLoadShortArray(this.prevStationRevenue);
         this.revenueTotal = this.saveIntToBuffer(this.revenueTotal);
@@ -6894,7 +6894,7 @@ implements Runnable {
         this.saveOrLoadShortArray(this.nextCar);
         this.saveOrLoadByteArray(this.trainEraOrStage);
         this.saveOrLoadByteArray(this.trainAgeOrTimer);
-        this.a(this.trainStateCode);
+        this.saveOrLoadIntArray(this.trainStateCode);
         this.saveOrLoadByteArray(this.trainAiOverride);
         this.industryCategory = this.saveIntToBuffer(this.industryCategory);
         this.industrySiteFound = this.d(this.industrySiteFound);
@@ -6914,11 +6914,11 @@ implements Runnable {
         this.saveOrLoadByteArray(this.menuRowParamB);
         this.saveOrLoadByteArray(this.placeTrainYear);
         this.saveOrLoadByteArray(this.menuRowParamC);
-        this.a(this.menuRowCost);
-        this.a(this.menuRowValue);
+        this.saveOrLoadIntArray(this.menuRowCost);
+        this.saveOrLoadIntArray(this.menuRowValue);
         this.saveOrLoadByteArray(this.menuRowAltType);
         this.saveOrLoadByteArray(this.menuRowEra);
-        this.a(this.menuRowRevenue);
+        this.saveOrLoadIntArray(this.menuRowRevenue);
         this.saveOrLoadShortArray(this.dU);
         this.trackBuildCost = this.saveIntToBuffer(this.trackBuildCost);
         this.bq = this.saveIntToBuffer(this.bq);
@@ -6975,8 +6975,8 @@ implements Runnable {
         this.scenarioStepCompare = this.saveIntToBuffer(this.scenarioStepCompare);
         this.transientH = this.saveIntToBuffer(this.transientH);
         this.gameStateCounter = this.saveIntToBuffer(this.gameStateCounter);
-        this.a(this.gk);
-        this.a(this.bd);
+        this.saveOrLoadIntArray(this.gk);
+        this.saveOrLoadIntArray(this.bd);
         this.saveOrLoadByteArray(this.bE);
     }
 
@@ -8417,7 +8417,7 @@ implements Runnable {
         }
     }
 
-    void a(Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray) {
+    void drawTextBox(Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray) {
         int n5 = 0;
         for (int i = 0; i < byArray.length; ++i) {
             if (byArray[i] >= 32 && byArray[i] <= 39) continue;
@@ -8580,7 +8580,7 @@ implements Runnable {
                 case 25: {
                     graphics.setColor(0);
                     graphics.fillRect(0, 0, screenWidth, hs);
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[0]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[0]]);
                     graphics.setColor(215, 222, 238);
                     graphics.fillRect(10, hs - 23, screenWidth - 21, 9);
                     int n11 = this.totalTilesToGenerate < 2 ? 2 : this.totalTilesToGenerate;
@@ -8630,7 +8630,7 @@ implements Runnable {
                     break;
                 }
                 case 35: {
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[50]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[50]]);
                     break;
                 }
                 case 40: {
@@ -8681,23 +8681,23 @@ implements Runnable {
                     break;
                 }
                 case 45: {
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[51]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[51]]);
                     break;
                 }
                 case 55: {
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[52]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[52]]);
                     break;
                 }
                 case 65: {
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[53]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[53]]);
                     break;
                 }
                 case 105: {
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[49]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[49]]);
                     break;
                 }
                 case 120: {
-                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[66]]);
+                    this.drawTextBox(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[66]]);
                 }
             }
         }

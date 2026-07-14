@@ -742,3 +742,10 @@ method a v (II)V                    handleBuildMenuState    # block0 switch on (
 # c(int*5) and b(int*5) are terrain-edit region loops
 method a c (IIIII)V                 raiseTerrainArea        # region raise (calls a(int,int,boolean))
 method a b (IIIII)V                 lowerTerrainArea        # region lower (calls a(int,int,boolean))
+
+# ---- Batch 31: train removal + RLE + save/load int array + textbox ----
+method a a (IZ)V                     removeTrainFromMap      # recursive via nextCar; sets flags 0xE0
+method a a (Ljava/io/ByteArrayOutputStream;II)V  writeRlePairToStream  # RLE pair writer (255 + len + byte)
+method a a ([I)V                     saveOrLoadIntArray      # int[] save/load (savePendingMode dispatch)
+method a a (Ljavax/microedition/lcdui/Graphics;IIII[B)V  drawTextBox  # renders textbox with byArray chars
+method a c (Ljava/lang/String;)V     crcSum                  # computes CRC sum over saveBuffer
