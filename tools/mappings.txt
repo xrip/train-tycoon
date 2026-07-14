@@ -694,3 +694,33 @@ field  a dM   decodeHeaderName4      # static byte[]; user-agent header name
 field  a cQ   decodeHeaderName5      # static byte[]; action header name (S/D)
 field  a l    decodeHeaderName6      # static byte[]; score header name
 field  a ag   decodeHeaderName7      # static byte[]; score-value header name
+
+# ---- Batch 28: scenario/map-gen parameters + display half-dimensions ----
+# Map-generation grid dimensions (loaded from scenario record)
+field  a gG   mapGenColumns          # int; = n8 — map-gen column count (scenario parameter)
+field  a co   mapGenRows             # int; = n9 — map-gen row count (scenario parameter)
+field  a dK   terrainFeatureStage7Count # int; = n10 — stage-7 terrain count threshold
+field  a bX   terrainFeatureStage6Count # int; = n11 — stage-6 terrain count threshold
+# Display half-dimensions (used in iso projection)
+field  a gU   viewportHalfWidth      # int; = mapScreenWidth / 2
+field  a fO   viewportHalfHeight     # int; = mapScreenHeight / 2
+# Scenario selector: the active scenario index; loaded in case 25 (n2)
+field  a J    activeScenario         # int; current scenario number
+# Snapshot loaded flag (paired with snapshotLoaded; gates initial load)
+field  a S    snapshotLoadedPending  # boolean; true while snapshot is loading (case 25 path)
+# Scenario milestone index (paired with scenarioMilestoneIndex)
+field  a ae   scenarioMilestone      # int; secondary scenario milestone index
+# Frame counter (incremented each frame; reset at milestones)
+field  a gg   frameIndex             # int; per-frame index counter
+# Per-tile action counts (used in build menu + AI)
+field  a et   trackTileCount         # int; count of trackMap tiles == 64 (used in scanTrackTiles)
+field  a er   trackBuildCost         # int; cost threshold for AI build validation
+field  a fe   revenueTotal           # int; running revenue total (fe += totalRevenue)
+field  a bI   counterA               # int; generic counter (used in load timeout)
+field  a bD   counterB               # int; generic counter (used in incrementRowValueType1)
+field  a eC   enterpriseTaxPct       # int; enterprise tax percent (eJ = totalRevenue * eC / 100)
+field  a H    transientH             # int; transient save-buffer value
+field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name collision with snapshotPending)
+field  a ay   flagAy                 # boolean; flag toggled in case 23
+field  a ao   scenarioFlagAo         # int; scenario flag (n21 from scenario record)
+field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
