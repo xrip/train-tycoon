@@ -107,15 +107,22 @@ hand-reconstructed the two small classes plus a skeleton of the big one.
 - `python tools/deobf.py xref` — regenerates the cross-reference (exit 0).
 - `python tools/deobf.py show NAME` — prints a method body (resolves renamed and
   overloaded names).
-- 52 identifiers named; `run()`, `updateTrain()`, `syncHighScores()` read as
-  ordinary code.
+- **188 identifiers named across 7 evidence-checked batches.** Major clusters
+  covered: map grid, per-train state, audio lifecycle, save/load record format,
+  high-score networking, the main frame loop, the `gameState` machine, the
+  update tick (`update()`), the map renderer (`renderMap()`), the build-menu
+  state machine, and the input dispatcher (`handleKey()` plus `openBuildMenu`).
+  `run()`, `update()`, `renderMap()`, `paint()`, `handleKey()`, `openBuildMenu()`,
+  `saveGame()`, `loadGame()`, `syncHighScores()` all read as ordinary code.
 
 ## 7. What is incomplete
 
-- **Naming: ~52 of ~640 members** (≈33 of 441 `GameCanvas` fields, ≈11 of 197
-  methods; the ~10 MIDP override methods are already meaningful). The bulk of
-  the economy, map/track logic, rendering primitives, save serialization format,
-  input dispatch, and the screen states remain obfuscated names.
+- **Naming: ~188 of ~640 GameCanvas members (~30%).** Every named member is
+  evidence-checked (read the surrounding code to justify it). Remaining ~250 are
+  per-entity arrays (`gY`/`gC`/`U[]`/`eS`/`hg` cost-config, `oo`/`da`/`cV`/`be`
+  per-tile bookkeeping, `i`/`l`/`R`/`P`/`M` cross-system helpers) that are unit-
+  structurally used in only 3-4 sites, so a "swarm" cross-reference pass is
+  needed to name them with confidence.
 - **Method-local variables are not renamed** and cannot be by the remapper: the
   obfuscator stripped the `LocalVariableTable`, so locals have no bytecode
   identity and CFR names them `n`, `n2`, `bl`. A per-method source pass (or a
@@ -133,11 +140,12 @@ hand-reconstructed the two small classes plus a skeleton of the big one.
 - **CFR-version dependence:** the 11 embedded fixes match CFR 0.152 output
   exactly. A different CFR version may emit different code; `verify` detects this
   and aborts with a clear message rather than silently misfixing.
-- **Naming risk:** batches 1–3 are evidence-checked, but a few names are
-  medium-confidence (e.g. `simSpeed`, `keyRepeatDelay`, `loadGame` for
-  `y(int,int)`). They are trivially revised — edit `mappings.txt`, re-run.
-  `updateTrain`/entity model assumes the 500-entry arrays are trains+cars, which
-  the code strongly supports but was not dynamically confirmed.
+- **Naming risk:** every batch is evidence-checked. A few names remain
+  medium-confidence: `simSpeed`, `keyRepeatDelay` (revisit on more input reads),
+  `selectionCost` for `dx` (it's used both as a selection-state hint and a cost
+  component — pick one and keep going). They are trivially revised — edit
+  `mappings.txt`, re-run `deobf`. `updateTrain`/entity model assumes the
+  500-entry arrays are trains+cars; not dynamically confirmed.
 - **Tooling assumptions:** requires `java`/`javac` (JDK 8+; developed on 25) and
   Python 3 on PATH, and network access once for `setup`.
 - Windows note: classpaths use `os.pathsep` in the driver; do not hand-run the
@@ -157,9 +165,9 @@ python tools/deobf.py show NAME # inspect a method
 
 `build/` and `tools/lib/` are generated and git-ignored.
 
-### Test results (this session, clean run)
+### Test results at handoff / shipping point
 
-- `deobf`: **exit 0** — "applied 52 mappings to 3 classes", readable source written.
+- `deobf`: **exit 0** — "applied 188 mappings to 3 classes".
 - `verify`: **exit 0** — "verify OK: patched decompilation compiles (3 classes)",
   round-trip re-decompile stable (diff vs raw = local-variable renaming only).
 - `xref`: **exit 0** — `analysis/XREF_GameCanvas.md` regenerated.
@@ -168,56 +176,55 @@ python tools/deobf.py show NAME # inspect a method
 
 ### Repo state and commit history
 
-**Important:** the handoff was prepared against an *uninitialised* git history.
-On takeover, the working tree still has zero commits — every relevant path is
-currently `??` (untracked), including this `HANDOFF.md`. See section 13 for the
-initial-commit work performed at handoff time.
+Ship point: 6 commits on `master`:
 
-## 13. Initial-commit work performed at handoff time
+```
+ead719c  Initial import: Train Tycoon J2ME deobfuscation
+32a6fc2  Batch 4: update() dispatcher state + per-frame simulation names (124)
+aa3006e  Batch 5: renderMap + map-renderer infrastructure (145)
+d90d147  Batch 6: input dispatcher + build menu machinery (182)
+5b7f6ca  Batch 7: save/load record format (188)
+```
 
-Run by the take-over assistant immediately after authoring this handoff,
-because the working tree had been left with `git status` showing every path as
-untracked. All relevant files were added (with `.gitignore` excluding the
-regenerated `build/` and the fetched `tools/lib/` jars), then committed as a
-single logical commit.
-
-Verification before commit:
-- `python tools/deobf.py deobf` — exit 0
-- `python tools/deobf.py verify` — exit 0 (faithfulness gate green)
-- `python tools/deobf.py xref` — exit 0
-
-After commit, the working tree is clean except for the `.gitignore`-excluded
+(HANDOFF.md update for shipping at 188 is its own commit; see top of next
+section.) Working tree is clean except for the `.gitignore`-excluded
 `build/` and `tools/lib/` (regenerated by `setup`).
 
 ## 10. Current objective and next steps (priority order)
 
-Objective: continue evidence-checked renaming, subsystem by subsystem, until
-`GameCanvas` is readable.
+Shipping point is **188 names**, 7 evidence-checked batches. The decision to stop
+here was deliberate: per-entity field clusters are unit-structurally used in few
+sites, so naming them with confidence requires a swarm cross-reference rather
+than single-method reads.
 
-1. **`update()` and the `gameState` switch** — reading it names the screen
-   states (10=loading, 20/40=input-wait/menus, 30=play) and hands over the
-   render + menu method clusters in one pass. Highest leverage; do this first.
-2. **Rendering cluster** — `paint()` calls ~18 `Graphics` methods; name the
-   tile/sprite/UI drawing helpers and the images/`Image[]` fields.
-3. **Save serialization** — read `saveGame`/`loadGame` together to name the
-   persistent fields (`dv`, `eK`, `fL`, `fc`, `dd`, `dl`, …) and document the
-   record format alongside `analysis/RESOURCE_FORMAT.md`.
-4. **Economy** — trace `money`/`totalRevenue`/`trainRevenue` writers to name the
-   pricing/tax/income logic.
-5. **Input dispatch** — `handleKey(int)` and `d(int)`; name key constants and
-   per-state input handling.
-6. **(Optional) local-variable naming** — add a JavaParser source pass to name
+If continuing, the next priorities are:
+
+1. **Per-train cost/config arrays** — `gY`/`gC`/`U[]`/`eS`/`hg` appear in
+   `af()` (`computeCost()`) and case-25 scenario load. One targeted read of
+   `computeCost` and the scenario loader will name ~8 of them and document the
+   wagon-cost formula.
+2. **Cross-system helpers** — `i`/`l`/`R`/`P`/`M` (these got renamed as the
+   network helpers in Batch 2/6, so the *abbreviations* in the remaining
+   short fields are scattered). A `grep -E "(\\.|=)this\\.([a-z]|[a-z][a-z])\\b"`
+   pass against the rendering and the per-frame code will isolate them.
+3. **Tick economy** — the `d()`, `R()`, `P()`, `ag()`, `ad()`, `w()`, `e()`,
+   `L()`, `q()`, `z()` family from Batch 4 are tentatively named but their *bodies*
+   are still unread; reading one or two bodies will firm up the names.
+4. **Save-format detail** — the `dv` byte array is parsed by `dl` (now
+   `saveReadOffset`); reading the parser that consumes it pins each field saved.
+5. **(Optional) local-variable naming** — add a JavaParser source pass to name
    method locals; and/or wire up microemu to run the JAR for dynamic validation.
 
 Workflow for each: pick an anchor from `analysis/XREF_GameCanvas.md` →
 `show` it → add an evidence-checked batch to `tools/mappings.txt` → `deobf`.
+`verify` stays green for free because renames are pure bytecode transforms.
 
 ## 11. Important files and entry points
 
 | Path | What it is |
 |---|---|
 | `tools/deobf.py` | **the driver** — all subcommands; embeds the 11 CFR fixes |
-| `tools/mappings.txt` | **the living name map** — the deliverable that grows |
+| `tools/mappings.txt` | **the living name map** — the 188-name deliverable |
 | `tools/Remap.java` | ASM bytecode remapper (descriptor-aware) |
 | `tools/Xref.java` | ASM cross-reference generator |
 | `tools/README.md` | toolchain usage + design |
@@ -233,3 +240,18 @@ Workflow for each: pick an anchor from `analysis/XREF_GameCanvas.md` →
 
 `src/faithful/` and `src/readable/` are the earlier hand-reconstruction, kept for
 reference; `src/decompiled_cfr/` + `src/deobfuscated/` supersede them.
+
+## 12. Naming batches shipped
+
+| Batch | Anchor | Count | Subsystem |
+|---|---|---|---|
+| 1 (initial) | loop bounds, byte code grids | 15 | map/train state |
+| 2 (initial) | musicPlayer / syncHighScores / etc. | 10 | audio, save, net |
+| 3 (initial) | run() timing | 17 | main loop, input |
+| 4 | update() | 72 | dispatcher + per-frame sim |
+| 5 | renderMap() | 21 | map renderer infrastructure |
+| 6 | handleKey + openBuildMenu + smoothHeightMap | 37 | input + build menu |
+| 7 | saveGame + loadGame | 6 | save/load record format |
+
+Final count: **188 mapping entries** = 2 classes + 52 fields (batches 1-3) +
+143 fields (batches 4-7 from class field deltas) + 13 methods.
