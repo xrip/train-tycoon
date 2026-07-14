@@ -345,3 +345,14 @@ field  a cP   menuRowEnabled       # boolean[6][]; row availability gate per mod
 field  a aX   scenarioBits         # byte; bit 1..3 each enables a menu row
 field  a eF   scenarioStep         # int; the active scenario; >=2 unlocks extra menu items
 field  a dJ   difficultySlot       # byte; 0/1 in case 25 (J<=1)
+
+# ---- Batch 11: train-cost snapshots + pending-transition plumbing ----
+# Snapshots of unitCost: baseTrainCostSnapshot is the unmodified price;
+# currentTrainCostSnapshot is the live price (drops as discounts/options apply).
+# 70% refund mechanic uses currentTrainCostSnapshot when the player backs out.
+field  a gv   baseTrainCostSnapshot  # int; unitCost captured before any discount applied
+field  a do   currentTrainCostSnapshot  # int; original field 'do' (Java keyword); unitCost after each computeTrainCost()
+field  a fq   discountApplied        # boolean; true when player picks the discount option (case 26)
+# pendingTransitionCode is set by build-menu case bodies (22..26) and consumed at
+# the end of the build-menu render loop: if > -1, transitionCode := gH and setState(20).
+field  a gH   pendingTransitionCode  # int; -1 = none pending, else next transitionCode

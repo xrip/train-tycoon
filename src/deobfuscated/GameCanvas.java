@@ -201,9 +201,9 @@ implements Runnable {
     byte[] da = new byte[48];
     byte[] cityPopulation = new byte[48];
     byte[] be = new byte[48];
-    int gH = -1;
-    boolean fq = false;
-    int gv = 0;
+    int pendingTransitionCode = -1;
+    boolean discountApplied = false;
+    int baseTrainCostSnapshot = 0;
     byte ae = 0;
     byte difficultyA = 0;
     byte difficultySlot = 0;
@@ -246,7 +246,7 @@ implements Runnable {
     int[] wagonOptionSlots = new int[5];
     int[] wagonCountMatch = new int[5];
     int unitCost = 0;
-    int cfr_renamed_0 = 0;
+    int currentTrainCostSnapshot = 0;
     int difficultyPct = 100;
     byte[] vehicleFlags = new byte[250];
     byte[] wagonAJ = new byte[250];
@@ -2587,10 +2587,10 @@ implements Runnable {
                     this.wagonDiscountType = this.wagonType;
                     this.difficultyPct = 100;
                     this.computeTrainCost();
-                    this.gv = this.unitCost;
+                    this.baseTrainCostSnapshot = this.unitCost;
                     this.difficultyPct = 100 - 3 * this.trainAgeOrTimer[this.trainAtCursor];
                     this.computeTrainCost();
-                    this.cfr_renamed_0 = this.unitCost;
+                    this.currentTrainCostSnapshot = this.unitCost;
                     this.ready = false;
                     this.transitionCode = 26;
                     this.setState(20);
@@ -3907,7 +3907,7 @@ implements Runnable {
                 break;
             }
             case 23: {
-                return this.b(this.unitCost - this.cfr_renamed_0);
+                return this.b(this.unitCost - this.currentTrainCostSnapshot);
             }
             case 22: {
                 return this.p(this.cO[this.aiWagonsLastSeen][n2], 0);
@@ -3927,10 +3927,10 @@ implements Runnable {
                     return this.p(this.trainAgeOrTimer[this.trainAtCursor], 0);
                 }
                 if (n2 == 9) {
-                    return this.b(this.cfr_renamed_0 * 70 / 100);
+                    return this.b(this.currentTrainCostSnapshot * 70 / 100);
                 }
                 if (n2 == 10) {
-                    return this.b(this.gv - this.cfr_renamed_0);
+                    return this.b(this.baseTrainCostSnapshot - this.currentTrainCostSnapshot);
                 }
                 if (n2 == 20) {
                     return this.bz[this.trainAtCursor] == 0 ? this.n[this.ds[21]] : this.n[this.ds[20]];
@@ -4161,7 +4161,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 4;
+                        this.pendingTransitionCode = 4;
                         this.setState(30);
                         break;
                     }
@@ -4172,7 +4172,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 14;
+                        this.pendingTransitionCode = 14;
                         this.setState(30);
                         break;
                     }
@@ -4183,7 +4183,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 14;
+                        this.pendingTransitionCode = 14;
                         this.setState(30);
                         break;
                     }
@@ -4193,7 +4193,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 10;
+                        this.pendingTransitionCode = 10;
                         this.setState(30);
                         break;
                     }
@@ -4203,7 +4203,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 2;
+                        this.pendingTransitionCode = 2;
                         this.setState(30);
                         break;
                     }
@@ -4213,7 +4213,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 3;
+                        this.pendingTransitionCode = 3;
                         this.setState(30);
                         break;
                     }
@@ -4227,7 +4227,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 5;
+                        this.pendingTransitionCode = 5;
                         this.setState(30);
                         break;
                     }
@@ -4237,7 +4237,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 28;
+                        this.pendingTransitionCode = 28;
                         this.setState(30);
                         break;
                     }
@@ -4248,7 +4248,7 @@ implements Runnable {
                             this.o();
                             break;
                         }
-                        this.gH = 14;
+                        this.pendingTransitionCode = 14;
                         this.setState(30);
                     }
                 }
@@ -4257,7 +4257,7 @@ implements Runnable {
             case 14: {
                 if (n2 == 2) {
                     if (this.screenParam == 4) {
-                        this.gH = 26;
+                        this.pendingTransitionCode = 26;
                         this.setState(30);
                         break;
                     }
@@ -4270,7 +4270,7 @@ implements Runnable {
                         this.o();
                         break;
                     }
-                    this.gH = 1;
+                    this.pendingTransitionCode = 1;
                     this.setState(30);
                     break;
                 }
@@ -4294,10 +4294,10 @@ implements Runnable {
                         break;
                     }
                     case 4: {
-                        this.money += this.cfr_renamed_0 * 70 / 100;
-                        this.aiMoneySpent -= this.cfr_renamed_0 * 70 / 100;
-                        if (this.cfr_renamed_0 != 0) {
-                            this.p(this.cfr_renamed_0 * 70 / 100);
+                        this.money += this.currentTrainCostSnapshot * 70 / 100;
+                        this.aiMoneySpent -= this.currentTrainCostSnapshot * 70 / 100;
+                        if (this.currentTrainCostSnapshot != 0) {
+                            this.p(this.currentTrainCostSnapshot * 70 / 100);
                         }
                         short s = this.nextCar[this.trainAtCursor];
                         this.o(s);
@@ -4317,7 +4317,7 @@ implements Runnable {
             }
             case 17: {
                 if (n2 == 1) {
-                    this.gH = 80 + this.ao;
+                    this.pendingTransitionCode = 80 + this.ao;
                 }
                 this.setState(30);
                 break;
@@ -4329,7 +4329,7 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = 1;
+                this.pendingTransitionCode = 1;
                 this.setState(30);
                 break;
             }
@@ -4356,7 +4356,7 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = 1;
+                this.pendingTransitionCode = 1;
                 this.setState(30);
                 break;
             }
@@ -4419,7 +4419,7 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = 1;
+                this.pendingTransitionCode = 1;
                 this.setState(30);
                 break;
             }
@@ -4442,7 +4442,7 @@ implements Runnable {
                     case 1: {
                         int n3;
                         this.wagonType = 0;
-                        this.cfr_renamed_0 = 0;
+                        this.currentTrainCostSnapshot = 0;
                         this.wagonDiscountType = this.wagonType;
                         for (n3 = 0; n3 < 5; ++n3) {
                             this.wagonOptionSlots[n3] = -1;
@@ -4451,9 +4451,9 @@ implements Runnable {
                             this.wagonCountMatch[n3] = -1;
                         }
                         this.difficultyPct = 100;
-                        this.fq = false;
+                        this.discountApplied = false;
                         this.computeTrainCost();
-                        this.gH = 23;
+                        this.pendingTransitionCode = 23;
                         this.setState(30);
                         break block0;
                     }
@@ -4463,27 +4463,27 @@ implements Runnable {
             }
             case 23: {
                 if (n2 == 0) {
-                    this.gH = 24;
+                    this.pendingTransitionCode = 24;
                     this.setState(30);
                     break;
                 }
                 if (n2 == 1) {
-                    this.gH = 25;
+                    this.pendingTransitionCode = 25;
                     this.setState(30);
                     break;
                 }
                 if (n2 == 2) {
-                    if (!this.fq) {
+                    if (!this.discountApplied) {
                         if (!this.y()) break;
                         this.setState(30);
                         break;
                     }
                     if (!this.a(this.trainAtCursor, this.wagonType, this.wagonOptionSlots)) break;
-                    this.gH = 26;
+                    this.pendingTransitionCode = 26;
                     this.setState(30);
                     break;
                 }
-                this.gH = !this.fq ? 22 : 26;
+                this.pendingTransitionCode = !this.discountApplied ? 22 : 26;
                 this.setState(30);
                 break;
             }
@@ -4492,7 +4492,7 @@ implements Runnable {
                     this.wagonType = n2;
                     this.computeTrainCost();
                 }
-                this.gH = 23;
+                this.pendingTransitionCode = 23;
                 this.setState(30);
                 break;
             }
@@ -4509,17 +4509,17 @@ implements Runnable {
                     this.popSelectedOption();
                 }
                 this.computeTrainCost();
-                this.gH = 23;
+                this.pendingTransitionCode = 23;
                 this.setState(30);
                 break;
             }
             case 26: {
                 if (n2 == 1) {
-                    this.fq = true;
-                    this.gH = 23;
+                    this.discountApplied = true;
+                    this.pendingTransitionCode = 23;
                     this.setState(30);
                 } else if (n2 == 2) {
-                    int n4 = this.gv - this.cfr_renamed_0;
+                    int n4 = this.baseTrainCostSnapshot - this.currentTrainCostSnapshot;
                     if (n4 <= this.money) {
                         this.trainAgeOrTimer[this.trainAtCursor] = 0;
                         this.money -= n4;
@@ -4527,15 +4527,15 @@ implements Runnable {
                         this.aiMoneySpent += n4;
                         this.difficultyPct = 100 - 3 * this.trainAgeOrTimer[this.trainAtCursor];
                         this.computeTrainCost();
-                        this.cfr_renamed_0 = this.unitCost;
-                        this.gH = 26;
+                        this.currentTrainCostSnapshot = this.unitCost;
+                        this.pendingTransitionCode = 26;
                         this.setState(30);
                     } else {
                         this.enterOutOfMoneyState();
                     }
                 } else if (n2 == 3) {
                     this.screenParam = 4;
-                    this.gH = 14;
+                    this.pendingTransitionCode = 14;
                     this.setState(30);
                 }
                 if (n2 == 4) {
@@ -4587,7 +4587,7 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = 1;
+                this.pendingTransitionCode = 1;
                 this.setState(30);
                 break;
             }
@@ -4598,19 +4598,19 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = 1;
+                this.pendingTransitionCode = 1;
                 this.setState(30);
                 break;
             }
             case 8: 
             case 9: {
                 if (n2 == 1) {
-                    this.gH = this.fY;
+                    this.pendingTransitionCode = this.fY;
                     this.setState(30);
                     break;
                 }
                 if (n2 == 2) {
-                    this.gH = this.dR;
+                    this.pendingTransitionCode = this.dR;
                     this.setState(30);
                     break;
                 }
@@ -4661,98 +4661,98 @@ implements Runnable {
                     case 0: {
                         this.y = false;
                         this.archiveOrRecall();
-                        this.gH = 32;
+                        this.pendingTransitionCode = 32;
                         this.setState(30);
                         break block0;
                     }
                     case 1: {
                         this.y = true;
-                        this.gH = 32;
+                        this.pendingTransitionCode = 32;
                         this.setState(30);
                         break block0;
                     }
                     case 2: {
                         this.b(0, false);
-                        this.gH = 33;
+                        this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 3: {
                         this.b(0, false);
-                        this.gH = 34;
+                        this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 4: {
                         this.b(1, false);
-                        this.gH = 33;
+                        this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 5: {
                         this.b(1, false);
-                        this.gH = 34;
+                        this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 6: {
                         this.b(2, false);
-                        this.gH = 33;
+                        this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 7: {
                         this.b(2, false);
-                        this.gH = 34;
+                        this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 8: {
                         this.b(0, true);
-                        this.gH = 33;
+                        this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 9: {
                         this.b(0, true);
-                        this.gH = 34;
+                        this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 10: {
                         this.b(1, true);
-                        this.gH = 33;
+                        this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 11: {
                         this.b(1, true);
-                        this.gH = 34;
+                        this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 12: {
                         this.b(2, true);
-                        this.gH = 33;
+                        this.pendingTransitionCode = 33;
                         this.setState(30);
                         break block0;
                     }
                     case 13: {
                         this.b(2, true);
-                        this.gH = 34;
+                        this.pendingTransitionCode = 34;
                         this.setState(30);
                         break block0;
                     }
                     case 14: {
                         this.y = false;
                         this.archiveOrRecall();
-                        this.gH = 35;
+                        this.pendingTransitionCode = 35;
                         this.setState(30);
                         break block0;
                     }
                     case 15: {
                         this.y = true;
-                        this.gH = 35;
+                        this.pendingTransitionCode = 35;
                         this.setState(30);
                         break block0;
                     }
@@ -4764,7 +4764,7 @@ implements Runnable {
             case 32: 
             case 35: {
                 if (!this.dS) {
-                    this.gH = 31;
+                    this.pendingTransitionCode = 31;
                     this.setState(30);
                     break;
                 }
@@ -4774,19 +4774,19 @@ implements Runnable {
             }
             case 33: 
             case 34: {
-                this.gH = 31;
+                this.pendingTransitionCode = 31;
                 this.setState(30);
                 break;
             }
             case 40: {
                 switch (n2) {
                     case 1: {
-                        this.gH = this.hm[this.cZ] + 40;
+                        this.pendingTransitionCode = this.hm[this.cZ] + 40;
                         this.cW = (byte)2;
                         break;
                     }
                     case 2: {
-                        this.gH = this.fa[this.cZ] + 60;
+                        this.pendingTransitionCode = this.fa[this.cZ] + 60;
                         this.cW = (byte)2;
                     }
                 }
@@ -4807,16 +4807,16 @@ implements Runnable {
             case 53: 
             case 54: {
                 if (this.cW == 1) {
-                    this.gH = 60;
+                    this.pendingTransitionCode = 60;
                 }
                 if (this.cW == 2) {
-                    this.gH = 40;
+                    this.pendingTransitionCode = 40;
                 }
                 if (this.cW == 3) {
-                    this.gH = 9;
+                    this.pendingTransitionCode = 9;
                 }
                 if (this.cW == 4) {
-                    this.gH = 8;
+                    this.pendingTransitionCode = 8;
                 }
                 this.setState(30);
                 break;
@@ -4824,11 +4824,11 @@ implements Runnable {
             case 60: {
                 if (n2 % 2 == 1) {
                     this.cZ = this.gP[n2 / 2];
-                    this.gH = this.hm[this.cZ] + 40;
+                    this.pendingTransitionCode = this.hm[this.cZ] + 40;
                 }
                 if (n2 % 2 == 0) {
                     this.cZ = this.gP[(n2 - 1) / 2];
-                    this.gH = this.fa[this.cZ] + 60;
+                    this.pendingTransitionCode = this.fa[this.cZ] + 60;
                 }
                 this.cW = 1;
                 this.setState(30);
@@ -4847,16 +4847,16 @@ implements Runnable {
             case 71: 
             case 72: {
                 if (this.cW == 1) {
-                    this.gH = 60;
+                    this.pendingTransitionCode = 60;
                 }
                 if (this.cW == 2) {
-                    this.gH = 40;
+                    this.pendingTransitionCode = 40;
                 }
                 if (this.cW == 3) {
-                    this.gH = 9;
+                    this.pendingTransitionCode = 9;
                 }
                 if (this.cW == 4) {
-                    this.gH = 8;
+                    this.pendingTransitionCode = 8;
                 }
                 this.setState(30);
                 break;
@@ -4872,7 +4872,7 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = n2 == 40 ? 27 : 1;
+                this.pendingTransitionCode = n2 == 40 ? 27 : 1;
                 this.setState(30);
                 break;
             }
@@ -4928,7 +4928,7 @@ implements Runnable {
                     this.o();
                     break;
                 }
-                this.gH = 28;
+                this.pendingTransitionCode = 28;
                 this.setState(30);
             }
         }
@@ -6489,7 +6489,7 @@ implements Runnable {
     }
 
     boolean a(int n, int n2, int[] nArray) {
-        if (this.money >= this.unitCost - this.cfr_renamed_0) {
+        if (this.money >= this.unitCost - this.currentTrainCostSnapshot) {
             this.eL[n] = (short)n2;
             this.o(this.nextCar[n]);
             for (int i = 0; i < 5; ++i) {
@@ -6503,10 +6503,10 @@ implements Runnable {
                 int n4 = n;
                 this.eL[n4] = this.eL[n4] | (nArray[i] & 7) << 3 + 3 * i;
             }
-            this.money -= this.unitCost - this.cfr_renamed_0;
-            this.aiMoneySpent += this.unitCost - this.cfr_renamed_0;
-            if (this.unitCost - this.cfr_renamed_0 != 0) {
-                this.p(-(this.unitCost - this.cfr_renamed_0));
+            this.money -= this.unitCost - this.currentTrainCostSnapshot;
+            this.aiMoneySpent += this.unitCost - this.currentTrainCostSnapshot;
+            if (this.unitCost - this.currentTrainCostSnapshot != 0) {
+                this.p(-(this.unitCost - this.currentTrainCostSnapshot));
             }
             return true;
         }
@@ -8490,11 +8490,11 @@ implements Runnable {
             this.bH = -1;
             if (this.gameState == 20 && !this.ready) {
                 if (this.hx == 30) {
-                    this.gH = this.transitionCode;
+                    this.pendingTransitionCode = this.transitionCode;
                     this.gameState = 30;
                 }
                 if (this.hx == 40) {
-                    this.gH = this.transitionCode;
+                    this.pendingTransitionCode = this.transitionCode;
                     this.gameState = 40;
                 }
             }
@@ -8609,10 +8609,10 @@ implements Runnable {
                     if (this.pauseFlag) {
                         this.a(graphics, 236, 0, 15, 0);
                     }
-                    if (this.gH > -1) {
-                        this.transitionCode = this.gH;
+                    if (this.pendingTransitionCode > -1) {
+                        this.transitionCode = this.pendingTransitionCode;
                         this.o();
-                        this.gH = -1;
+                        this.pendingTransitionCode = -1;
                         this.a(graphics, this.transitionCode);
                         this.setState(20);
                     }
@@ -8669,10 +8669,10 @@ implements Runnable {
                         this.setState(20);
                         this.ee = false;
                     }
-                    if (this.gH <= -1) break;
-                    this.transitionCode = this.gH;
+                    if (this.pendingTransitionCode <= -1) break;
+                    this.transitionCode = this.pendingTransitionCode;
                     this.o();
-                    this.gH = -1;
+                    this.pendingTransitionCode = -1;
                     this.a(graphics, this.transitionCode);
                     this.setState(20);
                     break;
