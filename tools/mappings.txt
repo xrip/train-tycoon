@@ -759,3 +759,13 @@ method a j ()V                      decompressSaveBuffer     # RLE decompress sa
 method a d (Z)Z                     saveOrLoadBool          # wraps saveOrLoadByte
 method a b (B)B                     saveOrLoadByte          # single-byte save/load (savePendingMode dispatch)
 method a g ()V                      maybeAiTakeTurn         # setState(105) if AI should take a turn
+
+# ---- Batch 33: track-build / placement / train state / spawn ----
+method a a (IIIZ)Z                   isAdjacentTileEmpty     # checks tileMap[n-1..n2-1] <= 33 (path-build validity)
+method a a (IIZ)V                    smoothTileAt            # height smoothing per tile (calls smoothHeightMap)
+method a a (IIIIIIII)V               computeTrackBuildCost   # track-build with start/step/end (sets trackStart/Step)
+method a a (ZIIIIIIZI)V              placeTrackAtCursor      # places track tile at tileCursorX/Y (trackMap=0x48|n9 etc.)
+method a a (IIZZ)V                   handleCursorClick      # money deduct; sets ck flag for affordability
+method a a (IIIZZI)V                 addMenuItem             # builds the menu row tables (sets buildMenuItemCode += 15)
+method a b (IIZ)V                    applyTrainStateTick     # train state tick: updates energy/counters/service
+method a m (II)V                     spawnTrainAt            # spawns a train at (n, n2) — uses spawnTrainCar
