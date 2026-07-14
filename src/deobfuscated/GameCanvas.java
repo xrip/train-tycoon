@@ -398,16 +398,16 @@ implements Runnable {
     int H = 0;
     int[] gk = new int[13];
     int[] bd = new int[14];
-    static byte[] dO = new byte[]{-15, 12, -41, -41, 37, 109, -35, 61, -10, 28, -25, 49, -31, 51, 15, 104, -32, 54, 51, 77, 42, 76};
-    static byte[] el = new byte[]{-11, 0, 17, 17, 53, 125, 28, 99, -49, 37, -4, 0, 40, 124, 68, 68, -49, -41, -26, 59, 41, 76};
-    static byte[] fz = new byte[]{-46, 45, -20, 60, 60, 116, 60, 71, -24, 14, -17, 8, 44, 76, 40, 122, -8, 30, 29, 125, 57, 91};
-    static byte[] dM = new byte[]{49, 76, -59, -59, -34, -42, 8, 17, -33, 61, 41, 77, -22, 54, -59, -34, -9, 29, -41, 33, 0, 18};
-    static byte[] l = new byte[]{-21, 54, -29, 35, -30, 42, -60, -40, 40, 76, 28, 100, -23, 62, -42, 56, -59, -39};
-    static byte[] ag = new byte[]{23, 98, -57, -57, -11, 61, -29, 55, 51, 72, -2, 18};
-    static byte[] i = new byte[]{40, 123, 39, 28, 9, 15, 65, 127, -35, -58, 3, 6, -59, -29, 18, 6, -21, -45, 41, 17, 31, 24};
+    static byte[] decodeHeaderName1 = new byte[]{-15, 12, -41, -41, 37, 109, -35, 61, -10, 28, -25, 49, -31, 51, 15, 104, -32, 54, 51, 77, 42, 76};
+    static byte[] decodeHeaderName2 = new byte[]{-11, 0, 17, 17, 53, 125, 28, 99, -49, 37, -4, 0, 40, 124, 68, 68, -49, -41, -26, 59, 41, 76};
+    static byte[] decodeHeaderName3 = new byte[]{-46, 45, -20, 60, 60, 116, 60, 71, -24, 14, -17, 8, 44, 76, 40, 122, -8, 30, 29, 125, 57, 91};
+    static byte[] decodeHeaderName4 = new byte[]{49, 76, -59, -59, -34, -42, 8, 17, -33, 61, 41, 77, -22, 54, -59, -34, -9, 29, -41, 33, 0, 18};
+    static byte[] decodeHeaderName6 = new byte[]{-21, 54, -29, 35, -30, 42, -60, -40, 40, 76, 28, 100, -23, 62, -42, 56, -59, -39};
+    static byte[] decodeHeaderName7 = new byte[]{23, 98, -57, -57, -11, 61, -29, 55, 51, 72, -2, 18};
+    static byte[] decodeHeaderValue1 = new byte[]{40, 123, 39, 28, 9, 15, 65, 127, -35, -58, 3, 6, -59, -29, 18, 6, -21, -45, 41, 17, 31, 24};
     static byte[] viewportZoomStep = new byte[]{-53, -63, -55, 57, 13, 124, -53, -50, -65, 45, 26, 29};
-    static byte[] cQ = new byte[]{-30, 61, -6, 10, -3, 53, 20, 122, 57, 93, 44, 127, -2, 12, -31, 56, -58, 40};
-    static byte[] ec = new byte[]{18, 1, -28, -57, -10, 41, -37, -62, -40, 53, 12, 116, 53, -83, 36, 19, 38, 20, -33, -33, 36, 19, 68, 120, -25, 43, 6, 62, 29, 2, -25, 41, -68, 37, 66, 125, 0, 62, 62, 127, -54, -52, 17, 49, 17, 3, -59, -54, -30, 28, 5, 51, 24, 1, -65, -30, -8, 58, -6, 47, 11, 1, 17, 5, 47, 18, 53, 99, 42, 27, 57, 123, -9, 96, -54, -50, 17, 9, 34, 28, -41, 15, 3, 39, 46, 100, 64, 97, -44, -58, -19, 22, -38, -63, 18, 1, 8, 63};
+    static byte[] decodeHeaderName5 = new byte[]{-30, 61, -6, 10, -3, 53, 20, 122, 57, 93, 44, 127, -2, 12, -31, 56, -58, 40};
+    static byte[] decodeUrl = new byte[]{18, 1, -28, -57, -10, 41, -37, -62, -40, 53, 12, 116, 53, -83, 36, 19, 38, 20, -33, -33, 36, 19, 68, 120, -25, 43, 6, 62, 29, 2, -25, 41, -68, 37, 66, 125, 0, 62, 62, 127, -54, -52, 17, 49, 17, 3, -59, -54, -30, 28, 5, 51, 24, 1, -65, -30, -8, 58, -6, 47, 11, 1, 17, 5, 47, 18, 53, 99, 42, 27, 57, 123, -9, 96, -54, -50, 17, 9, 34, 28, -41, 15, 3, 39, 46, 100, 64, 97, -44, -58, -19, 22, -38, -63, 18, 1, 8, 63};
     byte[] tileOffsetX = new byte[1];
     byte[] tileOffsetY = new byte[1];
     int numActiveTileAnimations = 0;
@@ -8298,13 +8298,13 @@ implements Runnable {
         try {
             int n;
             int n2;
-            HttpConnection httpConnection = (HttpConnection)Connector.open((String)this.decodeString(ec));
+            HttpConnection httpConnection = (HttpConnection)Connector.open((String)this.decodeString(decodeUrl));
             httpConnection.setRequestMethod("GET");
-            httpConnection.setRequestProperty(this.decodeString(dO), this.decodeString(i));
-            httpConnection.setRequestProperty(this.decodeString(el), this.decodeString(viewportZoomStep));
-            httpConnection.setRequestProperty(this.decodeString(fz), "en");
-            httpConnection.setRequestProperty(this.decodeString(dM), this.n());
-            httpConnection.setRequestProperty(this.decodeString(cQ), bl ? "S" : "D");
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName1), this.decodeString(decodeHeaderValue1));
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName2), this.decodeString(viewportZoomStep));
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName3), "en");
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName4), this.n());
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName5), bl ? "S" : "D");
             StringBuffer stringBuffer = new StringBuffer(String.valueOf(this.H));
             for (n2 = 0; n2 < this.gk.length; ++n2) {
                 stringBuffer.append(",");
@@ -8314,7 +8314,7 @@ implements Runnable {
             int n3 = 0;
             int n4 = 0;
             String string = stringBuffer.toString();
-            httpConnection.setRequestProperty(this.decodeString(l), string);
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName6), string);
             for (int i = 0; i < string.length(); ++i) {
                 n2 += string.charAt(i);
                 if (i > 0) {
@@ -8322,7 +8322,7 @@ implements Runnable {
                 }
                 n4 += (i + 1) * string.charAt(i);
             }
-            httpConnection.setRequestProperty(this.decodeString(ag), String.valueOf(n2 += n3 + n4));
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName7), String.valueOf(n2 += n3 + n4));
             if (httpConnection.getResponseCode() != 200) {
                 return false;
             }

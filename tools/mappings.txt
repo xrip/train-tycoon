@@ -682,3 +682,15 @@ field  a eW   spriteLoadCounter      # int; increments as sprites are loaded; tr
 field  a aM   scenarioStepCompare    # int; current scenario-step comparator
 # Build-menu auto-cancel flag (set when build is cancelled)
 field  a aC   buildCancelled         # boolean; true when build is cancelled
+
+# ---- Batch 27: high-score network decode tables ----
+# Each byte[] is a XOR-encoded string passed to decodeString(). Names below.
+field  a ec   decodeUrl              # static byte[]; high-score server URL
+field  a dO   decodeHeaderName1      # static byte[]; first HTTP header name
+field  a i    decodeHeaderValue1     # static byte[]; first HTTP header value
+field  a el   decodeHeaderName2      # static byte[]; second HTTP header name
+field  a fz   decodeHeaderName3      # static byte[]; language header name
+field  a dM   decodeHeaderName4      # static byte[]; user-agent header name
+field  a cQ   decodeHeaderName5      # static byte[]; action header name (S/D)
+field  a l    decodeHeaderName6      # static byte[]; score header name
+field  a ag   decodeHeaderName7      # static byte[]; score-value header name
