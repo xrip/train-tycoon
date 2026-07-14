@@ -590,3 +590,19 @@ method a c (I)I                 computeMapTrainMetric     # iterates trackMap+tr
 method a a (Ljavax/microedition/lcdui/Graphics;IIB)V  drawRouteSpritePreview # composes two sprite bitmaps via trainSelectionIndex
 method a a (II)V                setCanvasSize             # recreates backbuffer if e/hs changed
 method a s (I)I                 saveIntToBuffer           # writes 4-byte int to saveBuffer (savePendingMode aware)
+
+# ---- Batch 23: AI/track + sprite atlas + display statics ----
+# Track-piece attribute table (byte[12][2]; [eraMin, valueOffset]) used by AI train buy.
+field  a a    trackPieceRequirements  # byte[12][2]; a[n][0]=eraMin, a[n][1]=valueOffset for AI buy
+# BFS distance grid for path validation (placed at 20, decremented as path spreads).
+field  a aQ   pathDistanceGrid        # short[mapWidth][mapHeight]; BFS distance for path validation
+# Sprite atlas: byte[][] of sprite bitmaps; ds[] is index into n (per-sprite bitmap).
+field  a n    spriteBitmapTable       # byte[][]; the sprite atlas (256+ sprites, each is byte[])
+field  a ds   spriteIndexTable        # byte[]; index into spriteBitmapTable for each sprite ID
+# Year-graph offset array (12 entries, year - 1940 stored; rendered in case 33).
+field  a o    yearGraphOffsets        # byte[12]; year offset from 1940 for year-graph display
+# AI track-piece code: cycles 66,67,68 as new track tiles are placed.
+field  a hu   nextTrackPieceCode      # byte; cycles 66..68 for new track placements
+# Display statics (canvas dimensions)
+field  a e    screenWidth             # static int; canvas width in pixels (was 'e')
+field  a hj   mapHalfWidth            # int; = (mapWidth - 1) * 8 — half-width for iso projection

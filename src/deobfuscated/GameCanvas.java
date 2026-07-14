@@ -50,7 +50,7 @@ implements Runnable {
     final int D;
     int mapWidth;
     int mapHeight;
-    int hj = (this.mapWidth - 1) * 8;
+    int mapHalfWidth = (this.mapWidth - 1) * 8;
     int mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
     int mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
     int gU = this.mapScreenWidth / 2;
@@ -109,7 +109,7 @@ implements Runnable {
     int currentKey = 0;
     boolean ee = false;
     int dp = 255;
-    static int e = 1;
+    static int screenWidth = 1;
     static int hs = 1;
     static int eN = hs - 30;
     static int fX = hs - 15;
@@ -227,7 +227,7 @@ implements Runnable {
     boolean cH = false;
     boolean dP = false;
     int screenParam;
-    short[][] aQ;
+    short[][] pathDistanceGrid;
     int placementX;
     int placementY;
     int demolishX;
@@ -341,7 +341,7 @@ implements Runnable {
     int[] dG = new int[12];
     int[] ef = new int[12];
     int[] L = new int[12];
-    byte[] o = new byte[12];
+    byte[] yearGraphOffsets = new byte[12];
     byte[] dm = new byte[12];
     byte[] fA = new byte[12];
     int industryCategory;
@@ -351,12 +351,12 @@ implements Runnable {
     int dD;
     int k;
     byte difficultyCycle = 1;
-    int hu = 66;
+    int nextTrackPieceCode = 66;
     byte cd = (byte)15;
     byte fP = (byte)12;
     byte[] routeResourceFlags = new byte[6];
     byte[][] aK = new byte[][]{{1, 3, 13}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {1, 2, 3, 13, 14, 15}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {1, 2, 3, 13, 14, 15}, {4, 9}, {5, 10}, {6, 11}, {7, 12}, {8, 12}, {1, 2, 3, 13}, {1, 2, 3, 14}};
-    byte[][] a = new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}};
+    byte[][] trackPieceRequirements = new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}};
     byte[] menuRowType = new byte[6];
     byte[] bh = new byte[6];
     byte[] bY = new byte[6];
@@ -437,7 +437,7 @@ implements Runnable {
     int scenarioStep = 0;
     int ao = 0;
     Random rng = new Random(System.currentTimeMillis());
-    Image backbuffer = Image.createImage((int)e, (int)hs);
+    Image backbuffer = Image.createImage((int)screenWidth, (int)hs);
     Graphics backbufferG = this.backbuffer.getGraphics();
     Image[] tileSprites;
     byte[] tileSpriteIndex = new byte[255];
@@ -449,8 +449,8 @@ implements Runnable {
     int transitionCode = 0;
     boolean ready = true;
     int loadStep = 0;
-    byte[] ds;
-    byte[][] n;
+    byte[] spriteIndexTable;
+    byte[][] spriteBitmapTable;
     int timerA1 = 0;
     int timerA2 = 0;
     int timerB1 = 0;
@@ -977,7 +977,7 @@ implements Runnable {
             n18 += 6;
         }
         this.currentSpriteId = this.spriteData[s + 15];
-        int n20 = (e - n18) / 2;
+        int n20 = (screenWidth - n18) / 2;
         int n21 = (hs - n19) / 2;
         int n22 = 6;
         int n23 = 6;
@@ -1261,7 +1261,7 @@ implements Runnable {
         if (bl) {
             graphics.setClip(this.clipX, this.clipY, this.clipWidth, this.clipHeight);
         } else {
-            graphics.setClip(0, 0, e, hs);
+            graphics.setClip(0, 0, screenWidth, hs);
         }
     }
 
@@ -2062,13 +2062,13 @@ implements Runnable {
         if (this.viewportCenterY < 0) {
             this.viewportCenterY = 0;
         }
-        if (this.viewportCenterX > this.mapScreenWidth - e) {
-            this.viewportCenterX = this.mapScreenWidth - e;
+        if (this.viewportCenterX > this.mapScreenWidth - screenWidth) {
+            this.viewportCenterX = this.mapScreenWidth - screenWidth;
         }
         if (this.viewportCenterY > this.mapScreenHeight - eN) {
             this.viewportCenterY = this.mapScreenHeight - eN;
         }
-        this.viewportBaseX = this.viewportCenterX + e / 2;
+        this.viewportBaseX = this.viewportCenterX + screenWidth / 2;
         this.viewportBaseY = this.viewportCenterY + eN / 2;
         this.mapScaleX = this.viewportBaseX * 2;
         this.mapScaleY = this.viewportBaseY * 2;
@@ -2121,9 +2121,9 @@ implements Runnable {
             bl = true;
             this.viewportCenterY = this.viewportBaseY - 11;
         }
-        if (this.viewportBaseX - this.viewportCenterX >= e - 20) {
+        if (this.viewportBaseX - this.viewportCenterX >= screenWidth - 20) {
             bl = true;
-            this.viewportCenterX = this.viewportBaseX - e + 21;
+            this.viewportCenterX = this.viewportBaseX - screenWidth + 21;
         }
         if (this.viewportBaseY - this.viewportCenterY >= eN - 20) {
             bl = true;
@@ -2143,8 +2143,8 @@ implements Runnable {
             this.viewportCenterY = 0;
             bl = false;
         }
-        if (this.viewportCenterX > this.mapScreenWidth - e) {
-            this.viewportCenterX = this.mapScreenWidth - e;
+        if (this.viewportCenterX > this.mapScreenWidth - screenWidth) {
+            this.viewportCenterX = this.mapScreenWidth - screenWidth;
             bl = false;
         }
         if (this.viewportCenterY > this.mapScreenHeight - eN) {
@@ -2165,7 +2165,7 @@ implements Runnable {
 
     void computeIsoCorners(int n, int n2, int[] nArray, int[] nArray2, boolean bl) {
         int n3 = n * 16 + n2 * 16 + 16;
-        int n4 = this.hj - n * 8 + n2 * 8 + 8;
+        int n4 = this.mapHalfWidth - n * 8 + n2 * 8 + 8;
         nArray[0] = n3 - 16;
         nArray[1] = n3;
         nArray[2] = n3;
@@ -2192,15 +2192,15 @@ implements Runnable {
         int n4;
         int n5 = 0;
         int n6 = 0;
-        int n7 = this.viewportBaseX - 2 * this.viewportBaseY + 16 + 2 * this.hj;
-        int n8 = this.viewportBaseX + 2 * this.viewportBaseY - 16 - 2 * this.hj;
+        int n7 = this.viewportBaseX - 2 * this.viewportBaseY + 16 + 2 * this.mapHalfWidth;
+        int n8 = this.viewportBaseX + 2 * this.viewportBaseY - 16 - 2 * this.mapHalfWidth;
         n8 /= 32;
         this.blockBuildMenu = true;
         block0: for (n4 = (n7 /= 32) - 1; n4 <= n7 + 1; ++n4) {
             for (n3 = n8 - 1; n3 <= n8 + 1; ++n3) {
                 if (n4 < 0 || n4 > this.mapWidth - 1 || n3 < 0 || n3 > this.mapHeight - 1) continue;
                 n5 = n3 * 16 + n4 * 16 + 16;
-                n6 = this.hj - n4 * 8 + n3 * 8 + 8;
+                n6 = this.mapHalfWidth - n4 * 8 + n3 * 8 + 8;
                 this.computeIsoCorners(n4, n3, this.selectionTileX, this.selectionTileY, false);
                 n2 = this.crossProduct2D(this.viewportBaseX, this.viewportBaseY, this.selectionTileX[0], this.selectionTileY[0], this.selectionTileX[1], this.selectionTileY[1]) * this.crossProduct2D(this.viewportBaseX, this.viewportBaseY, this.selectionTileX[2], this.selectionTileY[2], this.selectionTileX[3], this.selectionTileY[3]);
                 n = this.crossProduct2D(this.viewportBaseX, this.viewportBaseY, this.selectionTileX[0], this.selectionTileY[0], this.selectionTileX[2], this.selectionTileY[2]) * this.crossProduct2D(this.viewportBaseX, this.viewportBaseY, this.selectionTileX[1], this.selectionTileY[1], this.selectionTileX[3], this.selectionTileY[3]);
@@ -3168,7 +3168,7 @@ implements Runnable {
     void drawConfirmBar(Graphics graphics) {
         this.drawHeaderBar(graphics);
         graphics.setColor(0x606060);
-        graphics.fillRect(0, fX, e, 15);
+        graphics.fillRect(0, fX, screenWidth, 15);
         this.drawMenuRow(graphics, 201, 10, 0, false);
         this.drawMenuRow(graphics, 235, 10, 18, false);
         graphics.setColor(0xFFFFFF);
@@ -3180,12 +3180,12 @@ implements Runnable {
         if (this.fr != this.dayOfMonth || this.fd != this.monthOfYear || this.dN != this.year || this.cy != this.money || this.menuDirty) {
             int n;
             graphics.setColor(0x909090);
-            graphics.fillRect(0, 0, e, 14);
+            graphics.fillRect(0, 0, screenWidth, 14);
             graphics.setColor(0xBBBBBB);
-            graphics.drawRect(0, 0, e, 14);
+            graphics.drawRect(0, 0, screenWidth, 14);
             graphics.setColor(0x222222);
-            graphics.drawLine(1, 14, e, 14);
-            graphics.drawLine(e - 1, 1, e - 1, 14);
+            graphics.drawLine(1, 14, screenWidth, 14);
+            graphics.drawLine(screenWidth - 1, 1, screenWidth - 1, 14);
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append(Math.abs(this.money));
             stringBuffer = stringBuffer.reverse();
@@ -3201,7 +3201,7 @@ implements Runnable {
                 byArray[n + 1] = string.charAt(n) == '-' ? 22 : (byte)(string.charAt(n) - 47);
             }
             this.a(graphics, 1, 5, byArray, false);
-            string = (String.valueOf(this.dayOfMonth).length() == 1 ? "0" : "") + this.dayOfMonth + "." + (String.valueOf(this.monthOfYear).length() == 1 ? "0" : "") + this.monthOfYear + "." + (e < 140 ? this.year - 1900 : this.year);
+            string = (String.valueOf(this.dayOfMonth).length() == 1 ? "0" : "") + this.dayOfMonth + "." + (String.valueOf(this.monthOfYear).length() == 1 ? "0" : "") + this.monthOfYear + "." + (screenWidth < 140 ? this.year - 1900 : this.year);
             byArray = new byte[string.length()];
             for (n = 0; n < string.length(); ++n) {
                 if (string.charAt(n) >= '0' && string.charAt(n) <= '9') {
@@ -3210,7 +3210,7 @@ implements Runnable {
                 if (string.charAt(n) != '.') continue;
                 byArray[n] = 11;
             }
-            this.a(graphics, e - (e < 140 ? 49 : 61), 5, byArray, false);
+            this.a(graphics, screenWidth - (screenWidth < 140 ? 49 : 61), 5, byArray, false);
             this.cy = this.money;
             this.fr = this.dayOfMonth;
             this.fd = this.monthOfYear;
@@ -3223,9 +3223,9 @@ implements Runnable {
         if (this.menuDirty) {
             boolean bl = false;
             this.backbufferG.setColor(0x606060);
-            this.backbufferG.fillRect(0, fX, e, 15);
+            this.backbufferG.fillRect(0, fX, screenWidth, 15);
             int n = this.c(this.menuItemCode[this.buildMenuMode][this.buildMenuIndex]);
-            int n2 = n + 15 - e;
+            int n2 = n + 15 - screenWidth;
             if (n2 < 0) {
                 n2 = 0;
             }
@@ -3238,12 +3238,12 @@ implements Runnable {
             }
             if (this.buildMenuMode == 2) {
                 String string = String.valueOf(Math.abs(this.selectionCost));
-                byte[] byArray = new byte[string.length() + this.n[this.ds[10]].length + 1];
+                byte[] byArray = new byte[string.length() + this.spriteBitmapTable[this.spriteIndexTable[10]].length + 1];
                 for (int i = 0; i < string.length(); ++i) {
                     byArray[i + 1] = (byte)(string.charAt(i) - 47);
                 }
                 byArray[0] = 24;
-                System.arraycopy(this.n[this.ds[10]], 0, byArray, string.length() + 1, this.n[this.ds[10]].length);
+                System.arraycopy(this.spriteBitmapTable[this.spriteIndexTable[10]], 0, byArray, string.length() + 1, this.spriteBitmapTable[this.spriteIndexTable[10]].length);
                 this.a(this.backbufferG, 35, fX + 5, byArray, false);
             }
             this.menuDirty = false;
@@ -3266,7 +3266,7 @@ implements Runnable {
             byArray[i + 1] = (byte)(string.charAt(i) - 47);
         }
         byArray[0] = 24;
-        this.a(graphics, e, 15 + n2, n < 0 ? 1 : 2, 4, byArray);
+        this.a(graphics, screenWidth, 15 + n2, n < 0 ? 1 : 2, 4, byArray);
         return n2 + 15;
     }
 
@@ -3290,7 +3290,7 @@ implements Runnable {
     void drawConfirmDialog(Graphics graphics) {
         if (this.confirmCounter > 0) {
             if (this.confirmTargetState >= 0) {
-                this.a(graphics, 10, 10, 0, 37, this.n[this.ds[120 + this.confirmTargetState]]);
+                this.a(graphics, 10, 10, 0, 37, this.spriteBitmapTable[this.spriteIndexTable[120 + this.confirmTargetState]]);
             }
             --this.confirmCounter;
         }
@@ -3787,19 +3787,19 @@ implements Runnable {
             case 14: {
                 switch (this.screenParam) {
                     case 0: {
-                        return this.n[this.ds[11]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[11]];
                     }
                     case 1: {
-                        return this.n[this.ds[12]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[12]];
                     }
                     case 2: {
-                        return this.n[this.ds[13]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[13]];
                     }
                     case 3: {
-                        return this.n[this.ds[14]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[14]];
                     }
                     case 4: {
-                        return this.n[this.ds[15]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[15]];
                     }
                 }
                 break;
@@ -3807,19 +3807,19 @@ implements Runnable {
             case 4: {
                 switch (n2) {
                     case 1: {
-                        return this.n[this.ds[25 + this.ae]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[25 + this.ae]];
                     }
                     case 2: {
-                        return this.n[this.ds[30 + this.difficultyA]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[30 + this.difficultyA]];
                     }
                     case 3: {
-                        return this.n[this.ds[35 + this.difficultySlot]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[35 + this.difficultySlot]];
                     }
                     case 4: {
-                        return this.n[this.ds[40 + this.difficultyB]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[40 + this.difficultyB]];
                     }
                     case 5: {
-                        return this.n[this.ds[40 + this.difficultyC]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[40 + this.difficultyC]];
                     }
                     case 6: {
                         return this.p(this.difficultyCycle, 0);
@@ -3830,8 +3830,8 @@ implements Runnable {
             case 20: {
                 switch (n2) {
                     case 0: {
-                        byte[] byArray = this.n[this.ds[80 + (this.trainSelectionIndex[this.junctionDirCursor] >> 8 & 0xFF)]];
-                        byte[] byArray2 = this.n[this.ds[86 + (this.trainSelectionIndex[this.junctionDirCursor] & 0xFF)]];
+                        byte[] byArray = this.spriteBitmapTable[this.spriteIndexTable[80 + (this.trainSelectionIndex[this.junctionDirCursor] >> 8 & 0xFF)]];
+                        byte[] byArray2 = this.spriteBitmapTable[this.spriteIndexTable[86 + (this.trainSelectionIndex[this.junctionDirCursor] & 0xFF)]];
                         byte[] byArray3 = new byte[byArray2.length + byArray.length];
                         System.arraycopy(byArray2, 0, byArray3, 0, byArray2.length);
                         System.arraycopy(byArray, 0, byArray3, byArray2.length, byArray.length);
@@ -3849,10 +3849,10 @@ implements Runnable {
             case 21: {
                 switch (n2) {
                     case 0: {
-                        return this.n[this.ds[100 + this.stationDirectionCode[this.stationDirCursor]]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[100 + this.stationDirectionCode[this.stationDirCursor]]];
                     }
                     case 1: {
-                        return this.n[this.ds[106 + this.stationDirectionCode[this.stationDirCursor] / 2]];
+                        return this.spriteBitmapTable[this.spriteIndexTable[106 + this.stationDirectionCode[this.stationDirCursor] / 2]];
                     }
                     case 2: {
                         return this.p(this.prevStationRevenue[this.stationDirCursor], 0);
@@ -3866,19 +3866,19 @@ implements Runnable {
             case 10: {
                 switch (n2) {
                     case 1: {
-                        return !ch ? this.n[this.ds[20]] : this.n[this.ds[21]];
+                        return !ch ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 2: {
-                        return !selectionHidden ? this.n[this.ds[20]] : this.n[this.ds[21]];
+                        return !selectionHidden ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 3: {
-                        return cc ? this.n[this.ds[20]] : this.n[this.ds[21]];
+                        return cc ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 4: {
-                        return q ? this.n[this.ds[20]] : this.n[this.ds[21]];
+                        return q ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 5: {
-                        return this.ac ? this.n[this.ds[20]] : this.n[this.ds[21]];
+                        return this.ac ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 6: {
                         return this.p(this.gh, 0);
@@ -3918,7 +3918,7 @@ implements Runnable {
             case 26: {
                 int n3;
                 if (n2 == 0) {
-                    return this.n[this.ds[60 + this.trainEraOrStage[this.trainAtCursor]]];
+                    return this.spriteBitmapTable[this.spriteIndexTable[60 + this.trainEraOrStage[this.trainAtCursor]]];
                 }
                 if (n2 == 6) {
                     return this.b(this.trainRevenue[this.trainAtCursor]);
@@ -3936,7 +3936,7 @@ implements Runnable {
                     return this.b(this.baseTrainCostSnapshot - this.currentTrainCostSnapshot);
                 }
                 if (n2 == 20) {
-                    return this.trainAiOverride[this.trainAtCursor] == 0 ? this.n[this.ds[21]] : this.n[this.ds[20]];
+                    return this.trainAiOverride[this.trainAtCursor] == 0 ? this.spriteBitmapTable[this.spriteIndexTable[21]] : this.spriteBitmapTable[this.spriteIndexTable[20]];
                 }
                 if (n2 <= 0 || n2 >= 6) break;
                 int n4 = 0;
@@ -4027,7 +4027,7 @@ implements Runnable {
             }
             case 33: {
                 if (n2 == 65) {
-                    return this.n[this.ds[57 + this.yearGraphMode]];
+                    return this.spriteBitmapTable[this.spriteIndexTable[57 + this.yearGraphMode]];
                 }
                 if (n2 >= 40) {
                     if (!this.yearGraphAlt) {
@@ -4055,17 +4055,17 @@ implements Runnable {
                     if (n2 >= 20) {
                         return !this.yearGraphAlt ? this.p(this.dm[n2 - 20], 0) : null;
                     }
-                    return !this.yearGraphAlt ? this.p(this.o[n2] + 1940, 20) : this.p(this.dm[n2] + 1940, 0);
+                    return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 1940, 20) : this.p(this.dm[n2] + 1940, 0);
                 }
             }
             case 34: {
                 if (n2 == 65) {
-                    return this.n[this.ds[54 + this.yearGraphMode]];
+                    return this.spriteBitmapTable[this.spriteIndexTable[54 + this.yearGraphMode]];
                 }
                 if (n2 >= 20) {
                     return !this.yearGraphAlt ? this.p(this.dm[n2 - 20], 0) : null;
                 }
-                return !this.yearGraphAlt ? this.p(this.o[n2] + 40, 20) : this.p(this.dm[n2] + 1940, 0);
+                return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 40, 20) : this.p(this.dm[n2] + 1940, 0);
             }
             case 41: 
             case 42: 
@@ -4102,7 +4102,7 @@ implements Runnable {
             case 60: {
                 if (n2 % 2 == 1) {
                     int n5 = n2 / 2;
-                    return this.n[this.c(this.ds[this.menuRowType[this.gP[n5]] + 160])];
+                    return this.spriteBitmapTable[this.c(this.spriteIndexTable[this.menuRowType[this.gP[n5]] + 160])];
                 }
                 int n6 = (n2 - 1) / 2;
                 return this.p(this.computeMenuRowDisplayValue(this.gP[n6]), 29);
@@ -4941,18 +4941,18 @@ implements Runnable {
     }
 
     boolean tryBuildPath() {
-        this.aQ = new short[this.mapWidth][this.mapHeight];
+        this.pathDistanceGrid = new short[this.mapWidth][this.mapHeight];
         this.fl = 10;
         this.selectionCost = 0;
         this.b();
-        this.aQ[this.placementX][this.placementY] = 20;
+        this.pathDistanceGrid[this.placementX][this.placementY] = 20;
         this.floodFillPath();
-        if (this.aQ[this.demolishX][this.demolishY] < 20) {
-            this.aQ = null;
+        if (this.pathDistanceGrid[this.demolishX][this.demolishY] < 20) {
+            this.pathDistanceGrid = null;
             return false;
         }
         this.validatePathStep();
-        this.aQ = null;
+        this.pathDistanceGrid = null;
         this.scanTrackTiles();
         if (this.et == 0) {
             return false;
@@ -4984,16 +4984,16 @@ implements Runnable {
             if (n4 == this.placementX && n5 == this.placementY) {
                 bl = false;
             } else if (this.ed % 2 == 0) {
-                if (!(this.findPathStep(n4 + 1, n5, this.aQ[n4][n5]) || this.findPathStep(n4 - 1, n5, this.aQ[n4][n5]) || this.findPathStep(n4, n5 + 1, this.aQ[n4][n5]) || this.findPathStep(n4, n5 - 1, this.aQ[n4][n5]))) {
+                if (!(this.findPathStep(n4 + 1, n5, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4 - 1, n5, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4, n5 + 1, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4, n5 - 1, this.pathDistanceGrid[n4][n5]))) {
                     bl = false;
                     bl2 = false;
                 }
-            } else if (!(this.findPathStep(n4, n5 + 1, this.aQ[n4][n5]) || this.findPathStep(n4, n5 - 1, this.aQ[n4][n5]) || this.findPathStep(n4 + 1, n5, this.aQ[n4][n5]) || this.findPathStep(n4 - 1, n5, this.aQ[n4][n5]))) {
+            } else if (!(this.findPathStep(n4, n5 + 1, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4, n5 - 1, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4 + 1, n5, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4 - 1, n5, this.pathDistanceGrid[n4][n5]))) {
                 bl = false;
                 bl2 = false;
             }
             ++this.ed;
-            this.aQ[n4][n5] = 9;
+            this.pathDistanceGrid[n4][n5] = 9;
             n4 = this.dX;
             n5 = this.gO;
             n2 = 0;
@@ -5012,13 +5012,13 @@ implements Runnable {
             }
             if (n == 0 && n2 == 0) continue;
             do {
-                this.aQ[n4][n5] = 9;
-            } while (this.aQ[n4 += n][n5 += n2] == 3);
+                this.pathDistanceGrid[n4][n5] = 9;
+            } while (this.pathDistanceGrid[n4 += n][n5 += n2] == 3);
         } while (bl);
         for (n3 = 0; n3 < this.mapWidth; ++n3) {
             for (n2 = 0; n2 < this.mapHeight; ++n2) {
-                if (this.aQ[n3][n2] == 9) continue;
-                this.aQ[n3][n2] = 0;
+                if (this.pathDistanceGrid[n3][n2] == 9) continue;
+                this.pathDistanceGrid[n3][n2] = 0;
             }
         }
         if (bl2) {
@@ -5027,11 +5027,11 @@ implements Runnable {
                     boolean bl3;
                     boolean bl4;
                     boolean bl5;
-                    if (this.aQ[n3][n2] != 9) continue;
-                    int n6 = n3 > 0 ? (this.aQ[n3 - 1][n2] == 9 ? 1 : 0) : (n = 0);
-                    boolean bl6 = n3 < this.mapWidth - 1 ? this.aQ[n3 + 1][n2] == 9 : (bl5 = false);
-                    boolean bl7 = n2 > 0 ? this.aQ[n3][n2 - 1] == 9 : (bl4 = false);
-                    boolean bl8 = n2 < this.mapHeight - 1 ? this.aQ[n3][n2 + 1] == 9 : (bl3 = false);
+                    if (this.pathDistanceGrid[n3][n2] != 9) continue;
+                    int n6 = n3 > 0 ? (this.pathDistanceGrid[n3 - 1][n2] == 9 ? 1 : 0) : (n = 0);
+                    boolean bl6 = n3 < this.mapWidth - 1 ? this.pathDistanceGrid[n3 + 1][n2] == 9 : (bl5 = false);
+                    boolean bl7 = n2 > 0 ? this.pathDistanceGrid[n3][n2 - 1] == 9 : (bl4 = false);
+                    boolean bl8 = n2 < this.mapHeight - 1 ? this.pathDistanceGrid[n3][n2 + 1] == 9 : (bl3 = false);
                     if ((n != 0 ? 1 : 0) + (bl5 ? 1 : 0) + (bl4 ? 1 : 0) + (bl3 ? 1 : 0) == 1) {
                         n = this.a(n != 0, n3 - 1, n2, 71, 72, 74, 78, 80, 84, 88, 90, true);
                         bl5 = this.a(bl5, n3 + 1, n2, 71, 73, 75, 78, 80, 85, 88, 90, true);
@@ -5122,7 +5122,7 @@ implements Runnable {
 
     boolean findPathStep(int n, int n2, int n3) {
         boolean bl = false;
-        if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.aQ[n][n2] >= 20 && this.aQ[n][n2] < n3) {
+        if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.pathDistanceGrid[n][n2] >= 20 && this.pathDistanceGrid[n][n2] < n3) {
             bl = true;
             this.dX = n;
             this.gO = n2;
@@ -5131,8 +5131,8 @@ implements Runnable {
     }
 
     void clearBuildPathTile(int n, int n2) {
-        if (n > 0 && n < this.mapWidth && n2 > 0 && n2 < this.mapHeight && (this.tileMap[n][n2] >= 7 && this.tileMap[n][n2] <= 10 || this.tileMap[n][n2] >= 21 && this.tileMap[n][n2] <= 24 || this.tileMap[n][n2] == 70 || this.tileMap[n][n2] == 71) && this.aQ[n][n2] > 0) {
-            this.aQ[n][n2] = 0;
+        if (n > 0 && n < this.mapWidth && n2 > 0 && n2 < this.mapHeight && (this.tileMap[n][n2] >= 7 && this.tileMap[n][n2] <= 10 || this.tileMap[n][n2] >= 21 && this.tileMap[n][n2] <= 24 || this.tileMap[n][n2] == 70 || this.tileMap[n][n2] == 71) && this.pathDistanceGrid[n][n2] > 0) {
+            this.pathDistanceGrid[n][n2] = 0;
         }
     }
 
@@ -5177,15 +5177,15 @@ implements Runnable {
 
     int hPath(int n, int n2) {
         boolean bl = false;
-        if (this.aQ[n][n2] > 0 && this.aQ[n][n2] != 3 && this.aQ[n][n2] != 7) {
+        if (this.pathDistanceGrid[n][n2] > 0 && this.pathDistanceGrid[n][n2] != 3 && this.pathDistanceGrid[n][n2] != 7) {
             int n3;
-            int n4 = n3 = this.aQ[n][n2] < 20 ? Short.MAX_VALUE : this.aQ[n][n2];
+            int n4 = n3 = this.pathDistanceGrid[n][n2] < 20 ? Short.MAX_VALUE : this.pathDistanceGrid[n][n2];
             n4 = this.h(n - 1, n2, n4);
             n4 = this.h(n + 1, n2, n4);
             n4 = this.h(n, n2 - 1, n4);
             if ((n4 = (int)this.h(n, n2 + 1, n4)) < n3) {
                 n4 = (short)(n4 + 1);
-                if (this.aQ[n][n2] == 2) {
+                if (this.pathDistanceGrid[n][n2] == 2) {
                     int n5 = 0;
                     int n6 = 0;
                     int n7 = n;
@@ -5206,23 +5206,23 @@ implements Runnable {
                         int n9 = n4;
                         do {
                             n9 = (short)(n9 + 1);
-                        } while (this.aQ[n7 += n6][n8 += n5] == 3);
-                        this.aQ[n7][n8] = n9;
+                        } while (this.pathDistanceGrid[n7 += n6][n8 += n5] == 3);
+                        this.pathDistanceGrid[n7][n8] = n9;
                         bl = true;
                     }
                 }
-                this.aQ[n][n2] = n4;
+                this.pathDistanceGrid[n][n2] = n4;
             }
         } else {
             bl = true;
         }
-        return this.aQ[this.demolishX][this.demolishY] >= 20 ? 2 : (bl ? 0 : 1);
+        return this.pathDistanceGrid[this.demolishX][this.demolishY] >= 20 ? 2 : (bl ? 0 : 1);
     }
 
     short h(int n, int n2, int n3) {
         short s = (short)n3;
-        if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.aQ[n][n2] >= 20 && this.aQ[n][n2] < s) {
-            s = this.aQ[n][n2];
+        if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.pathDistanceGrid[n][n2] >= 20 && this.pathDistanceGrid[n][n2] < s) {
+            s = this.pathDistanceGrid[n][n2];
         }
         return s;
     }
@@ -5301,7 +5301,7 @@ implements Runnable {
         int n2;
         for (n2 = 0; n2 < this.mapWidth; ++n2) {
             for (n = 0; n < this.mapHeight; ++n) {
-                this.aQ[n2][n] = 0;
+                this.pathDistanceGrid[n2][n] = 0;
             }
         }
         for (n2 = 0; n2 < this.mapWidth; ++n2) {
@@ -5310,7 +5310,7 @@ implements Runnable {
                 boolean bl;
                 boolean bl2;
                 int n4;
-                if (this.aQ[n2][n] != 0) continue;
+                if (this.pathDistanceGrid[n2][n] != 0) continue;
                 short s = 0;
                 if (this.trackMap[n2][n] == 0) {
                     s = 1;
@@ -5330,7 +5330,7 @@ implements Runnable {
                 if (by == 70 && n > 0 && n < this.mapHeight - 1 && this.trackMap[n2][n] == this.trackMap[n2][n - 1] && this.trackMap[n2][n] == this.trackMap[n2][n + 1]) {
                     s = 1;
                 }
-                this.aQ[n2][n] = s;
+                this.pathDistanceGrid[n2][n] = s;
                 if (this.tileMap[n2][n] == 7) {
                     n4 = n;
                     bl2 = false;
@@ -5348,10 +5348,10 @@ implements Runnable {
                     } while (!bl);
                     if (bl2) {
                         for (n3 = n4; n3 <= n; ++n3) {
-                            this.aQ[n2][n3] = 3;
+                            this.pathDistanceGrid[n2][n3] = 3;
                         }
-                        this.aQ[n2][n4] = 2;
-                        this.aQ[n2][n] = 2;
+                        this.pathDistanceGrid[n2][n4] = 2;
+                        this.pathDistanceGrid[n2][n] = 2;
                     }
                 }
                 if (this.tileMap[n2][n] != 8) continue;
@@ -5371,10 +5371,10 @@ implements Runnable {
                 } while (!bl);
                 if (!bl2) continue;
                 for (n3 = n4; n3 <= n2; ++n3) {
-                    this.aQ[n3][n] = 3;
+                    this.pathDistanceGrid[n3][n] = 3;
                 }
-                this.aQ[n4][n] = 2;
-                this.aQ[n2][n] = 2;
+                this.pathDistanceGrid[n4][n] = 2;
+                this.pathDistanceGrid[n2][n] = 2;
             }
         }
     }
@@ -6208,7 +6208,7 @@ implements Runnable {
         }
         n4 = this.c(this.tileMap[n5][n6]);
         n3 = n6 * 16 + n5 * 16 + 16 - this.viewportCenterX;
-        n2 = this.hj - n5 * 8 + n6 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n6] + 15;
+        n2 = this.mapHalfWidth - n5 * 8 + n6 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n6] + 15;
         if (this.trainPhase[n] >= 0) {
             switch (this.trainDir[n]) {
                 case 0: {
@@ -6898,9 +6898,9 @@ implements Runnable {
         this.a(this.trainAiOverride);
         this.industryCategory = this.saveIntToBuffer(this.industryCategory);
         this.aY = this.d(this.aY);
-        this.hu = this.saveIntToBuffer(this.hu);
-        if (this.hu == 0) {
-            this.hu = 66;
+        this.nextTrackPieceCode = this.saveIntToBuffer(this.nextTrackPieceCode);
+        if (this.nextTrackPieceCode == 0) {
+            this.nextTrackPieceCode = 66;
         }
         this.cd = this.b(this.cd);
         this.fP = this.b(this.fP);
@@ -7027,7 +7027,7 @@ implements Runnable {
         this.trackMap = new byte[this.mapWidth + 1][this.mapHeight + 1];
         this.tileElevation = new byte[this.mapWidth + 1][this.mapHeight + 1];
         this.heightMap = new byte[this.mapWidth + 2][this.mapHeight + 2];
-        this.hj = (this.mapWidth - 1) * 8;
+        this.mapHalfWidth = (this.mapWidth - 1) * 8;
         this.mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
         this.mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
         this.gU = this.mapScreenWidth / 2;
@@ -7244,12 +7244,12 @@ implements Runnable {
                 int n6 = 0;
                 for (n3 = 0; n3 < 12; ++n3) {
                     if (!bl) {
-                        this.o[n3] = (byte)(this.year - 1940);
+                        this.yearGraphOffsets[n3] = (byte)(this.year - 1940);
                         this.dm[n3] = (byte)(this.monthOfYear - n3);
                         if (this.dm[n3] < 1) {
                             this.dm[n3] = (byte)(12 + this.dm[n3]);
                             int n7 = n3;
-                            this.o[n7] = (byte)(this.o[n7] - 1);
+                            this.yearGraphOffsets[n7] = (byte)(this.yearGraphOffsets[n7] - 1);
                         }
                         if (n == 0) {
                             if (this.yrN[n3] > n6) {
@@ -7360,10 +7360,10 @@ implements Runnable {
                     this.autoExtendTrackStation(this.gS, this.bp);
                     this.autoExtendTrackStation(this.dD, this.k);
                     this.m(this.gS, this.bp);
-                    this.n(this.hu - 64);
-                    ++this.hu;
-                    if (this.hu == 69) {
-                        this.hu = 66;
+                    this.n(this.nextTrackPieceCode - 64);
+                    ++this.nextTrackPieceCode;
+                    if (this.nextTrackPieceCode == 69) {
+                        this.nextTrackPieceCode = 66;
                     }
                 }
             }
@@ -7427,38 +7427,38 @@ implements Runnable {
         boolean bl8 = n2 < this.mapHeight - 1 ? this.trackMap[n][n2 + 1] == 64 : (bl = false);
         if (bl4 || bl3) {
             this.tileMap[n][n2] = 88;
-            this.trackMap[n][n2] = (byte)this.hu;
+            this.trackMap[n][n2] = (byte)this.nextTrackPieceCode;
             if (bl3 && n > 1 && (this.tileMap[n - 1][n2] == 0 || this.tileMap[n - 1][n2] >= 29 && this.tileMap[n - 1][n2] <= 33) && (this.tileMap[n - 2][n2] == 0 || this.tileMap[n - 2][n2] >= 29 && this.tileMap[n - 2][n2] <= 33)) {
                 this.tileMap[n][n2] = 90;
                 this.tileMap[n - 1][n2] = 88;
                 this.tileMap[n - 2][n2] = 90;
-                this.trackMap[n - 1][n2] = (byte)this.hu;
-                this.trackMap[n - 2][n2] = (byte)this.hu;
+                this.trackMap[n - 1][n2] = (byte)this.nextTrackPieceCode;
+                this.trackMap[n - 2][n2] = (byte)this.nextTrackPieceCode;
             }
             if (bl4 && n < this.mapWidth - 2 && (this.tileMap[n + 1][n2] == 0 || this.tileMap[n + 1][n2] >= 29 && this.tileMap[n + 1][n2] <= 33) && (this.tileMap[n + 2][n2] == 0 || this.tileMap[n + 2][n2] >= 29 && this.tileMap[n + 2][n2] <= 33)) {
                 this.tileMap[n][n2] = 90;
                 this.tileMap[n + 1][n2] = 88;
                 this.tileMap[n + 2][n2] = 90;
-                this.trackMap[n + 1][n2] = (byte)this.hu;
-                this.trackMap[n + 2][n2] = (byte)this.hu;
+                this.trackMap[n + 1][n2] = (byte)this.nextTrackPieceCode;
+                this.trackMap[n + 2][n2] = (byte)this.nextTrackPieceCode;
             }
         }
         if (bl2 || bl) {
             this.tileMap[n][n2] = 87;
-            this.trackMap[n][n2] = (byte)this.hu;
+            this.trackMap[n][n2] = (byte)this.nextTrackPieceCode;
             if (bl2 && n2 > 1 && (this.tileMap[n][n2 - 1] == 0 || this.tileMap[n][n2 - 1] >= 29 && this.tileMap[n][n2 - 1] <= 33) && (this.tileMap[n][n2 - 2] == 0 || this.tileMap[n][n2 - 2] >= 29 && this.tileMap[n][n2 - 2] <= 33)) {
                 this.tileMap[n][n2] = 89;
                 this.tileMap[n][n2 - 1] = 87;
                 this.tileMap[n][n2 - 2] = 89;
-                this.trackMap[n][n2 - 1] = (byte)this.hu;
-                this.trackMap[n][n2 - 2] = (byte)this.hu;
+                this.trackMap[n][n2 - 1] = (byte)this.nextTrackPieceCode;
+                this.trackMap[n][n2 - 2] = (byte)this.nextTrackPieceCode;
             }
             if (bl2 && n2 < this.mapHeight - 2 && (this.tileMap[n][n2 + 1] == 0 || this.tileMap[n][n2 + 1] >= 29 && this.tileMap[n][n2 + 1] <= 33) && (this.tileMap[n][n2 + 2] == 0 || this.tileMap[n][n2 + 2] >= 29 && this.tileMap[n][n2 + 2] <= 33)) {
                 this.tileMap[n][n2] = 89;
                 this.tileMap[n][n2 + 1] = 87;
                 this.tileMap[n][n2 + 2] = 89;
-                this.trackMap[n][n2 + 1] = (byte)this.hu;
-                this.trackMap[n][n2 + 2] = (byte)this.hu;
+                this.trackMap[n][n2 + 1] = (byte)this.nextTrackPieceCode;
+                this.trackMap[n][n2 + 2] = (byte)this.nextTrackPieceCode;
             }
         }
     }
@@ -8013,7 +8013,7 @@ implements Runnable {
                         if (n5 == 4 && this.era >= 5) {
                             bl = false;
                         }
-                        if (this.er < this.a[n5 - 1][0]) {
+                        if (this.er < this.trackPieceRequirements[n5 - 1][0]) {
                             bl = false;
                         }
                         if (this.er < this.dU[n5 - 1]) {
@@ -8023,7 +8023,7 @@ implements Runnable {
                         n5 = 0;
                     }
                     int n13 = n5 - 1;
-                    this.dU[n13] = (short)(this.dU[n13] + this.c(this.a[n5 - 1][1]));
+                    this.dU[n13] = (short)(this.dU[n13] + this.c(this.trackPieceRequirements[n5 - 1][1]));
                     if (n5 == 1) {
                         this.menuRowEra[n4] = (byte)(30 + Math.abs(this.rng.nextInt() % 50));
                         this.menuRowRevenue[n4] = this.menuRowCost[n4] * this.menuRowEra[n4] / 100;
@@ -8454,8 +8454,8 @@ implements Runnable {
     }
 
     void drawRouteSpritePreview(Graphics graphics, int n, int n2, byte by) {
-        byte[] byArray = this.n[this.ds[80 + (this.trainSelectionIndex[by] >> 8 & 0xFF)]];
-        byte[] byArray2 = this.n[this.ds[86 + (this.trainSelectionIndex[by] & 0xFF)]];
+        byte[] byArray = this.spriteBitmapTable[this.spriteIndexTable[80 + (this.trainSelectionIndex[by] >> 8 & 0xFF)]];
+        byte[] byArray2 = this.spriteBitmapTable[this.spriteIndexTable[86 + (this.trainSelectionIndex[by] & 0xFF)]];
         byte[] byArray3 = new byte[byArray2.length + byArray.length];
         System.arraycopy(byArray2, 0, byArray3, 0, byArray2.length);
         System.arraycopy(byArray, 0, byArray3, byArray2.length, byArray.length);
@@ -8473,16 +8473,16 @@ implements Runnable {
         graphics.drawRect(n + n3 + 5, n2, 0, 11);
         this.clipX = 0;
         this.clipY = 15;
-        this.clipWidth = e;
+        this.clipWidth = screenWidth;
         this.clipHeight = eN;
         this.a(graphics, n + 4, n2 + 3, byArray3, true);
     }
 
     void setCanvasSize(int n, int n2) {
         if (this.eD != n || this.aJ != n2) {
-            e = n;
+            screenWidth = n;
             hs = n2;
-            this.backbuffer = Image.createImage((int)e, (int)hs);
+            this.backbuffer = Image.createImage((int)screenWidth, (int)hs);
             this.backbufferG = this.backbuffer.getGraphics();
             eN = hs - 30;
             fX = hs - 15;
@@ -8514,7 +8514,7 @@ implements Runnable {
                 graphics.setColor(0);
                 graphics.fillRect(0, 0, n, n2);
             }
-            graphics.setClip(0, 0, e, hs);
+            graphics.setClip(0, 0, screenWidth, hs);
             switch (this.gameState) {
                 case 0: 
                 case 1: 
@@ -8524,8 +8524,8 @@ implements Runnable {
                     if (this.gameState == 0) {
                         graphics.setColor(0);
                     }
-                    graphics.fillRect(0, 0, e, hs);
-                    int n3 = e / 2;
+                    graphics.fillRect(0, 0, screenWidth, hs);
+                    int n3 = screenWidth / 2;
                     int n4 = hs / 2;
                     int n5 = this.P.getWidth() / 2;
                     int n6 = this.P.getHeight();
@@ -8545,28 +8545,28 @@ implements Runnable {
                         graphics.setClip(n9 - n5, n4 - n6 / 2 + i * n7, n5 * 2, n7);
                         graphics.drawImage(this.P, n9, n4, 3);
                     }
-                    graphics.setClip(0, 0, e, hs);
+                    graphics.setClip(0, 0, screenWidth, hs);
                     break;
                 }
                 case 10: {
                     graphics.setColor(0xFFFFFF);
-                    graphics.fillRect(0, 0, e, hs);
-                    graphics.drawImage(this.P, e / 2, hs / 2, 3);
+                    graphics.fillRect(0, 0, screenWidth, hs);
+                    graphics.drawImage(this.P, screenWidth / 2, hs / 2, 3);
                     graphics.setColor(215, 222, 238);
-                    graphics.fillRect(10, hs - 13, e - 21, 9);
-                    int n10 = this.eW * (e - 20) / (this.al - 1);
+                    graphics.fillRect(10, hs - 13, screenWidth - 21, 9);
+                    int n10 = this.eW * (screenWidth - 20) / (this.al - 1);
                     graphics.setColor(60, 105, 144);
                     graphics.fillRect(10, hs - 13, n10, 9);
                     graphics.setColor(49, 64, 90);
-                    graphics.drawRect(10, hs - 13, e - 21, 9);
+                    graphics.drawRect(10, hs - 13, screenWidth - 21, 9);
                     break;
                 }
                 case 20: {
                     if (this.ready) {
                         graphics.setColor(0xFFFFFF);
-                        graphics.fillRect(0, 0, e, hs);
+                        graphics.fillRect(0, 0, screenWidth, hs);
                         if (this.P != null) {
-                            graphics.drawImage(this.P, e / 2, hs / 2, 3);
+                            graphics.drawImage(this.P, screenWidth / 2, hs / 2, 3);
                         }
                     }
                     if (this.transitionCode == 36) {
@@ -8579,16 +8579,16 @@ implements Runnable {
                 }
                 case 25: {
                     graphics.setColor(0);
-                    graphics.fillRect(0, 0, e, hs);
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[0]]);
+                    graphics.fillRect(0, 0, screenWidth, hs);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[0]]);
                     graphics.setColor(215, 222, 238);
-                    graphics.fillRect(10, hs - 23, e - 21, 9);
+                    graphics.fillRect(10, hs - 23, screenWidth - 21, 9);
                     int n11 = this.totalTilesToGenerate < 2 ? 2 : this.totalTilesToGenerate;
-                    int n12 = this.mapGenTilesDone * (e - 20) / (n11 - 1);
+                    int n12 = this.mapGenTilesDone * (screenWidth - 20) / (n11 - 1);
                     graphics.setColor(60, 105, 144);
                     graphics.fillRect(10, hs - 23, n12, 9);
                     graphics.setColor(0xFFFFFF);
-                    graphics.drawRect(10, hs - 23, e - 21, 9);
+                    graphics.drawRect(10, hs - 23, screenWidth - 21, 9);
                     break;
                 }
                 case 30: {
@@ -8598,14 +8598,14 @@ implements Runnable {
                     if (this.inputPending) {
                         int n13;
                         graphics.setColor(0);
-                        graphics.setClip(0, 15, e, fX - 15);
-                        for (n13 = 0; n13 < e; ++n13) {
+                        graphics.setClip(0, 15, screenWidth, fX - 15);
+                        for (n13 = 0; n13 < screenWidth; ++n13) {
                             graphics.drawLine(n13 * 2, 0, hs + n13 * 2, hs);
                         }
                         for (n13 = 0; n13 < hs; ++n13) {
-                            graphics.drawLine(0, n13 * 2, e, e + n13 * 2);
+                            graphics.drawLine(0, n13 * 2, screenWidth, screenWidth + n13 * 2);
                         }
-                        graphics.setClip(0, 0, e, hs);
+                        graphics.setClip(0, 0, screenWidth, hs);
                         this.drawTileSprite(graphics, 234, 0, 15, 20);
                     }
                     this.drawMoneyTicker(graphics);
@@ -8630,20 +8630,20 @@ implements Runnable {
                     break;
                 }
                 case 35: {
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[50]]);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[50]]);
                     break;
                 }
                 case 40: {
                     int n14;
-                    graphics.setClip(0, 15, e, eN);
+                    graphics.setClip(0, 15, screenWidth, eN);
                     graphics.setColor(0);
-                    graphics.fillRect(0, 15, e, eN);
+                    graphics.fillRect(0, 15, screenWidth, eN);
                     int n15 = this.viewportCenterX / 16;
                     int n16 = this.viewportCenterY / 8;
                     int n17 = this.mapWidth + this.mapHeight;
-                    int n18 = e / 2 - n15 - e / 32;
-                    if (e - n18 > n17) {
-                        n18 = e - n17;
+                    int n18 = screenWidth / 2 - n15 - screenWidth / 32;
+                    if (screenWidth - n18 > n17) {
+                        n18 = screenWidth - n17;
                     }
                     if (n18 > 0) {
                         n18 = 0;
@@ -8654,16 +8654,16 @@ implements Runnable {
                     if (n14 > 0) {
                         n14 = 0;
                     }
-                    int n19 = n17 < e ? (e - n17) / 2 : 0;
+                    int n19 = n17 < screenWidth ? (screenWidth - n17) / 2 : 0;
                     int n20 = n17 < eN ? (eN - n17) / 2 : 0;
                     graphics.drawImage(this.backbuffer, n18 + n19, 15 + n14 + n20, 20);
-                    int n21 = this.viewportCenterX - 2 * this.viewportCenterY + 16 + 2 * this.hj;
-                    int n22 = this.viewportCenterX + 2 * this.viewportCenterY - 16 - 2 * this.hj;
+                    int n21 = this.viewportCenterX - 2 * this.viewportCenterY + 16 + 2 * this.mapHalfWidth;
+                    int n22 = this.viewportCenterX + 2 * this.viewportCenterY - 16 - 2 * this.mapHalfWidth;
                     int n23 = this.mapWidth - (n21 /= 32) + (n22 /= 32);
                     int n24 = n21 + n22;
                     graphics.setColor(0xFFFFFF);
-                    graphics.drawRect(n24 + n18 + n19, 15 + n23 + n14 + n20, e / 16, eN / 8);
-                    graphics.setClip(0, 0, e, hs);
+                    graphics.drawRect(n24 + n18 + n19, 15 + n23 + n14 + n20, screenWidth / 16, eN / 8);
+                    graphics.setClip(0, 0, screenWidth, hs);
                     this.drawConfirmBar(graphics);
                     this.drawConfirmDialog(graphics);
                     if (this.ee) {
@@ -8681,23 +8681,23 @@ implements Runnable {
                     break;
                 }
                 case 45: {
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[51]]);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[51]]);
                     break;
                 }
                 case 55: {
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[52]]);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[52]]);
                     break;
                 }
                 case 65: {
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[53]]);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[53]]);
                     break;
                 }
                 case 105: {
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[49]]);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[49]]);
                     break;
                 }
                 case 120: {
-                    this.a(graphics, e / 2, hs / 2, 0, 3, this.n[this.ds[66]]);
+                    this.a(graphics, screenWidth / 2, hs / 2, 0, 3, this.spriteBitmapTable[this.spriteIndexTable[66]]);
                 }
             }
         }
@@ -8729,15 +8729,15 @@ implements Runnable {
                     XorResourceInput xorResourceInput = new XorResourceInput("/3");
                     int n2 = xorResourceInput.readByte();
                     int n3 = xorResourceInput.readByte();
-                    this.n = new byte[n2][];
-                    this.ds = new byte[n3 + 1];
+                    this.spriteBitmapTable = new byte[n2][];
+                    this.spriteIndexTable = new byte[n3 + 1];
                     for (int i = 0; i < n2; ++i) {
                         int n4 = xorResourceInput.readByte();
                         int n5 = xorResourceInput.readByte();
-                        this.n[i] = new byte[n5];
-                        this.ds[n4] = (byte)i;
+                        this.spriteBitmapTable[i] = new byte[n5];
+                        this.spriteIndexTable[n4] = (byte)i;
                         for (int j = 0; j < n5; ++j) {
-                            this.n[i][j] = (byte)xorResourceInput.readByte();
+                            this.spriteBitmapTable[i][j] = (byte)xorResourceInput.readByte();
                         }
                     }
                     xorResourceInput.close();
@@ -8779,7 +8779,7 @@ implements Runnable {
             case 30: {
                 this.backbuffer = null;
                 System.gc();
-                this.backbuffer = Image.createImage((int)e, (int)hs);
+                this.backbuffer = Image.createImage((int)screenWidth, (int)hs);
                 this.backbufferG = this.backbuffer.getGraphics();
                 this.lastViewportCenterX = -1;
                 this.menuDirty = true;
@@ -8923,7 +8923,7 @@ implements Runnable {
                             if (n2 != this.J) continue;
                             this.scenarioStep = n2;
                             this.mapWidth = this.mapHeight = n3;
-                            this.hj = (this.mapWidth - 1) * 8;
+                            this.mapHalfWidth = (this.mapWidth - 1) * 8;
                             this.mapScreenWidth = (this.mapWidth + this.mapHeight) * 16;
                             this.mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
                             this.gU = this.mapScreenWidth / 2;
@@ -9489,14 +9489,14 @@ implements Runnable {
                     --this.loadStep;
                 }
                 if (this.loadStep != 2) break;
-                if (this.hu - 66 < this.difficultyCycle) {
+                if (this.nextTrackPieceCode - 66 < this.difficultyCycle) {
                     this.placeCitiesAndIndustry();
                     this.setState(30);
                     break;
                 }
-                ++this.hu;
-                if (this.hu == 69) {
-                    this.hu = 66;
+                ++this.nextTrackPieceCode;
+                if (this.nextTrackPieceCode == 69) {
+                    this.nextTrackPieceCode = 66;
                 }
                 this.setState(30);
                 break;
@@ -9521,14 +9521,14 @@ implements Runnable {
         int n6;
         int n7;
         int n8;
-        int n9 = this.viewportCenterX - 2 * this.viewportCenterY + 16 + 2 * this.hj;
-        int n10 = this.viewportCenterX + 2 * this.viewportCenterY - 16 - 2 * this.hj;
+        int n9 = this.viewportCenterX - 2 * this.viewportCenterY + 16 + 2 * this.mapHalfWidth;
+        int n10 = this.viewportCenterX + 2 * this.viewportCenterY - 16 - 2 * this.mapHalfWidth;
         n9 /= 32;
         n10 /= 32;
         if (this.viewportCenterX != this.lastViewportCenterX || this.viewportCenterY != this.viewportCenterYCached) {
-            this.backbufferG.setClip(0, 15, e, eN);
+            this.backbufferG.setClip(0, 15, screenWidth, eN);
             this.backbufferG.setColor(0);
-            this.backbufferG.fillRect(0, 15, e, eN);
+            this.backbufferG.fillRect(0, 15, screenWidth, eN);
             this.visibleTrainCount = 0;
             this.viewportX0 = 2 * this.mapWidth;
             this.viewportY0 = 2 * this.mapHeight;
@@ -9544,7 +9544,7 @@ implements Runnable {
                     }
                     if (!(n6 != 0 && n6 <= 28 || n6 >= 77 && n6 <= 86)) {
                         n5 = n11 * 16 + n7 * 16 + 16 - this.viewportCenterX;
-                        n4 = this.hj - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
+                        n4 = this.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
                         if (this.tileElevation[n7][n11] > -1) {
                             if (n6 >= 42 && n6 <= 48 || n6 >= 70 && n6 <= 76) {
                                 this.backbufferG.drawImage(this.tileSprites[this.tileSpriteIndex[n6]], n5, n4, 33);
@@ -9557,17 +9557,17 @@ implements Runnable {
                     }
                     if (n6 >= 3 && n6 <= 28) {
                         n5 = n11 * 16 + n7 * 16 + 16 - this.viewportCenterX;
-                        n4 = this.hj - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
+                        n4 = this.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
                         this.backbufferG.drawImage(this.tileSprites[this.tileSpriteIndex[n6]], n5, n4 + this.tileSpriteYOffsetByCode[n6 - 3], 33);
                     }
                     if (n6 >= 77 && n6 <= 80) {
                         n5 = n11 * 16 + n7 * 16 + 16 - this.viewportCenterX;
-                        n4 = this.hj - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
+                        n4 = this.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
                         this.backbufferG.drawImage(this.tileSprites[this.tileSpriteIndex[n6]], n5, n4 + this.tileSpriteYOffsetByCode[n6 - 56 - 3], 33);
                     }
                     if (n6 >= 80 && n6 <= 86) {
                         n5 = n11 * 16 + n7 * 16 + 16 - this.viewportCenterX;
-                        n4 = this.hj - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
+                        n4 = this.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n7][n11] + 15;
                         n3 = 0;
                         switch (n6) {
                             case 84: {
@@ -9607,11 +9607,11 @@ implements Runnable {
             }
             this.lastViewportCenterX = this.viewportCenterX;
             this.viewportCenterYCached = this.viewportCenterY;
-            this.backbufferG.setClip(0, 0, e, hs);
+            this.backbufferG.setClip(0, 0, screenWidth, hs);
         }
         this.paintMain(graphics);
         graphics.drawImage(this.backbuffer, 0, 0, 20);
-        graphics.setClip(0, 15, e, eN);
+        graphics.setClip(0, 15, screenWidth, eN);
         this.c(graphics);
         n8 = this.viewportX1 - this.viewportX0 + 1;
         n7 = this.viewportY1 - this.viewportY0 + 1;
@@ -9643,7 +9643,7 @@ implements Runnable {
             }
             if (n2 > 28 && n2 < 128 && ((n2 < 42 || n2 > 48) && n2 < 70 || n2 > 86)) {
                 n = n4 * 16 + n5 * 16 + 16 - this.viewportCenterX;
-                n12 = this.hj - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
+                n12 = this.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
                 if (!ch) {
                     if (n2 == 54 || n2 == 55) {
                         graphics.drawImage(this.tileSprites[this.tileSpriteIndex[53]], n, n12, 33);
@@ -9680,7 +9680,7 @@ implements Runnable {
             }
             if (n3 < 128) continue;
             n = n4 * 16 + n5 * 16 + 16 - this.viewportCenterX;
-            n12 = this.hj - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
+            n12 = this.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
             int n14 = -1;
             for (int i = 0; i < 50; ++i) {
                 if (this.c(this.tileQueue[i][1]) != n5 || this.c(this.tileQueue[i][2]) != n4) continue;
@@ -9696,13 +9696,13 @@ implements Runnable {
                 for (n3 = 0; n3 < this.numSelectedTrains; ++n3) {
                     if (this.trainSelectionY[n3] != n5 || this.trainSelectionX[n3] != n4) continue;
                     n2 = n4 * 16 + n5 * 16 + 16 - this.viewportCenterX;
-                    n = this.hj - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
+                    n = this.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
                     this.drawRouteSpritePreview(graphics, n2, n - 16, (byte)n3);
                 }
             }
         }
         this.e(graphics);
-        graphics.setClip(0, 0, e, hs);
+        graphics.setClip(0, 0, screenWidth, hs);
         this.drawConfirmDialog(graphics);
     }
 
