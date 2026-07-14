@@ -107,22 +107,27 @@ hand-reconstructed the two small classes plus a skeleton of the big one.
 - `python tools/deobf.py xref` — regenerates the cross-reference (exit 0).
 - `python tools/deobf.py show NAME` — prints a method body (resolves renamed and
   overloaded names).
-- **188 identifiers named across 7 evidence-checked batches.** Major clusters
+- **276 identifiers named across 11 evidence-checked batches.** Major clusters
   covered: map grid, per-train state, audio lifecycle, save/load record format,
   high-score networking, the main frame loop, the `gameState` machine, the
   update tick (`update()`), the map renderer (`renderMap()`), the build-menu
-  state machine, and the input dispatcher (`handleKey()` plus `openBuildMenu`).
+  state machine, the input dispatcher (`handleKey()` plus `openBuildMenu`),
+  the build-menu data tables (`v(int)`), train-cost snapshot machinery
+  (`baseTrainCostSnapshot` / `currentTrainCostSnapshot` / `discountApplied`),
+  and the pending-transition plumbing (`pendingTransitionCode`).
   `run()`, `update()`, `renderMap()`, `paint()`, `handleKey()`, `openBuildMenu()`,
-  `saveGame()`, `loadGame()`, `syncHighScores()` all read as ordinary code.
+  `computeTrainCost()`, `saveGame()`, `loadGame()`, `syncHighScores()` all read
+  as ordinary code.
 
 ## 7. What is incomplete
 
-- **Naming: ~188 of ~640 GameCanvas members (~30%).** Every named member is
-  evidence-checked (read the surrounding code to justify it). Remaining ~250 are
-  per-entity arrays (`gY`/`gC`/`U[]`/`eS`/`hg` cost-config, `oo`/`da`/`cV`/`be`
-  per-tile bookkeeping, `i`/`l`/`R`/`P`/`M` cross-system helpers) that are unit-
-  structurally used in only 3-4 sites, so a "swarm" cross-reference pass is
-  needed to name them with confidence.
+- **Naming: ~276 of ~640 GameCanvas members (~43%).** Every named member is
+  evidence-checked (read the surrounding code to justify it). Remaining ~165 are
+  per-entity arrays (`gY`/`gC`/`U[]`/`eS`/`hg`/`bB` cost-config; per-tile
+  bookkeeping `da`/`cV`/`be`/`hv`/`aj`/`eq`/`gW`; train-state vectors `J`/`fY`/
+  `s`/`aiWagonsLastSeen`) plus a handful of short helpers (`et`, `cZ`, `cW`).
+  They are unit-structurally used in only 3-4 sites, so a "swarm" cross-
+  reference pass is needed to name them with confidence.
 - **Method-local variables are not renamed** and cannot be by the remapper: the
   obfuscator stripped the `LocalVariableTable`, so locals have no bytecode
   identity and CFR names them `n`, `n2`, `bl`. A per-method source pass (or a
@@ -167,7 +172,7 @@ python tools/deobf.py show NAME # inspect a method
 
 ### Test results at handoff / shipping point
 
-- `deobf`: **exit 0** — "applied 188 mappings to 3 classes".
+- `deobf`: **exit 0** — "applied 276 mappings to 3 classes".
 - `verify`: **exit 0** — "verify OK: patched decompilation compiles (3 classes)",
   round-trip re-decompile stable (diff vs raw = local-variable renaming only).
 - `xref`: **exit 0** — `analysis/XREF_GameCanvas.md` regenerated.
@@ -176,7 +181,7 @@ python tools/deobf.py show NAME # inspect a method
 
 ### Repo state and commit history
 
-Ship point: 6 commits on `master`:
+Ship point: 12 commits on `master`:
 
 ```
 ead719c  Initial import: Train Tycoon J2ME deobfuscation
@@ -184,6 +189,11 @@ ead719c  Initial import: Train Tycoon J2ME deobfuscation
 aa3006e  Batch 5: renderMap + map-renderer infrastructure (145)
 d90d147  Batch 6: input dispatcher + build menu machinery (182)
 5b7f6ca  Batch 7: save/load record format (188)
+0259cbb  HANDOFF.md: update to ship point (188 mappings across 7 batches)
+10d1c42  Batch 8: wagon cost + AI buy + cursor/track ops + viewport pan/zoom (229)
+27a9d5d  Batch 9: tick economy + scenario milestones + year-end balance-sheet (265)
+b4086e6  Batch 10: build-menu data tables + scenario modifier flags (272)
+4d03b75  Batch 11: train-cost snapshots + pending-transition plumbing (276)
 ```
 
 (HANDOFF.md update for shipping at 188 is its own commit; see top of next
@@ -199,19 +209,18 @@ than single-method reads.
 
 If continuing, the next priorities are:
 
-1. **Per-train cost/config arrays** — `gY`/`gC`/`U[]`/`eS`/`hg` appear in
-   `af()` (`computeCost()`) and case-25 scenario load. One targeted read of
-   `computeCost` and the scenario loader will name ~8 of them and document the
-   wagon-cost formula.
-2. **Cross-system helpers** — `i`/`l`/`R`/`P`/`M` (these got renamed as the
-   network helpers in Batch 2/6, so the *abbreviations* in the remaining
-   short fields are scattered). A `grep -E "(\\.|=)this\\.([a-z]|[a-z][a-z])\\b"`
-   pass against the rendering and the per-frame code will isolate them.
-3. **Tick economy** — the `d()`, `R()`, `P()`, `ag()`, `ad()`, `w()`, `e()`,
+1. **Per-train cost/config arrays** — `gY`/`gC`/`U[]`/`eS`/`hg` appear in the
+   scenario loader and case-25 build menu. Reading the scenario load (case 25)
+   will name ~5-8 of them and document the wagon-cost table.
+2. **Per-tile bookkeeping arrays** — `da`/`cV`/`be` (byte[48]) hold per-city
+   state; `hv`/`aj`/`eq` (byte[250]) hold per-vehicle flags. Reading the
+   scenario loader (case 25) and `update()` will reveal the layout.
+3. **Train-state vector aliases** — `J`/`fY`/`s` look like train-state scalars
+   used alongside `trainAgeOrTimer`/`trainAtCursor`. A 3-site xref sweep will
+   name them.
+4. **Tick economy** — the `d()`, `R()`, `P()`, `ag()`, `ad()`, `w()`, `e()`,
    `L()`, `q()`, `z()` family from Batch 4 are tentatively named but their *bodies*
    are still unread; reading one or two bodies will firm up the names.
-4. **Save-format detail** — the `dv` byte array is parsed by `dl` (now
-   `saveReadOffset`); reading the parser that consumes it pins each field saved.
 5. **(Optional) local-variable naming** — add a JavaParser source pass to name
    method locals; and/or wire up microemu to run the JAR for dynamic validation.
 
@@ -243,15 +252,21 @@ reference; `src/decompiled_cfr/` + `src/deobfuscated/` supersede them.
 
 ## 12. Naming batches shipped
 
-| Batch | Anchor | Count | Subsystem |
-|---|---|---|---|
-| 1 (initial) | loop bounds, byte code grids | 15 | map/train state |
-| 2 (initial) | musicPlayer / syncHighScores / etc. | 10 | audio, save, net |
-| 3 (initial) | run() timing | 17 | main loop, input |
-| 4 | update() | 72 | dispatcher + per-frame sim |
-| 5 | renderMap() | 21 | map renderer infrastructure |
-| 6 | handleKey + openBuildMenu + smoothHeightMap | 37 | input + build menu |
-| 7 | saveGame + loadGame | 6 | save/load record format |
+| Batch | Anchor | Δ | Running | Subsystem |
+|---|---|---|---|---|
+| 1 (initial) | loop bounds, byte code grids | 15 | 15 | map/train state |
+| 2 (initial) | musicPlayer / syncHighScores / etc. | 10 | 25 | audio, save, net |
+| 3 (initial) | run() timing | 17 | 42 | main loop, input |
+| 4 | update() | 72 | 124 | dispatcher + per-frame sim |
+| 5 | renderMap() | 21 | 145 | map renderer infrastructure |
+| 6 | handleKey + openBuildMenu + smoothHeightMap | 37 | 182 | input + build menu |
+| 7 | saveGame + loadGame | 6 | 188 | save/load record format |
+| 8 | wagon cost + AI buy + cursor/track ops + viewport pan/zoom | 41 | 229 | economy + track building |
+| 9 | tick economy + scenario milestones + year-end balance-sheet | 36 | 265 | per-frame simulation |
+| 10 | v(int) build-menu data tables | 7 | 272 | menu rendering + scenario flags |
+| 11 | computeTrainCost() call sites + cost snapshots | 4 | 276 | train cost + transition plumbing |
 
-Final count: **188 mapping entries** = 2 classes + 52 fields (batches 1-3) +
-143 fields (batches 4-7 from class field deltas) + 13 methods.
+Final count: **276 mapping entries** = 2 classes + 224 fields + 50 methods.
+Δ column = number of *new* mapping lines added in that batch (commit diff vs
+parent); Running column = `git show <commit>:tools/mappings.txt | grep -c '^'` per
+the ship point.
