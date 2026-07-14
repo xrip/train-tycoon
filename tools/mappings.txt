@@ -505,3 +505,22 @@ field  a be   cityIndex             # byte[48]; incremented in city-list rebuild
 # Per-train arrays (size 500)
 field  a eL   trainStateCode        # int[500]; compared to 7 in input handler (case 6/7)
 field  a bz   trainAiOverride       # byte[500]; toggled in input handler (case 4) — 0=auto, 1=manual
+
+# ---- Batch 18: more rendering + sprite loading + viewport tracking ----
+# Sprite resource stream: used in loadSprites to read packed sprite data.
+field  a aU   spriteStream          # XorResourceInput; instance used to load /5 sprite data
+# Per-route resource flags (size 6, indexed by route type)
+field  a eA   routeResourceFlags    # byte[6]; eA[0..5] used in energy calculations (route availability)
+# Industry tile category (set by pickCitySite/pickIndustrySite)
+field  a cA   industryCategory      # int; -1=none, 0=city/34-40, 1=industry/65-68, 2=forest/53-55, 3=farm/59-61
+# Route slot index in build-menu (cycles 0..9)
+field  a cu   routeSlotIndex        # byte; cycles through 10 route slots in route-picker
+# Sprite-cycle cursor (cycles 0..95 with skips for invalid sprite IDs)
+field  a fi   spriteCycleCursor     # byte; sprite ID cycler for route preview
+# Year-graph "compare-to-previous" toggle (true = show previous period)
+field  a y    compareToPrevious     # boolean; false=current year, true=previous year
+# Previous-frame viewport center X (set to viewportCenterX after each frame, used to detect pan)
+field  a bH   lastViewportCenterX   # int; -1 sentinel OR previous viewportCenterX
+# Build-menu index (0..5)
+field  a cZ   buildMenuIndex        # byte; current row index in the build menu (was cZ, kept)
+# Note: ch/q static debug flags deferred — they appear only in case 10 debug menu.

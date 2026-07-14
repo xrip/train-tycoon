@@ -36,6 +36,9 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordEnumeration;
 import javax.microedition.rms.RecordStore;
 
+/*
+ * Duplicate member names - consider using --renamedupmembers true
+ */
 public class GameCanvas
 extends Canvas
 implements Runnable {
@@ -110,7 +113,7 @@ implements Runnable {
     static int hs = 1;
     static int eN = hs - 30;
     static int fX = hs - 15;
-    XorResourceInput aU = null;
+    XorResourceInput spriteStream = null;
     Image[] ca = new Image[6];
     short[] spriteOffsetTable;
     byte[] spriteData;
@@ -156,7 +159,7 @@ implements Runnable {
     int trackStartY;
     int trackStepX;
     int trackStepY;
-    int buildMenuIndex = 0;
+    int buildMenuIndex;
     int[] selectionTileX = new int[4];
     int[] selectionTileY = new int[4];
     int cursorScreenX;
@@ -209,7 +212,7 @@ implements Runnable {
     byte difficultySlot = 0;
     byte difficultyB = 0;
     byte difficultyC = 0;
-    byte cZ = 0;
+    byte buildMenuIndex = 0;
     byte cW = 0;
     int J;
     int fY;
@@ -218,8 +221,8 @@ implements Runnable {
     boolean ad = false;
     byte[] bE = new byte[10];
     byte[] cD = new byte[10];
-    byte cu = 0;
-    byte fi = 0;
+    byte routeSlotIndex = 0;
+    byte spriteCycleCursor = 0;
     boolean S = false;
     boolean cH = false;
     boolean dP = false;
@@ -286,7 +289,7 @@ implements Runnable {
     int[] prevTrainRevenue = new int[500];
     short[] bb = new short[48];
     short[] prevStationRevenue = new short[48];
-    boolean y = false;
+    boolean compareToPrevious = false;
     int yearGraphMode = 0;
     boolean yearGraphAlt = false;
     boolean monthRolloverFlag = false;
@@ -341,7 +344,7 @@ implements Runnable {
     byte[] o = new byte[12];
     byte[] dm = new byte[12];
     byte[] fA = new byte[12];
-    int cA;
+    int industryCategory;
     boolean aY;
     int gS;
     int bp;
@@ -351,7 +354,7 @@ implements Runnable {
     int hu = 66;
     byte cd = (byte)15;
     byte fP = (byte)12;
-    byte[] eA = new byte[6];
+    byte[] routeResourceFlags = new byte[6];
     byte[][] aK = new byte[][]{{1, 3, 13}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {1, 2, 3, 13, 14, 15}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {1, 2, 3, 13, 14, 15}, {4, 9}, {5, 10}, {6, 11}, {7, 12}, {8, 12}, {1, 2, 3, 13}, {1, 2, 3, 14}};
     byte[][] a = new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}};
     byte[] menuRowType = new byte[6];
@@ -472,7 +475,7 @@ implements Runnable {
     long tickEnd;
     long gw = 0L;
     byte[] tileSpriteYOffsetByCode = new byte[]{0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
-    int bH = -1;
+    int lastViewportCenterX = -1;
     int viewportCenterYCached = -1;
     short[] visibleTrains = new short[500];
     int visibleTrainCount = 0;
@@ -786,7 +789,7 @@ implements Runnable {
     }
 
     public void a(String string) {
-        this.aU = new XorResourceInput(string);
+        this.spriteStream = new XorResourceInput(string);
     }
 
     public Image aa() {
@@ -794,23 +797,23 @@ implements Runnable {
         int n = 0;
         try {
             int n2;
-            int n3 = this.aU.readByte();
+            int n3 = this.spriteStream.readByte();
             if (n3 == 2) {
-                n = 256 * this.aU.readByte() + this.aU.readByte();
+                n = 256 * this.spriteStream.readByte() + this.spriteStream.readByte();
                 byArray = new byte[n];
                 byArray[0] = -119;
                 byArray[1] = 80;
                 byArray[2] = 78;
                 byArray[3] = 71;
                 for (n2 = 4; n2 < n; ++n2) {
-                    byArray[n2] = (byte)this.aU.readByte();
+                    byArray[n2] = (byte)this.spriteStream.readByte();
                 }
             }
             if (n3 == 1) {
                 int n4;
-                n2 = 256 * this.aU.readByte() + this.aU.readByte();
-                int n5 = this.aU.readByte() * 3;
-                int n6 = this.aU.readByte();
+                n2 = 256 * this.spriteStream.readByte() + this.spriteStream.readByte();
+                int n5 = this.spriteStream.readByte() * 3;
+                int n6 = this.spriteStream.readByte();
                 n = n2 + n5 + 69 + n6 * 13;
                 byArray = new byte[n];
                 byArray[0] = -119;
@@ -826,16 +829,16 @@ implements Runnable {
                 byArray[13] = 72;
                 byArray[14] = 68;
                 byArray[15] = 82;
-                byArray[18] = (byte)this.aU.readByte();
-                byArray[19] = (byte)this.aU.readByte();
-                byArray[22] = (byte)this.aU.readByte();
-                byArray[23] = (byte)this.aU.readByte();
-                byArray[24] = (byte)this.aU.readByte();
+                byArray[18] = (byte)this.spriteStream.readByte();
+                byArray[19] = (byte)this.spriteStream.readByte();
+                byArray[22] = (byte)this.spriteStream.readByte();
+                byArray[23] = (byte)this.spriteStream.readByte();
+                byArray[24] = (byte)this.spriteStream.readByte();
                 byArray[25] = 3;
-                byArray[29] = (byte)this.aU.readByte();
-                byArray[30] = (byte)this.aU.readByte();
-                byArray[31] = (byte)this.aU.readByte();
-                byArray[32] = (byte)this.aU.readByte();
+                byArray[29] = (byte)this.spriteStream.readByte();
+                byArray[30] = (byte)this.spriteStream.readByte();
+                byArray[31] = (byte)this.spriteStream.readByte();
+                byArray[32] = (byte)this.spriteStream.readByte();
                 byArray[35] = (byte)(n5 >> 8 & 0xFF);
                 byArray[36] = (byte)(n5 & 0xFF);
                 byArray[37] = 80;
@@ -843,7 +846,7 @@ implements Runnable {
                 byArray[39] = 84;
                 byArray[40] = 69;
                 for (n4 = 0; n4 < n5 + 4; ++n4) {
-                    byArray[41 + n4] = (byte)this.aU.readByte();
+                    byArray[41 + n4] = (byte)this.spriteStream.readByte();
                 }
                 n4 = 41 + n5 + 4;
                 if (n6 == 1) {
@@ -871,7 +874,7 @@ implements Runnable {
                 byArray[n4++] = 65;
                 byArray[n4++] = 84;
                 for (int i = 0; i < n2 + 4; ++i) {
-                    byArray[n4++] = (byte)this.aU.readByte();
+                    byArray[n4++] = (byte)this.spriteStream.readByte();
                 }
                 n4 += 4;
                 byArray[n4++] = 73;
@@ -1479,7 +1482,7 @@ implements Runnable {
                 }
             }
         }
-        this.bH = -1;
+        this.lastViewportCenterX = -1;
     }
 
     void c(int n, int n2, int n3, int n4, int n5) {
@@ -2804,7 +2807,7 @@ implements Runnable {
                 this.buildMenuMode = 1;
                 this.buildMenuIndex = this.aC ? 0 : 2;
                 this.menuDirty = true;
-                this.bH = -1;
+                this.lastViewportCenterX = -1;
                 break;
             }
             case 3: {
@@ -2870,7 +2873,7 @@ implements Runnable {
     boolean q(int n) {
         if (n <= this.money) {
             this.money -= n;
-            this.bH = -1;
+            this.lastViewportCenterX = -1;
             this.totalSpent += n;
             this.p(-n);
             return true;
@@ -2910,7 +2913,7 @@ implements Runnable {
                 this.d(n9, n10, -4);
                 this.trackMap[n9][n10] = 65;
             }
-            this.bH = -1;
+            this.lastViewportCenterX = -1;
         }
     }
 
@@ -2954,7 +2957,7 @@ implements Runnable {
                     n9 = n7 == 70 ? 0x48 | n9 : 0x41 | n9 << 3;
                     this.trackMap[this.tileCursorX][this.tileCursorY] = (byte)n9;
                     this.money -= n8;
-                    this.bH = -1;
+                    this.lastViewportCenterX = -1;
                     this.p(-n8);
                     this.totalSpent += n8;
                     this.x(n8);
@@ -2967,7 +2970,7 @@ implements Runnable {
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.money -= n8;
                 this.totalSpent += n8;
-                this.bH = -1;
+                this.lastViewportCenterX = -1;
                 this.p(-n8);
                 this.x(n8);
                 this.d(this.tileCursorX, this.tileCursorY, -4);
@@ -3967,28 +3970,28 @@ implements Runnable {
             case 32: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.y ? this.prevTotalSpent : this.totalSpent);
+                        return this.b(this.compareToPrevious ? this.prevTotalSpent : this.totalSpent);
                     }
                     case 1: {
-                        return this.b(this.y ? this.prevAiMoneySpent : this.aiMoneySpent);
+                        return this.b(this.compareToPrevious ? this.prevAiMoneySpent : this.aiMoneySpent);
                     }
                     case 2: {
-                        return this.b(this.y ? this.prevFuelCost : this.fuelCostAccrued);
+                        return this.b(this.compareToPrevious ? this.prevFuelCost : this.fuelCostAccrued);
                     }
                     case 3: {
-                        return this.b(this.y ? this.prevSubsidyCost : this.ho);
+                        return this.b(this.compareToPrevious ? this.prevSubsidyCost : this.ho);
                     }
                     case 4: {
-                        return this.b(this.y ? this.prevTerrainTotal : this.eg);
+                        return this.b(this.compareToPrevious ? this.prevTerrainTotal : this.eg);
                     }
                     case 5: {
-                        return this.b(this.y ? this.prevEnterpriseTotal : this.eJ);
+                        return this.b(this.compareToPrevious ? this.prevEnterpriseTotal : this.eJ);
                     }
                     case 6: {
-                        return this.b(this.y ? this.prevTotalRevenue : this.totalRevenue);
+                        return this.b(this.compareToPrevious ? this.prevTotalRevenue : this.totalRevenue);
                     }
                     case 7: {
-                        return this.b(this.y ? this.prevXIndicator : this.eX);
+                        return this.b(this.compareToPrevious ? this.prevXIndicator : this.eX);
                     }
                 }
                 break;
@@ -3996,28 +3999,28 @@ implements Runnable {
             case 35: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.y ? this.prevDecadeSpent : this.decadeSpentWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeSpent : this.decadeSpentWithCurrent);
                     }
                     case 1: {
-                        return this.b(this.y ? this.prevDecadeAiSpent : this.decadeAiSpentWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeAiSpent : this.decadeAiSpentWithCurrent);
                     }
                     case 2: {
-                        return this.b(this.y ? this.prevDecadeFuel : this.decadeFuelWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeFuel : this.decadeFuelWithCurrent);
                     }
                     case 3: {
-                        return this.b(this.y ? this.prevDecadeSubsidy : this.decadeSubsidyWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeSubsidy : this.decadeSubsidyWithCurrent);
                     }
                     case 4: {
-                        return this.b(this.y ? this.prevDecadeGs : this.gs);
+                        return this.b(this.compareToPrevious ? this.prevDecadeGs : this.gs);
                     }
                     case 5: {
-                        return this.b(this.y ? this.prevDecadeDq : this.decadeEnterpriseWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeDq : this.decadeEnterpriseWithCurrent);
                     }
                     case 6: {
-                        return this.b(this.y ? this.prevDecadeRevenue : this.decadeRevenueWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeRevenue : this.decadeRevenueWithCurrent);
                     }
                     case 7: {
-                        return this.b(this.y ? this.prevDecadeBm : this.decadeXWithCurrent);
+                        return this.b(this.compareToPrevious ? this.prevDecadeBm : this.decadeXWithCurrent);
                     }
                 }
                 break;
@@ -4078,9 +4081,9 @@ implements Runnable {
             case 53: 
             case 54: {
                 if (n2 == 1) {
-                    byte[] byArray = this.p(this.bY[this.cZ], 11);
-                    byte[] byArray4 = this.p(this.dE[this.cZ], 11);
-                    byte[] byArray5 = this.p(this.fF[this.cZ] + 1950, 0);
+                    byte[] byArray = this.p(this.bY[this.buildMenuIndex], 11);
+                    byte[] byArray4 = this.p(this.dE[this.buildMenuIndex], 11);
+                    byte[] byArray5 = this.p(this.fF[this.buildMenuIndex] + 1950, 0);
                     byte[] byArray6 = new byte[byArray.length + byArray4.length + byArray5.length];
                     System.arraycopy(byArray, 0, byArray6, 0, byArray.length);
                     System.arraycopy(byArray4, 0, byArray6, byArray.length, byArray4.length);
@@ -4088,13 +4091,13 @@ implements Runnable {
                     return byArray6;
                 }
                 if (n2 == 2) {
-                    return this.b(this.menuRowCost[this.cZ]);
+                    return this.b(this.menuRowCost[this.buildMenuIndex]);
                 }
                 if (n2 == 3) {
-                    return this.p(this.a(this.cZ), 29);
+                    return this.p(this.a(this.buildMenuIndex), 29);
                 }
                 if (n2 != 4) break;
-                return this.p(this.menuRowCost[this.cZ], 0);
+                return this.p(this.menuRowCost[this.buildMenuIndex], 0);
             }
             case 60: {
                 if (n2 % 2 == 1) {
@@ -4117,13 +4120,13 @@ implements Runnable {
             case 71: 
             case 72: {
                 if (n2 == 1) {
-                    return this.p(this.menuRowEra[this.cZ], 29);
+                    return this.p(this.menuRowEra[this.buildMenuIndex], 29);
                 }
                 if (n2 == 2) {
-                    return this.b(this.menuRowRevenue[this.cZ]);
+                    return this.b(this.menuRowRevenue[this.buildMenuIndex]);
                 }
                 if (n2 != 3) break;
-                return this.p(this.menuRowEra[this.cZ], 0);
+                return this.p(this.menuRowEra[this.buildMenuIndex], 0);
             }
             case 27: {
                 if (n2 == 1) {
@@ -4131,7 +4134,7 @@ implements Runnable {
                 }
                 if (n2 != 0) break;
                 this.cD = new byte[10];
-                this.cD[this.cu] = 28;
+                this.cD[this.routeSlotIndex] = 28;
                 return this.cD;
             }
             case 28: {
@@ -4659,14 +4662,14 @@ implements Runnable {
                 this.monthRolloverFlag = false;
                 switch (n2) {
                     case 0: {
-                        this.y = false;
+                        this.compareToPrevious = false;
                         this.archiveOrRecall();
                         this.pendingTransitionCode = 32;
                         this.setState(30);
                         break block0;
                     }
                     case 1: {
-                        this.y = true;
+                        this.compareToPrevious = true;
                         this.pendingTransitionCode = 32;
                         this.setState(30);
                         break block0;
@@ -4744,14 +4747,14 @@ implements Runnable {
                         break block0;
                     }
                     case 14: {
-                        this.y = false;
+                        this.compareToPrevious = false;
                         this.archiveOrRecall();
                         this.pendingTransitionCode = 35;
                         this.setState(30);
                         break block0;
                     }
                     case 15: {
-                        this.y = true;
+                        this.compareToPrevious = true;
                         this.pendingTransitionCode = 35;
                         this.setState(30);
                         break block0;
@@ -4781,12 +4784,12 @@ implements Runnable {
             case 40: {
                 switch (n2) {
                     case 1: {
-                        this.pendingTransitionCode = this.menuRowType[this.cZ] + 40;
+                        this.pendingTransitionCode = this.menuRowType[this.buildMenuIndex] + 40;
                         this.cW = (byte)2;
                         break;
                     }
                     case 2: {
-                        this.pendingTransitionCode = this.menuRowAltType[this.cZ] + 60;
+                        this.pendingTransitionCode = this.menuRowAltType[this.buildMenuIndex] + 60;
                         this.cW = (byte)2;
                     }
                 }
@@ -4823,12 +4826,12 @@ implements Runnable {
             }
             case 60: {
                 if (n2 % 2 == 1) {
-                    this.cZ = this.gP[n2 / 2];
-                    this.pendingTransitionCode = this.menuRowType[this.cZ] + 40;
+                    this.buildMenuIndex = this.gP[n2 / 2];
+                    this.pendingTransitionCode = this.menuRowType[this.buildMenuIndex] + 40;
                 }
                 if (n2 % 2 == 0) {
-                    this.cZ = this.gP[(n2 - 1) / 2];
-                    this.pendingTransitionCode = this.menuRowAltType[this.cZ] + 60;
+                    this.buildMenuIndex = this.gP[(n2 - 1) / 2];
+                    this.pendingTransitionCode = this.menuRowAltType[this.buildMenuIndex] + 60;
                 }
                 this.cW = 1;
                 this.setState(30);
@@ -4883,43 +4886,43 @@ implements Runnable {
                     break;
                 }
                 if (n2 == 0) {
-                    this.cu = (byte)(this.cu - 1);
+                    this.routeSlotIndex = (byte)(this.routeSlotIndex - 1);
                 }
                 if (n2 == 1) {
-                    this.cu = (byte)(this.cu + 1);
+                    this.routeSlotIndex = (byte)(this.routeSlotIndex + 1);
                 }
-                if (this.cu < 0) {
-                    this.cu = (byte)9;
+                if (this.routeSlotIndex < 0) {
+                    this.routeSlotIndex = (byte)9;
                 }
-                if (this.cu == 10) {
-                    this.cu = 0;
+                if (this.routeSlotIndex == 10) {
+                    this.routeSlotIndex = 0;
                 }
-                this.fi = this.bE[this.cu];
+                this.spriteCycleCursor = this.bE[this.routeSlotIndex];
                 if (n2 == 2) {
-                    this.fi = (byte)(this.fi - 1);
-                    if (this.fi < 0) {
-                        this.fi = (byte)95;
+                    this.spriteCycleCursor = (byte)(this.spriteCycleCursor - 1);
+                    if (this.spriteCycleCursor < 0) {
+                        this.spriteCycleCursor = (byte)95;
                     }
-                    if (this.fi == 69) {
-                        this.fi = (byte)65;
+                    if (this.spriteCycleCursor == 69) {
+                        this.spriteCycleCursor = (byte)65;
                     }
-                    if (this.fi == 39) {
-                        this.fi = (byte)17;
+                    if (this.spriteCycleCursor == 39) {
+                        this.spriteCycleCursor = (byte)17;
                     }
-                    this.bE[this.cu] = this.fi;
+                    this.bE[this.routeSlotIndex] = this.spriteCycleCursor;
                 }
                 if (n2 == 3) {
-                    this.fi = (byte)(this.fi + 1);
-                    if (this.fi == 18) {
-                        this.fi = (byte)40;
+                    this.spriteCycleCursor = (byte)(this.spriteCycleCursor + 1);
+                    if (this.spriteCycleCursor == 18) {
+                        this.spriteCycleCursor = (byte)40;
                     }
-                    if (this.fi == 66) {
-                        this.fi = (byte)70;
+                    if (this.spriteCycleCursor == 66) {
+                        this.spriteCycleCursor = (byte)70;
                     }
-                    if (this.fi == 96) {
-                        this.fi = 0;
+                    if (this.spriteCycleCursor == 96) {
+                        this.spriteCycleCursor = 0;
                     }
-                    this.bE[this.cu] = this.fi;
+                    this.bE[this.routeSlotIndex] = this.spriteCycleCursor;
                 }
                 if (n2 >= 0) break;
                 this.persistSnapshotMode0();
@@ -5775,7 +5778,7 @@ implements Runnable {
             this.wagonEnergyRemaining[n3] = 0;
             this.wagonIorHost[n3] = -1;
         }
-        this.bH = -1;
+        this.lastViewportCenterX = -1;
         return n3;
     }
 
@@ -5803,7 +5806,7 @@ implements Runnable {
             this.trainStateCode[n7] = 7;
             this.trainAiOverride[n7] = 0;
         }
-        this.bH = -1;
+        this.lastViewportCenterX = -1;
         return n7;
     }
 
@@ -5816,7 +5819,7 @@ implements Runnable {
     }
 
     void everyTwoTick() {
-        if (this.eA[0] == 0) {
+        if (this.routeResourceFlags[0] == 0) {
             for (int i = 0; i < 500; ++i) {
                 int n;
                 int n2;
@@ -5917,7 +5920,7 @@ implements Runnable {
                         n5 = this.spawnTrainCar(n5, n13);
                     }
                     this.trainStateCode[n] = 7;
-                    this.bH = -1;
+                    this.lastViewportCenterX = -1;
                 }
                 this.b(n, n8, false);
                 if (this.trainAiOverride[n] == 1 && this.i(n, n8)) {
@@ -6162,7 +6165,7 @@ implements Runnable {
             if (bl) {
                 this.a(this.c(this.trainX[n]), this.c(this.trainY[n]), false, true);
             }
-            this.bH = -1;
+            this.lastViewportCenterX = -1;
             this.ready = false;
             this.transitionCode = 16;
             this.setState(20);
@@ -6353,7 +6356,7 @@ implements Runnable {
                             int n5;
                             if ((this.trainFlagBits[n2] & 1) == 1) {
                                 n5 = this.trainEnergyOrCount[n] * 3 * (this.c(this.trainServiceCounter[n]) / 15 + 1);
-                                if (this.eA[4] > 0) {
+                                if (this.routeResourceFlags[4] > 0) {
                                     n5 *= 2;
                                 }
                                 n3 += n5;
@@ -6362,7 +6365,7 @@ implements Runnable {
                             }
                             if ((this.trainFlagBits[n2] & 0x10) != 16) break;
                             n5 = this.wagonEnergyRemaining[n] * 8 * (this.c(this.trainServiceCounter[n]) / 15 + 1);
-                            if (this.eA[5] > 0) {
+                            if (this.routeResourceFlags[5] > 0) {
                                 n5 *= 2;
                             }
                             n3 += n5;
@@ -6373,7 +6376,7 @@ implements Runnable {
                         case 3: {
                             if ((this.trainFlagBits[n2] & 2) != 2) break;
                             int n6 = this.trainEnergyOrCount[n] * 10 * (this.c(this.trainServiceCounter[n]) / 15 + 1);
-                            if (this.eA[3] > 0) {
+                            if (this.routeResourceFlags[3] > 0) {
                                 n6 *= 2;
                             }
                             n3 += n6;
@@ -6385,7 +6388,7 @@ implements Runnable {
                         case 5: {
                             if ((this.trainFlagBits[n2] & 4) != 4) break;
                             int n7 = this.trainEnergyOrCount[n] * 12 * (this.c(this.trainServiceCounter[n]) / 15 + 1);
-                            if (this.eA[2] > 0) {
+                            if (this.routeResourceFlags[2] > 0) {
                                 n7 *= 2;
                             }
                             n3 += n7;
@@ -6397,7 +6400,7 @@ implements Runnable {
                         case 7: {
                             if ((this.trainFlagBits[n2] & 8) != 8) break;
                             int n8 = this.trainEnergyOrCount[n] * 13 * (this.c(this.trainServiceCounter[n]) / 15 + 1);
-                            if (this.eA[1] > 0) {
+                            if (this.routeResourceFlags[1] > 0) {
                                 n8 *= 2;
                             }
                             n3 += n8;
@@ -6893,7 +6896,7 @@ implements Runnable {
         this.a(this.trainAgeOrTimer);
         this.a(this.trainStateCode);
         this.a(this.trainAiOverride);
-        this.cA = this.s(this.cA);
+        this.industryCategory = this.s(this.industryCategory);
         this.aY = this.d(this.aY);
         this.hu = this.s(this.hu);
         if (this.hu == 0) {
@@ -7042,7 +7045,7 @@ implements Runnable {
         this.loadGame(4, 1);
         this.j();
         this.a(this.heightMap);
-        this.bH = -1;
+        this.lastViewportCenterX = -1;
     }
 
     void everyTenTick() {
@@ -7145,7 +7148,7 @@ implements Runnable {
         this.eX = 0;
         this.eJ = 0;
         this.mapRedrawPending = true;
-        this.y = true;
+        this.compareToPrevious = true;
         this.monthRolloverFlag = true;
         if (this.monthOfYear == 13) {
             if (q) {
@@ -7343,7 +7346,7 @@ implements Runnable {
         int n2 = 0;
         do {
             this.pickCitySite();
-        } while (++n != 50 && this.cA == -1);
+        } while (++n != 50 && this.industryCategory == -1);
         if (n < 50) {
             do {
                 this.pickIndustrySite();
@@ -7398,13 +7401,13 @@ implements Runnable {
             n5 = 5;
         }
         int n6 = 2;
-        if (this.cA == 1) {
+        if (this.industryCategory == 1) {
             n6 = 3;
         }
-        if (this.cA == 2) {
+        if (this.industryCategory == 2) {
             n6 = 4;
         }
-        if (this.cA == 3) {
+        if (this.industryCategory == 3) {
             n6 = 6;
         }
         int n7 = this.b(n, n2, n3, n4, this.tileMap[n][n2] == 87 ? 0 : 2, 8 - n4);
@@ -7463,7 +7466,7 @@ implements Runnable {
     void pickCitySite() {
         int n = Math.abs(this.rng.nextInt() % this.mapWidth);
         int n2 = Math.abs(this.rng.nextInt() % this.mapHeight);
-        this.cA = -1;
+        this.industryCategory = -1;
         if (this.tileMap[n][n2] == 0 || this.tileMap[n][n2] >= 29 && this.tileMap[n][n2] <= 33) {
             int n3 = n - 2;
             int n4 = n2 - 2;
@@ -7485,21 +7488,21 @@ implements Runnable {
                 for (int j = n4; j <= n6; ++j) {
                     byte by = this.tileMap[i][j];
                     if (by >= 34 && by <= 40) {
-                        this.cA = 0;
+                        this.industryCategory = 0;
                     }
                     if (by >= 65 && by <= 68) {
-                        this.cA = 1;
+                        this.industryCategory = 1;
                     }
                     if (by >= 53 && by <= 55) {
-                        this.cA = 2;
+                        this.industryCategory = 2;
                     }
                     if (by >= 59 && by <= 61) {
-                        this.cA = 3;
+                        this.industryCategory = 3;
                     }
-                    if (this.cA > 0) break block0;
+                    if (this.industryCategory > 0) break block0;
                 }
             }
-            if (this.cA >= 0) {
+            if (this.industryCategory >= 0) {
                 this.gS = n;
                 this.bp = n2;
             }
@@ -7530,16 +7533,16 @@ implements Runnable {
             block0: for (int i = n3; i <= n5; ++i) {
                 for (int j = n4; j <= n6; ++j) {
                     byte by = this.tileMap[i][j];
-                    if (by >= 34 && by <= 40 && this.cA == 0) {
+                    if (by >= 34 && by <= 40 && this.industryCategory == 0) {
                         this.aY = true;
                     }
-                    if (by >= 62 && by <= 64 && this.cA == 1) {
+                    if (by >= 62 && by <= 64 && this.industryCategory == 1) {
                         this.aY = true;
                     }
-                    if (by >= 50 && by <= 52 && this.cA == 2) {
+                    if (by >= 50 && by <= 52 && this.industryCategory == 2) {
                         this.aY = true;
                     }
-                    if (by >= 56 && by <= 58 && this.cA == 3) {
+                    if (by >= 56 && by <= 58 && this.industryCategory == 3) {
                         this.aY = true;
                     }
                     if (this.aY) break block0;
@@ -7804,7 +7807,7 @@ implements Runnable {
         }
         if (this.menuRowAltType[n] >= 5 && this.menuRowAltType[n] <= 10) {
             int n2 = this.menuRowAltType[n] - 5;
-            this.eA[n2] = (byte)(this.eA[n2] + this.menuRowEra[n]);
+            this.routeResourceFlags[n2] = (byte)(this.routeResourceFlags[n2] + this.menuRowEra[n]);
         }
         if (this.menuRowAltType[n] == 11) {
             this.loanBalance -= this.loanBalance * this.menuRowEra[n] / 100;
@@ -7821,7 +7824,7 @@ implements Runnable {
         this.fY = this.menuRowType[n] + 40;
         this.dR = this.menuRowAltType[n] + 60;
         this.cW = (byte)3;
-        this.cZ = (byte)5;
+        this.buildMenuIndex = (byte)5;
         this.menuRowType[5] = this.menuRowType[n];
         this.menuRowCost[5] = this.menuRowCost[n];
         this.menuRowValue[5] = this.menuRowValue[n];
@@ -7849,7 +7852,7 @@ implements Runnable {
         this.fY = this.menuRowType[n] + 40;
         this.dR = this.menuRowAltType[n] + 60;
         this.cW = (byte)4;
-        this.cZ = (byte)5;
+        this.buildMenuIndex = (byte)5;
         this.menuRowType[5] = this.menuRowType[n];
         this.menuRowCost[5] = this.menuRowCost[n];
         this.menuRowValue[5] = this.menuRowValue[n];
@@ -7879,9 +7882,9 @@ implements Runnable {
             return;
         }
         for (n = 0; n < 6; ++n) {
-            if (this.eA[n] <= 0) continue;
+            if (this.routeResourceFlags[n] <= 0) continue;
             int n2 = n;
-            this.eA[n2] = (byte)(this.eA[n2] - 1);
+            this.routeResourceFlags[n2] = (byte)(this.routeResourceFlags[n2] - 1);
         }
         for (n = 0; n < 5; ++n) {
             if ((this.menuRowType[n] == 1 || this.menuRowType[n] >= 4 && this.menuRowType[n] <= 14) && this.menuRowCost[n] <= this.menuRowValue[n]) {
@@ -8042,7 +8045,7 @@ implements Runnable {
                 if (this.menuRowType[n4] != 0) {
                     this.ready = false;
                     this.transitionCode = 40;
-                    this.cZ = (byte)n4;
+                    this.buildMenuIndex = (byte)n4;
                     this.setState(20);
                     ++this.er;
                 }
@@ -8487,7 +8490,7 @@ implements Runnable {
             this.eD = n;
             this.aJ = n2;
             this.menuDirty = true;
-            this.bH = -1;
+            this.lastViewportCenterX = -1;
             if (this.gameState == 20 && !this.ready) {
                 if (this.hx == 30) {
                     this.pendingTransitionCode = this.transitionCode;
@@ -8778,7 +8781,7 @@ implements Runnable {
                 System.gc();
                 this.backbuffer = Image.createImage((int)e, (int)hs);
                 this.backbufferG = this.backbuffer.getGraphics();
-                this.bH = -1;
+                this.lastViewportCenterX = -1;
                 this.menuDirty = true;
                 break;
             }
@@ -9088,22 +9091,22 @@ implements Runnable {
                     if (n30 >= 70 && n30 <= 75 || n30 >= 87 && n30 <= 90) {
                         this.trackMap[n][n29] = 0;
                         this.tileMap[n][n29] = -128;
-                        this.bH = -1;
+                        this.lastViewportCenterX = -1;
                     }
                     if (n30 >= 77 && n30 <= 80) {
                         this.tileMap[n][n29] = (byte)(128 + n30 - 56);
                         this.trackMap[n][n29] = 0;
-                        this.bH = -1;
+                        this.lastViewportCenterX = -1;
                     }
                     if (n30 == 81 || n30 == 82) {
                         this.tileMap[n][n29] = -128;
                         this.trackMap[n][n29] = 0;
-                        this.bH = -1;
+                        this.lastViewportCenterX = -1;
                     }
                     if (n30 >= 83 && n30 <= 86) {
                         this.tileMap[n][n29] = (byte)(128 + n30 - 76);
                         this.trackMap[n][n29] = 0;
-                        this.bH = -1;
+                        this.lastViewportCenterX = -1;
                     }
                     if (n30 != 76) continue;
                     int n31 = this.trackMap[n][n29] & 7;
@@ -9118,7 +9121,7 @@ implements Runnable {
                         this.tileMap[n][n29] = -58;
                         this.trackMap[n][n29] = (byte)(0x40 | n31);
                     }
-                    this.bH = -1;
+                    this.lastViewportCenterX = -1;
                 }
                 for (n27 = 0; n27 < 500; ++n27) {
                     if ((this.trainFlags[n27] & 0x80) != 128 || (this.trainFlags[n27] & 0x40) != 64) continue;
@@ -9522,7 +9525,7 @@ implements Runnable {
         int n10 = this.viewportCenterX + 2 * this.viewportCenterY - 16 - 2 * this.hj;
         n9 /= 32;
         n10 /= 32;
-        if (this.viewportCenterX != this.bH || this.viewportCenterY != this.viewportCenterYCached) {
+        if (this.viewportCenterX != this.lastViewportCenterX || this.viewportCenterY != this.viewportCenterYCached) {
             this.backbufferG.setClip(0, 15, e, eN);
             this.backbufferG.setColor(0);
             this.backbufferG.fillRect(0, 15, e, eN);
@@ -9602,7 +9605,7 @@ implements Runnable {
             if (this.viewportY1 >= this.mapHeight) {
                 this.viewportY1 = this.mapHeight - 1;
             }
-            this.bH = this.viewportCenterX;
+            this.lastViewportCenterX = this.viewportCenterX;
             this.viewportCenterYCached = this.viewportCenterY;
             this.backbufferG.setClip(0, 0, e, hs);
         }
