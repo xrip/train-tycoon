@@ -63,7 +63,7 @@ void gc_saveGame(GameCanvas *gc) {
     }
     std::vector<uint8_t> record(static_cast<std::size_t>(gc->snapshotSize) + 1);
     record[0] = (uint8_t)gc->saveSlot;
-    memcpy(record.data() + 1, gc->saveBuffer, (size_t)gc->snapshotSize);
+    memcpy(record.data() + 1, gc->saveBuffer.data(), (size_t)gc->snapshotSize);
     store->add_record(record);
 }
 
@@ -109,8 +109,8 @@ void gc_compressSaveBuffer(GameCanvas *gc) {
     gc->bytesUncompressed += gc->snapshotSize;
     const auto compressed = output.bytes();
     gc->snapshotSize = static_cast<int>(compressed.size());
-    gc->saveBuffer = GC_NEW(int8_t, gc->snapshotSize);
-    memcpy(gc->saveBuffer, compressed.data(), (size_t)gc->snapshotSize);
+    gc->saveBuffer.assign(static_cast<std::size_t>(gc->snapshotSize), 0);
+    memcpy(gc->saveBuffer.data(), compressed.data(), (size_t)gc->snapshotSize);
     gc->bytesCompressed += gc->snapshotSize;
     gc_checkSaveByteSum(gc, "Compress post");
 }
@@ -131,8 +131,8 @@ void gc_decompressSaveBuffer(GameCanvas *gc) {
     gc->bytesCompressed += gc->snapshotSize;
     const auto decompressed = output.bytes();
     gc->snapshotSize = static_cast<int>(decompressed.size());
-    gc->saveBuffer = GC_NEW(int8_t, gc->snapshotSize);
-    memcpy(gc->saveBuffer, decompressed.data(), (size_t)gc->snapshotSize);
+    gc->saveBuffer.assign(static_cast<std::size_t>(gc->snapshotSize), 0);
+    memcpy(gc->saveBuffer.data(), decompressed.data(), (size_t)gc->snapshotSize);
     gc->bytesUncompressed += gc->snapshotSize;
     gc_checkSaveByteSum(gc, "Decompress post");
 }
@@ -143,7 +143,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     if (mode == 2) gc->savePendingMode = 2;
     if (mode == 4) {
         gc->snapshotSize = 0;
-        gc->saveBuffer = NULL;
+        gc->saveBuffer.clear();
         gc->savePendingMode = 0;
     }
     if (mode == 5) {

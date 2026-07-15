@@ -5,17 +5,9 @@
 
 // void ensureSaveBufferCapacity(int n)
 void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n) {
-    if (gc->snapshotSize > 0) {
-        std::vector<int8_t> expanded_data(
-            static_cast<size_t>(gc->snapshotSize + n));
-        memcpy(expanded_data.data(), gc->saveBuffer, (size_t)gc->snapshotSize);
-        gc->snapshotSize += n;
-        gc->saveBuffer = GC_NEW(int8_t, gc->snapshotSize);
-        memcpy(gc->saveBuffer, expanded_data.data(), (size_t)gc->snapshotSize);
-    } else {
-        gc->saveBuffer = GC_NEW(int8_t, n);
-        gc->snapshotSize += n;
-    }
+    // Grow by n, preserving existing bytes and zeroing the new tail.
+    gc->saveBuffer.resize(static_cast<std::size_t>(gc->snapshotSize + n));
+    gc->snapshotSize += n;
 }
 
 // Byte array save/load over an explicit length. The registry-based and
@@ -25,10 +17,10 @@ void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t *byArray, int len) {
         for (int i = 0; i < len; ++i) byArray[i] = 0;
     } else if (gc->savePendingMode == 0) {
         gc_ensureSaveBufferCapacity(gc, len);
-        memcpy(gc->saveBuffer + gc->saveReadOffset, byArray, (size_t)len);
+        memcpy(gc->saveBuffer.data() + gc->saveReadOffset, byArray, (size_t)len);
         gc->saveReadOffset += len;
     } else if (gc->snapshotLoaded) {
-        memcpy(byArray, gc->saveBuffer + gc->saveReadOffset, (size_t)len);
+        memcpy(byArray, gc->saveBuffer.data() + gc->saveReadOffset, (size_t)len);
         gc->saveReadOffset += len;
     }
 }

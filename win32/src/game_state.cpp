@@ -180,7 +180,7 @@ void gc_fields_init(GameCanvas *gc) {
         {{180, 181, 182, 183, 180, 181, 182, 183}},
         {{185, 186, 187, 188, 185, 186, 187, 188}},
     }};
-    gc->saveBuffer = NULL;
+    gc->saveBuffer.clear();
     gc->saveReadOffset = 0;
     gc->saveSlot = 0;
     gc->savePendingMode = 0;

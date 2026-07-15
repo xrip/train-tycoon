@@ -141,8 +141,8 @@ void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2) {
                 if (!record) continue;
                 const int len = static_cast<int>(record->size());
                 if (len > 0 && (int8_t)(*record)[0] == n) {
-                    gc->saveBuffer = GC_NEW(int8_t, len - 1);
-                    memcpy(gc->saveBuffer, record->data() + 1,
+                    gc->saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
+                    memcpy(gc->saveBuffer.data(), record->data() + 1,
                            (size_t)(len - 1));
                     gc->snapshotSize = len - 1;
                     gc->snapshotLoaded = true;
