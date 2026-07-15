@@ -7,8 +7,8 @@ Only one row may be `in_progress`.
 | BASE-01 | done | Debug smoke passed, 2026-07-15 | Work-control files |
 | BASE-02 | done | Library build and old smoke passed | Testable C library |
 | BASE-03 | done | 4 doctest cases passed in 1.94 s | doctest and smoke move |
-| BASE-04 | in_progress | BASE-03 green | Fixed test inputs |
-| BASE-05 | queued | - | Rule checks and goldens |
+| BASE-04 | done | Two fixed-input runs passed | Fixed test inputs |
+| BASE-05 | in_progress | BASE-04 green | Rule checks and goldens |
 | CXX-01 | queued | - | Mechanical C++20 move |
 | CXX-02 | queued | - | Strict warnings |
 | CXX-03 | queued | - | Presets and style |

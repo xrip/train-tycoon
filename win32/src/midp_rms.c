@@ -8,6 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+static char g_rms_root[512] = ".";
+
+void midp_rms_set_root(const char *root_dir) {
+    if (!root_dir) return;
+    snprintf(g_rms_root, sizeof(g_rms_root), "%s", root_dir);
+}
+
 typedef struct { int id; uint8_t *data; int len; } RmsRecord;
 
 struct MidpRecordStore {
@@ -61,7 +68,7 @@ static void rms_flush(MidpRecordStore *s) {
 MidpRecordStore *midp_rms_open(const char *name, bool create_if_needed) {
     MidpRecordStore *s = (MidpRecordStore *)calloc(1, sizeof(MidpRecordStore));
     if (!s) return NULL;
-    snprintf(s->path, sizeof(s->path), "%s.rms", name);
+    snprintf(s->path, sizeof(s->path), "%s/%s.rms", g_rms_root, name);
     s->next_id = 1;
     FILE *probe = fopen(s->path, "rb");
     if (probe) { fclose(probe); rms_load(s); }

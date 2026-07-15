@@ -147,6 +147,8 @@ void midp_resource_set_root(const char *root_dir);
 
 // --- RMS RecordStore (backed by <name>.rms in the save directory) -------------
 typedef struct MidpRecordStore MidpRecordStore;
+// Where save files live (defaults to the current directory).
+void midp_rms_set_root(const char *root_dir);
 MidpRecordStore *midp_rms_open(const char *name, bool create_if_needed);
 int midp_rms_add_record(MidpRecordStore *s, const uint8_t *data, int off, int len); // returns id
 bool midp_rms_get_record(MidpRecordStore *s, int id, uint8_t **out, int *out_len);

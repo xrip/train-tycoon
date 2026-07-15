@@ -2,32 +2,32 @@
 
 ## Item
 
-`BASE-04` - give tests fixed random, time, resource, and save inputs.
+`BASE-05` - add clear rule checks and fixed output digests.
 
 ## Base
 
-- Commit: the `BASE-03` doctest commit on top of `e8e969e`.
+- Commit: the `BASE-04` fixed-input commit on top of `9ade0a0`.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Make every automatic test independent of the wall clock, launch directory,
-and user save files.
+Lock present behavior for random values, resources, record files, save bytes,
+scenario generation, input, and key frames before structural work.
 
 ## Non-goals
 
-- No game-rule change or broad rename.
-- Production seeding still uses the current clock.
-- The save byte form stays unchanged.
+- No game-body rewrite or broad rename.
+- Do not update a value after it is recorded without a separate behavior item.
+- Keep slow all-scenario work out of the fast test label.
 
 ## Last proof
 
-`BASE-03`: four doctest cases passed on 2026-07-15 in 1.94 seconds. The
-executable no longer holds automatic smoke functions.
+`BASE-04`: two runs with fixed seed `0x5eed1234`, fixed boot fields, an
+explicit resource root, and an isolated save root passed on 2026-07-15.
 
 ## Next action
 
-Add a small test fixture that sets resource/save roots, fixed time fields, and
-fixed `JavaRandom` seed values before each full-game check. Run the suite twice
-and compare its output.
+Add small test support for stable byte/frame digests. Record clear expected
+values first, then add scenario and save fixtures. Split CTest labels into
+`fast`, `full`, and `device`.

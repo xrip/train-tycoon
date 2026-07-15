@@ -10,12 +10,14 @@ namespace {
 
 constexpr int kScreenWidth = 240;
 constexpr int kScreenHeight = 320;
+constexpr std::int64_t kFixedRandomSeed = 0x5eed1234;
 std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 
 GameCanvas* make_game() {
     auto* game = static_cast<GameCanvas*>(std::malloc(sizeof(GameCanvas)));
     REQUIRE(game != nullptr);
     gc_fields_init(game);
+    midp_random_set_seed(&game->rng, kFixedRandomSeed);
     return game;
 }
 
