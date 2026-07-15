@@ -1,43 +1,6 @@
-// midp_util.c - java.util.Random (exact 48-bit LCG), java.util.Vector, timing.
-//
-// The map generator draws from Random.nextInt(n) in a fixed order, so the
-// generator must reproduce Sun's algorithm bit-for-bit; that is why this is a
-// faithful reimplementation, not rand().
+// midp_util.cpp - java.util.Vector, array lengths, byte output, and timing.
 #include "midp.h"
 #include <stdlib.h>
-
-#define RND_MULT 0x5DEECE66DULL
-#define RND_ADD  0xBULL
-#define RND_MASK ((1ULL << 48) - 1)
-
-static int32_t rnd_next(MidpRandom *r, int bits) {
-    r->seed = (r->seed * RND_MULT + RND_ADD) & RND_MASK;
-    return (int32_t)(r->seed >> (48 - bits));
-}
-
-void midp_random_set_seed(MidpRandom *r, int64_t seed) {
-    r->seed = ((uint64_t)seed ^ RND_MULT) & RND_MASK;
-}
-
-void midp_random_init(MidpRandom *r, int64_t seed) {
-    midp_random_set_seed(r, seed);
-}
-
-int32_t midp_random_next_int(MidpRandom *r) {
-    return rnd_next(r, 32);
-}
-
-int32_t midp_random_next_int_bound(MidpRandom *r, int32_t n) {
-    if (n <= 0) return 0;
-    if ((n & -n) == n)    // n is a power of two
-        return (int32_t)(((int64_t)n * (int64_t)rnd_next(r, 31)) >> 31);
-    int32_t bits, val;
-    do {
-        bits = rnd_next(r, 31);
-        val = bits % n;
-    } while (bits - val + (n - 1) < 0);
-    return val;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // java.util.Vector (pointer elements; the vector owns its backing array only).

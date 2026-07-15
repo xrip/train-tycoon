@@ -421,7 +421,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->scenarioStepCompare = 1;
     gc->scenarioStep = 0;
     gc->scenarioNoticeId = 0;
-    midp_random_init(&gc->rng, midp_current_time_millis());
+    gc->rng.set_seed(midp_current_time_millis());
     gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
     gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
     gc->tileSpriteIndex = (int8_t*)midp_alloc_arr(sizeof(int8_t), 255);

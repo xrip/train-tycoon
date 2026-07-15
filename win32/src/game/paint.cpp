@@ -351,7 +351,7 @@ void gc_update(GameCanvas *gc) {
                 for (int n27 = 0; n27 < gc->mapWidth; ++n27) {
                     for (int n = 0; n < gc->mapHeight; ++n) {
                         if (gc->tileMap[n27][n] < 59 || gc->tileMap[n27][n] > 61
-                            || midp_random_next_int(&gc->rng) % 3 != 0)
+                            || gc->rng.next_int() % 3 != 0)
                             continue;
                         ++gc->tileMap[n27][n];
                         if (gc->tileMap[n27][n] == 62) gc->tileMap[n27][n] = 59;
@@ -469,7 +469,7 @@ void gc_update(GameCanvas *gc) {
                     gc_dayResetP(gc);
                     gc_dayResetAg(gc);
                     gc_dayResetAd(gc);
-                    switch (std::abs(midp_random_next_int(&gc->rng) % 7)) {
+                    switch (std::abs(gc->rng.next_int() % 7)) {
                         case 0: gc->moneyBaseA += 9; gc->moneyBaseB += 9; break;
                         case 1: ++gc->baseTrainSpeed; gc->accel1 += 3; gc->brake1 += 3; break;
                         case 2: ++gc->baseTrainSpeed2; gc->accel2 += 2; break;

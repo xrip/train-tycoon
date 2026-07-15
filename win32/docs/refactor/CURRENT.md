@@ -25,9 +25,10 @@ while keeping every fixed random, input, save, scenario, and frame value.
 
 Stage 1: preset Debug and Release full tests passed, and the MSVC
 AddressSanitizer full test passed on 2026-07-15. All first-party code is C++20
-and strict-warning clean. The style guide fixes the C-with-Classes limit.
+and strict-warning clean. `RT-01` JavaRandom is now a small value class; the
+Debug full test kept every random, scenario, and frame value.
 
 ## Next action
 
-Map `MidpRandom`, `MidpByteArray`, basic value records, and the Win32 input ring
-to their call sites. Add focused tests before changing each old support type.
+Replace `MidpByteArray` with a small vector-backed `ByteBuffer`, add its direct
+rule tests, and keep the save and frame digests unchanged.

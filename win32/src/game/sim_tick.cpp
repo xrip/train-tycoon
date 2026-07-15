@@ -53,7 +53,7 @@ void gc_maybeAITick(GameCanvas *gc) {
 // void dayResetAg()
 void gc_dayResetAg(GameCanvas *gc) {
     for (int i = 0; i < 48; ++i) {
-        gc->cityPopulation[i] += (int8_t)(midp_random_next_int(&gc->rng) % 8);
+        gc->cityPopulation[i] += (int8_t)(gc->rng.next_int() % 8);
         if (gc->cityPopulation[i] < 10) gc->cityPopulation[i] = 10;
         if (gc->cityPopulation[i] > 90) gc->cityPopulation[i] = 90;
     }
@@ -127,7 +127,7 @@ void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
 // void maybeAiTakeTurn()
 void gc_maybeAiTakeTurn(GameCanvas *gc) {
     if (gc->buildMenuMode != 2 && gc->buildMenuMode != 4
-        && midp_random_next_int(&gc->rng) % gc->aiFrequency > gc->aiThreshold)
+        && gc->rng.next_int() % gc->aiFrequency > gc->aiThreshold)
         gc_setState(gc, 105);
 }
 
@@ -235,8 +235,8 @@ void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) 
 
 // boolean pickValidForestTile()
 bool gc_pickValidForestTile(GameCanvas *gc) {
-    int n2 = std::abs(midp_random_next_int(&gc->rng) % (gc->mapWidth - 2)) + 1;
-    int n = std::abs(midp_random_next_int(&gc->rng) % (gc->mapHeight - 2)) + 1;
+    int n2 = std::abs(gc->rng.next_int() % (gc->mapWidth - 2)) + 1;
+    int n = std::abs(gc->rng.next_int() % (gc->mapHeight - 2)) + 1;
     if (gc->tileMap[n2][n] != 0
         && (gc->tileMap[n2][n] < 29 || gc->tileMap[n2][n] > 33))
         return false;
@@ -271,7 +271,7 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
     } else if (bl3 && bl) {
         gc->tileMap[n2][n] = 46;
     } else {
-        int n5 = std::abs(midp_random_next_int(&gc->rng) % 13);
+        int n5 = std::abs(gc->rng.next_int() % 13);
         if (n5 == 12) {
             gc->tileMap[n2][n] = 44;
         } else if (n5 == 11) {
@@ -559,7 +559,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                             int add = gc->zonePopulation[n11]
                                       * (gc->constructionTimers[n11] + 10
                                          + gc->zonePopulation[n11] / 10
-                                         + midp_random_next_int(&gc->rng) % 40) / 170;
+                                         + gc->rng.next_int() % 40) / 170;
                             gc->serviceResourceStock[i][0] =
                                 (int16_t)(gc->serviceResourceStock[i][0] + add);
                         }
@@ -567,13 +567,13 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                             int add = gc->zonePopulation[n11] / 2
                                       * (gc->constructionTimers[n11] + 10
                                          + gc->zonePopulation[n11] / 10
-                                         + std::abs(midp_random_next_int(&gc->rng) % 40)) / 170;
+                                         + std::abs(gc->rng.next_int() % 40)) / 170;
                             gc->serviceResourceStock[i][4] =
                                 (int16_t)(gc->serviceResourceStock[i][4] + add);
                         }
                         gc->zonePopulation[n11] =
                             (int16_t)(gc->zonePopulation[n11]
-                                      + midp_random_next_int(&gc->rng) % 2);
+                                      + gc->rng.next_int() % 2);
                     }
                     ++n9;
                 }

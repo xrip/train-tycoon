@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define RNG (&gc->rng)
-static int rint(GameCanvas *gc) { return midp_random_next_int(&gc->rng); }
+static int rint(GameCanvas *gc) { return gc->rng.next_int(); }
 
 // byte randomCityTile()
 int8_t gc_randomCityTile(GameCanvas *gc) {

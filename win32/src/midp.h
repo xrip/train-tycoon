@@ -97,13 +97,6 @@ int midp_image_get_width(const MidpImage *img);
 int midp_image_get_height(const MidpImage *img);
 void midp_image_free(MidpImage *img);
 
-// --- java.util.Random (exact 48-bit LCG; map-gen relies on the exact sequence)-
-typedef struct { uint64_t seed; } MidpRandom;
-void midp_random_init(MidpRandom *r, int64_t seed);
-void midp_random_set_seed(MidpRandom *r, int64_t seed);
-int32_t midp_random_next_int(MidpRandom *r);        // Random.nextInt()
-int32_t midp_random_next_int_bound(MidpRandom *r, int32_t n); // Random.nextInt(n)
-
 // --- java.util.Vector (holds void* elements) ----------------------------------
 typedef struct { void **data; int size; int cap; } MidpVector;
 MidpVector *midp_vector_new(void);

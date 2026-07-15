@@ -19,7 +19,7 @@ GameCanvas* make_game() {
     auto* game = static_cast<GameCanvas*>(std::malloc(sizeof(GameCanvas)));
     REQUIRE(game != nullptr);
     gc_fields_init(game);
-    midp_random_set_seed(&game->rng, kFixedRandomSeed);
+    game->rng.set_seed(kFixedRandomSeed);
     return game;
 }
 
@@ -56,12 +56,15 @@ void generate_scenario(GameCanvas* game, int scenario) {
 } // namespace
 
 TEST_CASE("fast: Java random values") {
-    MidpRandom random;
-    midp_random_init(&random, 0);
-    CHECK(midp_random_next_int(&random) == -1155484576);
-    CHECK(midp_random_next_int(&random) == -723955400);
-    CHECK(midp_random_next_int_bound(&random, 1000) == 29);
-    CHECK(midp_random_next_int_bound(&random, 16) == 9);
+    JavaRandom random{};
+    random.set_seed(0);
+    CHECK(random.next_int() == -1155484576);
+    CHECK(random.next_int() == -723955400);
+    CHECK(random.next_int(1000) == 29);
+    CHECK(random.next_int(16) == 9);
+
+    random.set_seed(0);
+    CHECK(random.next_int() == -1155484576);
 }
 
 TEST_CASE("fast: raw resources have fixed digests") {

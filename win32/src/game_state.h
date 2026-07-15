@@ -2,6 +2,7 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 #include "midp.h"
+#include "support/java_random.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -384,7 +385,7 @@ typedef struct GameCanvas {
     int32_t scenarioStepCompare;
     int32_t scenarioStep;
     int32_t scenarioNoticeId;
-    MidpRandom rng;
+    JavaRandom rng;
     MidpImage* backbuffer;
     MidpGraphics* backbufferG;
     MidpImage** tileSprites;
