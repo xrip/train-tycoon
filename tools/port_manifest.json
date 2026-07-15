@@ -691,13 +691,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "eN",
+   "java_name": "gameplayViewportHeight",
    "java_type": "int",
    "init": "hs - 30",
    "static": true,
    "final": false,
    "line": 111,
-   "c_name": "eN",
+   "c_name": "gameplayViewportHeight",
    "c_type": "int32_t"
   },
   {
@@ -1121,13 +1121,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "hh",
+   "java_name": "keyRepeatStep",
    "java_type": "int",
    "init": "3",
    "static": false,
    "final": false,
    "line": 154,
-   "c_name": "hh",
+   "c_name": "keyRepeatStep",
    "c_type": "int32_t"
   },
   {
@@ -4750,7 +4750,7 @@
    "start": 2027,
    "end": 2072,
    "c_name": "gc_viewportPanKey",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "viewportZoomKey",
@@ -4760,7 +4760,7 @@
    "start": 2074,
    "end": 2157,
    "c_name": "gc_viewportZoomKey",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "crossProduct2D",
@@ -4790,7 +4790,7 @@
    "start": 2185,
    "end": 2247,
    "c_name": "gc_computeViewportBounds",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawSelectionQuad",
@@ -4960,7 +4960,7 @@
    "start": 3144,
    "end": 3155,
    "c_name": "gc_cycleBuildMenuIndex",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawMenuRow",

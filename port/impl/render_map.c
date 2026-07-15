@@ -13,9 +13,9 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
     n9 /= 32;
     n10 /= 32;
     if (gc->viewportCenterX != gc->lastViewportCenterX || gc->viewportCenterY != gc->viewportCenterYCached) {
-        midp_set_clip(bb, 0, 15, gcs_screenWidth, gcs_eN);
+        midp_set_clip(bb, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
         midp_set_color(bb, 0);
-        midp_fill_rect(bb, 0, 15, gcs_screenWidth, gcs_eN);
+        midp_fill_rect(bb, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
         gc->visibleTrainCount = 0;
         gc->viewportX0 = 2 * gc->mapWidth;
         gc->viewportY0 = 2 * gc->mapHeight;
@@ -73,7 +73,7 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
     }
     gc_paintMain(gc, g);
     midp_draw_image(g, gc->backbuffer, 0, 0, 20);
-    midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_eN);
+    midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
     gc_drawBuildMenuCursor(gc, g);
     int n8w = gc->viewportX1 - gc->viewportX0 + 1;
     int n7h = gc->viewportY1 - gc->viewportY0 + 1;

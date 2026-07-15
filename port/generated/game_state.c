@@ -5,7 +5,7 @@
 
 int32_t gcs_screenWidth;
 int32_t gcs_hs;
-int32_t gcs_eN;
+int32_t gcs_gameplayViewportHeight;
 int32_t gcs_bottomBarY;
 int8_t* gcs_decodeHeaderName1;
 int8_t* gcs_decodeHeaderName2;
@@ -29,7 +29,7 @@ void gc_fields_init(GameCanvas *gc) {
     // --- static fields (declaration order) ---
     gcs_screenWidth = 1;
     gcs_hs = 1;
-    gcs_eN = gcs_hs - 30;
+    gcs_gameplayViewportHeight = gcs_hs - 30;
     gcs_bottomBarY = gcs_hs - 15;
     static const int8_t decodeHeaderName1__d[] = {-15, 12, -41, -41, 37, 109, -35, 61, -10, 28, -25, 49, -31, 51, 15, 104, -32, 54, 51, 77, 42, 76};
     gcs_decodeHeaderName1 = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(decodeHeaderName1__d)/sizeof(int8_t)));
@@ -113,7 +113,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->mapScaleY = gc->viewportHalfHeight * 2;
     gc->keySubState = 0;
     gc->lastKeyCode = 0;
-    gc->hh = 3;
+    gc->keyRepeatStep = 3;
     gc->buildMenuItemIndex = 0;
     gc->selectionTileX = (int32_t*)midp_alloc_arr(sizeof(int32_t), 4);
     gc->selectionTileY = (int32_t*)midp_alloc_arr(sizeof(int32_t), 4);

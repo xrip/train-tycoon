@@ -108,7 +108,7 @@ implements Runnable {
     int dp = 255;
     static int screenWidth = 1;
     static int hs = 1;
-    static int eN = hs - 30;
+    static int gameplayViewportHeight = hs - 30;
     static int bottomBarY = hs - 15;
     XorResourceInput spriteStream = null;
     Image[] ca = new Image[6];
@@ -151,7 +151,7 @@ implements Runnable {
     int mapScaleY = this.viewportHalfHeight * 2;
     int keySubState = 0;
     int lastKeyCode = 0;
-    int hh = 3;
+    int keyRepeatStep = 3;
     int trackStartX;
     int trackStartY;
     int trackStepX;
@@ -2018,7 +2018,7 @@ implements Runnable {
 
     int computeKeyRepeatDelay() {
         if (this.keySubState < 30) {
-            this.keySubState += this.hh;
+            this.keySubState += this.keyRepeatStep;
         }
         this.keySubState = (byte)this.keySubState;
         return this.keySubState / 3;
@@ -2062,11 +2062,11 @@ implements Runnable {
         if (this.viewportCenterX > this.mapScreenWidth - screenWidth) {
             this.viewportCenterX = this.mapScreenWidth - screenWidth;
         }
-        if (this.viewportCenterY > this.mapScreenHeight - eN) {
-            this.viewportCenterY = this.mapScreenHeight - eN;
+        if (this.viewportCenterY > this.mapScreenHeight - gameplayViewportHeight) {
+            this.viewportCenterY = this.mapScreenHeight - gameplayViewportHeight;
         }
         this.viewportBaseX = this.viewportCenterX + screenWidth / 2;
-        this.viewportBaseY = this.viewportCenterY + eN / 2;
+        this.viewportBaseY = this.viewportCenterY + gameplayViewportHeight / 2;
         this.mapScaleX = this.viewportBaseX * 2;
         this.mapScaleY = this.viewportBaseY * 2;
     }
@@ -2122,9 +2122,9 @@ implements Runnable {
             bl = true;
             this.viewportCenterX = this.viewportBaseX - screenWidth + 21;
         }
-        if (this.viewportBaseY - this.viewportCenterY >= eN - 20) {
+        if (this.viewportBaseY - this.viewportCenterY >= gameplayViewportHeight - 20) {
             bl = true;
-            this.viewportCenterY = this.viewportBaseY - eN + 21;
+            this.viewportCenterY = this.viewportBaseY - gameplayViewportHeight + 21;
         }
         if (this.viewportBaseX < 0) {
             this.viewportBaseX = 0;
@@ -2144,8 +2144,8 @@ implements Runnable {
             this.viewportCenterX = this.mapScreenWidth - screenWidth;
             bl = false;
         }
-        if (this.viewportCenterY > this.mapScreenHeight - eN) {
-            this.viewportCenterY = this.mapScreenHeight - eN;
+        if (this.viewportCenterY > this.mapScreenHeight - gameplayViewportHeight) {
+            this.viewportCenterY = this.mapScreenHeight - gameplayViewportHeight;
             bl = false;
         }
         if (bl) {
@@ -8432,7 +8432,7 @@ implements Runnable {
         }
         if (n4 == 37) {
             n = 0;
-            n2 = 15 + eN - 15;
+            n2 = 15 + gameplayViewportHeight - 15;
         }
         graphics.setColor(this.dc[3 * n3]);
         graphics.fillRect(n, n2, n5 + 5, 13);
@@ -8471,7 +8471,7 @@ implements Runnable {
         this.clipX = 0;
         this.clipY = 15;
         this.clipWidth = screenWidth;
-        this.clipHeight = eN;
+        this.clipHeight = gameplayViewportHeight;
         this.renderFontString(graphics, n + 4, n2 + 3, byArray3, true);
     }
 
@@ -8481,7 +8481,7 @@ implements Runnable {
             hs = n2;
             this.backbuffer = Image.createImage((int)screenWidth, (int)hs);
             this.backbufferG = this.backbuffer.getGraphics();
-            eN = hs - 30;
+            gameplayViewportHeight = hs - 30;
             bottomBarY = hs - 15;
             this.k(n, n2);
             this.eD = n;
@@ -8632,9 +8632,9 @@ implements Runnable {
                 }
                 case 40: {
                     int n14;
-                    graphics.setClip(0, 15, screenWidth, eN);
+                    graphics.setClip(0, 15, screenWidth, gameplayViewportHeight);
                     graphics.setColor(0);
-                    graphics.fillRect(0, 15, screenWidth, eN);
+                    graphics.fillRect(0, 15, screenWidth, gameplayViewportHeight);
                     int n15 = this.viewportCenterX / 16;
                     int n16 = this.viewportCenterY / 8;
                     int n17 = this.mapWidth + this.mapHeight;
@@ -8645,21 +8645,21 @@ implements Runnable {
                     if (n18 > 0) {
                         n18 = 0;
                     }
-                    if (eN - (n14 = eN / 2 - n16 - eN / 16) > n17) {
-                        n14 = eN - n17;
+                    if (gameplayViewportHeight - (n14 = gameplayViewportHeight / 2 - n16 - gameplayViewportHeight / 16) > n17) {
+                        n14 = gameplayViewportHeight - n17;
                     }
                     if (n14 > 0) {
                         n14 = 0;
                     }
                     int n19 = n17 < screenWidth ? (screenWidth - n17) / 2 : 0;
-                    int n20 = n17 < eN ? (eN - n17) / 2 : 0;
+                    int n20 = n17 < gameplayViewportHeight ? (gameplayViewportHeight - n17) / 2 : 0;
                     graphics.drawImage(this.backbuffer, n18 + n19, 15 + n14 + n20, 20);
                     int n21 = this.viewportCenterX - 2 * this.viewportCenterY + 16 + 2 * this.mapHalfWidth;
                     int n22 = this.viewportCenterX + 2 * this.viewportCenterY - 16 - 2 * this.mapHalfWidth;
                     int n23 = this.mapWidth - (n21 /= 32) + (n22 /= 32);
                     int n24 = n21 + n22;
                     graphics.setColor(0xFFFFFF);
-                    graphics.drawRect(n24 + n18 + n19, 15 + n23 + n14 + n20, screenWidth / 16, eN / 8);
+                    graphics.drawRect(n24 + n18 + n19, 15 + n23 + n14 + n20, screenWidth / 16, gameplayViewportHeight / 8);
                     graphics.setClip(0, 0, screenWidth, hs);
                     this.drawConfirmBar(graphics);
                     this.drawConfirmDialog(graphics);
@@ -9523,9 +9523,9 @@ implements Runnable {
         n9 /= 32;
         n10 /= 32;
         if (this.viewportCenterX != this.lastViewportCenterX || this.viewportCenterY != this.viewportCenterYCached) {
-            this.backbufferG.setClip(0, 15, screenWidth, eN);
+            this.backbufferG.setClip(0, 15, screenWidth, gameplayViewportHeight);
             this.backbufferG.setColor(0);
-            this.backbufferG.fillRect(0, 15, screenWidth, eN);
+            this.backbufferG.fillRect(0, 15, screenWidth, gameplayViewportHeight);
             this.visibleTrainCount = 0;
             this.viewportX0 = 2 * this.mapWidth;
             this.viewportY0 = 2 * this.mapHeight;
@@ -9608,7 +9608,7 @@ implements Runnable {
         }
         this.paintMain(graphics);
         graphics.drawImage(this.backbuffer, 0, 0, 20);
-        graphics.setClip(0, 15, screenWidth, eN);
+        graphics.setClip(0, 15, screenWidth, gameplayViewportHeight);
         this.drawBuildMenuCursor(graphics);
         n8 = this.viewportX1 - this.viewportX0 + 1;
         n7 = this.viewportY1 - this.viewportY0 + 1;

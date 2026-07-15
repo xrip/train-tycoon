@@ -113,7 +113,7 @@ typedef struct GameCanvas {
     int32_t mapScaleY; // int mapScaleY
     int32_t keySubState; // int keySubState
     int32_t lastKeyCode; // int lastKeyCode
-    int32_t hh; // int hh
+    int32_t keyRepeatStep; // int keyRepeatStep
     int32_t trackStartX; // int trackStartX
     int32_t trackStartY; // int trackStartY
     int32_t trackStepX; // int trackStepX
@@ -432,7 +432,7 @@ typedef struct GameCanvas {
 
 extern int32_t gcs_screenWidth; // static int screenWidth
 extern int32_t gcs_hs; // static int hs
-extern int32_t gcs_eN; // static int eN
+extern int32_t gcs_gameplayViewportHeight; // static int gameplayViewportHeight
 extern int32_t gcs_bottomBarY; // static int bottomBarY
 extern int8_t* gcs_decodeHeaderName1; // static byte[] decodeHeaderName1
 extern int8_t* gcs_decodeHeaderName2; // static byte[] decodeHeaderName2

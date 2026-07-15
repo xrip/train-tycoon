@@ -78,7 +78,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **127 / 196 (64%)** — 126 full + 1 partial (`update`).
+- Methods done: **131 / 196 (66%)** — 130 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -124,6 +124,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   and build cursor/selection drawing. `isTileBuildable` is in `terrain.c`.
   The smoke test still does not enter state 30, so this path has build proof but
   not end-to-end runtime proof yet.
+- **Basic state-30 control is ported.** Build-menu item cycling, map panning,
+  cursor movement with view limits, zoom movement, and isometric tile picking
+  are in `port/impl/input.c`.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -140,9 +143,8 @@ The map-gen and state-30 simulation chains are **done**. Selecting "new game"
 generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
 UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port interaction/build: `openBuildMenu`, `cycleBuildMenuIndex`,
-   `viewportPanKey`/`viewportZoomKey`, `computeViewportBounds`,
-   `demolishAtCursor`, `pickTrainsAtCursor`, `buildPlaceTrackPiece`,
+1. Port interaction/build: `openBuildMenu`, `demolishAtCursor`,
+   `pickTrainsAtCursor`, `buildPlaceTrackPiece`,
    `computeTrainCost`, `buyTrainAtCursor`, and the pathfinding cluster
    (`tryBuildPath`, `validatePathStep`, `findPathStep`, `floodFillPath`,
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
@@ -150,7 +152,7 @@ UI, input, building, and runtime proof are still incomplete. Continue from here:
    frame before treating gameplay rendering as behaviorally proved.
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 127 already
+`show NAME` throughout. Each is a mechanical faithful port like the 131 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

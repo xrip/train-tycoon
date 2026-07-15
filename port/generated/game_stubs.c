@@ -2,18 +2,6 @@
 // Stub bodies for methods not yet ported (status != 'ported').
 #include "game_methods.h"
 
-void gc_viewportPanKey(GameCanvas *gc) {
-    (void)gc; // TODO port: viewportPanKey()  L2027-2072
-}
-
-void gc_viewportZoomKey(GameCanvas *gc) {
-    (void)gc; // TODO port: viewportZoomKey()  L2074-2157
-}
-
-void gc_computeViewportBounds(GameCanvas *gc) {
-    (void)gc; // TODO port: computeViewportBounds()  L2185-2247
-}
-
 void gc_demolishAtCursor(GameCanvas *gc) {
     (void)gc; // TODO port: demolishAtCursor()  L2476-2529
 }
@@ -44,10 +32,6 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool bl, int32_t n, int32_t n2
 
 void gc_applyBackgroundCost(GameCanvas *gc) {
     (void)gc; // TODO port: applyBackgroundCost()  L3015-3023
-}
-
-void gc_cycleBuildMenuIndex(GameCanvas *gc, bool bl) {
-    (void)gc; // TODO port: cycleBuildMenuIndex(boolean bl)  L3144-3155
 }
 
 void gc_rebuildCityList(GameCanvas *gc) {

@@ -4,7 +4,7 @@
 
 // int computeKeyRepeatDelay()
 int32_t gc_computeKeyRepeatDelay(GameCanvas *gc) {
-    if (gc->keySubState < 30) gc->keySubState += gc->hh;
+    if (gc->keySubState < 30) gc->keySubState += gc->keyRepeatStep;
     gc->keySubState = (int8_t)gc->keySubState;
     return gc->keySubState / 3;
 }

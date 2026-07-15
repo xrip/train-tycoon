@@ -114,7 +114,7 @@ void gc_drawTextBox(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
     if ((n4 & 1) == 1) n -= n5 / 2 + 3;
     if ((n4 & 2) == 2) n2 -= 5;
     if ((n4 & 4) == 4) n -= n5 + 6;
-    if (n4 == 37) { n = 0; n2 = 15 + gcs_eN - 15; }
+    if (n4 == 37) { n = 0; n2 = 15 + gcs_gameplayViewportHeight - 15; }
     midp_set_color(g, gc->dc[3 * n3]);
     midp_fill_rect(g, n, n2, n5 + 5, 13);
     midp_set_color(g, gc->dc[3 * n3 + 1]);
@@ -148,7 +148,7 @@ void gc_drawRectFill(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2, int
     gc->clipX = 0;
     gc->clipY = 15;
     gc->clipWidth = gcs_screenWidth;
-    gc->clipHeight = gcs_eN;
+    gc->clipHeight = gcs_gameplayViewportHeight;
     gc_renderFontString(gc, g, n + 4, n2 + 3, byArray3, true);
 }
 

@@ -224,7 +224,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gcs_hs = n2;
         gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
         gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
-        gcs_eN = gcs_hs - 30;
+        gcs_gameplayViewportHeight = gcs_hs - 30;
         gcs_bottomBarY = gcs_hs - 15;
         gc_k(gc, n, n2);
         gc->eD = n;

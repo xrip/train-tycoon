@@ -115,5 +115,6 @@ when it helps a line-by-line faithfulness check.
 ## Known gotchas
 
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded `#define nullptr NULL` fallback before including `MiniFB.h`.
-- **`mappings.txt` has a duplicate field name** `buildMenuIndex` (Java L162 `int` + L215 `byte`); the port tool renames the second to `buildMenuIndex_2` and warns on `inventory`. Fix upstream in `mappings.txt`.
+- The old `buildMenuIndex` mapping conflict is fixed upstream as
+  `buildMenuItemIndex` and `offerRowIndex`.
 - Sound (MIDI `/6`) and high-score networking are intentionally **stubbed**.

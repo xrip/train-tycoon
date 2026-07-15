@@ -751,6 +751,10 @@ method a o ()V                       resetOverlayRenderState
 
 # ---- Batch 40: unsigned byte conversion ----
 method a c (B)I                       byteToUnsignedInt
+
+# ---- Batch 41: gameplay viewport input ----
+field  a eN   gameplayViewportHeight
+field  a hh   keyRepeatStep
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----
