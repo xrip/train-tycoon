@@ -298,9 +298,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->decadeProfitHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
     gc->altDecadeRevenueTotal = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
     gc->altDecadeTotalCost = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->yearGraphOffsets = (int8_t*)midp_alloc_arr(sizeof(int8_t), 12);
-    gc->altYearArray = (int8_t*)midp_alloc_arr(sizeof(int8_t), 12);
-    gc->yearGraphValues = (int8_t*)midp_alloc_arr(sizeof(int8_t), 12);
     gc->difficultyCycle = 1;
     gc->nextTrackPieceCode = 66;
     gc->aiFrequency = 15;

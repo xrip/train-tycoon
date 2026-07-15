@@ -305,9 +305,9 @@ typedef struct GameCanvas {
     int32_t* decadeProfitHistory;
     int32_t* altDecadeRevenueTotal;
     int32_t* altDecadeTotalCost;
-    int8_t* yearGraphOffsets;
-    int8_t* altYearArray;
-    int8_t* yearGraphValues;
+    std::array<int8_t, 12> yearGraphOffsets{};
+    std::array<int8_t, 12> altYearArray{};
+    std::array<int8_t, 12> yearGraphValues{};
     int32_t industryCategory;
     bool industrySiteFound;
     int32_t cityStationX;
