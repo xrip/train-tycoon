@@ -1,5 +1,6 @@
 // Simulation tick functions.
 #include "game_methods.h"
+#include <cstdlib>
 
 // void dayResetP()
 void gc_dayResetP(GameCanvas *gc) {
@@ -234,8 +235,8 @@ void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) 
 
 // boolean pickValidForestTile()
 bool gc_pickValidForestTile(GameCanvas *gc) {
-    int n2 = abs(midp_random_next_int(&gc->rng) % (gc->mapWidth - 2)) + 1;
-    int n = abs(midp_random_next_int(&gc->rng) % (gc->mapHeight - 2)) + 1;
+    int n2 = std::abs(midp_random_next_int(&gc->rng) % (gc->mapWidth - 2)) + 1;
+    int n = std::abs(midp_random_next_int(&gc->rng) % (gc->mapHeight - 2)) + 1;
     if (gc->tileMap[n2][n] != 0
         && (gc->tileMap[n2][n] < 29 || gc->tileMap[n2][n] > 33))
         return false;
@@ -270,7 +271,7 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
     } else if (bl3 && bl) {
         gc->tileMap[n2][n] = 46;
     } else {
-        int n5 = abs(midp_random_next_int(&gc->rng) % 13);
+        int n5 = std::abs(midp_random_next_int(&gc->rng) % 13);
         if (n5 == 12) {
             gc->tileMap[n2][n] = 44;
         } else if (n5 == 11) {
@@ -566,7 +567,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                             int add = gc->zonePopulation[n11] / 2
                                       * (gc->constructionTimers[n11] + 10
                                          + gc->zonePopulation[n11] / 10
-                                         + abs(midp_random_next_int(&gc->rng) % 40)) / 170;
+                                         + std::abs(midp_random_next_int(&gc->rng) % 40)) / 170;
                             gc->serviceResourceStock[i][4] =
                                 (int16_t)(gc->serviceResourceStock[i][4] + add);
                         }

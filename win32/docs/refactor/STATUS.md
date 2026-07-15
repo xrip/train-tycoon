@@ -10,8 +10,8 @@ Only one row may be `in_progress`.
 | BASE-04 | done | Two fixed-input runs passed | Fixed test inputs |
 | BASE-05 | done | Debug, Release, and ASan full tests passed | Rule checks and goldens |
 | BUG-ORDER-01 | done | Debug and Release digests match | Java read order restored |
-| CXX-01 | in_progress | Stage 0 green | Mechanical C++20 move |
-| CXX-02 | queued | - | Strict warnings |
+| CXX-01 | done | Debug and Release full tests passed | Mechanical C++20 move |
+| CXX-02 | in_progress | CXX-01 green | Strict warnings |
 | CXX-03 | queued | - | Presets and style |
 | RT-01..RT-05 | queued | - | Support classes |
 | OWN-01..OWN-04 | queued | - | Standard ownership |

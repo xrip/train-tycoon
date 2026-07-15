@@ -1,5 +1,6 @@
 // Monthly economy and offer processing.
 #include "game_methods.h"
+#include <cstdlib>
 
 // void placeTrainAt(int,int)
 void gc_placeTrainAt(GameCanvas *gc, int32_t duration_units, int32_t row) {
@@ -119,9 +120,9 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         gc->placeTrainDay[free_row] = (int8_t)gc->dayOfMonth;
         gc->placeTrainMonth[free_row] = (int8_t)gc->monthOfYear;
         gc->placeTrainYear[free_row] = (int8_t)(gc->year - 1950);
-        int offer_scale = 4 + abs(midp_random_next_int(&gc->rng) % 12);
+        int offer_scale = 4 + std::abs(midp_random_next_int(&gc->rng) % 12);
         gc_placeTrainAt(gc, offer_scale, free_row);
-        int offer_type = abs(midp_random_next_int(&gc->rng) % 16);
+        int offer_type = std::abs(midp_random_next_int(&gc->rng) % 16);
         int engine_count = 0;
         int active_train_count = 0;
         int type4_count = 0; // Current game logic keeps this value at zero.
@@ -171,21 +172,21 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
             gc->menuRowCost[free_row] = offer_scale * (type267_count * 2 + 5)
                                          * (10 + midp_random_next_int(&gc->rng) % 3);
         if (offer_type >= 9 && offer_type <= 12)
-            gc->menuRowCost[free_row] = 3 + abs(midp_random_next_int(&gc->rng) % 8);
+            gc->menuRowCost[free_row] = 3 + std::abs(midp_random_next_int(&gc->rng) % 8);
         if (offer_type == 13)
             gc->menuRowCost[free_row] =
-                (13324 + abs(midp_random_next_int(&gc->rng) % 5000)) * offer_scale;
+                (13324 + std::abs(midp_random_next_int(&gc->rng) % 5000)) * offer_scale;
         if (offer_type == 14) {
             if (gc->loanBalance > 40000)
                 gc->menuRowCost[free_row] = gc->loanBalance
-                    * (75 + abs(midp_random_next_int(&gc->rng) % 15)) / 100;
+                    * (75 + std::abs(midp_random_next_int(&gc->rng) % 15)) / 100;
             else
                 gc->menuRowType[free_row] = 0;
         }
         if (offer_type != 0) {
             int effect_code = 0;
             while (effect_code == 0) {
-                effect_code = 1 + abs(midp_random_next_int(&gc->rng) % 12);
+                effect_code = 1 + std::abs(midp_random_next_int(&gc->rng) % 12);
                 int8_t *allowed_types = gc->offerTypesByEffect[effect_code - 1];
                 bool valid = false;
                 for (int i = 0; i < midp_arr_len(allowed_types); ++i) {
@@ -207,22 +208,22 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
                           + gc_byteToUnsignedInt(gc, gc->offerEffectSchedule[effect_index][1]));
             if (effect_code == 1) {
                 gc->menuRowEra[free_row] =
-                    (int8_t)(30 + abs(midp_random_next_int(&gc->rng) % 50));
+                    (int8_t)(30 + std::abs(midp_random_next_int(&gc->rng) % 50));
                 gc->menuRowRevenue[free_row] =
                     gc->menuRowCost[free_row] * gc->menuRowEra[free_row] / 100;
             }
             if (effect_code == 2)
                 gc->menuRowRevenue[free_row] =
-                    5000 * (6 + abs(midp_random_next_int(&gc->rng) % 17));
+                    5000 * (6 + std::abs(midp_random_next_int(&gc->rng) % 17));
             if (effect_code == 3)
                 gc->menuRowRevenue[free_row] =
-                    20000 * (3 + abs(midp_random_next_int(&gc->rng) % 3));
+                    20000 * (3 + std::abs(midp_random_next_int(&gc->rng) % 3));
             if (effect_code >= 5 && effect_code <= 10)
                 gc->menuRowEra[free_row] =
-                    (int8_t)(25 + abs(midp_random_next_int(&gc->rng) % 45));
+                    (int8_t)(25 + std::abs(midp_random_next_int(&gc->rng) % 45));
             if (effect_code == 11)
                 gc->menuRowEra[free_row] =
-                    (int8_t)(15 + abs(midp_random_next_int(&gc->rng) % 30));
+                    (int8_t)(15 + std::abs(midp_random_next_int(&gc->rng) % 30));
             gc->menuRowAltType[free_row] = (int8_t)effect_code;
         }
         if (gc->menuRowType[free_row] != 0) {

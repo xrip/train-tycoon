@@ -1,5 +1,6 @@
 // Game paint and update state machines.
 #include "game_methods.h"
+#include <cstdlib>
 
 static int read_u16_le(MidpResource *resource) {
     int low = midp_resource_read_byte(resource);
@@ -468,7 +469,7 @@ void gc_update(GameCanvas *gc) {
                     gc_dayResetP(gc);
                     gc_dayResetAg(gc);
                     gc_dayResetAd(gc);
-                    switch (abs(midp_random_next_int(&gc->rng) % 7)) {
+                    switch (std::abs(midp_random_next_int(&gc->rng) % 7)) {
                         case 0: gc->moneyBaseA += 9; gc->moneyBaseB += 9; break;
                         case 1: ++gc->baseTrainSpeed; gc->accel1 += 3; gc->brake1 += 3; break;
                         case 2: ++gc->baseTrainSpeed2; gc->accel2 += 2; break;

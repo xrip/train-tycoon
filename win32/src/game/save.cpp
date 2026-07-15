@@ -88,7 +88,7 @@ void gc_writeRlePairInlined(GameCanvas *gc, MidpByteArray *output,
     }
 }
 
-void gc_checkSaveByteSum(GameCanvas *gc, char *label) {
+void gc_checkSaveByteSum(GameCanvas *gc, const char *label) {
     (void)label;
     uint64_t sum = 0;
     for (int i = 0; i < gc->snapshotSize; ++i)

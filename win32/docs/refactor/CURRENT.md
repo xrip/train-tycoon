@@ -2,34 +2,31 @@
 
 ## Item
 
-`CXX-01` - move first-party source files to C++20.
+`CXX-02` - make first-party C++ clean under strict MSVC warnings.
 
 ## Base
 
-- Commit: the green `BASE-05` behavior-lock commit.
+- Commit: the green `CXX-01` C++20 move commit.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Rename first-party `.c` files to `.cpp` and build all first-party code as
-C++20 without a structural rewrite or behavior change.
+Build first-party code with `/W4 /permissive- /WX`. Keep vendor code out of
+the warning-as-error gate.
 
 ## Non-goals
 
 - No ownership or model change.
 - No broad formatting or name pass.
-- Warning cleanup belongs to `CXX-02` unless a warning stops the C++ build.
+- Do not edit MiniFB or `stb_image` for a first-party warning rule.
 
 ## Last proof
 
-`BASE-05`: Debug and Release fast/full tests passed twice, and the full MSVC
-AddressSanitizer run passed on 2026-07-15. The tests lock Java random values,
-all raw resources, record files, save bytes, all 13 scenarios, input, and two
-frames. `BUG-ORDER-01` restored Java evaluation order for map RNG and
-multi-byte reads.
+`CXX-01`: all 35 source files build as C++20. Debug and Release fast/full tests
+passed with every Stage 0 digest unchanged on 2026-07-15.
 
 ## Next action
 
-List all first-party `.c` files, rename them to `.cpp`, update CMake, and build
-the fast gate before any C++ cleanup.
+Split vendor compilation from the first-party warning gate, enable the strict
+MSVC flags, and record each warning before making a fix.

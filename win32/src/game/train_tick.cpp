@@ -1,5 +1,6 @@
 // Train movement, loading, and delivery.
 #include "game_methods.h"
+#include <cstdlib>
 
 // int accumulateTrainTurns(int)
 int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
@@ -82,8 +83,8 @@ int32_t gc_collectNearbyServiceResource(GameCanvas *gc, int32_t vehicle,
     for (int other = 0; other < 250; ++other) {
         if (vehicle == other || (gc->vehicleFlags[other] & 0x80) != 128
             || (gc->vehicleFlags[other] & 7) != (gc->vehicleFlags[vehicle] & 7)
-            || abs(gc->serviceVehicleX[vehicle] - gc->serviceVehicleX[other]) >= 3
-            || abs(gc->serviceVehicleY[vehicle] - gc->serviceVehicleY[other]) >= 3)
+            || std::abs(gc->serviceVehicleX[vehicle] - gc->serviceVehicleX[other]) >= 3
+            || std::abs(gc->serviceVehicleY[vehicle] - gc->serviceVehicleY[other]) >= 3)
             continue;
         total += gc_takeServiceResource(gc, other, resource, wanted - total);
     }

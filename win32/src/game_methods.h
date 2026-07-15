@@ -137,7 +137,7 @@ void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n);
 int32_t gc_readShortFromBuffer(GameCanvas *gc);
 void gc_saveGame(GameCanvas *gc);
 void gc_writeRlePairInlined(GameCanvas *gc, MidpByteArray* byteArrayOutputStream, int32_t n, int32_t n2);
-void gc_checkSaveByteSum(GameCanvas *gc, char* string);
+void gc_checkSaveByteSum(GameCanvas *gc, const char* string);
 void gc_compressSaveBuffer(GameCanvas *gc);
 void gc_decompressSaveBuffer(GameCanvas *gc);
 bool gc_saveOrLoadBool(GameCanvas *gc, bool bl);

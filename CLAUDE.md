@@ -7,12 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Train Tycoon native Windows game with its old J2ME decompile kept as a
 behavior reference.
 
-**Current development is only under `win32/`.** Treat it as a normal native C
+**Current development is only under `win32/`.** Treat it as a normal native C++20
 project. It has its own source, resources, CMake build, and tests. It does not
 need Java, Python, the old JAR, `port/`, or generated files.
 
 Use the Java decompile and raw bytecode only when a game-behavior bug has no
-clear answer in the native C source. The old deobfuscation and port pipeline is
+clear answer in the native C++ source. The old deobfuscation and port pipeline is
 kept for that fact-check work; it is no longer the normal development path.
 
 ## Native Win32 project — current source of truth
@@ -27,11 +27,12 @@ ctest --test-dir build -C Debug --output-on-failure
 Run `win32/build/Debug/train_tycoon.exe`. Resources are copied beside the
 program and found from the executable path.
 
-- `win32/src/game/*.c` — game rules, state changes, simulation, and drawing.
+- `win32/src/game/*.cpp` — game rules, state changes, simulation, and drawing.
 - `win32/src/game_state.*` — game state and first values.
 - `win32/src/game_methods.h` — game function declarations.
 - `win32/src/midp_*` — small local runtime.
-- `win32/src/main.c` — Win32 start, frame loop, and smoke tests.
+- `win32/src/main.cpp` — Win32 start and frame loop.
+- `win32/tests/*.cpp` — fast and full behavior checks.
 - `win32/resources/` — game data and MIDI.
 
 Edit these native files directly. There is no manifest, generation, or port
@@ -116,7 +117,7 @@ rasterizer), `Image` (real PNG decode via vendored `port/third_party/stb_image.h
 
 ### Naming rule for native work
 
-Do not keep an obfuscated identifier in new or changed native C code when its
+Do not keep an obfuscated identifier in new or changed native C++ code when its
 purpose can be recovered. If native work reaches such a name:
 
 1. Read its behavior and descriptor-precise cross-references.
@@ -125,7 +126,7 @@ purpose can be recovered. If native work reaches such a name:
 3. Rename it directly in `win32/`. If needed, use `tools/mappings.txt`, the
    readable Java, xrefs, and raw bytecode only to get the right meaning.
 
-Use clear local names in native C. If old short names such as `n`, `by`, or
+Use clear local names in native C++. If old short names such as `n`, `by`, or
 `bl` make changed code unclear, give them behavioral names as part of that
 change.
 

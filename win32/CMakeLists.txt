@@ -1,33 +1,29 @@
 cmake_minimum_required(VERSION 3.25)
-project(train_tycoon LANGUAGES C CXX)
+project(train_tycoon LANGUAGES CXX)
 
 if(NOT WIN32)
     message(FATAL_ERROR "Train Tycoon needs Windows.")
 endif()
-
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 file(GLOB GAME_SOURCES CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp
 )
 
 add_library(train_tycoon_legacy STATIC
-    src/midp_graphics.c
-    src/midp_image.c
-    src/midp_input.c
-    src/midp_media_win32.c
-    src/midp_resource.c
-    src/midp_rms.c
-    src/midp_stub.c
-    src/midp_util.c
-    src/game_state.c
-    src/third_party/stb_image_impl.c
+    src/midp_graphics.cpp
+    src/midp_image.cpp
+    src/midp_input.cpp
+    src/midp_media_win32.cpp
+    src/midp_resource.cpp
+    src/midp_rms.cpp
+    src/midp_stub.cpp
+    src/midp_util.cpp
+    src/game_state.cpp
+    src/third_party/stb_image_impl.cpp
     ${GAME_SOURCES}
 )
 
@@ -39,13 +35,11 @@ target_include_directories(train_tycoon_legacy PUBLIC
 
 target_compile_definitions(train_tycoon_legacy PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX)
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(train_tycoon_legacy PRIVATE -Wall -Wextra)
-elseif(MSVC)
-    target_compile_options(train_tycoon_legacy PRIVATE /std:clatest)
 endif()
 
-add_executable(train_tycoon src/main.c)
+add_executable(train_tycoon src/main.cpp)
 target_link_libraries(train_tycoon PRIVATE
     train_tycoon_legacy
     user32
