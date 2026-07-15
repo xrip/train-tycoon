@@ -122,11 +122,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->flagsA = true;
     gc->junctionDirCursor = 0;
     gc->numSelectedTrains = 0;
-    gc->constructionTimers = (int8_t*)midp_alloc_arr(sizeof(int8_t), 64);
-    gc->zonePopulation = (int16_t*)midp_alloc_arr(sizeof(int16_t), 64);
-    gc->trainSelectionIndex = (int16_t*)midp_alloc_arr(sizeof(int16_t), 64);
-    gc->trainSelectionY = (int16_t*)midp_alloc_arr(sizeof(int16_t), 64);
-    gc->trainSelectionX = (int16_t*)midp_alloc_arr(sizeof(int16_t), 64);
     gc->stationDirCursor = 0;
     gc->cityListIndex = 0;
     gc->pendingTransitionCode = -1;

@@ -158,11 +158,11 @@ typedef struct GameCanvas {
     bool flagsA;
     int8_t junctionDirCursor;
     int8_t numSelectedTrains;
-    int8_t* constructionTimers;
-    int16_t* zonePopulation;
-    int16_t* trainSelectionIndex;
-    int16_t* trainSelectionY;
-    int16_t* trainSelectionX;
+    std::array<int8_t, 64> constructionTimers{};
+    std::array<int16_t, 64> zonePopulation{};
+    std::array<int16_t, 64> trainSelectionIndex{};
+    std::array<int16_t, 64> trainSelectionY{};
+    std::array<int16_t, 64> trainSelectionX{};
     int8_t stationDirCursor;
     int8_t cityListIndex;
     std::array<int8_t, 48> stationDirectionCode{};
