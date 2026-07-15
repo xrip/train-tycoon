@@ -134,6 +134,20 @@ real MIDI device test is an opt-in `device` label.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - All scenario, input, save, and frame golden values are unchanged.
 
+## OWN-03 proof
+
+- A row-owning `Grid<T>` (`support/grid.h`) holds the map grids and other
+  matrices; `grid[x][y]` reads are unchanged.
+- Map grids (`tileMap`, `trackMap`, `tileElevation`, `heightMap`,
+  `pathDistanceGrid`, `terrainEditBuffer`), the build-menu tables, the sprite
+  bitmap table, and the fixed `tileQueue` and `serviceResourceStock` matrices no
+  longer use raw pointers.
+- Matrix save helpers gained `std::array` and `Grid<int8_t>` overloads, so the
+  map and stock save byte order is unchanged.
+- No raw `**` matrix field remains in `GameCanvas`.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- All 13 scenario map digests, save/load, and frame goldens are unchanged.
+
 ## Manual baseline still needed
 
 - boot and menu;

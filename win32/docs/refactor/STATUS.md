@@ -20,8 +20,8 @@ Only one row may be `in_progress`.
 | RT-05 | done | Debug and Release full tests passed | Owned WinMM player and silent output |
 | OWN-01 | done | Debug and Release full tests passed | Local arrays and text ownership |
 | OWN-02 | done | Debug and Release full tests passed, 2026-07-15 | Fixed state arrays and tables |
-| OWN-03 | in_progress | OWN-02 green | Maps and matrices |
-| OWN-04 | queued | - | Remove raw registry |
+| OWN-03 | done | Debug and Release full tests passed, 2026-07-15 | Maps and matrices |
+| OWN-04 | in_progress | OWN-03 green | Remove raw registry |
 | MODEL-01 | queued | - | Enums and constants |
 | SAVE-01 | queued | - | Legacy save codec |
 | WORLD-01..WORLD-02 | queued | - | World and generation |

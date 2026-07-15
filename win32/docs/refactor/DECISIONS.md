@@ -104,6 +104,16 @@ no macro site changed. Constant tables use direct brace initializers instead of
 `midp_alloc_arr` plus `memcpy`. Uniform matrices use nested `std::array`; the one
 mixed-row table (`offerTypesByEffect`) uses `std::array<std::vector<int8_t>, N>`.
 
+## D-009: Row-owning Grid<T> for maps and matrices
+
+OWN-03 chose a row-owning `Grid<T>` (a `std::vector<std::vector<T>>` behind
+`operator[]`) rather than a flat `x * height + y` buffer. This keeps every ported
+`grid[x][y]` read compiling unchanged, so the map conversion touched allocation
+sites, the save codec, and a few row-pointer spots instead of hundreds of index
+sites. Grid rows may be jagged, which matches the padded map sizes (`mapWidth+1`,
+`heightMap` `+2`) and the variable-length menu and sprite rows. The save codec
+gets a `Grid<int8_t>` matrix overload that walks rows, preserving byte order.
+
 ## D-006: Plain native resources
 
 The native project keeps plain resource data. Old files `1` to `5` were changed

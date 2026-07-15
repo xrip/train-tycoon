@@ -20,18 +20,18 @@ resource values, and the current `.rms` save byte order.
 
 Branch: `master`.
 
-Active item: `OWN-03`, maps and other matrices to `Grid<T>` or nested
-containers.
+Active item: `OWN-04`, remove raw ownership and the array-length registry.
 
-`OWN-02` is complete. Every fixed-size raw state array and constant table now
-uses `std::array`: the selection corners and money ticker, wagon and route and
-menu flag arrays, the year graph arrays, service/city/zone/train-selection
-arrays, the per-train 500-slot arrays, train revenue and financial history,
-menu row tables, offer tables, scores, visible trains, player name codes, and
-the track-step and sprite-direction constant tables. The save helpers gained
-size-explicit `*Span` cores with templated `std::array` overloads so save byte
-order is unchanged, and the dead `dk` and `j` tables were removed. Debug and
-Release full gates passed on 2026-07-15.
+`OWN-02` and `OWN-03` are complete. Every fixed-size raw state array and constant
+table uses `std::array`, and every map grid and matrix uses a row-owning
+`Grid<T>` (`win32/src/support/grid.h`) or nested `std::array`. The save helpers
+gained size-explicit `*Span` cores plus `std::array`/`Grid` overloads so save
+byte order is unchanged, and dead `dk`/`j` state was removed. No raw `**` matrix
+field remains. Debug and Release full gates passed on 2026-07-15.
+
+Six dynamically-sized 1D raw arrays remain for OWN-04: `spriteOffsetTable`,
+`spriteData`, `spriteIndexTable`, `tileOffsetX`, `tileOffsetY`, and the growable
+`saveBuffer`.
 
 The work tree is clean except for root `AGENTS.md`. It is a user-owned,
 untracked instruction file. Do not add, change, or remove it.
@@ -144,18 +144,16 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Incomplete work and risks
 
-- `OWN-03` is in progress. Map grids and other matrices still use raw
-  `int8_t**`/`int16_t**` and `midp_alloc_arr`.
-- Map grids are sized `mapWidth * mapHeight`. Per the plan a `Grid<T>` stores
-  them as `x * height + y`; keep that index order exact.
-- Matrices written by save helpers need the same care arrays did. The matrix
-  helpers (`gc_saveOrLoad*MatrixInlined`) still read row and element length from
-  the array registry; give them a size-explicit path before moving a saved
-  matrix, mirroring the OWN-02 `*Span` split.
-- Dynamically-sized single arrays remain raw on purpose: `spriteOffsetTable`,
-  `spriteData`, `spriteIndexTable`, and `tileOffsetX`/`tileOffsetY` are sized at
-  load time, and `saveBuffer` grows during save. These belong to OWN-03/OWN-04.
-- Full old array-length registry removal is OWN-04.
+- `OWN-04` is in progress. Six dynamically-sized 1D raw arrays remain:
+  `spriteOffsetTable`, `spriteData`, `spriteIndexTable`, `tileOffsetX`,
+  `tileOffsetY`, and `saveBuffer`.
+- `saveBuffer` is the risky one: it grows through
+  `gc_ensureSaveBufferCapacity` and is read with pointer arithmetic and explicit
+  offsets in the save codec. Moving it to `std::vector<int8_t>` must keep the
+  exact compressed byte order.
+- After the six move, remove the dead raw save wrappers and matrix helpers, the
+  `gc_tracked_codes(const int8_t*)` inline, and the `midp_alloc_arr` /
+  `midp_arr_len` registry entirely; that is the point of OWN-04.
 - `GameCanvas`, `game_methods.h`, short state names, and Java-shape comments
   remain until later model and clean stages.
 - `gc_computeMenuRowDisplayValue` may divide by zero when money is zero. Do not
@@ -168,20 +166,20 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Next work, in order
 
-1. Start OWN-03 with a non-save matrix leaf if one exists, or first give the
-   matrix save helpers a size-explicit path (mirror the OWN-02 `*Span` split)
-   so a saved map grid can move without changing save order.
-2. Move the map grids (`tileMap`, `trackMap`, `tileElevation`, `heightMap`,
-   `terrainEditBuffer`, `pathDistanceGrid`) to `Grid<T>` with `x * height + y`
-   order. Keep `grid[x][y]` reads working through the grid accessor. Check every
-   call site before each group.
-3. Move the `serviceResourceStock` 250x5 matrix and any remaining nested tables.
-4. Close OWN-03 only after no fixed matrix remains on raw pointers. Run Debug and
-   Release full gates and update `CURRENT.md`, `STATUS.md`, `BASELINE.md`, and
+1. Move the sprite and tile-offset load buffers (`spriteOffsetTable`,
+   `spriteData`, `spriteIndexTable`, `tileOffsetX`, `tileOffsetY`) to
+   `std::vector`. Check every call site; they are load-time buffers.
+2. Move `saveBuffer` to `std::vector<int8_t>` with explicit offsets, keeping the
+   exact compressed save byte order. Verify with the save/load golden.
+3. Remove the dead raw save wrappers and matrix helpers, the
+   `gc_tracked_codes(const int8_t*)` inline, and the `midp_alloc_arr` /
+   `midp_arr_len` registry once nothing uses them.
+4. Close OWN-04 only after no raw owning array remains. Run Debug and Release
+   full gates and update `CURRENT.md`, `STATUS.md`, `BASELINE.md`, and
    `DECISIONS.md`.
-5. Continue the main plan in strict order: OWN-04 raw registry removal, then
-   model, save, world, path, fleet, economy, scenario, simulation, build,
-   assets, render, UI, app, clean, docs, and release stages.
+5. Continue the main plan in strict order: model, save, world, path, fleet,
+   economy, scenario, simulation, build, assets, render, UI, app, clean, docs,
+   and release stages.
 
 ## Files to read first
 
