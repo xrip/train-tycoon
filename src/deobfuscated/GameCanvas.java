@@ -36,9 +36,6 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordEnumeration;
 import javax.microedition.rms.RecordStore;
 
-/*
- * Duplicate member names - consider using --renamedupmembers true
- */
 public class GameCanvas
 extends Canvas
 implements Runnable {
@@ -159,7 +156,7 @@ implements Runnable {
     int trackStartY;
     int trackStepX;
     int trackStepY;
-    int buildMenuIndex;
+    int buildMenuItemIndex = 0;
     int[] selectionTileX = new int[4];
     int[] selectionTileY = new int[4];
     int cursorScreenX;
@@ -212,11 +209,11 @@ implements Runnable {
     byte difficultySlot = 0;
     byte difficultyB = 0;
     byte difficultyC = 0;
-    byte buildMenuIndex = 0;
+    byte offerRowIndex = 0;
     byte duplicateRowState = 0;
     int activeScenario;
-    int fY;
-    int dR;
+    int offerTypeTransitionCode;
+    int offerEffectTransitionCode;
     int gJ;
     boolean ad = false;
     byte[] bE = new byte[10];
@@ -355,8 +352,8 @@ implements Runnable {
     byte aiFrequency = (byte)15;
     byte aiThreshold = (byte)12;
     byte[] routeResourceFlags = new byte[6];
-    byte[][] aK = new byte[][]{{1, 3, 13}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {1, 2, 3, 13, 14, 15}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {1, 2, 3, 13, 14, 15}, {4, 9}, {5, 10}, {6, 11}, {7, 12}, {8, 12}, {1, 2, 3, 13}, {1, 2, 3, 14}};
-    byte[][] trackPieceRequirements = new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}};
+    byte[][] offerTypesByEffect = new byte[][]{{1, 3, 13}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {1, 2, 3, 13, 14, 15}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {1, 2, 3, 13, 14, 15}, {4, 9}, {5, 10}, {6, 11}, {7, 12}, {8, 12}, {1, 2, 3, 13}, {1, 2, 3, 14}};
+    byte[][] offerEffectSchedule = new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}};
     byte[] menuRowType = new byte[6];
     byte[] placeTrainDay = new byte[6];
     byte[] menuRowParamA = new byte[6];
@@ -369,11 +366,11 @@ implements Runnable {
     byte[] menuRowAltType = new byte[6];
     byte[] menuRowEra = new byte[6];
     int[] menuRowRevenue = new int[6];
-    int trackBuildCost = 0;
-    short[] dU = new short[12];
+    int offerGenerationCount = 0;
+    short[] offerEffectNextCount = new short[12];
     boolean flagsB;
     int bq;
-    int bv = 0;
+    int lastOfferDateCode = 0;
     int menuRowEnabledCount = 0;
     byte[] gP = new byte[5];
     byte scenarioMilestoneIndex;
@@ -546,7 +543,7 @@ implements Runnable {
                     if (!this.pauseFlag) {
                         this.update();
                     }
-                    if (!this.menuRowEnabled[this.buildMenuMode][this.buildMenuIndex]) continue;
+                    if (!this.menuRowEnabled[this.buildMenuMode][this.buildMenuItemIndex]) continue;
                     this.viewportZoomKey();
                 }
             } else {
@@ -728,21 +725,21 @@ implements Runnable {
                 if (this.inputSubState == 1) {
                     if (n == 42 && this.buildMenuMode != 4 && this.buildMenuMode != 2) {
                         this.buildMenuMode = 0;
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                         this.menuDirty = true;
                     }
                     if (n != 35) break;
                     if (this.buildMenuMode == 1) {
                         this.buildMenuMode = 0;
-                        this.buildMenuIndex = 1;
+                        this.buildMenuItemIndex = 1;
                     }
                     if (this.buildMenuMode == 3) {
                         this.buildMenuMode = 1;
-                        this.buildMenuIndex = 3;
+                        this.buildMenuItemIndex = 3;
                     }
                     if (this.buildMenuMode == 5) {
                         this.buildMenuMode = 1;
-                        this.buildMenuIndex = 1;
+                        this.buildMenuItemIndex = 1;
                     }
                     this.menuDirty = true;
                     break;
@@ -757,7 +754,7 @@ implements Runnable {
                 if (n == 53) {
                     if (this.confirmToggle == 0) {
                         this.setState(30);
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                         this.menuDirty = true;
                     } else {
                         this.ready = false;
@@ -2262,7 +2259,7 @@ implements Runnable {
 
     void drawBuildMenuCursor(Graphics graphics) {
         byte by;
-        if (!this.blockBuildMenu && (by = this.menuTransitionCode[this.buildMenuMode][this.buildMenuIndex]) != 0) {
+        if (!this.blockBuildMenu && (by = this.menuTransitionCode[this.buildMenuMode][this.buildMenuItemIndex]) != 0) {
             int[] nArray;
             int[] nArray2;
             if (by == 1) {
@@ -2387,7 +2384,7 @@ implements Runnable {
     }
 
     void drawBuildMenuRow(Graphics graphics) {
-        if (this.menuRowEnabled[this.buildMenuMode][this.buildMenuIndex]) {
+        if (this.menuRowEnabled[this.buildMenuMode][this.buildMenuItemIndex]) {
             int n = this.viewportBaseX - this.viewportCenterX;
             int n2 = this.viewportBaseY - this.viewportCenterY;
             if (this.blockBuildMenu) {
@@ -2396,16 +2393,16 @@ implements Runnable {
                 graphics.drawArc(n + 5, n2 + 5 + 15, 7, 7, 0, 360);
                 graphics.drawLine(n + 7, n2 + 10 + 15, n + 10, n2 + 7 + 15);
             } else {
-                if (this.buildMenuMode == 1 && (this.buildMenuIndex == 5 || this.buildMenuIndex == 6)) {
+                if (this.buildMenuMode == 1 && (this.buildMenuItemIndex == 5 || this.buildMenuItemIndex == 6)) {
                     this.drawSpriteQuad(graphics, 249, this.cursorScreenX - 2, this.cursorScreenY - 2 + 15, 20);
                 }
                 this.drawSpriteQuad(graphics, 200, n, n2 + 15, 20);
-                if (this.buildMenuMode != 0 || this.buildMenuIndex != 0) {
-                    this.drawSpriteQuad(graphics, this.c(this.menuTextIndex[this.buildMenuMode][this.buildMenuIndex]), n + 5, n2 + 4 + 15, 20);
+                if (this.buildMenuMode != 0 || this.buildMenuItemIndex != 0) {
+                    this.drawSpriteQuad(graphics, this.c(this.menuTextIndex[this.buildMenuMode][this.buildMenuItemIndex]), n + 5, n2 + 4 + 15, 20);
                 }
-                if (this.buildMenuMode == 3 && this.buildMenuIndex < 4) {
+                if (this.buildMenuMode == 3 && this.buildMenuItemIndex < 4) {
                     int n3;
-                    this.drawSpriteQuad(graphics, this.buildMenuIndex + 230, n + 5, n2 + 4 + 15, 20);
+                    this.drawSpriteQuad(graphics, this.buildMenuItemIndex + 230, n + 5, n2 + 4 + 15, 20);
                     int n4 = this.tileCursorX;
                     int n5 = this.tileCursorY;
                     int n6 = n4 - 3;
@@ -2660,7 +2657,7 @@ implements Runnable {
     }
 
     void openBuildMenu() {
-        byte by = this.buildMenuItems[this.buildMenuMode][this.buildMenuIndex];
+        byte by = this.buildMenuItems[this.buildMenuMode][this.buildMenuItemIndex];
         if (!(!this.pauseFlag || this.buildMenuMode == 0 && by == 11 || this.buildMenuMode == 0 && by == 1 || this.buildMenuMode == 0 && by == 9 || this.buildMenuMode == 1 && by == 1 || this.buildMenuMode == 1 && by == 3 || this.buildMenuMode == 1 && by == 9 || this.buildMenuMode == 3 && by == 9 || this.buildMenuMode == 5 && by == 9)) {
             return;
         }
@@ -2674,7 +2671,7 @@ implements Runnable {
                     case 1: {
                         this.buildMenuMode = 1;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                         break;
                     }
                     case 2: {
@@ -2729,13 +2726,13 @@ implements Runnable {
                         this.tileMap[this.placementX][this.placementY] = 127;
                         this.buildMenuMode = 4;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                         break;
                     }
                     case 1: {
                         this.buildMenuMode = 5;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                         break;
                     }
                     case 2: {
@@ -2756,7 +2753,7 @@ implements Runnable {
                     case 3: {
                         this.buildMenuMode = 3;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                         break;
                     }
                     case 4: {
@@ -2776,7 +2773,7 @@ implements Runnable {
                     case 9: {
                         this.buildMenuMode = 0;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 1;
+                        this.buildMenuItemIndex = 1;
                     }
                 }
                 break;
@@ -2805,7 +2802,7 @@ implements Runnable {
                     }
                 }
                 this.buildMenuMode = 1;
-                this.buildMenuIndex = this.buildCancelled ? 0 : 2;
+                this.buildMenuItemIndex = this.buildCancelled ? 0 : 2;
                 this.menuDirty = true;
                 this.lastViewportCenterX = -1;
                 break;
@@ -2820,7 +2817,7 @@ implements Runnable {
                 }
                 this.buildMenuMode = 1;
                 this.menuDirty = true;
-                this.buildMenuIndex = 3;
+                this.buildMenuItemIndex = 3;
                 break;
             }
             case 4: {
@@ -2837,7 +2834,7 @@ implements Runnable {
                         this.tileMap[this.placementX][this.placementY] = 0;
                         this.buildMenuMode = 1;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 0;
+                        this.buildMenuItemIndex = 0;
                     }
                 }
                 break;
@@ -2863,7 +2860,7 @@ implements Runnable {
                     case 9: {
                         this.buildMenuMode = 1;
                         this.menuDirty = true;
-                        this.buildMenuIndex = 1;
+                        this.buildMenuItemIndex = 1;
                     }
                 }
             }
@@ -2902,7 +2899,7 @@ implements Runnable {
             this.selectionCost = n11;
             this.buildMenuMode = 2;
             this.menuDirty = true;
-            this.buildMenuIndex = 0;
+            this.buildMenuItemIndex = 0;
             this.buildCancelled = false;
             this.tileMap[n][n2] = (byte)n7;
             this.trackMap[n][n2] = 65;
@@ -3145,21 +3142,21 @@ implements Runnable {
     }
 
     void cycleBuildMenuIndex(boolean bl) {
-        this.buildMenuIndex = bl ? ++this.buildMenuIndex : --this.buildMenuIndex;
-        if (this.buildMenuIndex < 0) {
-            this.buildMenuIndex = this.buildMenuItems[this.buildMenuMode].length - 1;
+        this.buildMenuItemIndex = bl ? ++this.buildMenuItemIndex : --this.buildMenuItemIndex;
+        if (this.buildMenuItemIndex < 0) {
+            this.buildMenuItemIndex = this.buildMenuItems[this.buildMenuMode].length - 1;
         }
-        if (this.buildMenuIndex == this.buildMenuItems[this.buildMenuMode].length) {
-            this.buildMenuIndex = 0;
+        if (this.buildMenuItemIndex == this.buildMenuItems[this.buildMenuMode].length) {
+            this.buildMenuItemIndex = 0;
         }
-        this.confirmTargetState = this.buildMenuResultCodes[this.buildMenuMode][this.buildMenuIndex];
+        this.confirmTargetState = this.buildMenuResultCodes[this.buildMenuMode][this.buildMenuItemIndex];
         this.menuDirty = true;
         this.confirmCounter = 20;
     }
 
     int drawMenuRow(Graphics graphics, int n, int n2, int n3, boolean bl) {
         this.drawSpriteQuad(graphics, n, n3, fX, 20);
-        if (this.buildMenuIndex == n2) {
+        if (this.buildMenuItemIndex == n2) {
             this.gj = n3;
         }
         return n3 + 15 + (bl ? 3 : 0);
@@ -3224,14 +3221,14 @@ implements Runnable {
             boolean bl = false;
             this.backbufferG.setColor(0x606060);
             this.backbufferG.fillRect(0, fX, screenWidth, 15);
-            int n = this.c(this.menuItemCode[this.buildMenuMode][this.buildMenuIndex]);
+            int n = this.c(this.menuItemCode[this.buildMenuMode][this.buildMenuItemIndex]);
             int n2 = n + 15 - screenWidth;
             if (n2 < 0) {
                 n2 = 0;
             }
             for (int i = 0; i < this.buildMenuItems[this.buildMenuMode].length; ++i) {
                 this.drawSpriteQuad(this.backbufferG, this.c(this.menuTextIndex[this.buildMenuMode][i]), this.c(this.menuItemCode[this.buildMenuMode][i]) - n2, fX, 20);
-                if (i != this.buildMenuIndex) continue;
+                if (i != this.buildMenuItemIndex) continue;
                 this.backbufferG.setColor(0xFFFFFF);
                 this.backbufferG.drawRect(this.c(this.menuItemCode[this.buildMenuMode][i]) - n2, fX, 14, 14);
                 this.backbufferG.drawRect(this.c(this.menuItemCode[this.buildMenuMode][i]) + 1 - n2, fX + 1, 12, 12);
@@ -4081,9 +4078,9 @@ implements Runnable {
             case 53: 
             case 54: {
                 if (n2 == 1) {
-                    byte[] byArray = this.p(this.menuRowParamA[this.buildMenuIndex], 11);
-                    byte[] byArray4 = this.p(this.menuRowParamB[this.buildMenuIndex], 11);
-                    byte[] byArray5 = this.p(this.menuRowParamC[this.buildMenuIndex] + 1950, 0);
+                    byte[] byArray = this.p(this.menuRowParamA[this.offerRowIndex], 11);
+                    byte[] byArray4 = this.p(this.menuRowParamB[this.offerRowIndex], 11);
+                    byte[] byArray5 = this.p(this.menuRowParamC[this.offerRowIndex] + 1950, 0);
                     byte[] byArray6 = new byte[byArray.length + byArray4.length + byArray5.length];
                     System.arraycopy(byArray, 0, byArray6, 0, byArray.length);
                     System.arraycopy(byArray4, 0, byArray6, byArray.length, byArray4.length);
@@ -4091,13 +4088,13 @@ implements Runnable {
                     return byArray6;
                 }
                 if (n2 == 2) {
-                    return this.b(this.menuRowCost[this.buildMenuIndex]);
+                    return this.b(this.menuRowCost[this.offerRowIndex]);
                 }
                 if (n2 == 3) {
-                    return this.p(this.computeMenuRowDisplayValue(this.buildMenuIndex), 29);
+                    return this.p(this.computeMenuRowDisplayValue(this.offerRowIndex), 29);
                 }
                 if (n2 != 4) break;
-                return this.p(this.menuRowCost[this.buildMenuIndex], 0);
+                return this.p(this.menuRowCost[this.offerRowIndex], 0);
             }
             case 60: {
                 if (n2 % 2 == 1) {
@@ -4120,13 +4117,13 @@ implements Runnable {
             case 71: 
             case 72: {
                 if (n2 == 1) {
-                    return this.p(this.menuRowEra[this.buildMenuIndex], 29);
+                    return this.p(this.menuRowEra[this.offerRowIndex], 29);
                 }
                 if (n2 == 2) {
-                    return this.b(this.menuRowRevenue[this.buildMenuIndex]);
+                    return this.b(this.menuRowRevenue[this.offerRowIndex]);
                 }
                 if (n2 != 3) break;
-                return this.p(this.menuRowEra[this.buildMenuIndex], 0);
+                return this.p(this.menuRowEra[this.offerRowIndex], 0);
             }
             case 27: {
                 if (n2 == 1) {
@@ -4608,12 +4605,12 @@ implements Runnable {
             case 8: 
             case 9: {
                 if (n2 == 1) {
-                    this.pendingTransitionCode = this.fY;
+                    this.pendingTransitionCode = this.offerTypeTransitionCode;
                     this.setState(30);
                     break;
                 }
                 if (n2 == 2) {
-                    this.pendingTransitionCode = this.dR;
+                    this.pendingTransitionCode = this.offerEffectTransitionCode;
                     this.setState(30);
                     break;
                 }
@@ -4784,12 +4781,12 @@ implements Runnable {
             case 40: {
                 switch (n2) {
                     case 1: {
-                        this.pendingTransitionCode = this.menuRowType[this.buildMenuIndex] + 40;
+                        this.pendingTransitionCode = this.menuRowType[this.offerRowIndex] + 40;
                         this.duplicateRowState = (byte)2;
                         break;
                     }
                     case 2: {
-                        this.pendingTransitionCode = this.menuRowAltType[this.buildMenuIndex] + 60;
+                        this.pendingTransitionCode = this.menuRowAltType[this.offerRowIndex] + 60;
                         this.duplicateRowState = (byte)2;
                     }
                 }
@@ -4826,12 +4823,12 @@ implements Runnable {
             }
             case 60: {
                 if (n2 % 2 == 1) {
-                    this.buildMenuIndex = this.gP[n2 / 2];
-                    this.pendingTransitionCode = this.menuRowType[this.buildMenuIndex] + 40;
+                    this.offerRowIndex = this.gP[n2 / 2];
+                    this.pendingTransitionCode = this.menuRowType[this.offerRowIndex] + 40;
                 }
                 if (n2 % 2 == 0) {
-                    this.buildMenuIndex = this.gP[(n2 - 1) / 2];
-                    this.pendingTransitionCode = this.menuRowAltType[this.buildMenuIndex] + 60;
+                    this.offerRowIndex = this.gP[(n2 - 1) / 2];
+                    this.pendingTransitionCode = this.menuRowAltType[this.offerRowIndex] + 60;
                 }
                 this.duplicateRowState = 1;
                 this.setState(30);
@@ -6919,10 +6916,10 @@ implements Runnable {
         this.saveOrLoadByteArrayInlined(this.menuRowAltType);
         this.saveOrLoadByteArrayInlined(this.menuRowEra);
         this.saveOrLoadIntArrayInlined(this.menuRowRevenue);
-        this.saveOrLoadShortArrayInlined(this.dU);
-        this.trackBuildCost = this.saveIntToBuffer(this.trackBuildCost);
+        this.saveOrLoadShortArrayInlined(this.offerEffectNextCount);
+        this.offerGenerationCount = this.saveIntToBuffer(this.offerGenerationCount);
         this.bq = this.saveIntToBuffer(this.bq);
-        this.bv = this.saveIntToBuffer(this.bv);
+        this.lastOfferDateCode = this.saveIntToBuffer(this.lastOfferDateCode);
         this.flagsB = this.saveOrLoadBool(this.flagsB);
         this.scenarioBits = this.saveOrLoadByte(this.scenarioBits);
         this.scenarioMilestoneIndex = this.saveOrLoadByte(this.scenarioMilestoneIndex);
@@ -7821,10 +7818,10 @@ implements Runnable {
         if (this.menuRowAltType[n] == 12 && this.interestRate > 1) {
             this.interestRate = (byte)(this.interestRate - 1);
         }
-        this.fY = this.menuRowType[n] + 40;
-        this.dR = this.menuRowAltType[n] + 60;
+        this.offerTypeTransitionCode = this.menuRowType[n] + 40;
+        this.offerEffectTransitionCode = this.menuRowAltType[n] + 60;
         this.duplicateRowState = (byte)3;
-        this.buildMenuIndex = (byte)5;
+        this.offerRowIndex = (byte)5;
         this.menuRowType[5] = this.menuRowType[n];
         this.menuRowCost[5] = this.menuRowCost[n];
         this.menuRowValue[5] = this.menuRowValue[n];
@@ -7849,10 +7846,10 @@ implements Runnable {
     }
 
     void duplicateMenuRow(int n) {
-        this.fY = this.menuRowType[n] + 40;
-        this.dR = this.menuRowAltType[n] + 60;
+        this.offerTypeTransitionCode = this.menuRowType[n] + 40;
+        this.offerEffectTransitionCode = this.menuRowAltType[n] + 60;
         this.duplicateRowState = (byte)4;
-        this.buildMenuIndex = (byte)5;
+        this.offerRowIndex = (byte)5;
         this.menuRowType[5] = this.menuRowType[n];
         this.menuRowCost[5] = this.menuRowCost[n];
         this.menuRowValue[5] = this.menuRowValue[n];
@@ -7898,7 +7895,7 @@ implements Runnable {
             this.duplicateMenuRow(n);
         }
         n = this.dayOfMonth + 32 * this.monthOfYear + 370 * (this.year - 1950);
-        if (n - this.bv > 150 + this.rng.nextInt() % 20) {
+        if (n - this.lastOfferDateCode > 150 + this.rng.nextInt() % 20) {
             int n3;
             int n4 = -1;
             for (n3 = 0; n3 < 5; ++n3) {
@@ -7998,7 +7995,7 @@ implements Runnable {
                     n5 = 0;
                     while (n5 == 0) {
                         n5 = 1 + Math.abs(this.rng.nextInt() % 12);
-                        byte[] byArray = this.aK[n5 - 1];
+                        byte[] byArray = this.offerTypesByEffect[n5 - 1];
                         boolean bl = false;
                         for (int i = 0; i < byArray.length; ++i) {
                             if (byArray[i] != n6) continue;
@@ -8013,17 +8010,17 @@ implements Runnable {
                         if (n5 == 4 && this.era >= 5) {
                             bl = false;
                         }
-                        if (this.trackBuildCost < this.trackPieceRequirements[n5 - 1][0]) {
+                        if (this.offerGenerationCount < this.offerEffectSchedule[n5 - 1][0]) {
                             bl = false;
                         }
-                        if (this.trackBuildCost < this.dU[n5 - 1]) {
+                        if (this.offerGenerationCount < this.offerEffectNextCount[n5 - 1]) {
                             bl = false;
                         }
                         if (bl) continue;
                         n5 = 0;
                     }
                     int n13 = n5 - 1;
-                    this.dU[n13] = (short)(this.dU[n13] + this.c(this.trackPieceRequirements[n5 - 1][1]));
+                    this.offerEffectNextCount[n13] = (short)(this.offerEffectNextCount[n13] + this.c(this.offerEffectSchedule[n5 - 1][1]));
                     if (n5 == 1) {
                         this.menuRowEra[n4] = (byte)(30 + Math.abs(this.rng.nextInt() % 50));
                         this.menuRowRevenue[n4] = this.menuRowCost[n4] * this.menuRowEra[n4] / 100;
@@ -8045,12 +8042,12 @@ implements Runnable {
                 if (this.menuRowType[n4] != 0) {
                     this.ready = false;
                     this.transitionCode = 40;
-                    this.buildMenuIndex = (byte)n4;
+                    this.offerRowIndex = (byte)n4;
                     this.setState(20);
-                    ++this.trackBuildCost;
+                    ++this.offerGenerationCount;
                 }
             }
-            this.bv = n;
+            this.lastOfferDateCode = n;
         }
     }
 
@@ -9010,7 +9007,7 @@ implements Runnable {
                     }
                 }
                 if (this.loadStep == 3) {
-                    this.buildMenuIndex = 0;
+                    this.buildMenuItemIndex = 0;
                     this.buildMenuMode = 0;
                     this.loadState25Setup(0);
                 }
@@ -9446,13 +9443,13 @@ implements Runnable {
                 if (this.loadStep != 2) break;
                 if (this.tryBuildPath()) {
                     this.setState(30);
-                    this.buildMenuIndex = 0;
+                    this.buildMenuItemIndex = 0;
                     this.buildCancelled = true;
                     this.buildMenuMode = 2;
                     this.menuDirty = true;
                     break;
                 }
-                this.buildMenuIndex = 0;
+                this.buildMenuItemIndex = 0;
                 this.buildCancelled = true;
                 this.buildMenuMode = 1;
                 this.menuDirty = true;
@@ -9467,7 +9464,7 @@ implements Runnable {
                 }
                 if (this.loadStep != 2) break;
                 this.saveAllMapArrays();
-                this.buildMenuIndex = 0;
+                this.buildMenuItemIndex = 0;
                 this.menuDirty = true;
                 this.setState(30);
                 break;
@@ -9479,7 +9476,7 @@ implements Runnable {
                 if (this.loadStep != 2) break;
                 this.restoreAllMapArrays();
                 this.pauseFlag = false;
-                this.buildMenuIndex = 0;
+                this.buildMenuItemIndex = 0;
                 this.menuDirty = true;
                 this.setState(30);
                 break;

@@ -311,7 +311,7 @@ void gc_update(GameCanvas *gc) {
                 }
             }
             if (gc->loadStep == 3) {
-                gc->buildMenuIndex = 0;
+                gc->buildMenuItemIndex = 0;
                 gc->buildMenuMode = 0;
                 gc_loadState25Setup(gc, 0);
             }

@@ -355,7 +355,7 @@ void gc_run(GameCanvas *gc) {
     if (gc->gameState == 30) {
         for (int n = 0; n < gc->simSpeed; ++n) {
             if (!gc->pauseFlag) gc_update(gc);
-            if (!gc->menuRowEnabled[gc->buildMenuMode][gc->buildMenuIndex]) continue;
+            if (!gc->menuRowEnabled[gc->buildMenuMode][gc->buildMenuItemIndex]) continue;
             gc_viewportZoomKey(gc);
         }
     } else {

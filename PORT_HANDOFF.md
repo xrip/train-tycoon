@@ -68,11 +68,17 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   allocate and `midp_arr_len(ptr)` to read a length (the generated init already
   uses `midp_alloc_arr`). `System.arraycopy(src,sp,dst,dp,len)` → `memcpy(dst+dp,
   src+sp, len)` (or `memmove` if regions overlap).
+- **Naming while porting:** do not add new C code with a recoverable obfuscated
+  member name. Use behavior plus descriptor-precise xrefs to choose a clear
+  name, add it to `tools/mappings.txt`, rerun `deobf`, then run
+  `port.py inventory` and `port.py gen` before finishing the C port. Ask when the evidence does
+  not support one clear name. Decompiler-only local names may be made clear
+  directly in C.
 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **99 / 196 (50%)** — 98 full + 1 partial (`update`).
+- Methods done: **103 / 196 (52%)** — 102 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -95,21 +101,22 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   blits it, then overlays dynamic tiles, trains and the build menu.
 - `update()` is **partial**: boot/loading (0/1/2/4/10), map-gen (25), and the
   full state-30 control branch (Java L9024-9282) are done. The port builds and
-  passes smoke, but core simulation calls are still stubs; menu/popup states are
+  passes smoke, but `updateTrain` is still a stub; menu/popup states are
   not done, and the smoke check does not drive the game into state 30.
 - **Menu system is functional** — `handleBuildMenuState` (~786 L) is ported, so
   selecting menu items drives the state transitions (new game → scenario →
   `setState(25)` map-gen, options, etc.).
 - **Biggest remaining gate to gameplay:** replace the direct stubs used by the
-  state-30 branch: `updateTrain` and `everyMonthlyTick`.
+  state-30 branch: `updateTrain`. `everyMonthlyTick` and its offer helpers are
+  ported in `port/impl/economy_tick.c`.
   Twenty-four helpers are now ported in `port/impl/sim_tick.c`, including:
   `dayResetP`, `advanceConstructionTimers`, `maybeAITick`, `dayResetAg`,
   `revenueOrYear`, `everyTwoTick`, `countCarsInTrain`, `maybeAiTakeTurn`,
   `dayResetAd`, `postRevenueReset`, `isTrainHeadCarAt`,
   `removeTrainFromMapInlined`, `mergeTrainAt`, `archiveOrRecall`, and
   `computeYearEndMetrics`, `handleCursorClickInlined`, `pickValidForestTile`,
-  `everyTwoTickZ`, `newYearNotify`, and `tickInputOrAi`. The milestone save path still reaches
-  the pending `saveGame`; port the save chain before save behavior is complete.
+  `everyTwoTickZ`, `newYearNotify`, and `tickInputOrAi`. The milestone save path
+  still reaches the pending `saveGame`; port the save chain before save behavior is complete.
   Then port the remaining UI-draw methods
   (`paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
   `drawBuildMenuCursor/Row`, `q` [372 L], `computeTrainCost`, …).
@@ -117,10 +124,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 
 ## 6. Known issues / flags
 
-- **`mappings.txt` collision:** two fields named `buildMenuIndex` (Java L162
-  `int`, L215 `byte`). The Java would not compile with `javac`. The port tool
-  renamed the second to `buildMenuIndex_2` and prints a WARNING on `inventory`.
-  Fix the mapping upstream and pick distinct names.
+- **Resolved mapping collision:** the two old `buildMenuIndex` mappings are now
+  `buildMenuItemIndex` (general menu cursor) and `offerRowIndex` (6-slot offer
+  list). `port.py inventory` no longer gives a duplicate-field warning.
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded fallback.
 - No behavioural test harness yet; `verify` only checks it builds and runs.
 
@@ -131,8 +137,8 @@ The map-gen chain and the state-30 control branch are **done**. Selecting
 tick. Core calls are still stubs, so simulation and interaction are incomplete.
 Continue from here:
 
-1. Port the two direct pending helpers called by state 30, starting with their
-   smallest leaf dependencies: `updateTrain` and `everyMonthlyTick`.
+1. Port the last direct pending helper called by state 30: `updateTrain` and its
+   leaf dependencies.
 2. The UI-draw methods called from the state-30/40 paint paths:
    `paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
    `drawBuildMenuCursor`, `drawBuildMenuRow`, `drawHeaderBar`, `drawNumber`.
@@ -144,7 +150,7 @@ Continue from here:
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 99 already
+`show NAME` throughout. Each is a mechanical faithful port like the 103 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

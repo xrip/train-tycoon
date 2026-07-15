@@ -205,8 +205,8 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
         case 8:
         case 9:
-            if (n2 == 1) { gc->pendingTransitionCode = gc->fY; gc_setState(gc, 30); break; }
-            if (n2 == 2) { gc->pendingTransitionCode = gc->dR; gc_setState(gc, 30); break; }
+            if (n2 == 1) { gc->pendingTransitionCode = gc->offerTypeTransitionCode; gc_setState(gc, 30); break; }
+            if (n2 == 2) { gc->pendingTransitionCode = gc->offerEffectTransitionCode; gc_setState(gc, 30); break; }
             gc_setState(gc, 30); break;
         case 11: case 12: case 13: case 16:
             gc_setState(gc, 30); break;
@@ -262,10 +262,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 40:
             switch (n2) {
                 case 1:
-                    gc->pendingTransitionCode = gc->menuRowType[gc->buildMenuIndex] + 40;
+                    gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + 40;
                     gc->duplicateRowState = 2; break;
                 case 2:
-                    gc->pendingTransitionCode = gc->menuRowAltType[gc->buildMenuIndex] + 60;
+                    gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + 60;
                     gc->duplicateRowState = 2; break;
             }
             gc_setState(gc, 30); break;
@@ -278,12 +278,12 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, 30); break;
         case 60:
             if (n2 % 2 == 1) {
-                gc->buildMenuIndex = gc->gP[n2 / 2];
-                gc->pendingTransitionCode = gc->menuRowType[gc->buildMenuIndex] + 40;
+                gc->offerRowIndex = gc->gP[n2 / 2];
+                gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + 40;
             }
             if (n2 % 2 == 0) {
-                gc->buildMenuIndex = gc->gP[(n2 - 1) / 2];
-                gc->pendingTransitionCode = gc->menuRowAltType[gc->buildMenuIndex] + 60;
+                gc->offerRowIndex = gc->gP[(n2 - 1) / 2];
+                gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + 60;
             }
             gc->duplicateRowState = 1;
             gc_setState(gc, 30); break;

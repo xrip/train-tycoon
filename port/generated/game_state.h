@@ -118,7 +118,7 @@ typedef struct GameCanvas {
     int32_t trackStartY; // int trackStartY
     int32_t trackStepX; // int trackStepX
     int32_t trackStepY; // int trackStepY
-    int32_t buildMenuIndex; // int buildMenuIndex
+    int32_t buildMenuItemIndex; // int buildMenuItemIndex
     int32_t* selectionTileX; // int[] selectionTileX
     int32_t* selectionTileY; // int[] selectionTileY
     int32_t cursorScreenX; // int cursorScreenX
@@ -171,11 +171,11 @@ typedef struct GameCanvas {
     int8_t difficultySlot; // byte difficultySlot
     int8_t difficultyB; // byte difficultyB
     int8_t difficultyC; // byte difficultyC
-    int8_t buildMenuIndex_2; // byte buildMenuIndex
+    int8_t offerRowIndex; // byte offerRowIndex
     int8_t duplicateRowState; // byte duplicateRowState
     int32_t activeScenario; // int activeScenario
-    int32_t fY; // int fY
-    int32_t dR; // int dR
+    int32_t offerTypeTransitionCode; // int offerTypeTransitionCode
+    int32_t offerEffectTransitionCode; // int offerEffectTransitionCode
     int32_t gJ; // int gJ
     bool ad; // boolean ad
     int8_t* bE; // byte[] bE
@@ -314,8 +314,8 @@ typedef struct GameCanvas {
     int8_t aiFrequency; // byte aiFrequency
     int8_t aiThreshold; // byte aiThreshold
     int8_t* routeResourceFlags; // byte[] routeResourceFlags
-    int8_t** aK; // byte[][] aK
-    int8_t** trackPieceRequirements; // byte[][] trackPieceRequirements
+    int8_t** offerTypesByEffect; // byte[][] offerTypesByEffect
+    int8_t** offerEffectSchedule; // byte[][] offerEffectSchedule
     int8_t* menuRowType; // byte[] menuRowType
     int8_t* placeTrainDay; // byte[] placeTrainDay
     int8_t* menuRowParamA; // byte[] menuRowParamA
@@ -328,11 +328,11 @@ typedef struct GameCanvas {
     int8_t* menuRowAltType; // byte[] menuRowAltType
     int8_t* menuRowEra; // byte[] menuRowEra
     int32_t* menuRowRevenue; // int[] menuRowRevenue
-    int32_t trackBuildCost; // int trackBuildCost
-    int16_t* dU; // short[] dU
+    int32_t offerGenerationCount; // int offerGenerationCount
+    int16_t* offerEffectNextCount; // short[] offerEffectNextCount
     bool flagsB; // boolean flagsB
     int32_t bq; // int bq
-    int32_t bv; // int bv
+    int32_t lastOfferDateCode; // int lastOfferDateCode
     int32_t menuRowEnabledCount; // int menuRowEnabledCount
     int8_t* gP; // byte[] gP
     int8_t scenarioMilestoneIndex; // byte scenarioMilestoneIndex

@@ -192,7 +192,7 @@ method a f (Ljavax/microedition/lcdui/Graphics;)V  renderMap   # main in-game ma
 # ---- Batch 6: input dispatch + build-menu (handleKey / ah / c(boolean)) ----
 # Build-menu state machine (key 53 in play opens it)
 field  a bt   buildMenuMode      # int; 0=main, 1=build, 2=buy, 3=train-shop, 4=demolish, 5=buy-vehicle
-field  a aT   buildMenuIndex     # int; selection within az[bt]
+field  a aT   buildMenuItemIndex # int; selection within buildMenuItems[buildMenuMode]
 field  a bu   menuDirty          # boolean; true means re-render menu state
 field  a az   buildMenuItems     # byte[][]; menu labels by mode
 field  a gp   buildMenuResultCodes  # int[][]; transition code after select
@@ -522,7 +522,7 @@ field  a y    compareToPrevious     # boolean; false=current year, true=previous
 # Previous-frame viewport center X (set to viewportCenterX after each frame, used to detect pan)
 field  a bH   lastViewportCenterX   # int; -1 sentinel OR previous viewportCenterX
 # Build-menu index (0..5)
-field  a cZ   buildMenuIndex        # byte; current row index in the build menu (was cZ, kept)
+field  a cZ   offerRowIndex         # byte; current row in the 6-slot offer list
 # Note: ch/q static debug flags deferred — they appear only in case 10 debug menu.
 
 # ---- Batch 19: terrain/path/placeability query methods ----
@@ -592,8 +592,8 @@ method a a (II)V                setCanvasSize             # recreates backbuffer
 method a s (I)I                 saveIntToBuffer           # writes 4-byte int to saveBuffer (savePendingMode aware)
 
 # ---- Batch 23: AI/track + sprite atlas + display statics ----
-# Track-piece attribute table (byte[12][2]; [eraMin, valueOffset]) used by AI train buy.
-field  a a    trackPieceRequirements  # byte[12][2]; a[n][0]=eraMin, a[n][1]=valueOffset for AI buy
+# Offer-effect schedule (byte[12][2]; [minimum offer count, repeat interval]).
+field  a a    offerEffectSchedule
 # BFS distance grid for path validation (placed at 20, decremented as path spreads).
 field  a aQ   pathDistanceGrid        # short[mapWidth][mapHeight]; BFS distance for path validation
 # Sprite atlas: byte[][] of sprite bitmaps; ds[] is index into n (per-sprite bitmap).
@@ -648,7 +648,7 @@ field  a P    cycleFlag              # int; periodic cycle counter (every 3 tick
 field  a aE   cityListIndex          # byte; next slot in city list
 # Auto-music toggle (set/cleared by case 5 in update()).
 field  a ac   autoMusic              # boolean; true = play music automatically
-# Per-row metadata arrays (size 6, indexed by buildMenuIndex)
+# Per-row metadata arrays (size 6, indexed by offerRowIndex)
 field  a bY   menuRowParamA          # byte[6]; per-row parameter A
 field  a dE   menuRowParamB          # byte[6]; per-row parameter B
 field  a fF   menuRowParamC          # byte[6]; per-row parameter C
@@ -714,7 +714,7 @@ field  a ae   scenarioMilestone      # int; secondary scenario milestone index
 field  a gg   frameIndex             # int; per-frame index counter
 # Per-tile action counts (used in build menu + AI)
 field  a et   trackTileCount         # int; count of trackMap tiles == 64 (used in scanTrackTiles)
-field  a er   trackBuildCost         # int; cost threshold for AI build validation
+field  a er   offerGenerationCount   # increments after each generated offer
 field  a fe   revenueTotal           # int; running revenue total (fe += totalRevenue)
 field  a bI   counterA               # int; generic counter (used in load timeout)
 field  a bD   counterB               # int; generic counter (used in incrementRowValueType1)
@@ -723,6 +723,13 @@ field  a H    transientH             # int; transient save-buffer value
 field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name collision with snapshotPending)
 field  a ay   flagAy                 # boolean; flag toggled in case 23
 field  a ao   scenarioFlagAo         # int; scenario flag (n21 from scenario record)
+
+# ---- Batch 36: monthly offer scheduling ----
+field  a aK   offerTypesByEffect     # byte[12][]; allowed offer type codes for each effect
+field  a dU   offerEffectNextCount   # short[12]; next offer count at which each effect is allowed
+field  a bv   lastOfferDateCode      # day + 32*month + 370*(year-1950)
+field  a fY   offerTypeTransitionCode
+field  a dR   offerEffectTransitionCode
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----
