@@ -398,7 +398,7 @@ typedef struct GameCanvas {
     bool ready;
     int32_t loadStep;
     int8_t* spriteIndexTable;
-    int8_t** spriteBitmapTable;
+    Grid<int8_t> spriteBitmapTable;
     int32_t timerA1;
     int32_t timerA2;
     int32_t timerB1;

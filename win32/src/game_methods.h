@@ -11,6 +11,10 @@
 inline std::span<const int8_t> gc_tracked_codes(const int8_t* codes) {
     return {codes, static_cast<size_t>(midp_arr_len(codes))};
 }
+// Owned code rows carry their own length.
+inline std::span<const int8_t> gc_tracked_codes(const std::vector<int8_t>& codes) {
+    return {codes.data(), codes.size()};
+}
 
 int32_t gc_byteToUnsignedInt(GameCanvas *gc, int8_t n);
 void gc_start(GameCanvas *gc, void* gameMIDlet);

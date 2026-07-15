@@ -271,12 +271,12 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             if (in) {
                 int n2 = in.read_byte();
                 int n3 = in.read_byte();
-                gc->spriteBitmapTable = (int8_t **)midp_alloc_arr(sizeof(int8_t *), n2);
+                gc->spriteBitmapTable.resize(n2, 0);
                 gc->spriteIndexTable = GC_NEW(int8_t, n3 + 1);
                 for (int i = 0; i < n2; ++i) {
                     int n4 = in.read_byte();
                     int n5 = in.read_byte();
-                    gc->spriteBitmapTable[i] = GC_NEW(int8_t, n5);
+                    gc->spriteBitmapTable[i].assign(static_cast<std::size_t>(n5), 0);
                     gc->spriteIndexTable[n4] = (int8_t)i;
                     for (int j = 0; j < n5; ++j)
                         gc->spriteBitmapTable[i][j] = (int8_t)in.read_byte();

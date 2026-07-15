@@ -4,13 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 
-static std::span<const int8_t> tracked_codes(const int8_t *codes) {
-    return {codes, static_cast<size_t>(midp_arr_len(codes))};
+static std::span<const int8_t> tracked_codes(const std::vector<int8_t> &codes) {
+    return {codes.data(), codes.size()};
 }
 
-static std::vector<int8_t> copy_codes(const int8_t *codes) {
-    const auto source = tracked_codes(codes);
-    return {source.begin(), source.end()};
+static std::vector<int8_t> copy_codes(const std::vector<int8_t> &codes) {
+    return codes;
 }
 
 // Owned code arrays carry their own length, so copy the whole array.
@@ -83,9 +82,9 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             switch (field) {
                 case 0: {
                     int selection = gc->trainSelectionIndex[gc->junctionDirCursor];
-                    const int8_t *engine = gc->spriteBitmapTable[
+                    const std::vector<int8_t> &engine = gc->spriteBitmapTable[
                         gc->spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
-                    const int8_t *wagon = gc->spriteBitmapTable[
+                    const std::vector<int8_t> &wagon = gc->spriteBitmapTable[
                         gc->spriteIndexTable[86 + (selection & 0xff)]];
                     return join_codes(tracked_codes(wagon), tracked_codes(engine));
                 }
