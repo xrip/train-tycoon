@@ -187,9 +187,9 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
             int effect_code = 0;
             while (effect_code == 0) {
                 effect_code = 1 + std::abs(gc->rng.next_int() % 12);
-                int8_t *allowed_types = gc->offerTypesByEffect[effect_code - 1];
+                const std::vector<int8_t> &allowed_types = gc->offerTypesByEffect[effect_code - 1];
                 bool valid = false;
-                for (int i = 0; i < midp_arr_len(allowed_types); ++i) {
+                for (int i = 0; i < static_cast<int>(allowed_types.size()); ++i) {
                     if (allowed_types[i] == offer_type) valid = true;
                 }
                 if (effect_code == 12 && gc->interestRate <= 1) valid = false;

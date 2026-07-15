@@ -319,8 +319,8 @@ typedef struct GameCanvas {
     int8_t aiFrequency;
     int8_t aiThreshold;
     std::array<int8_t, 6> routeResourceFlags{};
-    int8_t** offerTypesByEffect;
-    int8_t** offerEffectSchedule;
+    std::array<std::vector<int8_t>, 12> offerTypesByEffect{};
+    std::array<std::array<int8_t, 2>, 12> offerEffectSchedule{};
     int8_t* menuRowType;
     int8_t* placeTrainDay;
     int8_t* menuRowParamA;

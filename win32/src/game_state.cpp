@@ -284,56 +284,34 @@ void gc_fields_init(GameCanvas *gc) {
     gc->nextTrackPieceCode = 66;
     gc->aiFrequency = 15;
     gc->aiThreshold = 12;
-    static const int8_t offerTypesByEffect__r0[] = {1, 3, 13};
-    static const int8_t offerTypesByEffect__r1[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    static const int8_t offerTypesByEffect__r2[] = {1, 2, 3, 13, 14, 15};
-    static const int8_t offerTypesByEffect__r3[] = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
-    static const int8_t offerTypesByEffect__r4[] = {1, 2, 3, 13, 14, 15};
-    static const int8_t offerTypesByEffect__r5[] = {4, 9};
-    static const int8_t offerTypesByEffect__r6[] = {5, 10};
-    static const int8_t offerTypesByEffect__r7[] = {6, 11};
-    static const int8_t offerTypesByEffect__r8[] = {7, 12};
-    static const int8_t offerTypesByEffect__r9[] = {8, 12};
-    static const int8_t offerTypesByEffect__r10[] = {1, 2, 3, 13};
-    static const int8_t offerTypesByEffect__r11[] = {1, 2, 3, 14};
-    gc->offerTypesByEffect = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 12);
-    gc->offerTypesByEffect[0] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r0)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[0], offerTypesByEffect__r0, sizeof(offerTypesByEffect__r0));
-    gc->offerTypesByEffect[1] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r1)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[1], offerTypesByEffect__r1, sizeof(offerTypesByEffect__r1));
-    gc->offerTypesByEffect[2] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r2)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[2], offerTypesByEffect__r2, sizeof(offerTypesByEffect__r2));
-    gc->offerTypesByEffect[3] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r3)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[3], offerTypesByEffect__r3, sizeof(offerTypesByEffect__r3));
-    gc->offerTypesByEffect[4] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r4)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[4], offerTypesByEffect__r4, sizeof(offerTypesByEffect__r4));
-    gc->offerTypesByEffect[5] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r5)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[5], offerTypesByEffect__r5, sizeof(offerTypesByEffect__r5));
-    gc->offerTypesByEffect[6] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r6)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[6], offerTypesByEffect__r6, sizeof(offerTypesByEffect__r6));
-    gc->offerTypesByEffect[7] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r7)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[7], offerTypesByEffect__r7, sizeof(offerTypesByEffect__r7));
-    gc->offerTypesByEffect[8] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r8)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[8], offerTypesByEffect__r8, sizeof(offerTypesByEffect__r8));
-    gc->offerTypesByEffect[9] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r9)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[9], offerTypesByEffect__r9, sizeof(offerTypesByEffect__r9));
-    gc->offerTypesByEffect[10] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r10)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[10], offerTypesByEffect__r10, sizeof(offerTypesByEffect__r10));
-    gc->offerTypesByEffect[11] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerTypesByEffect__r11)/sizeof(int8_t))); memcpy(gc->offerTypesByEffect[11], offerTypesByEffect__r11, sizeof(offerTypesByEffect__r11));
-    static const int8_t offerEffectSchedule__r0[] = {0, 0};
-    static const int8_t offerEffectSchedule__r1[] = {0, 0};
-    static const int8_t offerEffectSchedule__r2[] = {5, 20};
-    static const int8_t offerEffectSchedule__r3[] = {10, -56};
-    static const int8_t offerEffectSchedule__r4[] = {0, 0};
-    static const int8_t offerEffectSchedule__r5[] = {0, 0};
-    static const int8_t offerEffectSchedule__r6[] = {0, 0};
-    static const int8_t offerEffectSchedule__r7[] = {0, 0};
-    static const int8_t offerEffectSchedule__r8[] = {0, 0};
-    static const int8_t offerEffectSchedule__r9[] = {0, 0};
-    static const int8_t offerEffectSchedule__r10[] = {0, 0};
-    static const int8_t offerEffectSchedule__r11[] = {8, 100};
-    gc->offerEffectSchedule = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 12);
-    gc->offerEffectSchedule[0] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r0)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[0], offerEffectSchedule__r0, sizeof(offerEffectSchedule__r0));
-    gc->offerEffectSchedule[1] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r1)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[1], offerEffectSchedule__r1, sizeof(offerEffectSchedule__r1));
-    gc->offerEffectSchedule[2] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r2)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[2], offerEffectSchedule__r2, sizeof(offerEffectSchedule__r2));
-    gc->offerEffectSchedule[3] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r3)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[3], offerEffectSchedule__r3, sizeof(offerEffectSchedule__r3));
-    gc->offerEffectSchedule[4] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r4)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[4], offerEffectSchedule__r4, sizeof(offerEffectSchedule__r4));
-    gc->offerEffectSchedule[5] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r5)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[5], offerEffectSchedule__r5, sizeof(offerEffectSchedule__r5));
-    gc->offerEffectSchedule[6] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r6)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[6], offerEffectSchedule__r6, sizeof(offerEffectSchedule__r6));
-    gc->offerEffectSchedule[7] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r7)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[7], offerEffectSchedule__r7, sizeof(offerEffectSchedule__r7));
-    gc->offerEffectSchedule[8] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r8)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[8], offerEffectSchedule__r8, sizeof(offerEffectSchedule__r8));
-    gc->offerEffectSchedule[9] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r9)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[9], offerEffectSchedule__r9, sizeof(offerEffectSchedule__r9));
-    gc->offerEffectSchedule[10] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r10)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[10], offerEffectSchedule__r10, sizeof(offerEffectSchedule__r10));
-    gc->offerEffectSchedule[11] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(offerEffectSchedule__r11)/sizeof(int8_t))); memcpy(gc->offerEffectSchedule[11], offerEffectSchedule__r11, sizeof(offerEffectSchedule__r11));
+    gc->offerTypesByEffect = {{
+        {1, 3, 13},
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+        {1, 2, 3, 13, 14, 15},
+        {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
+        {1, 2, 3, 13, 14, 15},
+        {4, 9},
+        {5, 10},
+        {6, 11},
+        {7, 12},
+        {8, 12},
+        {1, 2, 3, 13},
+        {1, 2, 3, 14},
+    }};
+    gc->offerEffectSchedule = {{
+        {{0, 0}},
+        {{0, 0}},
+        {{5, 20}},
+        {{10, -56}},
+        {{0, 0}},
+        {{0, 0}},
+        {{0, 0}},
+        {{0, 0}},
+        {{0, 0}},
+        {{0, 0}},
+        {{0, 0}},
+        {{8, 100}},
+    }};
     gc->menuRowType = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
     gc->placeTrainDay = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
     gc->menuRowParamA = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
