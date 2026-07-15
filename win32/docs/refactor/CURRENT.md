@@ -6,7 +6,7 @@
 
 ## Base
 
-- Commit: `a8be35f` (`OWN-01` code is green).
+- Commit: `25f7edd` (first `OWN-02` leaf group is green).
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
@@ -29,8 +29,12 @@ use standard containers. Text drawing borrows `std::span`; a missing dialog
 value is explicit with `std::optional`. Debug and Release fast/full tests
 passed with all fixed values unchanged on 2026-07-15.
 
+The first `OWN-02` group moved `selectionTileX` and `selectionTileY` from raw
+owned pointers to `std::array<int32_t, 4>`. The strict Debug build and fast
+tests passed on 2026-07-15.
+
 ## Next action
 
-List fixed raw arrays in `GameCanvas` and static game tables by size and use.
-Separate arrays which are written by the save codec, then select the smallest
-independent caller group for the first `std::array` move.
+Move `moneyHistory` and `moneyTickerFrames` to `std::array<..., 3>`. They are
+used only by the money ticker and are not written by the save codec. Run the
+strict Debug build and fast tests, then commit this leaf group.
