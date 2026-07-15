@@ -58,10 +58,6 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool bl, int32_t n, int32_t n2
     (void)gc; // TODO port: placeTrackAtCursorInlined(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, boolean bl2, int n7)  L2946-2981
 }
 
-void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl, bool bl2) {
-    (void)gc; // TODO port: handleCursorClickInlined(int n, int n2, boolean bl, boolean bl2)  L2983-3016
-}
-
 void gc_applyBackgroundCost(GameCanvas *gc) {
     (void)gc; // TODO port: applyBackgroundCost()  L3018-3026
 }
@@ -98,15 +94,6 @@ void gc_drawMoneyTicker(GameCanvas *gc, MidpGraphics* graphics) {
 
 void gc_drawConfirmDialog(GameCanvas *gc, MidpGraphics* graphics) {
     (void)gc; // TODO port: drawConfirmDialog(Graphics graphics)  L3290-3297
-}
-
-void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: placeCityTileInlined(int n, int n2, int n3)  L3375-3380
-}
-
-bool gc_pickValidForestTile(GameCanvas *gc) {
-    (void)gc; // TODO port: pickValidForestTile()  L3382-3508
-    return false;
 }
 
 void gc_rebuildCityList(GameCanvas *gc) {
@@ -307,25 +294,12 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t n) {
     (void)gc; // TODO port: initSaveOrLoad(int n)  L6778-6968
 }
 
-void gc_persistSnapshotMode0(GameCanvas *gc) {
-    (void)gc; // TODO port: persistSnapshotMode0()  L6983-6987
-}
-
 void gc_saveAllMapArrays(GameCanvas *gc) {
     (void)gc; // TODO port: saveAllMapArrays()  L6995-7015
 }
 
 void gc_restoreAllMapArrays(GameCanvas *gc) {
     (void)gc; // TODO port: restoreAllMapArrays()  L7022-7049
-}
-
-void gc_newYearNotify(GameCanvas *gc) {
-    (void)gc; // TODO port: newYearNotify()  L7071-7164
-}
-
-int32_t gc_scanMapForMetric(GameCanvas *gc) {
-    (void)gc; // TODO port: scanMapForMetric()  L7172-7233
-    return 0;
 }
 
 void gc_setYearGraphMode(GameCanvas *gc, int32_t n, bool bl) {
@@ -355,10 +329,6 @@ void gc_pickIndustrySite(GameCanvas *gc) {
 int32_t gc_computeMilestoneScore(GameCanvas *gc) {
     (void)gc; // TODO port: computeMilestoneScore()  L7558-7636
     return 0;
-}
-
-void gc_everyTwoTickZ(GameCanvas *gc) {
-    (void)gc; // TODO port: everyTwoTickZ()  L7638-7731
 }
 
 void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
@@ -424,11 +394,6 @@ void gc_setMusicVolume(GameCanvas *gc, int32_t n) {
 
 void gc_stopMusic(GameCanvas *gc) {
     (void)gc; // TODO port: stopMusic()  L8209-8219
-}
-
-int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: computeMapTrainMetric(int n)  L8221-8247
-    return 0;
 }
 
 char* gc_decodeString(GameCanvas *gc, int8_t* byArray) {

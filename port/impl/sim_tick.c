@@ -184,3 +184,345 @@ void gc_computeYearEndMetrics(GameCanvas *gc) {
     gc->decadeXWithCurrent = gc->decadeXTotal + gc->xIndicator;
     gc->decadeEnterpriseWithCurrent = gc->decadeEnterpriseTotal + gc->decadeEnterpriseTax;
 }
+
+// void handleCursorClickInlined(int,int,boolean,boolean)
+void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
+                                 bool bl, bool bl2) {
+    bool bl3 = !bl;
+    int n3;
+    if (bl) {
+        n3 = gc->tileMap[n][n2] >= 29 && gc->tileMap[n][n2] <= 33
+             ? gc->baseTrainSpeed2 : -gc->accel2;
+        if (gc->money >= n3 || gc->money < 0) {
+            gc->backgroundCost += n3;
+            bl3 = true;
+            gc->ck = true;
+        } else {
+            gc->ck = false;
+        }
+    }
+    for (n3 = 49; n3 >= 0; --n3) {
+        if (gc->tileQueue[n3][0] != 0
+            && gc_c(gc, gc->tileQueue[n3][1]) == n
+            && gc_c(gc, gc->tileQueue[n3][2]) == n2)
+            bl3 = false;
+    }
+    if (!bl3) return;
+    if (gc_c(gc, gc->tileMap[n][n2]) < 128)
+        gc->tileMap[n][n2] = (int8_t)(gc->tileMap[n][n2] + 128);
+    n3 = 0;
+    for (int i = 49; i >= 0; --i) {
+        if (gc->tileQueue[i][0] == 0) {
+            n3 = i;
+            break;
+        }
+    }
+    gc->tileQueue[n3][0] = 14;
+    gc->go[n3] = bl2;
+    gc->tileQueue[n3][1] = (int8_t)n;
+    gc->tileQueue[n3][2] = (int8_t)n2;
+}
+
+// void placeCityTileInlined(int,int,int)
+void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
+    if (gc->tileMap[n][n2] == 0
+        || (gc->tileMap[n][n2] >= 29 && gc->tileMap[n][n2] <= 33)) {
+        gc->tileMap[n][n2] = gc_randomCityTile(gc);
+        gc->trackMap[n][n2] = (int8_t)n3;
+    }
+}
+
+// boolean pickValidForestTile()
+bool gc_pickValidForestTile(GameCanvas *gc) {
+    int n2 = abs(midp_random_next_int(&gc->rng) % (gc->mapWidth - 2)) + 1;
+    int n = abs(midp_random_next_int(&gc->rng) % (gc->mapHeight - 2)) + 1;
+    if (gc->tileMap[n2][n] != 0
+        && (gc->tileMap[n2][n] < 29 || gc->tileMap[n2][n] > 33))
+        return false;
+
+    int8_t by = gc->tileMap[n2 - 1][n];
+    int8_t by2 = gc->tileMap[n2 + 1][n];
+    int8_t by3 = gc->tileMap[n2][n - 1];
+    int8_t by4 = gc->tileMap[n2][n + 1];
+    bool bl2 = by == 43 || by == 44 || by == 45 || by == 46;
+    bool bl3 = by2 == 43 || by2 == 44 || by2 == 47 || by2 == 48;
+    bool bl4 = by3 == 42 || by3 == 44 || by3 == 46 || by3 == 47;
+    bool bl = by4 == 42 || by4 == 44 || by4 == 45 || by4 == 48;
+    if (!bl2 && !bl3 && !bl4 && !bl) return false;
+
+    int n3;
+    if (bl2) n3 = gc->trackMap[n2 - 1][n];
+    else if (bl3) n3 = gc->trackMap[n2 + 1][n];
+    else if (bl4) n3 = gc->trackMap[n2][n - 1];
+    else n3 = gc->trackMap[n2][n + 1];
+    int n4 = n3 & 0x3F;
+    if (n4 <= -1) return false;
+
+    if ((bl2 && bl3 && bl4) || (bl2 && bl3 && bl)
+        || (bl2 && bl4 && bl) || (bl3 && bl4 && bl)) {
+        gc->tileMap[n2][n] = 44;
+    } else if (bl2 && bl4) {
+        gc->tileMap[n2][n] = 48;
+    } else if (bl2 && bl) {
+        gc->tileMap[n2][n] = 47;
+    } else if (bl3 && bl4) {
+        gc->tileMap[n2][n] = 45;
+    } else if (bl3 && bl) {
+        gc->tileMap[n2][n] = 46;
+    } else {
+        int n5 = abs(midp_random_next_int(&gc->rng) % 13);
+        if (n5 == 12) {
+            gc->tileMap[n2][n] = 44;
+        } else if (n5 == 11) {
+            if (bl2) gc->tileMap[n2][n] = 47;
+            if (bl3) gc->tileMap[n2][n] = 46;
+            if (bl4) gc->tileMap[n2][n] = 45;
+            if (bl) gc->tileMap[n2][n] = 46;
+        } else if (n5 == 10) {
+            if (bl2) gc->tileMap[n2][n] = 48;
+            if (bl3) gc->tileMap[n2][n] = 45;
+            if (bl4) gc->tileMap[n2][n] = 48;
+            if (bl) gc->tileMap[n2][n] = 47;
+        } else {
+            if (bl2 || bl3) gc->tileMap[n2][n] = 43;
+            if (bl4 || bl) gc->tileMap[n2][n] = 42;
+        }
+    }
+
+    switch (gc->tileMap[n2][n]) {
+        case 42:
+            gc_placeCityTileInlined(gc, n2 - 1, n, n3);
+            gc_placeCityTileInlined(gc, n2 + 1, n, n3);
+            break;
+        case 43:
+            gc_placeCityTileInlined(gc, n2, n - 1, n3);
+            gc_placeCityTileInlined(gc, n2, n + 1, n3);
+            break;
+        case 45:
+            gc_placeCityTileInlined(gc, n2 - 1, n, n3);
+            gc_placeCityTileInlined(gc, n2, n + 1, n3);
+            gc_placeCityTileInlined(gc, n2 - 1, n + 1, n3);
+            break;
+        case 46:
+            gc_placeCityTileInlined(gc, n2 - 1, n, n3);
+            gc_placeCityTileInlined(gc, n2, n - 1, n3);
+            gc_placeCityTileInlined(gc, n2 - 1, n - 1, n3);
+            break;
+        case 47:
+            gc_placeCityTileInlined(gc, n2 + 1, n, n3);
+            gc_placeCityTileInlined(gc, n2, n - 1, n3);
+            gc_placeCityTileInlined(gc, n2 + 1, n - 1, n3);
+            break;
+        case 48:
+            gc_placeCityTileInlined(gc, n2 + 1, n, n3);
+            gc_placeCityTileInlined(gc, n2, n + 1, n3);
+            gc_placeCityTileInlined(gc, n2 + 1, n + 1, n3);
+            break;
+    }
+    gc->trackMap[n2][n] = (int8_t)n3;
+    return true;
+}
+
+// void persistSnapshotMode0()
+void gc_persistSnapshotMode0(GameCanvas *gc) {
+    gc_loadGame(gc, 5, 0);
+    gc_writeSaveSnapshot(gc);
+    gc_saveGame(gc);
+}
+
+// int computeMapTrainMetric(int)
+int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
+    int n2 = gc->by;
+    for (int i = 0; i < gc->mapWidth; ++i) {
+        for (int j = 0; j < gc->mapHeight; ++j) {
+            if (gc->trackMap[i][j] != 65) continue;
+            n2 += 3;
+            for (int k = 0; k < 500; ++k) {
+                if ((gc->trainFlags[k] & 0x80) != 128
+                    || gc_c(gc, gc->trainX[k]) != i || gc_c(gc, gc->trainY[k]) != j)
+                    continue;
+                n2 += (gc->trainFlags[k] & 0x40) == 64 ? 400 : 55;
+            }
+        }
+    }
+    n2 += gc->dayOfMonth + 30 * gc->monthOfYear + 365 * (gc->year - 1950);
+    if (n < 0) {
+        if (n2 > gc->transientH) gc->transientH = n2;
+    } else {
+        gc->gk[n] = n2;
+    }
+    gc_persistSnapshotMode0(gc);
+    return n2;
+}
+
+// void everyTwoTickZ()
+void gc_everyTwoTickZ(GameCanvas *gc) {
+    bool bl = false;
+    if (!gc->milestonesEnabled) {
+        switch (gc->scenarioMilestoneIndex) {
+            case 1: bl = gc->currentMilestoneScore <= gc->milestoneThreshold1; break;
+            case 2: bl = gc->currentMilestoneScore <= gc->milestoneThreshold2; break;
+            case 3: bl = gc->currentMilestoneScore <= gc->milestoneThreshold3; break;
+            case 4: bl = gc->currentMilestoneScore <= gc->milestoneThreshold4; break;
+            case 5: bl = gc->currentMilestoneScore <= gc->milestoneThreshold5; break;
+            case 6:
+                bl = gc->currentMilestoneScore <= gc->milestoneThreshold1
+                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold2;
+                break;
+            case 7:
+                bl = gc->currentMilestoneScore <= gc->milestoneThreshold1
+                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold3;
+                break;
+            case 8:
+                bl = gc->currentMilestoneScore <= gc->milestoneThreshold1
+                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold4;
+                break;
+            case 9:
+                bl = gc->currentMilestoneScore <= gc->milestoneThreshold2
+                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold3;
+                break;
+            case 10:
+                bl = gc->currentMilestoneScore <= gc->milestoneThreshold2
+                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold4;
+                break;
+            case 11:
+                bl = gc->currentMilestoneScore <= gc->milestoneThreshold4
+                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold5;
+                break;
+            case 12: bl = gc->currentMilestoneScore <= gc->counterB; break;
+            case 13: bl = gc->loanBalance == 0; break;
+            case 14: bl = gc->year == gc->currentMilestoneScore; break;
+            case 15: bl = gc->currentMilestoneScore <= gc->aiWagonsBought; break;
+        }
+    }
+    if (!bl) return;
+    gc->ready = false;
+    gc->transitionCode = 6;
+    gc->milestonesEnabled = true;
+    if (gc->scenarioStep >= 2) {
+        if (gc->scenarioStepCompare < gc->scenarioStep)
+            gc->scenarioStepCompare = gc->scenarioStep;
+        gc_persistSnapshotMode0(gc);
+        gc->gJ = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
+    }
+    gc_setState(gc, 20);
+}
+
+// int scanMapForMetric()
+int32_t gc_scanMapForMetric(GameCanvas *gc) {
+    int n4 = 0;
+    for (int n3 = 0; n3 < gc->mapWidth; ++n3) {
+        for (int n2 = 0; n2 < gc->mapHeight; ++n2) {
+            if (gc->trackMap[n3][n2] != 65) continue;
+            int n = gc->tileMap[n3][n2];
+            if (n >= 70 && n <= 80) {
+                if (n > 76) n4 += 94;
+                n4 += 196;
+            }
+            if (n == 76) n4 += 168;
+            if (n >= 81 && n <= 86) n4 += gc->accel1;
+            if (n == 87 || n == 88) n4 += gc->costPower;
+            if (n == 89 || n == 90) n4 += gc->costPower / 2;
+        }
+    }
+    for (int n3 = 0; n3 < 500; ++n3) {
+        if ((gc->trainFlags[n3] & 0x80) != 128) continue;
+        int n2 = gc_c(gc, gc->trainX[n3]);
+        int n = gc_c(gc, gc->trainY[n3]);
+        if (gc->trackMap[n2][n] != 65) continue;
+        if ((gc->trainFlags[n3] & 0x40) == 64) {
+            switch (gc->trainEraOrStage[n3]) {
+                case 0: n4 += gc->gWagonCost; break;
+                case 1: n4 += gc->gWagonCost2; break;
+                case 2: n4 += gc->gWagonCost3; break;
+                case 3: n4 += gc->gWagonCost4; break;
+                case 4: n4 += gc->gWagonCost5; break;
+                case 5: n4 += gc->gWagonCost6; break;
+            }
+        } else {
+            n4 += (gc->costGroupC1 + gc->costGroupC2 + gc->costGroupC3
+                   + gc->costGroupC4) / 4;
+        }
+    }
+    return n4 - gc->loanBalance;
+}
+
+// void newYearNotify()
+void gc_newYearNotify(GameCanvas *gc) {
+    for (int n = 0; n < 500; ++n) {
+        gc->prevTrainRevenue[n] = gc->trainRevenue[n];
+        gc->trainRevenue[n] = 0;
+    }
+    for (int n = 0; n < 48; ++n) {
+        gc->prevStationRevenue[n] = gc->stationRevenue[n];
+        gc->stationRevenue[n] = 0;
+    }
+    gc_archiveOrRecall(gc);
+    gc->prevTotalSpent = gc->totalSpent;
+    gc->prevAiMoneySpent = gc->aiMoneySpent;
+    gc->prevFuelCost = gc->fuelCostAccrued;
+    gc->prevSubsidyCost = gc->subsidyCost;
+    gc->prevTotalRevenue = gc->totalRevenue;
+    gc->prevTerrainTotal = gc->terrainTotal;
+    gc->prevEnterpriseTotal = gc->decadeEnterpriseTax;
+    gc->prevXIndicator = gc->xIndicator;
+    for (int n = 10; n >= 0; --n) {
+        gc->yrN[n + 1] = gc->yrN[n];
+        gc->yrCx[n + 1] = gc->yrCx[n];
+        gc->yrZ[n + 1] = gc->yrZ[n];
+    }
+    gc->yrN[0] = gc->yrCx[0] = gc->yrZ[0] = 0;
+    gc->decadeCostTotal += gc->totalSpent;
+    gc->decadeSpentTotal += gc->aiMoneySpent;
+    gc->decadeFuelCost += gc->fuelCostAccrued;
+    gc->decadeSubsidyTotal += gc->subsidyCost;
+    gc->decadeRevenueTotal += gc->totalRevenue;
+    gc->decadeXTotal += gc->xIndicator;
+    gc->decadeEnterpriseTotal += gc->decadeEnterpriseTax;
+    gc->decadeOtherXTotal += gc->xIndicator;
+    gc->revenueTotal += gc->totalRevenue;
+    if (gc->monthOfYear == 13) {
+        gc->prevDecadeSpent = gc->decadeSpentWithCurrent;
+        gc->prevDecadeAiSpent = gc->decadeAiSpentWithCurrent;
+        gc->prevDecadeFuel = gc->decadeFuelWithCurrent;
+        gc->prevDecadeSubsidy = gc->decadeSubsidyWithCurrent;
+        gc->prevDecadeRevenue = gc->decadeRevenueWithCurrent;
+        gc->prevDecadeGs = gc->gs;
+        gc->prevDecadeDq = gc->decadeEnterpriseWithCurrent;
+        gc->prevDecadeBm = gc->decadeXWithCurrent;
+        gc->decadeCostTotal = gc->decadeSpentTotal = gc->decadeFuelCost = 0;
+        gc->decadeSubsidyTotal = gc->decadeRevenueTotal = gc->decadeXTotal = 0;
+        gc->decadeEnterpriseTotal = 0;
+        for (int n = 10; n >= 0; --n) {
+            gc->altDecadeOtherXTotal[n + 1] = gc->altDecadeOtherXTotal[n];
+            gc->altDecadeRevenueTotal[n + 1] = gc->altDecadeRevenueTotal[n];
+            gc->altDecadeTotalCost[n + 1] = gc->altDecadeTotalCost[n];
+        }
+        gc->decadeOtherXTotal = gc->revenueTotal = 0;
+        gc->altDecadeOtherXTotal[0] = gc->altDecadeRevenueTotal[0] = 0;
+        gc->altDecadeTotalCost[0] = 0;
+    }
+    gc->altDecadeTotalCost[0] = gc_scanMapForMetric(gc);
+    gc->money -= gc->terrainTotal;
+    if (gc->terrainTotal > 0) gc_pushMoneyHistory(gc, -gc->terrainTotal);
+    gc->money -= gc->decadeEnterpriseTax;
+    if (gc->decadeEnterpriseTax > 0)
+        gc_pushMoneyHistory(gc, -gc->decadeEnterpriseTax);
+    gc->totalSpent = gc->aiMoneySpent = gc->fuelCostAccrued = 0;
+    gc->subsidyCost = gc->totalRevenue = gc->xIndicator = 0;
+    gc->decadeEnterpriseTax = 0;
+    gc->mapRedrawPending = true;
+    gc->compareToPrevious = true;
+    gc->monthRolloverFlag = true;
+    if (gc->monthOfYear == 13) {
+        if (gcs_q) {
+            gc->ready = false;
+            gc->transitionCode = 35;
+            gc_setState(gc, 20);
+        }
+    } else if (gcs_cc) {
+        gc->ready = false;
+        gc->transitionCode = 32;
+        gc_setState(gc, 20);
+    }
+}

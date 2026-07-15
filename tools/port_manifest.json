@@ -4911,7 +4911,7 @@
    "start": 2983,
    "end": 3016,
    "c_name": "gc_handleCursorClickInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "applyBackgroundCost",
@@ -5091,7 +5091,7 @@
    "start": 3375,
    "end": 3380,
    "c_name": "gc_placeCityTileInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "pickValidForestTile",
@@ -5101,7 +5101,7 @@
    "start": 3382,
    "end": 3508,
    "c_name": "gc_pickValidForestTile",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "addCityEntry",
@@ -5851,7 +5851,7 @@
    "start": 6983,
    "end": 6987,
    "c_name": "gc_persistSnapshotMode0",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "persistSnapshotMode1",
@@ -5921,7 +5921,7 @@
    "start": 7071,
    "end": 7164,
    "c_name": "gc_newYearNotify",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "archiveOrRecall",
@@ -5941,7 +5941,7 @@
    "start": 7172,
    "end": 7233,
    "c_name": "gc_scanMapForMetric",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "setYearGraphMode",
@@ -6051,7 +6051,7 @@
    "start": 7638,
    "end": 7731,
    "c_name": "gc_everyTwoTickZ",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "rebuildMenuTypeIndexes",
@@ -6221,7 +6221,7 @@
    "start": 8221,
    "end": 8247,
    "c_name": "gc_computeMapTrainMetric",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "decodeString",
@@ -6342,7 +6342,7 @@
    "end": 9513,
    "c_name": "gc_update",
    "status": "partial",
-   "note": "boot states + 25 + state 30 control done; 6 direct sim helpers + menus TODO"
+   "note": "boot states + 25 + state 30 control done; 3 direct sim helpers + menus TODO"
   },
   {
    "java_name": "renderMap",
