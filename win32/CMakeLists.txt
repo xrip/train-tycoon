@@ -78,7 +78,26 @@ add_custom_command(TARGET train_tycoon_tests POST_BUILD
             ${TEST_RUN_DIR}/resources
 )
 
-add_test(NAME train_tycoon_smoke COMMAND $<TARGET_FILE:train_tycoon_tests>)
-set_tests_properties(train_tycoon_smoke PROPERTIES
+add_test(NAME train_tycoon_fast
+    COMMAND $<TARGET_FILE:train_tycoon_tests> "--test-case=fast:*")
+set_tests_properties(train_tycoon_fast PROPERTIES
     WORKING_DIRECTORY "${TEST_RUN_DIR}"
+    LABELS fast
 )
+
+add_test(NAME train_tycoon_full
+    COMMAND $<TARGET_FILE:train_tycoon_tests> "--test-case=full:*")
+set_tests_properties(train_tycoon_full PROPERTIES
+    WORKING_DIRECTORY "${TEST_RUN_DIR}"
+    LABELS full
+)
+
+option(TRAIN_TYCOON_ENABLE_DEVICE_TESTS "Add tests that need local sound hardware" OFF)
+if(TRAIN_TYCOON_ENABLE_DEVICE_TESTS)
+    add_test(NAME train_tycoon_midi_device COMMAND $<TARGET_FILE:train_tycoon>)
+    set_tests_properties(train_tycoon_midi_device PROPERTIES
+        WORKING_DIRECTORY "$<TARGET_FILE_DIR:train_tycoon>"
+        ENVIRONMENT "TRAIN_TYCOON_MIDI_TEST_MS=1000"
+        LABELS device
+    )
+endif()

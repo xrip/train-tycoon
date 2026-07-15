@@ -8,8 +8,9 @@ Only one row may be `in_progress`.
 | BASE-02 | done | Library build and old smoke passed | Testable C library |
 | BASE-03 | done | 4 doctest cases passed in 1.94 s | doctest and smoke move |
 | BASE-04 | done | Two fixed-input runs passed | Fixed test inputs |
-| BASE-05 | in_progress | BASE-04 green | Rule checks and goldens |
-| CXX-01 | queued | - | Mechanical C++20 move |
+| BASE-05 | done | Debug, Release, and ASan full tests passed | Rule checks and goldens |
+| BUG-ORDER-01 | done | Debug and Release digests match | Java read order restored |
+| CXX-01 | in_progress | Stage 0 green | Mechanical C++20 move |
 | CXX-02 | queued | - | Strict warnings |
 | CXX-03 | queued | - | Presets and style |
 | RT-01..RT-05 | queued | - | Support classes |

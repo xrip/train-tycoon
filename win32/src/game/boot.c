@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int read_u16_be(MidpResource *resource) {
+    int high = midp_resource_read_byte(resource);
+    int low = midp_resource_read_byte(resource);
+    return high * 256 + low;
+}
+
 // public void keyPressed(int n)
 void gc_keyPressed(GameCanvas *gc, int32_t n) {
     if (gc->inputPending) { gc->inputPending = false; return; }
@@ -27,13 +33,13 @@ void gc_b(GameCanvas *gc, char *string) {
     if (!in) return;
     int n = midp_resource_read_byte(in);
     int n2 = midp_resource_read_byte(in);
-    int n3 = 256 * midp_resource_read_byte(in) + midp_resource_read_byte(in);
+    int n3 = read_u16_be(in);
     int n4 = 0;
     gc->spriteOffsetTable = GC_NEW(int16_t, n2 + 1);
     gc->spriteData = GC_NEW(int8_t, n3);
     for (int i = 0; i < n; ++i) {
         int n5 = midp_resource_read_byte(in);
-        int n6 = 256 * midp_resource_read_byte(in) + midp_resource_read_byte(in);
+        int n6 = read_u16_be(in);
         gc->spriteOffsetTable[n5] = (int16_t)n4;
         for (int j = 0; j < n6; ++j) {
             gc->spriteData[n4] = (int8_t)midp_resource_read_byte(in);
@@ -49,14 +55,14 @@ MidpImage *gc_decodePngFromSpriteStream(GameCanvas *gc) {
     int n = 0;
     int n3 = midp_resource_read_byte(gc->spriteStream);
     if (n3 == 2) {
-        n = 256 * midp_resource_read_byte(gc->spriteStream) + midp_resource_read_byte(gc->spriteStream);
+        n = read_u16_be(gc->spriteStream);
         byArray = GC_NEW(int8_t, n);
         byArray[0] = -119; byArray[1] = 80; byArray[2] = 78; byArray[3] = 71;
         for (int n2 = 4; n2 < n; ++n2)
             byArray[n2] = (int8_t)midp_resource_read_byte(gc->spriteStream);
     }
     if (n3 == 1) {
-        int n2 = 256 * midp_resource_read_byte(gc->spriteStream) + midp_resource_read_byte(gc->spriteStream);
+        int n2 = read_u16_be(gc->spriteStream);
         int n5 = midp_resource_read_byte(gc->spriteStream) * 3;
         int n6 = midp_resource_read_byte(gc->spriteStream);
         n = n2 + n5 + 69 + n6 * 13;

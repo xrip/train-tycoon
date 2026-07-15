@@ -7,6 +7,8 @@
 - Classes are for ownership, state, and simple rules.
 - Plain data uses structs; simple algorithms use free functions.
 - Standard-library templates are welcome when they make code clearer.
+- Clear namespace aliases may be used in `.cpp` files. Public headers keep
+  full `std::` names, and `using namespace std` is not allowed.
 - One small `Grid<T>` is allowed.
 - No template design systems, CRTP, concepts, policy classes, deep class trees,
   event systems, or generic frameworks.

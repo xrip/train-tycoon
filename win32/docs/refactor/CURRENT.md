@@ -2,32 +2,34 @@
 
 ## Item
 
-`BASE-05` - add clear rule checks and fixed output digests.
+`CXX-01` - move first-party source files to C++20.
 
 ## Base
 
-- Commit: the `BASE-04` fixed-input commit on top of `9ade0a0`.
+- Commit: the green `BASE-05` behavior-lock commit.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Lock present behavior for random values, resources, record files, save bytes,
-scenario generation, input, and key frames before structural work.
+Rename first-party `.c` files to `.cpp` and build all first-party code as
+C++20 without a structural rewrite or behavior change.
 
 ## Non-goals
 
-- No game-body rewrite or broad rename.
-- Do not update a value after it is recorded without a separate behavior item.
-- Keep slow all-scenario work out of the fast test label.
+- No ownership or model change.
+- No broad formatting or name pass.
+- Warning cleanup belongs to `CXX-02` unless a warning stops the C++ build.
 
 ## Last proof
 
-`BASE-04`: two runs with fixed seed `0x5eed1234`, fixed boot fields, an
-explicit resource root, and an isolated save root passed on 2026-07-15.
+`BASE-05`: Debug and Release fast/full tests passed twice, and the full MSVC
+AddressSanitizer run passed on 2026-07-15. The tests lock Java random values,
+all raw resources, record files, save bytes, all 13 scenarios, input, and two
+frames. `BUG-ORDER-01` restored Java evaluation order for map RNG and
+multi-byte reads.
 
 ## Next action
 
-Add small test support for stable byte/frame digests. Record clear expected
-values first, then add scenario and save fixtures. Split CTest labels into
-`fast`, `full`, and `device`.
+List all first-party `.c` files, rename them to `.cpp`, update CMake, and build
+the fast gate before any C++ cleanup.

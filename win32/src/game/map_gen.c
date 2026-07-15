@@ -429,10 +429,22 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
         if (gc->mapGenStage == 7 && gc->tilesGeneratedInStage == gc->terrainFeatureStage7Count) { gc->mapGenStage = 8; gc->tilesGeneratedInStage = 0; }
         if (gc->mapGenStage == 8 && gc->tilesGeneratedInStage == gc->weightAccel4) { gc->mapGenStage = 9; gc->tilesGeneratedInStage = 0; }
         if (gc->mapGenStage == 9 && gc->tilesGeneratedInStage == gc->weightAccel3) { gc->mapGenStage = 10; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 1)
-            gc_raiseTerrainArea(gc, abs(rint(gc) % gc->mapWidth), abs(rint(gc) % gc->mapHeight), abs(rint(gc) % 20) + 1, abs(rint(gc) % 20) + 1, abs(rint(gc) % 2) + 1);
-        if (gc->mapGenStage == 2)
-            gc_lowerTerrainArea(gc, abs(rint(gc) % gc->mapWidth), abs(rint(gc) % gc->mapHeight), abs(rint(gc) % 20) + 1, abs(rint(gc) % 20) + 1, -1);
+        if (gc->mapGenStage == 1) {
+            int center_x = abs(rint(gc) % gc->mapWidth);
+            int center_y = abs(rint(gc) % gc->mapHeight);
+            int width = abs(rint(gc) % 20) + 1;
+            int height = abs(rint(gc) % 20) + 1;
+            int elevation_step = abs(rint(gc) % 2) + 1;
+            gc_raiseTerrainArea(gc, center_x, center_y, width, height,
+                                elevation_step);
+        }
+        if (gc->mapGenStage == 2) {
+            int center_x = abs(rint(gc) % gc->mapWidth);
+            int center_y = abs(rint(gc) % gc->mapHeight);
+            int width = abs(rint(gc) % 20) + 1;
+            int height = abs(rint(gc) % 20) + 1;
+            gc_lowerTerrainArea(gc, center_x, center_y, width, height, -1);
+        }
         gc->trackBuildInProgress = false;
         if (gc->mapGenStage == 3) {
             for (n4 = 0; n4 < gc->mapGenColumns; ++n4) {

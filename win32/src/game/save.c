@@ -40,9 +40,11 @@ int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n) {
         gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
         gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
     } else if (gc->snapshotLoaded) {
-        n2 = gc_readShortFromBuffer(gc) + 256 * gc_readShortFromBuffer(gc)
-             + 65536 * gc_readShortFromBuffer(gc)
-             + 0x1000000 * gc_readShortFromBuffer(gc);
+        uint32_t bits = (uint32_t)gc_readShortFromBuffer(gc);
+        bits |= (uint32_t)gc_readShortFromBuffer(gc) << 8;
+        bits |= (uint32_t)gc_readShortFromBuffer(gc) << 16;
+        bits |= (uint32_t)gc_readShortFromBuffer(gc) << 24;
+        memcpy(&n2, &bits, sizeof(n2));
     }
     return n2;
 }

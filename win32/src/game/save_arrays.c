@@ -49,8 +49,11 @@ void gc_saveOrLoadShortArrayInlined(GameCanvas *gc, int16_t *sArray) {
             gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(sArray[i] >> 8 & 0xFF);
         }
     } else if (gc->snapshotLoaded) {
-        for (int i = 0; i < len; ++i)
-            sArray[i] = (int16_t)(gc_readShortFromBuffer(gc) + 256 * gc_readShortFromBuffer(gc));
+        for (int i = 0; i < len; ++i) {
+            uint16_t bits = (uint16_t)gc_readShortFromBuffer(gc);
+            bits |= (uint16_t)((uint16_t)gc_readShortFromBuffer(gc) << 8);
+            memcpy(&sArray[i], &bits, sizeof(sArray[i]));
+        }
     }
 }
 
@@ -74,10 +77,13 @@ void gc_saveOrLoadIntArrayInlined(GameCanvas *gc, int32_t *nArray) {
             gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(nArray[i] >> 24 & 0xFF);
         }
     } else if (gc->snapshotLoaded) {
-        for (int i = 0; i < len; ++i)
-            nArray[i] = gc_readShortFromBuffer(gc) + 256 * gc_readShortFromBuffer(gc)
-                        + 65536 * gc_readShortFromBuffer(gc)
-                        + 0x1000000 * gc_readShortFromBuffer(gc);
+        for (int i = 0; i < len; ++i) {
+            uint32_t bits = (uint32_t)gc_readShortFromBuffer(gc);
+            bits |= (uint32_t)gc_readShortFromBuffer(gc) << 8;
+            bits |= (uint32_t)gc_readShortFromBuffer(gc) << 16;
+            bits |= (uint32_t)gc_readShortFromBuffer(gc) << 24;
+            memcpy(&nArray[i], &bits, sizeof(nArray[i]));
+        }
     }
 }
 

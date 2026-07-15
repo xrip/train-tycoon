@@ -14,6 +14,9 @@ This project uses C++ as C with Classes:
 - normal `std::array`, `std::vector`, `std::span`, `std::string`,
   `std::filesystem::path`, and `std::unique_ptr` are welcome when they make
   ownership or size clear;
+- a long standard namespace may have a clear alias in a `.cpp` file, such as
+  `namespace filesystem = std::filesystem`; public headers keep full `std::`
+  names;
 - one small `Grid<T>` is allowed;
 - template metaprogramming, CRTP, concepts, policy systems, generic
   frameworks, deep class trees, and event systems are not allowed.

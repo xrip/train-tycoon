@@ -41,13 +41,26 @@ The one current smoke test passed in about 7.5 seconds.
 
 ## Current automatic coverage
 
+- exact Java random values;
+- fixed raw digests for all seven resources;
+- record-store bytes, ids, reload, and delete;
+- fixed save-buffer size and digest, compress/decompress, and restored fields;
 - one small path search;
-- save-buffer compress/decompress and four restored fields;
 - MIDI file parse;
-- boot, resource load, scenario 0 generation, one key, one update, and paint.
+- fixed map digests for all 13 scenarios;
+- boot, resource load, scenario 0 generation, input, update, and two fixed
+  frame digests.
 
-The scenario seed comes from the clock. The test checks broad facts, not exact
-maps or frames. Stage 0 must fix this before structural work.
+All tests use seed `0x5eed1234`, explicit resource and save roots, and an
+isolated test save directory. Fast and full CTest labels are separate. The
+real MIDI device test is an opt-in `device` label.
+
+## Stage 0 proof
+
+- Debug fast/full passed twice on 2026-07-15.
+- Release fast/full passed twice on 2026-07-15.
+- MSVC AddressSanitizer fast/full passed on 2026-07-15.
+- Debug and Release use the same scenario and frame golden values.
 
 ## Manual baseline still needed
 

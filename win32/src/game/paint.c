@@ -1,6 +1,19 @@
 // Game paint and update state machines.
 #include "game_methods.h"
 
+static int read_u16_le(MidpResource *resource) {
+    int low = midp_resource_read_byte(resource);
+    int high = midp_resource_read_byte(resource);
+    return low + high * 256;
+}
+
+static int read_u24_le(MidpResource *resource) {
+    int low = midp_resource_read_byte(resource);
+    int middle = midp_resource_read_byte(resource);
+    int high = midp_resource_read_byte(resource);
+    return low + middle * 256 + high * 65536;
+}
+
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 #define WIDTH  MIDP_SCREEN_W   // this.getWidth()
 #define HEIGHT MIDP_SCREEN_H   // this.getHeight()
@@ -241,7 +254,7 @@ void gc_update(GameCanvas *gc) {
                         int a3 = midp_resource_read_byte(in);
                         int a4 = midp_resource_read_byte(in);
                         int a5 = midp_resource_read_byte(in);
-                        int a6 = midp_resource_read_byte(in) + 256 * midp_resource_read_byte(in);
+                        int a6 = read_u16_le(in);
                         int a7 = midp_resource_read_byte(in);
                         int a8 = midp_resource_read_byte(in);
                         int a9 = midp_resource_read_byte(in);
@@ -251,15 +264,15 @@ void gc_update(GameCanvas *gc) {
                         int a13 = midp_resource_read_byte(in);
                         int a14 = midp_resource_read_byte(in);
                         int a15 = midp_resource_read_byte(in);
-                        int a16 = midp_resource_read_byte(in) + 256 * midp_resource_read_byte(in) + 65536 * midp_resource_read_byte(in);
-                        int a17 = midp_resource_read_byte(in) + 256 * midp_resource_read_byte(in) + 65536 * midp_resource_read_byte(in);
-                        int a18 = midp_resource_read_byte(in) + 256 * midp_resource_read_byte(in) + 65536 * midp_resource_read_byte(in);
+                        int a16 = read_u24_le(in);
+                        int a17 = read_u24_le(in);
+                        int a18 = read_u24_le(in);
                         int a19 = midp_resource_read_byte(in);
                         int a20 = midp_resource_read_byte(in);
                         int a21 = midp_resource_read_byte(in);
                         int a22 = midp_resource_read_byte(in);
-                        int a23 = midp_resource_read_byte(in) + 256 * midp_resource_read_byte(in) + 65536 * midp_resource_read_byte(in);
-                        int a24 = midp_resource_read_byte(in) + 256 * midp_resource_read_byte(in) + 65536 * midp_resource_read_byte(in);
+                        int a23 = read_u24_le(in);
+                        int a24 = read_u24_le(in);
                         int a25 = midp_resource_read_byte(in);
                         int a26 = midp_resource_read_byte(in);
                         if (a2 != gc->activeScenario) continue;
