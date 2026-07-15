@@ -385,7 +385,7 @@ implements Runnable {
     int aiWagonsBought = 0;
     boolean milestonesEnabled;
     boolean musicPlaying = false;
-    boolean flagAy = false;
+    boolean musicAvailable = false;
     boolean musicAutoStart = false;
     boolean autoMusic = false;
     int gameStateCounter = 2;
@@ -8170,16 +8170,16 @@ implements Runnable {
             }
             this.volumeControl.setLevel(20 * this.gameStateCounter);
             this.musicPlaying = false;
-            this.flagAy = true;
+            this.musicAvailable = true;
         }
         catch (Exception exception) {
-            this.flagAy = false;
+            this.musicAvailable = false;
         }
     }
 
     void playMusic() {
         try {
-            if (this.flagAy && this.musicPlayer != null && !this.musicPlaying && this.autoMusic) {
+            if (this.musicAvailable && this.musicPlayer != null && !this.musicPlaying && this.autoMusic) {
                 this.musicPlayer.prefetch();
                 this.musicPlayer.setMediaTime(0L);
                 this.musicPlayer.setLoopCount(-1);
@@ -8205,7 +8205,7 @@ implements Runnable {
 
     void stopMusic() {
         try {
-            if (this.flagAy && this.musicPlayer != null && this.musicPlaying) {
+            if (this.musicAvailable && this.musicPlayer != null && this.musicPlaying) {
                 this.musicPlayer.stop();
                 this.musicPlaying = false;
             }

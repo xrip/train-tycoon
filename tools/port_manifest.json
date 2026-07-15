@@ -3461,13 +3461,13 @@
    "c_type": "bool"
   },
   {
-   "java_name": "flagAy",
+   "java_name": "musicAvailable",
    "java_type": "boolean",
    "init": "false",
    "static": false,
    "final": false,
    "line": 388,
-   "c_name": "flagAy",
+   "c_name": "musicAvailable",
    "c_type": "bool"
   },
   {

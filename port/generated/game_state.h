@@ -347,7 +347,7 @@ typedef struct GameCanvas {
     int32_t aiWagonsBought; // int aiWagonsBought
     bool milestonesEnabled; // boolean milestonesEnabled
     bool musicPlaying; // boolean musicPlaying
-    bool flagAy; // boolean flagAy
+    bool musicAvailable; // boolean musicAvailable
     bool musicAutoStart; // boolean musicAutoStart
     bool autoMusic; // boolean autoMusic
     int32_t gameStateCounter; // int gameStateCounter

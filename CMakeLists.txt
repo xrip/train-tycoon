@@ -25,6 +25,7 @@ add_executable(train_tycoon
     port/midp_rms.c
     port/midp_util.c
     port/midp_input.c
+    port/midp_media_win32.c
     port/midp_stub.c
     port/generated/game_state.c
     port/generated/game_stubs.c

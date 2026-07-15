@@ -390,7 +390,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->milestoneThreshold5 = 0;
     gc->aiWagonsBought = 0;
     gc->musicPlaying = false;
-    gc->flagAy = false;
+    gc->musicAvailable = false;
     gc->musicAutoStart = false;
     gc->autoMusic = false;
     gc->gameStateCounter = 2;

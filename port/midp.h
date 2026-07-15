@@ -9,8 +9,8 @@
 // setClip, clipRect, drawArc, fillArc}; Image {createImage(bytes)->PNG,
 // createImage(w,h)->mutable, getGraphics, getWidth, getHeight}; java.util.Random
 // (exact LCG); java.util.Vector; RMS RecordStore (backed by a file); the XOR
-// resource reader; input (keycodes + game actions). Media (MIDI) and networking
-// (high scores) are no-op stubs for this build.
+// resource reader; input (keycodes + game actions); WinMM MIDI music. High-score
+// networking is a no-op stub for this build.
 #ifndef MIDP_H
 #define MIDP_H
 
@@ -141,6 +141,7 @@ int midp_resource_read_byte(MidpResource *r);        // XOR-decoded byte, -1 at 
 void midp_resource_close(MidpResource *r);
 // Read a whole resource (raw bytes, no XOR). Caller frees *out.
 bool midp_resource_read_all(const char *name, uint8_t **out, int *out_len);
+bool midp_resource_path(const char *name, char *out, size_t out_size);
 // Where resource files live (defaults to "resources"). Set once at startup.
 void midp_resource_set_root(const char *root_dir);
 
@@ -160,10 +161,19 @@ void midp_rms_close(MidpRecordStore *s);
 int64_t midp_current_time_millis(void);
 void midp_sleep(int millis);
 
-// --- Media / networking stubs (no-op for this build) --------------------------
-void midp_media_play_midi(const char *resource_name); // stubbed
+// --- WinMM MIDI music ----------------------------------------------------------
+bool midp_media_validate_midi(const char *resource_name);
+bool midp_media_load_midi(const char *resource_name);
+bool midp_media_play_midi(void);
 void midp_media_stop(void);
 void midp_media_set_volume(int level);
+void midp_media_update(void); // main-thread loop check for infinite repeat
+void midp_media_shutdown(void);
+bool midp_media_is_loaded(void);
+bool midp_media_is_playing(void);
+const char *midp_media_last_error(void);
+
+// --- Networking stub ----------------------------------------------------------
 bool midp_net_sync_highscores(const uint8_t *payload, int len); // stubbed -> false
 
 #endif // MIDP_H

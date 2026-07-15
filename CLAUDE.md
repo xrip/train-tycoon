@@ -109,6 +109,8 @@ when it helps a line-by-line faithfulness check.
 
 - CMake ≥ 3.25; MSVC (VS 2022 Build Tools) or GCC/Clang with C23. Python 3 for tooling.
 - `python tools/port.py verify` runs the whole chain (build + headless smoke, ~120 frames). Set the `TRAIN_TYCOON_SMOKE` env var for smoke mode in `main.c`.
+- Set `TRAIN_TYCOON_MIDI_TEST_MS=3000` when running the native executable for a
+  short WinMM MIDI device check without the game window.
 - Raw build: `cmake -S . -B build/port_build -G "Visual Studio 17 2022" -A x64` then `cmake --build build/port_build --config Debug`.
 - Game assets extracted from the JAR live in `resources/` (`1`..`6`, `ico.png`) — required at runtime.
 
@@ -117,4 +119,5 @@ when it helps a line-by-line faithfulness check.
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded `#define nullptr NULL` fallback before including `MiniFB.h`.
 - The old `buildMenuIndex` mapping conflict is fixed upstream as
   `buildMenuItemIndex` and `offerRowIndex`.
-- Sound (MIDI `/6`) and high-score networking are intentionally **stubbed**.
+- MIDI music (`/6`) uses the WinMM MCI sequencer. Wave sound effects are the
+  planned second sound phase. High-score networking is intentionally stubbed.

@@ -29,6 +29,13 @@ static void resource_path(char *buf, size_t buflen, const char *name) {
     snprintf(buf, buflen, "%s/%s", g_root, n);
 }
 
+bool midp_resource_path(const char *name, char *out, size_t out_size) {
+    if (!name || !out || out_size == 0) return false;
+    const char *n = name[0] == '/' ? name + 1 : name;
+    int written = snprintf(out, out_size, "%s/%s", g_root, n);
+    return written >= 0 && (size_t)written < out_size;
+}
+
 MidpResource *midp_resource_open(const char *name) {
     char path[1024];
     resource_path(path, sizeof(path), name);

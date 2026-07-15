@@ -721,7 +721,7 @@ field  a bD   lifetimeTrainRevenue   # int; total train revenue, milestone 12 va
 field  a eC   enterpriseTaxPct       # int; enterprise tax percent (eJ = totalRevenue * eC / 100)
 field  a H    bestScenarioScore      # highest computeMapTrainMetric result; saved and sent to scores service
 field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name collision with snapshotPending)
-field  a ay   flagAy                 # boolean; flag toggled in case 23
+field  a ay   musicAvailable         # MIDI resource and output device opened successfully
 field  a ao   scenarioNoticeId       # int; notice id from scenario record
 
 # ---- Batch 36: monthly offer scheduling ----

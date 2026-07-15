@@ -22,6 +22,7 @@
 #include "midp.h"
 #include "game_state.h"
 #include "game_methods.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -86,6 +87,10 @@ static bool run_save_roundtrip_smoke(void) {
     return bytes_match && fields_match;
 }
 
+static bool run_midi_parser_smoke(void) {
+    return midp_media_validate_midi("/6");
+}
+
 static bool run_state30_smoke(void) {
     GameCanvas *test = (GameCanvas *)malloc(sizeof(GameCanvas));
     if (!test) return false;
@@ -104,12 +109,17 @@ static bool run_state30_smoke(void) {
     gc_setState(test, 10);
     for (int step = 0; test->gameState == 10 && step < 1000; ++step)
         gc_update(test);
-    if (test->gameState != 20) { free(test); return false; }
+    if (test->gameState != 20) {
+        midp_media_shutdown();
+        free(test);
+        return false;
+    }
     test->activeScenario = 0;
     gc_setState(test, 25);
     for (int step = 0; test->gameState == 25 && step < 200000; ++step)
         gc_update(test);
     if (test->gameState != 30 || !test->tileMap || !test->trackMap) {
+        midp_media_shutdown();
         free(test);
         return false;
     }
@@ -121,12 +131,70 @@ static bool run_state30_smoke(void) {
     gc_run(test);
     gc_paint(test, &screen);
     bool ok = test->gameState == 30 && test->backbuffer != NULL;
+    midp_media_shutdown();
     free(test);
     return ok;
 }
 
+static bool run_midi_device_test(int total_millis) {
+    if (total_millis < 200) total_millis = 200;
+    GameCanvas *test = (GameCanvas *)malloc(sizeof(GameCanvas));
+    if (!test) return false;
+    gc_fields_init(test);
+    test->autoMusic = true;
+    test->gameStateCounter = 1;
+    gc_loadMusic(test);
+    if (!test->musicAvailable || !midp_media_is_loaded()) {
+        fprintf(stderr, "MIDI load failed: %s\n", midp_media_last_error());
+        free(test);
+        return false;
+    }
+    gc_playMusic(test);
+    if (!test->musicPlaying || !midp_media_is_playing()) {
+        fprintf(stderr, "MIDI first play failed: %s\n",
+                midp_media_last_error());
+        midp_media_shutdown();
+        free(test);
+        return false;
+    }
+    int first_part = total_millis / 2;
+    int64_t end = midp_current_time_millis() + first_part;
+    while (midp_current_time_millis() < end) {
+        midp_media_update();
+        midp_sleep(10);
+    }
+    gc_stopMusic(test);
+    if (test->musicPlaying || midp_media_is_playing()) {
+        fprintf(stderr, "MIDI stop state failed\n");
+        midp_media_shutdown();
+        free(test);
+        return false;
+    }
+    gc_setMusicVolume(test, 3);
+    gc_playMusic(test);
+    if (!test->musicPlaying || !midp_media_is_playing()) {
+        fprintf(stderr, "MIDI second play failed: %s\n",
+                midp_media_last_error());
+        midp_media_shutdown();
+        free(test);
+        return false;
+    }
+    end = midp_current_time_millis() + total_millis - first_part;
+    while (midp_current_time_millis() < end) {
+        midp_media_update();
+        midp_sleep(10);
+    }
+    gc_stopMusic(test);
+    midp_media_shutdown();
+    free(test);
+    return true;
+}
+
 int main(void) {
     midp_resource_set_root("resources");
+
+    const char *midi_test = getenv("TRAIN_TYCOON_MIDI_TEST_MS");
+    if (midi_test) return run_midi_device_test(atoi(midi_test)) ? 0 : 6;
 
     // Smoke mode (set by `port.py verify`): run N frames then exit cleanly.
     int smoke_frames = 0;
@@ -134,7 +202,8 @@ int main(void) {
     if (smoke) smoke_frames = atoi(smoke);
     if (smoke_frames && !run_pathfinding_smoke()) return 2;
     if (smoke_frames && !run_save_roundtrip_smoke()) return 3;
-    if (smoke_frames && !run_state30_smoke()) return 4;
+    if (smoke_frames && !run_midi_parser_smoke()) return 4;
+    if (smoke_frames && !run_state30_smoke()) return 5;
 
     if (!mfb_open("Train Tycoon", MIDP_SCREEN_W, MIDP_SCREEN_H, WIN_SCALE, 32))
         return 1;
@@ -149,6 +218,7 @@ int main(void) {
 
     int frame = 0;
     for (;;) {
+        midp_media_update();
         int keycode; bool pressed;
         while (midp_input_poll(&keycode, &pressed)) {
             if (pressed) gc_keyPressed(gc, keycode);
@@ -164,6 +234,7 @@ int main(void) {
             break;
     }
 
+    midp_media_shutdown();
     free(gc);
     mfb_close();
     return 0;

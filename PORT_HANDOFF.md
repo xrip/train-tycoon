@@ -7,8 +7,9 @@ from any point with the toolchain below; no knowledge lives only in one head.
 
 Port the J2ME game (`src/deobfuscated/GameCanvas.java`, 9,727 lines, 441 fields,
 196 methods) to a native Win32 C23 program on the MiniFB backend. Strategy:
-**MIDP shim + faithful 1:1 transliteration**. Sound (MIDI `/6`) and high-score
-networking are **stubbed for now** (by request).
+**MIDP shim + faithful 1:1 transliteration**. MIDI music (`/6`) uses the WinMM
+MCI sequencer. Wave sound effects are a later phase. High-score networking is
+stubbed by request.
 
 ## 2. The two layers (what you edit vs what is generated)
 
@@ -142,9 +143,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   path construction, station extension, initial train and wagon creation, and
   owner assignment are in `port/impl/map_gen.c`.
 - **The small score, graph, and text helpers are ported.** They live in
-  `port/impl/remaining.c` with the lifecycle callbacks. The four sound methods
-  and the high-score network chain are explicit no-ops because those systems
-  are outside the requested port scope.
+  `port/impl/remaining.c` with the lifecycle callbacks. The four music methods
+  now use `port/midp_media_win32.c`: native MCI MIDI load, loop, stop, restart,
+  and five volume levels. The high-score network chain stays an explicit no-op.
 - **All methods now have C bodies.** `port/impl/dialog_data.c` resolves
   data-driven dialog values and formats money; `port/impl/train_render.c`
   draws moving train sprites.
@@ -152,6 +153,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   real resources, builds scenario 0, reaches state 30, paints the world, handles
   a movement key, advances a game frame, and paints again. It also runs focused
   pathfinding and in-memory save/RLE round-trip checks.
+- **Real MIDI device test passes.** Set `TRAIN_TYCOON_MIDI_TEST_MS=3000` and run
+  the native executable to check load, 20% play, stop, 60% restart, and clean
+  device shutdown without opening the game window.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -176,9 +180,10 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 
 ## 6a. Next-session plan
 
-The requested native port is complete, with sound and networking kept out of
-scope. Future work should be manual play testing and small fixes found there;
-keep using the naming rule above for any old names exposed by that work.
+The requested native port and MIDI music phase are complete. The next requested
+phase is wave sound effects, after effect assets and game trigger points are
+known. High-score networking stays out of scope. Keep using the naming rule
+above for any old names exposed by that work.
 
 ## 7. Build requirements
 

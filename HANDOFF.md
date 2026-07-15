@@ -9,8 +9,8 @@ This project has two connected parts:
 2. Make a native Windows C23 port on MiniFB.
 
 The Java source of truth is `src/deobfuscated/GameCanvas.java`. The native port
-target is the same game behavior, with sound and high-score network work left
-out by request.
+target is the same game behavior. MIDI music is now native WinMM work. Wave
+sound effects are the next phase. High-score network work stays out by request.
 
 The native port is complete at **196/196 full methods**, with **0 partial
 methods** and no generated method bodies in `port/generated/game_stubs.c`.
@@ -18,7 +18,7 @@ methods** and no generated method bodies in `port/generated/game_stubs.c`.
 ## 2. Current Git state
 
 - Branch: `master`
-- Base commit before this handoff: `1b7e828 Complete native gameplay port`
+- Music phase work started from `e72439f Refresh project handoff`.
 - Recent main commits:
   - `1b7e828` — completed all `update()` states and added the state-30 smoke
     path.
@@ -136,17 +136,17 @@ code needs Java `.length` behavior.
 The MIDP layer has the Java 48-bit random-number process. Map generation needs
 this exact behavior.
 
-### Sound and network
+### Music, future effects, and network
 
-Sound and high-score network work are outside the requested target:
-
-- `port/impl/remaining.c` has clear no-op game methods.
-- `port/midp_stub.c` has no-op MIDI and network support.
+- `port/midp_media_win32.c` opens `resources/6` with the WinMM MCI sequencer.
+- The main loop checks for the stopped state and starts from zero again, giving
+  an infinite music loop.
+- Stop, restart, and the five old volume levels are connected to the game.
+- A short-lived MIDI output handle changes volume without blocking MCI play.
+  The old device volume is put back at shutdown.
+- Wave sound effects are not present yet. They are the planned second phase.
 - High-score sync returns `false`, so the game takes its normal failure result
   state.
-
-Do not treat these as missing port work unless the user puts them back in
-scope.
 
 ## 5. What works now
 
@@ -159,6 +159,7 @@ scope.
 - Small path-finding smoke check.
 - In-memory save/RLE/load round-trip smoke check.
 - Native RecordStore file support through `TTStore.rms` for normal game use.
+- Native MIDI load, play, stop, restart, loop check, and volume control.
 
 `python tools/port.py status` reports:
 
@@ -169,7 +170,8 @@ fields (all generated): 441
 
 ## 6. What is not complete or not proved
 
-- Sound is a no-op by request.
+- Wave sound effects are not present. No effect assets or original effect calls
+  have been found in the project.
 - High-score network work is a no-op by request.
 - The smoke suite is not a full test of every menu selection, every scenario,
   long game play, all AI results, or every save/load path on disk.
@@ -250,6 +252,18 @@ frame loop, it also runs:
 2. An in-memory state save, RLE pack/unpack byte comparison, and field restore.
 3. Real asset load, scenario 0 generation, state-30 paint, movement-key input,
    one game frame, and a second paint.
+4. A header check for the real MIDI resource.
+
+For a short real-device music check:
+
+```powershell
+$env:TRAIN_TYCOON_MIDI_TEST_MS='3000'
+.\build\port_build\Debug\train_tycoon.exe
+Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
+```
+
+This plays at 20%, stops, changes to 60%, restarts from zero, then closes and
+puts the old MIDI device volume back.
 
 ### Java proof check
 
@@ -271,26 +285,31 @@ Run on 2026-07-15 from `E:\Train_Tycoon_readable_decompile`:
 - `python tools/port.py verify` — **PASS**, exit 0. MSBuild made
   `build/port_build/Debug/train_tycoon.exe`; all smoke work returned 0.
 - `python tools/port.py status` — **PASS**: 196/196 full, 0 partial, 441 fields.
+- `TRAIN_TYCOON_MIDI_TEST_MS=3000` device test — **PASS**, exit 0. WinMM MCI
+  play/stop/volume/restart and shutdown all completed.
 - `git diff --check` — **PASS**, exit 0.
 
 ## 9. Current development objective
 
-The requested port objective is complete. The next objective is proof by
-manual play and small, local fixes for any behavior difference found there.
-Sound and network work remain out of scope.
+The requested port and MIDI music phase are complete. The next objective is
+wave sound effects, followed by manual play and small, local fixes. High-score
+network work remains out of scope.
 
 ## 10. Next tasks, in order
 
-1. **Do a manual Windows play test.** Start a new game through the real title
+1. **Set the wave-effect list and assets.** Give each effect a game event and a
+   ready WAV file. Use `PlaySound` first unless effects must play together.
+2. **Do a manual Windows play test.** Start a new game through the real title
    menu. Build track and stations, buy a train, run service, open finance/map
-   views, save, load, and exit. Keep exact steps for any failure.
-2. **Add a small check for each found failure before its fix.** Keep changes
+   views, check music controls, save, load, and exit. Keep exact steps for any
+   failure.
+3. **Add a small check for each found failure before its fix.** Keep changes
    close to the Java and bytecode source.
-3. **Test more scenarios.** Extend the smoke suite only when a real problem or
+4. **Test more scenarios.** Extend the smoke suite only when a real problem or
    high-risk path gives a reason.
-4. **Check long-run state.** Let months and years pass, then check AI, money,
+5. **Check long-run state.** Let months and years pass, then check AI, money,
    era changes, reports, and save/load stability.
-5. **Only by a new user request:** add MIDI sound or high-score network support.
+6. **Only by a new user request:** add high-score network support.
 
 ## 11. Important files and entry points
 
@@ -304,6 +323,7 @@ Sound and network work remain out of scope.
 - `tools/port_manifest.json` — 196-method port state and 441-field C map.
 - `CMakeLists.txt` — Windows C23 build.
 - `port/main.c` — Windows entry, frame loop, and smoke suite.
+- `port/midp_media_win32.c` — WinMM MCI MIDI music backend.
 - `port/midp.h` and `port/midp_*.c` — MIDP support layer.
 - `port/impl/paint.c` — full paint and update state switches.
 - `port/impl/menu_dispatch.c` — menu action state changes.

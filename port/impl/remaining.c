@@ -151,11 +151,30 @@ int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
     return (int8_t)value;
 }
 
-// Sound is outside this port's requested scope.
-void gc_loadMusic(GameCanvas *gc) { (void)gc; }
-void gc_playMusic(GameCanvas *gc) { (void)gc; }
-void gc_setMusicVolume(GameCanvas *gc, int32_t level) { (void)gc; (void)level; }
-void gc_stopMusic(GameCanvas *gc) { gc->musicPlaying = false; }
+void gc_loadMusic(GameCanvas *gc) {
+    gc->musicAvailable = midp_media_load_midi("/6");
+    gc->musicPlayer = gc->musicAvailable ? gc : NULL;
+    gc->volumeControl = gc->musicAvailable ? gc : NULL;
+    if (gc->musicAvailable)
+        midp_media_set_volume(20 * gc->gameStateCounter);
+    gc->musicPlaying = false;
+}
+
+void gc_playMusic(GameCanvas *gc) {
+    if (gc->musicAvailable && gc->musicPlayer && !gc->musicPlaying &&
+        gc->autoMusic && midp_media_play_midi())
+        gc->musicPlaying = true;
+}
+
+void gc_setMusicVolume(GameCanvas *gc, int32_t level) {
+    if (gc->volumeControl) midp_media_set_volume(level * 20);
+}
+
+void gc_stopMusic(GameCanvas *gc) {
+    if (gc->musicAvailable && gc->musicPlayer && gc->musicPlaying)
+        midp_media_stop();
+    gc->musicPlaying = false;
+}
 
 // These helpers are used only by the excluded high-score network request.
 char *gc_decodeString(GameCanvas *gc, int8_t *bytes) {
