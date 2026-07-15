@@ -3,12 +3,13 @@
 
 // void initBuildMenuRow(int n, int n2)
 void gc_initBuildMenuRow(GameCanvas *gc, int32_t n, int32_t n2) {
-    gc->buildMenuItems[n] = GC_NEW(int8_t, n2);
-    gc->buildMenuResultCodes[n] = GC_NEW(int8_t, n2);
-    gc->menuItemCode[n] = GC_NEW(int8_t, n2);
-    gc->menuTextIndex[n] = GC_NEW(int8_t, n2);
-    gc->menuTransitionCode[n] = GC_NEW(int8_t, n2);
-    gc->menuRowEnabled[n] = GC_NEW(bool, n2);
+    const auto row_len = static_cast<std::size_t>(n2);
+    gc->buildMenuItems[n].assign(row_len, 0);
+    gc->buildMenuResultCodes[n].assign(row_len, 0);
+    gc->menuItemCode[n].assign(row_len, 0);
+    gc->menuTextIndex[n].assign(row_len, 0);
+    gc->menuTransitionCode[n].assign(row_len, 0);
+    gc->menuRowEnabled[n].assign(row_len, false);
     gc->buildMenuItemCursor = 0;
     gc->buildMenuModeIndex = n;
     gc->buildMenuItemCode = 0;
@@ -31,12 +32,12 @@ void gc_addMenuItemInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
 // void initBuildMenuForScenario(int n)
 void gc_initBuildMenuForScenario(GameCanvas *gc, int32_t n) {
     if (n != -1) gc->scenarioBits = (int8_t)n;
-    gc->buildMenuItems = (int8_t **)midp_alloc_arr(sizeof(int8_t *), 6);
-    gc->buildMenuResultCodes = (int8_t **)midp_alloc_arr(sizeof(int8_t *), 6);
-    gc->menuItemCode = (int8_t **)midp_alloc_arr(sizeof(int8_t *), 6);
-    gc->menuTextIndex = (int8_t **)midp_alloc_arr(sizeof(int8_t *), 6);
-    gc->menuTransitionCode = (int8_t **)midp_alloc_arr(sizeof(int8_t *), 6);
-    gc->menuRowEnabled = (bool **)midp_alloc_arr(sizeof(bool *), 6);
+    gc->buildMenuItems.resize(6, 0);
+    gc->buildMenuResultCodes.resize(6, 0);
+    gc->menuItemCode.resize(6, 0);
+    gc->menuTextIndex.resize(6, 0);
+    gc->menuTransitionCode.resize(6, 0);
+    gc->menuRowEnabled.resize(6, 0);
     int n2 = 5;
     if ((gc->scenarioBits & 1) == 1) ++n2;
     if ((gc->scenarioBits & 2) == 2) ++n2;

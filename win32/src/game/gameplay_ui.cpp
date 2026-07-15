@@ -104,7 +104,7 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
                                                [gc->buildMenuItemIndex]);
     int scroll = selected_x + 15 - gcs_screenWidth;
     if (scroll < 0) scroll = 0;
-    int item_count = midp_arr_len(gc->buildMenuItems[gc->buildMenuMode]);
+    int item_count = static_cast<int>(gc->buildMenuItems[gc->buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
         int x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode][item]) - scroll;
         int sprite = gc_byteToUnsignedInt(gc, gc->menuTextIndex[gc->buildMenuMode][item]);

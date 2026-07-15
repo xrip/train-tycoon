@@ -141,12 +141,12 @@ typedef struct GameCanvas {
     bool menuDirty;
     int32_t buildMenuMode;
     int32_t selectedMenuRowX;
-    int8_t** buildMenuItems;
-    int8_t** buildMenuResultCodes;
-    int8_t** menuItemCode;
-    int8_t** menuTextIndex;
-    int8_t** menuTransitionCode;
-    bool** menuRowEnabled;
+    Grid<int8_t> buildMenuItems;
+    Grid<int8_t> buildMenuResultCodes;
+    Grid<int8_t> menuItemCode;
+    Grid<int8_t> menuTextIndex;
+    Grid<int8_t> menuTransitionCode;
+    Grid<bool> menuRowEnabled;
     int32_t buildMenuItemCursor;
     int32_t buildMenuModeIndex;
     int32_t buildMenuItemCode;

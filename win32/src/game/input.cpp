@@ -39,7 +39,7 @@ void gc_resetKeyState(GameCanvas *gc, int32_t n) {
 // void cycleBuildMenuIndex(boolean forward)
 void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
     gc->buildMenuItemIndex += forward ? 1 : -1;
-    int item_count = midp_arr_len(gc->buildMenuItems[gc->buildMenuMode]);
+    int item_count = static_cast<int>(gc->buildMenuItems[gc->buildMenuMode].size());
     if (gc->buildMenuItemIndex < 0) gc->buildMenuItemIndex = item_count - 1;
     if (gc->buildMenuItemIndex == item_count) gc->buildMenuItemIndex = 0;
     gc->confirmTargetState =
