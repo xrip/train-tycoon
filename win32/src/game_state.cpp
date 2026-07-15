@@ -129,9 +129,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->trainSelectionX = (int16_t*)midp_alloc_arr(sizeof(int16_t), 64);
     gc->stationDirCursor = 0;
     gc->cityListIndex = 0;
-    gc->stationDirectionCode = (int8_t*)midp_alloc_arr(sizeof(int8_t), 48);
-    gc->cityPopulation = (int8_t*)midp_alloc_arr(sizeof(int8_t), 48);
-    gc->cityIndex = (int8_t*)midp_alloc_arr(sizeof(int8_t), 48);
     gc->pendingTransitionCode = -1;
     gc->discountApplied = false;
     gc->baseTrainCostSnapshot = 0;
@@ -208,8 +205,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->bytesCompressed = 0;
     gc->trainRevenue = (int32_t*)midp_alloc_arr(sizeof(int32_t), 500);
     gc->prevTrainRevenue = (int32_t*)midp_alloc_arr(sizeof(int32_t), 500);
-    gc->stationRevenue = (int16_t*)midp_alloc_arr(sizeof(int16_t), 48);
-    gc->prevStationRevenue = (int16_t*)midp_alloc_arr(sizeof(int16_t), 48);
     gc->compareToPrevious = false;
     gc->yearGraphMode = 0;
     gc->yearGraphAlt = false;

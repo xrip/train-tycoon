@@ -165,9 +165,9 @@ typedef struct GameCanvas {
     int16_t* trainSelectionX;
     int8_t stationDirCursor;
     int8_t cityListIndex;
-    int8_t* stationDirectionCode;
-    int8_t* cityPopulation;
-    int8_t* cityIndex;
+    std::array<int8_t, 48> stationDirectionCode{};
+    std::array<int8_t, 48> cityPopulation{};
+    std::array<int8_t, 48> cityIndex{};
     int32_t pendingTransitionCode;
     bool discountApplied;
     int32_t baseTrainCostSnapshot;
@@ -251,8 +251,8 @@ typedef struct GameCanvas {
     int32_t bytesCompressed;
     int32_t* trainRevenue;
     int32_t* prevTrainRevenue;
-    int16_t* stationRevenue;
-    int16_t* prevStationRevenue;
+    std::array<int16_t, 48> stationRevenue{};
+    std::array<int16_t, 48> prevStationRevenue{};
     bool compareToPrevious;
     int32_t yearGraphMode;
     bool yearGraphAlt;
