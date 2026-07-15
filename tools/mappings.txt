@@ -285,7 +285,7 @@ method a E (I)V                    buildPlaceTrackPiece
 method a l (II)I                   spawnTrainCar   # int return: slot, or 500
 method a n (II)I                   neighboursMask    # int neighbours query (W,x used)
 method a s (II)I                   findServiceVehicleAt
-method a h (II)I                   hPath             # int path over aQ[][] grid
+method a h (II)I                   relaxPathCell     # relax one path-distance cell
 method a c (II)I                   findTrainHeadAt   # head whose car chain occupies the tile
 method a x (II)I                   unloadTrainRevenue
 
@@ -763,6 +763,14 @@ field  a go   tileQueueVisualOnly
 # ---- Batch 43: build menu selection ----
 field  a gP   enabledMenuRowIndexes
 field  a bC   useDefaultOverlaySelection
+
+# ---- Batch 44: pathfinding state ----
+field  a fl   pathSearchLimit
+field  a dX   nextPathX
+field  a gO   nextPathY
+field  a ed   pathTieBreakCounter
+field  a bW   previewTrackOwnerCode
+field  a df   existingTrackOwnerCode
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----

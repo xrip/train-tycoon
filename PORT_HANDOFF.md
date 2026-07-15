@@ -78,7 +78,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **158 / 196 (80%)** — 157 full + 1 partial (`update`).
+- Methods done: **167 / 196 (85%)** — 166 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -134,6 +134,10 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **Train buying and upgrades are ported.** The same file now has train-slot
   setup, engine and cargo cost use, cargo option counts, buy, and upgrade
   actions. The related menu-dispatch calls no longer enter generated stubs.
+- **Build pathfinding is ported.** `port/impl/pathfinding.c` has grid setup,
+  flood relaxation, tunnel links, path choice, preview tile shaping, track
+  owner matching, cost work, and track counting. `port.py verify` now runs a
+  smoke-only 5x5 path build and checks for preview tiles and a non-zero cost.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -146,6 +150,8 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - CFR dropped a `break` from `computeTrackBuildInlined`: bytecode offsets
   106-134 stop at the first non-empty tile. The C port follows the bytecode,
   not the incorrect decompiled loop text.
+- `pathSearchLimit` is a low-confidence field name: the game sets the field to
+  10 before path search, but no bytecode reads it.
 
 ## 6a. Next-session plan: make state 30 playable
 
@@ -153,14 +159,16 @@ The map-gen and state-30 simulation chains are **done**. Selecting "new game"
 generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
 UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port the pathfinding cluster
-   (`tryBuildPath`, `validatePathStep`, `findPathStep`, `floodFillPath`,
-   `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
+1. Port the save/load chain, which is already called by state 25 and milestone
+   saves: `saveGame`, RLE/CRC helpers, `initSaveOrLoad`, and map-array save and
+   restore.
+2. Port the remaining large UI/data method `q` [372 L] after giving it a clear
+   upstream name.
 2. Add a smoke path that enters state 30 and exercises one full paint/input
    frame before treating gameplay rendering as behaviorally proved.
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 158 already
+`show NAME` throughout. Each is a mechanical faithful port like the 167 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

@@ -157,9 +157,9 @@ void gc_fields_init(GameCanvas *gc) {
     gc->snapshotLoadedFlag = false;
     gc->cH = false;
     gc->aiEnabled = false;
-    gc->ed = 0;
-    gc->bW = 0;
-    gc->df = 1;
+    gc->pathTieBreakCounter = 0;
+    gc->previewTrackOwnerCode = 0;
+    gc->existingTrackOwnerCode = 1;
     gc->selectionCost = 0;
     gc->buildCancelled = true;
     gc->trackTileCount = 0;

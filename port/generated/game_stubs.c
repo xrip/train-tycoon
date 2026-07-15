@@ -17,47 +17,6 @@ int8_t* gc_q(GameCanvas *gc, int32_t n, int32_t n2) {
     return 0;
 }
 
-bool gc_tryBuildPath(GameCanvas *gc) {
-    (void)gc; // TODO port: tryBuildPath()  L4940-4958
-    return false;
-}
-
-void gc_validatePathStep(GameCanvas *gc) {
-    (void)gc; // TODO port: validatePathStep()  L4960-5106
-}
-
-bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool bl, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6, int32_t n7, int32_t n8, int32_t n9, int32_t n10, bool bl2) {
-    (void)gc; // TODO port: isTileMatchForPathInlined(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8, int n9, int n10, boolean bl2)  L5108-5118
-    return false;
-}
-
-bool gc_findPathStep(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: findPathStep(int n, int n2, int n3)  L5120-5128
-    return false;
-}
-
-void gc_floodFillPath(GameCanvas *gc) {
-    (void)gc; // TODO port: floodFillPath()  L5136-5173
-}
-
-int32_t gc_hPath(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: hPath(int n, int n2)  L5175-5217
-    return 0;
-}
-
-int16_t gc_pathDistanceMin(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: pathDistanceMin(int n, int n2, int n3)  L5219-5225
-    return 0;
-}
-
-void gc_scanTrackTiles(GameCanvas *gc) {
-    (void)gc; // TODO port: scanTrackTiles()  L5254-5271
-}
-
-void gc_clearPathDistanceGrid(GameCanvas *gc) {
-    (void)gc; // TODO port: clearPathDistanceGrid()  L5296-5377
-}
-
 void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
     (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6172-6304
 }

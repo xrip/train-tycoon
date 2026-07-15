@@ -1901,63 +1901,63 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "fl",
+   "java_name": "pathSearchLimit",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 232,
-   "c_name": "fl",
+   "c_name": "pathSearchLimit",
    "c_type": "int32_t"
   },
   {
-   "java_name": "dX",
+   "java_name": "nextPathX",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 233,
-   "c_name": "dX",
+   "c_name": "nextPathX",
    "c_type": "int32_t"
   },
   {
-   "java_name": "gO",
+   "java_name": "nextPathY",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 234,
-   "c_name": "gO",
+   "c_name": "nextPathY",
    "c_type": "int32_t"
   },
   {
-   "java_name": "ed",
+   "java_name": "pathTieBreakCounter",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 235,
-   "c_name": "ed",
+   "c_name": "pathTieBreakCounter",
    "c_type": "int32_t"
   },
   {
-   "java_name": "bW",
+   "java_name": "previewTrackOwnerCode",
    "java_type": "byte",
    "init": "0",
    "static": false,
    "final": false,
    "line": 236,
-   "c_name": "bW",
+   "c_name": "previewTrackOwnerCode",
    "c_type": "int8_t"
   },
   {
-   "java_name": "df",
+   "java_name": "existingTrackOwnerCode",
    "java_type": "byte",
    "init": "1",
    "static": false,
    "final": false,
    "line": 237,
-   "c_name": "df",
+   "c_name": "existingTrackOwnerCode",
    "c_type": "int8_t"
   },
   {
@@ -5220,7 +5220,7 @@
    "start": 4940,
    "end": 4958,
    "c_name": "gc_tryBuildPath",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "validatePathStep",
@@ -5230,7 +5230,7 @@
    "start": 4960,
    "end": 5106,
    "c_name": "gc_validatePathStep",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "isTileMatchForPathInlined",
@@ -5240,7 +5240,7 @@
    "start": 5108,
    "end": 5118,
    "c_name": "gc_isTileMatchForPathInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "findPathStep",
@@ -5250,7 +5250,7 @@
    "start": 5120,
    "end": 5128,
    "c_name": "gc_findPathStep",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "clearBuildPathTile",
@@ -5270,17 +5270,17 @@
    "start": 5136,
    "end": 5173,
    "c_name": "gc_floodFillPath",
-   "status": "pending"
+   "status": "ported"
   },
   {
-   "java_name": "hPath",
+   "java_name": "relaxPathCell",
    "ret": "int",
    "params": "int n, int n2",
-   "sig": "int hPath(int n, int n2)",
+   "sig": "int relaxPathCell(int n, int n2)",
    "start": 5175,
    "end": 5217,
-   "c_name": "gc_hPath",
-   "status": "pending"
+   "c_name": "gc_relaxPathCell",
+   "status": "ported"
   },
   {
    "java_name": "pathDistanceMin",
@@ -5290,7 +5290,7 @@
    "start": 5219,
    "end": 5225,
    "c_name": "gc_pathDistanceMin",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "normalizeTrackBits",
@@ -5310,7 +5310,7 @@
    "start": 5254,
    "end": 5271,
    "c_name": "gc_scanTrackTiles",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "setTrackOwnerCode",
@@ -5330,7 +5330,7 @@
    "start": 5296,
    "end": 5377,
    "c_name": "gc_clearPathDistanceGrid",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "isTrackStepInlined",

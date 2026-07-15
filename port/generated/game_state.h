@@ -191,12 +191,12 @@ typedef struct GameCanvas {
     int32_t placementY; // int placementY
     int32_t demolishX; // int demolishX
     int32_t demolishY; // int demolishY
-    int32_t fl; // int fl
-    int32_t dX; // int dX
-    int32_t gO; // int gO
-    int32_t ed; // int ed
-    int8_t bW; // byte bW
-    int8_t df; // byte df
+    int32_t pathSearchLimit; // int pathSearchLimit
+    int32_t nextPathX; // int nextPathX
+    int32_t nextPathY; // int nextPathY
+    int32_t pathTieBreakCounter; // int pathTieBreakCounter
+    int8_t previewTrackOwnerCode; // byte previewTrackOwnerCode
+    int8_t existingTrackOwnerCode; // byte existingTrackOwnerCode
     int32_t selectionCost; // int selectionCost
     bool buildCancelled; // boolean buildCancelled
     int32_t trackTileCount; // int trackTileCount

@@ -229,12 +229,12 @@ implements Runnable {
     int placementY;
     int demolishX;
     int demolishY;
-    int fl;
-    int dX;
-    int gO;
-    int ed = 0;
-    byte bW = 0;
-    byte df = 1;
+    int pathSearchLimit;
+    int nextPathX;
+    int nextPathY;
+    int pathTieBreakCounter = 0;
+    byte previewTrackOwnerCode = 0;
+    byte existingTrackOwnerCode = 1;
     int selectionCost = 0;
     boolean buildCancelled = true;
     int trackTileCount = 0;
@@ -4939,7 +4939,7 @@ implements Runnable {
 
     boolean tryBuildPath() {
         this.pathDistanceGrid = new short[this.mapWidth][this.mapHeight];
-        this.fl = 10;
+        this.pathSearchLimit = 10;
         this.selectionCost = 0;
         this.clearPathDistanceGrid();
         this.pathDistanceGrid[this.placementX][this.placementY] = 20;
@@ -4967,8 +4967,8 @@ implements Runnable {
         boolean bl2 = true;
         do {
             bl = true;
-            this.dX = n4;
-            this.gO = n5;
+            this.nextPathX = n4;
+            this.nextPathY = n5;
             n3 = this.tileMap[n4][n5];
             if (n3 == 7 || n3 == 10 || n3 == 21 || n3 == 23 || n3 == 71) {
                 this.clearBuildPathTile(n4 - 1, n5);
@@ -4980,7 +4980,7 @@ implements Runnable {
             }
             if (n4 == this.placementX && n5 == this.placementY) {
                 bl = false;
-            } else if (this.ed % 2 == 0) {
+            } else if (this.pathTieBreakCounter % 2 == 0) {
                 if (!(this.findPathStep(n4 + 1, n5, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4 - 1, n5, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4, n5 + 1, this.pathDistanceGrid[n4][n5]) || this.findPathStep(n4, n5 - 1, this.pathDistanceGrid[n4][n5]))) {
                     bl = false;
                     bl2 = false;
@@ -4989,10 +4989,10 @@ implements Runnable {
                 bl = false;
                 bl2 = false;
             }
-            ++this.ed;
+            ++this.pathTieBreakCounter;
             this.pathDistanceGrid[n4][n5] = 9;
-            n4 = this.dX;
-            n5 = this.gO;
+            n4 = this.nextPathX;
+            n5 = this.nextPathY;
             n2 = 0;
             n = 0;
             if (this.tileMap[n4][n5] == 7) {
@@ -5055,7 +5055,7 @@ implements Runnable {
                         } else if (this.tileMap[n3][n2] == 70) {
                             this.tileMap[n3][n2] = 76;
                             bl9 = true;
-                            this.trackMap[n3][n2] = (byte)(0x40 | this.trackMap[n3][n2] & 0x3F | this.bW << 3);
+                            this.trackMap[n3][n2] = (byte)(0x40 | this.trackMap[n3][n2] & 0x3F | this.previewTrackOwnerCode << 3);
                         } else if (this.tileElevation[n3][n2] == -1) {
                             this.tileMap[n3][n2] = 81;
                             this.selectionCost += this.moneyBaseB;
@@ -5076,7 +5076,7 @@ implements Runnable {
                         } else if (this.tileMap[n3][n2] == 71) {
                             this.tileMap[n3][n2] = 76;
                             bl9 = true;
-                            this.trackMap[n3][n2] = (byte)(0x40 | (this.trackMap[n3][n2] & 0x3F) << 3 | this.bW);
+                            this.trackMap[n3][n2] = (byte)(0x40 | (this.trackMap[n3][n2] & 0x3F) << 3 | this.previewTrackOwnerCode);
                         } else if (this.tileElevation[n3][n2] == -1) {
                             this.tileMap[n3][n2] = 82;
                             this.selectionCost += this.moneyBaseB;
@@ -5093,7 +5093,7 @@ implements Runnable {
                         this.tileMap[n3][n2] = 74;
                     }
                     if (!bl9 && by != this.tileMap[n3][n2]) {
-                        this.trackMap[n3][n2] = (byte)(0x40 | this.bW);
+                        this.trackMap[n3][n2] = (byte)(0x40 | this.previewTrackOwnerCode);
                         if (n7 == this.selectionCost) {
                             this.selectionCost += this.accel1;
                         }
@@ -5110,7 +5110,7 @@ implements Runnable {
             byte by = this.tileMap[n][n2];
             int n11 = this.trackMap[n][n2] & 0x3F;
             n11 = by == 76 && bl2 ? (n11 >>= 3) : (n11 &= 7);
-            if (n11 == this.df && (by == n3 || by == n4 || by == n5 || by == n6 || by == n7 || by == n8 || by == n9 || by == n10 || by == 76)) {
+            if (n11 == this.existingTrackOwnerCode && (by == n3 || by == n4 || by == n5 || by == n6 || by == n7 || by == n8 || by == n9 || by == n10 || by == 76)) {
                 bl = true;
             }
         }
@@ -5121,8 +5121,8 @@ implements Runnable {
         boolean bl = false;
         if (n >= 0 && n < this.mapWidth && n2 >= 0 && n2 < this.mapHeight && this.pathDistanceGrid[n][n2] >= 20 && this.pathDistanceGrid[n][n2] < n3) {
             bl = true;
-            this.dX = n;
-            this.gO = n2;
+            this.nextPathX = n;
+            this.nextPathY = n2;
         }
         return bl;
     }
@@ -5143,28 +5143,28 @@ implements Runnable {
             bl = false;
             for (n3 = this.placementX; n3 >= 0; --n3) {
                 for (n2 = this.placementY; n2 >= 0; --n2) {
-                    n = this.hPath(n3, n2);
+                    n = this.relaxPathCell(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
             }
             for (n3 = this.placementX; n3 < this.mapWidth; ++n3) {
                 for (n2 = this.placementY; n2 < this.mapHeight; ++n2) {
-                    n = this.hPath(n3, n2);
+                    n = this.relaxPathCell(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
             }
             for (n3 = this.placementX; n3 >= 0; --n3) {
                 for (n2 = this.placementY; n2 < this.mapHeight; ++n2) {
-                    n = this.hPath(n3, n2);
+                    n = this.relaxPathCell(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
             }
             for (n3 = this.placementX; n3 < this.mapWidth; ++n3) {
                 for (n2 = this.placementY; n2 >= 0; --n2) {
-                    n = this.hPath(n3, n2);
+                    n = this.relaxPathCell(n3, n2);
                     bl |= n == 0;
                     bl2 |= n == 2;
                 }
@@ -5172,7 +5172,7 @@ implements Runnable {
         }
     }
 
-    int hPath(int n, int n2) {
+    int relaxPathCell(int n, int n2) {
         boolean bl = false;
         if (this.pathDistanceGrid[n][n2] > 0 && this.pathDistanceGrid[n][n2] != 3 && this.pathDistanceGrid[n][n2] != 7) {
             int n3;

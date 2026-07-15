@@ -29,6 +29,32 @@
 
 static uint32_t g_framebuffer[MIDP_SCREEN_W * MIDP_SCREEN_H];
 
+static bool run_pathfinding_smoke(void) {
+    GameCanvas *test = (GameCanvas *)malloc(sizeof(GameCanvas));
+    if (!test) return false;
+    gc_fields_init(test);
+    test->mapWidth = 5;
+    test->mapHeight = 5;
+    test->tileMap = GC_NEW(int8_t *, test->mapWidth);
+    test->trackMap = GC_NEW(int8_t *, test->mapWidth);
+    test->tileElevation = GC_NEW(int8_t *, test->mapWidth);
+    for (int x = 0; x < test->mapWidth; ++x) {
+        test->tileMap[x] = GC_NEW(int8_t, test->mapHeight);
+        test->trackMap[x] = GC_NEW(int8_t, test->mapHeight);
+        test->tileElevation[x] = GC_NEW(int8_t, test->mapHeight);
+    }
+    test->placementX = 1;
+    test->placementY = 2;
+    test->demolishX = 3;
+    test->demolishY = 2;
+    test->accel1 = 10;
+    bool ok = gc_tryBuildPath(test)
+              && test->trackTileCount > 0
+              && test->selectionCost > 0;
+    free(test);
+    return ok;
+}
+
 int main(void) {
     midp_resource_set_root("resources");
 
@@ -36,6 +62,7 @@ int main(void) {
     int smoke_frames = 0;
     const char *smoke = getenv("TRAIN_TYCOON_SMOKE");
     if (smoke) smoke_frames = atoi(smoke);
+    if (smoke_frames && !run_pathfinding_smoke()) return 2;
 
     if (!mfb_open("Train Tycoon", MIDP_SCREEN_W, MIDP_SCREEN_H, WIN_SCALE, 32))
         return 1;
