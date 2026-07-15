@@ -399,14 +399,10 @@ void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
 // void loadState25Setup(int n) -- the incremental map generator
 void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
     if (n == 0) {
-        gc->tileMap = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 1);
-        for (int i = 0; i <= gc->mapWidth; ++i) gc->tileMap[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 1);
-        gc->trackMap = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 1);
-        for (int i = 0; i <= gc->mapWidth; ++i) gc->trackMap[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 1);
-        gc->tileElevation = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 1);
-        for (int i = 0; i <= gc->mapWidth; ++i) gc->tileElevation[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 1);
-        gc->heightMap = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 2);
-        for (int i = 0; i <= gc->mapWidth + 1; ++i) gc->heightMap[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 2);
+        gc->tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+        gc->trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+        gc->tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+        gc->heightMap.resize(gc->mapWidth + 2, gc->mapHeight + 2);
         gc->initialIndustryPlaced = false;
         gc->mapGenStage = 0;
         gc->tilesGeneratedInStage = 0;

@@ -106,7 +106,7 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
                 if (n2 == 54 || n2 == 55)
                     midp_draw_image(g, gc->tile_sprites[gc->tileSpriteIndex[53]].get(), n, n12, 33);
                 if (gc->phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
-                    int8_t *row = gc->tileMap[n5];
+                    int8_t *row = gc->tileMap[n5].data();
                     row[n4] = (int8_t)(row[n4] + 1);
                     if (gc->tileMap[n5][n4] == 69) gc->tileMap[n5][n4] = 65;
                 }

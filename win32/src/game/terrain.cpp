@@ -120,7 +120,7 @@ bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
 // void commitTerrainEdit() -- copy the 10x10 edit buffer back into heightMap
 void gc_commitTerrainEdit(GameCanvas *gc) {
     for (int i = 0; i < 10; ++i) {
-        memcpy(gc->heightMap[gc->selectionStartX + i] + gc->selectionStartY,
+        memcpy(gc->heightMap[gc->selectionStartX + i].data() + gc->selectionStartY,
                gc->terrainEditBuffer[i].data(), 10);
     }
 }
@@ -137,7 +137,7 @@ void gc_setSelectionStart(GameCanvas *gc, int32_t n, int32_t n2) {
     gc->terrainEditBuffer.resize(10, 10);
     for (int i = 0; i < 10; ++i) {
         memcpy(gc->terrainEditBuffer[i].data(),
-               gc->heightMap[gc->selectionStartX + i] + gc->selectionStartY, 10);
+               gc->heightMap[gc->selectionStartX + i].data() + gc->selectionStartY, 10);
     }
     gc->terrainSmoothCost = 0;
 }

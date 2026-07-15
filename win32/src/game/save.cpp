@@ -362,17 +362,10 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
     gc_initSaveOrLoad(gc, 1);
-    gc->tileMap = GC_NEW(int8_t *, gc->mapWidth + 1);
-    gc->trackMap = GC_NEW(int8_t *, gc->mapWidth + 1);
-    gc->tileElevation = GC_NEW(int8_t *, gc->mapWidth + 1);
-    for (int x = 0; x < gc->mapWidth + 1; ++x) {
-        gc->tileMap[x] = GC_NEW(int8_t, gc->mapHeight + 1);
-        gc->trackMap[x] = GC_NEW(int8_t, gc->mapHeight + 1);
-        gc->tileElevation[x] = GC_NEW(int8_t, gc->mapHeight + 1);
-    }
-    gc->heightMap = GC_NEW(int8_t *, gc->mapWidth + 2);
-    for (int x = 0; x < gc->mapWidth + 2; ++x)
-        gc->heightMap[x] = GC_NEW(int8_t, gc->mapHeight + 2);
+    gc->tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+    gc->trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+    gc->tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+    gc->heightMap.resize(gc->mapWidth + 2, gc->mapHeight + 2);
     gc->mapHalfWidth = (gc->mapWidth - 1) * 8;
     gc->mapScreenWidth = (gc->mapWidth + gc->mapHeight) * 16;
     gc->mapScreenHeight = (gc->mapWidth + gc->mapHeight) * 8;

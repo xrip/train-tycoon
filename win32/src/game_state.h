@@ -101,8 +101,8 @@ typedef struct GameCanvas {
     int32_t currentSpriteId;
     int32_t lastRenderedSpriteId;
     int32_t spriteJustChanged;
-    int8_t** tileElevation;
-    int8_t** heightMap;
+    Grid<int8_t> tileElevation;
+    Grid<int8_t> heightMap;
     int32_t terrainSmoothCost;
     bool initialIndustryPlaced;
     Grid<int8_t> terrainEditBuffer;
@@ -364,8 +364,8 @@ typedef struct GameCanvas {
     int8_t* tileOffsetY;
     int32_t numActiveTileAnimations;
     int32_t gameState;
-    int8_t** tileMap;
-    int8_t** trackMap;
+    Grid<int8_t> tileMap;
+    Grid<int8_t> trackMap;
     int32_t viewportCenterX;
     int32_t viewportCenterY;
     int32_t money;
