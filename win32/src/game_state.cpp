@@ -421,9 +421,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->phaseTimer = 0;
     gc->tileQueue = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 50);
     for (int _i = 0; _i < 50; ++_i) gc->tileQueue[_i] = (int8_t*)midp_alloc_arr(sizeof(int8_t), 3);
-    static const int32_t dc__d[] = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
-    gc->dc = (int32_t*)midp_alloc_arr(sizeof(int32_t), (int)(sizeof(dc__d)/sizeof(int32_t)));
-    memcpy(gc->dc, dc__d, sizeof(dc__d));
+    gc->dc = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     gc->bx = 0;
     gc->fR = 0;
     gc->eD = -1;
@@ -432,9 +430,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->loadingTimer = 0;
     gc->dH = 50;
     gc->gw = 0;
-    static const int8_t tileSpriteYOffsetByCode__d[] = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
-    gc->tileSpriteYOffsetByCode = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(tileSpriteYOffsetByCode__d)/sizeof(int8_t)));
-    memcpy(gc->tileSpriteYOffsetByCode, tileSpriteYOffsetByCode__d, sizeof(tileSpriteYOffsetByCode__d));
+    gc->tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
     gc->lastViewportCenterX = -1;
     gc->viewportCenterYCached = -1;
     gc->visibleTrains = (int16_t*)midp_alloc_arr(sizeof(int16_t), 500);

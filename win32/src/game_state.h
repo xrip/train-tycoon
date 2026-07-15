@@ -410,7 +410,7 @@ typedef struct GameCanvas {
     int32_t phaseTimer;
     int8_t** tileQueue;
     std::array<bool, 50> tileQueueVisualOnly{};
-    int32_t* dc;
+    std::array<int32_t, 9> dc{};
     int32_t bx;
     int32_t fR;
     int8_t transitionDebounce;
@@ -423,7 +423,7 @@ typedef struct GameCanvas {
     int64_t tickStart;
     int64_t tickEnd;
     int64_t gw;
-    int8_t* tileSpriteYOffsetByCode;
+    std::array<int8_t, 26> tileSpriteYOffsetByCode{};
     int32_t lastViewportCenterX;
     int32_t viewportCenterYCached;
     int16_t* visibleTrains;
