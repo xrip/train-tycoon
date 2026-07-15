@@ -2,6 +2,7 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 #include "midp.h"
+#include "support/grid.h"
 #include "support/java_random.h"
 #include "support/music_output.h"
 #include "support/resource_reader.h"
@@ -191,7 +192,7 @@ typedef struct GameCanvas {
     bool cH;
     bool aiEnabled;
     int32_t screenParam;
-    int16_t** pathDistanceGrid;
+    Grid<int16_t> pathDistanceGrid;
     int32_t placementX;
     int32_t placementY;
     int32_t demolishX;

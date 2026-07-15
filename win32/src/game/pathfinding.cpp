@@ -372,20 +372,18 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
 }
 
 bool gc_tryBuildPath(GameCanvas *gc) {
-    gc->pathDistanceGrid = GC_NEW(int16_t *, gc->mapWidth);
-    for (int x = 0; x < gc->mapWidth; ++x)
-        gc->pathDistanceGrid[x] = GC_NEW(int16_t, gc->mapHeight);
+    gc->pathDistanceGrid.resize(gc->mapWidth, gc->mapHeight);
     gc->pathSearchLimit = 10;
     gc->selectionCost = 0;
     gc_clearPathDistanceGrid(gc);
     gc->pathDistanceGrid[gc->placementX][gc->placementY] = 20;
     gc_floodFillPath(gc);
     if (gc->pathDistanceGrid[gc->demolishX][gc->demolishY] < 20) {
-        gc->pathDistanceGrid = NULL;
+        gc->pathDistanceGrid.clear();
         return false;
     }
     gc_validatePathStep(gc);
-    gc->pathDistanceGrid = NULL;
+    gc->pathDistanceGrid.clear();
     gc_scanTrackTiles(gc);
     if (gc->trackTileCount == 0) return false;
     return gc->selectionCost != 0;
