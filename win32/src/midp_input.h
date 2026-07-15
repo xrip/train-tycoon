@@ -6,6 +6,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Called from the MiniFB input hook. `vk` is a Win32 virtual-key code.
 void midp_input_on_key(int vk, bool down);
 
@@ -14,5 +18,9 @@ bool midp_input_poll(int *keycode, bool *pressed);
 
 // Canvas.getGameAction: map a MIDP key code to a game action (0 if none).
 int midp_get_game_action(int keycode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MIDP_INPUT_H

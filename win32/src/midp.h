@@ -14,6 +14,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Framebuffer geometry (the J2ME canvas was 240x320).
 #define MIDP_SCREEN_W 240
@@ -171,5 +175,9 @@ const char *midp_media_last_error(void);
 
 // --- Networking stub ----------------------------------------------------------
 bool midp_net_sync_highscores(const uint8_t *payload, int len); // stubbed -> false
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MIDP_H

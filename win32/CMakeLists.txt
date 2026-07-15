@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(train_tycoon LANGUAGES C)
+project(train_tycoon LANGUAGES C CXX)
 
 if(NOT WIN32)
     message(FATAL_ERROR "Train Tycoon needs Windows.")
@@ -8,6 +8,10 @@ endif()
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 file(GLOB GAME_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.c
@@ -60,8 +64,21 @@ set_property(TARGET train_tycoon PROPERTY
 )
 
 enable_testing()
-add_test(NAME train_tycoon_smoke COMMAND $<TARGET_FILE:train_tycoon>)
+add_executable(train_tycoon_tests
+    tests/test_main.cpp
+    tests/test_smoke.cpp
+)
+target_link_libraries(train_tycoon_tests PRIVATE train_tycoon_legacy winmm)
+
+set(TEST_RUN_DIR "$<TARGET_FILE_DIR:train_tycoon_tests>/test_run")
+add_custom_command(TARGET train_tycoon_tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${TEST_RUN_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/resources
+            ${TEST_RUN_DIR}/resources
+)
+
+add_test(NAME train_tycoon_smoke COMMAND $<TARGET_FILE:train_tycoon_tests>)
 set_tests_properties(train_tycoon_smoke PROPERTIES
-    ENVIRONMENT "TRAIN_TYCOON_SMOKE=120"
-    WORKING_DIRECTORY "$<TARGET_FILE_DIR:train_tycoon>"
+    WORKING_DIRECTORY "${TEST_RUN_DIR}"
 )

@@ -3,6 +3,10 @@
 #define GAME_METHODS_H
 #include "game_state.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int32_t gc_byteToUnsignedInt(GameCanvas *gc, int8_t n);
 void gc_start(GameCanvas *gc, void* gameMIDlet);
 void gc_run(GameCanvas *gc);
@@ -199,5 +203,9 @@ void gc_update(GameCanvas *gc);
 void gc_renderMap(GameCanvas *gc, MidpGraphics* graphics);
 void gc_hideNotify(GameCanvas *gc);
 void gc_showNotify(GameCanvas *gc);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

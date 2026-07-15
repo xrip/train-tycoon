@@ -3,6 +3,10 @@
 #define GAME_STATE_H
 #include "midp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct GameCanvas {
     void* midlet;
     bool stopRequested;
@@ -449,5 +453,9 @@ extern bool gcs_monthlyReportEnabled;
 extern bool gcs_annualReportEnabled;
 
 void gc_fields_init(GameCanvas *gc);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
