@@ -5143,24 +5143,24 @@
    "status": "ported"
   },
   {
-   "java_name": "p",
+   "java_name": "formatNumberWithSuffix",
    "ret": "byte[]",
    "params": "int n, int n2",
-   "sig": "byte[] p(int n, int n2)",
+   "sig": "byte[] formatNumberWithSuffix(int n, int n2)",
    "start": 3583,
    "end": 3591,
-   "c_name": "gc_p",
-   "status": "pending"
+   "c_name": "gc_formatNumberWithSuffix",
+   "status": "ported"
   },
   {
-   "java_name": "d",
+   "java_name": "encodeDisplayText",
    "ret": "byte[]",
    "params": "String string",
-   "sig": "byte[] d(String string)",
+   "sig": "byte[] encodeDisplayText(String string)",
    "start": 3593,
    "end": 3599,
-   "c_name": "gc_d",
-   "status": "pending"
+   "c_name": "gc_encodeDisplayText",
+   "status": "ported"
   },
   {
    "java_name": "u",
@@ -5950,7 +5950,7 @@
    "start": 7232,
    "end": 7333,
    "c_name": "gc_setYearGraphMode",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "maybeAiTakeTurn",
@@ -6040,7 +6040,7 @@
    "start": 7555,
    "end": 7633,
    "c_name": "gc_computeMilestoneScore",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "everyTwoTickZ",
@@ -6070,7 +6070,7 @@
    "start": 7739,
    "end": 7771,
    "c_name": "gc_computeMenuRowDisplayValue",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "placeTrainAt",
@@ -6180,7 +6180,7 @@
    "start": 8157,
    "end": 8178,
    "c_name": "gc_loadMusic",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "playMusic",
@@ -6190,7 +6190,7 @@
    "start": 8180,
    "end": 8193,
    "c_name": "gc_playMusic",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "setMusicVolume",
@@ -6200,7 +6200,7 @@
    "start": 8195,
    "end": 8204,
    "c_name": "gc_setMusicVolume",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "stopMusic",
@@ -6210,7 +6210,7 @@
    "start": 8206,
    "end": 8216,
    "c_name": "gc_stopMusic",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "computeMapTrainMetric",
@@ -6230,17 +6230,17 @@
    "start": 8246,
    "end": 8252,
    "c_name": "gc_decodeString",
-   "status": "pending"
+   "status": "ported"
   },
   {
-   "java_name": "n",
+   "java_name": "buildPlayerNameString",
    "ret": "String",
    "params": "",
-   "sig": "String n()",
+   "sig": "String buildPlayerNameString()",
    "start": 8254,
    "end": 8292,
-   "c_name": "gc_n",
-   "status": "pending"
+   "c_name": "gc_buildPlayerNameString",
+   "status": "ported"
   },
   {
    "java_name": "syncHighScores",
@@ -6250,7 +6250,7 @@
    "start": 8294,
    "end": 8356,
    "c_name": "gc_syncHighScores",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "a",
@@ -6360,7 +6360,7 @@
    "start": 9706,
    "end": 9716,
    "c_name": "gc_hideNotify",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "showNotify",
@@ -6370,7 +6370,7 @@
    "start": 9718,
    "end": 9723,
    "c_name": "gc_showNotify",
-   "status": "pending"
+   "status": "ported"
   }
  ]
 }

@@ -3580,7 +3580,7 @@ implements Runnable {
         return byArray;
     }
 
-    byte[] p(int n, int n2) {
+    byte[] formatNumberWithSuffix(int n, int n2) {
         String string = String.valueOf(n);
         byte[] byArray = new byte[string.length() + 1];
         for (int i = 0; i < string.length(); ++i) {
@@ -3590,7 +3590,7 @@ implements Runnable {
         return byArray;
     }
 
-    byte[] d(String string) {
+    byte[] encodeDisplayText(String string) {
         byte[] byArray = new byte[string.length()];
         for (int i = 0; i < byArray.length; ++i) {
             byArray[i] = string.charAt(i) == '-' ? 22 : (string.charAt(i) == '.' ? 11 : (string.charAt(i) == '/' ? 20 : (string.charAt(i) == '%' ? 29 : (byte)(string.charAt(i) - 47))));
@@ -3819,7 +3819,7 @@ implements Runnable {
                         return this.spriteBitmapTable[this.spriteIndexTable[40 + this.difficultyC]];
                     }
                     case 6: {
-                        return this.p(this.difficultyCycle, 0);
+                        return this.formatNumberWithSuffix(this.difficultyCycle, 0);
                     }
                 }
                 break;
@@ -3835,10 +3835,10 @@ implements Runnable {
                         return byArray3;
                     }
                     case 1: {
-                        return this.p(this.zonePopulation[this.junctionDirCursor] * 13, 0);
+                        return this.formatNumberWithSuffix(this.zonePopulation[this.junctionDirCursor] * 13, 0);
                     }
                     case 2: {
-                        return this.p(this.constructionTimers[this.junctionDirCursor], 29);
+                        return this.formatNumberWithSuffix(this.constructionTimers[this.junctionDirCursor], 29);
                     }
                 }
                 break;
@@ -3852,13 +3852,13 @@ implements Runnable {
                         return this.spriteBitmapTable[this.spriteIndexTable[106 + this.stationDirectionCode[this.stationDirCursor] / 2]];
                     }
                     case 2: {
-                        return this.p(this.prevStationRevenue[this.stationDirCursor], 0);
+                        return this.formatNumberWithSuffix(this.prevStationRevenue[this.stationDirCursor], 0);
                     }
                 }
                 break;
             }
             case 17: {
-                return this.p(this.computeMilestoneScore(), 29);
+                return this.formatNumberWithSuffix(this.computeMilestoneScore(), 29);
             }
             case 10: {
                 switch (n2) {
@@ -3878,7 +3878,7 @@ implements Runnable {
                         return this.autoMusic ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 6: {
-                        return this.p(this.gameStateCounter, 0);
+                        return this.formatNumberWithSuffix(this.gameStateCounter, 0);
                     }
                 }
                 break;
@@ -3910,7 +3910,7 @@ implements Runnable {
                 return this.b(this.unitCost - this.currentTrainCostSnapshot);
             }
             case 22: {
-                return this.p(this.serviceResourceStock[this.serviceVehicleAtCursor][n2], 0);
+                return this.formatNumberWithSuffix(this.serviceResourceStock[this.serviceVehicleAtCursor][n2], 0);
             }
             case 26: {
                 int n3;
@@ -3924,7 +3924,7 @@ implements Runnable {
                     return this.b(this.prevTrainRevenue[this.trainAtCursor]);
                 }
                 if (n2 == 8) {
-                    return this.p(this.trainAgeOrTimer[this.trainAtCursor], 0);
+                    return this.formatNumberWithSuffix(this.trainAgeOrTimer[this.trainAtCursor], 0);
                 }
                 if (n2 == 9) {
                     return this.b(this.currentTrainCostSnapshot * 70 / 100);
@@ -3948,7 +3948,7 @@ implements Runnable {
                 if (n3 == 2) {
                     string = string + "/" + this.wagonEnergyRemaining[n4];
                 }
-                return this.d(string);
+                return this.encodeDisplayText(string);
             }
             case 30: {
                 switch (n2) {
@@ -3959,7 +3959,7 @@ implements Runnable {
                         return this.b(this.loanCeiling);
                     }
                     case 2: {
-                        return this.p(this.interestRate, 29);
+                        return this.formatNumberWithSuffix(this.interestRate, 29);
                     }
                 }
                 break;
@@ -4050,9 +4050,9 @@ implements Runnable {
                     }
                 } else {
                     if (n2 >= 20) {
-                        return !this.yearGraphAlt ? this.p(this.altYearArray[n2 - 20], 0) : null;
+                        return !this.yearGraphAlt ? this.formatNumberWithSuffix(this.altYearArray[n2 - 20], 0) : null;
                     }
-                    return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 1940, 20) : this.p(this.altYearArray[n2] + 1940, 0);
+                    return !this.yearGraphAlt ? this.formatNumberWithSuffix(this.yearGraphOffsets[n2] + 1940, 20) : this.formatNumberWithSuffix(this.altYearArray[n2] + 1940, 0);
                 }
             }
             case 34: {
@@ -4060,9 +4060,9 @@ implements Runnable {
                     return this.spriteBitmapTable[this.spriteIndexTable[54 + this.yearGraphMode]];
                 }
                 if (n2 >= 20) {
-                    return !this.yearGraphAlt ? this.p(this.altYearArray[n2 - 20], 0) : null;
+                    return !this.yearGraphAlt ? this.formatNumberWithSuffix(this.altYearArray[n2 - 20], 0) : null;
                 }
-                return !this.yearGraphAlt ? this.p(this.yearGraphOffsets[n2] + 40, 20) : this.p(this.altYearArray[n2] + 1940, 0);
+                return !this.yearGraphAlt ? this.formatNumberWithSuffix(this.yearGraphOffsets[n2] + 40, 20) : this.formatNumberWithSuffix(this.altYearArray[n2] + 1940, 0);
             }
             case 41: 
             case 42: 
@@ -4078,9 +4078,9 @@ implements Runnable {
             case 53: 
             case 54: {
                 if (n2 == 1) {
-                    byte[] byArray = this.p(this.menuRowParamA[this.offerRowIndex], 11);
-                    byte[] byArray4 = this.p(this.menuRowParamB[this.offerRowIndex], 11);
-                    byte[] byArray5 = this.p(this.menuRowParamC[this.offerRowIndex] + 1950, 0);
+                    byte[] byArray = this.formatNumberWithSuffix(this.menuRowParamA[this.offerRowIndex], 11);
+                    byte[] byArray4 = this.formatNumberWithSuffix(this.menuRowParamB[this.offerRowIndex], 11);
+                    byte[] byArray5 = this.formatNumberWithSuffix(this.menuRowParamC[this.offerRowIndex] + 1950, 0);
                     byte[] byArray6 = new byte[byArray.length + byArray4.length + byArray5.length];
                     System.arraycopy(byArray, 0, byArray6, 0, byArray.length);
                     System.arraycopy(byArray4, 0, byArray6, byArray.length, byArray4.length);
@@ -4091,10 +4091,10 @@ implements Runnable {
                     return this.b(this.menuRowCost[this.offerRowIndex]);
                 }
                 if (n2 == 3) {
-                    return this.p(this.computeMenuRowDisplayValue(this.offerRowIndex), 29);
+                    return this.formatNumberWithSuffix(this.computeMenuRowDisplayValue(this.offerRowIndex), 29);
                 }
                 if (n2 != 4) break;
-                return this.p(this.menuRowCost[this.offerRowIndex], 0);
+                return this.formatNumberWithSuffix(this.menuRowCost[this.offerRowIndex], 0);
             }
             case 60: {
                 if (n2 % 2 == 1) {
@@ -4102,7 +4102,7 @@ implements Runnable {
                     return this.spriteBitmapTable[this.byteToUnsignedInt(this.spriteIndexTable[this.menuRowType[this.enabledMenuRowIndexes[n5]] + 160])];
                 }
                 int n6 = (n2 - 1) / 2;
-                return this.p(this.computeMenuRowDisplayValue(this.enabledMenuRowIndexes[n6]), 29);
+                return this.formatNumberWithSuffix(this.computeMenuRowDisplayValue(this.enabledMenuRowIndexes[n6]), 29);
             }
             case 61: 
             case 62: 
@@ -4117,13 +4117,13 @@ implements Runnable {
             case 71: 
             case 72: {
                 if (n2 == 1) {
-                    return this.p(this.menuRowEra[this.offerRowIndex], 29);
+                    return this.formatNumberWithSuffix(this.menuRowEra[this.offerRowIndex], 29);
                 }
                 if (n2 == 2) {
                     return this.b(this.menuRowRevenue[this.offerRowIndex]);
                 }
                 if (n2 != 3) break;
-                return this.p(this.menuRowEra[this.offerRowIndex], 0);
+                return this.formatNumberWithSuffix(this.menuRowEra[this.offerRowIndex], 0);
             }
             case 27: {
                 if (n2 == 1) {
@@ -4136,16 +4136,16 @@ implements Runnable {
             }
             case 28: {
                 if (n2 == 0) {
-                    return this.p(this.transientH, 0);
+                    return this.formatNumberWithSuffix(this.transientH, 0);
                 }
                 if (n2 >= 1 && n2 <= 13) {
-                    return this.p(this.gk[n2 - 1], 0);
+                    return this.formatNumberWithSuffix(this.gk[n2 - 1], 0);
                 }
                 if (n2 < 20 || n2 > 33) break;
-                return this.p(this.bd[n2 - 20], 0);
+                return this.formatNumberWithSuffix(this.bd[n2 - 20], 0);
             }
             case 6: {
-                return this.p(this.gJ, 0);
+                return this.formatNumberWithSuffix(this.gJ, 0);
             }
         }
         return null;
@@ -8251,7 +8251,7 @@ implements Runnable {
         return new String(byArray2);
     }
 
-    String n() {
+    String buildPlayerNameString() {
         StringBuffer stringBuffer = new StringBuffer();
         for (int i = 0; i < this.bE.length; ++i) {
             byte by = this.bE[i];
@@ -8300,7 +8300,7 @@ implements Runnable {
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName1), this.decodeString(decodeHeaderValue1));
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName2), this.decodeString(viewportZoomStep));
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName3), "en");
-            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName4), this.n());
+            httpConnection.setRequestProperty(this.decodeString(decodeHeaderName4), this.buildPlayerNameString());
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName5), bl ? "S" : "D");
             StringBuffer stringBuffer = new StringBuffer(String.valueOf(this.transientH));
             for (n2 = 0; n2 < this.gk.length; ++n2) {

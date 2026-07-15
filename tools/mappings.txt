@@ -783,6 +783,11 @@ field  a dD   industryStationX
 field  a dQ   initialObstacleCount
 field  a hf   terrainRaiseStepCount
 field  a cK   terrainPatchBaseSize
+
+# ---- Batch 47: remaining display helpers ----
+method a p (II)[B                       formatNumberWithSuffix
+method a d (Ljava/lang/String;)[B       encodeDisplayText
+method a n ()Ljava/lang/String;         buildPlayerNameString
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----

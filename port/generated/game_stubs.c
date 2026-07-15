@@ -2,16 +2,6 @@
 // Stub bodies for methods not yet ported (status != 'ported').
 #include "game_methods.h"
 
-int8_t* gc_p(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: p(int n, int n2)  L3583-3591
-    return 0;
-}
-
-int8_t* gc_d(GameCanvas *gc, char* string) {
-    (void)gc; // TODO port: d(String string)  L3593-3599
-    return 0;
-}
-
 int8_t* gc_q(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)gc; // TODO port: q(int n, int n2)  L3782-4152
     return 0;
@@ -19,58 +9,5 @@ int8_t* gc_q(GameCanvas *gc, int32_t n, int32_t n2) {
 
 void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
     (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6172-6304
-}
-
-void gc_setYearGraphMode(GameCanvas *gc, int32_t n, bool bl) {
-    (void)gc; // TODO port: setYearGraphMode(int n, boolean bl)  L7232-7333
-}
-
-int32_t gc_computeMilestoneScore(GameCanvas *gc) {
-    (void)gc; // TODO port: computeMilestoneScore()  L7555-7633
-    return 0;
-}
-
-int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: computeMenuRowDisplayValue(int n)  L7739-7771
-    return 0;
-}
-
-void gc_loadMusic(GameCanvas *gc) {
-    (void)gc; // TODO port: loadMusic()  L8157-8178
-}
-
-void gc_playMusic(GameCanvas *gc) {
-    (void)gc; // TODO port: playMusic()  L8180-8193
-}
-
-void gc_setMusicVolume(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: setMusicVolume(int n)  L8195-8204
-}
-
-void gc_stopMusic(GameCanvas *gc) {
-    (void)gc; // TODO port: stopMusic()  L8206-8216
-}
-
-char* gc_decodeString(GameCanvas *gc, int8_t* byArray) {
-    (void)gc; // TODO port: decodeString(byte[] byArray)  L8246-8252
-    return 0;
-}
-
-char* gc_n(GameCanvas *gc) {
-    (void)gc; // TODO port: n()  L8254-8292
-    return 0;
-}
-
-bool gc_syncHighScores(GameCanvas *gc, bool bl) {
-    (void)gc; // TODO port: syncHighScores(boolean bl)  L8294-8356
-    return false;
-}
-
-void gc_hideNotify(GameCanvas *gc) {
-    (void)gc; // TODO port: hideNotify()  L9706-9716
-}
-
-void gc_showNotify(GameCanvas *gc) {
-    (void)gc; // TODO port: showNotify()  L9718-9723
 }
 
