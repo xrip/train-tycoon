@@ -206,23 +206,16 @@ void gc_fields_init(GameCanvas *gc) {
         {{11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
     }};
     gc->dI = 5;
-    static const int16_t trainSpriteDirectionTable__r0[] = {130, 131, 132, 133, 134, 135, 136, 137};
-    static const int16_t trainSpriteDirectionTable__r1[] = {140, 141, 142, 143, 144, 145, 146, 147};
-    static const int16_t trainSpriteDirectionTable__r2[] = {160, 161, 162, 163, 160, 161, 162, 163};
-    static const int16_t trainSpriteDirectionTable__r3[] = {165, 166, 167, 168, 165, 166, 167, 168};
-    static const int16_t trainSpriteDirectionTable__r4[] = {170, 171, 172, 173, 170, 171, 172, 173};
-    static const int16_t trainSpriteDirectionTable__r5[] = {175, 176, 177, 178, 175, 176, 177, 178};
-    static const int16_t trainSpriteDirectionTable__r6[] = {180, 181, 182, 183, 180, 181, 182, 183};
-    static const int16_t trainSpriteDirectionTable__r7[] = {185, 186, 187, 188, 185, 186, 187, 188};
-    gc->trainSpriteDirectionTable = (int16_t**)midp_alloc_arr(sizeof(int16_t*), 8);
-    gc->trainSpriteDirectionTable[0] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r0)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[0], trainSpriteDirectionTable__r0, sizeof(trainSpriteDirectionTable__r0));
-    gc->trainSpriteDirectionTable[1] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r1)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[1], trainSpriteDirectionTable__r1, sizeof(trainSpriteDirectionTable__r1));
-    gc->trainSpriteDirectionTable[2] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r2)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[2], trainSpriteDirectionTable__r2, sizeof(trainSpriteDirectionTable__r2));
-    gc->trainSpriteDirectionTable[3] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r3)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[3], trainSpriteDirectionTable__r3, sizeof(trainSpriteDirectionTable__r3));
-    gc->trainSpriteDirectionTable[4] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r4)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[4], trainSpriteDirectionTable__r4, sizeof(trainSpriteDirectionTable__r4));
-    gc->trainSpriteDirectionTable[5] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r5)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[5], trainSpriteDirectionTable__r5, sizeof(trainSpriteDirectionTable__r5));
-    gc->trainSpriteDirectionTable[6] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r6)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[6], trainSpriteDirectionTable__r6, sizeof(trainSpriteDirectionTable__r6));
-    gc->trainSpriteDirectionTable[7] = (int16_t*)midp_alloc_arr(sizeof(int16_t), (int)(sizeof(trainSpriteDirectionTable__r7)/sizeof(int16_t))); memcpy(gc->trainSpriteDirectionTable[7], trainSpriteDirectionTable__r7, sizeof(trainSpriteDirectionTable__r7));
+    gc->trainSpriteDirectionTable = {{
+        {{130, 131, 132, 133, 134, 135, 136, 137}},
+        {{140, 141, 142, 143, 144, 145, 146, 147}},
+        {{160, 161, 162, 163, 160, 161, 162, 163}},
+        {{165, 166, 167, 168, 165, 166, 167, 168}},
+        {{170, 171, 172, 173, 170, 171, 172, 173}},
+        {{175, 176, 177, 178, 175, 176, 177, 178}},
+        {{180, 181, 182, 183, 180, 181, 182, 183}},
+        {{185, 186, 187, 188, 185, 186, 187, 188}},
+    }};
     gc->saveBuffer = NULL;
     gc->saveReadOffset = 0;
     gc->saveSlot = 0;

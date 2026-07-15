@@ -240,7 +240,7 @@ typedef struct GameCanvas {
     std::array<std::array<int8_t, 12>, 6> forwardTrackSteps{};
     std::array<std::array<int8_t, 12>, 6> reverseTrackSteps{};
     int32_t dI;
-    int16_t** trainSpriteDirectionTable;
+    std::array<std::array<int16_t, 8>, 8> trainSpriteDirectionTable{};
     int8_t* saveBuffer;
     int32_t saveReadOffset;
     int32_t saveSlot;

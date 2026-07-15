@@ -12,7 +12,7 @@ static void draw_train_image(GameCanvas *gc, Surface *graphics,
 void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
                          int32_t train) {
     int16_t sprites[8];
-    memcpy(sprites, gc->trainSpriteDirectionTable[gc->trainFlags[train] & 0x0f],
+    memcpy(sprites, gc->trainSpriteDirectionTable[gc->trainFlags[train] & 0x0f].data(),
            sizeof(sprites));
 
     int tile_x = gc_byteToUnsignedInt(gc, gc->trainX[train]);
