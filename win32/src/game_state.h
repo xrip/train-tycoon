@@ -3,6 +3,7 @@
 #define GAME_STATE_H
 #include "midp.h"
 #include "support/java_random.h"
+#include "support/music_output.h"
 #include "support/resource_reader.h"
 #include <array>
 #include <memory>
@@ -350,13 +351,12 @@ typedef struct GameCanvas {
     int32_t milestoneThreshold5;
     int32_t aiWagonsBought;
     bool milestonesEnabled;
-    bool musicPlaying;
-    bool musicAvailable;
-    bool musicAutoStart;
-    bool autoMusic;
-    int32_t gameStateCounter;
-    void* musicPlayer;
-    void* volumeControl;
+    bool music_playing;
+    bool music_available;
+    bool music_auto_start;
+    bool music_enabled;
+    int32_t music_volume_level;
+    std::unique_ptr<MusicOutput> music_output;
     int32_t trainRevenueScore;
     int32_t bestScenarioScore;
     int32_t* scenarioScores;

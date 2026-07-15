@@ -152,28 +152,32 @@ int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
 }
 
 void gc_loadMusic(GameCanvas *gc) {
-    gc->musicAvailable = midp_media_load_midi("music.mid");
-    gc->musicPlayer = gc->musicAvailable ? gc : NULL;
-    gc->volumeControl = gc->musicAvailable ? gc : NULL;
-    if (gc->musicAvailable)
-        midp_media_set_volume(20 * gc->gameStateCounter);
-    gc->musicPlaying = false;
+    gc->music_available = gc->music_output &&
+        gc->music_output->load(resources::path_for("music.mid"));
+    if (gc->music_available) {
+        gc->music_output->set_volume(20 * gc->music_volume_level);
+    }
+    gc->music_playing = false;
 }
 
 void gc_playMusic(GameCanvas *gc) {
-    if (gc->musicAvailable && gc->musicPlayer && !gc->musicPlaying &&
-        gc->autoMusic && midp_media_play_midi())
-        gc->musicPlaying = true;
+    if (gc->music_available && !gc->music_playing && gc->music_enabled &&
+        gc->music_output->play()) {
+        gc->music_playing = true;
+    }
 }
 
 void gc_setMusicVolume(GameCanvas *gc, int32_t level) {
-    if (gc->volumeControl) midp_media_set_volume(level * 20);
+    if (gc->music_available) {
+        gc->music_output->set_volume(level * 20);
+    }
 }
 
 void gc_stopMusic(GameCanvas *gc) {
-    if (gc->musicAvailable && gc->musicPlayer && gc->musicPlaying)
-        midp_media_stop();
-    gc->musicPlaying = false;
+    if (gc->music_available && gc->music_playing) {
+        gc->music_output->stop();
+    }
+    gc->music_playing = false;
 }
 
 // These helpers are used only by the excluded high-score network request.

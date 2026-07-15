@@ -25,6 +25,7 @@ std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 GameCanvas* make_game() {
     auto* game = new GameCanvas{};
     gc_fields_init(game);
+    game->music_output = std::make_unique<SilentMusicOutput>();
     game->rng.set_seed(kFixedRandomSeed);
     return game;
 }
@@ -317,7 +318,36 @@ TEST_CASE("fast: save buffer bytes and round trip") {
 }
 
 TEST_CASE("fast: MIDI resource is valid") {
-    CHECK(midp_media_validate_midi("music.mid"));
+    const auto midi = resources::read_all("music.mid");
+    REQUIRE(midi);
+    CHECK(is_valid_midi(*midi));
+}
+
+TEST_CASE("fast: game music rules use a silent output") {
+    GameCanvas* game = make_game();
+    auto* output = static_cast<SilentMusicOutput*>(game->music_output.get());
+
+    gc_loadMusic(game);
+    CHECK(game->music_available);
+    CHECK_FALSE(game->music_playing);
+    CHECK(output->volume() == 40);
+
+    gc_playMusic(game);
+    CHECK(output->play_count() == 0);
+    game->music_enabled = true;
+    gc_playMusic(game);
+    CHECK(game->music_playing);
+    CHECK(output->play_count() == 1);
+    gc_playMusic(game);
+    CHECK(output->play_count() == 1);
+
+    gc_setMusicVolume(game, 5);
+    CHECK(output->volume() == 100);
+    gc_stopMusic(game);
+    CHECK_FALSE(game->music_playing);
+    CHECK(output->stop_count() == 1);
+
+    delete game;
 }
 
 TEST_CASE("full: all scenario maps have fixed digests") {
@@ -383,6 +413,5 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(moved_frame.value() == 2749731419861486662ULL);
 
-    midp_media_shutdown();
     delete game;
 }

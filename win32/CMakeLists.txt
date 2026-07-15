@@ -22,11 +22,12 @@ target_include_directories(train_tycoon_vendor PRIVATE
 
 add_library(train_tycoon_legacy STATIC
     src/midp_input.cpp
-    src/midp_media_win32.cpp
+    src/platform/winmm_music_player.cpp
     src/midp_stub.cpp
     src/midp_util.cpp
     src/support/java_random.cpp
     src/support/input_queue.cpp
+    src/support/music_output.cpp
     src/support/resource_reader.cpp
     src/support/record_store.cpp
     src/support/image.cpp
@@ -85,7 +86,7 @@ add_executable(train_tycoon_tests
     tests/test_main.cpp
     tests/test_smoke.cpp
 )
-target_link_libraries(train_tycoon_tests PRIVATE train_tycoon_legacy winmm)
+target_link_libraries(train_tycoon_tests PRIVATE train_tycoon_legacy)
 enable_strict_warnings(train_tycoon_tests)
 
 set(TEST_RUN_DIR "$<TARGET_FILE_DIR:train_tycoon_tests>/test_run")

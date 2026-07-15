@@ -97,8 +97,8 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
                 case 2: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_selectionHidden ? 21 : 20]];
                 case 3: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_monthlyReportEnabled ? 20 : 21]];
                 case 4: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_annualReportEnabled ? 20 : 21]];
-                case 5: return gc->spriteBitmapTable[gc->spriteIndexTable[gc->autoMusic ? 20 : 21]];
-                case 6: return gc_formatNumberWithSuffix(gc, gc->gameStateCounter, 0);
+                case 5: return gc->spriteBitmapTable[gc->spriteIndexTable[gc->music_enabled ? 20 : 21]];
+                case 6: return gc_formatNumberWithSuffix(gc, gc->music_volume_level, 0);
             }
             break;
 

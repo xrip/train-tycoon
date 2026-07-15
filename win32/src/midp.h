@@ -90,18 +90,6 @@ void midp_arr_forget(const void *ptr); // on free, to avoid stale entries
 int64_t midp_current_time_millis(void);
 void midp_sleep(int millis);
 
-// --- WinMM MIDI music ----------------------------------------------------------
-bool midp_media_validate_midi(const char *resource_name);
-bool midp_media_load_midi(const char *resource_name);
-bool midp_media_play_midi(void);
-void midp_media_stop(void);
-void midp_media_set_volume(int level);
-void midp_media_update(void); // main-thread loop check for infinite repeat
-void midp_media_shutdown(void);
-bool midp_media_is_loaded(void);
-bool midp_media_is_playing(void);
-const char *midp_media_last_error(void);
-
 // --- Networking stub ----------------------------------------------------------
 bool midp_net_sync_highscores(const uint8_t *payload, int len); // stubbed -> false
 

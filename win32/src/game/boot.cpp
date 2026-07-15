@@ -158,7 +158,7 @@ void gc_writeSaveSnapshot(GameCanvas *gc) {
     gcs_annualReportEnabled = gc_saveOrLoadBool(gc, gcs_annualReportEnabled);
     gc->scenarioStepCompare = gc_saveIntToBuffer(gc, gc->scenarioStepCompare);
     gc->bestScenarioScore = gc_saveIntToBuffer(gc, gc->bestScenarioScore);
-    gc->gameStateCounter = gc_saveIntToBuffer(gc, gc->gameStateCounter);
+    gc->music_volume_level = gc_saveIntToBuffer(gc, gc->music_volume_level);
     gc_saveOrLoadIntArrayInlined(gc, gc->scenarioScores);
     gc_saveOrLoadIntArrayInlined(gc, gc->leaderboardScores);
     gc_saveOrLoadByteArrayInlined(gc, gc->playerNameCodes);
@@ -168,7 +168,7 @@ void gc_writeSaveSnapshot(GameCanvas *gc) {
 void gc_persistSnapshotMode1(GameCanvas *gc) {
     gc_loadGame(gc, 5, 1);
     gc_writeSaveSnapshot(gc);
-    gc_setMusicVolume(gc, gc->gameStateCounter);
+    gc_setMusicVolume(gc, gc->music_volume_level);
 }
 
 // Add one isometric tile-draw offset pair.

@@ -52,7 +52,8 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 - `src/game_methods.h` — game function declarations.
 - `src/support/` — owned values, images, input, resources, and record files.
 - `src/midp_*` — the small remaining local runtime used by the game.
-- `src/midp_media_win32.cpp` — WinMM MIDI music.
+- `src/platform/winmm_music_player.*` — owned WinMM MIDI music for the app.
+- `src/support/music_output.*` — the music boundary and silent test output.
 - `src/third_party/stb_image.h` — PNG reading.
 - `tests/` — fast and full behavior checks.
 - `resources/` — plain game pictures and data, `music.mid`, and `icon.png`.

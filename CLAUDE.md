@@ -30,7 +30,8 @@ program and found from the executable path.
 - `win32/src/game/*.cpp` — game rules, state changes, simulation, and drawing.
 - `win32/src/game_state.*` — game state and first values.
 - `win32/src/game_methods.h` — game function declarations.
-- `win32/src/midp_*` — small local runtime.
+- `win32/src/midp_*` — small remaining local runtime.
+- `win32/src/platform/winmm_music_player.*` — owned WinMM MIDI output.
 - `win32/src/main.cpp` — Win32 start and frame loop.
 - `win32/tests/*.cpp` — fast and full behavior checks.
 - `win32/resources/` — game data and MIDI.

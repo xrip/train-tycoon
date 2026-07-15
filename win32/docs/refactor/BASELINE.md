@@ -104,6 +104,14 @@ real MIDI device test is an opt-in `device` label.
 - A direct test proves the exact 21-byte `.rms` form for one fixed record.
 - Debug and Release fast/full tests passed on 2026-07-15.
 
+## RT-05 proof
+
+- `GameCanvas` owns one music output; no global WinMM state remains.
+- Silent tests prove load, disabled play, play, stop, and volume rules.
+- Normal tests do not link `winmm` and need no MIDI device.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- The real MIDI device test remains an opt-in CTest gate.
+
 ## Manual baseline still needed
 
 - boot and menu;

@@ -66,6 +66,23 @@ not enough. Record uncertain evidence here before a rename.
 - `cycleFlag` -> `cycle_flag`: it is the loading-cycle image.
 - `backbufferG` -> `backbuffer_surface`: it borrows pixels from `backbuffer`.
 
+### Recovered in RT-05
+
+- `autoMusic` -> `music_enabled`: it is the user setting that permits play.
+- `gameStateCounter` -> `music_volume_level`: it is saved as a value from 1 to
+  5 and maps to output levels 20 to 100.
+- `musicAutoStart` -> `music_auto_start`: it requests play during image load.
+- `musicAvailable` and `musicPlaying` -> `music_available` and
+  `music_playing`.
+- `musicPlayer` and `volumeControl` were fake native pointers. One owned
+  `MusicOutput` now gives both operations.
+
+## D-007: Music output boundary
+
+Game music rules use one small `MusicOutput` interface. The app owns WinMM
+through `WinMmMusicPlayer`; tests use `SilentMusicOutput` and need no device or
+`winmm` link. This is the only class split needed for music.
+
 ## D-006: Plain native resources
 
 The native project keeps plain resource data. Old files `1` to `5` were changed

@@ -2,24 +2,24 @@
 
 ## Item
 
-`RT-05` - add `WinMmMusicPlayer` and a silent test output.
+`OWN-01` - move local arrays and text to standard containers.
 
 ## Base
 
-- Commit: the green `RT-04` record-store commit.
+- Commit: the green `RT-05` music commit.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Put WinMM MIDI state and lifetime in one owner. Keep game music rules separate
-from the device, and give tests a silent output that needs no sound hardware.
+Remove raw ownership from short-lived arrays and text made inside game methods.
+Keep return-value and save behavior unchanged.
 
 ## Non-goals
 
-- Do not change game-array ownership yet.
-- Do not add sound effects or change MIDI loop, stop, or volume rules.
-- Do not make the tests need a MIDI device.
+- Do not change fixed state arrays, maps, or matrix ownership yet.
+- Do not change public game rules or save order.
+- Do not add a general container layer.
 - Do not split game model parts yet.
 
 ## Last proof
@@ -42,7 +42,12 @@ scope end. The selected save root is a `std::filesystem::path`. All old raw
 record calls are gone. Debug and Release fast/full tests passed, and a direct
 21-byte check proves the `.rms` form is unchanged on 2026-07-15.
 
+`RT-05`: `GameCanvas` owns one `MusicOutput`. Tests use `SilentMusicOutput` and
+the app uses `WinMmMusicPlayer`; all WinMM state is inside that owner. Fake
+MIDP player/control pointers are gone. Debug and Release fast/full tests pass
+without a `winmm` test link on 2026-07-15. The hardware test stays opt-in.
+
 ## Next action
 
-Map game music rules against the current global WinMM state. Add a small music
-output interface and silent state test before moving the device code.
+List every local `GC_NEW`, `malloc`, returned raw text, and temporary array.
+Group them by lifetime and add focused tests before changing the first group.

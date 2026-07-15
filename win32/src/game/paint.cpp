@@ -225,8 +225,8 @@ void gc_update(GameCanvas *gc) {
             ++gc->spriteLoadCounter;
             if (gc->spriteLoadCounter == gc->scenarioResourceCount / 2) {
                 gc_loadMusic(gc);
-                if (gc->musicAutoStart) { gc_playMusic(gc); gc->autoMusic = true; }
-                else gc->autoMusic = false;
+                if (gc->music_auto_start) { gc_playMusic(gc); gc->music_enabled = true; }
+                else gc->music_enabled = false;
             }
             if (gc->spriteLoadCounter != gc->scenarioResourceCount) break;
             gc->ready = true;

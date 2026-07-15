@@ -23,6 +23,7 @@
 #include "midp.h"
 #include "game_state.h"
 #include "game_methods.h"
+#include "platform/winmm_music_player.h"
 #include "support/resource_reader.h"
 #include <filesystem>
 #include <stdio.h>
@@ -48,51 +49,53 @@ static bool run_midi_device_test(int total_millis) {
     if (total_millis < 200) total_millis = 200;
     GameCanvas *test = new GameCanvas{};
     gc_fields_init(test);
-    test->autoMusic = true;
-    test->gameStateCounter = 1;
+    test->music_output = std::make_unique<WinMmMusicPlayer>();
+    MusicOutput* output = test->music_output.get();
+    test->music_enabled = true;
+    test->music_volume_level = 1;
     gc_loadMusic(test);
-    if (!test->musicAvailable || !midp_media_is_loaded()) {
-        fprintf(stderr, "MIDI load failed: %s\n", midp_media_last_error());
+    if (!test->music_available || !output->is_loaded()) {
+        const std::string_view error = output->last_error();
+        fprintf(stderr, "MIDI load failed: %.*s\n",
+                static_cast<int>(error.size()), error.data());
         delete test;
         return false;
     }
     gc_playMusic(test);
-    if (!test->musicPlaying || !midp_media_is_playing()) {
-        fprintf(stderr, "MIDI first play failed: %s\n",
-                midp_media_last_error());
-        midp_media_shutdown();
+    if (!test->music_playing || !output->is_playing()) {
+        const std::string_view error = output->last_error();
+        fprintf(stderr, "MIDI first play failed: %.*s\n",
+                static_cast<int>(error.size()), error.data());
         delete test;
         return false;
     }
     int first_part = total_millis / 2;
     int64_t end = midp_current_time_millis() + first_part;
     while (midp_current_time_millis() < end) {
-        midp_media_update();
+        output->update();
         midp_sleep(10);
     }
     gc_stopMusic(test);
-    if (test->musicPlaying || midp_media_is_playing()) {
+    if (test->music_playing || output->is_playing()) {
         fprintf(stderr, "MIDI stop state failed\n");
-        midp_media_shutdown();
         delete test;
         return false;
     }
     gc_setMusicVolume(test, 3);
     gc_playMusic(test);
-    if (!test->musicPlaying || !midp_media_is_playing()) {
-        fprintf(stderr, "MIDI second play failed: %s\n",
-                midp_media_last_error());
-        midp_media_shutdown();
+    if (!test->music_playing || !output->is_playing()) {
+        const std::string_view error = output->last_error();
+        fprintf(stderr, "MIDI second play failed: %.*s\n",
+                static_cast<int>(error.size()), error.data());
         delete test;
         return false;
     }
     end = midp_current_time_millis() + total_millis - first_part;
     while (midp_current_time_millis() < end) {
-        midp_media_update();
+        output->update();
         midp_sleep(10);
     }
     gc_stopMusic(test);
-    midp_media_shutdown();
     delete test;
     return true;
 }
@@ -108,13 +111,14 @@ int main(void) {
 
     GameCanvas *gc = new GameCanvas{};
     gc_fields_init(gc);
+    gc->music_output = std::make_unique<WinMmMusicPlayer>();
     gc_start(gc, NULL); // resource load + initial state (no thread spawn)
 
     Surface screen;
     midp_gfx_init_screen(&screen, g_framebuffer, MIDP_SCREEN_W, MIDP_SCREEN_H);
 
     for (;;) {
-        midp_media_update();
+        gc->music_output->update();
         int keycode; bool pressed;
         while (midp_input_poll(&keycode, &pressed)) {
             if (pressed) gc_keyPressed(gc, keycode);
@@ -128,7 +132,6 @@ int main(void) {
             break;
     }
 
-    midp_media_shutdown();
     delete gc;
     mfb_close();
     return 0;

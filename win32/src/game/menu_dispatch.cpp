@@ -53,7 +53,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 0: gc_setState(gc, 55); break;
                 case 1: gc_setState(gc, 65); break;
                 case 2: gc->stopRequested = true; break;
-                case 3: gc->musicAutoStart = true; gc->autoMusic = true; gc_setState(gc, 10); break;
+                case 3: gc->music_auto_start = true; gc->music_enabled = true; gc_setState(gc, 10); break;
                 case 4: {
                     gc->money += gc->currentTrainCostSnapshot * 70 / 100;
                     gc->aiMoneySpent -= gc->currentTrainCostSnapshot * 70 / 100;
@@ -187,13 +187,13 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 3: gcs_monthlyReportEnabled = !gcs_monthlyReportEnabled; goto hbms_end;
                 case 4: gcs_annualReportEnabled = !gcs_annualReportEnabled; goto hbms_end;
                 case 5:
-                    gc->autoMusic = !gc->autoMusic;
-                    if (gc->autoMusic) { gc_playMusic(gc); goto hbms_end; }
+                    gc->music_enabled = !gc->music_enabled;
+                    if (gc->music_enabled) { gc_playMusic(gc); goto hbms_end; }
                     gc_stopMusic(gc); goto hbms_end;
                 case 6:
-                    ++gc->gameStateCounter;
-                    if (gc->gameStateCounter == 6) gc->gameStateCounter = 1;
-                    gc_setMusicVolume(gc, gc->gameStateCounter); goto hbms_end;
+                    ++gc->music_volume_level;
+                    if (gc->music_volume_level == 6) gc->music_volume_level = 1;
+                    gc_setMusicVolume(gc, gc->music_volume_level); goto hbms_end;
             }
             gc_persistSnapshotMode0(gc);
             if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
@@ -210,7 +210,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 11: case 12: case 13: case 16:
             gc_setState(gc, 30); break;
         case 15:
-            if (n2 == 1) gc->musicAutoStart = true;
+            if (n2 == 1) gc->music_auto_start = true;
             gc_setState(gc, 10); break;
         case 30:
             switch (n2) {
