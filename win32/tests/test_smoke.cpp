@@ -176,6 +176,36 @@ TEST_CASE("fast: resource reader reads plain bytes and reaches EOF") {
     CHECK(resource.read_byte() == -1);
 }
 
+TEST_CASE("fast: images own pixels and expose only valid drawing targets") {
+    CHECK(midp_image_create_blank(0, 2) == nullptr);
+
+    MidpImage* blank = midp_image_create_blank(2, 2);
+    REQUIRE(blank != nullptr);
+    CHECK(midp_image_get_width(blank) == 2);
+    CHECK(midp_image_get_height(blank) == 2);
+    REQUIRE(midp_image_get_graphics(blank) != nullptr);
+    for (int index = 0; index < 4; ++index) {
+        CHECK(blank->pixels[index] == 0xFFFFFFFFu);
+    }
+
+    MidpGraphics* surface = midp_image_get_graphics(blank);
+    midp_set_color(surface, 0x123456);
+    midp_fill_rect(surface, 0, 0, 1, 1);
+    CHECK(blank->pixels[0] == 0xFF123456u);
+    CHECK(blank->pixels[1] == 0xFFFFFFFFu);
+    midp_image_free(blank);
+
+    const auto png = resources::read_all("icon.png");
+    REQUIRE(png);
+    MidpImage* icon = midp_image_create_from_png(
+        png->data(), 0, static_cast<int>(png->size()));
+    REQUIRE(icon != nullptr);
+    CHECK(midp_image_get_width(icon) == 50);
+    CHECK(midp_image_get_height(icon) == 50);
+    CHECK(midp_image_get_graphics(icon) == nullptr);
+    midp_image_free(icon);
+}
+
 TEST_CASE("fast: record store keeps record bytes and ids") {
     constexpr std::array<std::uint8_t, 5> record{3, 1, 4, 1, 5};
     MidpRecordStore* store = midp_rms_open("RulesStore", true);

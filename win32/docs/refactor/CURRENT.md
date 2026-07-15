@@ -30,7 +30,12 @@ resource calls are gone. The scenario reader now reads its real record count.
 Debug and Release fast/full tests passed with all fixed game digests unchanged
 on 2026-07-15.
 
+`RT-03` ownership map: `backbuffer`, six font images, `cycleFlag`, and the tile
+image list own images. `backbufferG` and the screen drawing context borrow pixel
+storage. Direct tests now lock blank-image pixels, shared drawing storage,
+invalid size handling, decoded PNG size, and decoded-image immutability.
+
 ## Next action
 
-Map every `MidpImage` and `MidpGraphics` owner, creation call, draw target, and
-free call. Add direct pixel lifetime and surface tests before changing types.
+Add owning `Image` and non-owning `Surface` types. Move the image runtime first,
+then move each `GameCanvas` image owner to standard ownership.
