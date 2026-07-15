@@ -112,8 +112,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->lastKeyCode = 0;
     gc->keyRepeatStep = 3;
     gc->buildMenuItemIndex = 0;
-    gc->selectionTileX = (int32_t*)midp_alloc_arr(sizeof(int32_t), 4);
-    gc->selectionTileY = (int32_t*)midp_alloc_arr(sizeof(int32_t), 4);
     gc->blockBuildMenu = false;
     gc->menuDirty = true;
     gc->buildMenuMode = 0;

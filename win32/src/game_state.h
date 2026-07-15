@@ -124,8 +124,8 @@ typedef struct GameCanvas {
     int32_t trackStepX;
     int32_t trackStepY;
     int32_t buildMenuItemIndex;
-    int32_t* selectionTileX;
-    int32_t* selectionTileY;
+    std::array<int32_t, 4> selectionTileX{};
+    std::array<int32_t, 4> selectionTileY{};
     int32_t cursorScreenX;
     int32_t cursorScreenY;
     int32_t swapMapX;

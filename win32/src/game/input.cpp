@@ -181,8 +181,8 @@ void gc_computeViewportBounds(GameCanvas *gc) {
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
             tile_center_y = gc->mapHalfWidth - x * 8 + y * 8 + 8;
-            gc_computeIsoCornersInlined(gc, x, y, gc->selectionTileX,
-                                        gc->selectionTileY, false);
+            gc_computeIsoCornersInlined(gc, x, y, gc->selectionTileX.data(),
+                                        gc->selectionTileY.data(), false);
             int opposite_edges =
                 gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
                                   gc->selectionTileX[0], gc->selectionTileY[0],
