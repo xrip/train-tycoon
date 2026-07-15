@@ -110,7 +110,7 @@ int main(void) {
     gc_fields_init(gc);
     gc_start(gc, NULL); // resource load + initial state (no thread spawn)
 
-    MidpGraphics screen;
+    Surface screen;
     midp_gfx_init_screen(&screen, g_framebuffer, MIDP_SCREEN_W, MIDP_SCREEN_H);
 
     for (;;) {

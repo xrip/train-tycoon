@@ -5,7 +5,7 @@
 #include "midp.h"
 #include <math.h>
 
-static inline void clamp_clip(MidpGraphics *g) {
+static inline void clamp_clip(Surface *g) {
     if (g->clip_x < 0) { g->clip_w += g->clip_x; g->clip_x = 0; }
     if (g->clip_y < 0) { g->clip_h += g->clip_y; g->clip_y = 0; }
     if (g->clip_x + g->clip_w > g->width)  g->clip_w = g->width  - g->clip_x;
@@ -14,36 +14,36 @@ static inline void clamp_clip(MidpGraphics *g) {
     if (g->clip_h < 0) g->clip_h = 0;
 }
 
-static inline bool in_clip(const MidpGraphics *g, int x, int y) {
+static inline bool in_clip(const Surface *g, int x, int y) {
     return x >= g->clip_x && x < g->clip_x + g->clip_w &&
            y >= g->clip_y && y < g->clip_y + g->clip_h;
 }
 
 // Write one pixel (already clip-checked). For screen targets colour is opaque.
-static inline void put_pixel(MidpGraphics *g, int x, int y, uint32_t argb) {
+static inline void put_pixel(Surface *g, int x, int y, uint32_t argb) {
     g->pixels[y * g->width + x] = argb;
 }
 
-void midp_gfx_init_screen(MidpGraphics *g, uint32_t *fb, int w, int h) {
+void midp_gfx_init_screen(Surface *g, uint32_t *fb, int w, int h) {
     g->pixels = fb;
     g->width = w;
     g->height = h;
-    g->target_has_alpha = false;
+    g->has_alpha = false;
     g->color = 0;
     g->clip_x = 0; g->clip_y = 0; g->clip_w = w; g->clip_h = h;
 }
 
-void midp_set_color(MidpGraphics *g, int rgb) {
+void midp_set_color(Surface *g, int rgb) {
     g->color = rgb & 0x00FFFFFF;
 }
 
-void midp_set_clip(MidpGraphics *g, int x, int y, int w, int h) {
+void midp_set_clip(Surface *g, int x, int y, int w, int h) {
     g->clip_x = x; g->clip_y = y; g->clip_w = w; g->clip_h = h;
     clamp_clip(g);
 }
 
 // Intersect the current clip with the given rectangle (Graphics.clipRect).
-void midp_clip_rect(MidpGraphics *g, int x, int y, int w, int h) {
+void midp_clip_rect(Surface *g, int x, int y, int w, int h) {
     int x0 = g->clip_x > x ? g->clip_x : x;
     int y0 = g->clip_y > y ? g->clip_y : y;
     int x1 = (g->clip_x + g->clip_w) < (x + w) ? (g->clip_x + g->clip_w) : (x + w);
@@ -54,8 +54,8 @@ void midp_clip_rect(MidpGraphics *g, int x, int y, int w, int h) {
     if (g->clip_h < 0) g->clip_h = 0;
 }
 
-void midp_fill_rect(MidpGraphics *g, int x, int y, int w, int h) {
-    const uint32_t argb = (g->target_has_alpha ? 0xFF000000u : 0u) | (uint32_t)g->color;
+void midp_fill_rect(Surface *g, int x, int y, int w, int h) {
+    const uint32_t argb = (g->has_alpha ? 0xFF000000u : 0u) | (uint32_t)g->color;
     int x0 = x < g->clip_x ? g->clip_x : x;
     int y0 = y < g->clip_y ? g->clip_y : y;
     int x1 = (x + w) > (g->clip_x + g->clip_w) ? (g->clip_x + g->clip_w) : (x + w);
@@ -66,15 +66,15 @@ void midp_fill_rect(MidpGraphics *g, int x, int y, int w, int h) {
 }
 
 // Graphics.drawRect draws a w x h outline (right/bottom edges at x+w / y+h).
-void midp_draw_rect(MidpGraphics *g, int x, int y, int w, int h) {
+void midp_draw_rect(Surface *g, int x, int y, int w, int h) {
     midp_draw_line(g, x, y, x + w, y);
     midp_draw_line(g, x, y + h, x + w, y + h);
     midp_draw_line(g, x, y, x, y + h);
     midp_draw_line(g, x + w, y, x + w, y + h);
 }
 
-void midp_draw_line(MidpGraphics *g, int x1, int y1, int x2, int y2) {
-    const uint32_t argb = (g->target_has_alpha ? 0xFF000000u : 0u) | (uint32_t)g->color;
+void midp_draw_line(Surface *g, int x1, int y1, int x2, int y2) {
+    const uint32_t argb = (g->has_alpha ? 0xFF000000u : 0u) | (uint32_t)g->color;
     int dx = x2 - x1, dy = y2 - y1;
     int sx = dx < 0 ? -1 : 1, sy = dy < 0 ? -1 : 1;
     dx = dx < 0 ? -dx : dx;
@@ -93,10 +93,10 @@ void midp_draw_line(MidpGraphics *g, int x1, int y1, int x2, int y2) {
 // Midpoint-ellipse based arc. GameCanvas uses only full circles (arc == 360),
 // so we render the whole outline / disc and rely on the clip rectangle. This is
 // faithful for the observed call sites; partial sweeps can be added if needed.
-static void arc_impl(MidpGraphics *g, int x, int y, int w, int h,
+static void arc_impl(Surface *g, int x, int y, int w, int h,
                      int start, int arc, bool fill) {
     (void)start; (void)arc; // observed usage is full 360-degree circles
-    const uint32_t argb = (g->target_has_alpha ? 0xFF000000u : 0u) | (uint32_t)g->color;
+    const uint32_t argb = (g->has_alpha ? 0xFF000000u : 0u) | (uint32_t)g->color;
     if (w <= 0 || h <= 0) return;
     const double cx = x + w / 2.0, cy = y + h / 2.0;
     const double rx = w / 2.0, ry = h / 2.0;
@@ -123,10 +123,10 @@ static void arc_impl(MidpGraphics *g, int x, int y, int w, int h,
     }
 }
 
-void midp_draw_arc(MidpGraphics *g, int x, int y, int w, int h, int start, int arc) {
+void midp_draw_arc(Surface *g, int x, int y, int w, int h, int start, int arc) {
     arc_impl(g, x, y, w, h, start, arc, false);
 }
-void midp_fill_arc(MidpGraphics *g, int x, int y, int w, int h, int start, int arc) {
+void midp_fill_arc(Surface *g, int x, int y, int w, int h, int start, int arc) {
     arc_impl(g, x, y, w, h, start, arc, true);
 }
 
@@ -145,30 +145,31 @@ static inline uint32_t blend(uint32_t dst, uint32_t src, bool dst_alpha) {
     return dst_alpha ? (0xFF000000u | out) : out;
 }
 
-void midp_draw_image(MidpGraphics *g, const MidpImage *img, int x, int y, int anchor) {
+void midp_draw_image(Surface *g, const Image *img, int x, int y, int anchor) {
     if (!img) return;
     // Resolve the anchor to a top-left origin.
     int ox = x, oy = y;
-    if (anchor & MIDP_HCENTER) ox = x - img->width / 2;
-    else if (anchor & MIDP_RIGHT) ox = x - img->width;
-    if (anchor & MIDP_VCENTER) oy = y - img->height / 2;
-    else if (anchor & MIDP_BOTTOM) oy = y - img->height;
+    if (anchor & MIDP_HCENTER) ox = x - img->width() / 2;
+    else if (anchor & MIDP_RIGHT) ox = x - img->width();
+    if (anchor & MIDP_VCENTER) oy = y - img->height() / 2;
+    else if (anchor & MIDP_BOTTOM) oy = y - img->height();
     // (MIDP_LEFT / MIDP_TOP keep the given coordinate.)
 
     int sx0 = 0, sy0 = 0;
     int dx0 = ox, dy0 = oy;
     if (dx0 < g->clip_x) { sx0 += g->clip_x - dx0; dx0 = g->clip_x; }
     if (dy0 < g->clip_y) { sy0 += g->clip_y - dy0; dy0 = g->clip_y; }
-    int dx1 = ox + img->width;
-    int dy1 = oy + img->height;
+    int dx1 = ox + img->width();
+    int dy1 = oy + img->height();
     if (dx1 > g->clip_x + g->clip_w) dx1 = g->clip_x + g->clip_w;
     if (dy1 > g->clip_y + g->clip_h) dy1 = g->clip_y + g->clip_h;
+    if (dx0 >= dx1 || dy0 >= dy1) return;
 
     for (int dy = dy0, sy = sy0; dy < dy1; ++dy, ++sy) {
-        const uint32_t *srow = &img->pixels[sy * img->width + sx0];
+        const uint32_t *srow = &img->pixels()[sy * img->width() + sx0];
         uint32_t *drow = &g->pixels[dy * g->width + dx0];
         for (int dx = dx0, sx = 0; dx < dx1; ++dx, ++sx) {
-            drow[sx] = blend(drow[sx], srow[sx], g->target_has_alpha);
+            drow[sx] = blend(drow[sx], srow[sx], g->has_alpha);
         }
     }
 }

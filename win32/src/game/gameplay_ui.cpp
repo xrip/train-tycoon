@@ -34,7 +34,7 @@ static void format_money(int32_t value, char *out, int out_size) {
 }
 
 // int drawMenuRow(Graphics,int,int,int,boolean)
-int32_t gc_drawMenuRow(GameCanvas *gc, MidpGraphics *graphics, int32_t sprite,
+int32_t gc_drawMenuRow(GameCanvas *gc, Surface *graphics, int32_t sprite,
                        int32_t item_index, int32_t x, bool spaced) {
     gc_drawSpriteQuad(gc, graphics, sprite, x, gcs_bottomBarY, 20);
     if (gc->buildMenuItemIndex == item_index) gc->selectedMenuRowX = x;
@@ -42,7 +42,7 @@ int32_t gc_drawMenuRow(GameCanvas *gc, MidpGraphics *graphics, int32_t sprite,
 }
 
 // void drawHeaderBar(Graphics)
-void gc_drawHeaderBar(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_drawHeaderBar(GameCanvas *gc, Surface *graphics) {
     if (gc->cachedHeaderDay == gc->dayOfMonth
         && gc->cachedHeaderMonth == gc->monthOfYear
         && gc->cachedHeaderYear == gc->year
@@ -80,7 +80,7 @@ void gc_drawHeaderBar(GameCanvas *gc, MidpGraphics *graphics) {
 }
 
 // void drawConfirmBar(Graphics)
-void gc_drawConfirmBar(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_drawConfirmBar(GameCanvas *gc, Surface *graphics) {
     gc_drawHeaderBar(gc, graphics);
     midp_set_color(graphics, 0x606060);
     midp_fill_rect(graphics, 0, gcs_bottomBarY, gcs_screenWidth, 15);
@@ -92,12 +92,12 @@ void gc_drawConfirmBar(GameCanvas *gc, MidpGraphics *graphics) {
 }
 
 // void paintMain(Graphics)
-void gc_paintMain(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_paintMain(GameCanvas *gc, Surface *graphics) {
     (void)graphics;
-    gc_drawHeaderBar(gc, gc->backbufferG);
+    gc_drawHeaderBar(gc, gc->backbuffer_surface);
     if (!gc->menuDirty) return;
-    midp_set_color(gc->backbufferG, 0x606060);
-    midp_fill_rect(gc->backbufferG, 0, gcs_bottomBarY, gcs_screenWidth, 15);
+    midp_set_color(gc->backbuffer_surface, 0x606060);
+    midp_fill_rect(gc->backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
     int selected_x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode]
                                                [gc->buildMenuItemIndex]);
     int scroll = selected_x + 15 - gcs_screenWidth;
@@ -106,11 +106,11 @@ void gc_paintMain(GameCanvas *gc, MidpGraphics *graphics) {
     for (int item = 0; item < item_count; ++item) {
         int x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode][item]) - scroll;
         int sprite = gc_byteToUnsignedInt(gc, gc->menuTextIndex[gc->buildMenuMode][item]);
-        gc_drawSpriteQuad(gc, gc->backbufferG, sprite, x, gcs_bottomBarY, 20);
+        gc_drawSpriteQuad(gc, gc->backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
         if (item != gc->buildMenuItemIndex) continue;
-        midp_set_color(gc->backbufferG, 0xFFFFFF);
-        midp_draw_rect(gc->backbufferG, x, gcs_bottomBarY, 14, 14);
-        midp_draw_rect(gc->backbufferG, x + 1, gcs_bottomBarY + 1, 12, 12);
+        midp_set_color(gc->backbuffer_surface, 0xFFFFFF);
+        midp_draw_rect(gc->backbuffer_surface, x, gcs_bottomBarY, 14, 14);
+        midp_draw_rect(gc->backbuffer_surface, x + 1, gcs_bottomBarY + 1, 12, 12);
     }
     if (gc->buildMenuMode == 2) {
         char cost_text[24];
@@ -124,13 +124,13 @@ void gc_paintMain(GameCanvas *gc, MidpGraphics *graphics) {
         bytes[0] = 24;
         for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
         memcpy(bytes + text_len + 1, currency, (size_t)currency_len);
-        gc_renderFontString(gc, gc->backbufferG, 35, gcs_bottomBarY + 5, bytes, false);
+        gc_renderFontString(gc, gc->backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
     }
     gc->menuDirty = false;
 }
 
 // int drawNumber(Graphics,int,int)
-int32_t gc_drawNumber(GameCanvas *gc, MidpGraphics *graphics,
+int32_t gc_drawNumber(GameCanvas *gc, Surface *graphics,
                       int32_t value, int32_t y) {
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
     char text[24];
@@ -141,7 +141,7 @@ int32_t gc_drawNumber(GameCanvas *gc, MidpGraphics *graphics,
 }
 
 // void drawMoneyTicker(Graphics)
-void gc_drawMoneyTicker(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_drawMoneyTicker(GameCanvas *gc, Surface *graphics) {
     midp_set_color(graphics, 0xFF0000);
     int y = 0;
     if (gc->moneyTickerFrames[2] > 0) {
@@ -159,7 +159,7 @@ void gc_drawMoneyTicker(GameCanvas *gc, MidpGraphics *graphics) {
 }
 
 // void drawConfirmDialog(Graphics)
-void gc_drawConfirmDialog(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_drawConfirmDialog(GameCanvas *gc, Surface *graphics) {
     if (gc->confirmCounter <= 0) return;
     if (gc->confirmTargetState >= 0) {
         gc_drawTextBox(gc, graphics, 10, 10, 0, 37,
@@ -192,7 +192,7 @@ void gc_computeIsoCornersInlined(GameCanvas *gc, int32_t x, int32_t y,
 }
 
 // void drawSelectionQuad(Graphics,int[],int[])
-void gc_drawSelectionQuad(GameCanvas *gc, MidpGraphics *graphics,
+void gc_drawSelectionQuad(GameCanvas *gc, Surface *graphics,
                           int32_t *screen_x, int32_t *screen_y) {
     (void)gc;
     midp_draw_line(graphics, screen_x[0], screen_y[0] + 15,
@@ -214,7 +214,7 @@ void gc_drawSelectionQuad(GameCanvas *gc, MidpGraphics *graphics,
 }
 
 // void drawBuildMenuCursor(Graphics)
-void gc_drawBuildMenuCursor(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
     if (gc->blockBuildMenu) return;
     int action = gc->menuTransitionCode[gc->buildMenuMode][gc->buildMenuItemIndex];
     if (action == 0) return;
@@ -286,7 +286,7 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, MidpGraphics *graphics) {
 }
 
 // void drawBuildMenuRow(Graphics)
-void gc_drawBuildMenuRow(GameCanvas *gc, MidpGraphics *graphics) {
+void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
     if (!gc->menuRowEnabled[gc->buildMenuMode][gc->buildMenuItemIndex]) return;
     int menu_x = gc->viewportBaseX - gc->viewportCenterX;
     int menu_y = gc->viewportBaseY - gc->viewportCenterY;

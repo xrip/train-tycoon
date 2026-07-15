@@ -21,8 +21,6 @@ target_include_directories(train_tycoon_vendor PRIVATE
 )
 
 add_library(train_tycoon_legacy STATIC
-    src/midp_graphics.cpp
-    src/midp_image.cpp
     src/midp_input.cpp
     src/midp_media_win32.cpp
     src/midp_rms.cpp
@@ -31,6 +29,8 @@ add_library(train_tycoon_legacy STATIC
     src/support/java_random.cpp
     src/support/input_queue.cpp
     src/support/resource_reader.cpp
+    src/support/image.cpp
+    src/support/surface.cpp
     src/game_state.cpp
     ${GAME_SOURCES}
     $<TARGET_OBJECTS:train_tycoon_vendor>

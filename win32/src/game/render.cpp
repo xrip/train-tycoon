@@ -8,7 +8,7 @@ static int imin(int a, int b) { return a < b ? a : b; }
 static int imax(int a, int b) { return a > b ? a : b; }
 
 // public void renderFontString(Graphics graphics, int n, int n2, byte[] byArray, boolean bl)
-void gc_renderFontString(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
+void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
                         int8_t *byArray, bool bl) {
     int n3 = n;
     midp_set_color(g, 0);
@@ -23,7 +23,7 @@ void gc_renderFontString(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
         }
         if (by == 0) { n3 += 6; continue; }
         if (by < 32) {
-            midp_draw_image(g, gc->ca[(by - 1) / 16], n3 - 5 * ((by - 1) % 16), n2, 20);
+            midp_draw_image(g, gc->font_images[(by - 1) / 16].get(), n3 - 5 * ((by - 1) % 16), n2, 20);
             n3 += 6;
             continue;
         }
@@ -50,12 +50,12 @@ void gc_renderFontString(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
             continue;
         }
         if (by < 70) {
-            midp_draw_image(g, gc->ca[2 + (by - 40) / 16], n3 - 5 * ((by - 40) % 16), n2, 20);
+            midp_draw_image(g, gc->font_images[2 + (by - 40) / 16].get(), n3 - 5 * ((by - 40) % 16), n2, 20);
             n3 += 6;
             continue;
         }
         if (by >= 100) continue;
-        midp_draw_image(g, gc->ca[4 + (by - 70) / 16], n3 - 5 * ((by - 70) % 16), n2, 20);
+        midp_draw_image(g, gc->font_images[4 + (by - 70) / 16].get(), n3 - 5 * ((by - 70) % 16), n2, 20);
         n3 += 6;
     }
     if (bl) {
@@ -66,19 +66,19 @@ void gc_renderFontString(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
 }
 
 // Image u(int n, int n2)
-MidpImage *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
+Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
     if (n == 23) {
         if (n2 == 0 && gc->wagonType >= 0 && gc->wagonType < 3)
-            return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])];
+            return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])].get();
         if (n2 == 0 && gc->wagonType >= 3 && gc->wagonType < 6)
-            return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])];
+            return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])].get();
         if (n2 > 0) {
             switch (gc->wagonOptionSlots[n2 - 1]) {
                 case -1: return NULL;
-                case 0: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])];
-                case 1: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])];
-                case 2: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[172])];
-                case 3: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[182])];
+                case 0: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])].get();
+                case 1: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])].get();
+                case 2: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[172])].get();
+                case 3: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[182])].get();
             }
         }
     }
@@ -88,21 +88,21 @@ MidpImage *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
         int n3 = gc->trainFlags[n4] & 0xF;
         switch (n3) {
             case -1: return NULL;
-            case 0: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])];
-            case 1: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])];
-            case 2: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])];
-            case 3: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])];
-            case 4: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[172])];
-            case 5: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[177])];
-            case 6: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[182])];
-            case 7: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[187])];
+            case 0: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])].get();
+            case 1: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])].get();
+            case 2: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])].get();
+            case 3: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])].get();
+            case 4: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[172])].get();
+            case 5: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[177])].get();
+            case 6: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[182])].get();
+            case 7: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[187])].get();
         }
     }
     return NULL;
 }
 
 // void drawTextBox(Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray)
-void gc_drawTextBox(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
+void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
                     int32_t n3, int32_t n4, int8_t *byArray) {
     int n5 = 0;
     int len = midp_arr_len(byArray);
@@ -126,7 +126,7 @@ void gc_drawTextBox(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
 }
 
 // void drawRectFill(Graphics graphics, int n, int n2, byte by)
-void gc_drawRectFill(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2, int8_t by) {
+void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
     int8_t *byArray = gc->spriteBitmapTable[gc->spriteIndexTable[80 + (gc->trainSelectionIndex[by] >> 8 & 0xFF)]];
     int8_t *byArray2 = gc->spriteBitmapTable[gc->spriteIndexTable[86 + (gc->trainSelectionIndex[by] & 0xFF)]];
     int la = midp_arr_len(byArray), lb = midp_arr_len(byArray2);
@@ -153,7 +153,7 @@ void gc_drawRectFill(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2, int
 }
 
 // public void renderPackedSprite(Graphics graphics, int n)
-void gc_renderPackedSprite(GameCanvas *gc, MidpGraphics *g, int32_t n) {
+void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     int n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13;
     int8_t by;
     if (gc->lastRenderedSpriteId != n) {
@@ -300,10 +300,10 @@ void gc_renderPackedSprite(GameCanvas *gc, MidpGraphics *g, int32_t n) {
         n9 = (by & 0x20) == 32 ? 0 : gc->spriteData[n25++];
         n8 = (by & 0x10) == 16 ? 0 : gc->spriteData[n25++];
         n7 = n11 != 0 ? gc->spriteData[n25++] : 0;
-        MidpImage *image = gc_u(gc, gc->currentSpriteId, n10);
+        Image *image = gc_u(gc, gc->currentSpriteId, n10);
         if (image == NULL) continue;
-        n5 = midp_image_get_width(image);
-        n4 = midp_image_get_height(image);
+        n5 = image->width();
+        n4 = image->height();
         if (n11 != 0 && (n11 == 0 || !gc_isResourceTile(gc, gc->currentSpriteId, n7))) continue;
         if (gc->needsRepaint && n12 + n8 <= gc->clipY + gc->clipHeight && n12 + n8 + n4 >= gc->clipY)
             midp_draw_image(g, image, n26 + n9, n12 + n8, 20);

@@ -4,9 +4,9 @@ Open items need their own rule test and behavior decision.
 
 ## K-001: Game lifetime does not release owned state
 
-Tests and `main` delete only the outer `GameCanvas`. More than 100 pointer fields
-own data. The C++ ownership stage will give them normal lifetime without a game
-rule change.
+Tests and `main` delete only the outer `GameCanvas`. Image fields now have
+normal ownership, but more than 100 other pointer fields own data. The C++
+ownership stage will give them normal lifetime without a game rule change.
 
 ## K-002: Possible zero division
 
@@ -58,3 +58,12 @@ has the same loop, so this was old behavior and not a C port error.
 Fixed during `RT-02`: the loop now reads `count` records. A direct test proves
 that `scenarios.bin` is exactly `1 + count * 36` bytes. All game digests are
 unchanged.
+
+## DRAW-CLIP-01: fully clipped images formed an invalid source pointer
+
+The old drawing code made a source-row pointer before checking whether the
+image and clip had any common pixels. A fully off-screen image could therefore
+form an out-of-range pointer, though the empty loop did not read it.
+
+Fixed during `RT-03`: drawing returns on an empty intersection. A direct test
+draws a fully off-screen image, and all fixed frame digests are unchanged.

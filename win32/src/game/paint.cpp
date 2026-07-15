@@ -20,7 +20,7 @@ static int read_u24_le(ResourceReader& resource) {
 #define HEIGHT MIDP_SCREEN_H   // this.getHeight()
 
 // public void paint(Graphics graphics)
-void gc_paint(GameCanvas *gc, MidpGraphics *g) {
+void gc_paint(GameCanvas *gc, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
     if (gc->ce) return;
@@ -39,8 +39,8 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             int n3 = gcs_screenWidth / 2;
             int n4 = gcs_hs / 2;
-            int n5 = midp_image_get_width(gc->cycleFlag) / 2;
-            int n6 = midp_image_get_height(gc->cycleFlag);
+            int n5 = gc->cycle_flag->width() / 2;
+            int n6 = gc->cycle_flag->height();
             int n7 = n6 / 10 + 1;
             for (int i = 0; i < 10; ++i) {
                 int n8 = (n3 + n5 + 30) * (gc->loadingTimer - 5 * (i / 2)) / 10;
@@ -49,7 +49,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
                 int n9 = n3 - (n3 + n5 + 30 - n8);
                 if (i % 2 == 1) n9 = n3 + (n3 + n5 + 30 - n8);
                 midp_set_clip(g, n9 - n5, n4 - n6 / 2 + i * n7, n5 * 2, n7);
-                midp_draw_image(g, gc->cycleFlag, n9, n4, 3);
+                midp_draw_image(g, gc->cycle_flag.get(), n9, n4, 3);
             }
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
             break;
@@ -57,7 +57,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
         case 10: {
             midp_set_color(g, 0xFFFFFF);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            midp_draw_image(g, gc->cycleFlag, gcs_screenWidth / 2, gcs_hs / 2, 3);
+            midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
             int n10 = gc->spriteLoadCounter * (gcs_screenWidth - 20) / (gc->scenarioResourceCount - 1);
@@ -71,8 +71,8 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             if (gc->ready) {
                 midp_set_color(g, 0xFFFFFF);
                 midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-                if (gc->cycleFlag != NULL)
-                    midp_draw_image(g, gc->cycleFlag, gcs_screenWidth / 2, gcs_hs / 2, 3);
+                if (gc->cycle_flag != NULL)
+                    midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             }
             if (gc->transitionCode == 36) {
                 gc->gameState = 40;
@@ -150,7 +150,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             if (n14 > 0) n14 = 0;
             int n19 = n17 < gcs_screenWidth ? (gcs_screenWidth - n17) / 2 : 0;
             int n20 = n17 < gcs_gameplayViewportHeight ? (gcs_gameplayViewportHeight - n17) / 2 : 0;
-            midp_draw_image(g, gc->backbuffer, n18 + n19, 15 + n14 + n20, 20);
+            midp_draw_image(g, gc->backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
             int n21 = gc->viewportCenterX - 2 * gc->viewportCenterY + 16 + 2 * gc->mapHalfWidth;
             int n22 = gc->viewportCenterX + 2 * gc->viewportCenterY - 16 - 2 * gc->mapHalfWidth;
             int n23 = gc->mapWidth - (n21 /= 32) + (n22 /= 32);
@@ -206,7 +206,7 @@ void gc_update(GameCanvas *gc) {
             ++gc->loadingTimer;
             if (!gc->loadingTimeout) break;
             if (gc->gameState == 1) {
-                for (int i = 0; i < 6; ++i) gc->ca[i] = gc_decodePngFromSpriteStream(gc);
+                for (int i = 0; i < 6; ++i) gc->font_images[i] = gc_decodePngFromSpriteStream(gc);
                 gc_setState(gc, 4);
                 break;
             }
@@ -221,7 +221,7 @@ void gc_update(GameCanvas *gc) {
             gc_setState(gc, 20);
             break;
         case 10:
-            gc->tileSprites[gc->spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
+            gc->tile_sprites[gc->spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
             ++gc->spriteLoadCounter;
             if (gc->spriteLoadCounter == gc->scenarioResourceCount / 2) {
                 gc_loadMusic(gc);
@@ -522,12 +522,11 @@ void gc_update(GameCanvas *gc) {
         case 35: {
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            midp_image_free(gc->backbuffer);
             int size = gc->mapHeight + gc->mapWidth;
-            gc->backbuffer = midp_image_create_blank(size, size);
-            gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
-            midp_set_color(gc->backbufferG, 0);
-            midp_fill_rect(gc->backbufferG, 0, 0, size, size);
+            gc->backbuffer = Image::create_blank(size, size);
+            gc->backbuffer_surface = gc->backbuffer->drawing_surface();
+            midp_set_color(gc->backbuffer_surface, 0);
+            midp_fill_rect(gc->backbuffer_surface, 0, 0, size, size);
             int previous_kind = -1;
             int kind = 0;
             for (int x = 0; x < gc->mapWidth; ++x) {
@@ -556,30 +555,30 @@ void gc_update(GameCanvas *gc) {
                     if (kind != previous_kind) {
                         switch (kind) {
                             case 1:
-                                if (gc->tileElevation[x][y] == -1) midp_set_color(gc->backbufferG, 3167360);
-                                if (gc->tileElevation[x][y] == 0) midp_set_color(gc->backbufferG, 5274640);
-                                if (gc->tileElevation[x][y] == 1) midp_set_color(gc->backbufferG, 6327328);
-                                if (gc->tileElevation[x][y] == 2) midp_set_color(gc->backbufferG, 7380016);
-                                if (gc->tileElevation[x][y] == 3) midp_set_color(gc->backbufferG, 8432704);
+                                if (gc->tileElevation[x][y] == -1) midp_set_color(gc->backbuffer_surface, 3167360);
+                                if (gc->tileElevation[x][y] == 0) midp_set_color(gc->backbuffer_surface, 5274640);
+                                if (gc->tileElevation[x][y] == 1) midp_set_color(gc->backbuffer_surface, 6327328);
+                                if (gc->tileElevation[x][y] == 2) midp_set_color(gc->backbuffer_surface, 7380016);
+                                if (gc->tileElevation[x][y] == 3) midp_set_color(gc->backbuffer_surface, 8432704);
                                 break;
-                            case 2: midp_set_color(gc->backbufferG, 6327312); break;
-                            case 3: midp_set_color(gc->backbufferG, 0x909040); break;
-                            case 4: midp_set_color(gc->backbufferG, 0x606060); break;
-                            case 5: midp_set_color(gc->backbufferG, 0x404040); break;
-                            case 6: midp_set_color(gc->backbufferG, 0xFC0000); break;
-                            case 7: midp_set_color(gc->backbufferG, 0x101010); break;
-                            case 8: midp_set_color(gc->backbufferG, 0xFC9C00); break;
-                            case 9: midp_set_color(gc->backbufferG, 0x78DC1E); break;
-                            case 10: midp_set_color(gc->backbufferG, 0xFCFC00); break;
-                            case 11: midp_set_color(gc->backbufferG, 0x80C4FC); break;
-                            case 12: midp_set_color(gc->backbufferG, 0); break;
-                            case 13: midp_set_color(gc->backbufferG, 14287063); break;
-                            case 14: midp_set_color(gc->backbufferG, 16738557); break;
-                            case 15: midp_set_color(gc->backbufferG, 16040947); break;
+                            case 2: midp_set_color(gc->backbuffer_surface, 6327312); break;
+                            case 3: midp_set_color(gc->backbuffer_surface, 0x909040); break;
+                            case 4: midp_set_color(gc->backbuffer_surface, 0x606060); break;
+                            case 5: midp_set_color(gc->backbuffer_surface, 0x404040); break;
+                            case 6: midp_set_color(gc->backbuffer_surface, 0xFC0000); break;
+                            case 7: midp_set_color(gc->backbuffer_surface, 0x101010); break;
+                            case 8: midp_set_color(gc->backbuffer_surface, 0xFC9C00); break;
+                            case 9: midp_set_color(gc->backbuffer_surface, 0x78DC1E); break;
+                            case 10: midp_set_color(gc->backbuffer_surface, 0xFCFC00); break;
+                            case 11: midp_set_color(gc->backbuffer_surface, 0x80C4FC); break;
+                            case 12: midp_set_color(gc->backbuffer_surface, 0); break;
+                            case 13: midp_set_color(gc->backbuffer_surface, 14287063); break;
+                            case 14: midp_set_color(gc->backbuffer_surface, 16738557); break;
+                            case 15: midp_set_color(gc->backbuffer_surface, 16040947); break;
                         }
                     }
                     previous_kind = kind;
-                    midp_draw_line(gc->backbufferG, draw_x, draw_y,
+                    midp_draw_line(gc->backbuffer_surface, draw_x, draw_y,
                                    draw_x + 1, draw_y);
                 }
                 previous_kind = -1;

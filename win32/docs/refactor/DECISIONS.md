@@ -58,6 +58,14 @@ not enough. Record uncertain evidence here before a rename.
   rebuild sprite PNG data.
 - `spriteStream` -> `sprite_stream`: it is the owned sprite input stream.
 
+### Recovered in RT-03
+
+- `ca` -> `font_images`: all six images are font-code atlases used by the text
+  renderer.
+- `tileSprites` -> `tile_sprites`: it owns the decoded tile image set.
+- `cycleFlag` -> `cycle_flag`: it is the loading-cycle image.
+- `backbufferG` -> `backbuffer_surface`: it borrows pixels from `backbuffer`.
+
 ## D-006: Plain native resources
 
 The native project keeps plain resource data. Old files `1` to `5` were changed

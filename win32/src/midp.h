@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "support/image.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,49 +54,17 @@ extern "C" {
 #define MIDP_KEY_SOFT_LEFT  -6
 #define MIDP_KEY_SOFT_RIGHT -7
 
-///////////////////////////////////////////////////////////////////////////////
-// Image: a rectangular ARGB (0xAARRGGBB) pixel buffer. Immutable images come
-// from decoded PNGs; mutable images (createImage(w,h)) expose a Graphics.
-typedef struct MidpImage MidpImage;
-
-// Graphics: a drawing context bound to a target surface (the screen framebuffer
-// or a mutable Image's pixels). Colour is 0x00RRGGBB; a clip rectangle bounds
-// every primitive.
-typedef struct MidpGraphics MidpGraphics;
-
-struct MidpGraphics {
-    uint32_t *pixels;   // target surface (screen: 0x00RRGGBB, image: ARGB)
-    int width, height;  // target dimensions in pixels
-    bool target_has_alpha; // true when drawing into an Image (preserve alpha)
-    int color;          // current colour, 0x00RRGGBB
-    int clip_x, clip_y, clip_w, clip_h; // active clip rectangle
-};
-
-struct MidpImage {
-    int width, height;
-    uint32_t *pixels;   // ARGB, width*height
-    MidpGraphics *g;    // non-null only for mutable images (getGraphics)
-};
-
 // --- Graphics primitives (only what GameCanvas uses) --------------------------
-void midp_gfx_init_screen(MidpGraphics *g, uint32_t *fb, int w, int h);
-void midp_set_color(MidpGraphics *g, int rgb);
-void midp_set_clip(MidpGraphics *g, int x, int y, int w, int h);
-void midp_clip_rect(MidpGraphics *g, int x, int y, int w, int h);
-void midp_fill_rect(MidpGraphics *g, int x, int y, int w, int h);
-void midp_draw_rect(MidpGraphics *g, int x, int y, int w, int h);
-void midp_draw_line(MidpGraphics *g, int x1, int y1, int x2, int y2);
-void midp_draw_arc(MidpGraphics *g, int x, int y, int w, int h, int start, int arc);
-void midp_fill_arc(MidpGraphics *g, int x, int y, int w, int h, int start, int arc);
-void midp_draw_image(MidpGraphics *g, const MidpImage *img, int x, int y, int anchor);
-
-// --- Image --------------------------------------------------------------------
-MidpImage *midp_image_create_blank(int w, int h); // mutable, white, opaque
-MidpImage *midp_image_create_from_png(const uint8_t *data, int off, int len);
-MidpGraphics *midp_image_get_graphics(MidpImage *img);
-int midp_image_get_width(const MidpImage *img);
-int midp_image_get_height(const MidpImage *img);
-void midp_image_free(MidpImage *img);
+void midp_gfx_init_screen(Surface *g, uint32_t *fb, int w, int h);
+void midp_set_color(Surface *g, int rgb);
+void midp_set_clip(Surface *g, int x, int y, int w, int h);
+void midp_clip_rect(Surface *g, int x, int y, int w, int h);
+void midp_fill_rect(Surface *g, int x, int y, int w, int h);
+void midp_draw_rect(Surface *g, int x, int y, int w, int h);
+void midp_draw_line(Surface *g, int x1, int y1, int x2, int y2);
+void midp_draw_arc(Surface *g, int x, int y, int w, int h, int start, int arc);
+void midp_fill_arc(Surface *g, int x, int y, int w, int h, int start, int arc);
+void midp_draw_image(Surface *g, const Image *img, int x, int y, int anchor);
 
 // --- java.util.Vector (holds void* elements) ----------------------------------
 typedef struct { void **data; int size; int cap; } MidpVector;

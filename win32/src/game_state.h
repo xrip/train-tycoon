@@ -4,10 +4,9 @@
 #include "midp.h"
 #include "support/java_random.h"
 #include "support/resource_reader.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <array>
+#include <memory>
+#include <vector>
 
 typedef struct GameCanvas {
     void* midlet;
@@ -78,7 +77,7 @@ typedef struct GameCanvas {
     bool ee;
     int32_t dp;
     ResourceReader sprite_stream;
-    MidpImage** ca;
+    std::array<std::unique_ptr<Image>, 6> font_images;
     int16_t* spriteOffsetTable;
     int8_t* spriteData;
     int32_t cursorScale;
@@ -387,11 +386,11 @@ typedef struct GameCanvas {
     int32_t scenarioStep;
     int32_t scenarioNoticeId;
     JavaRandom rng;
-    MidpImage* backbuffer;
-    MidpGraphics* backbufferG;
-    MidpImage** tileSprites;
+    std::unique_ptr<Image> backbuffer;
+    Surface* backbuffer_surface;
+    std::vector<std::unique_ptr<Image>> tile_sprites;
     int8_t* tileSpriteIndex;
-    MidpImage* cycleFlag;
+    std::unique_ptr<Image> cycle_flag;
     int64_t loadingStartTime;
     bool loadingTimeout;
     int32_t spriteLoadCounter;
@@ -455,9 +454,5 @@ extern bool gcs_monthlyReportEnabled;
 extern bool gcs_annualReportEnabled;
 
 void gc_fields_init(GameCanvas *gc);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

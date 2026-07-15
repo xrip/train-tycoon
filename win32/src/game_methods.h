@@ -4,10 +4,6 @@
 #include "game_state.h"
 #include "support/byte_buffer.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int32_t gc_byteToUnsignedInt(GameCanvas *gc, int8_t n);
 void gc_start(GameCanvas *gc, void* gameMIDlet);
 void gc_run(GameCanvas *gc);
@@ -16,16 +12,16 @@ void gc_pointerReleased(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_pointerDragged(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_keyPressed(GameCanvas *gc, int32_t n);
 void gc_keyReleased(GameCanvas *gc, int32_t n);
-void gc_drawSpriteQuad(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4);
+void gc_drawSpriteQuad(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void gc_handleKey(GameCanvas *gc, int32_t n);
 void gc_resetKeyState(GameCanvas *gc, int32_t n);
 void gc_openSpriteStream(GameCanvas *gc, const char* resource_name);
-MidpImage* gc_decodePngFromSpriteStream(GameCanvas *gc);
+std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc);
 void gc_resetOverlayRenderState(GameCanvas *gc);
 void gc_loadPackedSpriteData(GameCanvas *gc, const char* resource_name);
 int8_t* gc_m(GameCanvas *gc, int32_t n);
-void gc_renderPackedSprite(GameCanvas *gc, MidpGraphics* graphics, int32_t n);
-void gc_renderFontString(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int8_t* byArray, bool bl);
+void gc_renderPackedSprite(GameCanvas *gc, Surface* graphics, int32_t n);
+void gc_renderFontString(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int8_t* byArray, bool bl);
 void gc_registerCityEntryInlined(GameCanvas *gc, int8_t by);
 void gc_setSelectionStart(GameCanvas *gc, int32_t n, int32_t n2);
 bool gc_isAdjacentTileEmpty(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl);
@@ -46,9 +42,9 @@ void gc_viewportZoomKey(GameCanvas *gc);
 int32_t gc_crossProduct2D(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6);
 void gc_computeIsoCornersInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t* nArray, int32_t* nArray2, bool bl);
 void gc_computeViewportBounds(GameCanvas *gc);
-void gc_drawSelectionQuad(GameCanvas *gc, MidpGraphics* graphics, int32_t* nArray, int32_t* nArray2);
-void gc_drawBuildMenuCursor(GameCanvas *gc, MidpGraphics* graphics);
-void gc_drawBuildMenuRow(GameCanvas *gc, MidpGraphics* graphics);
+void gc_drawSelectionQuad(GameCanvas *gc, Surface* graphics, int32_t* nArray, int32_t* nArray2);
+void gc_drawBuildMenuCursor(GameCanvas *gc, Surface* graphics);
+void gc_drawBuildMenuRow(GameCanvas *gc, Surface* graphics);
 void gc_demolishAtCursor(GameCanvas *gc);
 void gc_pickTrainsAtCursor(GameCanvas *gc);
 void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t n);
@@ -63,14 +59,14 @@ void gc_initBuildMenuRow(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_addMenuItemInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl, bool bl2, int32_t n4);
 void gc_initBuildMenuForScenario(GameCanvas *gc, int32_t n);
 void gc_cycleBuildMenuIndex(GameCanvas *gc, bool bl);
-int32_t gc_drawMenuRow(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int32_t n3, bool bl);
-void gc_drawConfirmBar(GameCanvas *gc, MidpGraphics* graphics);
-void gc_drawHeaderBar(GameCanvas *gc, MidpGraphics* graphics);
-void gc_paintMain(GameCanvas *gc, MidpGraphics* graphics);
+int32_t gc_drawMenuRow(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int32_t n3, bool bl);
+void gc_drawConfirmBar(GameCanvas *gc, Surface* graphics);
+void gc_drawHeaderBar(GameCanvas *gc, Surface* graphics);
+void gc_paintMain(GameCanvas *gc, Surface* graphics);
 void gc_pushMoneyHistory(GameCanvas *gc, int32_t n);
-int32_t gc_drawNumber(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2);
-void gc_drawMoneyTicker(GameCanvas *gc, MidpGraphics* graphics);
-void gc_drawConfirmDialog(GameCanvas *gc, MidpGraphics* graphics);
+int32_t gc_drawNumber(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2);
+void gc_drawMoneyTicker(GameCanvas *gc, Surface* graphics);
+void gc_drawConfirmDialog(GameCanvas *gc, Surface* graphics);
 int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2);
 void gc_dayResetP(GameCanvas *gc);
 void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3);
@@ -83,7 +79,7 @@ void gc_rebuildCityList(GameCanvas *gc);
 int8_t* gc_formatCurrency(GameCanvas *gc, int32_t n);
 int8_t* gc_formatNumberWithSuffix(GameCanvas *gc, int32_t n, int32_t n2);
 int8_t* gc_encodeDisplayText(GameCanvas *gc, char* string);
-MidpImage* gc_u(GameCanvas *gc, int32_t n, int32_t n2);
+Image* gc_u(GameCanvas *gc, int32_t n, int32_t n2);
 bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2);
 int32_t gc_neighboursMask(GameCanvas *gc, int32_t n, int32_t n2);
 int8_t* gc_resolveDialogValue(GameCanvas *gc, int32_t n, int32_t n2);
@@ -122,7 +118,7 @@ void gc_resetTrailingCars(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3);
 int32_t gc_countCarsInTrain(GameCanvas *gc, int32_t n);
 int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t n);
 void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl);
-void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n);
+void gc_drawSpriteSingle(GameCanvas *gc, Surface* graphics, int32_t n);
 bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3);
 void gc_mergeTrainAt(GameCanvas *gc, int32_t n);
 bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3);
@@ -195,19 +191,15 @@ bool gc_syncHighScores(GameCanvas *gc, bool bl);
 void gc_appendTileDrawOffset(GameCanvas *gc, ByteBuffer& x_offsets,
                              ByteBuffer& y_offsets, int32_t x, int32_t y);
 void gc_k(GameCanvas *gc, int32_t n, int32_t n2);
-void gc_drawTextBox(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4, int8_t* byArray);
+void gc_drawTextBox(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4, int8_t* byArray);
 void gc_enterOutOfMoneyState(GameCanvas *gc);
-void gc_drawRectFill(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int8_t by);
+void gc_drawRectFill(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int8_t by);
 void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2);
-void gc_paint(GameCanvas *gc, MidpGraphics* graphics);
+void gc_paint(GameCanvas *gc, Surface* graphics);
 void gc_setState(GameCanvas *gc, int32_t n);
 void gc_update(GameCanvas *gc);
-void gc_renderMap(GameCanvas *gc, MidpGraphics* graphics);
+void gc_renderMap(GameCanvas *gc, Surface* graphics);
 void gc_hideNotify(GameCanvas *gc);
 void gc_showNotify(GameCanvas *gc);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

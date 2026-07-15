@@ -177,33 +177,36 @@ TEST_CASE("fast: resource reader reads plain bytes and reaches EOF") {
 }
 
 TEST_CASE("fast: images own pixels and expose only valid drawing targets") {
-    CHECK(midp_image_create_blank(0, 2) == nullptr);
+    CHECK(Image::create_blank(0, 2) == nullptr);
 
-    MidpImage* blank = midp_image_create_blank(2, 2);
+    std::unique_ptr<Image> blank = Image::create_blank(2, 2);
     REQUIRE(blank != nullptr);
-    CHECK(midp_image_get_width(blank) == 2);
-    CHECK(midp_image_get_height(blank) == 2);
-    REQUIRE(midp_image_get_graphics(blank) != nullptr);
+    CHECK(blank->width() == 2);
+    CHECK(blank->height() == 2);
+    REQUIRE(blank->drawing_surface() != nullptr);
     for (int index = 0; index < 4; ++index) {
-        CHECK(blank->pixels[index] == 0xFFFFFFFFu);
+        CHECK(blank->pixels()[index] == 0xFFFFFFFFu);
     }
 
-    MidpGraphics* surface = midp_image_get_graphics(blank);
+    Surface* surface = blank->drawing_surface();
     midp_set_color(surface, 0x123456);
     midp_fill_rect(surface, 0, 0, 1, 1);
-    CHECK(blank->pixels[0] == 0xFF123456u);
-    CHECK(blank->pixels[1] == 0xFFFFFFFFu);
-    midp_image_free(blank);
+    CHECK(blank->pixels()[0] == 0xFF123456u);
+    CHECK(blank->pixels()[1] == 0xFFFFFFFFu);
+
+    const auto source = Image::create_blank(1, 1);
+    REQUIRE(source != nullptr);
+    midp_draw_image(surface, source.get(), -10, -10, MIDP_LEFT | MIDP_TOP);
+    CHECK(blank->pixels()[0] == 0xFF123456u);
+    CHECK(blank->pixels()[1] == 0xFFFFFFFFu);
 
     const auto png = resources::read_all("icon.png");
     REQUIRE(png);
-    MidpImage* icon = midp_image_create_from_png(
-        png->data(), 0, static_cast<int>(png->size()));
+    std::unique_ptr<Image> icon = Image::decode_png(*png);
     REQUIRE(icon != nullptr);
-    CHECK(midp_image_get_width(icon) == 50);
-    CHECK(midp_image_get_height(icon) == 50);
-    CHECK(midp_image_get_graphics(icon) == nullptr);
-    midp_image_free(icon);
+    CHECK(icon->width() == 50);
+    CHECK(icon->height() == 50);
+    CHECK(icon->drawing_surface() == nullptr);
 }
 
 TEST_CASE("fast: record store keeps record bytes and ids") {
@@ -352,7 +355,7 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     generate_scenario(game, 0);
 
     std::memset(framebuffer, 0, sizeof(framebuffer));
-    MidpGraphics screen;
+    Surface screen;
     midp_gfx_init_screen(&screen, framebuffer, kScreenWidth, kScreenHeight);
     gc_paint(game, &screen);
     StableDigest first_frame;

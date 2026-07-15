@@ -86,7 +86,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->currentKey = 0;
     gc->ee = false;
     gc->dp = 255;
-    gc->ca = (MidpImage**)midp_alloc_arr(sizeof(MidpImage*), 6);
     gc->cursorScale = 0;
     gc->cursorDragY = -1;
     gc->cursorSelectY = -1;
@@ -420,8 +419,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->scenarioStep = 0;
     gc->scenarioNoticeId = 0;
     gc->rng.set_seed(midp_current_time_millis());
-    gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
-    gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
+    gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+    gc->backbuffer_surface = gc->backbuffer->drawing_surface();
     gc->tileSpriteIndex = (int8_t*)midp_alloc_arr(sizeof(int8_t), 255);
     gc->scenarioResourceCount = 0;
     gc->transitionCode = 0;

@@ -48,7 +48,7 @@ void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
 }
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
-MidpImage *gc_decodePngFromSpriteStream(GameCanvas *gc) {
+std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
     int8_t *byArray = NULL;
     int n = 0;
     int n3 = gc->sprite_stream.read_byte();
@@ -106,8 +106,9 @@ MidpImage *gc_decodePngFromSpriteStream(GameCanvas *gc) {
         byArray[n4++] = 73; byArray[n4++] = 69; byArray[n4++] = 78; byArray[n4++] = 68;
         byArray[n4++] = -82; byArray[n4++] = 66; byArray[n4++] = 96; byArray[n4++] = -126;
     }
-    if (!byArray) return NULL;
-    return midp_image_create_from_png((const uint8_t *)byArray, 0, n);
+    if (!byArray) return nullptr;
+    return Image::decode_png(std::span<const uint8_t>(
+        reinterpret_cast<const uint8_t*>(byArray), static_cast<std::size_t>(n)));
 }
 
 // byte[] m(int n)
@@ -225,8 +226,8 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
     if (gc->eD != n || gc->aJ != n2) {
         gcs_screenWidth = n;
         gcs_hs = n2;
-        gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
-        gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
+        gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+        gc->backbuffer_surface = gc->backbuffer->drawing_surface();
         gcs_gameplayViewportHeight = gcs_hs - 30;
         gcs_bottomBarY = gcs_hs - 15;
         gc_k(gc, n, n2);
@@ -244,7 +245,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
 // public void setState(int n)
 void gc_setState(GameCanvas *gc, int32_t n) {
     gc->hx = gc->gameState;
-    if (!gc->ready) gc->cycleFlag = NULL;
+    if (!gc->ready) gc->cycle_flag = NULL;
     gc->snapshotLoadedFlag = false;
     gc->menuDirty = true;
     switch (n) {
@@ -255,7 +256,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             /* fall through */
         case 1:
         case 2:
-            gc->cycleFlag = gc_decodePngFromSpriteStream(gc);
+            gc->cycle_flag = gc_decodePngFromSpriteStream(gc);
             gc->loadingStartTime = midp_current_time_millis();
             gc->loadingTimeout = false;
             gc->loadingTimer = 0;
@@ -289,7 +290,9 @@ void gc_setState(GameCanvas *gc, int32_t n) {
                 }
             }
             gc->scenarioResourceCount -= 8;
-            gc->tileSprites = (MidpImage **)midp_alloc_arr(sizeof(MidpImage *), gc->scenarioResourceCount);
+            gc->tile_sprites.clear();
+            gc->tile_sprites.resize(
+                static_cast<std::size_t>(gc->scenarioResourceCount));
             gc->tileSpriteIndex[68] = gc->tileSpriteIndex[66];
             break;
         }
@@ -303,8 +306,8 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             break;
         case 30:
             gc->backbuffer = NULL;
-            gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
-            gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
+            gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+            gc->backbuffer_surface = gc->backbuffer->drawing_surface();
             gc->lastViewportCenterX = -1;
             gc->menuDirty = true;
             break;

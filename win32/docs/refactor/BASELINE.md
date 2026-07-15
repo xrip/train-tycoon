@@ -90,6 +90,13 @@ real MIDI device test is an opt-in `device` label.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - All scenario, input, save, and frame golden values are unchanged.
 
+## RT-03 proof
+
+- `Image` owns pixels; `Surface` only borrows them.
+- All game image owners use `std::unique_ptr` containers.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- All fixed frame golden values are unchanged.
+
 ## Manual baseline still needed
 
 - boot and menu;
