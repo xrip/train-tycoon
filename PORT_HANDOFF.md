@@ -78,7 +78,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **167 / 196 (85%)** — 166 full + 1 partial (`update`).
+- Methods done: **175 / 196 (89%)** — 174 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -138,6 +138,10 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   flood relaxation, tunnel links, path choice, preview tile shaping, track
   owner matching, cost work, and track counting. `port.py verify` now runs a
   smoke-only 5x5 path build and checks for preview tiles and a non-zero cost.
+- **Save/load is ported.** State fields, all four map matrices, RLE, record-store
+  writes, and restore allocation are in `port/impl/save.c`. The smoke check now
+  makes an in-memory snapshot, compresses and expands it, compares every byte,
+  and loads it back to check key fields. It does not change `TTStore.rms`.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -159,16 +163,16 @@ The map-gen and state-30 simulation chains are **done**. Selecting "new game"
 generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
 UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port the save/load chain, which is already called by state 25 and milestone
-   saves: `saveGame`, RLE/CRC helpers, `initSaveOrLoad`, and map-array save and
-   restore.
+1. Port the remaining map setup/AI placement methods: `placeCitiesAndIndustry`,
+   `spawnTrainAt`, `autoExtendTrackStation`, `pickCitySite`, and
+   `pickIndustrySite`.
 2. Port the remaining large UI/data method `q` [372 L] after giving it a clear
    upstream name.
 2. Add a smoke path that enters state 30 and exercises one full paint/input
    frame before treating gameplay rendering as behaviorally proved.
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 167 already
+`show NAME` throughout. Each is a mechanical faithful port like the 175 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

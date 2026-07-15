@@ -289,14 +289,14 @@ typedef struct GameCanvas {
     int32_t decadeFuelCost; // int decadeFuelCost
     int32_t decadeSubsidyTotal; // int decadeSubsidyTotal
     int32_t decadeRevenueTotal; // int decadeRevenueTotal
-    int32_t eb; // int eb
+    int32_t savedLegacyMetricEb; // int savedLegacyMetricEb
     int32_t decadeEnterpriseTotal; // int decadeEnterpriseTotal
     int32_t decadeXTotal; // int decadeXTotal
     int32_t revenueTotal; // int revenueTotal
     int32_t decadeOtherXTotal; // int decadeOtherXTotal
-    int32_t* yrN; // int[] yrN
-    int32_t* yrCx; // int[] yrCx
-    int32_t* yrZ; // int[] yrZ
+    int32_t* yearProfitHistory; // int[] yearProfitHistory
+    int32_t* yearRevenueHistory; // int[] yearRevenueHistory
+    int32_t* yearCompanyValueHistory; // int[] yearCompanyValueHistory
     int32_t* altDecadeOtherXTotal; // int[] altDecadeOtherXTotal
     int32_t* altDecadeRevenueTotal; // int[] altDecadeRevenueTotal
     int32_t* altDecadeTotalCost; // int[] altDecadeTotalCost
@@ -331,7 +331,7 @@ typedef struct GameCanvas {
     int32_t offerGenerationCount; // int offerGenerationCount
     int16_t* offerEffectNextCount; // short[] offerEffectNextCount
     bool flagsB; // boolean flagsB
-    int32_t bq; // int bq
+    int32_t savedLegacyMetricBq; // int savedLegacyMetricBq
     int32_t lastOfferDateCode; // int lastOfferDateCode
     int32_t menuRowEnabledCount; // int menuRowEnabledCount
     int8_t* enabledMenuRowIndexes; // byte[] enabledMenuRowIndexes
@@ -380,7 +380,7 @@ typedef struct GameCanvas {
     int32_t enterpriseTaxPct; // int enterpriseTaxPct
     int32_t scenarioStepCompare; // int scenarioStepCompare
     int32_t scenarioStep; // int scenarioStep
-    int32_t scenarioFlagAo; // int scenarioFlagAo
+    int32_t scenarioNoticeId; // int scenarioNoticeId
     MidpRandom rng; // Random rng
     MidpImage* backbuffer; // Image backbuffer
     MidpGraphics* backbufferG; // Graphics backbufferG

@@ -327,14 +327,14 @@ implements Runnable {
     int decadeFuelCost = 0;
     int decadeSubsidyTotal = 0;
     int decadeRevenueTotal = 0;
-    int eb = 0;
+    int savedLegacyMetricEb = 0;
     int decadeEnterpriseTotal = 0;
     int decadeXTotal = 0;
     int revenueTotal = 0;
     int decadeOtherXTotal = 0;
-    int[] yrN = new int[12];
-    int[] yrCx = new int[12];
-    int[] yrZ = new int[12];
+    int[] yearProfitHistory = new int[12];
+    int[] yearRevenueHistory = new int[12];
+    int[] yearCompanyValueHistory = new int[12];
     int[] altDecadeOtherXTotal = new int[12];
     int[] altDecadeRevenueTotal = new int[12];
     int[] altDecadeTotalCost = new int[12];
@@ -369,7 +369,7 @@ implements Runnable {
     int offerGenerationCount = 0;
     short[] offerEffectNextCount = new short[12];
     boolean flagsB;
-    int bq;
+    int savedLegacyMetricBq;
     int lastOfferDateCode = 0;
     int menuRowEnabledCount = 0;
     byte[] enabledMenuRowIndexes = new byte[5];
@@ -432,7 +432,7 @@ implements Runnable {
     int enterpriseTaxPct = 2;
     int scenarioStepCompare = 1;
     int scenarioStep = 0;
-    int scenarioFlagAo = 0;
+    int scenarioNoticeId = 0;
     Random rng = new Random(System.currentTimeMillis());
     Image backbuffer = Image.createImage((int)screenWidth, (int)hs);
     Graphics backbufferG = this.backbuffer.getGraphics();
@@ -4029,13 +4029,13 @@ implements Runnable {
                 if (n2 >= 40) {
                     if (!this.yearGraphAlt) {
                         if (this.yearGraphMode == 0) {
-                            return this.b(this.yrN[n2 - 40]);
+                            return this.b(this.yearProfitHistory[n2 - 40]);
                         }
                         if (this.yearGraphMode == 1) {
-                            return this.b(this.yrCx[n2 - 40]);
+                            return this.b(this.yearRevenueHistory[n2 - 40]);
                         }
                         if (this.yearGraphMode == 2) {
-                            return this.b(this.yrZ[n2 - 40]);
+                            return this.b(this.yearCompanyValueHistory[n2 - 40]);
                         }
                     } else {
                         if (this.yearGraphMode == 0) {
@@ -4317,7 +4317,7 @@ implements Runnable {
             }
             case 17: {
                 if (n2 == 1) {
-                    this.pendingTransitionCode = 80 + this.scenarioFlagAo;
+                    this.pendingTransitionCode = 80 + this.scenarioNoticeId;
                 }
                 this.setState(30);
                 break;
@@ -6597,7 +6597,7 @@ implements Runnable {
         }
     }
 
-    void crcSum(String string) {
+    void checkSaveByteSum(String string) {
         long l = 0L;
         for (int i = 0; i < this.snapshotSize; ++i) {
             l += (long)this.byteToUnsignedInt(this.saveBuffer[i]);
@@ -6605,7 +6605,7 @@ implements Runnable {
     }
 
     void compressSaveBuffer() {
-        this.crcSum("Compress pre");
+        this.checkSaveByteSum("Compress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte by = this.saveBuffer[0];
         int n = 1;
@@ -6629,11 +6629,11 @@ implements Runnable {
         catch (Exception exception) {
             // empty catch block
         }
-        this.crcSum("Compress post");
+        this.checkSaveByteSum("Compress post");
     }
 
     void decompressSaveBuffer() {
-        this.crcSum("Decompress pre");
+        this.checkSaveByteSum("Decompress pre");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (int i = 0; i < this.snapshotSize; ++i) {
             if (this.saveBuffer[i] == -1) {
@@ -6655,7 +6655,7 @@ implements Runnable {
         catch (Exception exception) {
             // empty catch block
         }
-        this.crcSum("Decompress post");
+        this.checkSaveByteSum("Decompress post");
     }
 
     boolean saveOrLoadBool(boolean bl) {
@@ -6818,9 +6818,9 @@ implements Runnable {
         this.loanCeiling = this.saveIntToBuffer(this.loanCeiling);
         this.interestRate = this.saveOrLoadByte(this.interestRate);
         this.enterpriseTaxPct = this.saveIntToBuffer(this.enterpriseTaxPct);
-        this.saveOrLoadIntArrayInlined(this.yrN);
-        this.saveOrLoadIntArrayInlined(this.yrCx);
-        this.saveOrLoadIntArrayInlined(this.yrZ);
+        this.saveOrLoadIntArrayInlined(this.yearProfitHistory);
+        this.saveOrLoadIntArrayInlined(this.yearRevenueHistory);
+        this.saveOrLoadIntArrayInlined(this.yearCompanyValueHistory);
         this.saveOrLoadIntArrayInlined(this.altDecadeOtherXTotal);
         this.saveOrLoadIntArrayInlined(this.altDecadeRevenueTotal);
         this.saveOrLoadIntArrayInlined(this.altDecadeTotalCost);
@@ -6859,7 +6859,7 @@ implements Runnable {
         this.decadeFuelCost = this.saveIntToBuffer(this.decadeFuelCost);
         this.decadeSubsidyTotal = this.saveIntToBuffer(this.decadeSubsidyTotal);
         this.decadeRevenueTotal = this.saveIntToBuffer(this.decadeRevenueTotal);
-        this.eb = this.saveIntToBuffer(this.eb);
+        this.savedLegacyMetricEb = this.saveIntToBuffer(this.savedLegacyMetricEb);
         this.decadeEnterpriseTotal = this.saveIntToBuffer(this.decadeEnterpriseTotal);
         this.decadeXTotal = this.saveIntToBuffer(this.decadeXTotal);
         this.cityListIndex = this.saveOrLoadByte(this.cityListIndex);
@@ -6918,7 +6918,7 @@ implements Runnable {
         this.saveOrLoadIntArrayInlined(this.menuRowRevenue);
         this.saveOrLoadShortArrayInlined(this.offerEffectNextCount);
         this.offerGenerationCount = this.saveIntToBuffer(this.offerGenerationCount);
-        this.bq = this.saveIntToBuffer(this.bq);
+        this.savedLegacyMetricBq = this.saveIntToBuffer(this.savedLegacyMetricBq);
         this.lastOfferDateCode = this.saveIntToBuffer(this.lastOfferDateCode);
         this.flagsB = this.saveOrLoadBool(this.flagsB);
         this.scenarioBits = this.saveOrLoadByte(this.scenarioBits);
@@ -6935,7 +6935,7 @@ implements Runnable {
         this.aiWagonsBought = this.saveIntToBuffer(this.aiWagonsBought);
         this.trainRevenueScore = this.saveIntToBuffer(this.trainRevenueScore);
         this.scenarioStep = this.saveIntToBuffer(this.scenarioStep);
-        this.scenarioFlagAo = this.saveIntToBuffer(this.scenarioFlagAo);
+        this.scenarioNoticeId = this.saveIntToBuffer(this.scenarioNoticeId);
         this.moneyBaseA = this.saveIntToBuffer(this.moneyBaseA);
         this.moneyBaseB = this.saveIntToBuffer(this.moneyBaseB);
         this.baseTrainSpeed = this.saveIntToBuffer(this.baseTrainSpeed);
@@ -7046,14 +7046,14 @@ implements Runnable {
     }
 
     void everyTenTick() {
-        this.yrZ[0] = this.scanMapForMetric();
-        this.altDecadeTotalCost[0] = this.yrZ[0];
+        this.yearCompanyValueHistory[0] = this.scanMapForMetric();
+        this.altDecadeTotalCost[0] = this.yearCompanyValueHistory[0];
     }
 
     void computeYearEndMetrics() {
         this.archiveOrRecall();
-        this.yrN[0] = this.xIndicator;
-        this.yrCx[0] = this.totalRevenue;
+        this.yearProfitHistory[0] = this.xIndicator;
+        this.yearRevenueHistory[0] = this.totalRevenue;
         this.altDecadeOtherXTotal[0] = this.decadeOtherXTotal + this.xIndicator;
         this.altDecadeRevenueTotal[0] = this.revenueTotal + this.totalRevenue;
         this.decadeSpentWithCurrent = this.decadeCostTotal + this.totalSpent;
@@ -7085,13 +7085,13 @@ implements Runnable {
         this.prevEnterpriseTotal = this.decadeEnterpriseTax;
         this.prevXIndicator = this.xIndicator;
         for (n = 10; n >= 0; --n) {
-            this.yrN[n + 1] = this.yrN[n];
-            this.yrCx[n + 1] = this.yrCx[n];
-            this.yrZ[n + 1] = this.yrZ[n];
+            this.yearProfitHistory[n + 1] = this.yearProfitHistory[n];
+            this.yearRevenueHistory[n + 1] = this.yearRevenueHistory[n];
+            this.yearCompanyValueHistory[n + 1] = this.yearCompanyValueHistory[n];
         }
-        this.yrN[0] = 0;
-        this.yrCx[0] = 0;
-        this.yrZ[0] = 0;
+        this.yearProfitHistory[0] = 0;
+        this.yearRevenueHistory[0] = 0;
+        this.yearCompanyValueHistory[0] = 0;
         this.decadeCostTotal += this.totalSpent;
         this.decadeSpentTotal += this.aiMoneySpent;
         this.decadeFuelCost += this.fuelCostAccrued;
@@ -7249,27 +7249,27 @@ implements Runnable {
                             this.yearGraphOffsets[n7] = (byte)(this.yearGraphOffsets[n7] - 1);
                         }
                         if (n == 0) {
-                            if (this.yrN[n3] > n6) {
-                                n6 = this.yrN[n3];
+                            if (this.yearProfitHistory[n3] > n6) {
+                                n6 = this.yearProfitHistory[n3];
                             }
-                            if (this.yrN[n3] < n5) {
-                                n5 = this.yrN[n3];
+                            if (this.yearProfitHistory[n3] < n5) {
+                                n5 = this.yearProfitHistory[n3];
                             }
                         }
                         if (n == 1) {
-                            if (this.yrCx[n3] > n6) {
-                                n6 = this.yrCx[n3];
+                            if (this.yearRevenueHistory[n3] > n6) {
+                                n6 = this.yearRevenueHistory[n3];
                             }
-                            if (this.yrCx[n3] < n5) {
-                                n5 = this.yrCx[n3];
+                            if (this.yearRevenueHistory[n3] < n5) {
+                                n5 = this.yearRevenueHistory[n3];
                             }
                         }
                         if (n != 2) continue;
-                        if (this.yrZ[n3] > n6) {
-                            n6 = this.yrZ[n3];
+                        if (this.yearCompanyValueHistory[n3] > n6) {
+                            n6 = this.yearCompanyValueHistory[n3];
                         }
-                        if (this.yrZ[n3] >= n5) continue;
-                        n5 = this.yrZ[n3];
+                        if (this.yearCompanyValueHistory[n3] >= n5) continue;
+                        n5 = this.yearCompanyValueHistory[n3];
                         continue;
                     }
                     this.altYearArray[n3] = (byte)(this.year - n3 - 1940);
@@ -7300,17 +7300,17 @@ implements Runnable {
                 if (bl) break block28;
                 if (n == 0) {
                     for (n4 = 0; n4 < 12; ++n4) {
-                        this.yearGraphValues[n4] = this.yrN[n4] == 0 ? (byte)0 : (byte)(30 * this.yrN[n4] / n3);
+                        this.yearGraphValues[n4] = this.yearProfitHistory[n4] == 0 ? (byte)0 : (byte)(30 * this.yearProfitHistory[n4] / n3);
                     }
                 }
                 if (n == 1) {
                     for (n4 = 0; n4 < 12; ++n4) {
-                        this.yearGraphValues[n4] = this.yrCx[n4] == 0 ? (byte)0 : (byte)(60 * this.yrCx[n4] / n3);
+                        this.yearGraphValues[n4] = this.yearRevenueHistory[n4] == 0 ? (byte)0 : (byte)(60 * this.yearRevenueHistory[n4] / n3);
                     }
                 }
                 if (n != 2) break block29;
                 for (n4 = 0; n4 < 12; ++n4) {
-                    this.yearGraphValues[n4] = this.yrN[n4] == 0 ? (byte)0 : (byte)(30 * this.yrZ[n4] / n3);
+                    this.yearGraphValues[n4] = this.yearProfitHistory[n4] == 0 ? (byte)0 : (byte)(30 * this.yearCompanyValueHistory[n4] / n3);
                 }
                 break block29;
             }
@@ -8962,7 +8962,7 @@ implements Runnable {
                                 this.aiFrequency = (byte)32;
                                 this.aiThreshold = (byte)29;
                             }
-                            this.scenarioFlagAo = n21;
+                            this.scenarioNoticeId = n21;
                             if (n21 != 0) {
                                 this.transitionDebounce = (byte)5;
                                 this.scenarioNoticeCode = (byte)n21;

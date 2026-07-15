@@ -72,7 +72,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 36:
             gc_setState(gc, 40); break;
         case 17:
-            if (n2 == 1) gc->pendingTransitionCode = 80 + gc->scenarioFlagAo;
+            if (n2 == 1) gc->pendingTransitionCode = 80 + gc->scenarioNoticeId;
             gc_setState(gc, 30); break;
         case 2:
         case 3:

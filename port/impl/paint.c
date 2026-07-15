@@ -292,7 +292,7 @@ void gc_update(GameCanvas *gc) {
                         gc->flagsB = (a26 & 4) == 4;
                         if ((a26 & 1) != 1) { gc->aiFrequency = 25; gc->aiThreshold = 100; }
                         else { gc->aiFrequency = 32; gc->aiThreshold = 29; }
-                        gc->scenarioFlagAo = a21;
+                        gc->scenarioNoticeId = a21;
                         if (a21 != 0) { gc->transitionDebounce = 5; gc->scenarioNoticeCode = (int8_t)a21; continue; }
                         gc->transitionDebounce = 0;
                     }

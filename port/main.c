@@ -23,6 +23,7 @@
 #include "game_state.h"
 #include "game_methods.h"
 #include <stdlib.h>
+#include <string.h>
 
 #define WIN_SCALE 2
 #define TARGET_FPS 30
@@ -55,6 +56,36 @@ static bool run_pathfinding_smoke(void) {
     return ok;
 }
 
+static bool run_save_roundtrip_smoke(void) {
+    GameCanvas *test = (GameCanvas *)malloc(sizeof(GameCanvas));
+    if (!test) return false;
+    gc_fields_init(test);
+    test->money = 123456;
+    test->dayOfMonth = 17;
+    test->monthOfYear = 8;
+    test->year = 1973;
+    gc_initSaveOrLoad(test, 4);
+    int plain_size = test->snapshotSize;
+    int8_t *plain = plain_size > 0 ? (int8_t *)malloc((size_t)plain_size) : NULL;
+    if (plain) memcpy(plain, test->saveBuffer, (size_t)plain_size);
+    gc_compressSaveBuffer(test);
+    gc_decompressSaveBuffer(test);
+    bool bytes_match = plain && test->snapshotSize == plain_size
+                       && memcmp(test->saveBuffer, plain, (size_t)plain_size) == 0;
+    test->money = 0;
+    test->dayOfMonth = 0;
+    test->monthOfYear = 0;
+    test->year = 0;
+    gc_initSaveOrLoad(test, 5);
+    bool fields_match = test->money == 123456
+                        && test->dayOfMonth == 17
+                        && test->monthOfYear == 8
+                        && test->year == 1973;
+    free(plain);
+    free(test);
+    return bytes_match && fields_match;
+}
+
 int main(void) {
     midp_resource_set_root("resources");
 
@@ -63,6 +94,7 @@ int main(void) {
     const char *smoke = getenv("TRAIN_TYCOON_SMOKE");
     if (smoke) smoke_frames = atoi(smoke);
     if (smoke_frames && !run_pathfinding_smoke()) return 2;
+    if (smoke_frames && !run_save_roundtrip_smoke()) return 3;
 
     if (!mfb_open("Train Tycoon", MIDP_SCREEN_W, MIDP_SCREEN_H, WIN_SCALE, 32))
         return 1;

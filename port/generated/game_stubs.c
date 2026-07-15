@@ -21,38 +21,6 @@ void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
     (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6172-6304
 }
 
-void gc_saveGame(GameCanvas *gc) {
-    (void)gc; // TODO port: saveGame()  L6562-6584
-}
-
-void gc_writeRlePairInlined(GameCanvas *gc, MidpByteArray* byteArrayOutputStream, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: writeRlePairInlined(ByteArrayOutputStream byteArrayOutputStream, int n, int n2)  L6586-6598
-}
-
-void gc_crcSum(GameCanvas *gc, char* string) {
-    (void)gc; // TODO port: crcSum(String string)  L6600-6605
-}
-
-void gc_compressSaveBuffer(GameCanvas *gc) {
-    (void)gc; // TODO port: compressSaveBuffer()  L6607-6633
-}
-
-void gc_decompressSaveBuffer(GameCanvas *gc) {
-    (void)gc; // TODO port: decompressSaveBuffer()  L6635-6659
-}
-
-void gc_initSaveOrLoad(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: initSaveOrLoad(int n)  L6775-6965
-}
-
-void gc_saveAllMapArrays(GameCanvas *gc) {
-    (void)gc; // TODO port: saveAllMapArrays()  L6992-7012
-}
-
-void gc_restoreAllMapArrays(GameCanvas *gc) {
-    (void)gc; // TODO port: restoreAllMapArrays()  L7019-7046
-}
-
 void gc_setYearGraphMode(GameCanvas *gc, int32_t n, bool bl) {
     (void)gc; // TODO port: setYearGraphMode(int n, boolean bl)  L7232-7333
 }

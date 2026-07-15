@@ -172,8 +172,8 @@ void gc_archiveOrRecall(GameCanvas *gc) {
 // void computeYearEndMetrics()
 void gc_computeYearEndMetrics(GameCanvas *gc) {
     gc_archiveOrRecall(gc);
-    gc->yrN[0] = gc->xIndicator;
-    gc->yrCx[0] = gc->totalRevenue;
+    gc->yearProfitHistory[0] = gc->xIndicator;
+    gc->yearRevenueHistory[0] = gc->totalRevenue;
     gc->altDecadeOtherXTotal[0] = gc->decadeOtherXTotal + gc->xIndicator;
     gc->altDecadeRevenueTotal[0] = gc->revenueTotal + gc->totalRevenue;
     gc->decadeSpentWithCurrent = gc->decadeCostTotal + gc->totalSpent;
@@ -467,11 +467,11 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->prevEnterpriseTotal = gc->decadeEnterpriseTax;
     gc->prevXIndicator = gc->xIndicator;
     for (int n = 10; n >= 0; --n) {
-        gc->yrN[n + 1] = gc->yrN[n];
-        gc->yrCx[n + 1] = gc->yrCx[n];
-        gc->yrZ[n + 1] = gc->yrZ[n];
+        gc->yearProfitHistory[n + 1] = gc->yearProfitHistory[n];
+        gc->yearRevenueHistory[n + 1] = gc->yearRevenueHistory[n];
+        gc->yearCompanyValueHistory[n + 1] = gc->yearCompanyValueHistory[n];
     }
-    gc->yrN[0] = gc->yrCx[0] = gc->yrZ[0] = 0;
+    gc->yearProfitHistory[0] = gc->yearRevenueHistory[0] = gc->yearCompanyValueHistory[0] = 0;
     gc->decadeCostTotal += gc->totalSpent;
     gc->decadeSpentTotal += gc->aiMoneySpent;
     gc->decadeFuelCost += gc->fuelCostAccrued;

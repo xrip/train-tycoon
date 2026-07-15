@@ -305,9 +305,9 @@ field  a en   milestonesEnabled     # boolean; gates everyTwoTickZ
 # Year-end balance-sheet (newYearNotify shifts 11-year sliding windows)
 field  a fS   prevTrainRevenue   # int[500]; last year's per-train revenue (slid each Jan)
 field  a fs   prevStationRevenue  # short[48]; last year's per-station revenue
-field  a N    yrN                # int[11]; 11-year sliding window N
-field  a cx   yrCx               # int[11]; 11-year sliding window cx
-field  a Z    yrZ                # int[11]; 11-year sliding window Z
+field  a N    yearProfitHistory       # int[12]; yearly net result
+field  a cx   yearRevenueHistory      # int[12]; yearly revenue
+field  a Z    yearCompanyValueHistory # int[12]; yearly map/train value
 field  a V    prevFuelCost       # int; snapshot of cF at year start
 field  a f    prevSubsidyCost    # int; snapshot of ho at year start
 field  a eu   prevTotalRevenue   # int; snapshot of totalRevenue at year start
@@ -722,7 +722,7 @@ field  a eC   enterpriseTaxPct       # int; enterprise tax percent (eJ = totalRe
 field  a H    transientH             # int; transient save-buffer value
 field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name collision with snapshotPending)
 field  a ay   flagAy                 # boolean; flag toggled in case 23
-field  a ao   scenarioFlagAo         # int; scenario flag (n21 from scenario record)
+field  a ao   scenarioNoticeId       # int; notice id from scenario record
 
 # ---- Batch 36: monthly offer scheduling ----
 field  a aK   offerTypesByEffect     # byte[12][]; allowed offer type codes for each effect
@@ -771,6 +771,10 @@ field  a gO   nextPathY
 field  a ed   pathTieBreakCounter
 field  a bW   previewTrackOwnerCode
 field  a df   existingTrackOwnerCode
+
+# ---- Batch 45: saved legacy state ----
+field  a eb   savedLegacyMetricEb
+field  a bq   savedLegacyMetricBq
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----
@@ -796,7 +800,7 @@ method a a (IZ)V                     removeTrainFromMap      # recursive via nex
 method a a (Ljava/io/ByteArrayOutputStream;II)V  writeRlePairToStream  # RLE pair writer (255 + len + byte)
 method a a ([I)V                     saveOrLoadIntArray      # int[] save/load (savePendingMode dispatch)
 method a a (Ljavax/microedition/lcdui/Graphics;IIII[B)V  drawTextBox  # renders textbox with byArray chars
-method a c (Ljava/lang/String;)V     crcSum                  # computes CRC sum over saveBuffer
+method a c (Ljava/lang/String;)V     checkSaveByteSum        # debug byte sum; result is discarded
 
 # ---- Batch 32: monthly/every-tick handlers + save/load primitives + AI trigger ----
 method a Q ()V                      everyMonthlyTick         # monthly: applies menu row effects; decrements route flags

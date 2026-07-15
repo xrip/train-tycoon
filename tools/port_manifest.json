@@ -2881,13 +2881,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "eb",
+   "java_name": "savedLegacyMetricEb",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 330,
-   "c_name": "eb",
+   "c_name": "savedLegacyMetricEb",
    "c_type": "int32_t"
   },
   {
@@ -2931,33 +2931,33 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "yrN",
+   "java_name": "yearProfitHistory",
    "java_type": "int[]",
    "init": "new int[12]",
    "static": false,
    "final": false,
    "line": 335,
-   "c_name": "yrN",
+   "c_name": "yearProfitHistory",
    "c_type": "int32_t*"
   },
   {
-   "java_name": "yrCx",
+   "java_name": "yearRevenueHistory",
    "java_type": "int[]",
    "init": "new int[12]",
    "static": false,
    "final": false,
    "line": 336,
-   "c_name": "yrCx",
+   "c_name": "yearRevenueHistory",
    "c_type": "int32_t*"
   },
   {
-   "java_name": "yrZ",
+   "java_name": "yearCompanyValueHistory",
    "java_type": "int[]",
    "init": "new int[12]",
    "static": false,
    "final": false,
    "line": 337,
-   "c_name": "yrZ",
+   "c_name": "yearCompanyValueHistory",
    "c_type": "int32_t*"
   },
   {
@@ -3301,13 +3301,13 @@
    "c_type": "bool"
   },
   {
-   "java_name": "bq",
+   "java_name": "savedLegacyMetricBq",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 372,
-   "c_name": "bq",
+   "c_name": "savedLegacyMetricBq",
    "c_type": "int32_t"
   },
   {
@@ -3931,13 +3931,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "scenarioFlagAo",
+   "java_name": "scenarioNoticeId",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 435,
-   "c_name": "scenarioFlagAo",
+   "c_name": "scenarioNoticeId",
    "c_type": "int32_t"
   },
   {
@@ -5700,7 +5700,7 @@
    "start": 6562,
    "end": 6584,
    "c_name": "gc_saveGame",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "writeRlePairInlined",
@@ -5710,17 +5710,17 @@
    "start": 6586,
    "end": 6598,
    "c_name": "gc_writeRlePairInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
-   "java_name": "crcSum",
+   "java_name": "checkSaveByteSum",
    "ret": "void",
    "params": "String string",
-   "sig": "void crcSum(String string)",
+   "sig": "void checkSaveByteSum(String string)",
    "start": 6600,
    "end": 6605,
-   "c_name": "gc_crcSum",
-   "status": "pending"
+   "c_name": "gc_checkSaveByteSum",
+   "status": "ported"
   },
   {
    "java_name": "compressSaveBuffer",
@@ -5730,7 +5730,7 @@
    "start": 6607,
    "end": 6633,
    "c_name": "gc_compressSaveBuffer",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "decompressSaveBuffer",
@@ -5740,7 +5740,7 @@
    "start": 6635,
    "end": 6659,
    "c_name": "gc_decompressSaveBuffer",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "saveOrLoadBool",
@@ -5830,7 +5830,7 @@
    "start": 6775,
    "end": 6965,
    "c_name": "gc_initSaveOrLoad",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "writeSaveSnapshot",
@@ -5870,7 +5870,7 @@
    "start": 6992,
    "end": 7012,
    "c_name": "gc_saveAllMapArrays",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "loadSnapshotAndReturn",
@@ -5890,7 +5890,7 @@
    "start": 7019,
    "end": 7046,
    "c_name": "gc_restoreAllMapArrays",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "everyTenTick",

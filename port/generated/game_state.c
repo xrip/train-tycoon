@@ -296,14 +296,14 @@ void gc_fields_init(GameCanvas *gc) {
     gc->decadeFuelCost = 0;
     gc->decadeSubsidyTotal = 0;
     gc->decadeRevenueTotal = 0;
-    gc->eb = 0;
+    gc->savedLegacyMetricEb = 0;
     gc->decadeEnterpriseTotal = 0;
     gc->decadeXTotal = 0;
     gc->revenueTotal = 0;
     gc->decadeOtherXTotal = 0;
-    gc->yrN = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->yrCx = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->yrZ = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
+    gc->yearProfitHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
+    gc->yearRevenueHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
+    gc->yearCompanyValueHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
     gc->altDecadeOtherXTotal = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
     gc->altDecadeRevenueTotal = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
     gc->altDecadeTotalCost = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
@@ -420,7 +420,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->enterpriseTaxPct = 2;
     gc->scenarioStepCompare = 1;
     gc->scenarioStep = 0;
-    gc->scenarioFlagAo = 0;
+    gc->scenarioNoticeId = 0;
     midp_random_init(&gc->rng, midp_current_time_millis());
     gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
     gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
