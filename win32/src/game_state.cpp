@@ -321,8 +321,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->timerC2 = 0;
     gc->woodAgeTimer = 0;
     gc->phaseTimer = 0;
-    gc->tileQueue = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 50);
-    for (int _i = 0; _i < 50; ++_i) gc->tileQueue[_i] = (int8_t*)midp_alloc_arr(sizeof(int8_t), 3);
     gc->dc = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     gc->bx = 0;
     gc->fR = 0;
