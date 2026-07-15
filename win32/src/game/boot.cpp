@@ -1,5 +1,6 @@
 // Game start, resources, sprites, state changes, and save start.
 #include "game_methods.h"
+#include "support/record_store.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -127,22 +128,22 @@ void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2) {
     gc->snapshotSize = 0;
     gc->snapshotLoaded = false;
     if (gc->savePendingMode == 1) {
-        MidpRecordStore *rs = midp_rms_open("TTStore", true);
-        if (rs) {
-            int nr = midp_rms_num_records(rs);
+        std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
+        if (store) {
+            int nr = store->record_count();
             for (int i = 0; i < nr; ++i) {
-                int id = midp_rms_record_id_at(rs, i);
-                uint8_t *rec; int len;
-                if (!midp_rms_get_record(rs, id, &rec, &len)) continue;
-                if (len > 0 && (int8_t)rec[0] == n) {
+                int id = store->record_id_at(i);
+                const auto record = store->record(id);
+                if (!record) continue;
+                const int len = static_cast<int>(record->size());
+                if (len > 0 && (int8_t)(*record)[0] == n) {
                     gc->saveBuffer = GC_NEW(int8_t, len - 1);
-                    memcpy(gc->saveBuffer, rec + 1, (size_t)(len - 1));
+                    memcpy(gc->saveBuffer, record->data() + 1,
+                           (size_t)(len - 1));
                     gc->snapshotSize = len - 1;
                     gc->snapshotLoaded = true;
                 }
-                free(rec);
             }
-            midp_rms_close(rs);
         }
     } else {
         gc->snapshotLoaded = true;

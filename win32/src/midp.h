@@ -86,20 +86,6 @@ void midp_arr_set_len(const void *ptr, int count);
 void midp_arr_forget(const void *ptr); // on free, to avoid stale entries
 #define GC_NEW(type, n) ((type *)midp_alloc_arr(sizeof(type), (n)))
 
-// --- RMS RecordStore (backed by <name>.rms in the save directory) -------------
-typedef struct MidpRecordStore MidpRecordStore;
-// Where save files live (defaults to the current directory).
-void midp_rms_set_root(const char *root_dir);
-MidpRecordStore *midp_rms_open(const char *name, bool create_if_needed);
-int midp_rms_add_record(MidpRecordStore *s, const uint8_t *data, int off, int len); // returns id
-bool midp_rms_get_record(MidpRecordStore *s, int id, uint8_t **out, int *out_len);
-void midp_rms_delete_record(MidpRecordStore *s, int id);
-int midp_rms_num_records(MidpRecordStore *s);
-int midp_rms_first_record_id(MidpRecordStore *s); // -1 when empty (enumeration)
-int midp_rms_record_id_at(MidpRecordStore *s, int index); // enumerate; -1 if OOB
-int midp_rms_record_size(MidpRecordStore *s, int id);      // bytes, -1 if missing
-void midp_rms_close(MidpRecordStore *s);
-
 // --- Timing -------------------------------------------------------------------
 int64_t midp_current_time_millis(void);
 void midp_sleep(int millis);

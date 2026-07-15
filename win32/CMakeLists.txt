@@ -23,12 +23,12 @@ target_include_directories(train_tycoon_vendor PRIVATE
 add_library(train_tycoon_legacy STATIC
     src/midp_input.cpp
     src/midp_media_win32.cpp
-    src/midp_rms.cpp
     src/midp_stub.cpp
     src/midp_util.cpp
     src/support/java_random.cpp
     src/support/input_queue.cpp
     src/support/resource_reader.cpp
+    src/support/record_store.cpp
     src/support/image.cpp
     src/support/surface.cpp
     src/game_state.cpp

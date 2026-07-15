@@ -5,11 +5,13 @@
 #include "stable_digest.h"
 #include "support/input_queue.h"
 #include "support/resource_reader.h"
+#include "support/record_store.h"
 
 #include <array>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 
 namespace filesystem = std::filesystem;
 
@@ -211,35 +213,40 @@ TEST_CASE("fast: images own pixels and expose only valid drawing targets") {
 
 TEST_CASE("fast: record store keeps record bytes and ids") {
     constexpr std::array<std::uint8_t, 5> record{3, 1, 4, 1, 5};
-    CHECK(midp_rms_open("MissingRulesStore", false) == nullptr);
-    MidpRecordStore* store = midp_rms_open("RulesStore", true);
-    REQUIRE(store != nullptr);
-    CHECK(midp_rms_num_records(store) == 0);
-    const int record_id = midp_rms_add_record(
-        store, record.data(), 0, static_cast<int>(record.size()));
-    CHECK(record_id == 1);
-    midp_rms_close(store);
+    CHECK(RecordStore::open("MissingRulesStore", false) == nullptr);
+    {
+        std::unique_ptr<RecordStore> store = RecordStore::open("RulesStore", true);
+        REQUIRE(store != nullptr);
+        CHECK(store->record_count() == 0);
+        CHECK(store->add_record(record) == 1);
+    }
     CHECK(filesystem::is_regular_file(
-        filesystem::current_path() / "saves" / "RulesStore.rms"));
+        RecordStore::path_for("RulesStore")));
+    constexpr std::array<std::uint8_t, 21> expected_file{
+        1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0, 0,
+        3, 1, 4, 1, 5,
+    };
+    std::ifstream file(RecordStore::path_for("RulesStore"), std::ios::binary);
+    std::vector<std::uint8_t> file_bytes(expected_file.size());
+    REQUIRE(file.read(reinterpret_cast<char*>(file_bytes.data()),
+                      static_cast<std::streamsize>(file_bytes.size())));
+    CHECK(file_bytes == std::vector<std::uint8_t>(expected_file.begin(),
+                                                   expected_file.end()));
 
-    store = midp_rms_open("RulesStore", false);
+    std::unique_ptr<RecordStore> store = RecordStore::open("RulesStore", false);
     REQUIRE(store != nullptr);
-    CHECK(midp_rms_num_records(store) == 1);
-    CHECK(midp_rms_first_record_id(store) == 1);
-    CHECK(midp_rms_record_size(store, 1) == static_cast<int>(record.size()));
-    std::uint8_t* restored = nullptr;
-    int restored_size = 0;
-    REQUIRE(midp_rms_get_record(store, 1, &restored, &restored_size));
-    CHECK(restored_size == static_cast<int>(record.size()));
-    CHECK(std::memcmp(restored, record.data(), record.size()) == 0);
-    std::free(restored);
-    midp_rms_delete_record(store, 1);
-    midp_rms_close(store);
+    CHECK(store->record_count() == 1);
+    CHECK(store->first_record_id() == 1);
+    CHECK(store->record_size(1) == static_cast<int>(record.size()));
+    const auto restored = store->record(1);
+    REQUIRE(restored);
+    CHECK(*restored == std::vector<std::uint8_t>(record.begin(), record.end()));
+    store->delete_record(1);
+    store.reset();
 
-    store = midp_rms_open("RulesStore", false);
+    store = RecordStore::open("RulesStore", false);
     REQUIRE(store != nullptr);
-    CHECK(midp_rms_num_records(store) == 0);
-    midp_rms_close(store);
+    CHECK(store->record_count() == 0);
 }
 
 TEST_CASE("fast: small path search") {

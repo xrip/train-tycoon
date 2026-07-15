@@ -1,5 +1,6 @@
 // Save-buffer reading, writing, and compression.
 #include "game_methods.h"
+#include "support/record_store.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -51,25 +52,19 @@ int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n) {
 
 void gc_saveGame(GameCanvas *gc) {
     if (gc->savePendingMode != 0) return;
-    MidpRecordStore *store = midp_rms_open("TTStore", true);
+    std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
     if (!store) return;
-    for (int index = midp_rms_num_records(store) - 1; index >= 0; --index) {
-        int id = midp_rms_record_id_at(store, index);
-        uint8_t *record = NULL;
-        int length = 0;
-        if (!midp_rms_get_record(store, id, &record, &length)) continue;
-        bool same_slot = length > 0 && (int8_t)record[0] == gc->saveSlot;
-        free(record);
-        if (same_slot) midp_rms_delete_record(store, id);
+    for (int index = store->record_count() - 1; index >= 0; --index) {
+        int id = store->record_id_at(index);
+        const auto record = store->record(id);
+        if (!record) continue;
+        bool same_slot = !record->empty() && (int8_t)(*record)[0] == gc->saveSlot;
+        if (same_slot) store->delete_record(id);
     }
-    uint8_t *record = (uint8_t *)malloc((size_t)gc->snapshotSize + 1);
-    if (record) {
-        record[0] = (uint8_t)gc->saveSlot;
-        memcpy(record + 1, gc->saveBuffer, (size_t)gc->snapshotSize);
-        midp_rms_add_record(store, record, 0, gc->snapshotSize + 1);
-        free(record);
-    }
-    midp_rms_close(store);
+    std::vector<uint8_t> record(static_cast<std::size_t>(gc->snapshotSize) + 1);
+    record[0] = (uint8_t)gc->saveSlot;
+    memcpy(record.data() + 1, gc->saveBuffer, (size_t)gc->snapshotSize);
+    store->add_record(record);
 }
 
 void gc_writeRleRun(GameCanvas *gc, ByteBuffer& output,

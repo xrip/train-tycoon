@@ -97,6 +97,13 @@ real MIDI device test is an opt-in `device` label.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - All fixed frame golden values are unchanged.
 
+## RT-04 proof
+
+- `RecordStore` owns all record bytes and writes on scope end.
+- The save root uses `std::filesystem::path`.
+- A direct test proves the exact 21-byte `.rms` form for one fixed record.
+- Debug and Release fast/full tests passed on 2026-07-15.
+
 ## Manual baseline still needed
 
 - boot and menu;

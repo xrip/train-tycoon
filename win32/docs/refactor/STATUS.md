@@ -16,7 +16,8 @@ Only one row may be `in_progress`.
 | RT-01 | done | Debug and Release full tests passed | Values, random, bytes, and input |
 | RT-02 | done | Debug and Release full tests passed | Plain resources, RAII reader, and paths |
 | RT-03 | done | Debug and Release full tests passed | Owned images and borrowed surfaces |
-| RT-04..RT-05 | queued | - | Record files and music classes |
+| RT-04 | done | Debug and Release full tests passed | RAII record store and save path |
+| RT-05 | queued | - | WinMM music class and silent output |
 | OWN-01..OWN-04 | queued | - | Standard ownership |
 | MODEL-01 | queued | - | Enums and constants |
 | SAVE-01 | queued | - | Legacy save codec |

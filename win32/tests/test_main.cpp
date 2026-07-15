@@ -3,6 +3,7 @@
 
 #include "midp.h"
 #include "support/resource_reader.h"
+#include "support/record_store.h"
 
 #include <filesystem>
 #include <iostream>
@@ -22,9 +23,8 @@ int main(int argc, char** argv) {
     filesystem::create_directories(save_root);
     filesystem::remove(save_root / "TTStore.rms");
     filesystem::remove(save_root / "RulesStore.rms");
-    const std::string save_root_text = save_root.string();
     resources::set_root(resource_root);
-    midp_rms_set_root(save_root_text.c_str());
+    RecordStore::set_root(save_root);
 
     doctest::Context context(argc, argv);
     return context.run();

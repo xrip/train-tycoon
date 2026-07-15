@@ -50,7 +50,7 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 - `src/game/` — game rules, state changes, simulation, and drawing.
 - `src/game_state.*` — the full game state and its first values.
 - `src/game_methods.h` — game function declarations.
-- `src/support/` — owned values, images, input, and resource reading.
+- `src/support/` — owned values, images, input, resources, and record files.
 - `src/midp_*` — the small remaining local runtime used by the game.
 - `src/midp_media_win32.cpp` — WinMM MIDI music.
 - `src/third_party/stb_image.h` — PNG reading.
