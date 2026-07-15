@@ -146,12 +146,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->selectionCost = 0;
     gc->buildCancelled = true;
     gc->trackTileCount = 0;
-    static const int32_t dk__d[] = {-1, 1, 0, 0, -1, 1, 0};
-    gc->dk = (int32_t*)midp_alloc_arr(sizeof(int32_t), (int)(sizeof(dk__d)/sizeof(int32_t)));
-    memcpy(gc->dk, dk__d, sizeof(dk__d));
-    static const int32_t j__d[] = {0, 0, -1, 1, 0, 0, -1};
-    gc->j = (int32_t*)midp_alloc_arr(sizeof(int32_t), (int)(sizeof(j__d)/sizeof(int32_t)));
-    memcpy(gc->j, j__d, sizeof(j__d));
     gc->serviceVehicleAtCursor = 0;
     gc->wagonType = 0;
     gc->wagonDiscountType = 0;

@@ -205,8 +205,6 @@ typedef struct GameCanvas {
     int32_t selectionCost;
     bool buildCancelled;
     int32_t trackTileCount;
-    int32_t* dk;
-    int32_t* j;
     int32_t serviceVehicleAtCursor;
     int32_t wagonType;
     int32_t wagonDiscountType;
