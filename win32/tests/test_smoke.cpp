@@ -211,6 +211,7 @@ TEST_CASE("fast: images own pixels and expose only valid drawing targets") {
 
 TEST_CASE("fast: record store keeps record bytes and ids") {
     constexpr std::array<std::uint8_t, 5> record{3, 1, 4, 1, 5};
+    CHECK(midp_rms_open("MissingRulesStore", false) == nullptr);
     MidpRecordStore* store = midp_rms_open("RulesStore", true);
     REQUIRE(store != nullptr);
     CHECK(midp_rms_num_records(store) == 0);
@@ -218,6 +219,8 @@ TEST_CASE("fast: record store keeps record bytes and ids") {
         store, record.data(), 0, static_cast<int>(record.size()));
     CHECK(record_id == 1);
     midp_rms_close(store);
+    CHECK(filesystem::is_regular_file(
+        filesystem::current_path() / "saves" / "RulesStore.rms"));
 
     store = midp_rms_open("RulesStore", false);
     REQUIRE(store != nullptr);

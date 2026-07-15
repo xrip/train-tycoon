@@ -36,7 +36,11 @@ ownership. A fully clipped image draw now returns before making an invalid
 source pointer. Debug and Release fast/full tests passed with all fixed frame
 digests unchanged on 2026-07-15.
 
+`RT-04` has three record-store owners: save, load, and the direct test. Direct
+checks lock missing-store behavior, close-time file creation, record ids, data,
+delete, and reopen behavior.
+
 ## Next action
 
-Map every `MidpRecordStore` open, close, read, write, and delete call. Add direct
-scope-close and root-path checks before changing the type.
+Add the RAII `RecordStore` and path-based save root. Move the test first, then
+the load and save callers.
