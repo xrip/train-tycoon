@@ -10,8 +10,8 @@ void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n) {
     gc->snapshotSize += n;
 }
 
-// Byte array save/load over an explicit length. The registry-based and
-// std::array overloads both forward here so the byte order stays identical.
+// Byte array save/load over an explicit length. The std::array and Grid
+// overloads forward here so the byte order stays identical.
 void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t *byArray, int len) {
     if (gc->savePendingMode == 2) {
         for (int i = 0; i < len; ++i) byArray[i] = 0;
@@ -23,17 +23,6 @@ void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t *byArray, int len) {
         memcpy(byArray, gc->saveBuffer.data() + gc->saveReadOffset, (size_t)len);
         gc->saveReadOffset += len;
     }
-}
-
-// byte[] byArray - length recovered from the array-length registry.
-void gc_saveOrLoadByteArrayInlined(GameCanvas *gc, int8_t *byArray) {
-    gc_saveOrLoadByteSpan(gc, byArray, midp_arr_len(byArray));
-}
-
-// void saveOrLoadByteMatrixInlined(byte[][] byArray)
-void gc_saveOrLoadByteMatrixInlined(GameCanvas *gc, int8_t **byArray) {
-    int rows = midp_arr_len(byArray);
-    for (int i = 0; i < rows; ++i) gc_saveOrLoadByteArrayInlined(gc, byArray[i]);
 }
 
 // Short array save/load over an explicit length.
@@ -53,17 +42,6 @@ void gc_saveOrLoadShortSpan(GameCanvas *gc, int16_t *sArray, int len) {
             memcpy(&sArray[i], &bits, sizeof(sArray[i]));
         }
     }
-}
-
-// short[] sArray - length recovered from the array-length registry.
-void gc_saveOrLoadShortArrayInlined(GameCanvas *gc, int16_t *sArray) {
-    gc_saveOrLoadShortSpan(gc, sArray, midp_arr_len(sArray));
-}
-
-// void saveOrLoadShortMatrixInlined(short[][] sArray)
-void gc_saveOrLoadShortMatrixInlined(GameCanvas *gc, int16_t **sArray) {
-    int rows = midp_arr_len(sArray);
-    for (int i = 0; i < rows; ++i) gc_saveOrLoadShortArrayInlined(gc, sArray[i]);
 }
 
 // Int array save/load over an explicit length.
@@ -87,11 +65,6 @@ void gc_saveOrLoadIntSpan(GameCanvas *gc, int32_t *nArray, int len) {
             memcpy(&nArray[i], &bits, sizeof(nArray[i]));
         }
     }
-}
-
-// int[] nArray - length recovered from the array-length registry.
-void gc_saveOrLoadIntArrayInlined(GameCanvas *gc, int32_t *nArray) {
-    gc_saveOrLoadIntSpan(gc, nArray, midp_arr_len(nArray));
 }
 
 // boolean loadSnapshotAndReturn()

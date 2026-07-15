@@ -8,9 +8,6 @@
 #include <span>
 #include <vector>
 
-inline std::span<const int8_t> gc_tracked_codes(const int8_t* codes) {
-    return {codes, static_cast<size_t>(midp_arr_len(codes))};
-}
 // Owned code rows carry their own length.
 inline std::span<const int8_t> gc_tracked_codes(const std::vector<int8_t>& codes) {
     return {codes.data(), codes.size()};
@@ -153,13 +150,8 @@ void gc_decompressSaveBuffer(GameCanvas *gc);
 bool gc_saveOrLoadBool(GameCanvas *gc, bool bl);
 int8_t gc_saveOrLoadByte(GameCanvas *gc, int8_t by);
 int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n);
-void gc_saveOrLoadByteMatrixInlined(GameCanvas *gc, int8_t** byArray);
-void gc_saveOrLoadShortMatrixInlined(GameCanvas *gc, int16_t** sArray);
-void gc_saveOrLoadByteArrayInlined(GameCanvas *gc, int8_t* byArray);
-void gc_saveOrLoadShortArrayInlined(GameCanvas *gc, int16_t* sArray);
-void gc_saveOrLoadIntArrayInlined(GameCanvas *gc, int32_t* nArray);
-// Explicit-length save/load: used for owned std::array state that has no
-// entry in the array-length registry. Same byte order as the raw versions.
+// Explicit-length save/load cores. The std::array, matrix, and Grid overloads
+// below forward here; the owned containers carry their own length.
 void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t* byArray, int len);
 void gc_saveOrLoadShortSpan(GameCanvas *gc, int16_t* sArray, int len);
 void gc_saveOrLoadIntSpan(GameCanvas *gc, int32_t* nArray, int len);
