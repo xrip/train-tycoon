@@ -135,7 +135,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->offerRowIndex = 0;
     gc->duplicateRowState = 0;
     gc->highScoreUploadRequested = false;
-    gc->playerNameCodes = (int8_t*)midp_alloc_arr(sizeof(int8_t), 10);
     gc->playerNameCursorMarker = (int8_t*)midp_alloc_arr(sizeof(int8_t), 10);
     gc->routeSlotIndex = 0;
     gc->spriteCycleCursor = 0;
@@ -293,8 +292,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->music_volume_level = 2;
     gc->trainRevenueScore = 0;
     gc->bestScenarioScore = 0;
-    gc->scenarioScores = (int32_t*)midp_alloc_arr(sizeof(int32_t), 13);
-    gc->leaderboardScores = (int32_t*)midp_alloc_arr(sizeof(int32_t), 14);
     gc->tileOffsetX = (int8_t*)midp_alloc_arr(sizeof(int8_t), 1);
     gc->tileOffsetY = (int8_t*)midp_alloc_arr(sizeof(int8_t), 1);
     gc->numActiveTileAnimations = 0;
@@ -345,6 +342,5 @@ void gc_fields_init(GameCanvas *gc) {
     gc->tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
     gc->lastViewportCenterX = -1;
     gc->viewportCenterYCached = -1;
-    gc->visibleTrains = (int16_t*)midp_alloc_arr(sizeof(int16_t), 500);
     gc->visibleTrainCount = 0;
 }

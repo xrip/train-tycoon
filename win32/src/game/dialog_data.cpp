@@ -13,6 +13,12 @@ static std::vector<int8_t> copy_codes(const int8_t *codes) {
     return {source.begin(), source.end()};
 }
 
+// Owned code arrays carry their own length, so copy the whole array.
+template <std::size_t N>
+static std::vector<int8_t> copy_codes(const std::array<int8_t, N> &codes) {
+    return {codes.begin(), codes.end()};
+}
+
 static std::vector<int8_t> join_codes(std::span<const int8_t> first,
                                       std::span<const int8_t> second) {
     std::vector<int8_t> result;

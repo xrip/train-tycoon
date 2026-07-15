@@ -183,7 +183,7 @@ typedef struct GameCanvas {
     int32_t offerEffectTransitionCode;
     int32_t currentScenarioScore;
     bool highScoreUploadRequested;
-    int8_t* playerNameCodes;
+    std::array<int8_t, 10> playerNameCodes{};
     int8_t* playerNameCursorMarker;
     int8_t routeSlotIndex;
     int8_t spriteCycleCursor;
@@ -359,8 +359,8 @@ typedef struct GameCanvas {
     std::unique_ptr<MusicOutput> music_output;
     int32_t trainRevenueScore;
     int32_t bestScenarioScore;
-    int32_t* scenarioScores;
-    int32_t* leaderboardScores;
+    std::array<int32_t, 13> scenarioScores{};
+    std::array<int32_t, 14> leaderboardScores{};
     int8_t* tileOffsetX;
     int8_t* tileOffsetY;
     int32_t numActiveTileAnimations;
@@ -426,7 +426,7 @@ typedef struct GameCanvas {
     std::array<int8_t, 26> tileSpriteYOffsetByCode{};
     int32_t lastViewportCenterX;
     int32_t viewportCenterYCached;
-    int16_t* visibleTrains;
+    std::array<int16_t, 500> visibleTrains{};
     int32_t visibleTrainCount;
     int32_t viewportX1;
     int32_t viewportY1;
