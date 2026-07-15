@@ -97,7 +97,7 @@ bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
         if (n2 == 2 && gc->stationDirectionCode[gc->stationDirCursor] % 2 == 1) return true;
     }
     if (n == 22) {
-        int slot = gc->aiWagonsLastSeen;
+        int slot = gc->serviceVehicleAtCursor;
         if (n2 == 0 && gc->serviceResourceStock[slot][0] == 0 && gc->serviceResourceStock[slot][1] == 0
             && gc->serviceResourceStock[slot][2] == 0 && gc->serviceResourceStock[slot][3] == 0) return true;
         if (n2 == 1 && gc->serviceResourceStock[slot][0] > 0) return true;

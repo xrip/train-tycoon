@@ -58,35 +58,8 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
     (void)gc; // TODO port: clearPathDistanceGrid()  L5296-5377
 }
 
-void gc_addSelectedOption(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: addSelectedOption(int n)  L5577-5583
-}
-
-void gc_popSelectedOption(GameCanvas *gc) {
-    (void)gc; // TODO port: popSelectedOption()  L5585-5591
-}
-
-bool gc_buyTrainAtCursor(GameCanvas *gc) {
-    (void)gc; // TODO port: buyTrainAtCursor()  L5593-5613
-    return false;
-}
-
-int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6) {
-    (void)gc; // TODO port: allocateTrainSlot(int n, int n2, int n3, int n4, int n5, int n6)  L5782-5808
-    return 0;
-}
-
 void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
     (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6172-6304
-}
-
-void gc_decrementOptionCounts(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: decrementOptionCounts(int n)  L6484-6489
-}
-
-bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t* nArray) {
-    (void)gc; // TODO port: applyTrainUpgradeInlined(int n, int n2, int[] nArray)  L6491-6515
-    return false;
 }
 
 void gc_saveGame(GameCanvas *gc) {
@@ -153,18 +126,6 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
 int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t n) {
     (void)gc; // TODO port: computeMenuRowDisplayValue(int n)  L7739-7771
     return 0;
-}
-
-void gc_adjustRowValueByCode(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: adjustRowValueByCode(int n)  L8093-8111
-}
-
-void gc_decCountsForOption(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: decCountsForOption(int n)  L8113-8139
-}
-
-void gc_incrementRowValueType14(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: incrementRowValueType14(int n)  L8149-8155
 }
 
 void gc_loadMusic(GameCanvas *gc) {

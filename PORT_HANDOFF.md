@@ -78,7 +78,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **149 / 196 (76%)** — 148 full + 1 partial (`update`).
+- Methods done: **158 / 196 (80%)** — 157 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -131,6 +131,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   menu action, track preview/confirm/cancel, track and station placement,
   removal, train picking, service-slot allocation, train cost, and city service
   counts. The direct `openBuildMenu` path no longer enters generated stubs.
+- **Train buying and upgrades are ported.** The same file now has train-slot
+  setup, engine and cargo cost use, cargo option counts, buy, and upgrade
+  actions. The related menu-dispatch calls no longer enter generated stubs.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -150,15 +153,14 @@ The map-gen and state-30 simulation chains are **done**. Selecting "new game"
 generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
 UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port train buying (`buyTrainAtCursor`, its slot/options helpers) and the
-   pathfinding cluster
+1. Port the pathfinding cluster
    (`tryBuildPath`, `validatePathStep`, `findPathStep`, `floodFillPath`,
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
 2. Add a smoke path that enters state 30 and exercises one full paint/input
    frame before treating gameplay rendering as behaviorally proved.
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 149 already
+`show NAME` throughout. Each is a mechanical faithful port like the 158 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

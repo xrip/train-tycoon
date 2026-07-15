@@ -2011,13 +2011,13 @@
    "c_type": "int32_t*"
   },
   {
-   "java_name": "aiWagonsLastSeen",
+   "java_name": "serviceVehicleAtCursor",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 243,
-   "c_name": "aiWagonsLastSeen",
+   "c_name": "serviceVehicleAtCursor",
    "c_type": "int32_t"
   },
   {
@@ -5420,7 +5420,7 @@
    "start": 5577,
    "end": 5583,
    "c_name": "gc_addSelectedOption",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "popSelectedOption",
@@ -5430,7 +5430,7 @@
    "start": 5585,
    "end": 5591,
    "c_name": "gc_popSelectedOption",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "buyTrainAtCursor",
@@ -5440,7 +5440,7 @@
    "start": 5593,
    "end": 5613,
    "c_name": "gc_buyTrainAtCursor",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "tickInputOrAi",
@@ -5470,7 +5470,7 @@
    "start": 5782,
    "end": 5808,
    "c_name": "gc_allocateTrainSlot",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "revenueOrYear",
@@ -5643,14 +5643,14 @@
    "status": "ported"
   },
   {
-   "java_name": "decrementOptionCounts",
+   "java_name": "decrementTrainCargoOptionCounts",
    "ret": "void",
    "params": "int n",
-   "sig": "void decrementOptionCounts(int n)",
+   "sig": "void decrementTrainCargoOptionCounts(int n)",
    "start": 6484,
    "end": 6489,
-   "c_name": "gc_decrementOptionCounts",
-   "status": "pending"
+   "c_name": "gc_decrementTrainCargoOptionCounts",
+   "status": "ported"
   },
   {
    "java_name": "applyTrainUpgradeInlined",
@@ -5660,7 +5660,7 @@
    "start": 6491,
    "end": 6515,
    "c_name": "gc_applyTrainUpgradeInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "loadGame",
@@ -6133,24 +6133,24 @@
    "status": "ported"
   },
   {
-   "java_name": "adjustRowValueByCode",
+   "java_name": "incrementCargoOptionCount",
    "ret": "void",
    "params": "int n",
-   "sig": "void adjustRowValueByCode(int n)",
+   "sig": "void incrementCargoOptionCount(int n)",
    "start": 8093,
    "end": 8111,
-   "c_name": "gc_adjustRowValueByCode",
-   "status": "pending"
+   "c_name": "gc_incrementCargoOptionCount",
+   "status": "ported"
   },
   {
-   "java_name": "decCountsForOption",
+   "java_name": "decrementCargoOptionCount",
    "ret": "void",
    "params": "int n",
-   "sig": "void decCountsForOption(int n)",
+   "sig": "void decrementCargoOptionCount(int n)",
    "start": 8113,
    "end": 8139,
-   "c_name": "gc_decCountsForOption",
-   "status": "pending"
+   "c_name": "gc_decrementCargoOptionCount",
+   "status": "ported"
   },
   {
    "java_name": "incrementRowValueType13",
@@ -6170,7 +6170,7 @@
    "start": 8149,
    "end": 8155,
    "c_name": "gc_incrementRowValueType14",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "loadMusic",

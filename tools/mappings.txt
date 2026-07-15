@@ -253,7 +253,7 @@ field  a s    unitCost             # long; price of one wagon (output of af())
 field  a gu   aiWagonsBought       # int; count of wagons purchased by AI
 field  a gE   aiMoneySpent         # long; AI running total alongside money
 field  a hv   vehicleFlags         # byte[500]; bit 0x40 active, 0x20 retreating
-field  a fD   aiWagonsLastSeen     # byte[]; per-wagon-id seen count (read in y())
+field  a fD   serviceVehicleAtCursor
 # Cursor + track-mutation reads (I() picks trains at cursor, J normalises track bits)
 field  a du   stationDirCursor     # byte; read when trackMap cursor & 0xC0==192
 field  a gL   junctionDirCursor    # byte; read when trackMap cursor & 0xC0==128
@@ -280,7 +280,7 @@ method a B ()V                     viewportZoomKey
 method a r (I)V                    addSelectedOption
 method a V ()V                     popSelectedOption
 method a af ()V                    computeTrainCost
-method a l (I)V                    decCountsForOption
+method a l (I)V                    decrementCargoOptionCount
 method a E (I)V                    buildPlaceTrackPiece
 method a l (II)I                   spawnTrainCar   # int return: slot, or 500
 method a n (II)I                   neighboursMask    # int neighbours query (W,x used)
@@ -581,7 +581,7 @@ method a f (II)V                placeTrainAt              # writes bh/dn/fW per 
 method a e (I)V                 duplicateMenuRow          # copies menuRowType[n] into row 5
 method a h (I)V                 recordTrainRevenue
 method a t (II)V                recordDeliveredResource
-method a w (I)V                 adjustRowValueByCode      # code 4 -> +1 to type 10, code 6 -> +1 to type 9
+method a w (I)V                 incrementCargoOptionCount
 
 # ---- Batch 22: more menu + save helpers + canvas resize ----
 method a x (I)V                 incrementRowValueType13   # menuRowValue[i] += n for type==13
@@ -819,7 +819,7 @@ method a i (II)Z                      trainCanLoadAtServiceVehicle
 method a b (Ljavax/microedition/lcdui/Graphics;I)V  drawTrainAtCursor # renders train sprite at cursor
 method a i (I)V                       mergeTrainAt            # merges colliding trains at (trainX[n], trainY[n])
 method a i (III)Z                     isTrainCarAtRecursive   # recursive: check if any car is at (n2,n3)
-method a o (I)V                       decrementOptionCounts   # recursive via nextCar
+method a o (I)V                       decrementTrainCargoOptionCounts
 method a a (II[I)Z                    applyTrainUpgrade       # sets trainStateCode with new options, charges money
 method a k (I)V                       ensureSaveBufferCapacity # allocates/grows saveBuffer
 method a s ()I                        readShortFromBuffer     # signed-byte extension helper

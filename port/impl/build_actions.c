@@ -214,9 +214,9 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
     gc->trainAtCursor =
         gc_findTrainHeadAt(gc, gc->tileCursorX, gc->tileCursorY);
     if (gc->trainAtCursor == 5000) {
-        gc->aiWagonsLastSeen =
+        gc->serviceVehicleAtCursor =
             gc_findServiceVehicleAt(gc, gc->tileCursorX, gc->tileCursorY);
-        if (gc->aiWagonsLastSeen != 5000) {
+        if (gc->serviceVehicleAtCursor != 5000) {
             gc->ready = false;
             gc->transitionCode = 22;
             gc_setState(gc, 20);
@@ -646,4 +646,136 @@ void gc_openBuildMenu(GameCanvas *gc) {
             }
             break;
     }
+}
+
+void gc_addSelectedOption(GameCanvas *gc, int32_t option) {
+    for (int slot = 0; slot < 5; ++slot) {
+        if (gc->wagonOptionSlots[slot] != -1) continue;
+        gc->wagonOptionSlots[slot] = option;
+        break;
+    }
+}
+
+void gc_popSelectedOption(GameCanvas *gc) {
+    for (int slot = 4; slot >= 0; --slot) {
+        if (gc->wagonOptionSlots[slot] == -1) continue;
+        gc->wagonOptionSlots[slot] = -1;
+        break;
+    }
+}
+
+int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t x, int32_t y,
+                             int32_t engine_type, int32_t era,
+                             int32_t direction, int32_t energy) {
+    int train = 500;
+    for (int slot = 0; slot < 500; ++slot) {
+        if ((gc->trainFlags[slot] & 0x80) == 0) {
+            train = slot;
+            break;
+        }
+    }
+    if (train != 500) {
+        gc->trainFlags[train] = (int8_t)(0xC0 | engine_type);
+        gc->nextCar[train] = -1;
+        gc->trainX[train] = (int8_t)x;
+        gc->trainY[train] = (int8_t)y;
+        gc->trainDir[train] = (int8_t)direction;
+        gc->wagonEnergyRemaining[train] = (int8_t)energy;
+        gc->trainPhase[train] = 0;
+        gc->trainEnergyOrCount[train] = 1;
+        gc->lastServiceVehicle[train] = -1;
+        gc->trainEraOrStage[train] = (int8_t)era;
+        gc->trainAgeOrTimer[train] = 0;
+        gc->trainStateCode[train] = 7;
+        gc->trainAiOverride[train] = 0;
+    }
+    gc->lastViewportCenterX = -1;
+    return train;
+}
+
+void gc_incrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
+    for (int row = 0; row < 5; ++row) {
+        if (car_type == 6 && gc->menuRowType[row] == 9)
+            ++gc->menuRowValue[row];
+        if (car_type == 4 && gc->menuRowType[row] == 10)
+            ++gc->menuRowValue[row];
+        if (car_type == 3 && gc->menuRowType[row] == 11)
+            ++gc->menuRowValue[row];
+        if (car_type == 2 && gc->menuRowType[row] == 12)
+            ++gc->menuRowValue[row];
+    }
+}
+
+void gc_decrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
+    for (int row = 0; row < 5; ++row) {
+        if ((car_type == 7 || car_type == 6) && gc->menuRowType[row] == 9)
+            --gc->menuRowValue[row];
+        if ((car_type == 5 || car_type == 4) && gc->menuRowType[row] == 10)
+            --gc->menuRowValue[row];
+        if (car_type == 3 && gc->menuRowType[row] == 11)
+            --gc->menuRowValue[row];
+        if (car_type == 2 && gc->menuRowType[row] == 12)
+            --gc->menuRowValue[row];
+    }
+}
+
+void gc_decrementTrainCargoOptionCounts(GameCanvas *gc, int32_t car) {
+    if (car == -1) return;
+    gc_decrementCargoOptionCount(gc, gc->trainFlags[car] & 7);
+    gc_decrementTrainCargoOptionCounts(gc, gc->nextCar[car]);
+}
+
+void gc_incrementRowValueType14(GameCanvas *gc, int32_t amount) {
+    for (int row = 0; row < 5; ++row)
+        if (gc->menuRowType[row] == 14) gc->menuRowValue[row] += amount;
+}
+
+bool gc_buyTrainAtCursor(GameCanvas *gc) {
+    if (gc->money < gc->unitCost) {
+        gc_enterOutOfMoneyState(gc);
+        return false;
+    }
+    int direction =
+        (gc->vehicleFlags[gc->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
+    int train = gc_allocateTrainSlot(
+        gc, gc->tileCursorX, gc->tileCursorY,
+        gc->wagonType < 3 ? 0 : 1, gc->wagonType,
+        direction, 8 - gc->wagonType);
+    for (int option = 0; option < 5; ++option) {
+        if (gc->wagonOptionSlots[option] < 0) continue;
+        int car_type = 2 + gc->wagonOptionSlots[option];
+        if (car_type == 5) ++car_type;
+        train = gc_spawnTrainCar(gc, train, car_type);
+        gc_incrementCargoOptionCount(gc, car_type);
+    }
+    gc->money -= gc->unitCost;
+    gc->aiMoneySpent += gc->unitCost;
+    gc_pushMoneyHistory(gc, -gc->unitCost);
+    ++gc->aiWagonsBought;
+    return true;
+}
+
+bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t train,
+                                 int32_t state_code, int32_t *options) {
+    int cost = gc->unitCost - gc->currentTrainCostSnapshot;
+    if (gc->money < cost) {
+        gc_enterOutOfMoneyState(gc);
+        return false;
+    }
+    gc->trainStateCode[train] = (int16_t)state_code;
+    gc_decrementTrainCargoOptionCounts(gc, gc->nextCar[train]);
+    for (int option = 0; option < 5; ++option) {
+        if (options[option] > -1) {
+            int car_type = options[option] + 2;
+            if (car_type == 5) ++car_type;
+            gc_incrementCargoOptionCount(gc, car_type);
+        }
+        gc->trainStateCode[train] = (int16_t)(
+            gc->trainStateCode[train]
+            | (options[option] & 7) << (3 + 3 * option));
+    }
+    gc->money -= cost;
+    gc->aiMoneySpent += cost;
+    if (cost != 0) gc_pushMoneyHistory(gc, -cost);
+    return true;
 }

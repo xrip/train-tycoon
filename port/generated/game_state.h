@@ -202,7 +202,7 @@ typedef struct GameCanvas {
     int32_t trackTileCount; // int trackTileCount
     int32_t* dk; // int[] dk
     int32_t* j; // int[] j
-    int32_t aiWagonsLastSeen; // int aiWagonsLastSeen
+    int32_t serviceVehicleAtCursor; // int serviceVehicleAtCursor
     int32_t wagonType; // int wagonType
     int32_t wagonDiscountType; // int wagonDiscountType
     int32_t* wagonOptionSlots; // int[] wagonOptionSlots

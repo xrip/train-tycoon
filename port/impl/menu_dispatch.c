@@ -61,7 +61,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     if (gc->currentTrainCostSnapshot != 0)
                         gc_pushMoneyHistory(gc, gc->currentTrainCostSnapshot * 70 / 100);
                     int16_t s = gc->nextCar[gc->trainAtCursor];
-                    gc_decrementOptionCounts(gc, s);
+                    gc_decrementTrainCargoOptionCounts(gc, s);
                     gc->trainFlags[gc->trainAtCursor] = 0;
                     while (s != -1) { gc->trainFlags[s] = 0; s = gc->nextCar[s]; }
                     gc_setState(gc, 30);

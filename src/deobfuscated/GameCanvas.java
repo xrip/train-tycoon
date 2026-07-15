@@ -240,7 +240,7 @@ implements Runnable {
     int trackTileCount = 0;
     int[] dk = new int[]{-1, 1, 0, 0, -1, 1, 0};
     int[] j = new int[]{0, 0, -1, 1, 0, 0, -1};
-    int aiWagonsLastSeen = 0;
+    int serviceVehicleAtCursor = 0;
     int wagonType = 0;
     int wagonDiscountType = 0;
     int[] wagonOptionSlots = new int[5];
@@ -2595,8 +2595,8 @@ implements Runnable {
                     this.transitionCode = 26;
                     this.setState(20);
                 } else {
-                    this.aiWagonsLastSeen = this.findServiceVehicleAt(this.tileCursorX, this.tileCursorY);
-                    if (this.aiWagonsLastSeen != 5000) {
+                    this.serviceVehicleAtCursor = this.findServiceVehicleAt(this.tileCursorX, this.tileCursorY);
+                    if (this.serviceVehicleAtCursor != 5000) {
                         this.ready = false;
                         this.transitionCode = 22;
                         this.setState(20);
@@ -3700,40 +3700,40 @@ implements Runnable {
             }
         }
         if (n == 22) {
-            if (n2 == 0 && this.serviceResourceStock[this.aiWagonsLastSeen][0] == 0 && this.serviceResourceStock[this.aiWagonsLastSeen][1] == 0 && this.serviceResourceStock[this.aiWagonsLastSeen][2] == 0 && this.serviceResourceStock[this.aiWagonsLastSeen][3] == 0) {
+            if (n2 == 0 && this.serviceResourceStock[this.serviceVehicleAtCursor][0] == 0 && this.serviceResourceStock[this.serviceVehicleAtCursor][1] == 0 && this.serviceResourceStock[this.serviceVehicleAtCursor][2] == 0 && this.serviceResourceStock[this.serviceVehicleAtCursor][3] == 0) {
                 return true;
             }
-            if (n2 == 1 && this.serviceResourceStock[this.aiWagonsLastSeen][0] > 0) {
+            if (n2 == 1 && this.serviceResourceStock[this.serviceVehicleAtCursor][0] > 0) {
                 return true;
             }
-            if (n2 == 2 && this.serviceResourceStock[this.aiWagonsLastSeen][1] > 0) {
+            if (n2 == 2 && this.serviceResourceStock[this.serviceVehicleAtCursor][1] > 0) {
                 return true;
             }
-            if (n2 == 3 && this.serviceResourceStock[this.aiWagonsLastSeen][2] > 0) {
+            if (n2 == 3 && this.serviceResourceStock[this.serviceVehicleAtCursor][2] > 0) {
                 return true;
             }
-            if (n2 == 4 && this.serviceResourceStock[this.aiWagonsLastSeen][3] > 0) {
+            if (n2 == 4 && this.serviceResourceStock[this.serviceVehicleAtCursor][3] > 0) {
                 return true;
             }
-            if (n2 == 5 && this.serviceResourceStock[this.aiWagonsLastSeen][4] > 0) {
+            if (n2 == 5 && this.serviceResourceStock[this.serviceVehicleAtCursor][4] > 0) {
                 return true;
             }
-            if (n2 == 6 && this.serviceUnloadFlags[this.aiWagonsLastSeen] == 0) {
+            if (n2 == 6 && this.serviceUnloadFlags[this.serviceVehicleAtCursor] == 0) {
                 return true;
             }
-            if (n2 == 7 && (this.serviceUnloadFlags[this.aiWagonsLastSeen] & 1) == 1) {
+            if (n2 == 7 && (this.serviceUnloadFlags[this.serviceVehicleAtCursor] & 1) == 1) {
                 return true;
             }
-            if (n2 == 8 && (this.serviceUnloadFlags[this.aiWagonsLastSeen] & 2) == 2) {
+            if (n2 == 8 && (this.serviceUnloadFlags[this.serviceVehicleAtCursor] & 2) == 2) {
                 return true;
             }
-            if (n2 == 9 && (this.serviceUnloadFlags[this.aiWagonsLastSeen] & 4) == 4) {
+            if (n2 == 9 && (this.serviceUnloadFlags[this.serviceVehicleAtCursor] & 4) == 4) {
                 return true;
             }
-            if (n2 == 10 && (this.serviceUnloadFlags[this.aiWagonsLastSeen] & 8) == 8) {
+            if (n2 == 10 && (this.serviceUnloadFlags[this.serviceVehicleAtCursor] & 8) == 8) {
                 return true;
             }
-            if (n2 == 11 && (this.serviceUnloadFlags[this.aiWagonsLastSeen] & 0x10) == 16) {
+            if (n2 == 11 && (this.serviceUnloadFlags[this.serviceVehicleAtCursor] & 0x10) == 16) {
                 return true;
             }
         }
@@ -3910,7 +3910,7 @@ implements Runnable {
                 return this.b(this.unitCost - this.currentTrainCostSnapshot);
             }
             case 22: {
-                return this.p(this.serviceResourceStock[this.aiWagonsLastSeen][n2], 0);
+                return this.p(this.serviceResourceStock[this.serviceVehicleAtCursor][n2], 0);
             }
             case 26: {
                 int n3;
@@ -4300,7 +4300,7 @@ implements Runnable {
                             this.pushMoneyHistory(this.currentTrainCostSnapshot * 70 / 100);
                         }
                         short s = this.nextCar[this.trainAtCursor];
-                        this.decrementOptionCounts(s);
+                        this.decrementTrainCargoOptionCounts(s);
                         this.trainFlags[this.trainAtCursor] = 0;
                         while (s != -1) {
                             this.trainFlags[s] = 0;
@@ -5592,7 +5592,7 @@ implements Runnable {
 
     boolean buyTrainAtCursor() {
         if (this.money >= this.unitCost) {
-            int n = this.allocateTrainSlot(this.tileCursorX, this.tileCursorY, this.wagonType < 3 ? 0 : 1, this.wagonType, (this.vehicleFlags[this.aiWagonsLastSeen] & 0x40) == 64 ? 2 : 0, 8 - this.wagonType);
+            int n = this.allocateTrainSlot(this.tileCursorX, this.tileCursorY, this.wagonType < 3 ? 0 : 1, this.wagonType, (this.vehicleFlags[this.serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0, 8 - this.wagonType);
             for (int i = 0; i < 5; ++i) {
                 if (this.wagonOptionSlots[i] < 0) continue;
                 int n2 = 2 + this.wagonOptionSlots[i];
@@ -5600,7 +5600,7 @@ implements Runnable {
                     ++n2;
                 }
                 n = this.spawnTrainCar(n, n2);
-                this.adjustRowValueByCode(n2);
+                this.incrementCargoOptionCount(n2);
             }
             this.money -= this.unitCost;
             this.aiMoneySpent += this.unitCost;
@@ -6481,24 +6481,24 @@ implements Runnable {
         }
     }
 
-    void decrementOptionCounts(int n) {
+    void decrementTrainCargoOptionCounts(int n) {
         if (n != -1) {
-            this.decCountsForOption(this.trainFlags[n] & 7);
-            this.decrementOptionCounts(this.nextCar[n]);
+            this.decrementCargoOptionCount(this.trainFlags[n] & 7);
+            this.decrementTrainCargoOptionCounts(this.nextCar[n]);
         }
     }
 
     boolean applyTrainUpgradeInlined(int n, int n2, int[] nArray) {
         if (this.money >= this.unitCost - this.currentTrainCostSnapshot) {
             this.trainStateCode[n] = (short)n2;
-            this.decrementOptionCounts(this.nextCar[n]);
+            this.decrementTrainCargoOptionCounts(this.nextCar[n]);
             for (int i = 0; i < 5; ++i) {
                 if (nArray[i] > -1) {
                     int n3 = nArray[i] + 2;
                     if (n3 == 5) {
                         ++n3;
                     }
-                    this.adjustRowValueByCode(n3);
+                    this.incrementCargoOptionCount(n3);
                 }
                 int n4 = n;
                 this.trainStateCode[n4] = this.trainStateCode[n4] | (nArray[i] & 7) << 3 + 3 * i;
@@ -8090,7 +8090,7 @@ implements Runnable {
         }
     }
 
-    void adjustRowValueByCode(int n) {
+    void incrementCargoOptionCount(int n) {
         for (int i = 0; i < 5; ++i) {
             if (n == 6 && this.menuRowType[i] == 9) {
                 int n2 = i;
@@ -8110,7 +8110,7 @@ implements Runnable {
         }
     }
 
-    void decCountsForOption(int n) {
+    void decrementCargoOptionCount(int n) {
         for (int i = 0; i < 5; ++i) {
             if (n == 7 && this.menuRowType[i] == 9) {
                 int n2 = i;
