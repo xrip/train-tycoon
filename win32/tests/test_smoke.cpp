@@ -9,6 +9,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
+
+namespace filesystem = std::filesystem;
 
 namespace {
 
@@ -152,6 +155,30 @@ TEST_CASE("fast: raw resources have fixed digests") {
         CHECK(digest.value() == resource.digest);
         std::free(bytes);
     }
+}
+
+TEST_CASE("fast: resource reader decodes bytes and reaches EOF") {
+    char path_text[1024];
+    REQUIRE(midp_resource_path("/5", path_text, sizeof(path_text)));
+    const filesystem::path path = path_text;
+    CHECK(path.filename() == "5");
+    CHECK(path.parent_path().filename() == "resources");
+    CHECK(midp_resource_open("/missing") == nullptr);
+
+    MidpResource* resource = midp_resource_open("/5");
+    REQUIRE(resource != nullptr);
+    CHECK(midp_resource_read_byte(resource) == 15);
+    CHECK(midp_resource_read_byte(resource) == 0);
+    CHECK(midp_resource_read_byte(resource) == 80);
+    CHECK(midp_resource_read_byte(resource) == 30);
+
+    std::uintmax_t byte_count = 4;
+    while (midp_resource_read_byte(resource) >= 0) {
+        ++byte_count;
+    }
+    CHECK(byte_count == filesystem::file_size(path));
+    CHECK(midp_resource_read_byte(resource) == -1);
+    midp_resource_close(resource);
 }
 
 TEST_CASE("fast: record store keeps record bytes and ids") {
