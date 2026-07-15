@@ -137,7 +137,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     if (!gc_buyTrainAtCursor(gc)) break;
                     gc_setState(gc, 30); break;
                 }
-                if (!gc_applyTrainUpgradeInlined(gc, gc->trainAtCursor, gc->wagonType, gc->wagonOptionSlots)) break;
+                if (!gc_applyTrainUpgradeInlined(gc, gc->trainAtCursor, gc->wagonType, gc->wagonOptionSlots.data())) break;
                 gc->pendingTransitionCode = 26; gc_setState(gc, 30); break;
             }
             gc->pendingTransitionCode = !gc->discountApplied ? 22 : 26;

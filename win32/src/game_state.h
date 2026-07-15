@@ -210,8 +210,8 @@ typedef struct GameCanvas {
     int32_t serviceVehicleAtCursor;
     int32_t wagonType;
     int32_t wagonDiscountType;
-    int32_t* wagonOptionSlots;
-    int32_t* wagonCountMatch;
+    std::array<int32_t, 5> wagonOptionSlots{};
+    std::array<int32_t, 5> wagonCountMatch{};
     int32_t unitCost;
     int32_t currentTrainCostSnapshot;
     int32_t difficultyPct;

@@ -165,8 +165,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->serviceVehicleAtCursor = 0;
     gc->wagonType = 0;
     gc->wagonDiscountType = 0;
-    gc->wagonOptionSlots = (int32_t*)midp_alloc_arr(sizeof(int32_t), 5);
-    gc->wagonCountMatch = (int32_t*)midp_alloc_arr(sizeof(int32_t), 5);
     gc->unitCost = 0;
     gc->currentTrainCostSnapshot = 0;
     gc->difficultyPct = 100;
