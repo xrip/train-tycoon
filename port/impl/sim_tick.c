@@ -196,9 +196,9 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
         if (gc->money >= n3 || gc->money < 0) {
             gc->backgroundCost += n3;
             bl3 = true;
-            gc->ck = true;
+            gc->demolitionAffordable = true;
         } else {
-            gc->ck = false;
+            gc->demolitionAffordable = false;
         }
     }
     for (n3 = 49; n3 >= 0; --n3) {
@@ -218,7 +218,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
         }
     }
     gc->tileQueue[n3][0] = 14;
-    gc->go[n3] = bl2;
+    gc->tileQueueVisualOnly[n3] = bl2;
     gc->tileQueue[n3][1] = (int8_t)n;
     gc->tileQueue[n3][2] = (int8_t)n2;
 }

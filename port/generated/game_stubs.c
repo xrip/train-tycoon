@@ -2,42 +2,6 @@
 // Stub bodies for methods not yet ported (status != 'ported').
 #include "game_methods.h"
 
-void gc_demolishAtCursor(GameCanvas *gc) {
-    (void)gc; // TODO port: demolishAtCursor()  L2476-2529
-}
-
-void gc_pickTrainsAtCursor(GameCanvas *gc) {
-    (void)gc; // TODO port: pickTrainsAtCursor()  L2531-2607
-}
-
-void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: buildPlaceTrackPiece(int n)  L2609-2657
-}
-
-void gc_openBuildMenu(GameCanvas *gc) {
-    (void)gc; // TODO port: openBuildMenu()  L2659-2868
-}
-
-void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6, int32_t n7, int32_t n8) {
-    (void)gc; // TODO port: computeTrackBuildInlined(int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8)  L2882-2915
-}
-
-void gc_revertTrackTiles(GameCanvas *gc) {
-    (void)gc; // TODO port: revertTrackTiles()  L2917-2941
-}
-
-void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool bl, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6, bool bl2, int32_t n7) {
-    (void)gc; // TODO port: placeTrackAtCursorInlined(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, boolean bl2, int n7)  L2943-2978
-}
-
-void gc_applyBackgroundCost(GameCanvas *gc) {
-    (void)gc; // TODO port: applyBackgroundCost()  L3015-3023
-}
-
-void gc_rebuildCityList(GameCanvas *gc) {
-    (void)gc; // TODO port: rebuildCityList()  L3527-3563
-}
-
 int8_t* gc_p(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)gc; // TODO port: p(int n, int n2)  L3583-3591
     return 0;
@@ -86,29 +50,12 @@ int16_t gc_pathDistanceMin(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     return 0;
 }
 
-void gc_normalizeTrackBits(GameCanvas *gc) {
-    (void)gc; // TODO port: normalizeTrackBits()  L5227-5252
-}
-
 void gc_scanTrackTiles(GameCanvas *gc) {
     (void)gc; // TODO port: scanTrackTiles()  L5254-5271
 }
 
-void gc_setTrackOwnerCode(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: setTrackOwnerCode(int n)  L5273-5294
-}
-
 void gc_clearPathDistanceGrid(GameCanvas *gc) {
     (void)gc; // TODO port: clearPathDistanceGrid()  L5296-5377
-}
-
-int32_t gc_spawnWagonSlotInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl, bool bl2) {
-    (void)gc; // TODO port: spawnWagonSlotInlined(int n, int n2, int n3, boolean bl, boolean bl2)  L5499-5525
-    return 0;
-}
-
-void gc_computeTrainCost(GameCanvas *gc) {
-    (void)gc; // TODO port: computeTrainCost()  L5527-5575
 }
 
 void gc_addSelectedOption(GameCanvas *gc, int32_t n) {
@@ -131,16 +78,6 @@ int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, 
 
 void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
     (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6172-6304
-}
-
-bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: isAnyTrainCarAt(int n, int n2, int n3)  L6325-6335
-    return false;
-}
-
-int32_t gc_cPosLookup(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: cPosLookup(int n, int n2)  L6337-6343
-    return 0;
 }
 
 void gc_decrementOptionCounts(GameCanvas *gc, int32_t n) {
@@ -213,10 +150,6 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
     return 0;
 }
 
-void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
-    (void)gc; // TODO port: rebuildMenuTypeIndexes()  L7730-7737
-}
-
 int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t n) {
     (void)gc; // TODO port: computeMenuRowDisplayValue(int n)  L7739-7771
     return 0;
@@ -228,10 +161,6 @@ void gc_adjustRowValueByCode(GameCanvas *gc, int32_t n) {
 
 void gc_decCountsForOption(GameCanvas *gc, int32_t n) {
     (void)gc; // TODO port: decCountsForOption(int n)  L8113-8139
-}
-
-void gc_incrementRowValueType13(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: incrementRowValueType13(int n)  L8141-8147
 }
 
 void gc_incrementRowValueType14(GameCanvas *gc, int32_t n) {
@@ -267,10 +196,6 @@ char* gc_n(GameCanvas *gc) {
 bool gc_syncHighScores(GameCanvas *gc, bool bl) {
     (void)gc; // TODO port: syncHighScores(boolean bl)  L8294-8356
     return false;
-}
-
-void gc_enterOutOfMoneyState(GameCanvas *gc) {
-    (void)gc; // TODO port: enterOutOfMoneyState()  L8447-8451
 }
 
 void gc_hideNotify(GameCanvas *gc) {

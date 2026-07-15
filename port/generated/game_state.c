@@ -95,7 +95,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->cursorSelectX = -1;
     gc->cursorDragX = -1;
     gc->mapRedrawPending = false;
-    gc->bC = true;
+    gc->useDefaultOverlaySelection = true;
     gc->pauseMenuOpen = false;
     gc->needsRepaint = false;
     gc->lastRenderedSpriteId = -1;
@@ -381,7 +381,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->offerEffectNextCount = (int16_t*)midp_alloc_arr(sizeof(int16_t), 12);
     gc->lastOfferDateCode = 0;
     gc->menuRowEnabledCount = 0;
-    gc->gP = (int8_t*)midp_alloc_arr(sizeof(int8_t), 5);
+    gc->enabledMenuRowIndexes = (int8_t*)midp_alloc_arr(sizeof(int8_t), 5);
     gc->lifetimeTrainRevenue = 0;
     gc->milestoneThreshold1 = 0;
     gc->milestoneThreshold2 = 0;
@@ -439,7 +439,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->phaseTimer = 0;
     gc->tileQueue = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 50);
     for (int _i = 0; _i < 50; ++_i) gc->tileQueue[_i] = (int8_t*)midp_alloc_arr(sizeof(int8_t), 3);
-    gc->go = (bool*)midp_alloc_arr(sizeof(bool), 50);
+    gc->tileQueueVisualOnly = (bool*)midp_alloc_arr(sizeof(bool), 50);
     static const int32_t dc__d[] = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     gc->dc = (int32_t*)midp_alloc_arr(sizeof(int32_t), (int)(sizeof(dc__d)/sizeof(int32_t)));
     memcpy(gc->dc, dc__d, sizeof(dc__d));

@@ -84,7 +84,7 @@ typedef struct GameCanvas {
     bool cursorAllowZoomOut; // boolean cursorAllowZoomOut
     int32_t cursorDragX; // int cursorDragX
     bool mapRedrawPending; // boolean mapRedrawPending
-    bool bC; // boolean bC
+    bool useDefaultOverlaySelection; // boolean useDefaultOverlaySelection
     bool pauseMenuOpen; // boolean pauseMenuOpen
     int32_t dialogContentHeight; // int dialogContentHeight
     bool needsRepaint; // boolean needsRepaint
@@ -131,7 +131,7 @@ typedef struct GameCanvas {
     bool trainMenuSelectIndex; // boolean trainMenuSelectIndex
     bool blockBuildMenu; // boolean blockBuildMenu
     int32_t backgroundCost; // int backgroundCost
-    bool ck; // boolean ck
+    bool demolitionAffordable; // boolean demolitionAffordable
     bool menuDirty; // boolean menuDirty
     int32_t buildMenuMode; // int buildMenuMode
     int32_t selectedMenuRowX; // int selectedMenuRowX
@@ -334,7 +334,7 @@ typedef struct GameCanvas {
     int32_t bq; // int bq
     int32_t lastOfferDateCode; // int lastOfferDateCode
     int32_t menuRowEnabledCount; // int menuRowEnabledCount
-    int8_t* gP; // byte[] gP
+    int8_t* enabledMenuRowIndexes; // byte[] enabledMenuRowIndexes
     int8_t scenarioMilestoneIndex; // byte scenarioMilestoneIndex
     int32_t currentMilestoneScore; // int currentMilestoneScore
     int32_t milestoneCoThreshold2; // int milestoneCoThreshold2
@@ -405,7 +405,7 @@ typedef struct GameCanvas {
     int32_t woodAgeTimer; // int woodAgeTimer
     int32_t phaseTimer; // int phaseTimer
     int8_t** tileQueue; // byte[][] tileQueue
-    bool* go; // boolean[] go
+    bool* tileQueueVisualOnly; // boolean[] tileQueueVisualOnly
     int32_t* dc; // int[] dc
     int32_t bx; // int bx
     int32_t fR; // int fR

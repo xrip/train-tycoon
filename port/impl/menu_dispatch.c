@@ -278,11 +278,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, 30); break;
         case 60:
             if (n2 % 2 == 1) {
-                gc->offerRowIndex = gc->gP[n2 / 2];
+                gc->offerRowIndex = gc->enabledMenuRowIndexes[n2 / 2];
                 gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + 40;
             }
             if (n2 % 2 == 0) {
-                gc->offerRowIndex = gc->gP[(n2 - 1) / 2];
+                gc->offerRowIndex = gc->enabledMenuRowIndexes[(n2 - 1) / 2];
                 gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + 60;
             }
             gc->duplicateRowState = 1;

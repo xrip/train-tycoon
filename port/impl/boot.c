@@ -294,8 +294,8 @@ void gc_setState(GameCanvas *gc, int32_t n) {
         }
         case 20:
             gc_resetOverlayRenderState(gc);
-            if (!gc->bC) gc->cursorDragY = 2;
-            gc->bC = true;
+            if (!gc->useDefaultOverlaySelection) gc->cursorDragY = 2;
+            gc->useDefaultOverlaySelection = true;
             break;
         case 25:
             gc->loadStep = 0;

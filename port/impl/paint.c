@@ -362,7 +362,7 @@ void gc_update(GameCanvas *gc) {
                     || n >= gc->mapWidth || n29 >= gc->mapHeight)
                     continue;
                 int n30 = gc_byteToUnsignedInt(gc, gc->tileMap[n][n29]) - 128;
-                if (gc->go[n27]) continue;
+                if (gc->tileQueueVisualOnly[n27]) continue;
                 if (n30 >= 29 && n30 <= 33) gc->tileMap[n][n29] = -128;
                 if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
                     gc->trackMap[n][n29] = 0;

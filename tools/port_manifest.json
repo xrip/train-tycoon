@@ -831,13 +831,13 @@
    "c_type": "bool"
   },
   {
-   "java_name": "bC",
+   "java_name": "useDefaultOverlaySelection",
    "java_type": "boolean",
    "init": "true",
    "static": false,
    "final": false,
    "line": 125,
-   "c_name": "bC",
+   "c_name": "useDefaultOverlaySelection",
    "c_type": "bool"
   },
   {
@@ -1301,13 +1301,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "ck",
+   "java_name": "demolitionAffordable",
    "java_type": "boolean",
    "init": "",
    "static": false,
    "final": false,
    "line": 172,
-   "c_name": "ck",
+   "c_name": "demolitionAffordable",
    "c_type": "bool"
   },
   {
@@ -3331,13 +3331,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "gP",
+   "java_name": "enabledMenuRowIndexes",
    "java_type": "byte[]",
    "init": "new byte[5]",
    "static": false,
    "final": false,
    "line": 375,
-   "c_name": "gP",
+   "c_name": "enabledMenuRowIndexes",
    "c_type": "int8_t*"
   },
   {
@@ -4181,13 +4181,13 @@
    "c_type": "int8_t**"
   },
   {
-   "java_name": "go",
+   "java_name": "tileQueueVisualOnly",
    "java_type": "boolean[]",
    "init": "new boolean[50]",
    "static": false,
    "final": false,
    "line": 460,
-   "c_name": "go",
+   "c_name": "tileQueueVisualOnly",
    "c_type": "bool*"
   },
   {
@@ -4830,7 +4830,7 @@
    "start": 2476,
    "end": 2529,
    "c_name": "gc_demolishAtCursor",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "pickTrainsAtCursor",
@@ -4840,7 +4840,7 @@
    "start": 2531,
    "end": 2607,
    "c_name": "gc_pickTrainsAtCursor",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "buildPlaceTrackPiece",
@@ -4850,7 +4850,7 @@
    "start": 2609,
    "end": 2657,
    "c_name": "gc_buildPlaceTrackPiece",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "openBuildMenu",
@@ -4860,7 +4860,7 @@
    "start": 2659,
    "end": 2868,
    "c_name": "gc_openBuildMenu",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "spendMoney",
@@ -4880,7 +4880,7 @@
    "start": 2882,
    "end": 2915,
    "c_name": "gc_computeTrackBuildInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "revertTrackTiles",
@@ -4890,7 +4890,7 @@
    "start": 2917,
    "end": 2941,
    "c_name": "gc_revertTrackTiles",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "placeTrackAtCursorInlined",
@@ -4900,7 +4900,7 @@
    "start": 2943,
    "end": 2978,
    "c_name": "gc_placeTrackAtCursorInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "handleCursorClickInlined",
@@ -4920,7 +4920,7 @@
    "start": 3015,
    "end": 3023,
    "c_name": "gc_applyBackgroundCost",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "initBuildMenuRow",
@@ -5130,7 +5130,7 @@
    "start": 3527,
    "end": 3563,
    "c_name": "gc_rebuildCityList",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "b",
@@ -5300,7 +5300,7 @@
    "start": 5227,
    "end": 5252,
    "c_name": "gc_normalizeTrackBits",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "scanTrackTiles",
@@ -5320,7 +5320,7 @@
    "start": 5273,
    "end": 5294,
    "c_name": "gc_setTrackOwnerCode",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "clearPathDistanceGrid",
@@ -5393,14 +5393,14 @@
    "status": "ported"
   },
   {
-   "java_name": "spawnWagonSlotInlined",
+   "java_name": "allocateServiceVehicleSlot",
    "ret": "int",
    "params": "int n, int n2, int n3, boolean bl, boolean bl2",
-   "sig": "int spawnWagonSlotInlined(int n, int n2, int n3, boolean bl, boolean bl2)",
+   "sig": "int allocateServiceVehicleSlot(int n, int n2, int n3, boolean bl, boolean bl2)",
    "start": 5499,
    "end": 5525,
-   "c_name": "gc_spawnWagonSlotInlined",
-   "status": "pending"
+   "c_name": "gc_allocateServiceVehicleSlot",
+   "status": "ported"
   },
   {
    "java_name": "computeTrainCost",
@@ -5410,7 +5410,7 @@
    "start": 5527,
    "end": 5575,
    "c_name": "gc_computeTrainCost",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "addSelectedOption",
@@ -5590,17 +5590,17 @@
    "start": 6325,
    "end": 6335,
    "c_name": "gc_isAnyTrainCarAt",
-   "status": "pending"
+   "status": "ported"
   },
   {
-   "java_name": "cPosLookup",
+   "java_name": "findTrainHeadAt",
    "ret": "int",
    "params": "int n, int n2",
-   "sig": "int cPosLookup(int n, int n2)",
+   "sig": "int findTrainHeadAt(int n, int n2)",
    "start": 6337,
    "end": 6343,
-   "c_name": "gc_cPosLookup",
-   "status": "pending"
+   "c_name": "gc_findTrainHeadAt",
+   "status": "ported"
   },
   {
    "java_name": "unloadTrainRevenue",
@@ -6060,7 +6060,7 @@
    "start": 7730,
    "end": 7737,
    "c_name": "gc_rebuildMenuTypeIndexes",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "computeMenuRowDisplayValue",
@@ -6160,7 +6160,7 @@
    "start": 8141,
    "end": 8147,
    "c_name": "gc_incrementRowValueType13",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "incrementRowValueType14",
@@ -6290,7 +6290,7 @@
    "start": 8447,
    "end": 8451,
    "c_name": "gc_enterOutOfMoneyState",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawRectFill",

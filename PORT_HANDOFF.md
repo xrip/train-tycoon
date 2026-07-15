@@ -78,7 +78,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **131 / 196 (66%)** — 130 full + 1 partial (`update`).
+- Methods done: **149 / 196 (76%)** — 148 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -127,6 +127,10 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **Basic state-30 control is ported.** Build-menu item cycling, map panning,
   cursor movement with view limits, zoom movement, and isometric tile picking
   are in `port/impl/input.c`.
+- **Direct build actions are ported.** `port/impl/build_actions.c` has the build
+  menu action, track preview/confirm/cancel, track and station placement,
+  removal, train picking, service-slot allocation, train cost, and city service
+  counts. The direct `openBuildMenu` path no longer enters generated stubs.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -136,6 +140,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   list). `port.py inventory` no longer gives a duplicate-field warning.
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded fallback.
 - No behavioural test harness yet; `verify` only checks it builds and runs.
+- CFR dropped a `break` from `computeTrackBuildInlined`: bytecode offsets
+  106-134 stop at the first non-empty tile. The C port follows the bytecode,
+  not the incorrect decompiled loop text.
 
 ## 6a. Next-session plan: make state 30 playable
 
@@ -143,16 +150,15 @@ The map-gen and state-30 simulation chains are **done**. Selecting "new game"
 generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
 UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port interaction/build: `openBuildMenu`, `demolishAtCursor`,
-   `pickTrainsAtCursor`, `buildPlaceTrackPiece`,
-   `computeTrainCost`, `buyTrainAtCursor`, and the pathfinding cluster
+1. Port train buying (`buyTrainAtCursor`, its slot/options helpers) and the
+   pathfinding cluster
    (`tryBuildPath`, `validatePathStep`, `findPathStep`, `floodFillPath`,
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
 2. Add a smoke path that enters state 30 and exercises one full paint/input
    frame before treating gameplay rendering as behaviorally proved.
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 131 already
+`show NAME` throughout. Each is a mechanical faithful port like the 149 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

@@ -286,7 +286,7 @@ method a l (II)I                   spawnTrainCar   # int return: slot, or 500
 method a n (II)I                   neighboursMask    # int neighbours query (W,x used)
 method a s (II)I                   findServiceVehicleAt
 method a h (II)I                   hPath             # int path over aQ[][] grid
-method a c (II)I                   cPosLookup        # int trained-position lookup
+method a c (II)I                   findTrainHeadAt   # head whose car chain occupies the tile
 method a x (II)I                   unloadTrainRevenue
 
 # ---- Batch 9: tick economy + scenario milestones + year-end sheet ----
@@ -755,6 +755,14 @@ method a c (B)I                       byteToUnsignedInt
 # ---- Batch 41: gameplay viewport input ----
 field  a eN   gameplayViewportHeight
 field  a hh   keyRepeatStep
+
+# ---- Batch 42: direct build actions ----
+field  a ck   demolitionAffordable
+field  a go   tileQueueVisualOnly
+
+# ---- Batch 43: build menu selection ----
+field  a gP   enabledMenuRowIndexes
+field  a bC   useDefaultOverlaySelection
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----
@@ -855,7 +863,7 @@ method a a (IIZZ)V                   handleCursorClickInlined # inlined
 method a a (IIIZZI)V                 addMenuItemInlined      # inlined
 method a a (ZIIIIIIIIIIZ)Z           isTileMatchForPathInlined # inlined
 method a a (IIIII)Z                  isTrackStepInlined      # inlined
-method a a (IIIZZ)I                  spawnWagonSlotInlined   # inlined
+method a a (IIIZZ)I                  allocateServiceVehicleSlot
 method a a (II[I)Z                   applyTrainUpgradeInlined # inlined
 method a a (IZ)V                     removeTrainFromMapInlined # inlined
 method a a (I)V                      resetFlagInlined        # inlined

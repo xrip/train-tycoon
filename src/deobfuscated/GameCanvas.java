@@ -122,7 +122,7 @@ implements Runnable {
     boolean cursorAllowZoomOut;
     int cursorDragX = -1;
     boolean mapRedrawPending = false;
-    boolean bC = true;
+    boolean useDefaultOverlaySelection = true;
     boolean pauseMenuOpen = false;
     int dialogContentHeight;
     boolean needsRepaint = false;
@@ -169,7 +169,7 @@ implements Runnable {
     boolean trainMenuSelectIndex;
     boolean blockBuildMenu = false;
     int backgroundCost;
-    boolean ck;
+    boolean demolitionAffordable;
     boolean menuDirty = true;
     int buildMenuMode = 0;
     int selectedMenuRowX = 0;
@@ -372,7 +372,7 @@ implements Runnable {
     int bq;
     int lastOfferDateCode = 0;
     int menuRowEnabledCount = 0;
-    byte[] gP = new byte[5];
+    byte[] enabledMenuRowIndexes = new byte[5];
     byte scenarioMilestoneIndex;
     int currentMilestoneScore;
     int milestoneCoThreshold2;
@@ -457,7 +457,7 @@ implements Runnable {
     int woodAgeTimer = 0;
     int phaseTimer = 0;
     byte[][] tileQueue = new byte[50][3];
-    boolean[] go = new boolean[50];
+    boolean[] tileQueueVisualOnly = new boolean[50];
     int[] dc = new int[]{16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     int bx = 0;
     int fR = 0;
@@ -2544,7 +2544,7 @@ implements Runnable {
                 this.setState(20);
             }
             if (by == 65) {
-                this.trainAtCursor = this.cPosLookup(this.tileCursorX, this.tileCursorY);
+                this.trainAtCursor = this.findTrainHeadAt(this.tileCursorX, this.tileCursorY);
                 if (this.trainAtCursor != 5000) {
                     int n;
                     int n2;
@@ -2610,7 +2610,7 @@ implements Runnable {
         switch (n) {
             case 0: {
                 int n2;
-                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0) || (n2 = this.spawnWagonSlotInlined(1, this.tileCursorX, this.tileCursorY, false, false)) == 5000 || !this.spendMoney(this.costPower)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0) || (n2 = this.allocateServiceVehicleSlot(1, this.tileCursorX, this.tileCursorY, false, false)) == 5000 || !this.spendMoney(this.costPower)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -8);
@@ -2619,7 +2619,7 @@ implements Runnable {
             }
             case 1: {
                 int n3;
-                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0) || (n3 = this.spawnWagonSlotInlined(1, this.tileCursorX, this.tileCursorY, true, false)) == 5000 || !this.spendMoney(this.costPower)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 0) || (n3 = this.allocateServiceVehicleSlot(1, this.tileCursorX, this.tileCursorY, true, false)) == 5000 || !this.spendMoney(this.costPower)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.trackMap[this.tileCursorX][this.tileCursorY] = 65;
                 this.advanceConstructionTimers(this.tileCursorX, this.tileCursorY, -8);
@@ -2628,7 +2628,7 @@ implements Runnable {
             }
             case 2: {
                 int n4;
-                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 5) || (n4 = this.spawnWagonSlotInlined(1, this.tileCursorX, this.tileCursorY, false, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 5) || (n4 = this.allocateServiceVehicleSlot(1, this.tileCursorX, this.tileCursorY, false, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 87;
                 this.tileMap[this.tileCursorX][this.tileCursorY - 1] = 89;
                 this.tileMap[this.tileCursorX][this.tileCursorY + 1] = 89;
@@ -2641,7 +2641,7 @@ implements Runnable {
             }
             case 3: {
                 int n5;
-                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 6) || (n5 = this.spawnWagonSlotInlined(1, this.tileCursorX, this.tileCursorY, true, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
+                if (!this.isTileBuildable(this.tileCursorX, this.tileCursorY, 6) || (n5 = this.allocateServiceVehicleSlot(1, this.tileCursorX, this.tileCursorY, true, true)) == 5000 || !this.spendMoney(this.costStruct)) break;
                 this.tileMap[this.tileCursorX][this.tileCursorY] = 88;
                 this.tileMap[this.tileCursorX - 1][this.tileCursorY] = 90;
                 this.tileMap[this.tileCursorX + 1][this.tileCursorY] = 90;
@@ -2705,7 +2705,7 @@ implements Runnable {
                     }
                     case 9: {
                         this.computeMapTrainMetric(this.scenarioStep - 2);
-                        this.bC = false;
+                        this.useDefaultOverlaySelection = false;
                         this.ready = false;
                         this.transitionCode = 1;
                         this.setState(20);
@@ -2986,9 +2986,9 @@ implements Runnable {
             if (this.money >= n3 || this.money < 0) {
                 this.backgroundCost += n3;
                 bl3 = true;
-                this.ck = true;
+                this.demolitionAffordable = true;
             } else {
-                this.ck = false;
+                this.demolitionAffordable = false;
             }
         }
         for (n3 = 49; n3 >= 0; --n3) {
@@ -3006,14 +3006,14 @@ implements Runnable {
                 break;
             }
             this.tileQueue[n3][0] = 14;
-            this.go[n3] = bl2;
+            this.tileQueueVisualOnly[n3] = bl2;
             this.tileQueue[n3][1] = (byte)n;
             this.tileQueue[n3][2] = (byte)n2;
         }
     }
 
     void applyBackgroundCost() {
-        if (this.ck) {
+        if (this.demolitionAffordable) {
             this.subsidyCost += this.backgroundCost;
             this.money -= this.backgroundCost;
             this.pushMoneyHistory(-this.backgroundCost);
@@ -4099,10 +4099,10 @@ implements Runnable {
             case 60: {
                 if (n2 % 2 == 1) {
                     int n5 = n2 / 2;
-                    return this.spriteBitmapTable[this.byteToUnsignedInt(this.spriteIndexTable[this.menuRowType[this.gP[n5]] + 160])];
+                    return this.spriteBitmapTable[this.byteToUnsignedInt(this.spriteIndexTable[this.menuRowType[this.enabledMenuRowIndexes[n5]] + 160])];
                 }
                 int n6 = (n2 - 1) / 2;
-                return this.p(this.computeMenuRowDisplayValue(this.gP[n6]), 29);
+                return this.p(this.computeMenuRowDisplayValue(this.enabledMenuRowIndexes[n6]), 29);
             }
             case 61: 
             case 62: 
@@ -4823,11 +4823,11 @@ implements Runnable {
             }
             case 60: {
                 if (n2 % 2 == 1) {
-                    this.offerRowIndex = this.gP[n2 / 2];
+                    this.offerRowIndex = this.enabledMenuRowIndexes[n2 / 2];
                     this.pendingTransitionCode = this.menuRowType[this.offerRowIndex] + 40;
                 }
                 if (n2 % 2 == 0) {
-                    this.offerRowIndex = this.gP[(n2 - 1) / 2];
+                    this.offerRowIndex = this.enabledMenuRowIndexes[(n2 - 1) / 2];
                     this.pendingTransitionCode = this.menuRowAltType[this.offerRowIndex] + 60;
                 }
                 this.duplicateRowState = 1;
@@ -5496,7 +5496,7 @@ implements Runnable {
         return 5000;
     }
 
-    int spawnWagonSlotInlined(int n, int n2, int n3, boolean bl, boolean bl2) {
+    int allocateServiceVehicleSlot(int n, int n2, int n3, boolean bl, boolean bl2) {
         int n4;
         int n5 = 5000;
         for (n4 = 0; n4 < 250; ++n4) {
@@ -6334,7 +6334,7 @@ implements Runnable {
         return false;
     }
 
-    int cPosLookup(int n, int n2) {
+    int findTrainHeadAt(int n, int n2) {
         for (int i = 0; i < 500; ++i) {
             if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.isAnyTrainCarAt(i, n, n2)) continue;
             return i;
@@ -7731,7 +7731,7 @@ implements Runnable {
         this.menuRowEnabledCount = 0;
         for (int i = 0; i < 5; ++i) {
             if (this.menuRowType[i] == 0) continue;
-            this.gP[this.menuRowEnabledCount] = (byte)i;
+            this.enabledMenuRowIndexes[this.menuRowEnabledCount] = (byte)i;
             ++this.menuRowEnabledCount;
         }
     }
@@ -8763,10 +8763,10 @@ implements Runnable {
             }
             case 20: {
                 this.resetOverlayRenderState();
-                if (!this.bC) {
+                if (!this.useDefaultOverlaySelection) {
                     this.cursorDragY = 2;
                 }
-                this.bC = true;
+                this.useDefaultOverlaySelection = true;
                 break;
             }
             case 25: {
@@ -9081,7 +9081,7 @@ implements Runnable {
                     n29 = this.byteToUnsignedInt(this.tileQueue[n27][2]);
                     if (n < 0 || n29 < 0 || n >= this.mapWidth || n29 >= this.mapHeight) continue;
                     int n30 = this.byteToUnsignedInt(this.tileMap[n][n29]) - 128;
-                    if (this.go[n27]) continue;
+                    if (this.tileQueueVisualOnly[n27]) continue;
                     if (n30 >= 29 && n30 <= 33) {
                         this.tileMap[n][n29] = -128;
                     }
