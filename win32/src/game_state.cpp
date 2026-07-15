@@ -174,7 +174,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->serviceResourceStock = (int16_t**)midp_alloc_arr(sizeof(int16_t*), 250);
     for (int _i = 0; _i < 250; ++_i) gc->serviceResourceStock[_i] = (int16_t*)midp_alloc_arr(sizeof(int16_t), 5);
     gc->serviceUnloadFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
-    gc->serviceLoadFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
     gc->trainX = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
     gc->trainY = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
     gc->trainDir = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
@@ -408,7 +407,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->rng.set_seed(midp_current_time_millis());
     gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
     gc->backbuffer_surface = gc->backbuffer->drawing_surface();
-    gc->tileSpriteIndex = (int8_t*)midp_alloc_arr(sizeof(int8_t), 255);
     gc->scenarioResourceCount = 0;
     gc->transitionCode = 0;
     gc->ready = true;
@@ -423,7 +421,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->phaseTimer = 0;
     gc->tileQueue = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 50);
     for (int _i = 0; _i < 50; ++_i) gc->tileQueue[_i] = (int8_t*)midp_alloc_arr(sizeof(int8_t), 3);
-    gc->tileQueueVisualOnly = (bool*)midp_alloc_arr(sizeof(bool), 50);
     static const int32_t dc__d[] = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     gc->dc = (int32_t*)midp_alloc_arr(sizeof(int32_t), (int)(sizeof(dc__d)/sizeof(int32_t)));
     memcpy(gc->dc, dc__d, sizeof(dc__d));

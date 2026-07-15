@@ -220,7 +220,7 @@ typedef struct GameCanvas {
     int8_t* serviceVehicleY;
     int16_t** serviceResourceStock;
     int8_t* serviceUnloadFlags;
-    int8_t* serviceLoadFlags;
+    std::array<int8_t, 250> serviceLoadFlags{};
     int8_t* trainX;
     int8_t* trainY;
     int8_t* trainDir;
@@ -389,7 +389,7 @@ typedef struct GameCanvas {
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface;
     std::vector<std::unique_ptr<Image>> tile_sprites;
-    int8_t* tileSpriteIndex;
+    std::array<int8_t, 255> tileSpriteIndex{};
     std::unique_ptr<Image> cycle_flag;
     int64_t loadingStartTime;
     bool loadingTimeout;
@@ -409,7 +409,7 @@ typedef struct GameCanvas {
     int32_t woodAgeTimer;
     int32_t phaseTimer;
     int8_t** tileQueue;
-    bool* tileQueueVisualOnly;
+    std::array<bool, 50> tileQueueVisualOnly{};
     int32_t* dc;
     int32_t bx;
     int32_t fR;
