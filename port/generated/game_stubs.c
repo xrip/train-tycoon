@@ -100,18 +100,6 @@ void gc_drawConfirmDialog(GameCanvas *gc, MidpGraphics* graphics) {
     (void)gc; // TODO port: drawConfirmDialog(Graphics graphics)  L3290-3297
 }
 
-void gc_dayResetP(GameCanvas *gc) {
-    (void)gc; // TODO port: dayResetP()  L3321-3329
-}
-
-void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: advanceConstructionTimers(int n, int n2, int n3)  L3331-3359
-}
-
-void gc_maybeAITick(GameCanvas *gc) {
-    (void)gc; // TODO port: maybeAITick()  L3361-3373
-}
-
 void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     (void)gc; // TODO port: placeCityTileInlined(int n, int n2, int n3)  L3375-3380
 }
@@ -119,10 +107,6 @@ void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) 
 bool gc_pickValidForestTile(GameCanvas *gc) {
     (void)gc; // TODO port: pickValidForestTile()  L3382-3508
     return false;
-}
-
-void gc_dayResetAg(GameCanvas *gc) {
-    (void)gc; // TODO port: dayResetAg()  L3518-3528
 }
 
 void gc_rebuildCityList(GameCanvas *gc) {
@@ -239,14 +223,6 @@ int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, 
     return 0;
 }
 
-void gc_revenueOrYear(GameCanvas *gc) {
-    (void)gc; // TODO port: revenueOrYear()  L5813-5819
-}
-
-void gc_everyTwoTick(GameCanvas *gc) {
-    (void)gc; // TODO port: everyTwoTick()  L5821-5839
-}
-
 bool gc_canRefuelAtTile(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)gc; // TODO port: canRefuelAtTile(int n, int n2)  L5841-5875
     return false;
@@ -258,11 +234,6 @@ void gc_updateTrain(GameCanvas *gc, int32_t n) {
 
 void gc_f(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     (void)gc; // TODO port: f(int n, int n2, int n3)  L6120-6128
-}
-
-int32_t gc_countCarsInTrain(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: countCarsInTrain(int n)  L6130-6135
-    return 0;
 }
 
 int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t n) {
@@ -382,20 +353,8 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t n, bool bl) {
     (void)gc; // TODO port: setYearGraphMode(int n, boolean bl)  L7235-7336
 }
 
-void gc_maybeAiTakeTurn(GameCanvas *gc) {
-    (void)gc; // TODO port: maybeAiTakeTurn()  L7338-7342
-}
-
 void gc_placeCitiesAndIndustry(GameCanvas *gc) {
     (void)gc; // TODO port: placeCitiesAndIndustry()  L7344-7371
-}
-
-void gc_dayResetAd(GameCanvas *gc) {
-    (void)gc; // TODO port: dayResetAd()  L7373-7385
-}
-
-void gc_postRevenueReset(GameCanvas *gc) {
-    (void)gc; // TODO port: postRevenueReset()  L7387-7394
 }
 
 void gc_spawnTrainAt(GameCanvas *gc, int32_t n, int32_t n2) {

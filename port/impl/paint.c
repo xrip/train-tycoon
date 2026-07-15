@@ -1,7 +1,7 @@
-// port/impl/paint.c - paint() (full) + update() (boot states; PARTIAL).
+// port/impl/paint.c - paint() (full) + update() (PARTIAL).
 // paint is fully ported. update currently covers the loading/boot states
-// (0,1,2,4,10); the gameplay states (25 map-gen, 30 sim, menus, year-end...)
-// remain to be ported -- tracked as `partial` in the manifest.
+// (0,1,2,4,10), map generation (25), and the simulation tick (30).
+// Menu/year-end states remain to be ported -- tracked as `partial` in the manifest.
 #include "game_methods.h"
 
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
@@ -186,7 +186,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
     }
 }
 
-// public void update() -- PARTIAL: loading/boot states only.
+// public void update() -- PARTIAL: boot, map generation, and simulation tick.
 void gc_update(GameCanvas *gc) {
     switch (gc->gameState) {
         case 0: case 1: case 2: {
@@ -322,8 +322,194 @@ void gc_update(GameCanvas *gc) {
             gc_setState(gc, 30);
             break;
         }
+        case 30: {
+            gc->tickStart = midp_current_time_millis();
+            if (++gc->timerA1 == 2) {
+                gc->timerA1 = 0;
+                if (++gc->timerA2 == 3) gc->timerA2 = 0;
+            }
+            if (++gc->timerB1 == 2) {
+                gc->timerB1 = 0;
+                if (++gc->timerB2 == 3) gc->timerB2 = 0;
+            }
+            if (++gc->timerC1 == 3) {
+                gc->timerC1 = 0;
+                if (++gc->timerC2 == 3) gc->timerC2 = 0;
+            }
+            if (++gc->woodAgeTimer == 150) {
+                for (int n27 = 0; n27 < gc->mapWidth; ++n27) {
+                    for (int n = 0; n < gc->mapHeight; ++n) {
+                        if (gc->tileMap[n27][n] < 59 || gc->tileMap[n27][n] > 61
+                            || midp_random_next_int(&gc->rng) % 3 != 0)
+                            continue;
+                        ++gc->tileMap[n27][n];
+                        if (gc->tileMap[n27][n] == 62) gc->tileMap[n27][n] = 59;
+                    }
+                }
+                gc->woodAgeTimer = 0;
+            }
+            if (++gc->phaseTimer == 10) gc->phaseTimer = 0;
+
+            for (int n27 = 0; n27 < 50; ++n27) {
+                if (gc->tileQueue[n27][0] <= 0) continue;
+                --gc->tileQueue[n27][0];
+                int n = gc_c(gc, gc->tileQueue[n27][1]);
+                int n29 = gc_c(gc, gc->tileQueue[n27][2]);
+                if (gc->tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
+                    && n < gc->mapWidth && n29 < gc->mapHeight)
+                    gc->tileMap[n][n29] = (int8_t)(gc_c(gc, gc->tileMap[n][n29]) - 128);
+                if (gc->tileQueue[n27][0] != 7 || n < 0 || n29 < 0
+                    || n >= gc->mapWidth || n29 >= gc->mapHeight)
+                    continue;
+                int n30 = gc_c(gc, gc->tileMap[n][n29]) - 128;
+                if (gc->go[n27]) continue;
+                if (n30 >= 29 && n30 <= 33) gc->tileMap[n][n29] = -128;
+                if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
+                    gc->trackMap[n][n29] = 0;
+                    gc->tileMap[n][n29] = -128;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 >= 77 && n30 <= 80) {
+                    gc->tileMap[n][n29] = (int8_t)(128 + n30 - 56);
+                    gc->trackMap[n][n29] = 0;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 == 81 || n30 == 82) {
+                    gc->tileMap[n][n29] = -128;
+                    gc->trackMap[n][n29] = 0;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 >= 83 && n30 <= 86) {
+                    gc->tileMap[n][n29] = (int8_t)(128 + n30 - 76);
+                    gc->trackMap[n][n29] = 0;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 == 76) {
+                    int n31 = gc->trackMap[n][n29] & 7;
+                    int n32 = (gc->trackMap[n][n29] & 0x3F) >> 3;
+                    if (n31 == 1 && n32 == 1) {
+                        gc->tileMap[n][n29] = -128;
+                        gc->trackMap[n][n29] = 0;
+                    } else if (n31 == 1) {
+                        gc->tileMap[n][n29] = -57;
+                        gc->trackMap[n][n29] = (int8_t)(0x40 | n32);
+                    } else if (n32 == 1) {
+                        gc->tileMap[n][n29] = -58;
+                        gc->trackMap[n][n29] = (int8_t)(0x40 | n31);
+                    }
+                    gc->lastViewportCenterX = -1;
+                }
+            }
+
+            for (int n27 = 0; n27 < 500; ++n27) {
+                if ((gc->trainFlags[n27] & 0x80) != 128
+                    || (gc->trainFlags[n27] & 0x40) != 64)
+                    continue;
+                if ((gc->trainFlags[n27] & 0x20) == 32) {
+                    if (gc->trainEnergyOrCount[n27] > 0) {
+                        --gc->trainEnergyOrCount[n27];
+                        continue;
+                    }
+                    gc->trainPhase[n27] = 0;
+                    gc->trainFlags[n27] = 0;
+                    continue;
+                }
+                gc_updateTrain(gc, n27);
+                gc_updateTrain(gc, n27);
+                if (gc->trainPhase[n27] == 0) gc_mergeTrainAt(gc, n27);
+            }
+
+            if (gc->counterA >= gc->dH) {
+                gc_computeYearEndMetrics(gc);
+                if (gc->frameIndex > 0) --gc->frameIndex;
+                gc->counterA = 0;
+                ++gc->dayOfMonth;
+                gc_everyMonthlyTick(gc);
+                if (gc->dayOfMonth % 4 == 0) gc_maybeAiTakeTurn(gc);
+                if (gc->dayOfMonth % 2 == 0) {
+                    if (gc->dayOfMonth % 10 == 0) gc_everyTenTick(gc);
+                    gc_everyTwoTick(gc);
+                    gc_everyTwoTickZ(gc);
+                    if (gc->flagsA) {
+                        int found = 0;
+                        for (int n = 0; n < 30; ++n)
+                            found = found || gc_pickValidForestTile(gc);
+                        if (found) gc_maybeAITick(gc);
+                    }
+                    gc_tickInputOrAi(gc, false);
+                }
+                int oldMonth = gc->monthOfYear;
+                switch (gc->monthOfYear) {
+                    case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+                        if (gc->dayOfMonth == 32) ++gc->monthOfYear;
+                        break;
+                    case 2:
+                        if ((gc->year % 4 != 0 && gc->dayOfMonth == 29)
+                            || (gc->year % 4 == 0 && gc->dayOfMonth == 30))
+                            ++gc->monthOfYear;
+                        break;
+                    case 4: case 6: case 9: case 11:
+                        if (gc->dayOfMonth == 31) ++gc->monthOfYear;
+                        break;
+                }
+                if (oldMonth != gc->monthOfYear) {
+                    gc->dayOfMonth = 1;
+                    gc_newYearNotify(gc);
+                    gc_dayResetP(gc);
+                    gc_dayResetAg(gc);
+                    gc_dayResetAd(gc);
+                    switch (abs(midp_random_next_int(&gc->rng) % 7)) {
+                        case 0: gc->moneyBaseA += 9; gc->moneyBaseB += 9; break;
+                        case 1: ++gc->baseTrainSpeed; gc->accel1 += 3; gc->brake1 += 3; break;
+                        case 2: ++gc->baseTrainSpeed2; gc->accel2 += 2; break;
+                        case 3: gc->costPower += 47; gc->costStruct += 98; break;
+                        case 4:
+                            gc->costOverhead += 3; gc->costMaintenance += 59; gc->costCrew += 4;
+                            break;
+                        case 5:
+                            gc->gWagonCost += 378; gc->gWagonCost2 += 432;
+                            gc->gWagonCost3 += 518; gc->gWagonCost4 += 601;
+                            gc->gWagonCost5 += 714; gc->gWagonCost6 += 826;
+                            break;
+                        case 6:
+                            gc->costGroupC1 += 45; gc->costGroupC2 += 51;
+                            gc->costGroupC3 += 43; gc->costGroupC4 += 50;
+                            break;
+                    }
+                }
+                if (gc->monthOfYear == 13) {
+                    gc_revenueOrYear(gc);
+                    gc_postRevenueReset(gc);
+                    gc->monthOfYear = 1;
+                    ++gc->year;
+                    if (gc->money < 0) {
+                        gc->ready = false;
+                        gc->transitionCode = 7;
+                        gc_setState(gc, 20);
+                    }
+                }
+                int oldEra = gc->era;
+                if (gc->dayOfMonth == 5 && gc->monthOfYear == 3 && gc->year == 1951 && gc->era < 2)
+                    gc->era = 2;
+                if (gc->dayOfMonth == 17 && gc->monthOfYear == 7 && gc->year == 1953 && gc->era < 3)
+                    gc->era = 3;
+                if (gc->dayOfMonth == 4 && gc->monthOfYear == 12 && gc->year == 1957 && gc->era < 4)
+                    gc->era = 4;
+                if (gc->dayOfMonth == 26 && gc->monthOfYear == 2 && gc->year == 1962 && gc->era < 5)
+                    gc->era = 5;
+                if (oldEra != gc->era) {
+                    gc->ready = false;
+                    gc->transitionCode = 13;
+                    gc_setState(gc, 20);
+                }
+            } else {
+                ++gc->counterA;
+            }
+            gc->tickEnd = midp_current_time_millis();
+            break;
+        }
         default:
-            // TODO port: gameplay state 30 (sim tick) + menus (35/40/45/...).
+            // TODO port: menus (35/40/45/...) and remaining update states.
             break;
     }
 }

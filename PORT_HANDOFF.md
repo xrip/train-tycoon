@@ -72,7 +72,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **75 / 196 (38%)** — 74 full + 1 partial (`update`).
+- Methods done: **85 / 196 (43%)** — 84 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -93,17 +93,20 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **Isometric world renderer ported:** `renderMap` (`port/impl/render_map.c`,
   155 L) draws terrain into the offscreen backbuffer when the viewport moves,
   blits it, then overlays dynamic tiles, trains and the build menu.
-- `update()` is **partial**: boot/loading (0/1/2/4/10) **and** map-gen (25) are
-  done; the **sim tick (state 30)** and the remaining menu/popup states are not.
+- `update()` is **partial**: boot/loading (0/1/2/4/10), map-gen (25), and the
+  full state-30 control branch (Java L9024-9282) are done. The port builds and
+  passes smoke, but core simulation calls are still stubs; menu/popup states are
+  not done, and the smoke check does not drive the game into state 30.
 - **Menu system is functional** — `handleBuildMenuState` (~786 L) is ported, so
   selecting menu items drives the state transitions (new game → scenario →
   `setState(25)` map-gen, options, etc.).
-- **Biggest remaining gate to gameplay:** `update()` **state 30 (sim tick)** —
-  `updateTrain`, `tickInputOrAi`, `everyTwoTick`, `everyMonthlyTick`,
-  `advanceConstructionTimers`, `maybeAITick` — plus the ~120 still-pending
-  methods (run `python tools/port.py status -v`). The game now reaches the
-  generated map but cannot yet simulate/interact with it. Port state 30 next,
-  pulling in its helper methods; then the remaining UI-draw methods
+- **Biggest remaining gate to gameplay:** replace the direct stubs used by the
+  state-30 branch: `updateTrain`, `mergeTrainAt`, `computeYearEndMetrics`,
+  `everyMonthlyTick`, `everyTwoTickZ`, `pickValidForestTile`, `tickInputOrAi`,
+  and `newYearNotify`. Ten short helpers are now ported in `port/impl/sim_tick.c`:
+  `dayResetP`, `advanceConstructionTimers`, `maybeAITick`, `dayResetAg`,
+  `revenueOrYear`, `everyTwoTick`, `countCarsInTrain`, `maybeAiTakeTurn`,
+  `dayResetAd`, and `postRevenueReset`. Then port the remaining UI-draw methods
   (`paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
   `drawBuildMenuCursor/Row`, `q` [372 L], `computeTrainCost`, …).
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
@@ -117,17 +120,17 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded fallback.
 - No behavioural test harness yet; `verify` only checks it builds and runs.
 
-## 6a. Next-session plan: reach playable simulation (state 30)
+## 6a. Next-session plan: complete playable simulation (state 30)
 
-The map-gen chain (steps 1–4 below) is **done** — selecting "new game" now
-generates a world, paints it via `renderMap`, and `setState(30)`. The game
-freezes there because the sim tick is not ported. Continue from here:
+The map-gen chain and the state-30 control branch are **done**. Selecting
+"new game" generates a world, paints it via `renderMap`, and enters the sim
+tick. Core calls are still stubs, so simulation and interaction are incomplete.
+Continue from here:
 
-1. `update()` **state 30** (Java L9024-9172): the sim tick — the priority. It
-   drives the per-frame economy/train/AI update. Extend `update()` in
-   `port/impl/paint.c` with `case 30`, pulling in its helpers:
-   - `updateTrain`, `tickInputOrAi`, `everyTwoTick`, `everyMonthlyTick`,
-     `advanceConstructionTimers`, `maybeAITick`.
+1. Port the eight direct pending helpers called by state 30, starting with their
+   smallest leaf dependencies: `updateTrain`, `mergeTrainAt`,
+   `computeYearEndMetrics`, `everyMonthlyTick`, `everyTwoTickZ`,
+   `pickValidForestTile`, `tickInputOrAi`, and `newYearNotify`.
 2. The UI-draw methods called from the state-30/40 paint paths:
    `paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
    `drawBuildMenuCursor`, `drawBuildMenuRow`, `drawHeaderBar`, `drawNumber`.
@@ -139,7 +142,7 @@ freezes there because the sim tick is not ported. Continue from here:
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 75 already
+`show NAME` throughout. Each is a mechanical faithful port like the 85 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

@@ -5061,7 +5061,7 @@
    "start": 3321,
    "end": 3329,
    "c_name": "gc_dayResetP",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "advanceConstructionTimers",
@@ -5071,7 +5071,7 @@
    "start": 3331,
    "end": 3359,
    "c_name": "gc_advanceConstructionTimers",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "maybeAITick",
@@ -5081,7 +5081,7 @@
    "start": 3361,
    "end": 3373,
    "c_name": "gc_maybeAITick",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "placeCityTileInlined",
@@ -5121,7 +5121,7 @@
    "start": 3518,
    "end": 3528,
    "c_name": "gc_dayResetAg",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "rebuildCityList",
@@ -5481,7 +5481,7 @@
    "start": 5813,
    "end": 5819,
    "c_name": "gc_revenueOrYear",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "everyTwoTick",
@@ -5491,7 +5491,7 @@
    "start": 5821,
    "end": 5839,
    "c_name": "gc_everyTwoTick",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "canRefuelAtTile",
@@ -5531,7 +5531,7 @@
    "start": 6130,
    "end": 6135,
    "c_name": "gc_countCarsInTrain",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "accumulateTrainTurns",
@@ -5961,7 +5961,7 @@
    "start": 7338,
    "end": 7342,
    "c_name": "gc_maybeAiTakeTurn",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "placeCitiesAndIndustry",
@@ -5981,7 +5981,7 @@
    "start": 7373,
    "end": 7385,
    "c_name": "gc_dayResetAd",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "postRevenueReset",
@@ -5991,7 +5991,7 @@
    "start": 7387,
    "end": 7394,
    "c_name": "gc_postRevenueReset",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "spawnTrainAt",
@@ -6342,7 +6342,7 @@
    "end": 9513,
    "c_name": "gc_update",
    "status": "partial",
-   "note": "boot states + 25 (map-gen) done; state 30 sim tick + menus TODO"
+   "note": "boot states + 25 (map-gen) + state 30 control done; core sim helpers + menus TODO"
   },
   {
    "java_name": "renderMap",
