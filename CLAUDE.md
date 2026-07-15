@@ -4,17 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A two-phase project on the Train Tycoon J2ME game (originally a single obfuscated class `a` in a `.jar`):
+A Train Tycoon native Windows game with its old J2ME decompile kept as a
+behavior reference.
 
-1. **Deobfuscation** — reproducibly rename the obfuscated bytecode into readable Java.
-2. **Win32 port** (currently active) — port that readable Java to a native C23 program on the MiniFB backend.
+**Current development is only under `win32/`.** Treat it as a normal native C
+project. It has its own source, resources, CMake build, and tests. It does not
+need Java, Python, the old JAR, `port/`, or generated files.
 
-Both phases are driven by **reproducible, subcommand-based Python toolchains** — never hand edits to generated output. Resumability is a hard requirement: anyone can continue from any point with no bus factor. When continuing the port, read **`PORT_HANDOFF.md`** first.
+Use the Java decompile and raw bytecode only when a game-behavior bug has no
+clear answer in the native C source. The old deobfuscation and port pipeline is
+kept for that fact-check work; it is no longer the normal development path.
 
-## Source layout (`src/`)
+## Native Win32 project — current source of truth
+
+```powershell
+cd win32
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Debug
+ctest --test-dir build -C Debug --output-on-failure
+```
+
+Run `win32/build/Debug/train_tycoon.exe`. Resources are copied beside the
+program and found from the executable path.
+
+- `win32/src/game/*.c` — game rules, state changes, simulation, and drawing.
+- `win32/src/game_state.*` — game state and first values.
+- `win32/src/game_methods.h` — game function declarations.
+- `win32/src/midp_*` — small local runtime.
+- `win32/src/main.c` — Win32 start, frame loop, and smoke tests.
+- `win32/resources/` — game data and MIDI.
+
+Edit these native files directly. There is no manifest, generation, or port
+status step for `win32/`.
+
+## Historical decompile source layout (`src/`)
 
 Several variants exist; know which is which before editing:
-- `src/deobfuscated/` — the deobfuscation output. **`GameCanvas.java` here is the single source of truth** for both renaming and the port.
+- `src/deobfuscated/` — the deobfuscation output and main bug-reference source.
 - `src/readable/` — earlier hand-recovered readable Java (historical).
 - `src/faithful/` — the two classes reconstructable near-exactly, original identifiers preserved.
 - `src/decompiled_cfr/` — raw CFR decompilation (input to the pipeline).
@@ -35,11 +61,11 @@ Requires `java`/`javac` (JDK 8+) on PATH. Renames live in `tools/mappings.txt`:
 `class|field|method <original-obfuscated keys> <newName>`; method rows carry the
 original JVM descriptor. Keys are always the *original obfuscated* owner/name.
 
-## Win32 port — `tools/port.py`
+## Historical Win32 port pipeline — `tools/port.py`
 
-`src/deobfuscated/GameCanvas.java` (9,727 lines, 441 fields, 196 methods) is the
-source of truth. The toolchain extracts fields/methods, generates C scaffolding,
-and tracks per-method port status in `tools/port_manifest.json`.
+`src/deobfuscated/GameCanvas.java` (9,727 lines, 441 fields, 196 methods) was
+the source for the first native C work. This toolchain remains only for old
+port checks and bug comparison.
 
 ```
 python tools/port.py inventory    # (re)scan Java -> manifest (idempotent, safe)
@@ -88,30 +114,29 @@ rasterizer), `Image` (real PNG decode via vendored `port/third_party/stb_image.h
 - Java array `.length` is impossible on raw C pointers — every game array is length-tracked: allocate with `GC_NEW(type, n)`, read length with `midp_arr_len(ptr)`. `System.arraycopy(...)` → `memcpy` (or `memmove` if regions overlap).
 - `run()` is **not** a blocking loop: `port/main.c` owns the frame loop and calls `gc_update` + `gc_paint` each frame. Port the run-iteration body into `update()`/`paint()`.
 
-### Naming rule during the port
+### Naming rule for native work
 
-Do not carry an obfuscated identifier into new C code when its purpose can be
-recovered. If a method being ported still has an obfuscated member name:
+Do not keep an obfuscated identifier in new or changed native C code when its
+purpose can be recovered. If native work reaches such a name:
 
 1. Read its behavior and descriptor-precise cross-references.
 2. Pick a clear behavioral name. If the evidence is not strong, record the
    uncertainty and ask before renaming.
-3. Add the member rename to `tools/mappings.txt`, then run the deobfuscation
-   pipeline so `src/deobfuscated/GameCanvas.java` stays the source of truth.
-4. Run `python tools/port.py inventory` and regenerate the C scaffolding before
-   finishing the C method.
+3. Rename it directly in `win32/`. If needed, use `tools/mappings.txt`, the
+   readable Java, xrefs, and raw bytecode only to get the right meaning.
 
-Use clear local names in hand-ported C even when a decompiler-only Java local
-still has a name such as `n`, `by`, or `bl`. Keep a short Java-name comment only
-when it helps a line-by-line faithfulness check.
+Use clear local names in native C. If old short names such as `n`, `by`, or
+`bl` make changed code unclear, give them behavioral names as part of that
+change.
 
-## Build & run
+## Historical root build
 
 - CMake ≥ 3.25; MSVC (VS 2022 Build Tools) or GCC/Clang with C23. Python 3 for tooling.
 - `python tools/port.py verify` runs the whole chain (build + headless smoke, ~120 frames). Set the `TRAIN_TYCOON_SMOKE` env var for smoke mode in `main.c`.
 - Set `TRAIN_TYCOON_MIDI_TEST_MS=3000` when running the native executable for a
   short WinMM MIDI device check without the game window.
-- Raw build: `cmake -S . -B build/port_build -G "Visual Studio 17 2022" -A x64` then `cmake --build build/port_build --config Debug`.
+- The root CMake build is kept for old port proof. Normal work and builds start
+  in `win32/`.
 - Game assets extracted from the JAR live in `resources/` (`1`..`6`, `ico.png`) — required at runtime.
 
 ## Known gotchas

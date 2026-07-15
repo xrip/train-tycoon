@@ -1,0 +1,59 @@
+# Train Tycoon for Windows
+
+This is the standalone native C source for Train Tycoon.
+
+The game uses a 240×320 software canvas in a 2× Win32 window. MiniFB gives the
+window and key input. The local runtime gives picture, resource, save-file,
+time, random-number, and MIDI support. Music uses the WinMM MCI sequencer.
+
+## Build
+
+Needs Windows, CMake 3.25 or later, and Visual Studio 2022 C build tools.
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Debug
+```
+
+The program and its resource copy will be under `build/Debug`:
+
+```powershell
+.\build\Debug\train_tycoon.exe
+```
+
+## Test
+
+```powershell
+ctest --test-dir build -C Debug --output-on-failure
+```
+
+The smoke test checks route finding, save-data compression and restore, MIDI
+data, resource reading, scenario 0 map generation, game input, one game step,
+and paint.
+
+For a short MIDI device test:
+
+```powershell
+$env:TRAIN_TYCOON_MIDI_TEST_MS='3000'
+.\build\Debug\train_tycoon.exe
+Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
+```
+
+## Source map
+
+- `src/main.c` — Win32 start, frame loop, and smoke tests.
+- `src/game/` — game rules, state changes, simulation, and drawing.
+- `src/game_state.*` — the full game state and its first values.
+- `src/game_methods.h` — game function declarations.
+- `src/midp_*` — the small local runtime used by the game.
+- `src/midp_media_win32.c` — WinMM MIDI music.
+- `src/third_party/stb_image.h` — PNG reading.
+- `resources/` — game pictures, data, and MIDI music.
+
+This folder is the main source for future native work. It has no build need for
+Java, Python, the old JAR, or files outside this folder. If a game-behavior bug
+has no clear answer in this C source, the decompile in the parent project may
+be used only as a fact check.
+
+The old game has no separate sound-effect file or sound-effect call. Any future
+WAV effects will be a new feature.

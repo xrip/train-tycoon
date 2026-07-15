@@ -1,0 +1,634 @@
+// Terrain and map generation.
+// Driven by loadState25Setup across mapGenStage 0..10 (raise/lower terrain,
+// place patches and features, scatter industry). The random process is exact.
+#include "game_methods.h"
+#include <stdlib.h> // abs
+#include <string.h>
+
+#define RNG (&gc->rng)
+static int rint(GameCanvas *gc) { return midp_random_next_int(&gc->rng); }
+
+// byte randomCityTile()
+int8_t gc_randomCityTile(GameCanvas *gc) {
+    int n = abs(rint(gc) % 22);
+    if (n < 6) return 34;
+    if (n < 11) return 35;
+    if (n < 15) return 36;
+    if (n < 18) return 37;
+    if (n < 20) return 38;
+    if (n < 21) return 39;
+    if (n < 22) return 40;
+    return 0;
+}
+
+// byte addCityEntry(int n)
+int8_t gc_addCityEntry(GameCanvas *gc, int32_t n) {
+    gc->stationDirectionCode[gc->cityListIndex] = (int8_t)n;
+    gc->cityPopulation[gc->cityListIndex] = (int8_t)(50 + rint(gc) % 20);
+    gc->cityIndex[gc->cityListIndex] = 0;
+    gc->cityListIndex = (int8_t)(gc->cityListIndex + 1);
+    return (int8_t)(gc->cityListIndex - 1);
+}
+
+// byte registerTrain(byte by, int n, int n2)
+int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2) {
+    gc->constructionTimers[gc->numSelectedTrains] = 50;
+    gc->zonePopulation[gc->numSelectedTrains] = by;
+    gc->trainSelectionY[gc->numSelectedTrains] = (int16_t)n;
+    gc->trainSelectionX[gc->numSelectedTrains] = (int16_t)n2;
+    int16_t s = 0;
+    bool bl;
+    do {
+        int8_t by2 = (int8_t)abs(rint(gc) % 6);
+        int8_t by3 = (int8_t)abs(rint(gc) % 14);
+        s = (int16_t)(256 * by2 + by3);
+        bl = true;
+        for (int i = 0; i < gc->numSelectedTrains; ++i)
+            if (s == gc->trainSelectionIndex[i]) bl = false;
+    } while (!bl);
+    gc->trainSelectionIndex[gc->numSelectedTrains] = s;
+    gc->numSelectedTrains = (int8_t)(gc->numSelectedTrains + 1);
+    return (int8_t)(gc->numSelectedTrains - 1);
+}
+
+// void toggleFlagInlined(boolean bl) -- recompute slope tiles from heightMap
+void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
+    int n, n2, n3, n4;
+    if (bl) {
+        gc_commitTerrainEdit(gc);
+        gc->terrainEditBuffer = NULL;
+        n4 = gc->selectionStartX; n3 = gc->selectionStartY;
+        n2 = gc->selectionStartX + 10; n = gc->selectionStartY + 10;
+    } else {
+        n4 = 0; n3 = 0; n2 = gc->mapWidth; n = gc->mapHeight;
+    }
+    for (int i = n4; i < n2; ++i) {
+        for (int j = n3; j < n; ++j) {
+            int8_t by = gc->heightMap[i][j];
+            int8_t by2 = gc->heightMap[i][j + 1];
+            int8_t by3 = gc->heightMap[i + 1][j];
+            int8_t by4 = gc->heightMap[i + 1][j + 1];
+            if (gc->tileMap[i][j] >= 34) continue;
+            if (by == by2 && by == by3 && by == by4) {
+                gc->tileElevation[i][j] = by;
+                if (gc->tileMap[i][j] <= 28) gc->tileMap[i][j] = 0;
+            } else if (by == by2 && by == by3 && by4 < by) {
+                gc->tileElevation[i][j] = by; gc->tileMap[i][j] = 11;
+            }
+            if (by == by3 && by == by4 && by2 < by) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = 13; }
+            if (by == by2 && by == by4 && by3 < by) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = 14; }
+            if (by2 == by3 && by2 == by4 && by < by2) { gc->tileElevation[i][j] = by2; gc->tileMap[i][j] = 12; }
+            if (by == by4 && by2 == by3 && by2 < by) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = 16; }
+            if (by == by4 && by2 == by3 && by < by2) { gc->tileElevation[i][j] = by2; gc->tileMap[i][j] = 15; }
+            if (by == by2 && by3 == by4 && by3 < by) {
+                gc->tileElevation[i][j] = by;
+                gc->tileMap[i][j] = (int8_t)(by3 == -1 && i + 2 <= gc->mapWidth && (gc->heightMap[i + 2][j] == -1 || gc->heightMap[i + 2][j + 1] == -1) ? 9 : 24);
+            }
+            if (by == by2 && by3 == by4 && by < by3) {
+                gc->tileElevation[i][j] = by3;
+                gc->tileMap[i][j] = (int8_t)(by == -1 && i - 1 >= 0 && (gc->heightMap[i - 1][j] == -1 || gc->heightMap[i - 1][j + 1] == -1) ? 8 : 22);
+            }
+            if (by == by3 && by2 == by4 && by2 < by) {
+                gc->tileElevation[i][j] = by;
+                gc->tileMap[i][j] = (int8_t)(by2 == -1 && j + 2 <= gc->mapHeight && (gc->heightMap[i][j + 2] == -1 || gc->heightMap[i + 1][j + 2] == -1) ? 10 : 21);
+            }
+            if (by == by3 && by2 == by4 && by < by2) {
+                gc->tileElevation[i][j] = by2;
+                gc->tileMap[i][j] = (int8_t)(by == -1 && j - 1 >= 0 && (gc->heightMap[i][j - 1] == -1 || gc->heightMap[i + 1][j - 1] == -1) ? 7 : 23);
+            }
+            if (by == by2 && by == by3 && by < by4) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = (int8_t)(by == -1 ? 3 : 19); }
+            if (by == by2 && by == by4 && by < by3) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = (int8_t)(by == -1 ? 6 : 18); }
+            if (by == by3 && by == by4 && by < by2) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = (int8_t)(by == -1 ? 5 : 20); }
+            if (by2 == by3 && by2 == by4 && by4 < by) { gc->tileElevation[i][j] = by4; gc->tileMap[i][j] = (int8_t)(by4 == -1 ? 4 : 17); }
+            if (by == by4 && by2 < by && by3 > by) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = 25; }
+            if (by3 == by2 && by < by3 && by4 > by3) { gc->tileElevation[i][j] = by3; gc->tileMap[i][j] = 26; }
+            if (by == by4 && by2 > by && by3 < by) { gc->tileElevation[i][j] = by; gc->tileMap[i][j] = 27; }
+            if (by3 != by2 || by <= by3 || by4 >= by3) continue;
+            gc->tileElevation[i][j] = by3; gc->tileMap[i][j] = 28;
+        }
+    }
+}
+
+// void smoothTileAtInlined(int n, int n2, boolean bl)
+void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
+    if ((bl && gc->heightMap[n][n2] < 3) || (!bl && gc->heightMap[n][n2] > -1)) {
+        gc_setSelectionStart(gc, n, n2);
+        if (gc_isAdjacentTileEmpty(gc, n, n2, gc->heightMap[n][n2] + (bl ? 1 : -1), bl)) {
+            if (gc->initialIndustryPlaced) {
+                if (gc->terrainSmoothCost <= gc->money) {
+                    gc->money -= gc->terrainSmoothCost;
+                    gc_pushMoneyHistory(gc, -gc->terrainSmoothCost);
+                    gc->subsidyCost += gc->terrainSmoothCost;
+                    gc_toggleFlagInlined(gc, true);
+                } else {
+                    gc_enterOutOfMoneyState(gc);
+                }
+            } else {
+                gc_toggleFlagInlined(gc, true);
+            }
+        }
+    }
+    gc->lastViewportCenterX = -1;
+}
+
+// void raiseTerrainArea(int n, int n2, int n3, int n4, int n5)
+void gc_raiseTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
+    for (int i = n; i < n + n3; ++i) {
+        for (int j = n2; j < n2 + n4; ++j) {
+            if (i <= 0 || j <= 0 || i > gc->mapWidth || j > gc->mapHeight) continue;
+            gc_setSelectionStart(gc, i, j);
+            gc_isAdjacentTileEmpty(gc, i, j, n5, true);
+            if (rint(gc) % 2 < 0 && i > 0) gc_isAdjacentTileEmpty(gc, i - 1, j, n5, true);
+            if (rint(gc) % 2 < 0 && j > 0) gc_isAdjacentTileEmpty(gc, i, j - 1, n5, true);
+            if (rint(gc) % 2 < 0 && i < gc->mapWidth) gc_isAdjacentTileEmpty(gc, i + 1, j, n5, true);
+            if (rint(gc) % 2 < 0 && j < gc->mapHeight) gc_isAdjacentTileEmpty(gc, i, j + 1, n5, true);
+            gc_commitTerrainEdit(gc);
+        }
+    }
+}
+
+// void lowerTerrainArea(int n, int n2, int n3, int n4, int n5)
+void gc_lowerTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
+    (void)n5;
+    for (int i = n; i < n + n3; ++i) {
+        for (int j = n2; j < n2 + n4; ++j) {
+            if (i <= 0 || j <= 0 || i > gc->mapWidth || j > gc->mapHeight) continue;
+            for (int k = 0; k < 3; ++k) gc_smoothTileAtInlined(gc, i, j, false);
+            if (rint(gc) % 2 < 0 && i > 0) gc_smoothTileAtInlined(gc, i - 1, j, false);
+            if (rint(gc) % 2 < 0 && j > 0) gc_smoothTileAtInlined(gc, i, j - 1, false);
+            if (rint(gc) % 2 < 0 && i < gc->mapWidth) gc_smoothTileAtInlined(gc, i + 1, j, false);
+            if (rint(gc) % 2 >= 0 || j >= gc->mapHeight) continue;
+            gc_smoothTileAtInlined(gc, i, j + 1, false);
+        }
+    }
+}
+
+// void trackBuildStepInlined(int n, int n2, int n3, int n4)
+void gc_trackBuildStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
+    int8_t by = -2;
+    for (int i = n; i < n + n3; ++i) {
+        for (int j = n2; j < n2 + n4; ++j) {
+            if (i >= gc->mapWidth || j >= gc->mapHeight) continue;
+            if (by == -2 && (by = gc->heightMap[i][j]) < 0) by = 0;
+            while (by != gc->heightMap[i][j]) gc_smoothTileAtInlined(gc, i, j, by > gc->heightMap[i][j]);
+            while (by != gc->heightMap[i + 1][j]) gc_smoothTileAtInlined(gc, i + 1, j, by > gc->heightMap[i + 1][j]);
+            while (by != gc->heightMap[i][j + 1]) gc_smoothTileAtInlined(gc, i, j + 1, by > gc->heightMap[i][j + 1]);
+            while (by != gc->heightMap[i + 1][j + 1]) gc_smoothTileAtInlined(gc, i + 1, j + 1, by > gc->heightMap[i + 1][j + 1]);
+        }
+    }
+}
+
+// void placeTerrainPatch(int n, int n2)
+void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
+    int n3, n4, n5, n6;
+    int8_t by, by2, by3, by4;
+    int n7 = abs(rint(gc) % 5) + gc->terrainPatchBaseSize;
+    int8_t by5 = (int8_t)(abs(rint(gc) % 5) + gc->terrainPatchBaseSize);
+    int8_t **byArray = (int8_t **)midp_alloc_arr(sizeof(int8_t *), n7);
+    for (int i = 0; i < n7; ++i) byArray[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), by5);
+    bool bl = false;
+    int n8 = abs(rint(gc) % (n7 - 2)) + 1;
+    for (n6 = abs(rint(gc) % 3); n6 < by5 - abs(rint(gc) % 3); ++n6) byArray[n8][n6] = 1;
+    if (n7 >= 7) {
+        do {
+            n8 = abs(rint(gc) % (n7 - 2)) + 1;
+            bl = false;
+            for (n6 = 0; n6 < by5; ++n6)
+                if (byArray[n8 - 1][n6] == 1 || byArray[n8 + 1][n6] == 1) bl = true;
+        } while (bl);
+        for (n6 = abs(rint(gc) % 3); n6 < by5 - abs(rint(gc) % 3); ++n6) byArray[n8][n6] = 1;
+    }
+    n6 = abs(rint(gc) % (by5 - 2)) + 1;
+    for (n5 = abs(rint(gc) % 3); n5 < n7 - abs(rint(gc) % 3); ++n5) byArray[n5][n6] = 2;
+    if (by5 >= 7) {
+        do {
+            n6 = abs(rint(gc) % (by5 - 2)) + 1;
+            bl = false;
+            for (n5 = 0; n5 < n7; ++n5)
+                if (byArray[n5][n6 - 1] == 2 || byArray[n5][n6 + 1] == 2) bl = true;
+        } while (bl);
+    }
+    for (n5 = 0; n5 < n7; ++n5) {
+        for (by4 = 0; by4 < by5; ++by4) {
+            if (byArray[n5][by4] != 1 && byArray[n5][by4] != 2) continue;
+            by3 = (int8_t)(n5 > 0 && byArray[n5 - 1][by4] > 0 ? 1 : 0);
+            by2 = (int8_t)(n5 < n7 - 1 && byArray[n5 + 1][by4] > 0 ? 1 : 0);
+            by = (int8_t)(by4 < by5 - 1 && byArray[n5][by4 + 1] > 0 ? 1 : 0);
+            n4 = by4 > 0 && byArray[n5][by4 - 1] > 0 ? 1 : 0;
+            n3 = (by3 != 0 ? 1 : 0) + (by2 != 0 ? 1 : 0) + (by != 0 ? 1 : 0) + (n4 != 0 ? 1 : 0);
+            if (n3 > 2) { byArray[n5][by4] = 44; continue; }
+            if (by2 != 0 && n4 != 0) { byArray[n5][by4] = 45; continue; }
+            if (by2 != 0 && by != 0) { byArray[n5][by4] = 46; continue; }
+            if (by3 != 0 && by != 0) { byArray[n5][by4] = 47; continue; }
+            if (by3 != 0 && n4 != 0) { byArray[n5][by4] = 48; continue; }
+            if ((by3 != 0 || by2 != 0) && by == 0 && n4 == 0) { byArray[n5][by4] = 43; continue; }
+            if ((n4 == 0 && by == 0) || by3 != 0 || by2 != 0) continue;
+            byArray[n5][by4] = 42;
+        }
+    }
+    for (n5 = 0; n5 < n7; ++n5) {
+        for (by4 = 0; by4 < by5; ++by4) {
+            if (byArray[n5][by4] != 0) continue;
+            by3 = 1;
+            by2 = (int8_t)(n5 > 0 ? byArray[n5 - 1][by4] : 0);
+            n4 = n5 < n7 - 1 ? byArray[n5 + 1][by4] : 0;
+            by = (int8_t)(by4 > 0 ? byArray[n5][by4 - 1] : 0);
+            n3 = by4 < by5 - 1 ? byArray[n5][by4 + 1] : 0;
+            if (by2 < 42 && n4 < 42 && by < 42 && n3 < 42) by3 = 0;
+            if (by2 == 44 || n4 == 44 || by == 44 || n3 == 44) by3 = 0;
+            if (by2 == 45 || by2 == 46 || by2 == 43) by3 = 0;
+            if (n4 == 47 || n4 == 48 || n4 == 43) by3 = 0;
+            if (by == 46 || by == 47 || by == 42) by3 = 0;
+            if (n3 == 45 || n3 == 48 || n3 == 42) by3 = 0;
+            if (by2 == 44) byArray[n5][by4] = 43;
+            if (n4 == 44) byArray[n5][by4] = 43;
+            if (by == 44) byArray[n5][by4] = 42;
+            if (n3 == 44) byArray[n5][by4] = 42;
+            if (by3 == 0) continue;
+            byArray[n5][by4] = gc_randomCityTile(gc);
+        }
+    }
+    n5 = -2;
+    for (by4 = 0; by4 < n7; ++by4) {
+        for (by3 = 0; by3 < by5; ++by3) {
+            if (n + by4 >= gc->mapWidth || n2 + by3 >= gc->mapHeight
+                || (byArray[by4][by3] == 0 && (byArray[by4][by3] != 0 || rint(gc) % 3 >= 0))) continue;
+            if (n5 == -2 && (n5 = gc->heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
+            int64_t l = midp_current_time_millis();
+            while (n5 != gc->heightMap[n + by4][n2 + by3]) {
+                gc_smoothTileAtInlined(gc, n + by4, n2 + by3, n5 > gc->heightMap[n + by4][n2 + by3]);
+                if (midp_current_time_millis() - l <= 1000) continue;
+                gc->trackBuildInProgress = true; goto cleanup;
+            }
+            l = midp_current_time_millis();
+            while (n5 != gc->heightMap[n + by4 + 1][n2 + by3]) {
+                gc_smoothTileAtInlined(gc, n + by4 + 1, n2 + by3, n5 > gc->heightMap[n + by4 + 1][n2 + by3]);
+                if (midp_current_time_millis() - l <= 1000) continue;
+                gc->trackBuildInProgress = true; goto cleanup;
+            }
+            l = midp_current_time_millis();
+            while (n5 != gc->heightMap[n + by4][n2 + by3 + 1]) {
+                gc_smoothTileAtInlined(gc, n + by4, n2 + by3 + 1, n5 > gc->heightMap[n + by4][n2 + by3 + 1]);
+                if (midp_current_time_millis() - l <= 1000) continue;
+                gc->trackBuildInProgress = true; goto cleanup;
+            }
+            l = midp_current_time_millis();
+            while (n5 != gc->heightMap[n + by4 + 1][n2 + by3 + 1]) {
+                gc_smoothTileAtInlined(gc, n + by4 + 1, n2 + by3 + 1, n5 > gc->heightMap[n + by4 + 1][n2 + by3 + 1]);
+                if (midp_current_time_millis() - l <= 1000) continue;
+                gc->trackBuildInProgress = true; goto cleanup;
+            }
+        }
+    }
+    by4 = 0;
+    for (by3 = 0; by3 < n7; ++by3)
+        for (int8_t by6 = 0; by6 < by5; ++by6)
+            if (!(byArray[by3][by6] > 40 || byArray[by3][by6] < 34)) by4 = (int8_t)(by4 + 1);
+    by3 = gc_registerTrain(gc, by4, n + n7 / 2, n2 + by5 / 2);
+    for (int i = 0; i < n7; ++i) {
+        for (n4 = 0; n4 < by5; ++n4) {
+            if (n + i >= gc->mapWidth || n2 + n4 >= gc->mapHeight || byArray[i][n4] == 0) continue;
+            gc->tileMap[n + i][n2 + n4] = byArray[i][n4];
+            gc->trackMap[n + i][n2 + n4] = (int8_t)(0x80 | by3);
+        }
+    }
+cleanup:
+    for (int i = 0; i < n7; ++i) free(byArray[i]);
+    free(byArray);
+}
+
+// void placeTerrainFeature(int n)
+void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
+    int n2, n3, n4, n5, n6, n7;
+    bool bl;
+    if (gc->trackBuildInProgress) return;
+    int64_t l = midp_current_time_millis();
+    do {
+        bl = true;
+        n7 = abs(rint(gc) % (gc->mapWidth - 8)) + 4;
+        n6 = abs(rint(gc) % (gc->mapHeight - 8)) + 4;
+        n5 = rint(gc) % 2 <= 0 ? 3 : 2;
+        n4 = rint(gc) % 2 <= 0 ? 3 : 2;
+        if (n == 2) { n5 = 2; n4 = 2; }
+        for (n3 = n7 - 3; n3 < n7 + n5 + 3; ++n3) {
+            for (n2 = n6 - 3; n2 < n6 + n4 + 3; ++n2) {
+                if (gc->tileMap[n3][n2] > 33) bl = false;
+                if (gc->tileElevation[n3][n2] != -1) continue;
+                bl = false;
+            }
+        }
+        if (midp_current_time_millis() - l <= 1500) continue;
+        gc->trackBuildInProgress = true;
+        break;
+    } while (!bl);
+    if (gc->trackBuildInProgress) return;
+    gc_trackBuildStepInlined(gc, n7, n6, n5, n4);
+    n3 = gc_addCityEntry(gc, n);
+    switch (n) {
+        case 0:
+            if (n5 == 2 && n4 == 2) {
+                gc_placeTrackTile(gc, n7, n6, 52, n3); gc_placeTrackTile(gc, n7, n6 + 1, 52, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6, 51, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 1, 50, n3);
+            }
+            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
+                gc_placeTrackTile(gc, n7, n6, 52, n3); gc_placeTrackTile(gc, n7, n6 + 1, 52, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6, 51, n3); gc_placeTrackTile(gc, n7 + 2, n6, 51, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6 + 1, 50, n3); gc_placeTrackTile(gc, n7 + 2, n6 + 1, 50, n3);
+            }
+            if (n5 != 2 || n4 != 3) break;
+            gc_placeTrackTile(gc, n7, n6, 52, n3); gc_placeTrackTile(gc, n7 + 1, n6, 52, n3);
+            gc_placeTrackTile(gc, n7, n6 + 1, 50, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 1, 51, n3);
+            gc_placeTrackTile(gc, n7, n6 + 2, 50, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 2, 51, n3);
+            break;
+        case 1:
+            if (n5 == 2 && n4 == 2) {
+                gc_placeTrackTile(gc, n7, n6, 53, n3); gc_placeTrackTile(gc, n7, n6 + 1, 53, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6, 55, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 1, 54, n3);
+            }
+            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
+                gc_placeTrackTile(gc, n7, n6, 53, n3); gc_placeTrackTile(gc, n7, n6 + 1, 53, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6, 55, n3); gc_placeTrackTile(gc, n7 + 2, n6, 55, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6 + 1, 54, n3); gc_placeTrackTile(gc, n7 + 2, n6 + 1, 54, n3);
+            }
+            if (n5 != 2 || n4 != 3) break;
+            gc_placeTrackTile(gc, n7, n6, 53, n3); gc_placeTrackTile(gc, n7 + 1, n6, 53, n3);
+            gc_placeTrackTile(gc, n7, n6 + 1, 55, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 1, 55, n3);
+            gc_placeTrackTile(gc, n7, n6 + 2, 54, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 2, 54, n3);
+            break;
+        case 2:
+            if (n5 != 2 || n4 != 2) break;
+            gc_placeTrackTile(gc, n7, n6, 57 + abs(rint(gc) % 2), n3);
+            gc_placeTrackTile(gc, n7, n6 + 1, 56, n3);
+            gc_placeTrackTile(gc, n7 + 1, n6, 57 + abs(rint(gc) % 2), n3);
+            gc_placeTrackTile(gc, n7 + 1, n6 + 1, 57 + abs(rint(gc) % 2), n3);
+            break;
+        case 3:
+            for (n2 = n7; n2 < n7 + n5; ++n2)
+                for (int i = n6; i < n6 + n4; ++i)
+                    gc_placeTrackTile(gc, n2, i, 59 + abs(rint(gc) % 3), n3);
+            break;
+        case 4:
+            if (n5 == 2 && n4 == 2) {
+                gc_placeTrackTile(gc, n7, n6, 62, n3); gc_placeTrackTile(gc, n7, n6 + 1, 62, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6, 64, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 1, 63, n3);
+            }
+            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
+                gc_placeTrackTile(gc, n7, n6, 62, n3); gc_placeTrackTile(gc, n7, n6 + 1, 62, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6, 64, n3); gc_placeTrackTile(gc, n7 + 2, n6, 64, n3);
+                gc_placeTrackTile(gc, n7 + 1, n6 + 1, 62, n3); gc_placeTrackTile(gc, n7 + 2, n6 + 1, 63, n3);
+            }
+            if (n5 != 2 || n4 != 3) break;
+            gc_placeTrackTile(gc, n7, n6, 62, n3); gc_placeTrackTile(gc, n7 + 1, n6, 63, n3);
+            gc_placeTrackTile(gc, n7, n6 + 1, 62, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 1, 64, n3);
+            gc_placeTrackTile(gc, n7, n6 + 2, 62, n3); gc_placeTrackTile(gc, n7 + 1, n6 + 2, 64, n3);
+            break;
+        case 5:
+            if (n5 == 2 && n4 == 2) {
+                gc_placeTrackTile(gc, n7, n6, 65, n3); gc_placeTrackTile(gc, n7 + 1, n6, 66, n3);
+                gc_placeTrackTile(gc, n7, n6 + 1, 67, n3);
+            }
+            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
+                gc_placeTrackTile(gc, n7, n6, 65, n3); gc_placeTrackTile(gc, n7 + 1, n6, 66, n3);
+                gc_placeTrackTile(gc, n7 + 2, n6, 67, n3); gc_placeTrackTile(gc, n7, n6 + 1, 68, n3);
+            }
+            if (n5 != 2 || n4 != 3) break;
+            gc_placeTrackTile(gc, n7, n6, 65, n3); gc_placeTrackTile(gc, n7, n6 + 1, 66, n3);
+            gc_placeTrackTile(gc, n7, n6 + 2, 67, n3); gc_placeTrackTile(gc, n7 + 1, n6, 68, n3);
+            break;
+    }
+}
+
+// void loadState25Setup(int n) -- the incremental map generator
+void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
+    if (n == 0) {
+        gc->tileMap = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 1);
+        for (int i = 0; i <= gc->mapWidth; ++i) gc->tileMap[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 1);
+        gc->trackMap = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 1);
+        for (int i = 0; i <= gc->mapWidth; ++i) gc->trackMap[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 1);
+        gc->tileElevation = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 1);
+        for (int i = 0; i <= gc->mapWidth; ++i) gc->tileElevation[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 1);
+        gc->heightMap = (int8_t **)midp_alloc_arr(sizeof(int8_t *), gc->mapWidth + 2);
+        for (int i = 0; i <= gc->mapWidth + 1; ++i) gc->heightMap[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), gc->mapHeight + 2);
+        gc->initialIndustryPlaced = false;
+        gc->mapGenStage = 0;
+        gc->tilesGeneratedInStage = 0;
+        gc->totalTilesToGenerate = gc->terrainRaiseStepCount + gc->terrainLowerStepCount + gc->mapGenColumns * (gc->mapGenColumns - 1)
+            + gc->mapGenRows + gc->weightAccel2 + gc->weightAccel + gc->terrainFeatureStage6Count
+            + gc->terrainFeatureStage7Count + gc->weightAccel4 + gc->weightAccel3 + 1;
+        gc->mapGenTilesDone = 0;
+    }
+    if (n == 1) {
+        int n2 = 0, n3, n4;
+        if (gc->mapGenStage == 0) { gc->mapGenStage = 1; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 1 && gc->tilesGeneratedInStage == gc->terrainRaiseStepCount) { gc->mapGenStage = 2; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
+        if (gc->mapGenStage == 2 && gc->tilesGeneratedInStage == gc->terrainLowerStepCount) { gc->mapGenStage = 3; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
+        if (gc->mapGenStage == 3 && gc->tilesGeneratedInStage == gc->mapGenColumns * (gc->mapGenColumns - 1) + gc->mapGenRows) { gc->mapGenStage = 4; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 4 && gc->tilesGeneratedInStage == gc->weightAccel2) { gc->mapGenStage = 5; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 5 && gc->tilesGeneratedInStage == gc->weightAccel) { gc->mapGenStage = 6; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 6 && gc->tilesGeneratedInStage == gc->terrainFeatureStage6Count) { gc->mapGenStage = 7; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 7 && gc->tilesGeneratedInStage == gc->terrainFeatureStage7Count) { gc->mapGenStage = 8; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 8 && gc->tilesGeneratedInStage == gc->weightAccel4) { gc->mapGenStage = 9; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 9 && gc->tilesGeneratedInStage == gc->weightAccel3) { gc->mapGenStage = 10; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == 1)
+            gc_raiseTerrainArea(gc, abs(rint(gc) % gc->mapWidth), abs(rint(gc) % gc->mapHeight), abs(rint(gc) % 20) + 1, abs(rint(gc) % 20) + 1, abs(rint(gc) % 2) + 1);
+        if (gc->mapGenStage == 2)
+            gc_lowerTerrainArea(gc, abs(rint(gc) % gc->mapWidth), abs(rint(gc) % gc->mapHeight), abs(rint(gc) % 20) + 1, abs(rint(gc) % 20) + 1, -1);
+        gc->trackBuildInProgress = false;
+        if (gc->mapGenStage == 3) {
+            for (n4 = 0; n4 < gc->mapGenColumns; ++n4) {
+                bool done = false;
+                for (n3 = 0; n3 < gc->mapGenRows && !done; ++n3) {
+                    if (gc->tilesGeneratedInStage != gc->mapGenColumns * n4 + n3) continue;
+                    n2 = gc->mapWidth / gc->mapGenColumns;
+                    int n5 = gc->mapHeight / gc->mapGenRows;
+                    int n6 = n4 * n2 + abs(rint(gc) % (n2 / 2));
+                    int n7 = n3 * n5 + abs(rint(gc) % (n5 / 2));
+                    gc_placeTerrainPatch(gc, n6, n7);
+                    done = true;
+                }
+                if (done) break;
+            }
+        }
+        if (gc->mapGenStage == 4) gc_placeTerrainFeature(gc, 0);
+        if (gc->mapGenStage == 5) gc_placeTerrainFeature(gc, 1);
+        if (gc->mapGenStage == 6) gc_placeTerrainFeature(gc, 2);
+        if (gc->mapGenStage == 7) gc_placeTerrainFeature(gc, 3);
+        if (gc->mapGenStage == 8) gc_placeTerrainFeature(gc, 4);
+        if (gc->mapGenStage == 9) gc_placeTerrainFeature(gc, 5);
+        if (gc->trackBuildInProgress) gc->loadStep = 0;
+        if (gc->mapGenStage == 10) {
+            for (n4 = 0; n4 < gc->initialObstacleCount; ++n4) {
+                n3 = abs(rint(gc) % gc->mapWidth);
+                n2 = abs(rint(gc) % gc->mapHeight);
+                if (gc->tileMap[n3][n2] != 0 || gc->tileElevation[n3][n2] < 0) continue;
+                gc->tileMap[n3][n2] = (int8_t)(29 + abs(rint(gc) % 5));
+            }
+            gc->initialIndustryPlaced = true;
+        }
+        ++gc->tilesGeneratedInStage;
+        ++gc->mapGenTilesDone;
+    }
+}
+
+void gc_pickCitySite(GameCanvas *gc) {
+    int x = abs(rint(gc) % gc->mapWidth);
+    int y = abs(rint(gc) % gc->mapHeight);
+    gc->industryCategory = -1;
+    int tile = gc->tileMap[x][y];
+    if (tile != 0 && (tile < 29 || tile > 33)) return;
+    int min_x = x - 2;
+    int min_y = y - 2;
+    int max_x = x + 2;
+    int max_y = y + 2;
+    if (min_x < 0) min_x = 0;
+    if (min_y < 0) min_y = 0;
+    if (max_x >= gc->mapWidth) max_x = gc->mapWidth - 1;
+    if (max_y >= gc->mapHeight) max_y = gc->mapHeight - 1;
+    for (int near_x = min_x;
+         near_x <= max_x && gc->industryCategory <= 0; ++near_x) {
+        for (int near_y = min_y;
+             near_y <= max_y && gc->industryCategory <= 0; ++near_y) {
+            tile = gc->tileMap[near_x][near_y];
+            if (tile >= 34 && tile <= 40) gc->industryCategory = 0;
+            if (tile >= 65 && tile <= 68) gc->industryCategory = 1;
+            if (tile >= 53 && tile <= 55) gc->industryCategory = 2;
+            if (tile >= 59 && tile <= 61) gc->industryCategory = 3;
+        }
+    }
+    if (gc->industryCategory >= 0) {
+        gc->cityStationX = x;
+        gc->cityStationY = y;
+    }
+}
+
+void gc_pickIndustrySite(GameCanvas *gc) {
+    int x = abs(rint(gc) % gc->mapWidth);
+    int y = abs(rint(gc) % gc->mapHeight);
+    gc->industrySiteFound = false;
+    int tile = gc->tileMap[x][y];
+    if (tile != 0 && (tile < 29 || tile > 33)) return;
+    int min_x = x - 2;
+    int min_y = y - 2;
+    int max_x = x + 2;
+    int max_y = y + 2;
+    if (min_x < 0) min_x = 0;
+    if (min_y < 0) min_y = 0;
+    if (max_x >= gc->mapWidth) max_x = gc->mapWidth - 1;
+    if (max_y >= gc->mapHeight) max_y = gc->mapHeight - 1;
+    for (int near_x = min_x;
+         near_x <= max_x && !gc->industrySiteFound; ++near_x) {
+        for (int near_y = min_y;
+             near_y <= max_y && !gc->industrySiteFound; ++near_y) {
+            tile = gc->tileMap[near_x][near_y];
+            if (tile >= 34 && tile <= 40 && gc->industryCategory == 0)
+                gc->industrySiteFound = true;
+            if (tile >= 62 && tile <= 64 && gc->industryCategory == 1)
+                gc->industrySiteFound = true;
+            if (tile >= 50 && tile <= 52 && gc->industryCategory == 2)
+                gc->industrySiteFound = true;
+            if (tile >= 56 && tile <= 58 && gc->industryCategory == 3)
+                gc->industrySiteFound = true;
+        }
+    }
+    if (gc->industrySiteFound) {
+        gc->industryStationX = x;
+        gc->industryTileY = y;
+    }
+}
+
+void gc_spawnTrainAt(GameCanvas *gc, int32_t x, int32_t y) {
+    int engine_type = gc->era / 3;
+    int wagon_count = gc->selectionCost / 8000 + 1;
+    if (wagon_count > 5) wagon_count = 5;
+    int cargo_type = 2;
+    if (gc->industryCategory == 1) cargo_type = 3;
+    if (gc->industryCategory == 2) cargo_type = 4;
+    if (gc->industryCategory == 3) cargo_type = 6;
+    int train = gc_allocateTrainSlot(
+        gc, x, y, engine_type, gc->era,
+        gc->tileMap[x][y] == 87 ? 0 : 2, 8 - gc->era);
+    for (int wagon = 0; wagon < wagon_count; ++wagon)
+        train = gc_spawnTrainCar(gc, train, cargo_type);
+}
+
+static bool can_extend_station_over(GameCanvas *gc, int x, int y) {
+    int tile = gc->tileMap[x][y];
+    return tile == 0 || (tile >= 29 && tile <= 33);
+}
+
+void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
+    bool track_left = x > 0 && gc->trackMap[x - 1][y] == 64;
+    bool track_right = x < gc->mapWidth - 1 && gc->trackMap[x + 1][y] == 64;
+    bool track_up = y > 0 && gc->trackMap[x][y - 1] == 64;
+    bool track_down = y < gc->mapHeight - 1 && gc->trackMap[x][y + 1] == 64;
+    if (track_left || track_right) {
+        gc->tileMap[x][y] = 88;
+        gc->trackMap[x][y] = (int8_t)gc->nextTrackPieceCode;
+        if (track_right && x > 1
+            && can_extend_station_over(gc, x - 1, y)
+            && can_extend_station_over(gc, x - 2, y)) {
+            gc->tileMap[x][y] = 90;
+            gc->tileMap[x - 1][y] = 88;
+            gc->tileMap[x - 2][y] = 90;
+            gc->trackMap[x - 1][y] = (int8_t)gc->nextTrackPieceCode;
+            gc->trackMap[x - 2][y] = (int8_t)gc->nextTrackPieceCode;
+        }
+        if (track_left && x < gc->mapWidth - 2
+            && can_extend_station_over(gc, x + 1, y)
+            && can_extend_station_over(gc, x + 2, y)) {
+            gc->tileMap[x][y] = 90;
+            gc->tileMap[x + 1][y] = 88;
+            gc->tileMap[x + 2][y] = 90;
+            gc->trackMap[x + 1][y] = (int8_t)gc->nextTrackPieceCode;
+            gc->trackMap[x + 2][y] = (int8_t)gc->nextTrackPieceCode;
+        }
+    }
+    if (track_up || track_down) {
+        gc->tileMap[x][y] = 87;
+        gc->trackMap[x][y] = (int8_t)gc->nextTrackPieceCode;
+        if (track_up && y > 1
+            && can_extend_station_over(gc, x, y - 1)
+            && can_extend_station_over(gc, x, y - 2)) {
+            gc->tileMap[x][y] = 89;
+            gc->tileMap[x][y - 1] = 87;
+            gc->tileMap[x][y - 2] = 89;
+            gc->trackMap[x][y - 1] = (int8_t)gc->nextTrackPieceCode;
+            gc->trackMap[x][y - 2] = (int8_t)gc->nextTrackPieceCode;
+        }
+        // The original bytecode tests track_up here too (not track_down).
+        if (track_up && y < gc->mapHeight - 2
+            && can_extend_station_over(gc, x, y + 1)
+            && can_extend_station_over(gc, x, y + 2)) {
+            gc->tileMap[x][y] = 89;
+            gc->tileMap[x][y + 1] = 87;
+            gc->tileMap[x][y + 2] = 89;
+            gc->trackMap[x][y + 1] = (int8_t)gc->nextTrackPieceCode;
+            gc->trackMap[x][y + 2] = (int8_t)gc->nextTrackPieceCode;
+        }
+    }
+}
+
+void gc_placeCitiesAndIndustry(GameCanvas *gc) {
+    int city_attempts = 0;
+    int industry_attempts = 0;
+    do {
+        gc_pickCitySite(gc);
+    } while (++city_attempts != 50 && gc->industryCategory == -1);
+    if (city_attempts >= 50) return;
+    do {
+        gc_pickIndustrySite(gc);
+    } while (++industry_attempts != 50 && !gc->industrySiteFound);
+    if (industry_attempts >= 50) return;
+
+    gc->placementX = gc->cityStationX;
+    gc->placementY = gc->cityStationY;
+    gc->demolishX = gc->industryStationX;
+    gc->demolishY = gc->industryTileY;
+    if (!gc_tryBuildPath(gc)) return;
+    gc_autoExtendTrackStation(gc, gc->cityStationX, gc->cityStationY);
+    gc_autoExtendTrackStation(gc, gc->industryStationX, gc->industryTileY);
+    gc_spawnTrainAt(gc, gc->cityStationX, gc->cityStationY);
+    gc_setTrackOwnerCode(gc, gc->nextTrackPieceCode - 64);
+    ++gc->nextTrackPieceCode;
+    if (gc->nextTrackPieceCode == 69) gc->nextTrackPieceCode = 66;
+}
