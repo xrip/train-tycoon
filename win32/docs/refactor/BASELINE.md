@@ -112,6 +112,15 @@ real MIDI device test is an opt-in `device` label.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - The real MIDI device test remains an opt-in CTest gate.
 
+## OWN-01 proof
+
+- Short-lived PNG, city, train-visibility, terrain-patch, and save-growth
+  buffers use `std::vector`.
+- Made text code values use `std::vector`, optional dialog values use
+  `std::optional`, and drawing borrows text with `std::span`.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- All fixed map, save, input, and frame values are unchanged.
+
 ## Manual baseline still needed
 
 - boot and menu;

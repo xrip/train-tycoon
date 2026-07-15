@@ -18,8 +18,9 @@ Only one row may be `in_progress`.
 | RT-03 | done | Debug and Release full tests passed | Owned images and borrowed surfaces |
 | RT-04 | done | Debug and Release full tests passed | RAII record store and save path |
 | RT-05 | done | Debug and Release full tests passed | Owned WinMM player and silent output |
-| OWN-01 | in_progress | RT-05 green | Local arrays and text ownership |
-| OWN-02..OWN-04 | queued | - | Other standard ownership |
+| OWN-01 | done | Debug and Release full tests passed | Local arrays and text ownership |
+| OWN-02 | in_progress | OWN-01 green | Fixed state arrays and tables |
+| OWN-03..OWN-04 | queued | - | Other standard ownership |
 | MODEL-01 | queued | - | Enums and constants |
 | SAVE-01 | queued | - | Legacy save codec |
 | WORLD-01..WORLD-02 | queued | - | World and generation |

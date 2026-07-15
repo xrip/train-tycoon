@@ -37,7 +37,7 @@ not enough. Record uncertain evidence here before a rename.
 
 ### Open name set
 
-- Methods: `gc_b`, `gc_k`, `gc_m`, `gc_u`.
+- Methods: `gc_k`, `gc_u`.
 - Weak method groups: `dayResetP`, `dayResetAg`, `dayResetAd`,
   `everyTwoTickZ`, and all `*Inlined` names.
 - Short state fields: `aJ`, `ar`, `at`, `bT`, `bx`, `ca`, `cB`, `ce`, `cH`,
@@ -76,6 +76,14 @@ not enough. Record uncertain evidence here before a rename.
   `music_playing`.
 - `musicPlayer` and `volumeControl` were fake native pointers. One owned
   `MusicOutput` now gives both operations.
+
+### Recovered in OWN-01
+
+- `gc_m` -> `gc_readPackedTextCodes`: it copies one length-prefixed text-code
+  value from packed sprite data.
+- Local `byArray` work buffers were named for their use: `png_bytes`,
+  `seen_city_tiles`, `visible_train_tiles`, `patch_tiles`, and text-code
+  values.
 
 ## D-007: Music output boundary
 
