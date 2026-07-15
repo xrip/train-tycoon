@@ -37,8 +37,15 @@ not enough. Record uncertain evidence here before a rename.
 
 ### Open name set
 
-- Methods: `gc_a`, `gc_b`, `gc_k`, `gc_m`, `gc_u`.
+- Methods: `gc_b`, `gc_k`, `gc_m`, `gc_u`.
 - Weak method groups: `dayResetP`, `dayResetAg`, `dayResetAd`,
   `everyTwoTickZ`, and all `*Inlined` names.
 - Short state fields: `aJ`, `ar`, `at`, `bT`, `bx`, `ca`, `cB`, `ce`, `cH`,
   `D`, `dc`, `dH`, `dI`, `dk`, `dp`, `eD`, `ee`, `fR`, `gw`, `hx`, and `j`.
+
+### Recovered in RT-01
+
+- `gc_a` -> `gc_appendTileDrawOffset`: its only caller adds one x/y pair to
+  the isometric tile draw-order buffers.
+- `gc_writeRlePairInlined` -> `gc_writeRleRun`: it writes one literal or
+  repeated run to the save RLE output.

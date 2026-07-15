@@ -67,6 +67,21 @@ TEST_CASE("fast: Java random values") {
     CHECK(random.next_int() == -1155484576);
 }
 
+TEST_CASE("fast: byte buffer owns low-byte output") {
+    ByteBuffer buffer;
+    CHECK(buffer.bytes().empty());
+
+    buffer.write(0x123);
+    buffer.write(-1);
+    const auto bytes = buffer.bytes();
+    REQUIRE(bytes.size() == 2);
+    CHECK(bytes[0] == 0x23);
+    CHECK(bytes[1] == 0xff);
+
+    buffer.clear();
+    CHECK(buffer.bytes().empty());
+}
+
 TEST_CASE("fast: raw resources have fixed digests") {
     struct ExpectedResource {
         const char* name;

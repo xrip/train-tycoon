@@ -72,19 +72,19 @@ void gc_saveGame(GameCanvas *gc) {
     midp_rms_close(store);
 }
 
-void gc_writeRlePairInlined(GameCanvas *gc, MidpByteArray *output,
-                            int32_t value, int32_t count) {
+void gc_writeRleRun(GameCanvas *gc, ByteBuffer& output,
+                    int32_t value, int32_t count) {
     (void)gc;
     if (count == 1) {
         if (value == -1) {
-            midp_bytearray_write(output, 255);
-            midp_bytearray_write(output, 1);
+            output.write(255);
+            output.write(1);
         }
-        midp_bytearray_write(output, value);
+        output.write(value);
     } else {
-        midp_bytearray_write(output, 255);
-        midp_bytearray_write(output, count);
-        midp_bytearray_write(output, value);
+        output.write(255);
+        output.write(count);
+        output.write(value);
     }
 }
 
@@ -98,47 +98,47 @@ void gc_checkSaveByteSum(GameCanvas *gc, const char *label) {
 
 void gc_compressSaveBuffer(GameCanvas *gc) {
     gc_checkSaveByteSum(gc, "Compress pre");
-    MidpByteArray *output = midp_bytearray_new();
+    ByteBuffer output;
     int value = gc->saveBuffer[0];
     int count = 1;
     for (int i = 1; i < gc->snapshotSize; ++i) {
         if (value != gc->saveBuffer[i] || count == 254) {
-            gc_writeRlePairInlined(gc, output, value, count);
+            gc_writeRleRun(gc, output, value, count);
             value = gc->saveBuffer[i];
             count = 1;
         } else {
             ++count;
         }
     }
-    gc_writeRlePairInlined(gc, output, value, count);
+    gc_writeRleRun(gc, output, value, count);
     gc->bytesUncompressed += gc->snapshotSize;
-    gc->snapshotSize = midp_bytearray_size(output);
+    const auto compressed = output.bytes();
+    gc->snapshotSize = static_cast<int>(compressed.size());
     gc->saveBuffer = GC_NEW(int8_t, gc->snapshotSize);
-    memcpy(gc->saveBuffer, midp_bytearray_data(output), (size_t)gc->snapshotSize);
+    memcpy(gc->saveBuffer, compressed.data(), (size_t)gc->snapshotSize);
     gc->bytesCompressed += gc->snapshotSize;
-    midp_bytearray_free(output);
     gc_checkSaveByteSum(gc, "Compress post");
 }
 
 void gc_decompressSaveBuffer(GameCanvas *gc) {
     gc_checkSaveByteSum(gc, "Decompress pre");
-    MidpByteArray *output = midp_bytearray_new();
+    ByteBuffer output;
     for (int i = 0; i < gc->snapshotSize; ++i) {
         if (gc->saveBuffer[i] == -1) {
             int count = gc_byteToUnsignedInt(gc, gc->saveBuffer[i + 1]);
             for (int j = 0; j < count; ++j)
-                midp_bytearray_write(output, gc->saveBuffer[i + 2]);
+                output.write(gc->saveBuffer[i + 2]);
             i += 2;
         } else {
-            midp_bytearray_write(output, gc->saveBuffer[i]);
+            output.write(gc->saveBuffer[i]);
         }
     }
     gc->bytesCompressed += gc->snapshotSize;
-    gc->snapshotSize = midp_bytearray_size(output);
+    const auto decompressed = output.bytes();
+    gc->snapshotSize = static_cast<int>(decompressed.size());
     gc->saveBuffer = GC_NEW(int8_t, gc->snapshotSize);
-    memcpy(gc->saveBuffer, midp_bytearray_data(output), (size_t)gc->snapshotSize);
+    memcpy(gc->saveBuffer, decompressed.data(), (size_t)gc->snapshotSize);
     gc->bytesUncompressed += gc->snapshotSize;
-    midp_bytearray_free(output);
     gc_checkSaveByteSum(gc, "Decompress post");
 }
 

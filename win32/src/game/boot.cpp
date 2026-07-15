@@ -171,17 +171,18 @@ void gc_persistSnapshotMode1(GameCanvas *gc) {
     gc_setMusicVolume(gc, gc->gameStateCounter);
 }
 
-// private void a(ByteArrayOutputStream, ByteArrayOutputStream, int, int)
-void gc_a(GameCanvas *gc, MidpByteArray *b1, MidpByteArray *b2, int32_t n, int32_t n2) {
+// Add one isometric tile-draw offset pair.
+void gc_appendTileDrawOffset(GameCanvas *gc, ByteBuffer& x_offsets,
+                             ByteBuffer& y_offsets, int32_t x, int32_t y) {
     (void)gc;
-    midp_bytearray_write(b1, n);
-    midp_bytearray_write(b2, n2);
+    x_offsets.write(x);
+    y_offsets.write(y);
 }
 
 // public void k(int n, int n2) -- build+sort the iso tile-draw order tables
 void gc_k(GameCanvas *gc, int32_t n, int32_t n2) {
-    MidpByteArray *b1 = midp_bytearray_new();
-    MidpByteArray *b2 = midp_bytearray_new();
+    ByteBuffer x_offsets;
+    ByteBuffer y_offsets;
     int n3, n4, n5;
     n2 += n2 % 8;
     int n6 = (n2 -= 30) / 8 + 6;
@@ -190,17 +191,17 @@ void gc_k(GameCanvas *gc, int32_t n, int32_t n2) {
         for (n4 = -1; n4 < n7; ++n4) {
             n3 = n4 - n5 / 2;
             int n8 = n5 % 2 == 0 ? 0 + n4 + n5 / 2 : -1 + n4 + n5 / 2;
-            gc_a(gc, b1, b2, n3, n8);
+            gc_appendTileDrawOffset(gc, x_offsets, y_offsets, n3, n8);
         }
     }
-    int sz = midp_bytearray_size(b1);
+    const auto x_offset_bytes = x_offsets.bytes();
+    const auto y_offset_bytes = y_offsets.bytes();
+    int sz = static_cast<int>(x_offset_bytes.size());
     gc->tileOffsetX = GC_NEW(int8_t, sz);
-    memcpy(gc->tileOffsetX, midp_bytearray_data(b1), (size_t)sz);
+    memcpy(gc->tileOffsetX, x_offset_bytes.data(), (size_t)sz);
     gc->tileOffsetY = GC_NEW(int8_t, sz);
-    memcpy(gc->tileOffsetY, midp_bytearray_data(b2), (size_t)sz);
+    memcpy(gc->tileOffsetY, y_offset_bytes.data(), (size_t)sz);
     gc->numActiveTileAnimations = sz;
-    midp_bytearray_free(b1);
-    midp_bytearray_free(b2);
     do {
         n5 = 0;
         for (n4 = 0; n4 < gc->numActiveTileAnimations - 1; ++n4) {

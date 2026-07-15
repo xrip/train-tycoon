@@ -26,9 +26,10 @@ while keeping every fixed random, input, save, scenario, and frame value.
 Stage 1: preset Debug and Release full tests passed, and the MSVC
 AddressSanitizer full test passed on 2026-07-15. All first-party code is C++20
 and strict-warning clean. `RT-01` JavaRandom is now a small value class; the
-Debug full test kept every random, scenario, and frame value.
+vector-backed ByteBuffer now owns save RLE and tile-offset output. The Debug
+full test kept every random, save, scenario, and frame value.
 
 ## Next action
 
-Replace `MidpByteArray` with a small vector-backed `ByteBuffer`, add its direct
-rule tests, and keep the save and frame digests unchanged.
+Replace the global Win32 input ring with `KeyEvent` and a small `InputQueue`.
+Add direct debounce, mapping, order, and full-queue rule tests first.

@@ -117,15 +117,6 @@ void midp_arr_set_len(const void *ptr, int count);
 void midp_arr_forget(const void *ptr); // on free, to avoid stale entries
 #define GC_NEW(type, n) ((type *)midp_alloc_arr(sizeof(type), (n)))
 
-// --- java.io.ByteArrayOutputStream (growable byte buffer) ---------------------
-typedef struct { uint8_t *data; int size; int cap; } MidpByteArray;
-MidpByteArray *midp_bytearray_new(void);
-void midp_bytearray_write(MidpByteArray *b, int byte_value); // write() low 8 bits
-int midp_bytearray_size(const MidpByteArray *b);
-uint8_t *midp_bytearray_data(MidpByteArray *b); // toByteArray (live pointer)
-void midp_bytearray_reset(MidpByteArray *b);
-void midp_bytearray_free(MidpByteArray *b);
-
 // --- Resources ----------------------------------------------------------------
 // XorResourceInput: reads /1../5 (cycling XOR key 1..127) or plain bytes.
 typedef struct MidpResource MidpResource;

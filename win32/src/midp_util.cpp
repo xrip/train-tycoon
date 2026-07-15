@@ -1,4 +1,4 @@
-// midp_util.cpp - java.util.Vector, array lengths, byte output, and timing.
+// midp_util.cpp - java.util.Vector, array lengths, and timing.
 #include "midp.h"
 #include <stdlib.h>
 
@@ -101,34 +101,6 @@ void *midp_alloc_arr(size_t elem_size, int count) {
     void *p = calloc((size_t)count, elem_size);
     midp_arr_set_len(p, count);
     return p;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// java.io.ByteArrayOutputStream.
-
-MidpByteArray *midp_bytearray_new(void) {
-    return (MidpByteArray *)calloc(1, sizeof(MidpByteArray));
-}
-
-void midp_bytearray_write(MidpByteArray *b, int byte_value) {
-    if (b->size == b->cap) {
-        int nc = b->cap ? b->cap * 2 : 64;
-        uint8_t *nd = (uint8_t *)realloc(b->data, (size_t)nc);
-        if (!nd) return;
-        b->data = nd;
-        b->cap = nc;
-    }
-    b->data[b->size++] = (uint8_t)(byte_value & 0xFF);
-}
-
-int midp_bytearray_size(const MidpByteArray *b) { return b->size; }
-uint8_t *midp_bytearray_data(MidpByteArray *b) { return b->data; }
-void midp_bytearray_reset(MidpByteArray *b) { b->size = 0; }
-
-void midp_bytearray_free(MidpByteArray *b) {
-    if (!b) return;
-    free(b->data);
-    free(b);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

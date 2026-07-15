@@ -2,6 +2,7 @@
 #ifndef GAME_METHODS_H
 #define GAME_METHODS_H
 #include "game_state.h"
+#include "support/byte_buffer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,7 +137,7 @@ void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n);
 int32_t gc_readShortFromBuffer(GameCanvas *gc);
 void gc_saveGame(GameCanvas *gc);
-void gc_writeRlePairInlined(GameCanvas *gc, MidpByteArray* byteArrayOutputStream, int32_t n, int32_t n2);
+void gc_writeRleRun(GameCanvas *gc, ByteBuffer& output, int32_t value, int32_t count);
 void gc_checkSaveByteSum(GameCanvas *gc, const char* string);
 void gc_compressSaveBuffer(GameCanvas *gc);
 void gc_decompressSaveBuffer(GameCanvas *gc);
@@ -191,7 +192,8 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n);
 char* gc_decodeString(GameCanvas *gc, int8_t* byArray);
 char* gc_buildPlayerNameString(GameCanvas *gc);
 bool gc_syncHighScores(GameCanvas *gc, bool bl);
-void gc_a(GameCanvas *gc, MidpByteArray* byteArrayOutputStream, MidpByteArray* byteArrayOutputStream2, int32_t n, int32_t n2);
+void gc_appendTileDrawOffset(GameCanvas *gc, ByteBuffer& x_offsets,
+                             ByteBuffer& y_offsets, int32_t x, int32_t y);
 void gc_k(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_drawTextBox(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4, int8_t* byArray);
 void gc_enterOutOfMoneyState(GameCanvas *gc);
