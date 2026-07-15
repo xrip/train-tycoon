@@ -212,7 +212,8 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         if (gc->needsRepaint) midp_draw_rect(g, n20 + 2, n21 + 13, n18 - 4, 0);
         gc->clipX = n20; gc->clipY = n21; gc->clipWidth = n18; gc->clipHeight = n19;
         if (gc->needsRepaint)
-            gc_renderFontString(gc, g, n20 + 3, n21 + 5, gc_m(gc, s + 16), true);
+            gc_renderFontString(gc, g, n20 + 3, n21 + 5,
+                                gc_readPackedTextCodes(gc, s + 16), true);
         n25 += 1 + gc->spriteData[s + 16];
         n22 = 19; n23 = 19; n24 = 19;
     }
@@ -257,7 +258,8 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
             int8_t by2 = (by & 0x10) == 16 ? gc->spriteData[n25++] : (int8_t)0;
             std::optional<std::vector<int8_t>> text_codes = n8 != 0
                 ? gc_resolveDialogValue(gc, gc->currentSpriteId, n6)
-                : std::optional<std::vector<int8_t>>(gc_m(gc, n25));
+                : std::optional<std::vector<int8_t>>(
+                    gc_readPackedTextCodes(gc, n25));
             int n29 = 0;
             if (!text_codes) continue;
             const int blen = static_cast<int>(text_codes->size());

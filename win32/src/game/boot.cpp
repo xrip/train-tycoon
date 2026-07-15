@@ -118,7 +118,7 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
 }
 
 // byte[] m(int n)
-std::vector<int8_t> gc_m(GameCanvas *gc, int32_t offset) {
+std::vector<int8_t> gc_readPackedTextCodes(GameCanvas *gc, int32_t offset) {
     const int code_count = gc->spriteData[offset];
     return {gc->spriteData + offset + 1,
             gc->spriteData + offset + 1 + code_count};

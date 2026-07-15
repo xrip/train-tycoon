@@ -27,7 +27,7 @@ void gc_openSpriteStream(GameCanvas *gc, const char* resource_name);
 std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc);
 void gc_resetOverlayRenderState(GameCanvas *gc);
 void gc_loadPackedSpriteData(GameCanvas *gc, const char* resource_name);
-std::vector<int8_t> gc_m(GameCanvas *gc, int32_t n);
+std::vector<int8_t> gc_readPackedTextCodes(GameCanvas *gc, int32_t offset);
 void gc_renderPackedSprite(GameCanvas *gc, Surface* graphics, int32_t n);
 void gc_renderFontString(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2,
                          std::span<const int8_t> codes, bool bl);

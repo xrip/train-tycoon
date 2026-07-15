@@ -1,15 +1,17 @@
 // Save and load of game arrays and matrices.
 #include "game_methods.h"
 #include <string.h>
+#include <vector>
 
 // void ensureSaveBufferCapacity(int n)
 void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n) {
     if (gc->snapshotSize > 0) {
-        int8_t *byArray = GC_NEW(int8_t, gc->snapshotSize + n);
-        memcpy(byArray, gc->saveBuffer, (size_t)gc->snapshotSize);
+        std::vector<int8_t> expanded_data(
+            static_cast<size_t>(gc->snapshotSize + n));
+        memcpy(expanded_data.data(), gc->saveBuffer, (size_t)gc->snapshotSize);
         gc->snapshotSize += n;
         gc->saveBuffer = GC_NEW(int8_t, gc->snapshotSize);
-        memcpy(gc->saveBuffer, byArray, (size_t)gc->snapshotSize);
+        memcpy(gc->saveBuffer, expanded_data.data(), (size_t)gc->snapshotSize);
     } else {
         gc->saveBuffer = GC_NEW(int8_t, n);
         gc->snapshotSize += n;

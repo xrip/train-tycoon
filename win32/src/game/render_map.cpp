@@ -2,7 +2,6 @@
 // Draws terrain into the offscreen backbuffer (only when the viewport moved),
 // blits it, then overlays dynamic tiles, trains, selections and the build menu.
 #include "game_methods.h"
-#include <stdlib.h>
 #include <vector>
 
 // public void renderMap(Graphics graphics)

@@ -3,7 +3,7 @@
 // place patches and features, scatter industry). The random process is exact.
 #include "game_methods.h"
 #include <stdlib.h> // abs
-#include <string.h>
+#include <vector>
 
 #define RNG (&gc->rng)
 static int rint(GameCanvas *gc) { return gc->rng.next_int(); }
@@ -184,117 +184,115 @@ void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
     int8_t by, by2, by3, by4;
     int n7 = abs(rint(gc) % 5) + gc->terrainPatchBaseSize;
     int8_t by5 = (int8_t)(abs(rint(gc) % 5) + gc->terrainPatchBaseSize);
-    int8_t **byArray = (int8_t **)midp_alloc_arr(sizeof(int8_t *), n7);
-    for (int i = 0; i < n7; ++i) byArray[i] = (int8_t *)midp_alloc_arr(sizeof(int8_t), by5);
+    std::vector<std::vector<int8_t>> patch_tiles(
+        static_cast<size_t>(n7),
+        std::vector<int8_t>(static_cast<size_t>(by5)));
     bool bl = false;
     int n8 = abs(rint(gc) % (n7 - 2)) + 1;
-    for (n6 = abs(rint(gc) % 3); n6 < by5 - abs(rint(gc) % 3); ++n6) byArray[n8][n6] = 1;
+    for (n6 = abs(rint(gc) % 3); n6 < by5 - abs(rint(gc) % 3); ++n6) patch_tiles[n8][n6] = 1;
     if (n7 >= 7) {
         do {
             n8 = abs(rint(gc) % (n7 - 2)) + 1;
             bl = false;
             for (n6 = 0; n6 < by5; ++n6)
-                if (byArray[n8 - 1][n6] == 1 || byArray[n8 + 1][n6] == 1) bl = true;
+                if (patch_tiles[n8 - 1][n6] == 1 || patch_tiles[n8 + 1][n6] == 1) bl = true;
         } while (bl);
-        for (n6 = abs(rint(gc) % 3); n6 < by5 - abs(rint(gc) % 3); ++n6) byArray[n8][n6] = 1;
+        for (n6 = abs(rint(gc) % 3); n6 < by5 - abs(rint(gc) % 3); ++n6) patch_tiles[n8][n6] = 1;
     }
     n6 = abs(rint(gc) % (by5 - 2)) + 1;
-    for (n5 = abs(rint(gc) % 3); n5 < n7 - abs(rint(gc) % 3); ++n5) byArray[n5][n6] = 2;
+    for (n5 = abs(rint(gc) % 3); n5 < n7 - abs(rint(gc) % 3); ++n5) patch_tiles[n5][n6] = 2;
     if (by5 >= 7) {
         do {
             n6 = abs(rint(gc) % (by5 - 2)) + 1;
             bl = false;
             for (n5 = 0; n5 < n7; ++n5)
-                if (byArray[n5][n6 - 1] == 2 || byArray[n5][n6 + 1] == 2) bl = true;
+                if (patch_tiles[n5][n6 - 1] == 2 || patch_tiles[n5][n6 + 1] == 2) bl = true;
         } while (bl);
     }
     for (n5 = 0; n5 < n7; ++n5) {
         for (by4 = 0; by4 < by5; ++by4) {
-            if (byArray[n5][by4] != 1 && byArray[n5][by4] != 2) continue;
-            by3 = (int8_t)(n5 > 0 && byArray[n5 - 1][by4] > 0 ? 1 : 0);
-            by2 = (int8_t)(n5 < n7 - 1 && byArray[n5 + 1][by4] > 0 ? 1 : 0);
-            by = (int8_t)(by4 < by5 - 1 && byArray[n5][by4 + 1] > 0 ? 1 : 0);
-            n4 = by4 > 0 && byArray[n5][by4 - 1] > 0 ? 1 : 0;
+            if (patch_tiles[n5][by4] != 1 && patch_tiles[n5][by4] != 2) continue;
+            by3 = (int8_t)(n5 > 0 && patch_tiles[n5 - 1][by4] > 0 ? 1 : 0);
+            by2 = (int8_t)(n5 < n7 - 1 && patch_tiles[n5 + 1][by4] > 0 ? 1 : 0);
+            by = (int8_t)(by4 < by5 - 1 && patch_tiles[n5][by4 + 1] > 0 ? 1 : 0);
+            n4 = by4 > 0 && patch_tiles[n5][by4 - 1] > 0 ? 1 : 0;
             n3 = (by3 != 0 ? 1 : 0) + (by2 != 0 ? 1 : 0) + (by != 0 ? 1 : 0) + (n4 != 0 ? 1 : 0);
-            if (n3 > 2) { byArray[n5][by4] = 44; continue; }
-            if (by2 != 0 && n4 != 0) { byArray[n5][by4] = 45; continue; }
-            if (by2 != 0 && by != 0) { byArray[n5][by4] = 46; continue; }
-            if (by3 != 0 && by != 0) { byArray[n5][by4] = 47; continue; }
-            if (by3 != 0 && n4 != 0) { byArray[n5][by4] = 48; continue; }
-            if ((by3 != 0 || by2 != 0) && by == 0 && n4 == 0) { byArray[n5][by4] = 43; continue; }
+            if (n3 > 2) { patch_tiles[n5][by4] = 44; continue; }
+            if (by2 != 0 && n4 != 0) { patch_tiles[n5][by4] = 45; continue; }
+            if (by2 != 0 && by != 0) { patch_tiles[n5][by4] = 46; continue; }
+            if (by3 != 0 && by != 0) { patch_tiles[n5][by4] = 47; continue; }
+            if (by3 != 0 && n4 != 0) { patch_tiles[n5][by4] = 48; continue; }
+            if ((by3 != 0 || by2 != 0) && by == 0 && n4 == 0) { patch_tiles[n5][by4] = 43; continue; }
             if ((n4 == 0 && by == 0) || by3 != 0 || by2 != 0) continue;
-            byArray[n5][by4] = 42;
+            patch_tiles[n5][by4] = 42;
         }
     }
     for (n5 = 0; n5 < n7; ++n5) {
         for (by4 = 0; by4 < by5; ++by4) {
-            if (byArray[n5][by4] != 0) continue;
+            if (patch_tiles[n5][by4] != 0) continue;
             by3 = 1;
-            by2 = (int8_t)(n5 > 0 ? byArray[n5 - 1][by4] : 0);
-            n4 = n5 < n7 - 1 ? byArray[n5 + 1][by4] : 0;
-            by = (int8_t)(by4 > 0 ? byArray[n5][by4 - 1] : 0);
-            n3 = by4 < by5 - 1 ? byArray[n5][by4 + 1] : 0;
+            by2 = (int8_t)(n5 > 0 ? patch_tiles[n5 - 1][by4] : 0);
+            n4 = n5 < n7 - 1 ? patch_tiles[n5 + 1][by4] : 0;
+            by = (int8_t)(by4 > 0 ? patch_tiles[n5][by4 - 1] : 0);
+            n3 = by4 < by5 - 1 ? patch_tiles[n5][by4 + 1] : 0;
             if (by2 < 42 && n4 < 42 && by < 42 && n3 < 42) by3 = 0;
             if (by2 == 44 || n4 == 44 || by == 44 || n3 == 44) by3 = 0;
             if (by2 == 45 || by2 == 46 || by2 == 43) by3 = 0;
             if (n4 == 47 || n4 == 48 || n4 == 43) by3 = 0;
             if (by == 46 || by == 47 || by == 42) by3 = 0;
             if (n3 == 45 || n3 == 48 || n3 == 42) by3 = 0;
-            if (by2 == 44) byArray[n5][by4] = 43;
-            if (n4 == 44) byArray[n5][by4] = 43;
-            if (by == 44) byArray[n5][by4] = 42;
-            if (n3 == 44) byArray[n5][by4] = 42;
+            if (by2 == 44) patch_tiles[n5][by4] = 43;
+            if (n4 == 44) patch_tiles[n5][by4] = 43;
+            if (by == 44) patch_tiles[n5][by4] = 42;
+            if (n3 == 44) patch_tiles[n5][by4] = 42;
             if (by3 == 0) continue;
-            byArray[n5][by4] = gc_randomCityTile(gc);
+            patch_tiles[n5][by4] = gc_randomCityTile(gc);
         }
     }
     n5 = -2;
     for (by4 = 0; by4 < n7; ++by4) {
         for (by3 = 0; by3 < by5; ++by3) {
             if (n + by4 >= gc->mapWidth || n2 + by3 >= gc->mapHeight
-                || (byArray[by4][by3] == 0 && (byArray[by4][by3] != 0 || rint(gc) % 3 >= 0))) continue;
+                || (patch_tiles[by4][by3] == 0 && (patch_tiles[by4][by3] != 0 || rint(gc) % 3 >= 0))) continue;
             if (n5 == -2 && (n5 = gc->heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
             int64_t l = midp_current_time_millis();
             while (n5 != gc->heightMap[n + by4][n2 + by3]) {
                 gc_smoothTileAtInlined(gc, n + by4, n2 + by3, n5 > gc->heightMap[n + by4][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; goto cleanup;
+                gc->trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != gc->heightMap[n + by4 + 1][n2 + by3]) {
                 gc_smoothTileAtInlined(gc, n + by4 + 1, n2 + by3, n5 > gc->heightMap[n + by4 + 1][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; goto cleanup;
+                gc->trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != gc->heightMap[n + by4][n2 + by3 + 1]) {
                 gc_smoothTileAtInlined(gc, n + by4, n2 + by3 + 1, n5 > gc->heightMap[n + by4][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; goto cleanup;
+                gc->trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != gc->heightMap[n + by4 + 1][n2 + by3 + 1]) {
                 gc_smoothTileAtInlined(gc, n + by4 + 1, n2 + by3 + 1, n5 > gc->heightMap[n + by4 + 1][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; goto cleanup;
+                gc->trackBuildInProgress = true; return;
             }
         }
     }
     by4 = 0;
     for (by3 = 0; by3 < n7; ++by3)
         for (int8_t by6 = 0; by6 < by5; ++by6)
-            if (!(byArray[by3][by6] > 40 || byArray[by3][by6] < 34)) by4 = (int8_t)(by4 + 1);
+            if (!(patch_tiles[by3][by6] > 40 || patch_tiles[by3][by6] < 34)) by4 = (int8_t)(by4 + 1);
     by3 = gc_registerTrain(gc, by4, n + n7 / 2, n2 + by5 / 2);
     for (int i = 0; i < n7; ++i) {
         for (n4 = 0; n4 < by5; ++n4) {
-            if (n + i >= gc->mapWidth || n2 + n4 >= gc->mapHeight || byArray[i][n4] == 0) continue;
-            gc->tileMap[n + i][n2 + n4] = byArray[i][n4];
+            if (n + i >= gc->mapWidth || n2 + n4 >= gc->mapHeight || patch_tiles[i][n4] == 0) continue;
+            gc->tileMap[n + i][n2 + n4] = patch_tiles[i][n4];
             gc->trackMap[n + i][n2 + n4] = (int8_t)(0x80 | by3);
         }
     }
-cleanup:
-    for (int i = 0; i < n7; ++i) free(byArray[i]);
-    free(byArray);
 }
 
 // void placeTerrainFeature(int n)
