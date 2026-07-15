@@ -151,8 +151,8 @@ typedef struct GameCanvas {
     int32_t buildMenuItemCode;
     int8_t scenarioBits;
     int32_t confirmToggle;
-    int32_t* moneyHistory;
-    int8_t* moneyTickerFrames;
+    std::array<int32_t, 3> moneyHistory{};
+    std::array<int8_t, 3> moneyTickerFrames{};
     int32_t confirmCounter;
     int32_t confirmTargetState;
     bool flagsA;

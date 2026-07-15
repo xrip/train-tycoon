@@ -117,8 +117,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->buildMenuMode = 0;
     gc->selectedMenuRowX = 0;
     gc->confirmToggle = 0;
-    gc->moneyHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 3);
-    gc->moneyTickerFrames = (int8_t*)midp_alloc_arr(sizeof(int8_t), 3);
     gc->confirmCounter = 0;
     gc->confirmTargetState = -1;
     gc->flagsA = true;

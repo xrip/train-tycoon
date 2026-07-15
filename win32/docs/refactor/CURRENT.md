@@ -33,8 +33,14 @@ The first `OWN-02` group moved `selectionTileX` and `selectionTileY` from raw
 owned pointers to `std::array<int32_t, 4>`. The strict Debug build and fast
 tests passed on 2026-07-15.
 
+The second `OWN-02` group moved `moneyHistory` to `std::array<int32_t, 3>` and
+`moneyTickerFrames` to `std::array<int8_t, 3>`, and removed their two
+`midp_alloc_arr` calls. The strict Debug build and full tests passed on
+2026-07-15 with all fixed values unchanged.
+
 ## Next action
 
-Move `moneyHistory` and `moneyTickerFrames` to `std::array<..., 3>`. They are
-used only by the money ticker and are not written by the save codec. Run the
-strict Debug build and fast tests, then commit this leaf group.
+Continue with small non-save fixed groups by size and use. Good next candidates
+are player name codes, wagon option arrays, route flags, enabled menu rows, and
+the 12-value graph arrays. Check all call sites before each group, then run the
+strict Debug build and fast tests and commit each green leaf.

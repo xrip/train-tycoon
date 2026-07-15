@@ -23,9 +23,12 @@ Branch: `master`.
 Active item: `OWN-02`, fixed state arrays and tables to `std::array`.
 
 The first OWN-02 leaf group is complete in commit `25f7edd`: the four
-selection-corner x and y values now use `std::array<int32_t, 4>`. The next leaf
-group is `moneyHistory` and `moneyTickerFrames`, both fixed size 3 and used
-only by the money ticker.
+selection-corner x and y values now use `std::array<int32_t, 4>`. The second
+leaf group is also complete: `moneyHistory` now uses `std::array<int32_t, 3>`
+and `moneyTickerFrames` uses `std::array<int8_t, 3>`, with their two
+`midp_alloc_arr` calls removed. The next leaf group is a small non-save fixed
+group such as player name codes, wagon option arrays, route flags, enabled menu
+rows, or the 12-value graph arrays.
 
 The work tree is clean except for root `AGENTS.md`. It is a user-owned,
 untracked instruction file. Do not add, change, or remove it.
@@ -159,25 +162,20 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Next work, in order
 
-1. Move `moneyHistory` and `moneyTickerFrames` in `game_state.h` to
-   `std::array<int32_t, 3>` and `std::array<int8_t, 3>`. Remove their two
-   `midp_alloc_arr` calls in `game_state.cpp`. Their callers only use indexing,
-   so no adapter should be needed. Run Debug build and fast tests, then make a
-   green leaf commit.
-2. Continue small non-save fixed groups by size and use. Good next candidates
+1. Continue small non-save fixed groups by size and use. Good next candidates
    are player name codes, wagon option arrays, route flags, enabled menu rows,
    and the 12-value graph arrays. Check all call sites before each group.
-3. Move large fixed service and train slot arrays only as their own green
+2. Move large fixed service and train slot arrays only as their own green
    groups. Keep slot count and indexes exact.
-4. Move fixed constant row tables such as track steps and train sprite
+3. Move fixed constant row tables such as track steps and train sprite
    direction tables. Use nested `std::array` only where every row has one
    fixed size; use a clear container for mixed row sizes.
-5. Handle save-written fixed arrays after save helpers can take an explicit
+4. Handle save-written fixed arrays after save helpers can take an explicit
    `std::span` or size without changing save order.
-6. Close OWN-02 only after no fixed raw state array remains. Run Debug and
+5. Close OWN-02 only after no fixed raw state array remains. Run Debug and
    Release full gates and update `CURRENT.md`, `STATUS.md`, `BASELINE.md`, and
    `DECISIONS.md`.
-7. Continue the main plan in strict order: OWN-03 matrices, OWN-04 raw registry
+6. Continue the main plan in strict order: OWN-03 matrices, OWN-04 raw registry
    removal, then model, save, world, path, fleet, economy, scenario, simulation,
    build, assets, render, UI, app, clean, docs, and release stages.
 
