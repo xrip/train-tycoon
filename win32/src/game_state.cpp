@@ -198,8 +198,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->snapshotLoaded = false;
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
-    gc->trainRevenue = (int32_t*)midp_alloc_arr(sizeof(int32_t), 500);
-    gc->prevTrainRevenue = (int32_t*)midp_alloc_arr(sizeof(int32_t), 500);
     gc->compareToPrevious = false;
     gc->yearGraphMode = 0;
     gc->yearGraphAlt = false;
@@ -246,12 +244,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->decadeProfitTotal = 0;
     gc->revenueTotal = 0;
     gc->decadeProfitGraphTotal = 0;
-    gc->yearProfitHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->yearRevenueHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->yearCompanyValueHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->decadeProfitHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->altDecadeRevenueTotal = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
-    gc->altDecadeTotalCost = (int32_t*)midp_alloc_arr(sizeof(int32_t), 12);
     gc->difficultyCycle = 1;
     gc->nextTrackPieceCode = 66;
     gc->aiFrequency = 15;
