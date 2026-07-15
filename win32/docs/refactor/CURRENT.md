@@ -2,31 +2,32 @@
 
 ## Item
 
-`CXX-02` - make first-party C++ clean under strict MSVC warnings.
+`CXX-03` - add build/test presets and final C++ style rules.
 
 ## Base
 
-- Commit: the green `CXX-01` C++20 move commit.
+- Commit: the green `CXX-02` strict-warning commit.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Build first-party code with `/W4 /permissive- /WX`. Keep vendor code out of
-the warning-as-error gate.
+Give programmers short, fixed configure/build/test commands and record the
+C-with-Classes rules used for all later work.
 
 ## Non-goals
 
+- No source formatting pass.
 - No ownership or model change.
-- No broad formatting or name pass.
-- Do not edit MiniFB or `stb_image` for a first-party warning rule.
+- Do not add a new package or format tool.
 
 ## Last proof
 
-`CXX-01`: all 35 source files build as C++20. Debug and Release fast/full tests
-passed with every Stage 0 digest unchanged on 2026-07-15.
+`CXX-02`: first-party library, application, and tests build with
+`/W4 /permissive- /WX`. Vendor code and headers are outside that warning gate.
+Debug and Release fast/full tests passed on 2026-07-15.
 
 ## Next action
 
-Split vendor compilation from the first-party warning gate, enable the strict
-MSVC flags, and record each warning before making a fix.
+Add `CMakePresets.json` for x64 Debug/Release and fast/full tests. Add one short
+style guide that makes the C-with-Classes limit clear.

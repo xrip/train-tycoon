@@ -11,7 +11,14 @@
 
 #define MFB_HANDLE_INPUT(wParam, isKeyDown) midp_input_on_key((int)(wParam), (isKeyDown))
 #define MINIFB_IMPLEMENTATION
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4244) // MiniFB stores a Win32 BOOL in a char.
+#endif
 #include "MiniFB.h"
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 
 #include "midp.h"
 #include "game_state.h"

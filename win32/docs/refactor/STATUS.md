@@ -11,8 +11,8 @@ Only one row may be `in_progress`.
 | BASE-05 | done | Debug, Release, and ASan full tests passed | Rule checks and goldens |
 | BUG-ORDER-01 | done | Debug and Release digests match | Java read order restored |
 | CXX-01 | done | Debug and Release full tests passed | Mechanical C++20 move |
-| CXX-02 | in_progress | CXX-01 green | Strict warnings |
-| CXX-03 | queued | - | Presets and style |
+| CXX-02 | done | Strict Debug and Release full tests passed | Strict warnings |
+| CXX-03 | in_progress | CXX-02 green | Presets and style |
 | RT-01..RT-05 | queued | - | Support classes |
 | OWN-01..OWN-04 | queued | - | Standard ownership |
 | MODEL-01 | queued | - | Enums and constants |

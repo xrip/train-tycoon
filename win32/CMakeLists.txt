@@ -13,6 +13,13 @@ file(GLOB GAME_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.cpp
 )
 
+add_library(train_tycoon_vendor OBJECT
+    src/third_party/stb_image_impl.cpp
+)
+target_include_directories(train_tycoon_vendor PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party
+)
+
 add_library(train_tycoon_legacy STATIC
     src/midp_graphics.cpp
     src/midp_image.cpp
@@ -23,8 +30,8 @@ add_library(train_tycoon_legacy STATIC
     src/midp_stub.cpp
     src/midp_util.cpp
     src/game_state.cpp
-    src/third_party/stb_image_impl.cpp
     ${GAME_SOURCES}
+    $<TARGET_OBJECTS:train_tycoon_vendor>
 )
 
 target_include_directories(train_tycoon_legacy PUBLIC
@@ -35,9 +42,22 @@ target_include_directories(train_tycoon_legacy PUBLIC
 
 target_compile_definitions(train_tycoon_legacy PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(train_tycoon_legacy PRIVATE -Wall -Wextra)
-endif()
+function(enable_strict_warnings target)
+    if(MSVC)
+        target_compile_definitions(${target} PRIVATE _CRT_SECURE_NO_WARNINGS)
+        target_compile_options(${target} PRIVATE
+            /W4
+            /permissive-
+            /WX
+            /external:W0
+            "/external:I${CMAKE_CURRENT_SOURCE_DIR}/src/third_party"
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
+endfunction()
+
+enable_strict_warnings(train_tycoon_legacy)
 
 add_executable(train_tycoon src/main.cpp)
 target_link_libraries(train_tycoon PRIVATE
@@ -46,6 +66,7 @@ target_link_libraries(train_tycoon PRIVATE
     gdi32
     winmm
 )
+enable_strict_warnings(train_tycoon)
 
 add_custom_command(TARGET train_tycoon POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -63,6 +84,7 @@ add_executable(train_tycoon_tests
     tests/test_smoke.cpp
 )
 target_link_libraries(train_tycoon_tests PRIVATE train_tycoon_legacy winmm)
+enable_strict_warnings(train_tycoon_tests)
 
 set(TEST_RUN_DIR "$<TARGET_FILE_DIR:train_tycoon_tests>/test_run")
 add_custom_command(TARGET train_tycoon_tests POST_BUILD
