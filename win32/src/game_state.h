@@ -105,7 +105,7 @@ typedef struct GameCanvas {
     int8_t** heightMap;
     int32_t terrainSmoothCost;
     bool initialIndustryPlaced;
-    int8_t** terrainEditBuffer;
+    Grid<int8_t> terrainEditBuffer;
     int32_t selectionStartX;
     int32_t selectionStartY;
     bool trackBuildInProgress;

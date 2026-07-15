@@ -56,7 +56,7 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
     int n, n2, n3, n4;
     if (bl) {
         gc_commitTerrainEdit(gc);
-        gc->terrainEditBuffer = NULL;
+        gc->terrainEditBuffer.clear();
         n4 = gc->selectionStartX; n3 = gc->selectionStartY;
         n2 = gc->selectionStartX + 10; n = gc->selectionStartY + 10;
     } else {
