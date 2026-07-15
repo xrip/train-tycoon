@@ -30,6 +30,7 @@ add_library(train_tycoon_legacy STATIC
     src/midp_stub.cpp
     src/midp_util.cpp
     src/support/java_random.cpp
+    src/support/input_queue.cpp
     src/game_state.cpp
     ${GAME_SOURCES}
     $<TARGET_OBJECTS:train_tycoon_vendor>

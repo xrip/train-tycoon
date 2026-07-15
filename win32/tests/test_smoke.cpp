@@ -1,7 +1,9 @@
 #include "doctest/doctest.h"
 
 #include "game_methods.h"
+#include "midp_input.h"
 #include "stable_digest.h"
+#include "support/input_queue.h"
 
 #include <array>
 #include <cstdint>
@@ -80,6 +82,49 @@ TEST_CASE("fast: byte buffer owns low-byte output") {
 
     buffer.clear();
     CHECK(buffer.bytes().empty());
+}
+
+TEST_CASE("fast: input queue maps, orders, and debounces keys") {
+    InputQueue queue;
+    KeyEvent event;
+    CHECK_FALSE(queue.poll(event));
+
+    queue.on_virtual_key('6', true);
+    queue.on_virtual_key('6', true);
+    queue.on_virtual_key('6', false);
+
+    REQUIRE(queue.poll(event));
+    CHECK(event.key_code == MIDP_KEY_NUM0 + 6);
+    CHECK(event.pressed);
+    CHECK(midp_get_game_action(event.key_code) == MIDP_RIGHT_ACTION);
+    REQUIRE(queue.poll(event));
+    CHECK(event.key_code == MIDP_KEY_NUM0 + 6);
+    CHECK_FALSE(event.pressed);
+    CHECK_FALSE(queue.poll(event));
+
+    queue.on_virtual_key(0x26, true); // VK_UP
+    REQUIRE(queue.poll(event));
+    CHECK(midp_get_game_action(event.key_code) == MIDP_UP);
+
+    queue.clear();
+    queue.on_virtual_key(0x26, true);
+    REQUIRE(queue.poll(event));
+    CHECK(event.pressed);
+}
+
+TEST_CASE("fast: full input queue keeps its first 63 events") {
+    InputQueue queue;
+    for (int index = 0; index < 70; ++index) {
+        queue.on_virtual_key('1', index % 2 == 0);
+    }
+
+    KeyEvent event;
+    int count = 0;
+    while (queue.poll(event)) {
+        CHECK(event.key_code == MIDP_KEY_NUM0 + 1);
+        ++count;
+    }
+    CHECK(count == 63);
 }
 
 TEST_CASE("fast: raw resources have fixed digests") {
