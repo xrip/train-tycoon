@@ -1,346 +1,336 @@
-# HANDOFF — Train Tycoon readable decompilation
+# HANDOFF — Train Tycoon readable decompile and native port
 
-## 1. Project purpose and target state
+## 1. Project purpose and target
 
-Recover readable, faithful Java source from the obfuscated 2007 J2ME MIDlet
-`Train_Tycoon_6233_N73_N95_240x320.jar` (LifeWeb Interactive; MIDP 1.0 / CLDC
-1.0, 240×320). "Faithful" means the recovered code provably preserves the
-original behaviour; "readable" means obfuscated identifiers are replaced with
-meaningful names. **Target end state**: all three classes decompiled,
-compilable, verified faithful, and progressively renamed to human-readable
-identifiers — delivered as a reproducible toolchain, not hand edits.
+This project has two connected parts:
 
-## 2. What the JAR contains
+1. Make a repeatable, readable Java decompile of the obfuscated Train Tycoon
+   J2ME game.
+2. Make a native Windows C23 port on MiniFB.
 
-Three classes plus resources:
+The Java source of truth is `src/deobfuscated/GameCanvas.java`. The native port
+target is the same game behavior, with sound and high-score network work left
+out by request.
 
-- `GameMIDlet` (448 B) — MIDlet entry point.
-- `b` (~675 B) — XOR resource reader. Renamed to `XorResourceInput`.
-- `a` (~144 KB) — the entire game: one `Canvas implements Runnable` with
-  **442 fields and 197 methods + static init**. Renamed to `GameCanvas`.
-- Resources: `/1`..`/5` XOR-encrypted (cycling key 1..127), `/6` a plain
-  MIDI, `/ico.png`. 200 game PNGs already extracted to `resources/images/`.
+The native port is complete at **196/196 full methods**, with **0 partial
+methods** and no generated method bodies in `port/generated/game_stubs.c`.
 
-## 3. Obfuscation profile (established this session)
+## 2. Current Git state
 
-Name/layout obfuscation only — **ProGuard-style aggressive renaming**:
+- Branch: `master`
+- Base commit before this handoff: `1b7e828 Complete native gameplay port`
+- Recent main commits:
+  - `1b7e828` — completed all `update()` states and added the state-30 smoke
+    path.
+  - `400a23f` — added the last dialog-data, money-format, and train-render
+    methods; also completed the last clear name changes.
+  - `ae30cbb` — added score, graph, text, life-cycle, and excluded-system
+    methods.
+  - `b074cca` through `f1a38fc` — added map setup, save/load, path finding,
+    train buying, build actions, and view control.
 
-- Short 1–2 char, random-looking, heavily overloaded names (method `a(...)`
-  appears 39×; field `a`, `b`, `do` (a Java keyword) etc.).
-- **No** string encryption of the constant pool, **except**: high-score
-  network strings (URL + HTTP headers) are XOR-encoded in `byte[]` fields
-  decoded at runtime by `decodeString`. A light, targeted hiding.
-- **No** control-flow flattening.
+`AGENTS.md` is an untracked, user-owned instruction file. It is not part of the
+project commit and must stay uncommitted unless the user gives a direct request.
 
-Original identifier *names* are unrecoverable (renaming is one-way). Every
-method, branch, constant, and operation is recoverable. Recovery = full
-logic + names we assign by understanding the code.
+No other uncommitted project work was present before this handoff.
 
-## 4. Toolchain (the deliverable)
+The following ignored files are normal generated data and must not be put in a
+commit: `build/`, `tools/lib/`, `tools/__pycache__/`, and `TTStore.rms`.
 
-All steps are subcommands of one driver, `python tools/deobf.py`:
+## 3. What was made and why
 
-```
-setup      # fetch pinned CFR + ASM + J2ME stubs into tools/lib/
-extract    # extract classes from JAR
-remap      # apply mappings.txt via ASM bytecode rewrite
-deobf      # full pipeline: extract + remap + CFR decompile
-decompile  # CFR-only (raw classes)
-xref       # regenerate analysis/XREF_GameCanvas.md
-verify     # compile + round-trip decompile; the faithfulness gate
-show NAME  # print a method body (resolves renamed + overloaded names)
-```
+### Repeatable deobfuscation
 
-Supporting tools:
+- `tools/deobf.py` drives extract, bytecode name changes, CFR decompile, xref,
+  and Java proof steps.
+- `tools/mappings.txt` holds descriptor-specific class, field, and method name
+  changes.
+- `tools/Remap.java` does bytecode name changes through ASM. This keeps
+  overloaded names separate and does not make source-text substitutions.
+- `tools/Xref.java` creates `analysis/XREF_GameCanvas.md` for exact callers,
+  callees, field use, and string data.
 
-- `tools/mappings.txt` — the living name map (the primary deliverable).
-- `tools/Remap.java` — ASM bytecode remapper (descriptor-aware, scope-safe).
-- `tools/Xref.java` — ASM cross-reference generator.
-- `tools/unmapped.py` — list class-a members not yet in mappings.txt
-  (supports `--obfuscated` filter and `--usage` counts).
-- `tools/all_a_members.txt` — raw `javap -p` dump for cross-checking.
+This design makes every readable name repeatable from the original JAR and
+keeps `src/deobfuscated/` as generated source rather than hand-edited Java.
 
-**Why bytecode rename, not source.** ASM `SimpleRemapper` keys methods by
-`owner+name+descriptor` (overload-safe) and fields by `owner+name`. This
-guarantees no false positives, and a remap is a pure rename that cannot
-change behaviour. **The faithfulness gate (`verify`) is invariant under
-`mappings.txt` edits** — renames need not be re-verified per batch.
+### Native C23 port
 
-## 5. Faithfulness proof (current state)
+- `tools/port.py` reads the readable Java, keeps port state in
+  `tools/port_manifest.json`, and creates `port/generated/`.
+- `port/impl/*.c` has the 196 hand-ported game methods, grouped by work area.
+- `port/midp_*.c` and `port/midp.h` give the small MIDP layer needed by this
+  game: graphics, PNG images, resources, key input, Java-style random numbers,
+  vectors, byte streams, and RecordStore files.
+- `port/main.c` owns the Windows frame loop. The old Java `run()` loop is one
+  frame at a time in native code.
+- `MiniFB.h` gives the Windows window and frame output.
+- `port/third_party/stb_image.h` gives PNG decode.
 
-`b` and `GameMIDlet`: byte-identical round-trip through CFR 0.152.
+This design keeps generated state and declarations separate from hand-written
+game code. It also keeps the port close to the Java control flow, which lowers
+the risk of behavior changes.
 
-`GameCanvas` (`a`): compiles clean after **11 documented, behaviour-
-preserving fixes** to CFR emission artifacts:
+### Main game systems now present
 
-- 8 lost narrowing casts (CFR dropped `i2b`/`i2s` conversions).
-- 1 boolean-return-assigned-to-int.
-- **2 methods** (`S()` and `g(int,int)`) where CFR split one logical flag
-  into two locals — an artifact of the obfuscator's register/slot reuse.
-  The correct reconstruction was read from `raw-bytecode/a.javap.txt`
-  and re-decompiles clean — a stable fixpoint.
+- Full start and resource decode path.
+- Title and menu state machines.
+- Scenario read and map generation.
+- Isometric terrain, tile, train, menu, and dialog drawing.
+- Key input, view movement, zoom, and tile selection.
+- Track, station, train, wagon, removal, and upgrade actions.
+- Track path finding and preview work.
+- Train movement, service, cargo, income, AI, month, year, and era work.
+- Save/load state, map matrices, RLE, and RecordStore file support.
+- Map overview and all `update()` state cases.
+- Score, graph, number, money, and dynamic dialog data.
 
-The 11 fixes are codified in `deobf.py` as exact string replacements with a
-drift check that fails loudly if a different CFR version emits different
-code. Details: `analysis/VERIFICATION.md`.
+These changes meet the main goal: a native start-to-gameplay port with no
+missing game method bodies.
 
-## 6. Renaming progress (this session)
+### Clear-name rule
 
-**500 mapping entries total** as of the last shipped batch (Batch 28,
-`10bfcf9`). Breakdown: **2 classes** + **381 fields** + **120 methods**.
+When port work shows an old obfuscated member name, use behavior and exact
+xrefs to get a clear name. Put the name change in `tools/mappings.txt`, run the
+deobfuscation steps, then run `port.py inventory` and `port.py gen`.
 
-Shipped across 28 evidence-checked batches. Each name is justified by
-reading the surrounding code, never by blind text-substitution. Per-batch
-counts (derived from `git show <commit>:tools/mappings.txt | grep -c '^'`):
+Do not put a recoverable obfuscated name only in the C code. If evidence does
+not give one clear meaning, say so and keep the doubt in project notes. One
+example is `legacyDecadeMetric`: bytecode gives no writes after its zero start,
+so its business meaning is not known.
 
-| Batch | Anchor | Δ | Running |
-|---|---|---|---|
-| 1 (init) | loop bounds, byte code grids | 15 | 15 |
-| 2 (init) | musicPlayer / syncHighScores / etc. | 10 | 25 |
-| 3 (init) | run() timing | 17 | 42 |
-| 4 | update() dispatcher + per-frame sim | 72 | 124 |
-| 5 | renderMap() | 21 | 145 |
-| 6 | handleKey + openBuildMenu + smoothHeightMap | 37 | 182 |
-| 7 | saveGame + loadGame | 6 | 188 |
-| 8 | wagon cost + AI buy + cursor/track ops + viewport pan/zoom | 41 | 229 |
-| 9 | tick economy + scenario milestones + year-end balance-sheet | 36 | 265 |
-| 10 | v(int) build-menu data tables | 7 | 272 |
-| 11 | computeTrainCost() call sites + cost snapshots | 4 | 276 |
-| 12 | packed-sprite renderer state | 12 | 288 |
-| 13 | map-gen pipeline + terrain edit + selection rect | 17 | 305 |
-| 14 | loan economy + per-train state + per-menu-row tables | 12 | 317 |
-| 15 | previous-year + previous-decade snapshots | 17 | 334 |
-| 16 | key algorithms + save/load pipeline methods | 18 | 352 |
-| 17 | snapshot state + per-city/per-train code arrays | 10 | 362 |
-| 18 | rendering + sprite loading + viewport tracking | 8 | 370 |
-| 19 | terrain/path/placeability query methods | 10 | 380 |
-| 20 | rendering pipeline + terrain editing + AI train registration | 26 | 406 |
-| 21 | save/restore + year-graph + menu-build helpers | 13 | 419 |
-| 22 | more menu + save helpers + canvas resize | 6 | 425 |
-| 23 | AI/track + sprite atlas + display statics | 8 | 433 |
-| 24 | year-graph alt data + money ticker frames | 4 | 437 |
-| 25 | state counters + per-row metadata | 19 | 456 |
-| 26 | AI + scenario + train placement + build-menu construction | 17 | 473 |
-| 27 | high-score network decode tables | 9 | 482 |
-| 28 | scenario/map-gen parameters + display half-dimensions | 18 | 500 |
+## 4. Architecture and important decisions
 
-Method names shipped in batches 4–28 cover most major algorithms:
-`computeKeyRepeatDelay`, `rebuildCityList`, `tryBuildPath`, `validatePathStep`,
-`floodFillPath`, `scanTrackTiles`, `countCarsInTrain`, `accumulateTrainTurns`,
-`compressSaveBuffer`, `writeSaveSnapshot`, `pickCitySite`, `pickIndustrySite`,
-`computeMilestoneScore`, `spendMoney`, `isResourceTile`, `findPathStep`,
-`clearBuildPathTile`, `findLineIntersection`, `isCurveTile`,
-`isPlaceableTerrain`, `isCityOrStationTile`, `randomCityTile`,
-`drawTileSprite`, `resetKeyState`, `setSelectionStart`, `flattenHeightArea`,
-`placeTrackTile`, `crossProduct2D`, `computeIsoCorners`,
-`computeViewportBounds`, `drawMenuRow`, `drawConfirmBar`, `drawHeaderBar`,
-`paintMain`, `pushMoneyHistory`, `drawNumber`, `drawMoneyTicker`,
-`drawConfirmDialog`, `registerTrain`, `initBuildMenuRow`,
-`initBuildMenuForScenario`, `revertTrackTiles`, `applyBackgroundCost`,
-`advanceConstructionTimers`, `restoreAllMapArrays`, `computeYearEndMetrics`,
-`scanMapForMetric`, `setYearGraphMode`, `placeCitiesAndIndustry`,
-`autoExtendTrackStation`, `rebuildMenuTypeIndexes`,
-`computeMenuRowDisplayValue`, `placeTrainAt`, `duplicateMenuRow`,
-`incrementRowValueType1`, `incrementRowValueType13/14`, `adjustRowValueByCode`,
-`setCanvasSize`, `saveIntToBuffer`.
+### Source-of-truth flow
 
-The full table of renames lives in `tools/mappings.txt`.
-
-## 7. Architecture and key design decisions
-
-- **Rename in bytecode, not source.** ASM `SimpleRemapper` keyed by
-  `owner+name+descriptor` for methods (overload-safe) and `owner+name` for
-  fields. Guarantees no false positives and behaviour preservation.
-- **Verify once, independent of naming.** `verify` runs on the *unmapped*
-  decompilation + the embedded CFR fixes. Renames are pure, so `verify`
-  need not re-run per batch.
-- **CFR fixes are codified, not hand-applied.** The 11 fixes live in
-  `deobf.py` as exact string replacements with a drift check.
-- **`mappings.txt` is the single growing deliverable.** Everything else
-  regenerates from `JAR + mappings.txt`.
-- **CFR `--renameillegalidents true`** is used to emit Java-legal
-  identifiers for fields whose original names were Java keywords
-  (notably `do` — renamed to `currentTrainCostSnapshot`). Our mappings
-  key on the **original bytecode name** (`do`), not the CFR-emitted alias
-  (`cfr_renamed_0`). This pattern caught us in Batch 11; documented in
-  the Batch 11 commit message.
-- **Pinned tools:** CFR 0.152, ASM 9.7, microemu stubs 2.0.4 (cldcapi10,
-  midpapi20, microemu-jsr-135).
-
-## 8. What currently works
-
-- `python tools/deobf.py deobf` — JAR → renamed readable source.
-- `python tools/deobf.py verify` — compile + round-trip.
-- `python tools/deobf.py xref` — regenerate the cross-reference.
-- `python tools/deobf.py show NAME` — print a method body.
-- `python tools/unmapped.py [--obfuscated] [--usage] [fields|methods]` —
-  list unmapped identifiers.
-
-Pipeline state at handoff: `deobf` and `verify` both **exit 0** on
-Java 25.0.2 / Python 3.14.2 / Windows 11.
-
-`run()`, `update()`, `renderMap()`, `paint()`, `handleKey()`,
-`openBuildMenu()`, `computeTrainCost()`, `saveGame()`, `loadGame()`,
-`syncHighScores()` all read as ordinary code.
-
-## 9. What remains incomplete
-
-- **Naming: 500 of ~640 GameCanvas members (~78%).** Remaining ~140 are
-  ~65 fields + ~136 methods (after filtering the obfuscated-name heuristic).
-  Most are deeply-nested methods that drive the build-menu animation cycle,
-  per-frame input dispatch, and a few obscure per-zone/per-track arrays.
-- **Method-local variables are not renamed.** The obfuscator stripped the
-  `LocalVariableTable`, so locals have no bytecode identity and CFR names
-  them `n`, `n2`, `bl`. A per-method source pass (JavaParser) would be
-  needed; low risk since locals are method-scoped.
-- **Encrypted resources `/2`..`/5`** are decrypted but their table formats
-  are only partially understood (see `analysis/RESOURCE_FORMAT.md`).
-- **No emulator run** has been wired up to validate behaviour dynamically.
-
-## 10. Known issues, constraints, assumptions, risks
-
-- **Byte-for-byte identity with the 2007 JAR is impossible** (Java 25
-  cannot emit class-file v45; local slot allocation differs). Faithfulness
-  is proven by *fixpoint equivalence* (re-compile + re-decompile = same
-  logic, modulo local-variable names).
-- **CFR-version dependence:** the 11 embedded fixes match CFR 0.152 output
-  exactly. A different CFR version may emit different code; `verify`
-  detects this and aborts with a clear message rather than silently
-  misfixing.
-- **Naming risk:** every batch is evidence-checked. A few names are
-  medium-confidence — the `decadeXxxWithCurrent` family (Batch 15) and
-  `prevDecade*` snapshots are described in terms of their decade array
-  names, not in domain terms (e.g. "subsidy", "fuel", "revenue"). They
-  are trivially revised — edit `mappings.txt`, re-run `deobf`.
-- **`trainY2` / `trainX2` CFR aliases:** CFR's `--renameillegalidents`
-  silently renamed two fields `gi → trainY2` and `bL → trainX2` to
-  disambiguate from existing `trainY` / `trainX`. Our mappings key on
-  the **original bytecode names** (`gi`, `bL`), not the CFR alias.
-  Documented in the Batch 20 commit message.
-- **Tooling assumptions:** requires `java`/`javac` (JDK 8+; developed
-  on 25) and Python 3 on PATH, and network access once for `setup`.
-- **Windows note:** classpaths use `os.pathsep` in the driver; do not
-  hand-run the Java commands with `:` separators on Windows.
-
-## 11. Build / run / test / verify
-
-Prerequisites: JDK 8+ and Python 3 on PATH; network for first `setup`.
-
-```sh
-python tools/deobf.py setup     # fetch pinned CFR + ASM + J2ME stubs -> tools/lib/
-python tools/deobf.py deobf     # regenerate src/deobfuscated/ from JAR + mappings.txt
-python tools/deobf.py xref      # regenerate analysis/XREF_GameCanvas.md
-python tools/deobf.py verify    # faithfulness gate: compile + round-trip
-python tools/deobf.py show NAME # inspect a method
-python tools/unmapped.py        # list unmapped identifiers
+```text
+original JAR
+  -> tools/deobf.py + tools/mappings.txt
+  -> src/deobfuscated/GameCanvas.java
+  -> tools/port.py + tools/port_manifest.json
+  -> port/generated/* declarations and state
+  -> port/impl/* native method bodies
 ```
 
-`build/` and `tools/lib/` are generated and git-ignored.
+Do not hand-edit `port/generated/*`. Run `python tools/port.py gen` after a
+manifest or Java name change.
 
-### Test results at handoff
+### Runtime flow
 
-- `deobf`: **exit 0** — 503 mapping entries applied (2 classes + 381 fields
-  + 120 methods).
-- `verify`: **exit 0** — "verify OK: patched decompilation compiles
-  (3 classes)"; round-trip re-decompile stable (diff vs raw = local-
-  variable renaming only).
-- Environment: `java 25.0.2`, `Python 3.14.2`, Windows 11.
-- There is no unit-test suite; `verify` is the project's correctness gate.
+`port/main.c` does:
 
-### Repo state and commit history
-
-Ship point: 32 commits on `master`. Most recent first:
-
-```
-f6e5824  Add tools/unmapped.py + tools/all_a_members.txt
-10bfcf9  Batch 28: scenario/map-gen parameters + display half-dimensions (500)
-935d9dd  Batch 27: high-score network decode tables (482)
-b5b7547  Batch 26: AI + scenario + train placement + build-menu construction (473)
-ad73b41  Batch 25: state counters + per-row metadata (456)
-921adf8  Batch 24: year-graph alt data + money ticker frames (437)
-5a1b183  Batch 23: AI/track + sprite atlas + display statics (433)
-82bc359  Batch 22: more menu + save helpers + canvas resize (425)
-0669246  Batch 21: save/restore + year-graph + menu-build helpers (419)
-e5c3df5  Batch 20: rendering pipeline + terrain editing + AI train registration (406)
-1fb6ea5  Batch 19: terrain/path/placeability query methods (380)
-0a81e58  Batch 18: rendering + sprite loading + viewport tracking (370)
-6221dad  Batch 17: snapshot state + per-city/per-train code arrays (362)
-7de434e  Batch 16: key algorithms + save/load pipeline methods (352)
-6cd2533  Batch 15: previous-year + previous-decade snapshots (334)
-388980d  Batch 14: loan economy + per-train state + per-menu-row tables (317)
-88760e6  Batch 13: map-generation pipeline + terrain-edit + selection-rect state (305)
-1eb8f72  Batch 12: packed-sprite renderer state (288)
-197f677  HANDOFF.md: sync to ship point (276 mappings across 11 batches)
-4d03b75  Batch 11: train-cost snapshots + pending-transition plumbing (276)
-b4086e6  Batch 10: build-menu data tables + scenario modifier flags (272)
-27a9d5d  Batch 9: tick economy + scenario milestones + year-end balance-sheet (265)
-10d1c42  Batch 8: wagon cost + AI buy + cursor/track ops + viewport pan/zoom (229)
-0259cbb  HANDOFF.md: update to ship point (188 mappings across 7 batches)
-5b7f6ca  Batch 7: save/load record format (188)
-d90d147  Batch 6: input dispatcher + build menu machinery (182)
-aa3006e  Batch 5: renderMap + map-renderer infrastructure (145)
-32a6fc2  Batch 4: update() dispatcher state + per-frame simulation names (124)
-ead719c  Initial import: Train Tycoon J2ME deobfuscation
+```text
+resource root -> GameCanvas field start -> game start
+-> key events -> one gc_run frame -> gc_paint -> MiniFB frame output
 ```
 
-Working tree is clean (HANDOFF.md deletion is staged; will be committed
-with the new handoff in this same transfer).
+The window is 240×320 game pixels at 2× display scale and 30 frames per second.
 
-## 12. Current development objective and next steps
+### Java array support
 
-The project's goal is **complete readability** ("no obfuscated names
-remain"). At handoff, 500/640 GameCanvas members are named (~78%). The
-remaining ~140 are mostly methods — naming a method requires reading
-its full body (which can be 100+ lines).
+Native game arrays keep their length through `GC_NEW` and `midp_arr_len`.
+Use these helpers for game arrays. Do not replace them with plain `malloc` when
+code needs Java `.length` behavior.
 
-Priority order:
+### Random numbers
 
-1. **Build-menu animation cycle methods** — the dozen-or-so methods that
-   drive `duplicateMenuRow` / `incrementRowValueTypeN` /
-   `adjustRowValueByCode` and their helpers. Reading these will likely
-   name several more fields used only in the menu.
-2. **Per-zone/per-track arrays** — `bE`, `bT`, `bW`, `cQ`, `cW`, `cy`
-   (byte[6] / short[] / int[] etc) are mostly already-named in their
-   common uses; a sweep with `unmapped.py --obfuscated --usage fields`
-   will isolate them.
-3. **Per-frame render-method overloads** — `a(Graphics, ...)` has many
-   overloads still obfuscated. These are rendering primitives (draw
-   circle, draw number, draw string); reading one or two bodies will
-   reveal the pattern.
-4. **Method-local variables** — add a JavaParser source pass to name
-   method locals; and/or wire up microemu to run the JAR for dynamic
-   validation.
-5. **Decade-3 `decadeEnterpriseWithCurrent` etc. — revisit naming** once
-   the game's economy is fully understood; current names are accurate
-   to the code but not to the domain.
+The MIDP layer has the Java 48-bit random-number process. Map generation needs
+this exact behavior.
 
-Workflow for each: `unmapped.py --obfuscated --usage fields` →
-`show NAME` → read 1-3 call sites → add an evidence-checked entry to
-`tools/mappings.txt` → `deobf` + `verify` → commit. `verify` stays
-green for free because renames are pure bytecode transforms.
+### Sound and network
 
-## 13. Important files and entry points
+Sound and high-score network work are outside the requested target:
 
-| Path | What it is |
-|---|---|
-| `tools/deobf.py` | **the driver** — all subcommands; embeds the 11 CFR fixes |
-| `tools/mappings.txt` | **the living name map** — the 500-entry deliverable |
-| `tools/Remap.java` | ASM bytecode remapper (descriptor-aware) |
-| `tools/Xref.java` | ASM cross-reference generator |
-| `tools/unmapped.py` | List class-a members not yet in mappings.txt |
-| `tools/all_a_members.txt` | Reference javap -p dump of class `a` |
-| `tools/README.md` | toolchain usage + design |
-| `analysis/VERIFICATION.md` | the faithfulness proof and the 11 fixes |
-| `analysis/XREF_GameCanvas.md` | generated cross-reference (drives naming) |
-| `analysis/` (README, LIMITATIONS, RESOURCE_FORMAT, STATE_MAP, …) | prior findings |
-| `src/deobfuscated/` | current renamed readable source (generated) |
-| `src/decompiled_cfr/compilable/` | verified-compilable baseline (patched) |
-| `src/decompiled_cfr/a.java`, `a_renamed.java` | raw CFR output |
-| `raw-bytecode/a.javap.txt` | authoritative disassembly — ground truth for hard methods |
-| `resources/images/` | 200 recovered PNGs |
-| `Train_Tycoon_6233_N73_N95_240x320.jar` | the source artifact |
-| `.gitignore` | excludes regenerated `build/` and fetched `tools/lib/` |
+- `port/impl/remaining.c` has clear no-op game methods.
+- `port/midp_stub.c` has no-op MIDI and network support.
+- High-score sync returns `false`, so the game takes its normal failure result
+  state.
 
-`src/faithful/` and `src/readable/` are the prior hand-reconstruction,
-kept for reference; `src/decompiled_cfr/` + `src/deobfuscated/`
-supersede them.
+Do not treat these as missing port work unless the user puts them back in
+scope.
+
+## 5. What works now
+
+- Java proof build and round-trip decompile.
+- Native MSVC C23 build.
+- Real game resource decode and PNG drawing.
+- Start screen and menu drawing/input.
+- Scenario 0 map generation to game state 30.
+- One state-30 input, update, and paint cycle in the smoke suite.
+- Small path-finding smoke check.
+- In-memory save/RLE/load round-trip smoke check.
+- Native RecordStore file support through `TTStore.rms` for normal game use.
+
+`python tools/port.py status` reports:
+
+```text
+methods done: 196/196 (100%)  [196 full, 0 partial]
+fields (all generated): 441
+```
+
+## 6. What is not complete or not proved
+
+- Sound is a no-op by request.
+- High-score network work is a no-op by request.
+- The smoke suite is not a full test of every menu selection, every scenario,
+  long game play, all AI results, or every save/load path on disk.
+- A full manual play test on a normal Windows desktop is still needed.
+- The build is Windows-only. `CMakeLists.txt` gives an error on non-Windows
+  systems.
+- The old `README.md` still gives the early decompile view. Use this file,
+  `CLAUDE.md`, and `PORT_HANDOFF.md` for the current native-port state.
+
+No known build or smoke failure is present at handoff time.
+
+## 7. Known limits, risks, and technical debt
+
+- MSVC does not give the C23 `nullptr` word used by MiniFB. `port/main.c` has a
+  guarded `nullptr -> NULL` definition before `MiniFB.h`.
+- CFR left out a real `break` in `computeTrackBuildInlined`. Bytecode shows that
+  the scan stops at the first non-empty tile. The C port follows bytecode.
+- `autoExtendTrackStation` checks the “track above” bit for both vertical ways.
+  Bytecode shows the same strange behavior, so the C port keeps it.
+- `pathSearchLimit` is a low-confidence name. The game sets it to 10, but
+  bytecode has no read of the field.
+- `legacyDecadeMetric` has no bytecode writes after its zero start. Its exact
+  old business meaning is not known.
+- Some smoke test objects do not free every nested game allocation before the
+  short test process ends. This is test-only process-lifetime waste, not a
+  known game-loop growth path.
+- The main smoke path directly selects scenario 0 after the real asset load.
+  It proves the main game state chain, but not every title-menu key sequence.
+
+## 8. Build, run, and check
+
+### Requirements
+
+- Windows.
+- CMake 3.25 or later.
+- Visual Studio 2022 C build tools and MSVC, or a Windows GCC/Clang setup.
+- Python 3.
+- JDK 8 or later for deobfuscation checks.
+- `resources/1` through `resources/6` and `resources/ico.png` in the project
+  tree.
+
+Pinned Java tool JARs are under ignored `tools/lib/`. If they are missing, run:
+
+```powershell
+python tools/deobf.py setup
+```
+
+### Normal build
+
+```powershell
+cmake -S . -B build/port_build -G "Visual Studio 17 2022" -A x64
+cmake --build build/port_build --config Debug
+```
+
+Output:
+
+```text
+build/port_build/Debug/train_tycoon.exe
+```
+
+Run it from the project root so the relative `resources` path is valid:
+
+```powershell
+.\build\port_build\Debug\train_tycoon.exe
+```
+
+### Port checks
+
+```powershell
+python tools/port.py status
+python tools/port.py verify
+```
+
+`verify` builds the native target and runs 120 smoke frames. Before the window
+frame loop, it also runs:
+
+1. A 5×5 path build with track and cost checks.
+2. An in-memory state save, RLE pack/unpack byte comparison, and field restore.
+3. Real asset load, scenario 0 generation, state-30 paint, movement-key input,
+   one game frame, and a second paint.
+
+### Java proof check
+
+```powershell
+python tools/deobf.py verify
+```
+
+This decompiles the original classes, applies the known CFR output fixes,
+builds all three Java classes against the J2ME support JARs, and checks a stable
+round-trip decompile.
+
+### Exact handoff check results
+
+Run on 2026-07-15 from `E:\Train_Tycoon_readable_decompile`:
+
+- `python tools/deobf.py verify` — **PASS**, exit 0. The patched decompile built
+  3 classes. Round-trip change was local-variable naming only. Java gave only
+  the known old-API note.
+- `python tools/port.py verify` — **PASS**, exit 0. MSBuild made
+  `build/port_build/Debug/train_tycoon.exe`; all smoke work returned 0.
+- `python tools/port.py status` — **PASS**: 196/196 full, 0 partial, 441 fields.
+- `git diff --check` — **PASS**, exit 0.
+
+## 9. Current development objective
+
+The requested port objective is complete. The next objective is proof by
+manual play and small, local fixes for any behavior difference found there.
+Sound and network work remain out of scope.
+
+## 10. Next tasks, in order
+
+1. **Do a manual Windows play test.** Start a new game through the real title
+   menu. Build track and stations, buy a train, run service, open finance/map
+   views, save, load, and exit. Keep exact steps for any failure.
+2. **Add a small check for each found failure before its fix.** Keep changes
+   close to the Java and bytecode source.
+3. **Test more scenarios.** Extend the smoke suite only when a real problem or
+   high-risk path gives a reason.
+4. **Check long-run state.** Let months and years pass, then check AI, money,
+   era changes, reports, and save/load stability.
+5. **Only by a new user request:** add MIDI sound or high-score network support.
+
+## 11. Important files and entry points
+
+- `CLAUDE.md` — project rules, tool use, and port design.
+- `PORT_HANDOFF.md` — detailed port history and known bytecode facts.
+- `src/deobfuscated/GameCanvas.java` — readable Java source of truth.
+- `tools/mappings.txt` — repeatable bytecode name map.
+- `analysis/XREF_GameCanvas.md` — exact member cross-references.
+- `tools/deobf.py` — deobfuscation and Java proof driver.
+- `tools/port.py` — port inventory, generation, build, and smoke driver.
+- `tools/port_manifest.json` — 196-method port state and 441-field C map.
+- `CMakeLists.txt` — Windows C23 build.
+- `port/main.c` — Windows entry, frame loop, and smoke suite.
+- `port/midp.h` and `port/midp_*.c` — MIDP support layer.
+- `port/impl/paint.c` — full paint and update state switches.
+- `port/impl/menu_dispatch.c` — menu action state changes.
+- `port/impl/map_gen.c` — terrain, city, industry, and route setup.
+- `port/impl/render_map.c` — isometric world draw.
+- `port/impl/train_tick.c` and `port/impl/sim_tick.c` — train and time work.
+- `port/impl/build_actions.c` and `port/impl/pathfinding.c` — building work.
+- `port/impl/save.c` and `port/impl/save_arrays.c` — game and map save/load.
+- `port/generated/game_state.h` — generated `GameCanvas` C state.
+- `port/generated/game_methods.h` — generated method declarations.
+- `port/generated/game_stubs.c` — generated and empty at this handoff.
+- `resources/` — required game data and extracted review material.
+
+## 12. Safe change process
+
+For a Java name change:
+
+```powershell
+# edit tools/mappings.txt
+python tools/deobf.py deobf
+python tools/deobf.py xref
+python tools/deobf.py verify
+python tools/port.py inventory
+python tools/port.py gen
+python tools/port.py verify
+```
+
+For a C-only bug fix, edit only the needed `port/impl` or MIDP file, then run
+`python tools/port.py verify`. Do not edit generated C files by hand. Keep
+unrelated code and the user-owned `AGENTS.md` unchanged.
