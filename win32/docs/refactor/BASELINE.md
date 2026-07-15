@@ -121,6 +121,19 @@ real MIDI device test is an opt-in `device` label.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - All fixed map, save, input, and frame values are unchanged.
 
+## OWN-02 proof
+
+- Every fixed-size raw state array and constant table is now `std::array`,
+  including per-train 500-slot arrays, service and city arrays, financial
+  history, menu row tables, offer tables, and the track-step and
+  sprite-direction constant tables.
+- Save helpers split into size-explicit `*Span` cores plus registry wrappers,
+  with templated `std::array` overloads of the `*Inlined` names; save byte
+  order is unchanged.
+- Dead `dk` and `j` offset tables were removed.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- All scenario, input, save, and frame golden values are unchanged.
+
 ## Manual baseline still needed
 
 - boot and menu;

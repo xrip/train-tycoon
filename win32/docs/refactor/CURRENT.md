@@ -2,45 +2,44 @@
 
 ## Item
 
-`OWN-02` - move fixed state arrays and tables to `std::array`.
+`OWN-03` - move maps and other matrices to `Grid<T>` or nested containers.
 
 ## Base
 
-- Commit: `25f7edd` (first `OWN-02` leaf group is green).
+- Commit: OWN-02 closed green (fixed state arrays and tables all owned).
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Give fixed-size game state direct standard ownership and known sizes. Keep all
-indexes, first values, save order, and game behavior unchanged.
+Give map grids and other two-dimensional game state clear standard ownership
+with known sizes. Keep `grid[x][y]` order (`x * height + y` for `Grid<T>`), save
+byte order, random and tick order, and all game behavior unchanged.
 
 ## Non-goals
 
-- Do not move maps, variable rows, or other matrices yet.
+- Do not remove the array-length registry yet; that is OWN-04.
 - Do not change save byte order or numeric game values.
-- Do not add a general container layer.
 - Do not split game model parts yet.
 
 ## Last proof
 
-`OWN-01`: all short-lived owned game buffers and returned text-code values now
-use standard containers. Text drawing borrows `std::span`; a missing dialog
-value is explicit with `std::optional`. Debug and Release fast/full tests
-passed with all fixed values unchanged on 2026-07-15.
-
-The first `OWN-02` group moved `selectionTileX` and `selectionTileY` from raw
-owned pointers to `std::array<int32_t, 4>`. The strict Debug build and fast
-tests passed on 2026-07-15.
-
-The second `OWN-02` group moved `moneyHistory` to `std::array<int32_t, 3>` and
-`moneyTickerFrames` to `std::array<int8_t, 3>`, and removed their two
-`midp_alloc_arr` calls. The strict Debug build and full tests passed on
-2026-07-15 with all fixed values unchanged.
+`OWN-02` is complete. Every fixed-size raw state array and constant table now
+uses `std::array` (including the per-train 500-slot arrays, service and city
+arrays, financial history, menu row tables, offer tables, and the track-step and
+sprite-direction tables). The save helpers gained size-explicit `*Span` cores
+with templated `std::array` overloads, so save byte order is unchanged. Dead
+`dk` and `j` tables were removed. Debug and Release fast/full tests passed on
+2026-07-15.
 
 ## Next action
 
-Continue with small non-save fixed groups by size and use. Good next candidates
-are player name codes, wagon option arrays, route flags, enabled menu rows, and
-the 12-value graph arrays. Check all call sites before each group, then run the
-strict Debug build and fast tests and commit each green leaf.
+Pick the first OWN-03 leaf. Good early candidates are the fixed-shape matrices
+still on raw `int8_t**`/`int16_t**`: the map grids (`tileMap`, `trackMap`,
+`tileElevation`, `heightMap`, `terrainEditBuffer`, `pathDistanceGrid`) and the
+service resource stock matrix (`serviceResourceStock`, 250x5). Map grids are
+sized `mapWidth * mapHeight`, so they need `Grid<T>` with `x * height + y`
+order. The save codec reaches map matrices through
+`gc_saveOrLoad*MatrixInlined`, which will need a size-explicit path like the
+array helpers before a saved matrix moves. Check all call sites before each
+group, then run the strict Debug build and full tests and commit each green leaf.

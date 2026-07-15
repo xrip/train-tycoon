@@ -20,15 +20,18 @@ resource values, and the current `.rms` save byte order.
 
 Branch: `master`.
 
-Active item: `OWN-02`, fixed state arrays and tables to `std::array`.
+Active item: `OWN-03`, maps and other matrices to `Grid<T>` or nested
+containers.
 
-The first OWN-02 leaf group is complete in commit `25f7edd`: the four
-selection-corner x and y values now use `std::array<int32_t, 4>`. The second
-leaf group is also complete: `moneyHistory` now uses `std::array<int32_t, 3>`
-and `moneyTickerFrames` uses `std::array<int8_t, 3>`, with their two
-`midp_alloc_arr` calls removed. The next leaf group is a small non-save fixed
-group such as player name codes, wagon option arrays, route flags, enabled menu
-rows, or the 12-value graph arrays.
+`OWN-02` is complete. Every fixed-size raw state array and constant table now
+uses `std::array`: the selection corners and money ticker, wagon and route and
+menu flag arrays, the year graph arrays, service/city/zone/train-selection
+arrays, the per-train 500-slot arrays, train revenue and financial history,
+menu row tables, offer tables, scores, visible trains, player name codes, and
+the track-step and sprite-direction constant tables. The save helpers gained
+size-explicit `*Span` cores with templated `std::array` overloads so save byte
+order is unchanged, and the dead `dk` and `j` tables were removed. Debug and
+Release full gates passed on 2026-07-15.
 
 The work tree is clean except for root `AGENTS.md`. It is a user-owned,
 untracked instruction file. Do not add, change, or remove it.
@@ -141,15 +144,18 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Incomplete work and risks
 
-- `OWN-02` is in progress. Most fixed `GameCanvas` arrays still use raw
-  pointers and `midp_alloc_arr`.
-- Arrays written by save helpers need extra care. The current save helpers get
-  length from the old array registry; a `std::array::data()` pointer has no
-  registry length. Move non-save leaf groups first, or give the save helper an
-  explicit span/size before moving a saved group.
-- Variable row tables and maps are not part of OWN-02. They belong to OWN-03.
-- More than 100 raw owning fields remain. Full old array registry removal is
-  OWN-04.
+- `OWN-03` is in progress. Map grids and other matrices still use raw
+  `int8_t**`/`int16_t**` and `midp_alloc_arr`.
+- Map grids are sized `mapWidth * mapHeight`. Per the plan a `Grid<T>` stores
+  them as `x * height + y`; keep that index order exact.
+- Matrices written by save helpers need the same care arrays did. The matrix
+  helpers (`gc_saveOrLoad*MatrixInlined`) still read row and element length from
+  the array registry; give them a size-explicit path before moving a saved
+  matrix, mirroring the OWN-02 `*Span` split.
+- Dynamically-sized single arrays remain raw on purpose: `spriteOffsetTable`,
+  `spriteData`, `spriteIndexTable`, and `tileOffsetX`/`tileOffsetY` are sized at
+  load time, and `saveBuffer` grows during save. These belong to OWN-03/OWN-04.
+- Full old array-length registry removal is OWN-04.
 - `GameCanvas`, `game_methods.h`, short state names, and Java-shape comments
   remain until later model and clean stages.
 - `gc_computeMenuRowDisplayValue` may divide by zero when money is zero. Do not
@@ -162,22 +168,20 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Next work, in order
 
-1. Continue small non-save fixed groups by size and use. Good next candidates
-   are player name codes, wagon option arrays, route flags, enabled menu rows,
-   and the 12-value graph arrays. Check all call sites before each group.
-2. Move large fixed service and train slot arrays only as their own green
-   groups. Keep slot count and indexes exact.
-3. Move fixed constant row tables such as track steps and train sprite
-   direction tables. Use nested `std::array` only where every row has one
-   fixed size; use a clear container for mixed row sizes.
-4. Handle save-written fixed arrays after save helpers can take an explicit
-   `std::span` or size without changing save order.
-5. Close OWN-02 only after no fixed raw state array remains. Run Debug and
+1. Start OWN-03 with a non-save matrix leaf if one exists, or first give the
+   matrix save helpers a size-explicit path (mirror the OWN-02 `*Span` split)
+   so a saved map grid can move without changing save order.
+2. Move the map grids (`tileMap`, `trackMap`, `tileElevation`, `heightMap`,
+   `terrainEditBuffer`, `pathDistanceGrid`) to `Grid<T>` with `x * height + y`
+   order. Keep `grid[x][y]` reads working through the grid accessor. Check every
+   call site before each group.
+3. Move the `serviceResourceStock` 250x5 matrix and any remaining nested tables.
+4. Close OWN-03 only after no fixed matrix remains on raw pointers. Run Debug and
    Release full gates and update `CURRENT.md`, `STATUS.md`, `BASELINE.md`, and
    `DECISIONS.md`.
-6. Continue the main plan in strict order: OWN-03 matrices, OWN-04 raw registry
-   removal, then model, save, world, path, fleet, economy, scenario, simulation,
-   build, assets, render, UI, app, clean, docs, and release stages.
+5. Continue the main plan in strict order: OWN-04 raw registry removal, then
+   model, save, world, path, fleet, economy, scenario, simulation, build,
+   assets, render, UI, app, clean, docs, and release stages.
 
 ## Files to read first
 
@@ -188,9 +192,12 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 - `win32/docs/refactor/STATUS.md` - item states.
 - `win32/docs/refactor/DECISIONS.md` - C++ style and recovered names.
 - `win32/docs/refactor/KNOWN_ISSUES.md` - known bugs and fixed port defects.
-- `win32/src/game_state.h` and `game_state.cpp` - active OWN-02 data.
-- `win32/src/game/query.cpp` and `game/gameplay_ui.cpp` - next money ticker
-  callers.
-- `win32/src/game/save_arrays.cpp` - old tracked-length save helpers.
+- `win32/src/game_state.h` and `game_state.cpp` - state fields and init; the
+  raw `**` matrices here are the active OWN-03 data.
+- `win32/src/game/save.cpp` - save codec and the `IO_*`/matrix macros that reach
+  map grids.
+- `win32/src/game/save_arrays.cpp` - array save helpers, now split into
+  size-explicit `*Span` cores plus registry wrappers; the `*MatrixInlined`
+  helpers still need the same split for saved matrices.
 - `win32/tests/test_smoke.cpp` - fixed behavior checks and golden values.
 - `win32/CMakeLists.txt` and `CMakePresets.json` - build and test setup.

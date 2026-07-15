@@ -41,7 +41,8 @@ not enough. Record uncertain evidence here before a rename.
 - Weak method groups: `dayResetP`, `dayResetAg`, `dayResetAd`,
   `everyTwoTickZ`, and all `*Inlined` names.
 - Short state fields: `aJ`, `ar`, `at`, `bT`, `bx`, `ca`, `cB`, `ce`, `cH`,
-  `D`, `dc`, `dH`, `dI`, `dk`, `dp`, `eD`, `ee`, `fR`, `gw`, `hx`, and `j`.
+  `D`, `dc`, `dH`, `dI`, `dp`, `eD`, `ee`, `fR`, `gw`, and `hx`.
+  (`dk` and `j` were removed in OWN-02 as dead state.)
 
 ### Recovered in RT-01
 
@@ -90,6 +91,18 @@ not enough. Record uncertain evidence here before a rename.
 Game music rules use one small `MusicOutput` interface. The app owns WinMM
 through `WinMmMusicPlayer`; tests use `SilentMusicOutput` and need no device or
 `winmm` link. This is the only class split needed for music.
+
+## D-008: Save helpers over owned fixed arrays
+
+OWN-02 moved every fixed-size state array to `std::array`, which has no entry in
+the old array-length registry that `midp_arr_len` reads. To keep the save byte
+order exactly, each array save/load helper was split into a size-explicit
+`gc_saveOrLoad*Span(gc, data, len)` core plus a thin registry wrapper for
+still-raw arrays. Templated `std::array` overloads of the `*Inlined` names let
+the save codec `IO_*` macros resolve to the size-explicit path automatically, so
+no macro site changed. Constant tables use direct brace initializers instead of
+`midp_alloc_arr` plus `memcpy`. Uniform matrices use nested `std::array`; the one
+mixed-row table (`offerTypesByEffect`) uses `std::array<std::vector<int8_t>, N>`.
 
 ## D-006: Plain native resources
 
