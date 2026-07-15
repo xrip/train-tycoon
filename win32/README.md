@@ -12,8 +12,8 @@ time, random-number, and MIDI support. Music uses the WinMM MCI sequencer.
 Needs Windows, CMake 3.25 or later, and Visual Studio 2022 C++ build tools.
 
 ```powershell
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-cmake --build build --config Debug
+cmake --preset windows-x64
+cmake --build --preset build-debug
 ```
 
 The program and its resource copy will be under `build/Debug`:
@@ -25,12 +25,16 @@ The program and its resource copy will be under `build/Debug`:
 ## Test
 
 ```powershell
-ctest --test-dir build -C Debug --output-on-failure
+ctest --preset test-debug-fast
+ctest --preset test-debug-full
 ```
 
 The fast tests check random values, resources, record files, save data, route
 finding, and MIDI data. The full tests check all 13 scenario maps, game input,
 and fixed frames.
+
+Use `build-release` and `test-release-full` for the Release gate. The native
+style rules are in `docs/STYLE.md`.
 
 For a short MIDI device test:
 

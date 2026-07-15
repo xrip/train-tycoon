@@ -62,6 +62,13 @@ real MIDI device test is an opt-in `device` label.
 - MSVC AddressSanitizer fast/full passed on 2026-07-15.
 - Debug and Release use the same scenario and frame golden values.
 
+## Stage 1 proof
+
+- All 35 source files build as C++20.
+- First-party targets use `/W4 /permissive- /WX` under MSVC.
+- Preset Debug and Release full tests passed on 2026-07-15.
+- MSVC AddressSanitizer fast/full passed on 2026-07-15.
+
 ## Manual baseline still needed
 
 - boot and menu;

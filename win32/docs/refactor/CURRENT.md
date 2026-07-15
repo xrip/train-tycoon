@@ -2,32 +2,32 @@
 
 ## Item
 
-`CXX-03` - add build/test presets and final C++ style rules.
+`RT-01` - add value types, exact Java random, byte buffer, and input queue.
 
 ## Base
 
-- Commit: the green `CXX-02` strict-warning commit.
+- Commit: the green `CXX-03` Stage 1 exit commit.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Give programmers short, fixed configure/build/test commands and record the
-C-with-Classes rules used for all later work.
+Replace small support-code C shapes with direct C++ value and ownership types
+while keeping every fixed random, input, save, scenario, and frame value.
 
 ## Non-goals
 
-- No source formatting pass.
-- No ownership or model change.
-- Do not add a new package or format tool.
+- Do not move game model fields in this item.
+- Do not change image, resource, record-store, or WinMM ownership yet.
+- Do not add a general template utility.
 
 ## Last proof
 
-`CXX-02`: first-party library, application, and tests build with
-`/W4 /permissive- /WX`. Vendor code and headers are outside that warning gate.
-Debug and Release fast/full tests passed on 2026-07-15.
+Stage 1: preset Debug and Release full tests passed, and the MSVC
+AddressSanitizer full test passed on 2026-07-15. All first-party code is C++20
+and strict-warning clean. The style guide fixes the C-with-Classes limit.
 
 ## Next action
 
-Add `CMakePresets.json` for x64 Debug/Release and fast/full tests. Add one short
-style guide that makes the C-with-Classes limit clear.
+Map `MidpRandom`, `MidpByteArray`, basic value records, and the Win32 input ring
+to their call sites. Add focused tests before changing each old support type.
