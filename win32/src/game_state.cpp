@@ -135,7 +135,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->offerRowIndex = 0;
     gc->duplicateRowState = 0;
     gc->highScoreUploadRequested = false;
-    gc->playerNameCursorMarker = (int8_t*)midp_alloc_arr(sizeof(int8_t), 10);
     gc->routeSlotIndex = 0;
     gc->spriteCycleCursor = 0;
     gc->snapshotLoadedFlag = false;

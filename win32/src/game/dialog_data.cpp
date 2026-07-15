@@ -270,7 +270,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
         case 27:
             if (field == 1) return copy_codes(gc->playerNameCodes);
             if (field == 0) {
-                gc->playerNameCursorMarker = GC_NEW(int8_t, 10);
+                gc->playerNameCursorMarker.fill(0);
                 gc->playerNameCursorMarker[gc->routeSlotIndex] = 28;
                 return copy_codes(gc->playerNameCursorMarker);
             }

@@ -184,7 +184,7 @@ typedef struct GameCanvas {
     int32_t currentScenarioScore;
     bool highScoreUploadRequested;
     std::array<int8_t, 10> playerNameCodes{};
-    int8_t* playerNameCursorMarker;
+    std::array<int8_t, 10> playerNameCursorMarker{};
     int8_t routeSlotIndex;
     int8_t spriteCycleCursor;
     bool snapshotLoadedFlag;
