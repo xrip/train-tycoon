@@ -171,6 +171,14 @@ template <std::size_t N>
 inline void gc_saveOrLoadIntArrayInlined(GameCanvas *gc, std::array<int32_t, N> &a) {
     gc_saveOrLoadIntSpan(gc, a.data(), static_cast<int>(N));
 }
+template <std::size_t Rows, std::size_t Cols>
+inline void gc_saveOrLoadByteMatrixInlined(GameCanvas *gc, std::array<std::array<int8_t, Cols>, Rows> &m) {
+    for (auto &row : m) gc_saveOrLoadByteSpan(gc, row.data(), static_cast<int>(Cols));
+}
+template <std::size_t Rows, std::size_t Cols>
+inline void gc_saveOrLoadShortMatrixInlined(GameCanvas *gc, std::array<std::array<int16_t, Cols>, Rows> &m) {
+    for (auto &row : m) gc_saveOrLoadShortSpan(gc, row.data(), static_cast<int>(Cols));
+}
 void gc_initSaveOrLoad(GameCanvas *gc, int32_t n);
 void gc_writeSaveSnapshot(GameCanvas *gc);
 void gc_persistSnapshotMode0(GameCanvas *gc);

@@ -216,7 +216,7 @@ typedef struct GameCanvas {
     std::array<int8_t, 250> vehicleFlags{};
     std::array<int8_t, 250> serviceVehicleX{};
     std::array<int8_t, 250> serviceVehicleY{};
-    int16_t** serviceResourceStock;
+    std::array<std::array<int16_t, 5>, 250> serviceResourceStock{};
     std::array<int8_t, 250> serviceUnloadFlags{};
     std::array<int8_t, 250> serviceLoadFlags{};
     std::array<int8_t, 500> trainX{};
