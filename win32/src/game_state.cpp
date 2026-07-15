@@ -189,32 +189,22 @@ void gc_fields_init(GameCanvas *gc) {
     gc->trainStateCode = (int32_t*)midp_alloc_arr(sizeof(int32_t), 500);
     gc->trainAiOverride = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
     gc->era = 1;
-    static const int8_t forwardTrackSteps__r0[] = {0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0};
-    static const int8_t forwardTrackSteps__r1[] = {2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2};
-    static const int8_t forwardTrackSteps__r2[] = {4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2};
-    static const int8_t forwardTrackSteps__r3[] = {6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0};
-    static const int8_t forwardTrackSteps__r4[] = {8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0};
-    static const int8_t forwardTrackSteps__r5[] = {10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3};
-    gc->forwardTrackSteps = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 6);
-    gc->forwardTrackSteps[0] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(forwardTrackSteps__r0)/sizeof(int8_t))); memcpy(gc->forwardTrackSteps[0], forwardTrackSteps__r0, sizeof(forwardTrackSteps__r0));
-    gc->forwardTrackSteps[1] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(forwardTrackSteps__r1)/sizeof(int8_t))); memcpy(gc->forwardTrackSteps[1], forwardTrackSteps__r1, sizeof(forwardTrackSteps__r1));
-    gc->forwardTrackSteps[2] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(forwardTrackSteps__r2)/sizeof(int8_t))); memcpy(gc->forwardTrackSteps[2], forwardTrackSteps__r2, sizeof(forwardTrackSteps__r2));
-    gc->forwardTrackSteps[3] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(forwardTrackSteps__r3)/sizeof(int8_t))); memcpy(gc->forwardTrackSteps[3], forwardTrackSteps__r3, sizeof(forwardTrackSteps__r3));
-    gc->forwardTrackSteps[4] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(forwardTrackSteps__r4)/sizeof(int8_t))); memcpy(gc->forwardTrackSteps[4], forwardTrackSteps__r4, sizeof(forwardTrackSteps__r4));
-    gc->forwardTrackSteps[5] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(forwardTrackSteps__r5)/sizeof(int8_t))); memcpy(gc->forwardTrackSteps[5], forwardTrackSteps__r5, sizeof(forwardTrackSteps__r5));
-    static const int8_t reverseTrackSteps__r0[] = {1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1};
-    static const int8_t reverseTrackSteps__r1[] = {3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3};
-    static const int8_t reverseTrackSteps__r2[] = {5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1};
-    static const int8_t reverseTrackSteps__r3[] = {7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3};
-    static const int8_t reverseTrackSteps__r4[] = {9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2};
-    static const int8_t reverseTrackSteps__r5[] = {11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1};
-    gc->reverseTrackSteps = (int8_t**)midp_alloc_arr(sizeof(int8_t*), 6);
-    gc->reverseTrackSteps[0] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(reverseTrackSteps__r0)/sizeof(int8_t))); memcpy(gc->reverseTrackSteps[0], reverseTrackSteps__r0, sizeof(reverseTrackSteps__r0));
-    gc->reverseTrackSteps[1] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(reverseTrackSteps__r1)/sizeof(int8_t))); memcpy(gc->reverseTrackSteps[1], reverseTrackSteps__r1, sizeof(reverseTrackSteps__r1));
-    gc->reverseTrackSteps[2] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(reverseTrackSteps__r2)/sizeof(int8_t))); memcpy(gc->reverseTrackSteps[2], reverseTrackSteps__r2, sizeof(reverseTrackSteps__r2));
-    gc->reverseTrackSteps[3] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(reverseTrackSteps__r3)/sizeof(int8_t))); memcpy(gc->reverseTrackSteps[3], reverseTrackSteps__r3, sizeof(reverseTrackSteps__r3));
-    gc->reverseTrackSteps[4] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(reverseTrackSteps__r4)/sizeof(int8_t))); memcpy(gc->reverseTrackSteps[4], reverseTrackSteps__r4, sizeof(reverseTrackSteps__r4));
-    gc->reverseTrackSteps[5] = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(reverseTrackSteps__r5)/sizeof(int8_t))); memcpy(gc->reverseTrackSteps[5], reverseTrackSteps__r5, sizeof(reverseTrackSteps__r5));
+    gc->forwardTrackSteps = {{
+        {{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
+        {{2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}},
+        {{4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}},
+        {{6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
+        {{8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
+        {{10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}},
+    }};
+    gc->reverseTrackSteps = {{
+        {{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
+        {{3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}},
+        {{5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
+        {{7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}},
+        {{9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}},
+        {{11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
+    }};
     gc->dI = 5;
     static const int16_t trainSpriteDirectionTable__r0[] = {130, 131, 132, 133, 134, 135, 136, 137};
     static const int16_t trainSpriteDirectionTable__r1[] = {140, 141, 142, 143, 144, 145, 146, 147};

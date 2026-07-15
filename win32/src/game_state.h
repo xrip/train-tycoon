@@ -237,8 +237,8 @@ typedef struct GameCanvas {
     int8_t* trainAiOverride;
     int32_t trainAtCursor;
     int32_t era;
-    int8_t** forwardTrackSteps;
-    int8_t** reverseTrackSteps;
+    std::array<std::array<int8_t, 12>, 6> forwardTrackSteps{};
+    std::array<std::array<int8_t, 12>, 6> reverseTrackSteps{};
     int32_t dI;
     int16_t** trainSpriteDirectionTable;
     int8_t* saveBuffer;

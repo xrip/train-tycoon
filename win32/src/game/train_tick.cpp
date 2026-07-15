@@ -375,7 +375,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
                 current_variant = 1;
             }
             current_variant = normalize_track_variant(current_variant);
-            int8_t *step =
+            const std::array<int8_t, 12> &step =
                 gc->forwardTrackSteps[current_variant][0] == gc->trainDir[head]
                 ? gc->forwardTrackSteps[current_variant]
                 : gc->reverseTrackSteps[current_variant];
@@ -386,7 +386,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
                 bool moved = false;
                 int next_track = gc->trackMap[next_x][next_y];
                 int next_variant = normalize_track_variant(gc->tileMap[next_x][next_y] - 70);
-                for (int pair = 2; pair < midp_arr_len(step) / 2; ++pair) {
+                for (int pair = 2; pair < static_cast<int>(step.size()) / 2; ++pair) {
                     if (step[2 * pair] != next_variant) continue;
                     int next_dir = step[2 * pair + 1];
                     if (next_variant == 6) {
