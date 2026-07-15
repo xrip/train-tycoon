@@ -241,21 +241,8 @@ int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t n) {
     return 0;
 }
 
-void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
-    (void)gc; // TODO port: removeTrainFromMapInlined(int n, boolean bl)  L6158-6173
-}
-
 void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
     (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6175-6307
-}
-
-bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: isTrainHeadCarAt(int n, int n2, int n3)  L6309-6317
-    return false;
-}
-
-void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: mergeTrainAt(int n)  L6319-6326
 }
 
 bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
@@ -332,16 +319,8 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     (void)gc; // TODO port: restoreAllMapArrays()  L7022-7049
 }
 
-void gc_computeYearEndMetrics(GameCanvas *gc) {
-    (void)gc; // TODO port: computeYearEndMetrics()  L7056-7069
-}
-
 void gc_newYearNotify(GameCanvas *gc) {
     (void)gc; // TODO port: newYearNotify()  L7071-7164
-}
-
-void gc_archiveOrRecall(GameCanvas *gc) {
-    (void)gc; // TODO port: archiveOrRecall()  L7166-7170
 }
 
 int32_t gc_scanMapForMetric(GameCanvas *gc) {

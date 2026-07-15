@@ -5551,7 +5551,7 @@
    "start": 6158,
    "end": 6173,
    "c_name": "gc_removeTrainFromMapInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawSpriteSingle",
@@ -5571,7 +5571,7 @@
    "start": 6309,
    "end": 6317,
    "c_name": "gc_isTrainHeadCarAt",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "mergeTrainAt",
@@ -5581,7 +5581,7 @@
    "start": 6319,
    "end": 6326,
    "c_name": "gc_mergeTrainAt",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "isAnyTrainCarAt",
@@ -5911,7 +5911,7 @@
    "start": 7056,
    "end": 7069,
    "c_name": "gc_computeYearEndMetrics",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "newYearNotify",
@@ -5931,7 +5931,7 @@
    "start": 7166,
    "end": 7170,
    "c_name": "gc_archiveOrRecall",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "scanMapForMetric",
@@ -6342,7 +6342,7 @@
    "end": 9513,
    "c_name": "gc_update",
    "status": "partial",
-   "note": "boot states + 25 (map-gen) + state 30 control done; core sim helpers + menus TODO"
+   "note": "boot states + 25 + state 30 control done; 6 direct sim helpers + menus TODO"
   },
   {
    "java_name": "renderMap",

@@ -72,7 +72,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **85 / 196 (43%)** — 84 full + 1 partial (`update`).
+- Methods done: **90 / 196 (45%)** — 89 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -101,12 +101,16 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   selecting menu items drives the state transitions (new game → scenario →
   `setState(25)` map-gen, options, etc.).
 - **Biggest remaining gate to gameplay:** replace the direct stubs used by the
-  state-30 branch: `updateTrain`, `mergeTrainAt`, `computeYearEndMetrics`,
-  `everyMonthlyTick`, `everyTwoTickZ`, `pickValidForestTile`, `tickInputOrAi`,
-  and `newYearNotify`. Ten short helpers are now ported in `port/impl/sim_tick.c`:
+  state-30 branch: `updateTrain`, `everyMonthlyTick`, `everyTwoTickZ`,
+  `pickValidForestTile`, `tickInputOrAi`, and `newYearNotify`. Fifteen helpers
+  are now ported in `port/impl/sim_tick.c`, including:
   `dayResetP`, `advanceConstructionTimers`, `maybeAITick`, `dayResetAg`,
   `revenueOrYear`, `everyTwoTick`, `countCarsInTrain`, `maybeAiTakeTurn`,
-  `dayResetAd`, and `postRevenueReset`. Then port the remaining UI-draw methods
+  `dayResetAd`, `postRevenueReset`, `isTrainHeadCarAt`,
+  `removeTrainFromMapInlined`, `mergeTrainAt`, `archiveOrRecall`, and
+  `computeYearEndMetrics`. `removeTrainFromMapInlined` still calls the pending
+  `handleCursorClickInlined`; port it before treating train merge as complete.
+  Then port the remaining UI-draw methods
   (`paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
   `drawBuildMenuCursor/Row`, `q` [372 L], `computeTrainCost`, …).
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
@@ -127,10 +131,11 @@ The map-gen chain and the state-30 control branch are **done**. Selecting
 tick. Core calls are still stubs, so simulation and interaction are incomplete.
 Continue from here:
 
-1. Port the eight direct pending helpers called by state 30, starting with their
-   smallest leaf dependencies: `updateTrain`, `mergeTrainAt`,
-   `computeYearEndMetrics`, `everyMonthlyTick`, `everyTwoTickZ`,
-   `pickValidForestTile`, `tickInputOrAi`, and `newYearNotify`.
+1. Port the six direct pending helpers called by state 30, starting with their
+   smallest leaf dependencies: `updateTrain`, `everyMonthlyTick`,
+   `everyTwoTickZ`, `pickValidForestTile`, `tickInputOrAi`, and `newYearNotify`.
+   Also port `handleCursorClickInlined`, which is needed by the completed merge
+   chain.
 2. The UI-draw methods called from the state-30/40 paint paths:
    `paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
    `drawBuildMenuCursor`, `drawBuildMenuRow`, `drawHeaderBar`, `drawNumber`.
@@ -142,7 +147,7 @@ Continue from here:
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 85 already
+`show NAME` throughout. Each is a mechanical faithful port like the 90 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

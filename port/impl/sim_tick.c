@@ -86,6 +86,43 @@ int32_t gc_countCarsInTrain(GameCanvas *gc, int32_t n) {
     return n != -1 ? gc_countCarsInTrain(gc, gc->nextCar[n]) + 1 : 0;
 }
 
+// boolean isTrainHeadCarAt(int,int,int)
+bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
+    if (n == -1) return false;
+    if (gc_c(gc, gc->trainX[n]) == n2 && gc_c(gc, gc->trainY[n]) == n3)
+        return true;
+    return gc_isTrainHeadCarAt(gc, gc->nextCar[n], n2, n3);
+}
+
+// void removeTrainFromMapInlined(int,boolean)
+void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
+    if (n == -1) return;
+    gc_removeTrainFromMapInlined(gc, gc->nextCar[n], bl);
+    gc->trainFlags[n] = (int8_t)(gc->trainFlags[n] | 0xE0);
+    gc->nextCar[n] = -1;
+    gc->trainEnergyOrCount[n] = 7;
+    if (bl)
+        gc_handleCursorClickInlined(gc, gc_c(gc, gc->trainX[n]),
+                                    gc_c(gc, gc->trainY[n]), false, true);
+    gc->lastViewportCenterX = -1;
+    gc->ready = false;
+    gc->transitionCode = 16;
+    gc_setState(gc, 20);
+}
+
+// void mergeTrainAt(int)
+void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
+    for (int i = 0; i < 500; ++i) {
+        if (n == i || (gc->trainFlags[i] & 0x80) != 128
+            || (gc->trainFlags[i] & 0x40) != 64
+            || !gc_isTrainHeadCarAt(gc, i, gc_c(gc, gc->trainX[n]),
+                                    gc_c(gc, gc->trainY[n])))
+            continue;
+        gc_removeTrainFromMapInlined(gc, i, true);
+        gc_removeTrainFromMapInlined(gc, n, true);
+    }
+}
+
 // void maybeAiTakeTurn()
 void gc_maybeAiTakeTurn(GameCanvas *gc) {
     if (gc->buildMenuMode != 2 && gc->buildMenuMode != 4
@@ -121,4 +158,29 @@ void gc_postRevenueReset(GameCanvas *gc) {
             || gc->trackMap[n2][n] == 68)
             gc->trainAgeOrTimer[i] = 0;
     }
+}
+
+// void archiveOrRecall()
+void gc_archiveOrRecall(GameCanvas *gc) {
+    gc->terrainTotal = gc->loanBalance * gc->interestRate / 1200;
+    gc->decadeEnterpriseTax = gc->totalRevenue * gc->enterpriseTaxPct / 100;
+    gc->xIndicator = gc->totalRevenue - gc->terrainTotal - gc->totalSpent
+                     - gc->aiMoneySpent - gc->fuelCostAccrued - gc->subsidyCost
+                     - gc->decadeEnterpriseTax;
+}
+
+// void computeYearEndMetrics()
+void gc_computeYearEndMetrics(GameCanvas *gc) {
+    gc_archiveOrRecall(gc);
+    gc->yrN[0] = gc->xIndicator;
+    gc->yrCx[0] = gc->totalRevenue;
+    gc->altDecadeOtherXTotal[0] = gc->decadeOtherXTotal + gc->xIndicator;
+    gc->altDecadeRevenueTotal[0] = gc->revenueTotal + gc->totalRevenue;
+    gc->decadeSpentWithCurrent = gc->decadeCostTotal + gc->totalSpent;
+    gc->decadeAiSpentWithCurrent = gc->decadeSpentTotal + gc->aiMoneySpent;
+    gc->decadeFuelWithCurrent = gc->decadeFuelCost + gc->fuelCostAccrued;
+    gc->decadeSubsidyWithCurrent = gc->decadeSubsidyTotal + gc->subsidyCost;
+    gc->decadeRevenueWithCurrent = gc->decadeRevenueTotal + gc->totalRevenue;
+    gc->decadeXWithCurrent = gc->decadeXTotal + gc->xIndicator;
+    gc->decadeEnterpriseWithCurrent = gc->decadeEnterpriseTotal + gc->decadeEnterpriseTax;
 }
