@@ -276,20 +276,7 @@ void gc_fields_init(GameCanvas *gc) {
         {{0, 0}},
         {{8, 100}},
     }};
-    gc->menuRowType = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->placeTrainDay = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->menuRowParamA = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->placeTrainMonth = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->menuRowParamB = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->placeTrainYear = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->menuRowParamC = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->menuRowCost = (int32_t*)midp_alloc_arr(sizeof(int32_t), 6);
-    gc->menuRowValue = (int32_t*)midp_alloc_arr(sizeof(int32_t), 6);
-    gc->menuRowAltType = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->menuRowEra = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
-    gc->menuRowRevenue = (int32_t*)midp_alloc_arr(sizeof(int32_t), 6);
     gc->offerGenerationCount = 0;
-    gc->offerEffectNextCount = (int16_t*)midp_alloc_arr(sizeof(int16_t), 12);
     gc->lastOfferDateCode = 0;
     gc->menuRowEnabledCount = 0;
     gc->lifetimeTrainRevenue = 0;
