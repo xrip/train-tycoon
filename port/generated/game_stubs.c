@@ -196,10 +196,6 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
     return false;
 }
 
-void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
-    (void)gc; // TODO port: tickInputOrAi(boolean bl)  L5618-5758
-}
-
 int32_t gc_spawnTrainCar(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)gc; // TODO port: spawnTrainCar(int n, int n2)  L5760-5783
     return 0;

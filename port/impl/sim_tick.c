@@ -526,3 +526,116 @@ void gc_newYearNotify(GameCanvas *gc) {
         gc_setState(gc, 20);
     }
 }
+
+// void tickInputOrAi(boolean)
+void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
+    for (int i = 0; i < 250; ++i) {
+        if ((gc->vehicleFlags[i] & 0x80) != 128) continue;
+        int n3 = gc_c(gc, gc->wagonAJ[i]);
+        int n4 = gc_c(gc, gc->wagonEQ[i]);
+        int n5 = n3 - 3;
+        int n6 = n4 - 3;
+        int n7 = n3 + 3;
+        int n8 = n4 + 3;
+        if (n5 < 0) n5 = 0;
+        if (n6 < 0) n6 = 0;
+        if (n7 >= gc->mapWidth) n7 = gc->mapWidth - 1;
+        if (n8 >= gc->mapHeight) n8 = gc->mapHeight - 1;
+        int n9 = 0;
+        bool seenZones[64] = {false};
+        bool seenIndustry1[64] = {false};
+        bool seenIndustry2[64] = {false};
+        bool seenIndustry3[64] = {false};
+        for (int n2 = n5; n2 <= n7; ++n2) {
+            for (int n = n6; n <= n8; ++n) {
+                int tile = gc->tileMap[n2][n];
+                int n11 = gc->trackMap[n2][n] & 0x3F;
+                if (tile >= 34 && tile <= 40) {
+                    if ((gc->trackMap[n2][n] & 0xC0) == 128 && !bl
+                        && !seenZones[n11]) {
+                        seenZones[n11] = true;
+                        if ((gc->trainFlagBits[i] & 1) == 1) {
+                            int add = gc->zonePopulation[n11]
+                                      * (gc->constructionTimers[n11] + 10
+                                         + gc->zonePopulation[n11] / 10
+                                         + midp_random_next_int(&gc->rng) % 40) / 170;
+                            gc->trainOptionSlots[i][0] =
+                                (int16_t)(gc->trainOptionSlots[i][0] + add);
+                        }
+                        if ((gc->trainFlagBits[i] & 0x10) == 0x10) {
+                            int add = gc->zonePopulation[n11] / 2
+                                      * (gc->constructionTimers[n11] + 10
+                                         + gc->zonePopulation[n11] / 10
+                                         + abs(midp_random_next_int(&gc->rng) % 40)) / 170;
+                            gc->trainOptionSlots[i][4] =
+                                (int16_t)(gc->trainOptionSlots[i][4] + add);
+                        }
+                        gc->zonePopulation[n11] =
+                            (int16_t)(gc->zonePopulation[n11]
+                                      + midp_random_next_int(&gc->rng) % 2);
+                    }
+                    ++n9;
+                }
+                if (tile >= 65 && tile <= 68 && !bl
+                    && (gc->trackMap[n2][n] & 0xC0) == 192
+                    && !seenIndustry1[n11]) {
+                    seenIndustry1[n11] = true;
+                    int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
+                    if (n10 == 0) n10 = 1;
+                    gc->trainOptionSlots[i][1] =
+                        (int16_t)(gc->trainOptionSlots[i][1] + n10);
+                    gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
+                    gc->wagonServiceCounter[i] =
+                        (int8_t)(gc->wagonServiceCounter[i] | 4);
+                }
+                if (tile >= 53 && tile <= 55 && !bl
+                    && (gc->trackMap[n2][n] & 0xC0) == 192
+                    && !seenIndustry2[n11]) {
+                    seenIndustry2[n11] = true;
+                    int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
+                    if (n10 == 0) n10 = 1;
+                    gc->trainOptionSlots[i][2] =
+                        (int16_t)(gc->trainOptionSlots[i][2] + n10);
+                    gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
+                    gc->wagonServiceCounter[i] =
+                        (int8_t)(gc->wagonServiceCounter[i] | 8);
+                }
+                if (tile >= 59 && tile <= 61 && !bl
+                    && (gc->trackMap[n2][n] & 0xC0) == 192
+                    && !seenIndustry3[n11]) {
+                    seenIndustry3[n11] = true;
+                    int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
+                    if (n10 == 0) n10 = 1;
+                    gc->trainOptionSlots[i][3] =
+                        (int16_t)(gc->trainOptionSlots[i][3] + n10);
+                    gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
+                    gc->wagonServiceCounter[i] =
+                        (int8_t)(gc->wagonServiceCounter[i] | 2);
+                }
+                if (tile >= 50 && tile <= 52)
+                    gc->trainFlagBits[i] = (int8_t)(gc->trainFlagBits[i] | 4);
+                if (tile >= 56 && tile <= 58)
+                    gc->trainFlagBits[i] = (int8_t)(gc->trainFlagBits[i] | 8);
+                if (tile >= 62 && tile <= 64)
+                    gc->trainFlagBits[i] = (int8_t)(gc->trainFlagBits[i] | 2);
+            }
+        }
+        if (n9 / 3 > 0) {
+            gc->trainFlagBits[i] = (int8_t)(gc->trainFlagBits[i] | 1);
+            gc->wagonServiceCounter[i] = (int8_t)(gc->wagonServiceCounter[i] | 1);
+        }
+        if (n9 / 7 > 0) {
+            gc->trainFlagBits[i] = (int8_t)(gc->trainFlagBits[i] | 0x10);
+            gc->wagonServiceCounter[i] =
+                (int8_t)(gc->wagonServiceCounter[i] | 0x10);
+        }
+        bool large = (gc->vehicleFlags[i] & 0x20) == 0x20;
+        for (int n = 0; n < 5; ++n) {
+            int limit;
+            if (large) limit = n == 0 ? 250 : (n == 4 ? 325 : 450);
+            else limit = n == 0 ? 100 : (n == 4 ? 150 : 200);
+            if (gc->trainOptionSlots[i][n] > limit)
+                gc->trainOptionSlots[i][n] = (int16_t)limit;
+        }
+    }
+}

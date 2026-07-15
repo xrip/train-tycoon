@@ -5451,7 +5451,7 @@
    "start": 5618,
    "end": 5758,
    "c_name": "gc_tickInputOrAi",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "spawnTrainCar",
@@ -6342,7 +6342,7 @@
    "end": 9513,
    "c_name": "gc_update",
    "status": "partial",
-   "note": "boot states + 25 + state 30 control done; 3 direct sim helpers + menus TODO"
+   "note": "boot states + 25 + state 30 control done; updateTrain + everyMonthlyTick + menus TODO"
   },
   {
    "java_name": "renderMap",
