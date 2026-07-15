@@ -1,0 +1,6378 @@
+{
+ "fields": [
+  {
+   "java_name": "midlet",
+   "java_type": "GameMIDlet",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 45,
+   "c_name": "midlet",
+   "c_type": "void*"
+  },
+  {
+   "java_name": "stopRequested",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 46,
+   "c_name": "stopRequested",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "at",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": true,
+   "line": 47,
+   "c_name": "at",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cB",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": true,
+   "line": 48,
+   "c_name": "cB",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ar",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": true,
+   "line": 49,
+   "c_name": "ar",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "D",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": true,
+   "line": 50,
+   "c_name": "D",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapWidth",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 51,
+   "c_name": "mapWidth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapHeight",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 52,
+   "c_name": "mapHeight",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapHalfWidth",
+   "java_type": "int",
+   "init": "(this.mapWidth - 1) * 8",
+   "static": false,
+   "final": false,
+   "line": 53,
+   "c_name": "mapHalfWidth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapScreenWidth",
+   "java_type": "int",
+   "init": "(this.mapWidth + this.mapHeight) * 16",
+   "static": false,
+   "final": false,
+   "line": 54,
+   "c_name": "mapScreenWidth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapScreenHeight",
+   "java_type": "int",
+   "init": "(this.mapWidth + this.mapHeight) * 8",
+   "static": false,
+   "final": false,
+   "line": 55,
+   "c_name": "mapScreenHeight",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportHalfWidth",
+   "java_type": "int",
+   "init": "this.mapScreenWidth / 2",
+   "static": false,
+   "final": false,
+   "line": 56,
+   "c_name": "viewportHalfWidth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportHalfHeight",
+   "java_type": "int",
+   "init": "this.mapScreenHeight / 2",
+   "static": false,
+   "final": false,
+   "line": 57,
+   "c_name": "viewportHalfHeight",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dQ",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 58,
+   "c_name": "dQ",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "hf",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 59,
+   "c_name": "hf",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "archiveOrRecallMethod",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 60,
+   "c_name": "archiveOrRecallMethod",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapGenColumns",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 61,
+   "c_name": "mapGenColumns",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapGenRows",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 62,
+   "c_name": "mapGenRows",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cK",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 63,
+   "c_name": "cK",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "terrainFeatureStage7Count",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 64,
+   "c_name": "terrainFeatureStage7Count",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "terrainFeatureStage6Count",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 65,
+   "c_name": "terrainFeatureStage6Count",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "weightAccel",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 66,
+   "c_name": "weightAccel",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "weightAccel2",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 67,
+   "c_name": "weightAccel2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "weightAccel3",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 68,
+   "c_name": "weightAccel3",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "weightAccel4",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 69,
+   "c_name": "weightAccel4",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "moneyBaseA",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 70,
+   "c_name": "moneyBaseA",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "moneyBaseB",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 71,
+   "c_name": "moneyBaseB",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "baseTrainSpeed",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 72,
+   "c_name": "baseTrainSpeed",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "accel1",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 73,
+   "c_name": "accel1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "brake1",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 74,
+   "c_name": "brake1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "baseTrainSpeed2",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 75,
+   "c_name": "baseTrainSpeed2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "accel2",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 76,
+   "c_name": "accel2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costPower",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 77,
+   "c_name": "costPower",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costStruct",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 78,
+   "c_name": "costStruct",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costOverhead",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 79,
+   "c_name": "costOverhead",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costMaintenance",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 80,
+   "c_name": "costMaintenance",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costCrew",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 81,
+   "c_name": "costCrew",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gWagonCost",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 82,
+   "c_name": "gWagonCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gWagonCost2",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 83,
+   "c_name": "gWagonCost2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gWagonCost3",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 84,
+   "c_name": "gWagonCost3",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gWagonCost4",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 85,
+   "c_name": "gWagonCost4",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gWagonCost5",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 86,
+   "c_name": "gWagonCost5",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gWagonCost6",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 87,
+   "c_name": "gWagonCost6",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costGroupC1",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 88,
+   "c_name": "costGroupC1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costGroupC2",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 89,
+   "c_name": "costGroupC2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costGroupC3",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 90,
+   "c_name": "costGroupC3",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "costGroupC4",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 91,
+   "c_name": "costGroupC4",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gameThread",
+   "java_type": "Thread",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 92,
+   "c_name": "gameThread",
+   "c_type": "void*"
+  },
+  {
+   "java_name": "simSpeed",
+   "java_type": "int",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 93,
+   "c_name": "simSpeed",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "frameStartTime",
+   "java_type": "long",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 94,
+   "c_name": "frameStartTime",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "sleepStart",
+   "java_type": "long",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 95,
+   "c_name": "sleepStart",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "sleepMillis",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 96,
+   "c_name": "sleepMillis",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "frameCount",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 97,
+   "c_name": "frameCount",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "frameIndex",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 98,
+   "c_name": "frameIndex",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "inputPending",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 99,
+   "c_name": "inputPending",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "pauseFlag",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 100,
+   "c_name": "pauseFlag",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "paused",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 101,
+   "c_name": "paused",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "frameTime",
+   "java_type": "long",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 102,
+   "c_name": "frameTime",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "ce",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 103,
+   "c_name": "ce",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "bT",
+   "java_type": "long",
+   "init": "System.currentTimeMillis()",
+   "static": false,
+   "final": false,
+   "line": 104,
+   "c_name": "bT",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "keyRepeatDelay",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 105,
+   "c_name": "keyRepeatDelay",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "heldKey",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 106,
+   "c_name": "heldKey",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "displayInitialized",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 107,
+   "c_name": "displayInitialized",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "inputSubState",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 108,
+   "c_name": "inputSubState",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "currentKey",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 109,
+   "c_name": "currentKey",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ee",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 110,
+   "c_name": "ee",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "dp",
+   "java_type": "int",
+   "init": "255",
+   "static": false,
+   "final": false,
+   "line": 111,
+   "c_name": "dp",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "screenWidth",
+   "java_type": "int",
+   "init": "1",
+   "static": true,
+   "final": false,
+   "line": 112,
+   "c_name": "screenWidth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "hs",
+   "java_type": "int",
+   "init": "1",
+   "static": true,
+   "final": false,
+   "line": 113,
+   "c_name": "hs",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "eN",
+   "java_type": "int",
+   "init": "hs - 30",
+   "static": true,
+   "final": false,
+   "line": 114,
+   "c_name": "eN",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fX",
+   "java_type": "int",
+   "init": "hs - 15",
+   "static": true,
+   "final": false,
+   "line": 115,
+   "c_name": "fX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "spriteStream",
+   "java_type": "XorResourceInput",
+   "init": "null",
+   "static": false,
+   "final": false,
+   "line": 116,
+   "c_name": "spriteStream",
+   "c_type": "MidpResource*"
+  },
+  {
+   "java_name": "ca",
+   "java_type": "Image[]",
+   "init": "new Image[6]",
+   "static": false,
+   "final": false,
+   "line": 117,
+   "c_name": "ca",
+   "c_type": "MidpImage**"
+  },
+  {
+   "java_name": "spriteOffsetTable",
+   "java_type": "short[]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 118,
+   "c_name": "spriteOffsetTable",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "spriteData",
+   "java_type": "byte[]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 119,
+   "c_name": "spriteData",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "cursorScale",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 120,
+   "c_name": "cursorScale",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cursorDragY",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 121,
+   "c_name": "cursorDragY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cursorSelectY",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 122,
+   "c_name": "cursorSelectY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cursorSelectX",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 123,
+   "c_name": "cursorSelectX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cursorOverUI",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 124,
+   "c_name": "cursorOverUI",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "cursorAllowZoomOut",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 125,
+   "c_name": "cursorAllowZoomOut",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "cursorDragX",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 126,
+   "c_name": "cursorDragX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapRedrawPending",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 127,
+   "c_name": "mapRedrawPending",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "bC",
+   "java_type": "boolean",
+   "init": "true",
+   "static": false,
+   "final": false,
+   "line": 128,
+   "c_name": "bC",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "pauseMenuOpen",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 129,
+   "c_name": "pauseMenuOpen",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "dialogContentHeight",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 130,
+   "c_name": "dialogContentHeight",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "needsRepaint",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 131,
+   "c_name": "needsRepaint",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "clipX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 132,
+   "c_name": "clipX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "clipY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 133,
+   "c_name": "clipY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "clipWidth",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 134,
+   "c_name": "clipWidth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "clipHeight",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 135,
+   "c_name": "clipHeight",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "currentSpriteId",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 136,
+   "c_name": "currentSpriteId",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "lastRenderedSpriteId",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 137,
+   "c_name": "lastRenderedSpriteId",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "spriteJustChanged",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 138,
+   "c_name": "spriteJustChanged",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tileElevation",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 139,
+   "c_name": "tileElevation",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "heightMap",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 140,
+   "c_name": "heightMap",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "terrainSmoothCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 141,
+   "c_name": "terrainSmoothCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "initialIndustryPlaced",
+   "java_type": "boolean",
+   "init": "true",
+   "static": false,
+   "final": false,
+   "line": 142,
+   "c_name": "initialIndustryPlaced",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "terrainEditBuffer",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 143,
+   "c_name": "terrainEditBuffer",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "selectionStartX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 144,
+   "c_name": "selectionStartX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "selectionStartY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 145,
+   "c_name": "selectionStartY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "trackBuildInProgress",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 146,
+   "c_name": "trackBuildInProgress",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "mapGenStage",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 147,
+   "c_name": "mapGenStage",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tilesGeneratedInStage",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 148,
+   "c_name": "tilesGeneratedInStage",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "totalTilesToGenerate",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 149,
+   "c_name": "totalTilesToGenerate",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapGenTilesDone",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 150,
+   "c_name": "mapGenTilesDone",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportBaseX",
+   "java_type": "int",
+   "init": "this.viewportHalfWidth",
+   "static": false,
+   "final": false,
+   "line": 151,
+   "c_name": "viewportBaseX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportBaseY",
+   "java_type": "int",
+   "init": "this.viewportHalfHeight",
+   "static": false,
+   "final": false,
+   "line": 152,
+   "c_name": "viewportBaseY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapScaleX",
+   "java_type": "int",
+   "init": "this.viewportHalfWidth * 2",
+   "static": false,
+   "final": false,
+   "line": 153,
+   "c_name": "mapScaleX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "mapScaleY",
+   "java_type": "int",
+   "init": "this.viewportHalfHeight * 2",
+   "static": false,
+   "final": false,
+   "line": 154,
+   "c_name": "mapScaleY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "keySubState",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 155,
+   "c_name": "keySubState",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "lastKeyCode",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 156,
+   "c_name": "lastKeyCode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "hh",
+   "java_type": "int",
+   "init": "3",
+   "static": false,
+   "final": false,
+   "line": 157,
+   "c_name": "hh",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "trackStartX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 158,
+   "c_name": "trackStartX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "trackStartY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 159,
+   "c_name": "trackStartY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "trackStepX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 160,
+   "c_name": "trackStepX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "trackStepY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 161,
+   "c_name": "trackStepY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "buildMenuIndex",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 162,
+   "c_name": "buildMenuIndex",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "selectionTileX",
+   "java_type": "int[]",
+   "init": "new int[4]",
+   "static": false,
+   "final": false,
+   "line": 163,
+   "c_name": "selectionTileX",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "selectionTileY",
+   "java_type": "int[]",
+   "init": "new int[4]",
+   "static": false,
+   "final": false,
+   "line": 164,
+   "c_name": "selectionTileY",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "cursorScreenX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 165,
+   "c_name": "cursorScreenX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cursorScreenY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 166,
+   "c_name": "cursorScreenY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "swapMapX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 167,
+   "c_name": "swapMapX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "swapMapY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 168,
+   "c_name": "swapMapY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tileCursorX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 169,
+   "c_name": "tileCursorX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tileCursorY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 170,
+   "c_name": "tileCursorY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "vehicleMenuSelectIndex",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 171,
+   "c_name": "vehicleMenuSelectIndex",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "trainMenuSelectIndex",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 172,
+   "c_name": "trainMenuSelectIndex",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "blockBuildMenu",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 173,
+   "c_name": "blockBuildMenu",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "backgroundCost",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 174,
+   "c_name": "backgroundCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ck",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 175,
+   "c_name": "ck",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "menuDirty",
+   "java_type": "boolean",
+   "init": "true",
+   "static": false,
+   "final": false,
+   "line": 176,
+   "c_name": "menuDirty",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "buildMenuMode",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 177,
+   "c_name": "buildMenuMode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gj",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 178,
+   "c_name": "gj",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "buildMenuItems",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 179,
+   "c_name": "buildMenuItems",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "buildMenuResultCodes",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 180,
+   "c_name": "buildMenuResultCodes",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "menuItemCode",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 181,
+   "c_name": "menuItemCode",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "menuTextIndex",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 182,
+   "c_name": "menuTextIndex",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "menuTransitionCode",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 183,
+   "c_name": "menuTransitionCode",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "menuRowEnabled",
+   "java_type": "boolean[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 184,
+   "c_name": "menuRowEnabled",
+   "c_type": "bool**"
+  },
+  {
+   "java_name": "buildMenuItemCursor",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 185,
+   "c_name": "buildMenuItemCursor",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "buildMenuModeIndex",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 186,
+   "c_name": "buildMenuModeIndex",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "buildMenuItemCode",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 187,
+   "c_name": "buildMenuItemCode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "scenarioBits",
+   "java_type": "byte",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 188,
+   "c_name": "scenarioBits",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "confirmToggle",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 189,
+   "c_name": "confirmToggle",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "moneyHistory",
+   "java_type": "int[]",
+   "init": "new int[3]",
+   "static": false,
+   "final": false,
+   "line": 190,
+   "c_name": "moneyHistory",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "moneyTickerFrames",
+   "java_type": "byte[]",
+   "init": "new byte[3]",
+   "static": false,
+   "final": false,
+   "line": 191,
+   "c_name": "moneyTickerFrames",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "confirmCounter",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 192,
+   "c_name": "confirmCounter",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "confirmTargetState",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 193,
+   "c_name": "confirmTargetState",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "flagsA",
+   "java_type": "boolean",
+   "init": "true",
+   "static": false,
+   "final": false,
+   "line": 194,
+   "c_name": "flagsA",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "junctionDirCursor",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 195,
+   "c_name": "junctionDirCursor",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "numSelectedTrains",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 196,
+   "c_name": "numSelectedTrains",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "constructionTimers",
+   "java_type": "byte[]",
+   "init": "new byte[64]",
+   "static": false,
+   "final": false,
+   "line": 197,
+   "c_name": "constructionTimers",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "zonePopulation",
+   "java_type": "short[]",
+   "init": "new short[64]",
+   "static": false,
+   "final": false,
+   "line": 198,
+   "c_name": "zonePopulation",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "trainSelectionIndex",
+   "java_type": "short[]",
+   "init": "new short[64]",
+   "static": false,
+   "final": false,
+   "line": 199,
+   "c_name": "trainSelectionIndex",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "trainSelectionY",
+   "java_type": "short[]",
+   "init": "new short[64]",
+   "static": false,
+   "final": false,
+   "line": 200,
+   "c_name": "trainSelectionY",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "trainSelectionX",
+   "java_type": "short[]",
+   "init": "new short[64]",
+   "static": false,
+   "final": false,
+   "line": 201,
+   "c_name": "trainSelectionX",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "stationDirCursor",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 202,
+   "c_name": "stationDirCursor",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "cityListIndex",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 203,
+   "c_name": "cityListIndex",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "stationDirectionCode",
+   "java_type": "byte[]",
+   "init": "new byte[48]",
+   "static": false,
+   "final": false,
+   "line": 204,
+   "c_name": "stationDirectionCode",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "cityPopulation",
+   "java_type": "byte[]",
+   "init": "new byte[48]",
+   "static": false,
+   "final": false,
+   "line": 205,
+   "c_name": "cityPopulation",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "cityIndex",
+   "java_type": "byte[]",
+   "init": "new byte[48]",
+   "static": false,
+   "final": false,
+   "line": 206,
+   "c_name": "cityIndex",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "pendingTransitionCode",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 207,
+   "c_name": "pendingTransitionCode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "discountApplied",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 208,
+   "c_name": "discountApplied",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "baseTrainCostSnapshot",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 209,
+   "c_name": "baseTrainCostSnapshot",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "scenarioMilestone",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 210,
+   "c_name": "scenarioMilestone",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "difficultyA",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 211,
+   "c_name": "difficultyA",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "difficultySlot",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 212,
+   "c_name": "difficultySlot",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "difficultyB",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 213,
+   "c_name": "difficultyB",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "difficultyC",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 214,
+   "c_name": "difficultyC",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "buildMenuIndex",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 215,
+   "dup_of": "buildMenuIndex",
+   "c_name": "buildMenuIndex_2",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "duplicateRowState",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 216,
+   "c_name": "duplicateRowState",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "activeScenario",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 217,
+   "c_name": "activeScenario",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 218,
+   "c_name": "fY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dR",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 219,
+   "c_name": "dR",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gJ",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 220,
+   "c_name": "gJ",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ad",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 221,
+   "c_name": "ad",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "bE",
+   "java_type": "byte[]",
+   "init": "new byte[10]",
+   "static": false,
+   "final": false,
+   "line": 222,
+   "c_name": "bE",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "cD",
+   "java_type": "byte[]",
+   "init": "new byte[10]",
+   "static": false,
+   "final": false,
+   "line": 223,
+   "c_name": "cD",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "routeSlotIndex",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 224,
+   "c_name": "routeSlotIndex",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "spriteCycleCursor",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 225,
+   "c_name": "spriteCycleCursor",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "snapshotLoadedFlag",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 226,
+   "c_name": "snapshotLoadedFlag",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "cH",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 227,
+   "c_name": "cH",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "aiEnabled",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 228,
+   "c_name": "aiEnabled",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "screenParam",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 229,
+   "c_name": "screenParam",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "pathDistanceGrid",
+   "java_type": "short[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 230,
+   "c_name": "pathDistanceGrid",
+   "c_type": "int16_t**"
+  },
+  {
+   "java_name": "placementX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 231,
+   "c_name": "placementX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "placementY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 232,
+   "c_name": "placementY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "demolishX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 233,
+   "c_name": "demolishX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "demolishY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 234,
+   "c_name": "demolishY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fl",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 235,
+   "c_name": "fl",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dX",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 236,
+   "c_name": "dX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gO",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 237,
+   "c_name": "gO",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ed",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 238,
+   "c_name": "ed",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "bW",
+   "java_type": "byte",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 239,
+   "c_name": "bW",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "df",
+   "java_type": "byte",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 240,
+   "c_name": "df",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "selectionCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 241,
+   "c_name": "selectionCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "buildCancelled",
+   "java_type": "boolean",
+   "init": "true",
+   "static": false,
+   "final": false,
+   "line": 242,
+   "c_name": "buildCancelled",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "trackTileCount",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 243,
+   "c_name": "trackTileCount",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dk",
+   "java_type": "int[]",
+   "init": "new int[]{-1, 1, 0, 0, -1, 1, 0}",
+   "static": false,
+   "final": false,
+   "line": 244,
+   "c_name": "dk",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "j",
+   "java_type": "int[]",
+   "init": "new int[]{0, 0, -1, 1, 0, 0, -1}",
+   "static": false,
+   "final": false,
+   "line": 245,
+   "c_name": "j",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "aiWagonsLastSeen",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 246,
+   "c_name": "aiWagonsLastSeen",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "wagonType",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 247,
+   "c_name": "wagonType",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "wagonDiscountType",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 248,
+   "c_name": "wagonDiscountType",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "wagonOptionSlots",
+   "java_type": "int[]",
+   "init": "new int[5]",
+   "static": false,
+   "final": false,
+   "line": 249,
+   "c_name": "wagonOptionSlots",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "wagonCountMatch",
+   "java_type": "int[]",
+   "init": "new int[5]",
+   "static": false,
+   "final": false,
+   "line": 250,
+   "c_name": "wagonCountMatch",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "unitCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 251,
+   "c_name": "unitCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "currentTrainCostSnapshot",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 252,
+   "c_name": "currentTrainCostSnapshot",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "difficultyPct",
+   "java_type": "int",
+   "init": "100",
+   "static": false,
+   "final": false,
+   "line": 253,
+   "c_name": "difficultyPct",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "vehicleFlags",
+   "java_type": "byte[]",
+   "init": "new byte[250]",
+   "static": false,
+   "final": false,
+   "line": 254,
+   "c_name": "vehicleFlags",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "wagonAJ",
+   "java_type": "byte[]",
+   "init": "new byte[250]",
+   "static": false,
+   "final": false,
+   "line": 255,
+   "c_name": "wagonAJ",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "wagonEQ",
+   "java_type": "byte[]",
+   "init": "new byte[250]",
+   "static": false,
+   "final": false,
+   "line": 256,
+   "c_name": "wagonEQ",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainOptionSlots",
+   "java_type": "short[][]",
+   "init": "new short[250][5]",
+   "static": false,
+   "final": false,
+   "line": 257,
+   "c_name": "trainOptionSlots",
+   "c_type": "int16_t**"
+  },
+  {
+   "java_name": "trainFlagBits",
+   "java_type": "byte[]",
+   "init": "new byte[250]",
+   "static": false,
+   "final": false,
+   "line": 258,
+   "c_name": "trainFlagBits",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "wagonServiceCounter",
+   "java_type": "byte[]",
+   "init": "new byte[250]",
+   "static": false,
+   "final": false,
+   "line": 259,
+   "c_name": "wagonServiceCounter",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainX",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 260,
+   "c_name": "trainX",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainY",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 261,
+   "c_name": "trainY",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainDir",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 262,
+   "c_name": "trainDir",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainPhase",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 263,
+   "c_name": "trainPhase",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainFlags",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 264,
+   "c_name": "trainFlags",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainEraOrStage",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 265,
+   "c_name": "trainEraOrStage",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainAgeOrTimer",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 266,
+   "c_name": "trainAgeOrTimer",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "wagonEnergyRemaining",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 267,
+   "c_name": "wagonEnergyRemaining",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainEnergyOrCount",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 268,
+   "c_name": "trainEnergyOrCount",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "wagonIorHost",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 269,
+   "c_name": "wagonIorHost",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainServiceCounter",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 270,
+   "c_name": "trainServiceCounter",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "nextCar",
+   "java_type": "short[]",
+   "init": "new short[500]",
+   "static": false,
+   "final": false,
+   "line": 271,
+   "c_name": "nextCar",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "trainStateCode",
+   "java_type": "int[]",
+   "init": "new int[500]",
+   "static": false,
+   "final": false,
+   "line": 272,
+   "c_name": "trainStateCode",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "trainAiOverride",
+   "java_type": "byte[]",
+   "init": "new byte[500]",
+   "static": false,
+   "final": false,
+   "line": 273,
+   "c_name": "trainAiOverride",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "trainAtCursor",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 274,
+   "c_name": "trainAtCursor",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "era",
+   "java_type": "int",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 275,
+   "c_name": "era",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "eR",
+   "java_type": "byte[][]",
+   "init": "new byte[][]{{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}}",
+   "static": false,
+   "final": false,
+   "line": 276,
+   "c_name": "eR",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "aH",
+   "java_type": "byte[][]",
+   "init": "new byte[][]{{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}}",
+   "static": false,
+   "final": false,
+   "line": 277,
+   "c_name": "aH",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "dI",
+   "java_type": "int",
+   "init": "5",
+   "static": false,
+   "final": false,
+   "line": 278,
+   "c_name": "dI",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cs",
+   "java_type": "short[][]",
+   "init": "new short[][]{{130, 131, 132, 133, 134, 135, 136, 137}, {140, 141, 142, 143, 144, 145, 146, 147}, {160, 161, 162, 163, 160, 161, 162, 163}, {165, 166, 167, 168, 165, 166, 167, 168}, {170, 171, 172, 173, 170, 171, 172, 173}, {175, 176, 177, 178, 175, 176, 177, 178}, {180, 181, 182, 183, 180, 181, 182, 183}, {185, 186, 187, 188, 185, 186, 187, 188}}",
+   "static": false,
+   "final": false,
+   "line": 279,
+   "c_name": "cs",
+   "c_type": "int16_t**"
+  },
+  {
+   "java_name": "saveBuffer",
+   "java_type": "byte[]",
+   "init": "null",
+   "static": false,
+   "final": false,
+   "line": 280,
+   "c_name": "saveBuffer",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "saveReadOffset",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 281,
+   "c_name": "saveReadOffset",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "saveSlot",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 282,
+   "c_name": "saveSlot",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "savePendingMode",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 283,
+   "c_name": "savePendingMode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "snapshotSize",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 284,
+   "c_name": "snapshotSize",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "snapshotLoaded",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 285,
+   "c_name": "snapshotLoaded",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "bytesUncompressed",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 286,
+   "c_name": "bytesUncompressed",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "bytesCompressed",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 287,
+   "c_name": "bytesCompressed",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "trainRevenue",
+   "java_type": "int[]",
+   "init": "new int[500]",
+   "static": false,
+   "final": false,
+   "line": 288,
+   "c_name": "trainRevenue",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "prevTrainRevenue",
+   "java_type": "int[]",
+   "init": "new int[500]",
+   "static": false,
+   "final": false,
+   "line": 289,
+   "c_name": "prevTrainRevenue",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "stationRevenue",
+   "java_type": "short[]",
+   "init": "new short[48]",
+   "static": false,
+   "final": false,
+   "line": 290,
+   "c_name": "stationRevenue",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "prevStationRevenue",
+   "java_type": "short[]",
+   "init": "new short[48]",
+   "static": false,
+   "final": false,
+   "line": 291,
+   "c_name": "prevStationRevenue",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "compareToPrevious",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 292,
+   "c_name": "compareToPrevious",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "yearGraphMode",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 293,
+   "c_name": "yearGraphMode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "yearGraphAlt",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 294,
+   "c_name": "yearGraphAlt",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "monthRolloverFlag",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 295,
+   "c_name": "monthRolloverFlag",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "totalSpent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 296,
+   "c_name": "totalSpent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "aiMoneySpent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 297,
+   "c_name": "aiMoneySpent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fuelCostAccrued",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 298,
+   "c_name": "fuelCostAccrued",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "subsidyCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 299,
+   "c_name": "subsidyCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "totalRevenue",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 300,
+   "c_name": "totalRevenue",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "terrainTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 301,
+   "c_name": "terrainTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeEnterpriseTax",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 302,
+   "c_name": "decadeEnterpriseTax",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "xIndicator",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 303,
+   "c_name": "xIndicator",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeSpentWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 304,
+   "c_name": "decadeSpentWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeAiSpentWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 305,
+   "c_name": "decadeAiSpentWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeFuelWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 306,
+   "c_name": "decadeFuelWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeSubsidyWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 307,
+   "c_name": "decadeSubsidyWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeRevenueWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 308,
+   "c_name": "decadeRevenueWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gs",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 309,
+   "c_name": "gs",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeEnterpriseWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 310,
+   "c_name": "decadeEnterpriseWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeXWithCurrent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 311,
+   "c_name": "decadeXWithCurrent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevTotalSpent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 312,
+   "c_name": "prevTotalSpent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevAiMoneySpent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 313,
+   "c_name": "prevAiMoneySpent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevFuelCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 314,
+   "c_name": "prevFuelCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevSubsidyCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 315,
+   "c_name": "prevSubsidyCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevTotalRevenue",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 316,
+   "c_name": "prevTotalRevenue",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevTerrainTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 317,
+   "c_name": "prevTerrainTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevEnterpriseTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 318,
+   "c_name": "prevEnterpriseTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevXIndicator",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 319,
+   "c_name": "prevXIndicator",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeSpent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 320,
+   "c_name": "prevDecadeSpent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeAiSpent",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 321,
+   "c_name": "prevDecadeAiSpent",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeFuel",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 322,
+   "c_name": "prevDecadeFuel",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeSubsidy",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 323,
+   "c_name": "prevDecadeSubsidy",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeRevenue",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 324,
+   "c_name": "prevDecadeRevenue",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeGs",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 325,
+   "c_name": "prevDecadeGs",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeDq",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 326,
+   "c_name": "prevDecadeDq",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "prevDecadeBm",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 327,
+   "c_name": "prevDecadeBm",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeCostTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 328,
+   "c_name": "decadeCostTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeSpentTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 329,
+   "c_name": "decadeSpentTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeFuelCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 330,
+   "c_name": "decadeFuelCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeSubsidyTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 331,
+   "c_name": "decadeSubsidyTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeRevenueTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 332,
+   "c_name": "decadeRevenueTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "eb",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 333,
+   "c_name": "eb",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeEnterpriseTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 334,
+   "c_name": "decadeEnterpriseTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeXTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 335,
+   "c_name": "decadeXTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "revenueTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 336,
+   "c_name": "revenueTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "decadeOtherXTotal",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 337,
+   "c_name": "decadeOtherXTotal",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "yrN",
+   "java_type": "int[]",
+   "init": "new int[12]",
+   "static": false,
+   "final": false,
+   "line": 338,
+   "c_name": "yrN",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "yrCx",
+   "java_type": "int[]",
+   "init": "new int[12]",
+   "static": false,
+   "final": false,
+   "line": 339,
+   "c_name": "yrCx",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "yrZ",
+   "java_type": "int[]",
+   "init": "new int[12]",
+   "static": false,
+   "final": false,
+   "line": 340,
+   "c_name": "yrZ",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "altDecadeOtherXTotal",
+   "java_type": "int[]",
+   "init": "new int[12]",
+   "static": false,
+   "final": false,
+   "line": 341,
+   "c_name": "altDecadeOtherXTotal",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "altDecadeRevenueTotal",
+   "java_type": "int[]",
+   "init": "new int[12]",
+   "static": false,
+   "final": false,
+   "line": 342,
+   "c_name": "altDecadeRevenueTotal",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "altDecadeTotalCost",
+   "java_type": "int[]",
+   "init": "new int[12]",
+   "static": false,
+   "final": false,
+   "line": 343,
+   "c_name": "altDecadeTotalCost",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "yearGraphOffsets",
+   "java_type": "byte[]",
+   "init": "new byte[12]",
+   "static": false,
+   "final": false,
+   "line": 344,
+   "c_name": "yearGraphOffsets",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "altYearArray",
+   "java_type": "byte[]",
+   "init": "new byte[12]",
+   "static": false,
+   "final": false,
+   "line": 345,
+   "c_name": "altYearArray",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "yearGraphValues",
+   "java_type": "byte[]",
+   "init": "new byte[12]",
+   "static": false,
+   "final": false,
+   "line": 346,
+   "c_name": "yearGraphValues",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "industryCategory",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 347,
+   "c_name": "industryCategory",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "industrySiteFound",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 348,
+   "c_name": "industrySiteFound",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "gS",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 349,
+   "c_name": "gS",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "bp",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 350,
+   "c_name": "bp",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dD",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 351,
+   "c_name": "dD",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "industryTileY",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 352,
+   "c_name": "industryTileY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "difficultyCycle",
+   "java_type": "byte",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 353,
+   "c_name": "difficultyCycle",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "nextTrackPieceCode",
+   "java_type": "int",
+   "init": "66",
+   "static": false,
+   "final": false,
+   "line": 354,
+   "c_name": "nextTrackPieceCode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "aiFrequency",
+   "java_type": "byte",
+   "init": "(byte)15",
+   "static": false,
+   "final": false,
+   "line": 355,
+   "c_name": "aiFrequency",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "aiThreshold",
+   "java_type": "byte",
+   "init": "(byte)12",
+   "static": false,
+   "final": false,
+   "line": 356,
+   "c_name": "aiThreshold",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "routeResourceFlags",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 357,
+   "c_name": "routeResourceFlags",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "aK",
+   "java_type": "byte[][]",
+   "init": "new byte[][]{{1, 3, 13}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {1, 2, 3, 13, 14, 15}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {1, 2, 3, 13, 14, 15}, {4, 9}, {5, 10}, {6, 11}, {7, 12}, {8, 12}, {1, 2, 3, 13}, {1, 2, 3, 14}}",
+   "static": false,
+   "final": false,
+   "line": 358,
+   "c_name": "aK",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "trackPieceRequirements",
+   "java_type": "byte[][]",
+   "init": "new byte[][]{{0, 0}, {0, 0}, {5, 20}, {10, -56}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {8, 100}}",
+   "static": false,
+   "final": false,
+   "line": 359,
+   "c_name": "trackPieceRequirements",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "menuRowType",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 360,
+   "c_name": "menuRowType",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "placeTrainDay",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 361,
+   "c_name": "placeTrainDay",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "menuRowParamA",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 362,
+   "c_name": "menuRowParamA",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "placeTrainMonth",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 363,
+   "c_name": "placeTrainMonth",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "menuRowParamB",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 364,
+   "c_name": "menuRowParamB",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "placeTrainYear",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 365,
+   "c_name": "placeTrainYear",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "menuRowParamC",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 366,
+   "c_name": "menuRowParamC",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "menuRowCost",
+   "java_type": "int[]",
+   "init": "new int[6]",
+   "static": false,
+   "final": false,
+   "line": 367,
+   "c_name": "menuRowCost",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "menuRowValue",
+   "java_type": "int[]",
+   "init": "new int[6]",
+   "static": false,
+   "final": false,
+   "line": 368,
+   "c_name": "menuRowValue",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "menuRowAltType",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 369,
+   "c_name": "menuRowAltType",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "menuRowEra",
+   "java_type": "byte[]",
+   "init": "new byte[6]",
+   "static": false,
+   "final": false,
+   "line": 370,
+   "c_name": "menuRowEra",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "menuRowRevenue",
+   "java_type": "int[]",
+   "init": "new int[6]",
+   "static": false,
+   "final": false,
+   "line": 371,
+   "c_name": "menuRowRevenue",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "trackBuildCost",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 372,
+   "c_name": "trackBuildCost",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dU",
+   "java_type": "short[]",
+   "init": "new short[12]",
+   "static": false,
+   "final": false,
+   "line": 373,
+   "c_name": "dU",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "flagsB",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 374,
+   "c_name": "flagsB",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "bq",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 375,
+   "c_name": "bq",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "bv",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 376,
+   "c_name": "bv",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "menuRowEnabledCount",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 377,
+   "c_name": "menuRowEnabledCount",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gP",
+   "java_type": "byte[]",
+   "init": "new byte[5]",
+   "static": false,
+   "final": false,
+   "line": 378,
+   "c_name": "gP",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "scenarioMilestoneIndex",
+   "java_type": "byte",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 379,
+   "c_name": "scenarioMilestoneIndex",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "currentMilestoneScore",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 380,
+   "c_name": "currentMilestoneScore",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestoneCoThreshold2",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 381,
+   "c_name": "milestoneCoThreshold2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "counterB",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 382,
+   "c_name": "counterB",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestoneThreshold1",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 383,
+   "c_name": "milestoneThreshold1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestoneThreshold2",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 384,
+   "c_name": "milestoneThreshold2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestoneThreshold3",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 385,
+   "c_name": "milestoneThreshold3",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestoneThreshold4",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 386,
+   "c_name": "milestoneThreshold4",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestoneThreshold5",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 387,
+   "c_name": "milestoneThreshold5",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "aiWagonsBought",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 388,
+   "c_name": "aiWagonsBought",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "milestonesEnabled",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 389,
+   "c_name": "milestonesEnabled",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "musicPlaying",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 390,
+   "c_name": "musicPlaying",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "flagAy",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 391,
+   "c_name": "flagAy",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "musicAutoStart",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 392,
+   "c_name": "musicAutoStart",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "autoMusic",
+   "java_type": "boolean",
+   "init": "false",
+   "static": false,
+   "final": false,
+   "line": 393,
+   "c_name": "autoMusic",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "gameStateCounter",
+   "java_type": "int",
+   "init": "2",
+   "static": false,
+   "final": false,
+   "line": 394,
+   "c_name": "gameStateCounter",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "musicPlayer",
+   "java_type": "Player",
+   "init": "null",
+   "static": false,
+   "final": false,
+   "line": 395,
+   "c_name": "musicPlayer",
+   "c_type": "void*"
+  },
+  {
+   "java_name": "volumeControl",
+   "java_type": "VolumeControl",
+   "init": "null",
+   "static": false,
+   "final": false,
+   "line": 396,
+   "c_name": "volumeControl",
+   "c_type": "void*"
+  },
+  {
+   "java_name": "by",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 397,
+   "c_name": "by",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "transientH",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 398,
+   "c_name": "transientH",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "gk",
+   "java_type": "int[]",
+   "init": "new int[13]",
+   "static": false,
+   "final": false,
+   "line": 399,
+   "c_name": "gk",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "bd",
+   "java_type": "int[]",
+   "init": "new int[14]",
+   "static": false,
+   "final": false,
+   "line": 400,
+   "c_name": "bd",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "decodeHeaderName1",
+   "java_type": "byte[]",
+   "init": "new byte[]{-15, 12, -41, -41, 37, 109, -35, 61, -10, 28, -25, 49, -31, 51, 15, 104, -32, 54, 51, 77, 42, 76}",
+   "static": true,
+   "final": false,
+   "line": 401,
+   "c_name": "decodeHeaderName1",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderName2",
+   "java_type": "byte[]",
+   "init": "new byte[]{-11, 0, 17, 17, 53, 125, 28, 99, -49, 37, -4, 0, 40, 124, 68, 68, -49, -41, -26, 59, 41, 76}",
+   "static": true,
+   "final": false,
+   "line": 402,
+   "c_name": "decodeHeaderName2",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderName3",
+   "java_type": "byte[]",
+   "init": "new byte[]{-46, 45, -20, 60, 60, 116, 60, 71, -24, 14, -17, 8, 44, 76, 40, 122, -8, 30, 29, 125, 57, 91}",
+   "static": true,
+   "final": false,
+   "line": 403,
+   "c_name": "decodeHeaderName3",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderName4",
+   "java_type": "byte[]",
+   "init": "new byte[]{49, 76, -59, -59, -34, -42, 8, 17, -33, 61, 41, 77, -22, 54, -59, -34, -9, 29, -41, 33, 0, 18}",
+   "static": true,
+   "final": false,
+   "line": 404,
+   "c_name": "decodeHeaderName4",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderName6",
+   "java_type": "byte[]",
+   "init": "new byte[]{-21, 54, -29, 35, -30, 42, -60, -40, 40, 76, 28, 100, -23, 62, -42, 56, -59, -39}",
+   "static": true,
+   "final": false,
+   "line": 405,
+   "c_name": "decodeHeaderName6",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderName7",
+   "java_type": "byte[]",
+   "init": "new byte[]{23, 98, -57, -57, -11, 61, -29, 55, 51, 72, -2, 18}",
+   "static": true,
+   "final": false,
+   "line": 406,
+   "c_name": "decodeHeaderName7",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderValue1",
+   "java_type": "byte[]",
+   "init": "new byte[]{40, 123, 39, 28, 9, 15, 65, 127, -35, -58, 3, 6, -59, -29, 18, 6, -21, -45, 41, 17, 31, 24}",
+   "static": true,
+   "final": false,
+   "line": 407,
+   "c_name": "decodeHeaderValue1",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "viewportZoomStep",
+   "java_type": "byte[]",
+   "init": "new byte[]{-53, -63, -55, 57, 13, 124, -53, -50, -65, 45, 26, 29}",
+   "static": true,
+   "final": false,
+   "line": 408,
+   "c_name": "viewportZoomStep",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeHeaderName5",
+   "java_type": "byte[]",
+   "init": "new byte[]{-30, 61, -6, 10, -3, 53, 20, 122, 57, 93, 44, 127, -2, 12, -31, 56, -58, 40}",
+   "static": true,
+   "final": false,
+   "line": 409,
+   "c_name": "decodeHeaderName5",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "decodeUrl",
+   "java_type": "byte[]",
+   "init": "new byte[]{18, 1, -28, -57, -10, 41, -37, -62, -40, 53, 12, 116, 53, -83, 36, 19, 38, 20, -33, -33, 36, 19, 68, 120, -25, 43, 6, 62, 29, 2, -25, 41, -68, 37, 66, 125, 0, 62, 62, 127, -54, -52, 17, 49, 17, 3, -59, -54, -30, 28, 5, 51, 24, 1, -65, -30, -8, 58, -6, 47, 11, 1, 17, 5, 47, 18, 53, 99, 42, 27, 57, 123, -9, 96, -54, -50, 17, 9, 34, 28, -41, 15, 3, 39, 46, 100, 64, 97, -44, -58, -19, 22, -38, -63, 18, 1, 8, 63}",
+   "static": true,
+   "final": false,
+   "line": 410,
+   "c_name": "decodeUrl",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "tileOffsetX",
+   "java_type": "byte[]",
+   "init": "new byte[1]",
+   "static": false,
+   "final": false,
+   "line": 411,
+   "c_name": "tileOffsetX",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "tileOffsetY",
+   "java_type": "byte[]",
+   "init": "new byte[1]",
+   "static": false,
+   "final": false,
+   "line": 412,
+   "c_name": "tileOffsetY",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "numActiveTileAnimations",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 413,
+   "c_name": "numActiveTileAnimations",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ch",
+   "java_type": "boolean",
+   "init": "false",
+   "static": true,
+   "final": false,
+   "line": 414,
+   "c_name": "ch",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "selectionHidden",
+   "java_type": "boolean",
+   "init": "false",
+   "static": true,
+   "final": false,
+   "line": 415,
+   "c_name": "selectionHidden",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "cc",
+   "java_type": "boolean",
+   "init": "true",
+   "static": true,
+   "final": false,
+   "line": 416,
+   "c_name": "cc",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "q",
+   "java_type": "boolean",
+   "init": "true",
+   "static": true,
+   "final": false,
+   "line": 417,
+   "c_name": "q",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "gameState",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 418,
+   "c_name": "gameState",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tileMap",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 419,
+   "c_name": "tileMap",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "trackMap",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 420,
+   "c_name": "trackMap",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "viewportCenterX",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 421,
+   "c_name": "viewportCenterX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportCenterY",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 422,
+   "c_name": "viewportCenterY",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "money",
+   "java_type": "int",
+   "init": "200000",
+   "static": false,
+   "final": false,
+   "line": 423,
+   "c_name": "money",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "cy",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 424,
+   "c_name": "cy",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "loanBalance",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 425,
+   "c_name": "loanBalance",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "loanCeiling",
+   "java_type": "int",
+   "init": "600000",
+   "static": false,
+   "final": false,
+   "line": 426,
+   "c_name": "loanCeiling",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "interestRate",
+   "java_type": "byte",
+   "init": "(byte)4",
+   "static": false,
+   "final": false,
+   "line": 427,
+   "c_name": "interestRate",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "dayOfMonth",
+   "java_type": "int",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 428,
+   "c_name": "dayOfMonth",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "monthOfYear",
+   "java_type": "int",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 429,
+   "c_name": "monthOfYear",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "year",
+   "java_type": "int",
+   "init": "1950",
+   "static": false,
+   "final": false,
+   "line": 430,
+   "c_name": "year",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fr",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 431,
+   "c_name": "fr",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fd",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 432,
+   "c_name": "fd",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dN",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 433,
+   "c_name": "dN",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "counterA",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 434,
+   "c_name": "counterA",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "enterpriseTaxPct",
+   "java_type": "int",
+   "init": "2",
+   "static": false,
+   "final": false,
+   "line": 435,
+   "c_name": "enterpriseTaxPct",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "scenarioStepCompare",
+   "java_type": "int",
+   "init": "1",
+   "static": false,
+   "final": false,
+   "line": 436,
+   "c_name": "scenarioStepCompare",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "scenarioStep",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 437,
+   "c_name": "scenarioStep",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "scenarioFlagAo",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 438,
+   "c_name": "scenarioFlagAo",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "rng",
+   "java_type": "Random",
+   "init": "new Random(System.currentTimeMillis())",
+   "static": false,
+   "final": false,
+   "line": 439,
+   "c_name": "rng",
+   "c_type": "MidpRandom"
+  },
+  {
+   "java_name": "backbuffer",
+   "java_type": "Image",
+   "init": "Image.createImage((int)screenWidth, (int)hs)",
+   "static": false,
+   "final": false,
+   "line": 440,
+   "c_name": "backbuffer",
+   "c_type": "MidpImage*"
+  },
+  {
+   "java_name": "backbufferG",
+   "java_type": "Graphics",
+   "init": "this.backbuffer.getGraphics()",
+   "static": false,
+   "final": false,
+   "line": 441,
+   "c_name": "backbufferG",
+   "c_type": "MidpGraphics*"
+  },
+  {
+   "java_name": "tileSprites",
+   "java_type": "Image[]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 442,
+   "c_name": "tileSprites",
+   "c_type": "MidpImage**"
+  },
+  {
+   "java_name": "tileSpriteIndex",
+   "java_type": "byte[]",
+   "init": "new byte[255]",
+   "static": false,
+   "final": false,
+   "line": 443,
+   "c_name": "tileSpriteIndex",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "cycleFlag",
+   "java_type": "Image",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 444,
+   "c_name": "cycleFlag",
+   "c_type": "MidpImage*"
+  },
+  {
+   "java_name": "loadingStartTime",
+   "java_type": "long",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 445,
+   "c_name": "loadingStartTime",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "loadingTimeout",
+   "java_type": "boolean",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 446,
+   "c_name": "loadingTimeout",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "spriteLoadCounter",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 447,
+   "c_name": "spriteLoadCounter",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "scenarioResourceCount",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 448,
+   "c_name": "scenarioResourceCount",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "transitionCode",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 449,
+   "c_name": "transitionCode",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "ready",
+   "java_type": "boolean",
+   "init": "true",
+   "static": false,
+   "final": false,
+   "line": 450,
+   "c_name": "ready",
+   "c_type": "bool"
+  },
+  {
+   "java_name": "loadStep",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 451,
+   "c_name": "loadStep",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "spriteIndexTable",
+   "java_type": "byte[]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 452,
+   "c_name": "spriteIndexTable",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "spriteBitmapTable",
+   "java_type": "byte[][]",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 453,
+   "c_name": "spriteBitmapTable",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "timerA1",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 454,
+   "c_name": "timerA1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "timerA2",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 455,
+   "c_name": "timerA2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "timerB1",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 456,
+   "c_name": "timerB1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "timerB2",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 457,
+   "c_name": "timerB2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "timerC1",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 458,
+   "c_name": "timerC1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "timerC2",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 459,
+   "c_name": "timerC2",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "woodAgeTimer",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 460,
+   "c_name": "woodAgeTimer",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "phaseTimer",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 461,
+   "c_name": "phaseTimer",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tileQueue",
+   "java_type": "byte[][]",
+   "init": "new byte[50][3]",
+   "static": false,
+   "final": false,
+   "line": 462,
+   "c_name": "tileQueue",
+   "c_type": "int8_t**"
+  },
+  {
+   "java_name": "go",
+   "java_type": "boolean[]",
+   "init": "new boolean[50]",
+   "static": false,
+   "final": false,
+   "line": 463,
+   "c_name": "go",
+   "c_type": "bool*"
+  },
+  {
+   "java_name": "dc",
+   "java_type": "int[]",
+   "init": "new int[]{16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200}",
+   "static": false,
+   "final": false,
+   "line": 464,
+   "c_name": "dc",
+   "c_type": "int32_t*"
+  },
+  {
+   "java_name": "bx",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 465,
+   "c_name": "bx",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "fR",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 466,
+   "c_name": "fR",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "transitionDebounce",
+   "java_type": "byte",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 467,
+   "c_name": "transitionDebounce",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "ff",
+   "java_type": "byte",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 468,
+   "c_name": "ff",
+   "c_type": "int8_t"
+  },
+  {
+   "java_name": "eD",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 469,
+   "c_name": "eD",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "aJ",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 470,
+   "c_name": "aJ",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "hx",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 471,
+   "c_name": "hx",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "loadingTimer",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 472,
+   "c_name": "loadingTimer",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "dH",
+   "java_type": "int",
+   "init": "50",
+   "static": false,
+   "final": false,
+   "line": 473,
+   "c_name": "dH",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "tickStart",
+   "java_type": "long",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 474,
+   "c_name": "tickStart",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "tickEnd",
+   "java_type": "long",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 475,
+   "c_name": "tickEnd",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "gw",
+   "java_type": "long",
+   "init": "0L",
+   "static": false,
+   "final": false,
+   "line": 476,
+   "c_name": "gw",
+   "c_type": "int64_t"
+  },
+  {
+   "java_name": "tileSpriteYOffsetByCode",
+   "java_type": "byte[]",
+   "init": "new byte[]{0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0}",
+   "static": false,
+   "final": false,
+   "line": 477,
+   "c_name": "tileSpriteYOffsetByCode",
+   "c_type": "int8_t*"
+  },
+  {
+   "java_name": "lastViewportCenterX",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 478,
+   "c_name": "lastViewportCenterX",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportCenterYCached",
+   "java_type": "int",
+   "init": "-1",
+   "static": false,
+   "final": false,
+   "line": 479,
+   "c_name": "viewportCenterYCached",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "visibleTrains",
+   "java_type": "short[]",
+   "init": "new short[500]",
+   "static": false,
+   "final": false,
+   "line": 480,
+   "c_name": "visibleTrains",
+   "c_type": "int16_t*"
+  },
+  {
+   "java_name": "visibleTrainCount",
+   "java_type": "int",
+   "init": "0",
+   "static": false,
+   "final": false,
+   "line": 481,
+   "c_name": "visibleTrainCount",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportX1",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 482,
+   "c_name": "viewportX1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportY1",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 483,
+   "c_name": "viewportY1",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportX0",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 484,
+   "c_name": "viewportX0",
+   "c_type": "int32_t"
+  },
+  {
+   "java_name": "viewportY0",
+   "java_type": "int",
+   "init": "",
+   "static": false,
+   "final": false,
+   "line": 485,
+   "c_name": "viewportY0",
+   "c_type": "int32_t"
+  }
+ ],
+ "methods": [
+  {
+   "java_name": "c",
+   "ret": "int",
+   "params": "byte n",
+   "sig": "public int c(byte n)",
+   "start": 494,
+   "end": 496,
+   "c_name": "gc_c",
+   "status": "ported"
+  },
+  {
+   "java_name": "start",
+   "ret": "void",
+   "params": "GameMIDlet gameMIDlet",
+   "sig": "public void start(GameMIDlet gameMIDlet)",
+   "start": 498,
+   "end": 505,
+   "c_name": "gc_start",
+   "status": "ported"
+  },
+  {
+   "java_name": "run",
+   "ret": "void",
+   "params": "",
+   "sig": "public void run()",
+   "start": 507,
+   "end": 586,
+   "c_name": "gc_run",
+   "status": "ported"
+  },
+  {
+   "java_name": "pointerPressed",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "public void pointerPressed(int n, int n2)",
+   "start": 588,
+   "end": 592,
+   "c_name": "gc_pointerPressed",
+   "status": "ported"
+  },
+  {
+   "java_name": "pointerReleased",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "public void pointerReleased(int n, int n2)",
+   "start": 594,
+   "end": 599,
+   "c_name": "gc_pointerReleased",
+   "status": "ported"
+  },
+  {
+   "java_name": "pointerDragged",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "public void pointerDragged(int n, int n2)",
+   "start": 601,
+   "end": 605,
+   "c_name": "gc_pointerDragged",
+   "status": "ported"
+  },
+  {
+   "java_name": "keyPressed",
+   "ret": "void",
+   "params": "int n",
+   "sig": "public void keyPressed(int n)",
+   "start": 607,
+   "end": 613,
+   "c_name": "gc_keyPressed",
+   "status": "ported"
+  },
+  {
+   "java_name": "keyReleased",
+   "ret": "void",
+   "params": "int n",
+   "sig": "public void keyReleased(int n)",
+   "start": 615,
+   "end": 617,
+   "c_name": "gc_keyReleased",
+   "status": "ported"
+  },
+  {
+   "java_name": "drawSpriteQuad",
+   "ret": "void",
+   "params": "Graphics graphics, int n, int n2, int n3, int n4",
+   "sig": "void drawSpriteQuad(Graphics graphics, int n, int n2, int n3, int n4)",
+   "start": 619,
+   "end": 621,
+   "c_name": "gc_drawSpriteQuad",
+   "status": "ported"
+  },
+  {
+   "java_name": "handleKey",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void handleKey(int n)",
+   "start": 623,
+   "end": 780,
+   "c_name": "gc_handleKey",
+   "status": "ported"
+  },
+  {
+   "java_name": "resetKeyState",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void resetKeyState(int n)",
+   "start": 782,
+   "end": 789,
+   "c_name": "gc_resetKeyState",
+   "status": "ported"
+  },
+  {
+   "java_name": "loadSpriteStream",
+   "ret": "void",
+   "params": "String string",
+   "sig": "public void loadSpriteStream(String string)",
+   "start": 791,
+   "end": 793,
+   "c_name": "gc_loadSpriteStream",
+   "status": "ported"
+  },
+  {
+   "java_name": "decodePngFromSpriteStream",
+   "ret": "Image",
+   "params": "",
+   "sig": "public Image decodePngFromSpriteStream()",
+   "start": 795,
+   "end": 894,
+   "c_name": "gc_decodePngFromSpriteStream",
+   "status": "ported"
+  },
+  {
+   "java_name": "o",
+   "ret": "void",
+   "params": "",
+   "sig": "public void o()",
+   "start": 896,
+   "end": 905,
+   "c_name": "gc_o",
+   "status": "ported"
+  },
+  {
+   "java_name": "b",
+   "ret": "void",
+   "params": "String string",
+   "sig": "public void b(String string)",
+   "start": 907,
+   "end": 929,
+   "c_name": "gc_b",
+   "status": "ported"
+  },
+  {
+   "java_name": "m",
+   "ret": "byte[]",
+   "params": "int n",
+   "sig": "byte[] m(int n)",
+   "start": 931,
+   "end": 936,
+   "c_name": "gc_m",
+   "status": "ported"
+  },
+  {
+   "java_name": "renderPackedSprite",
+   "ret": "void",
+   "params": "Graphics graphics, int n",
+   "sig": "public void renderPackedSprite(Graphics graphics, int n)",
+   "start": 938,
+   "end": 1206,
+   "c_name": "gc_renderPackedSprite",
+   "status": "ported"
+  },
+  {
+   "java_name": "renderFontString",
+   "ret": "void",
+   "params": "Graphics graphics, int n, int n2, byte[] byArray, boolean bl",
+   "sig": "public void renderFontString(Graphics graphics, int n, int n2, byte[] byArray, boolean bl)",
+   "start": 1208,
+   "end": 1266,
+   "c_name": "gc_renderFontString",
+   "status": "ported"
+  },
+  {
+   "java_name": "registerCityEntryInlined",
+   "ret": "void",
+   "params": "byte by",
+   "sig": "public void registerCityEntryInlined(byte by)",
+   "start": 1268,
+   "end": 1295,
+   "c_name": "gc_registerCityEntryInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "setSelectionStart",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void setSelectionStart(int n, int n2)",
+   "start": 1297,
+   "end": 1317,
+   "c_name": "gc_setSelectionStart",
+   "status": "ported"
+  },
+  {
+   "java_name": "isAdjacentTileEmpty",
+   "ret": "boolean",
+   "params": "int n, int n2, int n3, boolean bl",
+   "sig": "boolean isAdjacentTileEmpty(int n, int n2, int n3, boolean bl)",
+   "start": 1319,
+   "end": 1354,
+   "c_name": "gc_isAdjacentTileEmpty",
+   "status": "ported"
+  },
+  {
+   "java_name": "commitTerrainEdit",
+   "ret": "void",
+   "params": "",
+   "sig": "void commitTerrainEdit()",
+   "start": 1356,
+   "end": 1360,
+   "c_name": "gc_commitTerrainEdit",
+   "status": "ported"
+  },
+  {
+   "java_name": "toggleFlagInlined",
+   "ret": "void",
+   "params": "boolean bl",
+   "sig": "void toggleFlagInlined(boolean bl)",
+   "start": 1362,
+   "end": 1465,
+   "c_name": "gc_toggleFlagInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "smoothTileAtInlined",
+   "ret": "void",
+   "params": "int n, int n2, boolean bl",
+   "sig": "void smoothTileAtInlined(int n, int n2, boolean bl)",
+   "start": 1467,
+   "end": 1486,
+   "c_name": "gc_smoothTileAtInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "raiseTerrainArea",
+   "ret": "void",
+   "params": "int n, int n2, int n3, int n4, int n5",
+   "sig": "void raiseTerrainArea(int n, int n2, int n3, int n4, int n5)",
+   "start": 1488,
+   "end": 1509,
+   "c_name": "gc_raiseTerrainArea",
+   "status": "ported"
+  },
+  {
+   "java_name": "lowerTerrainArea",
+   "ret": "void",
+   "params": "int n, int n2, int n3, int n4, int n5",
+   "sig": "void lowerTerrainArea(int n, int n2, int n3, int n4, int n5)",
+   "start": 1511,
+   "end": 1531,
+   "c_name": "gc_lowerTerrainArea",
+   "status": "ported"
+  },
+  {
+   "java_name": "loadState25Setup",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void loadState25Setup(int n)",
+   "start": 1533,
+   "end": 1643,
+   "c_name": "gc_loadState25Setup",
+   "status": "ported"
+  },
+  {
+   "java_name": "randomCityTile",
+   "ret": "byte",
+   "params": "",
+   "sig": "byte randomCityTile()",
+   "start": 1645,
+   "end": 1669,
+   "c_name": "gc_randomCityTile",
+   "status": "ported"
+  },
+  {
+   "java_name": "placeTerrainPatch",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void placeTerrainPatch(int n, int n2)",
+   "start": 1671,
+   "end": 1842,
+   "c_name": "gc_placeTerrainPatch",
+   "status": "ported"
+  },
+  {
+   "java_name": "trackBuildStepInlined",
+   "ret": "void",
+   "params": "int n, int n2, int n3, int n4",
+   "sig": "void trackBuildStepInlined(int n, int n2, int n3, int n4)",
+   "start": 1844,
+   "end": 1866,
+   "c_name": "gc_trackBuildStepInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "placeTrackTile",
+   "ret": "void",
+   "params": "int n, int n2, int n3, int n4",
+   "sig": "void placeTrackTile(int n, int n2, int n3, int n4)",
+   "start": 1868,
+   "end": 1871,
+   "c_name": "gc_placeTrackTile",
+   "status": "ported"
+  },
+  {
+   "java_name": "placeTerrainFeature",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void placeTerrainFeature(int n)",
+   "start": 1873,
+   "end": 2020,
+   "c_name": "gc_placeTerrainFeature",
+   "status": "ported"
+  },
+  {
+   "java_name": "computeKeyRepeatDelay",
+   "ret": "int",
+   "params": "",
+   "sig": "int computeKeyRepeatDelay()",
+   "start": 2022,
+   "end": 2028,
+   "c_name": "gc_computeKeyRepeatDelay",
+   "status": "ported"
+  },
+  {
+   "java_name": "viewportPanKey",
+   "ret": "void",
+   "params": "",
+   "sig": "void viewportPanKey()",
+   "start": 2030,
+   "end": 2075,
+   "c_name": "gc_viewportPanKey",
+   "status": "pending"
+  },
+  {
+   "java_name": "viewportZoomKey",
+   "ret": "void",
+   "params": "",
+   "sig": "void viewportZoomKey()",
+   "start": 2077,
+   "end": 2160,
+   "c_name": "gc_viewportZoomKey",
+   "status": "pending"
+  },
+  {
+   "java_name": "crossProduct2D",
+   "ret": "int",
+   "params": "int n, int n2, int n3, int n4, int n5, int n6",
+   "sig": "int crossProduct2D(int n, int n2, int n3, int n4, int n5, int n6)",
+   "start": 2162,
+   "end": 2164,
+   "c_name": "gc_crossProduct2D",
+   "status": "ported"
+  },
+  {
+   "java_name": "computeIsoCornersInlined",
+   "ret": "void",
+   "params": "int n, int n2, int[] nArray, int[] nArray2, boolean bl",
+   "sig": "void computeIsoCornersInlined(int n, int n2, int[] nArray, int[] nArray2, boolean bl)",
+   "start": 2166,
+   "end": 2186,
+   "c_name": "gc_computeIsoCornersInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "computeViewportBounds",
+   "ret": "void",
+   "params": "",
+   "sig": "void computeViewportBounds()",
+   "start": 2188,
+   "end": 2250,
+   "c_name": "gc_computeViewportBounds",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawSelectionQuad",
+   "ret": "void",
+   "params": "Graphics graphics, int[] nArray, int[] nArray2",
+   "sig": "void drawSelectionQuad(Graphics graphics, int[] nArray, int[] nArray2)",
+   "start": 2252,
+   "end": 2261,
+   "c_name": "gc_drawSelectionQuad",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawBuildMenuCursor",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void drawBuildMenuCursor(Graphics graphics)",
+   "start": 2263,
+   "end": 2387,
+   "c_name": "gc_drawBuildMenuCursor",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawBuildMenuRow",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void drawBuildMenuRow(Graphics graphics)",
+   "start": 2389,
+   "end": 2477,
+   "c_name": "gc_drawBuildMenuRow",
+   "status": "pending"
+  },
+  {
+   "java_name": "demolishAtCursor",
+   "ret": "void",
+   "params": "",
+   "sig": "void demolishAtCursor()",
+   "start": 2479,
+   "end": 2532,
+   "c_name": "gc_demolishAtCursor",
+   "status": "pending"
+  },
+  {
+   "java_name": "pickTrainsAtCursor",
+   "ret": "void",
+   "params": "",
+   "sig": "void pickTrainsAtCursor()",
+   "start": 2534,
+   "end": 2610,
+   "c_name": "gc_pickTrainsAtCursor",
+   "status": "pending"
+  },
+  {
+   "java_name": "buildPlaceTrackPiece",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void buildPlaceTrackPiece(int n)",
+   "start": 2612,
+   "end": 2660,
+   "c_name": "gc_buildPlaceTrackPiece",
+   "status": "pending"
+  },
+  {
+   "java_name": "openBuildMenu",
+   "ret": "void",
+   "params": "",
+   "sig": "void openBuildMenu()",
+   "start": 2662,
+   "end": 2871,
+   "c_name": "gc_openBuildMenu",
+   "status": "pending"
+  },
+  {
+   "java_name": "spendMoney",
+   "ret": "boolean",
+   "params": "int n",
+   "sig": "boolean spendMoney(int n)",
+   "start": 2873,
+   "end": 2883,
+   "c_name": "gc_spendMoney",
+   "status": "ported"
+  },
+  {
+   "java_name": "computeTrackBuildInlined",
+   "ret": "void",
+   "params": "int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8",
+   "sig": "void computeTrackBuildInlined(int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8)",
+   "start": 2885,
+   "end": 2918,
+   "c_name": "gc_computeTrackBuildInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "revertTrackTiles",
+   "ret": "void",
+   "params": "",
+   "sig": "void revertTrackTiles()",
+   "start": 2920,
+   "end": 2944,
+   "c_name": "gc_revertTrackTiles",
+   "status": "pending"
+  },
+  {
+   "java_name": "placeTrackAtCursorInlined",
+   "ret": "void",
+   "params": "boolean bl, int n, int n2, int n3, int n4, int n5, int n6, boolean bl2, int n7",
+   "sig": "void placeTrackAtCursorInlined(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, boolean bl2, int n7)",
+   "start": 2946,
+   "end": 2981,
+   "c_name": "gc_placeTrackAtCursorInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "handleCursorClickInlined",
+   "ret": "void",
+   "params": "int n, int n2, boolean bl, boolean bl2",
+   "sig": "void handleCursorClickInlined(int n, int n2, boolean bl, boolean bl2)",
+   "start": 2983,
+   "end": 3016,
+   "c_name": "gc_handleCursorClickInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "applyBackgroundCost",
+   "ret": "void",
+   "params": "",
+   "sig": "void applyBackgroundCost()",
+   "start": 3018,
+   "end": 3026,
+   "c_name": "gc_applyBackgroundCost",
+   "status": "pending"
+  },
+  {
+   "java_name": "initBuildMenuRow",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void initBuildMenuRow(int n, int n2)",
+   "start": 3028,
+   "end": 3038,
+   "c_name": "gc_initBuildMenuRow",
+   "status": "ported"
+  },
+  {
+   "java_name": "addMenuItemInlined",
+   "ret": "void",
+   "params": "int n, int n2, int n3, boolean bl, boolean bl2, int n4",
+   "sig": "void addMenuItemInlined(int n, int n2, int n3, boolean bl, boolean bl2, int n4)",
+   "start": 3040,
+   "end": 3049,
+   "c_name": "gc_addMenuItemInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "initBuildMenuForScenario",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void initBuildMenuForScenario(int n)",
+   "start": 3051,
+   "end": 3145,
+   "c_name": "gc_initBuildMenuForScenario",
+   "status": "ported"
+  },
+  {
+   "java_name": "cycleBuildMenuIndex",
+   "ret": "void",
+   "params": "boolean bl",
+   "sig": "void cycleBuildMenuIndex(boolean bl)",
+   "start": 3147,
+   "end": 3158,
+   "c_name": "gc_cycleBuildMenuIndex",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawMenuRow",
+   "ret": "int",
+   "params": "Graphics graphics, int n, int n2, int n3, boolean bl",
+   "sig": "int drawMenuRow(Graphics graphics, int n, int n2, int n3, boolean bl)",
+   "start": 3160,
+   "end": 3166,
+   "c_name": "gc_drawMenuRow",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawConfirmBar",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void drawConfirmBar(Graphics graphics)",
+   "start": 3168,
+   "end": 3177,
+   "c_name": "gc_drawConfirmBar",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawHeaderBar",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void drawHeaderBar(Graphics graphics)",
+   "start": 3179,
+   "end": 3219,
+   "c_name": "gc_drawHeaderBar",
+   "status": "pending"
+  },
+  {
+   "java_name": "paintMain",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void paintMain(Graphics graphics)",
+   "start": 3221,
+   "end": 3251,
+   "c_name": "gc_paintMain",
+   "status": "pending"
+  },
+  {
+   "java_name": "pushMoneyHistory",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void pushMoneyHistory(int n)",
+   "start": 3253,
+   "end": 3260,
+   "c_name": "gc_pushMoneyHistory",
+   "status": "ported"
+  },
+  {
+   "java_name": "drawNumber",
+   "ret": "int",
+   "params": "Graphics graphics, int n, int n2",
+   "sig": "int drawNumber(Graphics graphics, int n, int n2)",
+   "start": 3262,
+   "end": 3271,
+   "c_name": "gc_drawNumber",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawMoneyTicker",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void drawMoneyTicker(Graphics graphics)",
+   "start": 3273,
+   "end": 3288,
+   "c_name": "gc_drawMoneyTicker",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawConfirmDialog",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "void drawConfirmDialog(Graphics graphics)",
+   "start": 3290,
+   "end": 3297,
+   "c_name": "gc_drawConfirmDialog",
+   "status": "pending"
+  },
+  {
+   "java_name": "registerTrain",
+   "ret": "byte",
+   "params": "byte by, int n, int n2",
+   "sig": "byte registerTrain(byte by, int n, int n2)",
+   "start": 3299,
+   "end": 3319,
+   "c_name": "gc_registerTrain",
+   "status": "ported"
+  },
+  {
+   "java_name": "dayResetP",
+   "ret": "void",
+   "params": "",
+   "sig": "void dayResetP()",
+   "start": 3321,
+   "end": 3329,
+   "c_name": "gc_dayResetP",
+   "status": "pending"
+  },
+  {
+   "java_name": "advanceConstructionTimers",
+   "ret": "void",
+   "params": "int n, int n2, int n3",
+   "sig": "void advanceConstructionTimers(int n, int n2, int n3)",
+   "start": 3331,
+   "end": 3359,
+   "c_name": "gc_advanceConstructionTimers",
+   "status": "pending"
+  },
+  {
+   "java_name": "maybeAITick",
+   "ret": "void",
+   "params": "",
+   "sig": "void maybeAITick()",
+   "start": 3361,
+   "end": 3373,
+   "c_name": "gc_maybeAITick",
+   "status": "pending"
+  },
+  {
+   "java_name": "placeCityTileInlined",
+   "ret": "void",
+   "params": "int n, int n2, int n3",
+   "sig": "void placeCityTileInlined(int n, int n2, int n3)",
+   "start": 3375,
+   "end": 3380,
+   "c_name": "gc_placeCityTileInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "pickValidForestTile",
+   "ret": "boolean",
+   "params": "",
+   "sig": "boolean pickValidForestTile()",
+   "start": 3382,
+   "end": 3508,
+   "c_name": "gc_pickValidForestTile",
+   "status": "pending"
+  },
+  {
+   "java_name": "addCityEntry",
+   "ret": "byte",
+   "params": "int n",
+   "sig": "byte addCityEntry(int n)",
+   "start": 3510,
+   "end": 3516,
+   "c_name": "gc_addCityEntry",
+   "status": "ported"
+  },
+  {
+   "java_name": "dayResetAg",
+   "ret": "void",
+   "params": "",
+   "sig": "void dayResetAg()",
+   "start": 3518,
+   "end": 3528,
+   "c_name": "gc_dayResetAg",
+   "status": "pending"
+  },
+  {
+   "java_name": "rebuildCityList",
+   "ret": "void",
+   "params": "",
+   "sig": "void rebuildCityList()",
+   "start": 3530,
+   "end": 3566,
+   "c_name": "gc_rebuildCityList",
+   "status": "pending"
+  },
+  {
+   "java_name": "b",
+   "ret": "byte[]",
+   "params": "int n",
+   "sig": "byte[] b(int n)",
+   "start": 3568,
+   "end": 3584,
+   "c_name": "gc_b__1",
+   "status": "ported"
+  },
+  {
+   "java_name": "p",
+   "ret": "byte[]",
+   "params": "int n, int n2",
+   "sig": "byte[] p(int n, int n2)",
+   "start": 3586,
+   "end": 3594,
+   "c_name": "gc_p",
+   "status": "pending"
+  },
+  {
+   "java_name": "d",
+   "ret": "byte[]",
+   "params": "String string",
+   "sig": "byte[] d(String string)",
+   "start": 3596,
+   "end": 3602,
+   "c_name": "gc_d",
+   "status": "pending"
+  },
+  {
+   "java_name": "u",
+   "ret": "Image",
+   "params": "int n, int n2",
+   "sig": "Image u(int n, int n2)",
+   "start": 3604,
+   "end": 3670,
+   "c_name": "gc_u",
+   "status": "ported"
+  },
+  {
+   "java_name": "isResourceTile",
+   "ret": "boolean",
+   "params": "int n, int n2",
+   "sig": "boolean isResourceTile(int n, int n2)",
+   "start": 3672,
+   "end": 3761,
+   "c_name": "gc_isResourceTile",
+   "status": "ported"
+  },
+  {
+   "java_name": "neighboursMask",
+   "ret": "int",
+   "params": "int n, int n2",
+   "sig": "int neighboursMask(int n, int n2)",
+   "start": 3763,
+   "end": 3783,
+   "c_name": "gc_neighboursMask",
+   "status": "ported"
+  },
+  {
+   "java_name": "q",
+   "ret": "byte[]",
+   "params": "int n, int n2",
+   "sig": "byte[] q(int n, int n2)",
+   "start": 3785,
+   "end": 4155,
+   "c_name": "gc_q",
+   "status": "pending"
+  },
+  {
+   "java_name": "handleBuildMenuState",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void handleBuildMenuState(int n, int n2)",
+   "start": 4157,
+   "end": 4941,
+   "c_name": "gc_handleBuildMenuState",
+   "status": "ported"
+  },
+  {
+   "java_name": "tryBuildPath",
+   "ret": "boolean",
+   "params": "",
+   "sig": "boolean tryBuildPath()",
+   "start": 4943,
+   "end": 4961,
+   "c_name": "gc_tryBuildPath",
+   "status": "pending"
+  },
+  {
+   "java_name": "validatePathStep",
+   "ret": "void",
+   "params": "",
+   "sig": "void validatePathStep()",
+   "start": 4963,
+   "end": 5109,
+   "c_name": "gc_validatePathStep",
+   "status": "pending"
+  },
+  {
+   "java_name": "isTileMatchForPathInlined",
+   "ret": "boolean",
+   "params": "boolean bl, int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8, int n9, int n10, boolean bl2",
+   "sig": "boolean isTileMatchForPathInlined(boolean bl, int n, int n2, int n3, int n4, int n5, int n6, int n7, int n8, int n9, int n10, boolean bl2)",
+   "start": 5111,
+   "end": 5121,
+   "c_name": "gc_isTileMatchForPathInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "findPathStep",
+   "ret": "boolean",
+   "params": "int n, int n2, int n3",
+   "sig": "boolean findPathStep(int n, int n2, int n3)",
+   "start": 5123,
+   "end": 5131,
+   "c_name": "gc_findPathStep",
+   "status": "pending"
+  },
+  {
+   "java_name": "clearBuildPathTile",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void clearBuildPathTile(int n, int n2)",
+   "start": 5133,
+   "end": 5137,
+   "c_name": "gc_clearBuildPathTile",
+   "status": "ported"
+  },
+  {
+   "java_name": "floodFillPath",
+   "ret": "void",
+   "params": "",
+   "sig": "void floodFillPath()",
+   "start": 5139,
+   "end": 5176,
+   "c_name": "gc_floodFillPath",
+   "status": "pending"
+  },
+  {
+   "java_name": "hPath",
+   "ret": "int",
+   "params": "int n, int n2",
+   "sig": "int hPath(int n, int n2)",
+   "start": 5178,
+   "end": 5220,
+   "c_name": "gc_hPath",
+   "status": "pending"
+  },
+  {
+   "java_name": "pathDistanceMin",
+   "ret": "short",
+   "params": "int n, int n2, int n3",
+   "sig": "short pathDistanceMin(int n, int n2, int n3)",
+   "start": 5222,
+   "end": 5228,
+   "c_name": "gc_pathDistanceMin",
+   "status": "pending"
+  },
+  {
+   "java_name": "normalizeTrackBits",
+   "ret": "void",
+   "params": "",
+   "sig": "void normalizeTrackBits()",
+   "start": 5230,
+   "end": 5255,
+   "c_name": "gc_normalizeTrackBits",
+   "status": "pending"
+  },
+  {
+   "java_name": "scanTrackTiles",
+   "ret": "void",
+   "params": "",
+   "sig": "void scanTrackTiles()",
+   "start": 5257,
+   "end": 5274,
+   "c_name": "gc_scanTrackTiles",
+   "status": "pending"
+  },
+  {
+   "java_name": "setTrackOwnerCode",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void setTrackOwnerCode(int n)",
+   "start": 5276,
+   "end": 5297,
+   "c_name": "gc_setTrackOwnerCode",
+   "status": "pending"
+  },
+  {
+   "java_name": "clearPathDistanceGrid",
+   "ret": "void",
+   "params": "",
+   "sig": "void clearPathDistanceGrid()",
+   "start": 5299,
+   "end": 5380,
+   "c_name": "gc_clearPathDistanceGrid",
+   "status": "pending"
+  },
+  {
+   "java_name": "isTrackStepInlined",
+   "ret": "boolean",
+   "params": "int n, int n2, int n3, int n4, int n5",
+   "sig": "boolean isTrackStepInlined(int n, int n2, int n3, int n4, int n5)",
+   "start": 5382,
+   "end": 5392,
+   "c_name": "gc_isTrackStepInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "isCurveTile",
+   "ret": "boolean",
+   "params": "int n, int n2",
+   "sig": "boolean isCurveTile(int n, int n2)",
+   "start": 5394,
+   "end": 5413,
+   "c_name": "gc_isCurveTile",
+   "status": "ported"
+  },
+  {
+   "java_name": "isPlaceableTerrain",
+   "ret": "boolean",
+   "params": "int n, int n2",
+   "sig": "boolean isPlaceableTerrain(int n, int n2)",
+   "start": 5415,
+   "end": 5417,
+   "c_name": "gc_isPlaceableTerrain",
+   "status": "ported"
+  },
+  {
+   "java_name": "isCityOrStationTile",
+   "ret": "boolean",
+   "params": "int n, int n2",
+   "sig": "boolean isCityOrStationTile(int n, int n2)",
+   "start": 5419,
+   "end": 5461,
+   "c_name": "gc_isCityOrStationTile",
+   "status": "ported"
+  },
+  {
+   "java_name": "isTileBuildable",
+   "ret": "boolean",
+   "params": "int n, int n2, int n3",
+   "sig": "boolean isTileBuildable(int n, int n2, int n3)",
+   "start": 5463,
+   "end": 5485,
+   "c_name": "gc_isTileBuildable",
+   "status": "pending"
+  },
+  {
+   "java_name": "spawnOrFindAt",
+   "ret": "int",
+   "params": "int n, int n2",
+   "sig": "int spawnOrFindAt(int n, int n2)",
+   "start": 5487,
+   "end": 5500,
+   "c_name": "gc_spawnOrFindAt",
+   "status": "pending"
+  },
+  {
+   "java_name": "spawnWagonSlotInlined",
+   "ret": "int",
+   "params": "int n, int n2, int n3, boolean bl, boolean bl2",
+   "sig": "int spawnWagonSlotInlined(int n, int n2, int n3, boolean bl, boolean bl2)",
+   "start": 5502,
+   "end": 5528,
+   "c_name": "gc_spawnWagonSlotInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "computeTrainCost",
+   "ret": "void",
+   "params": "",
+   "sig": "void computeTrainCost()",
+   "start": 5530,
+   "end": 5578,
+   "c_name": "gc_computeTrainCost",
+   "status": "pending"
+  },
+  {
+   "java_name": "addSelectedOption",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void addSelectedOption(int n)",
+   "start": 5580,
+   "end": 5586,
+   "c_name": "gc_addSelectedOption",
+   "status": "pending"
+  },
+  {
+   "java_name": "popSelectedOption",
+   "ret": "void",
+   "params": "",
+   "sig": "void popSelectedOption()",
+   "start": 5588,
+   "end": 5594,
+   "c_name": "gc_popSelectedOption",
+   "status": "pending"
+  },
+  {
+   "java_name": "buyTrainAtCursor",
+   "ret": "boolean",
+   "params": "",
+   "sig": "boolean buyTrainAtCursor()",
+   "start": 5596,
+   "end": 5616,
+   "c_name": "gc_buyTrainAtCursor",
+   "status": "pending"
+  },
+  {
+   "java_name": "tickInputOrAi",
+   "ret": "void",
+   "params": "boolean bl",
+   "sig": "void tickInputOrAi(boolean bl)",
+   "start": 5618,
+   "end": 5758,
+   "c_name": "gc_tickInputOrAi",
+   "status": "pending"
+  },
+  {
+   "java_name": "spawnTrainCar",
+   "ret": "int",
+   "params": "int n, int n2",
+   "sig": "int spawnTrainCar(int n, int n2)",
+   "start": 5760,
+   "end": 5783,
+   "c_name": "gc_spawnTrainCar",
+   "status": "pending"
+  },
+  {
+   "java_name": "allocateTrainSlot",
+   "ret": "int",
+   "params": "int n, int n2, int n3, int n4, int n5, int n6",
+   "sig": "int allocateTrainSlot(int n, int n2, int n3, int n4, int n5, int n6)",
+   "start": 5785,
+   "end": 5811,
+   "c_name": "gc_allocateTrainSlot",
+   "status": "pending"
+  },
+  {
+   "java_name": "revenueOrYear",
+   "ret": "void",
+   "params": "",
+   "sig": "void revenueOrYear()",
+   "start": 5813,
+   "end": 5819,
+   "c_name": "gc_revenueOrYear",
+   "status": "pending"
+  },
+  {
+   "java_name": "everyTwoTick",
+   "ret": "void",
+   "params": "",
+   "sig": "void everyTwoTick()",
+   "start": 5821,
+   "end": 5839,
+   "c_name": "gc_everyTwoTick",
+   "status": "pending"
+  },
+  {
+   "java_name": "canRefuelAtTile",
+   "ret": "boolean",
+   "params": "int n, int n2",
+   "sig": "boolean canRefuelAtTile(int n, int n2)",
+   "start": 5841,
+   "end": 5875,
+   "c_name": "gc_canRefuelAtTile",
+   "status": "pending"
+  },
+  {
+   "java_name": "updateTrain",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void updateTrain(int n)",
+   "start": 5877,
+   "end": 6118,
+   "c_name": "gc_updateTrain",
+   "status": "pending"
+  },
+  {
+   "java_name": "f",
+   "ret": "void",
+   "params": "int n, int n2, int n3",
+   "sig": "void f(int n, int n2, int n3)",
+   "start": 6120,
+   "end": 6128,
+   "c_name": "gc_f",
+   "status": "pending"
+  },
+  {
+   "java_name": "countCarsInTrain",
+   "ret": "int",
+   "params": "int n",
+   "sig": "int countCarsInTrain(int n)",
+   "start": 6130,
+   "end": 6135,
+   "c_name": "gc_countCarsInTrain",
+   "status": "pending"
+  },
+  {
+   "java_name": "accumulateTrainTurns",
+   "ret": "int",
+   "params": "int n",
+   "sig": "int accumulateTrainTurns(int n)",
+   "start": 6137,
+   "end": 6156,
+   "c_name": "gc_accumulateTrainTurns",
+   "status": "pending"
+  },
+  {
+   "java_name": "removeTrainFromMapInlined",
+   "ret": "void",
+   "params": "int n, boolean bl",
+   "sig": "void removeTrainFromMapInlined(int n, boolean bl)",
+   "start": 6158,
+   "end": 6173,
+   "c_name": "gc_removeTrainFromMapInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawSpriteSingle",
+   "ret": "void",
+   "params": "Graphics graphics, int n",
+   "sig": "void drawSpriteSingle(Graphics graphics, int n)",
+   "start": 6175,
+   "end": 6307,
+   "c_name": "gc_drawSpriteSingle",
+   "status": "pending"
+  },
+  {
+   "java_name": "isTrainHeadCarAt",
+   "ret": "boolean",
+   "params": "int n, int n2, int n3",
+   "sig": "boolean isTrainHeadCarAt(int n, int n2, int n3)",
+   "start": 6309,
+   "end": 6317,
+   "c_name": "gc_isTrainHeadCarAt",
+   "status": "pending"
+  },
+  {
+   "java_name": "mergeTrainAt",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void mergeTrainAt(int n)",
+   "start": 6319,
+   "end": 6326,
+   "c_name": "gc_mergeTrainAt",
+   "status": "pending"
+  },
+  {
+   "java_name": "isAnyTrainCarAt",
+   "ret": "boolean",
+   "params": "int n, int n2, int n3",
+   "sig": "boolean isAnyTrainCarAt(int n, int n2, int n3)",
+   "start": 6328,
+   "end": 6338,
+   "c_name": "gc_isAnyTrainCarAt",
+   "status": "pending"
+  },
+  {
+   "java_name": "cPosLookup",
+   "ret": "int",
+   "params": "int n, int n2",
+   "sig": "int cPosLookup(int n, int n2)",
+   "start": 6340,
+   "end": 6346,
+   "c_name": "gc_cPosLookup",
+   "status": "pending"
+  },
+  {
+   "java_name": "xPlaceSpawn",
+   "ret": "int",
+   "params": "int n, int n2",
+   "sig": "int xPlaceSpawn(int n, int n2)",
+   "start": 6348,
+   "end": 6416,
+   "c_name": "gc_xPlaceSpawn",
+   "status": "pending"
+  },
+  {
+   "java_name": "consumeWagonOption",
+   "ret": "int",
+   "params": "int n, int n2, int n3",
+   "sig": "int consumeWagonOption(int n, int n2, int n3)",
+   "start": 6418,
+   "end": 6424,
+   "c_name": "gc_consumeWagonOption",
+   "status": "pending"
+  },
+  {
+   "java_name": "computeWagonOptionCount",
+   "ret": "int",
+   "params": "int n, int n2, int n3",
+   "sig": "int computeWagonOptionCount(int n, int n2, int n3)",
+   "start": 6426,
+   "end": 6433,
+   "c_name": "gc_computeWagonOptionCount",
+   "status": "pending"
+  },
+  {
+   "java_name": "applyTrainStateTick",
+   "ret": "void",
+   "params": "int n, int n2, boolean bl",
+   "sig": "void applyTrainStateTick(int n, int n2, boolean bl)",
+   "start": 6435,
+   "end": 6485,
+   "c_name": "gc_applyTrainStateTick",
+   "status": "pending"
+  },
+  {
+   "java_name": "decrementOptionCounts",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void decrementOptionCounts(int n)",
+   "start": 6487,
+   "end": 6492,
+   "c_name": "gc_decrementOptionCounts",
+   "status": "pending"
+  },
+  {
+   "java_name": "applyTrainUpgradeInlined",
+   "ret": "boolean",
+   "params": "int n, int n2, int[] nArray",
+   "sig": "boolean applyTrainUpgradeInlined(int n, int n2, int[] nArray)",
+   "start": 6494,
+   "end": 6518,
+   "c_name": "gc_applyTrainUpgradeInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "loadGame",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void loadGame(int n, int n2)",
+   "start": 6520,
+   "end": 6546,
+   "c_name": "gc_loadGame",
+   "status": "ported"
+  },
+  {
+   "java_name": "ensureSaveBufferCapacity",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void ensureSaveBufferCapacity(int n)",
+   "start": 6548,
+   "end": 6559,
+   "c_name": "gc_ensureSaveBufferCapacity",
+   "status": "ported"
+  },
+  {
+   "java_name": "readShortFromBuffer",
+   "ret": "int",
+   "params": "",
+   "sig": "private int readShortFromBuffer()",
+   "start": 6561,
+   "end": 6563,
+   "c_name": "gc_readShortFromBuffer",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveGame",
+   "ret": "void",
+   "params": "",
+   "sig": "public void saveGame()",
+   "start": 6565,
+   "end": 6587,
+   "c_name": "gc_saveGame",
+   "status": "pending"
+  },
+  {
+   "java_name": "writeRlePairInlined",
+   "ret": "void",
+   "params": "ByteArrayOutputStream byteArrayOutputStream, int n, int n2",
+   "sig": "void writeRlePairInlined(ByteArrayOutputStream byteArrayOutputStream, int n, int n2)",
+   "start": 6589,
+   "end": 6601,
+   "c_name": "gc_writeRlePairInlined",
+   "status": "pending"
+  },
+  {
+   "java_name": "crcSum",
+   "ret": "void",
+   "params": "String string",
+   "sig": "void crcSum(String string)",
+   "start": 6603,
+   "end": 6608,
+   "c_name": "gc_crcSum",
+   "status": "pending"
+  },
+  {
+   "java_name": "compressSaveBuffer",
+   "ret": "void",
+   "params": "",
+   "sig": "void compressSaveBuffer()",
+   "start": 6610,
+   "end": 6636,
+   "c_name": "gc_compressSaveBuffer",
+   "status": "pending"
+  },
+  {
+   "java_name": "decompressSaveBuffer",
+   "ret": "void",
+   "params": "",
+   "sig": "void decompressSaveBuffer()",
+   "start": 6638,
+   "end": 6662,
+   "c_name": "gc_decompressSaveBuffer",
+   "status": "pending"
+  },
+  {
+   "java_name": "saveOrLoadBool",
+   "ret": "boolean",
+   "params": "boolean bl",
+   "sig": "boolean saveOrLoadBool(boolean bl)",
+   "start": 6664,
+   "end": 6666,
+   "c_name": "gc_saveOrLoadBool",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveOrLoadByte",
+   "ret": "byte",
+   "params": "byte by",
+   "sig": "byte saveOrLoadByte(byte by)",
+   "start": 6668,
+   "end": 6680,
+   "c_name": "gc_saveOrLoadByte",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveIntToBuffer",
+   "ret": "int",
+   "params": "int n",
+   "sig": "int saveIntToBuffer(int n)",
+   "start": 6682,
+   "end": 6697,
+   "c_name": "gc_saveIntToBuffer",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveOrLoadByteMatrixInlined",
+   "ret": "void",
+   "params": "byte[][] byArray",
+   "sig": "void saveOrLoadByteMatrixInlined(byte[][] byArray)",
+   "start": 6699,
+   "end": 6703,
+   "c_name": "gc_saveOrLoadByteMatrixInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveOrLoadShortMatrixInlined",
+   "ret": "void",
+   "params": "short[][] sArray",
+   "sig": "void saveOrLoadShortMatrixInlined(short[][] sArray)",
+   "start": 6705,
+   "end": 6709,
+   "c_name": "gc_saveOrLoadShortMatrixInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveOrLoadByteArrayInlined",
+   "ret": "void",
+   "params": "byte[] byArray",
+   "sig": "void saveOrLoadByteArrayInlined(byte[] byArray)",
+   "start": 6711,
+   "end": 6724,
+   "c_name": "gc_saveOrLoadByteArrayInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveOrLoadShortArrayInlined",
+   "ret": "void",
+   "params": "short[] sArray",
+   "sig": "void saveOrLoadShortArrayInlined(short[] sArray)",
+   "start": 6726,
+   "end": 6749,
+   "c_name": "gc_saveOrLoadShortArrayInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveOrLoadIntArrayInlined",
+   "ret": "void",
+   "params": "int[] nArray",
+   "sig": "void saveOrLoadIntArrayInlined(int[] nArray)",
+   "start": 6751,
+   "end": 6776,
+   "c_name": "gc_saveOrLoadIntArrayInlined",
+   "status": "ported"
+  },
+  {
+   "java_name": "initSaveOrLoad",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void initSaveOrLoad(int n)",
+   "start": 6778,
+   "end": 6968,
+   "c_name": "gc_initSaveOrLoad",
+   "status": "pending"
+  },
+  {
+   "java_name": "writeSaveSnapshot",
+   "ret": "void",
+   "params": "",
+   "sig": "void writeSaveSnapshot()",
+   "start": 6970,
+   "end": 6981,
+   "c_name": "gc_writeSaveSnapshot",
+   "status": "ported"
+  },
+  {
+   "java_name": "persistSnapshotMode0",
+   "ret": "void",
+   "params": "",
+   "sig": "void persistSnapshotMode0()",
+   "start": 6983,
+   "end": 6987,
+   "c_name": "gc_persistSnapshotMode0",
+   "status": "pending"
+  },
+  {
+   "java_name": "persistSnapshotMode1",
+   "ret": "void",
+   "params": "",
+   "sig": "void persistSnapshotMode1()",
+   "start": 6989,
+   "end": 6993,
+   "c_name": "gc_persistSnapshotMode1",
+   "status": "ported"
+  },
+  {
+   "java_name": "saveAllMapArrays",
+   "ret": "void",
+   "params": "",
+   "sig": "void saveAllMapArrays()",
+   "start": 6995,
+   "end": 7015,
+   "c_name": "gc_saveAllMapArrays",
+   "status": "pending"
+  },
+  {
+   "java_name": "loadSnapshotAndReturn",
+   "ret": "boolean",
+   "params": "",
+   "sig": "boolean loadSnapshotAndReturn()",
+   "start": 7017,
+   "end": 7020,
+   "c_name": "gc_loadSnapshotAndReturn",
+   "status": "ported"
+  },
+  {
+   "java_name": "restoreAllMapArrays",
+   "ret": "void",
+   "params": "",
+   "sig": "void restoreAllMapArrays()",
+   "start": 7022,
+   "end": 7049,
+   "c_name": "gc_restoreAllMapArrays",
+   "status": "pending"
+  },
+  {
+   "java_name": "everyTenTick",
+   "ret": "void",
+   "params": "",
+   "sig": "void everyTenTick()",
+   "start": 7051,
+   "end": 7054,
+   "c_name": "gc_everyTenTick",
+   "status": "ported"
+  },
+  {
+   "java_name": "computeYearEndMetrics",
+   "ret": "void",
+   "params": "",
+   "sig": "void computeYearEndMetrics()",
+   "start": 7056,
+   "end": 7069,
+   "c_name": "gc_computeYearEndMetrics",
+   "status": "pending"
+  },
+  {
+   "java_name": "newYearNotify",
+   "ret": "void",
+   "params": "",
+   "sig": "void newYearNotify()",
+   "start": 7071,
+   "end": 7164,
+   "c_name": "gc_newYearNotify",
+   "status": "pending"
+  },
+  {
+   "java_name": "archiveOrRecall",
+   "ret": "void",
+   "params": "",
+   "sig": "void archiveOrRecall()",
+   "start": 7166,
+   "end": 7170,
+   "c_name": "gc_archiveOrRecall",
+   "status": "pending"
+  },
+  {
+   "java_name": "scanMapForMetric",
+   "ret": "int",
+   "params": "",
+   "sig": "int scanMapForMetric()",
+   "start": 7172,
+   "end": 7233,
+   "c_name": "gc_scanMapForMetric",
+   "status": "pending"
+  },
+  {
+   "java_name": "setYearGraphMode",
+   "ret": "void",
+   "params": "int n, boolean bl",
+   "sig": "void setYearGraphMode(int n, boolean bl)",
+   "start": 7235,
+   "end": 7336,
+   "c_name": "gc_setYearGraphMode",
+   "status": "pending"
+  },
+  {
+   "java_name": "maybeAiTakeTurn",
+   "ret": "void",
+   "params": "",
+   "sig": "void maybeAiTakeTurn()",
+   "start": 7338,
+   "end": 7342,
+   "c_name": "gc_maybeAiTakeTurn",
+   "status": "pending"
+  },
+  {
+   "java_name": "placeCitiesAndIndustry",
+   "ret": "void",
+   "params": "",
+   "sig": "void placeCitiesAndIndustry()",
+   "start": 7344,
+   "end": 7371,
+   "c_name": "gc_placeCitiesAndIndustry",
+   "status": "pending"
+  },
+  {
+   "java_name": "dayResetAd",
+   "ret": "void",
+   "params": "",
+   "sig": "void dayResetAd()",
+   "start": 7373,
+   "end": 7385,
+   "c_name": "gc_dayResetAd",
+   "status": "pending"
+  },
+  {
+   "java_name": "postRevenueReset",
+   "ret": "void",
+   "params": "",
+   "sig": "void postRevenueReset()",
+   "start": 7387,
+   "end": 7394,
+   "c_name": "gc_postRevenueReset",
+   "status": "pending"
+  },
+  {
+   "java_name": "spawnTrainAt",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void spawnTrainAt(int n, int n2)",
+   "start": 7396,
+   "end": 7417,
+   "c_name": "gc_spawnTrainAt",
+   "status": "pending"
+  },
+  {
+   "java_name": "autoExtendTrackStation",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void autoExtendTrackStation(int n, int n2)",
+   "start": 7419,
+   "end": 7464,
+   "c_name": "gc_autoExtendTrackStation",
+   "status": "pending"
+  },
+  {
+   "java_name": "pickCitySite",
+   "ret": "void",
+   "params": "",
+   "sig": "void pickCitySite()",
+   "start": 7466,
+   "end": 7510,
+   "c_name": "gc_pickCitySite",
+   "status": "pending"
+  },
+  {
+   "java_name": "pickIndustrySite",
+   "ret": "void",
+   "params": "",
+   "sig": "void pickIndustrySite()",
+   "start": 7512,
+   "end": 7556,
+   "c_name": "gc_pickIndustrySite",
+   "status": "pending"
+  },
+  {
+   "java_name": "computeMilestoneScore",
+   "ret": "int",
+   "params": "",
+   "sig": "int computeMilestoneScore()",
+   "start": 7558,
+   "end": 7636,
+   "c_name": "gc_computeMilestoneScore",
+   "status": "pending"
+  },
+  {
+   "java_name": "everyTwoTickZ",
+   "ret": "void",
+   "params": "",
+   "sig": "void everyTwoTickZ()",
+   "start": 7638,
+   "end": 7731,
+   "c_name": "gc_everyTwoTickZ",
+   "status": "pending"
+  },
+  {
+   "java_name": "rebuildMenuTypeIndexes",
+   "ret": "void",
+   "params": "",
+   "sig": "void rebuildMenuTypeIndexes()",
+   "start": 7733,
+   "end": 7740,
+   "c_name": "gc_rebuildMenuTypeIndexes",
+   "status": "pending"
+  },
+  {
+   "java_name": "computeMenuRowDisplayValue",
+   "ret": "byte",
+   "params": "int n",
+   "sig": "byte computeMenuRowDisplayValue(int n)",
+   "start": 7742,
+   "end": 7774,
+   "c_name": "gc_computeMenuRowDisplayValue",
+   "status": "pending"
+  },
+  {
+   "java_name": "placeTrainAt",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void placeTrainAt(int n, int n2)",
+   "start": 7776,
+   "end": 7795,
+   "c_name": "gc_placeTrainAt",
+   "status": "pending"
+  },
+  {
+   "java_name": "applyMenuRowEffect",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void applyMenuRowEffect(int n)",
+   "start": 7797,
+   "end": 7849,
+   "c_name": "gc_applyMenuRowEffect",
+   "status": "pending"
+  },
+  {
+   "java_name": "duplicateMenuRow",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void duplicateMenuRow(int n)",
+   "start": 7851,
+   "end": 7877,
+   "c_name": "gc_duplicateMenuRow",
+   "status": "pending"
+  },
+  {
+   "java_name": "everyMonthlyTick",
+   "ret": "void",
+   "params": "",
+   "sig": "void everyMonthlyTick()",
+   "start": 7879,
+   "end": 8055,
+   "c_name": "gc_everyMonthlyTick",
+   "status": "pending"
+  },
+  {
+   "java_name": "incrementRowValueType1",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void incrementRowValueType1(int n)",
+   "start": 8057,
+   "end": 8065,
+   "c_name": "gc_incrementRowValueType1",
+   "status": "pending"
+  },
+  {
+   "java_name": "incrementRowValueTypeN",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void incrementRowValueTypeN(int n, int n2)",
+   "start": 8067,
+   "end": 8094,
+   "c_name": "gc_incrementRowValueTypeN",
+   "status": "pending"
+  },
+  {
+   "java_name": "adjustRowValueByCode",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void adjustRowValueByCode(int n)",
+   "start": 8096,
+   "end": 8114,
+   "c_name": "gc_adjustRowValueByCode",
+   "status": "pending"
+  },
+  {
+   "java_name": "decCountsForOption",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void decCountsForOption(int n)",
+   "start": 8116,
+   "end": 8142,
+   "c_name": "gc_decCountsForOption",
+   "status": "pending"
+  },
+  {
+   "java_name": "incrementRowValueType13",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void incrementRowValueType13(int n)",
+   "start": 8144,
+   "end": 8150,
+   "c_name": "gc_incrementRowValueType13",
+   "status": "pending"
+  },
+  {
+   "java_name": "incrementRowValueType14",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void incrementRowValueType14(int n)",
+   "start": 8152,
+   "end": 8158,
+   "c_name": "gc_incrementRowValueType14",
+   "status": "pending"
+  },
+  {
+   "java_name": "loadMusic",
+   "ret": "void",
+   "params": "",
+   "sig": "void loadMusic()",
+   "start": 8160,
+   "end": 8181,
+   "c_name": "gc_loadMusic",
+   "status": "pending"
+  },
+  {
+   "java_name": "playMusic",
+   "ret": "void",
+   "params": "",
+   "sig": "void playMusic()",
+   "start": 8183,
+   "end": 8196,
+   "c_name": "gc_playMusic",
+   "status": "pending"
+  },
+  {
+   "java_name": "setMusicVolume",
+   "ret": "void",
+   "params": "int n",
+   "sig": "void setMusicVolume(int n)",
+   "start": 8198,
+   "end": 8207,
+   "c_name": "gc_setMusicVolume",
+   "status": "pending"
+  },
+  {
+   "java_name": "stopMusic",
+   "ret": "void",
+   "params": "",
+   "sig": "void stopMusic()",
+   "start": 8209,
+   "end": 8219,
+   "c_name": "gc_stopMusic",
+   "status": "pending"
+  },
+  {
+   "java_name": "computeMapTrainMetric",
+   "ret": "int",
+   "params": "int n",
+   "sig": "int computeMapTrainMetric(int n)",
+   "start": 8221,
+   "end": 8247,
+   "c_name": "gc_computeMapTrainMetric",
+   "status": "pending"
+  },
+  {
+   "java_name": "decodeString",
+   "ret": "String",
+   "params": "byte[] byArray",
+   "sig": "String decodeString(byte[] byArray)",
+   "start": 8249,
+   "end": 8255,
+   "c_name": "gc_decodeString",
+   "status": "pending"
+  },
+  {
+   "java_name": "n",
+   "ret": "String",
+   "params": "",
+   "sig": "String n()",
+   "start": 8257,
+   "end": 8295,
+   "c_name": "gc_n",
+   "status": "pending"
+  },
+  {
+   "java_name": "syncHighScores",
+   "ret": "boolean",
+   "params": "boolean bl",
+   "sig": "boolean syncHighScores(boolean bl)",
+   "start": 8297,
+   "end": 8359,
+   "c_name": "gc_syncHighScores",
+   "status": "pending"
+  },
+  {
+   "java_name": "a",
+   "ret": "void",
+   "params": "ByteArrayOutputStream byteArrayOutputStream, ByteArrayOutputStream byteArrayOutputStream2, int n, int n2",
+   "sig": "private void a(ByteArrayOutputStream byteArrayOutputStream, ByteArrayOutputStream byteArrayOutputStream2, int n, int n2)",
+   "start": 8361,
+   "end": 8364,
+   "c_name": "gc_a",
+   "status": "ported"
+  },
+  {
+   "java_name": "k",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "public void k(int n, int n2)",
+   "start": 8366,
+   "end": 8418,
+   "c_name": "gc_k",
+   "status": "ported"
+  },
+  {
+   "java_name": "drawTextBox",
+   "ret": "void",
+   "params": "Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray",
+   "sig": "void drawTextBox(Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray)",
+   "start": 8420,
+   "end": 8448,
+   "c_name": "gc_drawTextBox",
+   "status": "ported"
+  },
+  {
+   "java_name": "enterOutOfMoneyState",
+   "ret": "void",
+   "params": "",
+   "sig": "void enterOutOfMoneyState()",
+   "start": 8450,
+   "end": 8454,
+   "c_name": "gc_enterOutOfMoneyState",
+   "status": "pending"
+  },
+  {
+   "java_name": "drawRectFill",
+   "ret": "void",
+   "params": "Graphics graphics, int n, int n2, byte by",
+   "sig": "void drawRectFill(Graphics graphics, int n, int n2, byte by)",
+   "start": 8456,
+   "end": 8479,
+   "c_name": "gc_drawRectFill",
+   "status": "ported"
+  },
+  {
+   "java_name": "setCanvasSize",
+   "ret": "void",
+   "params": "int n, int n2",
+   "sig": "void setCanvasSize(int n, int n2)",
+   "start": 8481,
+   "end": 8505,
+   "c_name": "gc_setCanvasSize",
+   "status": "ported"
+  },
+  {
+   "java_name": "paint",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "public void paint(Graphics graphics)",
+   "start": 8507,
+   "end": 8704,
+   "c_name": "gc_paint",
+   "status": "ported"
+  },
+  {
+   "java_name": "setState",
+   "ret": "void",
+   "params": "int n",
+   "sig": "public void setState(int n)",
+   "start": 8706,
+   "end": 8814,
+   "c_name": "gc_setState",
+   "status": "ported"
+  },
+  {
+   "java_name": "update",
+   "ret": "void",
+   "params": "",
+   "sig": "public void update()",
+   "start": 8816,
+   "end": 9513,
+   "c_name": "gc_update",
+   "status": "partial",
+   "note": "boot states + 25 (map-gen) done; state 30 sim tick + menus TODO"
+  },
+  {
+   "java_name": "renderMap",
+   "ret": "void",
+   "params": "Graphics graphics",
+   "sig": "public void renderMap(Graphics graphics)",
+   "start": 9515,
+   "end": 9707,
+   "c_name": "gc_renderMap",
+   "status": "ported"
+  },
+  {
+   "java_name": "hideNotify",
+   "ret": "void",
+   "params": "",
+   "sig": "public void hideNotify()",
+   "start": 9709,
+   "end": 9719,
+   "c_name": "gc_hideNotify",
+   "status": "pending"
+  },
+  {
+   "java_name": "showNotify",
+   "ret": "void",
+   "params": "",
+   "sig": "public void showNotify()",
+   "start": 9721,
+   "end": 9726,
+   "c_name": "gc_showNotify",
+   "status": "pending"
+  }
+ ]
+}

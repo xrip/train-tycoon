@@ -3,3 +3,10 @@
 
 # Pinned tool jars fetched by `python tools/deobf.py setup`
 /tools/lib/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+
+# Runtime save file (RecordStore → file; regenerated on each run by the port)
+/TTStore.rms

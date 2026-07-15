@@ -78,13 +78,61 @@ def count_uses(name, kind="field"):
     return len(pat.findall(text))
 
 
+JVM_TO_SOURCE_TYPES = {
+    "B": "byte", "S": "short", "I": "int", "J": "long", "F": "float",
+    "D": "double", "C": "char", "Z": "boolean", "V": "void",
+}
+
+
+def jvm_args_to_source(jvm_desc):
+    """Convert JVM-style descriptor args like (LGameMIDlet;I[B)V to source-style
+    like (GameMIDlet,int,byte[])."""
+    if not jvm_desc.startswith("("):
+        return jvm_desc
+    close = jvm_desc.find(")")
+    if close < 0:
+        return jvm_desc
+    args = jvm_desc[1:close]
+    src_parts = []
+    i = 0
+    while i < len(args):
+        c = args[i]
+        if c == "L":
+            # L<class>; — read up to ';'
+            end = args.find(";", i)
+            if end < 0:
+                src_parts.append(c)
+                break
+            cls = args[i + 1 : end].replace("/", ".")
+            src_parts.append(cls)
+            i = end + 1
+        elif c == "[":
+            # array — count brackets, then element type
+            depth = 1
+            while depth < len(args) and args[i + depth] == "[":
+                depth += 1
+            elem = args[i + depth]
+            if elem == "L":
+                end = args.find(";", i + depth)
+                cls = args[i + depth + 1 : end].replace("/", ".")
+                src_parts.append(cls + "[]" * depth)
+                i = end + 1
+            else:
+                src_parts.append(JVM_TO_SOURCE_TYPES.get(elem, elem) + "[]" * depth)
+                i += depth + 1
+        else:
+            src_parts.append(JVM_TO_SOURCE_TYPES.get(c, c))
+            i += 1
+    return "(" + ",".join(src_parts) + ")"
+
+
 def parse_mappings():
     """Return:
         mapped_fields:  set of (owner, name)
-        mapped_methods: dict (owner, name) -> count of mapped overloads
+        mapped_methods: set of (owner, name, source-style-args-descriptor)
     """
     mapped_fields = set()
-    mapped_methods = {}
+    mapped_methods = set()
     for line in MAPPINGS.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
@@ -96,8 +144,10 @@ def parse_mappings():
         if kind == "field":
             mapped_fields.add((tokens[1], tokens[2]))
         elif kind == "method":
-            key = (tokens[1], tokens[2])
-            mapped_methods[key] = mapped_methods.get(key, 0) + 1
+            owner, name, desc = tokens[1], tokens[2], tokens[3]
+            # Convert JVM-style descriptor args to source-style
+            source_args = jvm_args_to_source(desc)
+            mapped_methods.add((owner, name, source_args))
     return mapped_fields, mapped_methods
 
 
@@ -113,12 +163,6 @@ def main(argv):
     members = parse_javap()
     mapped_fields, mapped_methods = parse_mappings()
 
-    # Count overloads per (owner, name) so we can identify fully-mapped methods
-    overloads = {}
-    for kind, owner, name, _ in members:
-        if kind == "method":
-            overloads[(owner, name)] = overloads.get((owner, name), 0) + 1
-
     rows = []
     for kind, owner, name, desc in members:
         if obfuscated_only and not is_obfuscated_name(name):
@@ -127,8 +171,8 @@ def main(argv):
             if (owner, name) in mapped_fields:
                 continue
         elif kind == "method":
-            # fully mapped if mapped_methods count == overloads count
-            if mapped_methods.get((owner, name), 0) >= overloads.get((owner, name), 0):
+            # Check exact (owner, name, args-only-descriptor) match
+            if (owner, name, desc) in mapped_methods:
                 continue
         else:
             continue
