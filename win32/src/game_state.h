@@ -318,7 +318,7 @@ typedef struct GameCanvas {
     int32_t nextTrackPieceCode;
     int8_t aiFrequency;
     int8_t aiThreshold;
-    int8_t* routeResourceFlags;
+    std::array<int8_t, 6> routeResourceFlags{};
     int8_t** offerTypesByEffect;
     int8_t** offerEffectSchedule;
     int8_t* menuRowType;
@@ -339,7 +339,7 @@ typedef struct GameCanvas {
     int32_t savedLegacyMetricBq;
     int32_t lastOfferDateCode;
     int32_t menuRowEnabledCount;
-    int8_t* enabledMenuRowIndexes;
+    std::array<int8_t, 5> enabledMenuRowIndexes{};
     int8_t scenarioMilestoneIndex;
     int32_t currentMilestoneScore;
     int32_t milestoneCoThreshold2;

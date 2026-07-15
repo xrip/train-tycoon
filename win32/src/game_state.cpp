@@ -305,7 +305,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->nextTrackPieceCode = 66;
     gc->aiFrequency = 15;
     gc->aiThreshold = 12;
-    gc->routeResourceFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 6);
     static const int8_t offerTypesByEffect__r0[] = {1, 3, 13};
     static const int8_t offerTypesByEffect__r1[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     static const int8_t offerTypesByEffect__r2[] = {1, 2, 3, 13, 14, 15};
@@ -372,7 +371,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->offerEffectNextCount = (int16_t*)midp_alloc_arr(sizeof(int16_t), 12);
     gc->lastOfferDateCode = 0;
     gc->menuRowEnabledCount = 0;
-    gc->enabledMenuRowIndexes = (int8_t*)midp_alloc_arr(sizeof(int8_t), 5);
     gc->lifetimeTrainRevenue = 0;
     gc->milestoneThreshold1 = 0;
     gc->milestoneThreshold2 = 0;
