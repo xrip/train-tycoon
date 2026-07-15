@@ -36,8 +36,8 @@ void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
     int n2 = in.read_byte();
     int n3 = read_u16_be(in);
     int n4 = 0;
-    gc->spriteOffsetTable = GC_NEW(int16_t, n2 + 1);
-    gc->spriteData = GC_NEW(int8_t, n3);
+    gc->spriteOffsetTable.assign(static_cast<std::size_t>(n2 + 1), 0);
+    gc->spriteData.assign(static_cast<std::size_t>(n3), 0);
     for (int i = 0; i < n; ++i) {
         int n5 = in.read_byte();
         int n6 = read_u16_be(in);
@@ -120,8 +120,8 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
 // byte[] m(int n)
 std::vector<int8_t> gc_readPackedTextCodes(GameCanvas *gc, int32_t offset) {
     const int code_count = gc->spriteData[offset];
-    return {gc->spriteData + offset + 1,
-            gc->spriteData + offset + 1 + code_count};
+    return {gc->spriteData.data() + offset + 1,
+            gc->spriteData.data() + offset + 1 + code_count};
 }
 
 // void loadGame(int n, int n2)
@@ -201,10 +201,10 @@ void gc_k(GameCanvas *gc, int32_t n, int32_t n2) {
     const auto x_offset_bytes = x_offsets.bytes();
     const auto y_offset_bytes = y_offsets.bytes();
     int sz = static_cast<int>(x_offset_bytes.size());
-    gc->tileOffsetX = GC_NEW(int8_t, sz);
-    memcpy(gc->tileOffsetX, x_offset_bytes.data(), (size_t)sz);
-    gc->tileOffsetY = GC_NEW(int8_t, sz);
-    memcpy(gc->tileOffsetY, y_offset_bytes.data(), (size_t)sz);
+    gc->tileOffsetX.resize(static_cast<std::size_t>(sz));
+    memcpy(gc->tileOffsetX.data(), x_offset_bytes.data(), (size_t)sz);
+    gc->tileOffsetY.resize(static_cast<std::size_t>(sz));
+    memcpy(gc->tileOffsetY.data(), y_offset_bytes.data(), (size_t)sz);
     gc->numActiveTileAnimations = sz;
     do {
         n5 = 0;
@@ -272,7 +272,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
                 int n2 = in.read_byte();
                 int n3 = in.read_byte();
                 gc->spriteBitmapTable.resize(n2, 0);
-                gc->spriteIndexTable = GC_NEW(int8_t, n3 + 1);
+                gc->spriteIndexTable.assign(static_cast<std::size_t>(n3 + 1), 0);
                 for (int i = 0; i < n2; ++i) {
                     int n4 = in.read_byte();
                     int n5 = in.read_byte();

@@ -80,8 +80,8 @@ typedef struct GameCanvas {
     int32_t dp;
     ResourceReader sprite_stream;
     std::array<std::unique_ptr<Image>, 6> font_images;
-    int16_t* spriteOffsetTable;
-    int8_t* spriteData;
+    std::vector<int16_t> spriteOffsetTable;
+    std::vector<int8_t> spriteData;
     int32_t cursorScale;
     int32_t cursorDragY;
     int32_t cursorSelectY;
@@ -360,8 +360,8 @@ typedef struct GameCanvas {
     int32_t bestScenarioScore;
     std::array<int32_t, 13> scenarioScores{};
     std::array<int32_t, 14> leaderboardScores{};
-    int8_t* tileOffsetX;
-    int8_t* tileOffsetY;
+    std::vector<int8_t> tileOffsetX;
+    std::vector<int8_t> tileOffsetY;
     int32_t numActiveTileAnimations;
     int32_t gameState;
     Grid<int8_t> tileMap;
@@ -397,7 +397,7 @@ typedef struct GameCanvas {
     int32_t transitionCode;
     bool ready;
     int32_t loadStep;
-    int8_t* spriteIndexTable;
+    std::vector<int8_t> spriteIndexTable;
     Grid<int8_t> spriteBitmapTable;
     int32_t timerA1;
     int32_t timerA2;

@@ -283,8 +283,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->music_volume_level = 2;
     gc->trainRevenueScore = 0;
     gc->bestScenarioScore = 0;
-    gc->tileOffsetX = (int8_t*)midp_alloc_arr(sizeof(int8_t), 1);
-    gc->tileOffsetY = (int8_t*)midp_alloc_arr(sizeof(int8_t), 1);
     gc->numActiveTileAnimations = 0;
     gc->viewportCenterX = 0;
     gc->viewportCenterY = 0;
