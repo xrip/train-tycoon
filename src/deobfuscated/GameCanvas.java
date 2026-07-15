@@ -52,12 +52,12 @@ implements Runnable {
     int mapScreenHeight = (this.mapWidth + this.mapHeight) * 8;
     int viewportHalfWidth = this.mapScreenWidth / 2;
     int viewportHalfHeight = this.mapScreenHeight / 2;
-    int dQ;
-    int hf;
-    int archiveOrRecallMethod;
+    int initialObstacleCount;
+    int terrainRaiseStepCount;
+    int terrainLowerStepCount;
     int mapGenColumns;
     int mapGenRows;
-    int cK;
+    int terrainPatchBaseSize;
     int terrainFeatureStage7Count;
     int terrainFeatureStage6Count;
     int weightAccel;
@@ -343,9 +343,9 @@ implements Runnable {
     byte[] yearGraphValues = new byte[12];
     int industryCategory;
     boolean industrySiteFound;
-    int gS;
-    int bp;
-    int dD;
+    int cityStationX;
+    int cityStationY;
+    int industryStationX;
     int industryTileY;
     byte difficultyCycle = 1;
     int nextTrackPieceCode = 66;
@@ -1536,7 +1536,7 @@ implements Runnable {
             this.initialIndustryPlaced = false;
             this.mapGenStage = 0;
             this.tilesGeneratedInStage = 0;
-            this.totalTilesToGenerate = this.hf + this.archiveOrRecallMethod + this.mapGenColumns * (this.mapGenColumns - 1) + this.mapGenRows + this.weightAccel2 + this.weightAccel + this.terrainFeatureStage6Count + this.terrainFeatureStage7Count + this.weightAccel4 + this.weightAccel3 + 1;
+            this.totalTilesToGenerate = this.terrainRaiseStepCount + this.terrainLowerStepCount + this.mapGenColumns * (this.mapGenColumns - 1) + this.mapGenRows + this.weightAccel2 + this.weightAccel + this.terrainFeatureStage6Count + this.terrainFeatureStage7Count + this.weightAccel4 + this.weightAccel3 + 1;
             this.mapGenTilesDone = 0;
         }
         if (n == 1) {
@@ -1547,12 +1547,12 @@ implements Runnable {
                 this.mapGenStage = 1;
                 this.tilesGeneratedInStage = 0;
             }
-            if (this.mapGenStage == 1 && this.tilesGeneratedInStage == this.hf) {
+            if (this.mapGenStage == 1 && this.tilesGeneratedInStage == this.terrainRaiseStepCount) {
                 this.mapGenStage = 2;
                 this.tilesGeneratedInStage = 0;
                 this.toggleFlagInlined(false);
             }
-            if (this.mapGenStage == 2 && this.tilesGeneratedInStage == this.archiveOrRecallMethod) {
+            if (this.mapGenStage == 2 && this.tilesGeneratedInStage == this.terrainLowerStepCount) {
                 this.mapGenStage = 3;
                 this.tilesGeneratedInStage = 0;
                 this.toggleFlagInlined(false);
@@ -1627,7 +1627,7 @@ implements Runnable {
                 this.loadStep = 0;
             }
             if (this.mapGenStage == 10) {
-                for (n4 = 0; n4 < this.dQ; ++n4) {
+                for (n4 = 0; n4 < this.initialObstacleCount; ++n4) {
                     n3 = Math.abs(this.rng.nextInt() % this.mapWidth);
                     if (this.tileMap[n3][n2 = Math.abs(this.rng.nextInt() % this.mapHeight)] != 0 || this.tileElevation[n3][n2] < 0) continue;
                     this.tileMap[n3][n2] = (byte)(29 + Math.abs(this.rng.nextInt() % 5));
@@ -1674,8 +1674,8 @@ implements Runnable {
         byte by4;
         int n5;
         int n6;
-        int n7 = Math.abs(this.rng.nextInt() % 5) + this.cK;
-        byte by5 = Math.abs(this.rng.nextInt() % 5) + this.cK;
+        int n7 = Math.abs(this.rng.nextInt() % 5) + this.terrainPatchBaseSize;
+        byte by5 = Math.abs(this.rng.nextInt() % 5) + this.terrainPatchBaseSize;
         byte[][] byArray = new byte[n7][by5];
         boolean bl = false;
         int n8 = Math.abs(this.rng.nextInt() % (n7 - 2)) + 1;
@@ -7349,14 +7349,14 @@ implements Runnable {
                 this.pickIndustrySite();
             } while (++n2 != 50 && !this.industrySiteFound);
             if (n2 < 50) {
-                this.placementX = this.gS;
-                this.placementY = this.bp;
-                this.demolishX = this.dD;
+                this.placementX = this.cityStationX;
+                this.placementY = this.cityStationY;
+                this.demolishX = this.industryStationX;
                 this.demolishY = this.industryTileY;
                 if (this.tryBuildPath()) {
-                    this.autoExtendTrackStation(this.gS, this.bp);
-                    this.autoExtendTrackStation(this.dD, this.industryTileY);
-                    this.spawnTrainAt(this.gS, this.bp);
+                    this.autoExtendTrackStation(this.cityStationX, this.cityStationY);
+                    this.autoExtendTrackStation(this.industryStationX, this.industryTileY);
+                    this.spawnTrainAt(this.cityStationX, this.cityStationY);
                     this.setTrackOwnerCode(this.nextTrackPieceCode - 64);
                     ++this.nextTrackPieceCode;
                     if (this.nextTrackPieceCode == 69) {
@@ -7500,8 +7500,8 @@ implements Runnable {
                 }
             }
             if (this.industryCategory >= 0) {
-                this.gS = n;
-                this.bp = n2;
+                this.cityStationX = n;
+                this.cityStationY = n2;
             }
         }
     }
@@ -7546,7 +7546,7 @@ implements Runnable {
                 }
             }
             if (this.industrySiteFound) {
-                this.dD = n;
+                this.industryStationX = n;
                 this.industryTileY = n2;
             }
         }
@@ -8931,10 +8931,10 @@ implements Runnable {
                             this.viewportBaseY = this.viewportCenterY;
                             this.mapScaleX = this.viewportBaseX * 2;
                             this.mapScaleY = this.viewportBaseY * 2;
-                            this.dQ = n6;
-                            this.hf = n4;
-                            this.archiveOrRecallMethod = n5;
-                            this.cK = n7;
+                            this.initialObstacleCount = n6;
+                            this.terrainRaiseStepCount = n4;
+                            this.terrainLowerStepCount = n5;
+                            this.terrainPatchBaseSize = n7;
                             this.mapGenColumns = n8;
                             this.mapGenRows = n9;
                             this.terrainFeatureStage7Count = n10;

@@ -78,7 +78,7 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **175 / 196 (89%)** — 174 full + 1 partial (`update`).
+- Methods done: **180 / 196 (91%)** — 179 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -142,6 +142,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   writes, and restore allocation are in `port/impl/save.c`. The smoke check now
   makes an in-memory snapshot, compresses and expands it, compares every byte,
   and loads it back to check key fields. It does not change `TTStore.rms`.
+- **Remaining city/industry route setup is ported.** Random endpoint selection,
+  path construction, station extension, initial train and wagon creation, and
+  owner assignment are in `port/impl/map_gen.c`.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -156,6 +159,9 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   not the incorrect decompiled loop text.
 - `pathSearchLimit` is a low-confidence field name: the game sets the field to
   10 before path search, but no bytecode reads it.
+- `autoExtendTrackStation` tests the “track above” flag for both vertical
+  extension directions. Bytecode confirms this odd original behavior; the C
+  port keeps it.
 
 ## 6a. Next-session plan: make state 30 playable
 
@@ -163,16 +169,14 @@ The map-gen and state-30 simulation chains are **done**. Selecting "new game"
 generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
 UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port the remaining map setup/AI placement methods: `placeCitiesAndIndustry`,
-   `spawnTrainAt`, `autoExtendTrackStation`, `pickCitySite`, and
-   `pickIndustrySite`.
-2. Port the remaining large UI/data method `q` [372 L] after giving it a clear
+1. Port the remaining large UI/data method `q` [372 L] after giving it a clear
    upstream name.
+2. Port the remaining score/graph/text helpers and lifecycle calls.
 2. Add a smoke path that enters state 30 and exercises one full paint/input
    frame before treating gameplay rendering as behaviorally proved.
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 175 already
+`show NAME` throughout. Each is a mechanical faithful port like the 180 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

@@ -25,26 +25,6 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t n, bool bl) {
     (void)gc; // TODO port: setYearGraphMode(int n, boolean bl)  L7232-7333
 }
 
-void gc_placeCitiesAndIndustry(GameCanvas *gc) {
-    (void)gc; // TODO port: placeCitiesAndIndustry()  L7341-7368
-}
-
-void gc_spawnTrainAt(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: spawnTrainAt(int n, int n2)  L7393-7414
-}
-
-void gc_autoExtendTrackStation(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: autoExtendTrackStation(int n, int n2)  L7416-7461
-}
-
-void gc_pickCitySite(GameCanvas *gc) {
-    (void)gc; // TODO port: pickCitySite()  L7463-7507
-}
-
-void gc_pickIndustrySite(GameCanvas *gc) {
-    (void)gc; // TODO port: pickIndustrySite()  L7509-7553
-}
-
 int32_t gc_computeMilestoneScore(GameCanvas *gc) {
     (void)gc; // TODO port: computeMilestoneScore()  L7555-7633
     return 0;

@@ -279,7 +279,7 @@ void gc_update(GameCanvas *gc) {
                         gc->viewportBaseY = gc->viewportCenterY;
                         gc->mapScaleX = gc->viewportBaseX * 2;
                         gc->mapScaleY = gc->viewportBaseY * 2;
-                        gc->dQ = a6; gc->hf = a4; gc->archiveOrRecallMethod = a5; gc->cK = a7;
+                        gc->initialObstacleCount = a6; gc->terrainRaiseStepCount = a4; gc->terrainLowerStepCount = a5; gc->terrainPatchBaseSize = a7;
                         gc->mapGenColumns = a8; gc->mapGenRows = a9;
                         gc->terrainFeatureStage7Count = a10; gc->terrainFeatureStage6Count = a11;
                         gc->weightAccel = a12; gc->weightAccel2 = a13; gc->weightAccel3 = a14; gc->weightAccel4 = a15;

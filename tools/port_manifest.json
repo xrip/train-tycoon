@@ -131,33 +131,33 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "dQ",
+   "java_name": "initialObstacleCount",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 55,
-   "c_name": "dQ",
+   "c_name": "initialObstacleCount",
    "c_type": "int32_t"
   },
   {
-   "java_name": "hf",
+   "java_name": "terrainRaiseStepCount",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 56,
-   "c_name": "hf",
+   "c_name": "terrainRaiseStepCount",
    "c_type": "int32_t"
   },
   {
-   "java_name": "archiveOrRecallMethod",
+   "java_name": "terrainLowerStepCount",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 57,
-   "c_name": "archiveOrRecallMethod",
+   "c_name": "terrainLowerStepCount",
    "c_type": "int32_t"
   },
   {
@@ -181,13 +181,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "cK",
+   "java_name": "terrainPatchBaseSize",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 60,
-   "c_name": "cK",
+   "c_name": "terrainPatchBaseSize",
    "c_type": "int32_t"
   },
   {
@@ -3041,33 +3041,33 @@
    "c_type": "bool"
   },
   {
-   "java_name": "gS",
+   "java_name": "cityStationX",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 346,
-   "c_name": "gS",
+   "c_name": "cityStationX",
    "c_type": "int32_t"
   },
   {
-   "java_name": "bp",
+   "java_name": "cityStationY",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 347,
-   "c_name": "bp",
+   "c_name": "cityStationY",
    "c_type": "int32_t"
   },
   {
-   "java_name": "dD",
+   "java_name": "industryStationX",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 348,
-   "c_name": "dD",
+   "c_name": "industryStationX",
    "c_type": "int32_t"
   },
   {
@@ -5970,7 +5970,7 @@
    "start": 7341,
    "end": 7368,
    "c_name": "gc_placeCitiesAndIndustry",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "dayResetAd",
@@ -6000,7 +6000,7 @@
    "start": 7393,
    "end": 7414,
    "c_name": "gc_spawnTrainAt",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "autoExtendTrackStation",
@@ -6010,7 +6010,7 @@
    "start": 7416,
    "end": 7461,
    "c_name": "gc_autoExtendTrackStation",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "pickCitySite",
@@ -6020,7 +6020,7 @@
    "start": 7463,
    "end": 7507,
    "c_name": "gc_pickCitySite",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "pickIndustrySite",
@@ -6030,7 +6030,7 @@
    "start": 7509,
    "end": 7553,
    "c_name": "gc_pickIndustrySite",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "computeMilestoneScore",

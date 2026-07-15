@@ -18,12 +18,12 @@ typedef struct GameCanvas {
     int32_t mapScreenHeight; // int mapScreenHeight
     int32_t viewportHalfWidth; // int viewportHalfWidth
     int32_t viewportHalfHeight; // int viewportHalfHeight
-    int32_t dQ; // int dQ
-    int32_t hf; // int hf
-    int32_t archiveOrRecallMethod; // int archiveOrRecallMethod
+    int32_t initialObstacleCount; // int initialObstacleCount
+    int32_t terrainRaiseStepCount; // int terrainRaiseStepCount
+    int32_t terrainLowerStepCount; // int terrainLowerStepCount
     int32_t mapGenColumns; // int mapGenColumns
     int32_t mapGenRows; // int mapGenRows
-    int32_t cK; // int cK
+    int32_t terrainPatchBaseSize; // int terrainPatchBaseSize
     int32_t terrainFeatureStage7Count; // int terrainFeatureStage7Count
     int32_t terrainFeatureStage6Count; // int terrainFeatureStage6Count
     int32_t weightAccel; // int weightAccel
@@ -305,9 +305,9 @@ typedef struct GameCanvas {
     int8_t* yearGraphValues; // byte[] yearGraphValues
     int32_t industryCategory; // int industryCategory
     bool industrySiteFound; // boolean industrySiteFound
-    int32_t gS; // int gS
-    int32_t bp; // int bp
-    int32_t dD; // int dD
+    int32_t cityStationX; // int cityStationX
+    int32_t cityStationY; // int cityStationY
+    int32_t industryStationX; // int industryStationX
     int32_t industryTileY; // int industryTileY
     int8_t difficultyCycle; // byte difficultyCycle
     int32_t nextTrackPieceCode; // int nextTrackPieceCode

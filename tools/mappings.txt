@@ -322,7 +322,7 @@ field  a bo   decadeRevenueTotal # int; +=totalRevenue each year
 field  a aq   decadeXTotal       # int; +=eX each year
 field  a dF   decadeEnterpriseTotal   # int; +=eJ each year
 field  a eh   decadeOtherXTotal  # int; +=eX/eJ/running duplicate
-field  a ab   archiveOrRecallMethod   # int; called once a year from newYearNotify
+field  a ab   terrainLowerStepCount
 # Per-train state from dayResetAd
 field  a aw   trainAgeOrTimer    # byte[500]; per-train aging counter (incremented by revenueOrYear)
 field  a g    trainEraOrStage    # byte[500]; era-progress per train (compare to era; advance on station)
@@ -775,6 +775,14 @@ field  a df   existingTrackOwnerCode
 # ---- Batch 45: saved legacy state ----
 field  a eb   savedLegacyMetricEb
 field  a bq   savedLegacyMetricBq
+
+# ---- Batch 46: AI route endpoints ----
+field  a gS   cityStationX
+field  a bp   cityStationY
+field  a dD   industryStationX
+field  a dQ   initialObstacleCount
+field  a hf   terrainRaiseStepCount
+field  a cK   terrainPatchBaseSize
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----
