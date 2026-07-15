@@ -5,8 +5,8 @@
 // (or `python tools/port.py mark <name>`), then `gen` stops emitting its stub.
 #include "game_methods.h"
 
-// public int c(byte n) { return n < 0 ? 256 + n : n; }  -- unsigned byte value
-int32_t gc_c(GameCanvas *gc, int8_t n) {
+// public int byteToUnsignedInt(byte n)
+int32_t gc_byteToUnsignedInt(GameCanvas *gc, int8_t n) {
     (void)gc;
     return n < 0 ? 256 + n : n;
 }

@@ -134,7 +134,7 @@ typedef struct GameCanvas {
     bool ck; // boolean ck
     bool menuDirty; // boolean menuDirty
     int32_t buildMenuMode; // int buildMenuMode
-    int32_t gj; // int gj
+    int32_t selectedMenuRowX; // int selectedMenuRowX
     int8_t** buildMenuItems; // byte[][] buildMenuItems
     int8_t** buildMenuResultCodes; // byte[][] buildMenuResultCodes
     int8_t** menuItemCode; // byte[][] menuItemCode
@@ -366,16 +366,16 @@ typedef struct GameCanvas {
     int32_t viewportCenterX; // int viewportCenterX
     int32_t viewportCenterY; // int viewportCenterY
     int32_t money; // int money
-    int32_t cy; // int cy
+    int32_t cachedHeaderMoney; // int cachedHeaderMoney
     int32_t loanBalance; // int loanBalance
     int32_t loanCeiling; // int loanCeiling
     int8_t interestRate; // byte interestRate
     int32_t dayOfMonth; // int dayOfMonth
     int32_t monthOfYear; // int monthOfYear
     int32_t year; // int year
-    int32_t fr; // int fr
-    int32_t fd; // int fd
-    int32_t dN; // int dN
+    int32_t cachedHeaderDay; // int cachedHeaderDay
+    int32_t cachedHeaderMonth; // int cachedHeaderMonth
+    int32_t cachedHeaderYear; // int cachedHeaderYear
     int32_t counterA; // int counterA
     int32_t enterpriseTaxPct; // int enterpriseTaxPct
     int32_t scenarioStepCompare; // int scenarioStepCompare
@@ -410,7 +410,7 @@ typedef struct GameCanvas {
     int32_t bx; // int bx
     int32_t fR; // int fR
     int8_t transitionDebounce; // byte transitionDebounce
-    int8_t ff; // byte ff
+    int8_t scenarioNoticeCode; // byte scenarioNoticeCode
     int32_t eD; // int eD
     int32_t aJ; // int aJ
     int32_t hx; // int hx
@@ -433,7 +433,7 @@ typedef struct GameCanvas {
 extern int32_t gcs_screenWidth; // static int screenWidth
 extern int32_t gcs_hs; // static int hs
 extern int32_t gcs_eN; // static int eN
-extern int32_t gcs_fX; // static int fX
+extern int32_t gcs_bottomBarY; // static int bottomBarY
 extern int8_t* gcs_decodeHeaderName1; // static byte[] decodeHeaderName1
 extern int8_t* gcs_decodeHeaderName2; // static byte[] decodeHeaderName2
 extern int8_t* gcs_decodeHeaderName3; // static byte[] decodeHeaderName3

@@ -109,7 +109,7 @@ implements Runnable {
     static int screenWidth = 1;
     static int hs = 1;
     static int eN = hs - 30;
-    static int fX = hs - 15;
+    static int bottomBarY = hs - 15;
     XorResourceInput spriteStream = null;
     Image[] ca = new Image[6];
     short[] spriteOffsetTable;
@@ -172,7 +172,7 @@ implements Runnable {
     boolean ck;
     boolean menuDirty = true;
     int buildMenuMode = 0;
-    int gj = 0;
+    int selectedMenuRowX = 0;
     byte[][] buildMenuItems;
     byte[][] buildMenuResultCodes;
     byte[][] menuItemCode;
@@ -418,16 +418,16 @@ implements Runnable {
     int viewportCenterX = 0;
     int viewportCenterY = 0;
     int money = 200000;
-    int cy = 0;
+    int cachedHeaderMoney = 0;
     int loanBalance = 0;
     int loanCeiling = 600000;
     byte interestRate = (byte)4;
     int dayOfMonth = 1;
     int monthOfYear = 1;
     int year = 1950;
-    int fr = 0;
-    int fd = 0;
-    int dN = 0;
+    int cachedHeaderDay = 0;
+    int cachedHeaderMonth = 0;
+    int cachedHeaderYear = 0;
     int counterA = 0;
     int enterpriseTaxPct = 2;
     int scenarioStepCompare = 1;
@@ -462,7 +462,7 @@ implements Runnable {
     int bx = 0;
     int fR = 0;
     byte transitionDebounce;
-    byte ff;
+    byte scenarioNoticeCode;
     int eD = -1;
     int aJ = -1;
     int hx = 0;
@@ -488,7 +488,7 @@ implements Runnable {
         this.D = 24;
     }
 
-    public int c(byte n) {
+    public int byteToUnsignedInt(byte n) {
         return n < 0 ? 256 + n : n;
     }
 
@@ -614,7 +614,7 @@ implements Runnable {
     }
 
     void drawSpriteQuad(Graphics graphics, int n, int n2, int n3, int n4) {
-        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[n])], n2, n3, n4);
+        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[n])], n2, n3, n4);
     }
 
     void handleKey(int n) {
@@ -890,7 +890,7 @@ implements Runnable {
         return Image.createImage(byArray, (int)0, (int)n);
     }
 
-    public void o() {
+    public void resetOverlayRenderState() {
         this.cursorScale = 0;
         this.cursorDragY = -1;
         this.cursorSelectY = -1;
@@ -959,12 +959,12 @@ implements Runnable {
             this.mapRedrawPending = false;
         }
         short s = this.spriteOffsetTable[n];
-        int n14 = 65536 * this.c(this.spriteData[s + 1]) + 256 * this.c(this.spriteData[s + 2]) + this.c(this.spriteData[s + 3]);
-        int n15 = 65536 * this.c(this.spriteData[s + 4]) + 256 * this.c(this.spriteData[s + 5]) + this.c(this.spriteData[s + 6]);
-        int n16 = 65536 * this.c(this.spriteData[s + 7]) + 256 * this.c(this.spriteData[s + 8]) + this.c(this.spriteData[s + 9]);
-        int n17 = 65536 * this.c(this.spriteData[s + 10]) + 256 * this.c(this.spriteData[s + 11]) + this.c(this.spriteData[s + 12]);
-        int n18 = this.c(this.spriteData[s + 13]);
-        int n19 = this.c(this.spriteData[s + 14]);
+        int n14 = 65536 * this.byteToUnsignedInt(this.spriteData[s + 1]) + 256 * this.byteToUnsignedInt(this.spriteData[s + 2]) + this.byteToUnsignedInt(this.spriteData[s + 3]);
+        int n15 = 65536 * this.byteToUnsignedInt(this.spriteData[s + 4]) + 256 * this.byteToUnsignedInt(this.spriteData[s + 5]) + this.byteToUnsignedInt(this.spriteData[s + 6]);
+        int n16 = 65536 * this.byteToUnsignedInt(this.spriteData[s + 7]) + 256 * this.byteToUnsignedInt(this.spriteData[s + 8]) + this.byteToUnsignedInt(this.spriteData[s + 9]);
+        int n17 = 65536 * this.byteToUnsignedInt(this.spriteData[s + 10]) + 256 * this.byteToUnsignedInt(this.spriteData[s + 11]) + this.byteToUnsignedInt(this.spriteData[s + 12]);
+        int n18 = this.byteToUnsignedInt(this.spriteData[s + 13]);
+        int n19 = this.byteToUnsignedInt(this.spriteData[s + 14]);
         if (this.dialogContentHeight < n19) {
             this.dialogContentHeight = n19;
         } else {
@@ -1143,11 +1143,11 @@ implements Runnable {
             n12 = n21 + n23 - this.cursorScale;
             by = this.spriteData[n25++];
             n11 = by & 7;
-            n10 = 65536 * this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]) + this.c(this.spriteData[n25++]);
-            n9 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
-            n8 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
-            n7 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
-            n6 = this.c(this.spriteData[n25++]) + 256 * this.c(this.spriteData[n25++]);
+            n10 = 65536 * this.byteToUnsignedInt(this.spriteData[n25++]) + 256 * this.byteToUnsignedInt(this.spriteData[n25++]) + this.byteToUnsignedInt(this.spriteData[n25++]);
+            n9 = this.byteToUnsignedInt(this.spriteData[n25++]) + 256 * this.byteToUnsignedInt(this.spriteData[n25++]);
+            n8 = this.byteToUnsignedInt(this.spriteData[n25++]) + 256 * this.byteToUnsignedInt(this.spriteData[n25++]);
+            n7 = this.byteToUnsignedInt(this.spriteData[n25++]) + 256 * this.byteToUnsignedInt(this.spriteData[n25++]);
+            n6 = this.byteToUnsignedInt(this.spriteData[n25++]) + 256 * this.byteToUnsignedInt(this.spriteData[n25++]);
             n9 = (short)((by & 8) == 8 ? this.neighboursMask(this.currentSpriteId, n9) : n9);
             n8 = (short)((by & 0x10) == 16 ? this.neighboursMask(this.currentSpriteId, n8) : n8);
             n7 = (short)((by & 0x20) == 32 ? this.neighboursMask(this.currentSpriteId, n7) : n7);
@@ -2398,7 +2398,7 @@ implements Runnable {
                 }
                 this.drawSpriteQuad(graphics, 200, n, n2 + 15, 20);
                 if (this.buildMenuMode != 0 || this.buildMenuItemIndex != 0) {
-                    this.drawSpriteQuad(graphics, this.c(this.menuTextIndex[this.buildMenuMode][this.buildMenuItemIndex]), n + 5, n2 + 4 + 15, 20);
+                    this.drawSpriteQuad(graphics, this.byteToUnsignedInt(this.menuTextIndex[this.buildMenuMode][this.buildMenuItemIndex]), n + 5, n2 + 4 + 15, 20);
                 }
                 if (this.buildMenuMode == 3 && this.buildMenuItemIndex < 4) {
                     int n3;
@@ -2500,8 +2500,8 @@ implements Runnable {
             } else if (this.tileMap[this.tileCursorX][this.tileCursorY] >= 87 && this.tileMap[this.tileCursorX][this.tileCursorY] <= 90) {
                 int n = this.findServiceVehicleAt(this.tileCursorX, this.tileCursorY);
                 if (n != 5000) {
-                    int n5 = this.c(this.serviceVehicleX[n]);
-                    int n6 = this.c(this.serviceVehicleY[n]);
+                    int n5 = this.byteToUnsignedInt(this.serviceVehicleX[n]);
+                    int n6 = this.byteToUnsignedInt(this.serviceVehicleY[n]);
                     if ((this.vehicleFlags[n] & 0x20) == 32) {
                         if ((this.vehicleFlags[n] & 0x40) == 0) {
                             this.trackMap[n5][n6 - 1] = 0;
@@ -2992,11 +2992,11 @@ implements Runnable {
             }
         }
         for (n3 = 49; n3 >= 0; --n3) {
-            if (this.tileQueue[n3][0] == 0 || this.c(this.tileQueue[n3][1]) != n || this.c(this.tileQueue[n3][2]) != n2) continue;
+            if (this.tileQueue[n3][0] == 0 || this.byteToUnsignedInt(this.tileQueue[n3][1]) != n || this.byteToUnsignedInt(this.tileQueue[n3][2]) != n2) continue;
             bl3 = false;
         }
         if (bl3) {
-            if (this.c(this.tileMap[n][n2]) < 128) {
+            if (this.byteToUnsignedInt(this.tileMap[n][n2]) < 128) {
                 this.tileMap[n][n2] = (byte)(this.tileMap[n][n2] + 128);
             }
             n3 = 0;
@@ -3155,9 +3155,9 @@ implements Runnable {
     }
 
     int drawMenuRow(Graphics graphics, int n, int n2, int n3, boolean bl) {
-        this.drawSpriteQuad(graphics, n, n3, fX, 20);
+        this.drawSpriteQuad(graphics, n, n3, bottomBarY, 20);
         if (this.buildMenuItemIndex == n2) {
-            this.gj = n3;
+            this.selectedMenuRowX = n3;
         }
         return n3 + 15 + (bl ? 3 : 0);
     }
@@ -3165,16 +3165,16 @@ implements Runnable {
     void drawConfirmBar(Graphics graphics) {
         this.drawHeaderBar(graphics);
         graphics.setColor(0x606060);
-        graphics.fillRect(0, fX, screenWidth, 15);
+        graphics.fillRect(0, bottomBarY, screenWidth, 15);
         this.drawMenuRow(graphics, 201, 10, 0, false);
         this.drawMenuRow(graphics, 235, 10, 18, false);
         graphics.setColor(0xFFFFFF);
-        graphics.drawRect(18 * this.confirmToggle, fX, 14, 14);
-        graphics.drawRect(18 * this.confirmToggle + 1, fX + 1, 12, 12);
+        graphics.drawRect(18 * this.confirmToggle, bottomBarY, 14, 14);
+        graphics.drawRect(18 * this.confirmToggle + 1, bottomBarY + 1, 12, 12);
     }
 
     void drawHeaderBar(Graphics graphics) {
-        if (this.fr != this.dayOfMonth || this.fd != this.monthOfYear || this.dN != this.year || this.cy != this.money || this.menuDirty) {
+        if (this.cachedHeaderDay != this.dayOfMonth || this.cachedHeaderMonth != this.monthOfYear || this.cachedHeaderYear != this.year || this.cachedHeaderMoney != this.money || this.menuDirty) {
             int n;
             graphics.setColor(0x909090);
             graphics.fillRect(0, 0, screenWidth, 14);
@@ -3208,10 +3208,10 @@ implements Runnable {
                 byArray[n] = 11;
             }
             this.renderFontString(graphics, screenWidth - (screenWidth < 140 ? 49 : 61), 5, byArray, false);
-            this.cy = this.money;
-            this.fr = this.dayOfMonth;
-            this.fd = this.monthOfYear;
-            this.dN = this.year;
+            this.cachedHeaderMoney = this.money;
+            this.cachedHeaderDay = this.dayOfMonth;
+            this.cachedHeaderMonth = this.monthOfYear;
+            this.cachedHeaderYear = this.year;
         }
     }
 
@@ -3220,18 +3220,18 @@ implements Runnable {
         if (this.menuDirty) {
             boolean bl = false;
             this.backbufferG.setColor(0x606060);
-            this.backbufferG.fillRect(0, fX, screenWidth, 15);
-            int n = this.c(this.menuItemCode[this.buildMenuMode][this.buildMenuItemIndex]);
+            this.backbufferG.fillRect(0, bottomBarY, screenWidth, 15);
+            int n = this.byteToUnsignedInt(this.menuItemCode[this.buildMenuMode][this.buildMenuItemIndex]);
             int n2 = n + 15 - screenWidth;
             if (n2 < 0) {
                 n2 = 0;
             }
             for (int i = 0; i < this.buildMenuItems[this.buildMenuMode].length; ++i) {
-                this.drawSpriteQuad(this.backbufferG, this.c(this.menuTextIndex[this.buildMenuMode][i]), this.c(this.menuItemCode[this.buildMenuMode][i]) - n2, fX, 20);
+                this.drawSpriteQuad(this.backbufferG, this.byteToUnsignedInt(this.menuTextIndex[this.buildMenuMode][i]), this.byteToUnsignedInt(this.menuItemCode[this.buildMenuMode][i]) - n2, bottomBarY, 20);
                 if (i != this.buildMenuItemIndex) continue;
                 this.backbufferG.setColor(0xFFFFFF);
-                this.backbufferG.drawRect(this.c(this.menuItemCode[this.buildMenuMode][i]) - n2, fX, 14, 14);
-                this.backbufferG.drawRect(this.c(this.menuItemCode[this.buildMenuMode][i]) + 1 - n2, fX + 1, 12, 12);
+                this.backbufferG.drawRect(this.byteToUnsignedInt(this.menuItemCode[this.buildMenuMode][i]) - n2, bottomBarY, 14, 14);
+                this.backbufferG.drawRect(this.byteToUnsignedInt(this.menuItemCode[this.buildMenuMode][i]) + 1 - n2, bottomBarY + 1, 12, 12);
             }
             if (this.buildMenuMode == 2) {
                 String string = String.valueOf(Math.abs(this.selectionCost));
@@ -3241,7 +3241,7 @@ implements Runnable {
                 }
                 byArray[0] = 24;
                 System.arraycopy(this.spriteBitmapTable[this.spriteIndexTable[10]], 0, byArray, string.length() + 1, this.spriteBitmapTable[this.spriteIndexTable[10]].length);
-                this.renderFontString(this.backbufferG, 35, fX + 5, byArray, false);
+                this.renderFontString(this.backbufferG, 35, bottomBarY + 5, byArray, false);
             }
             this.menuDirty = false;
         }
@@ -3601,10 +3601,10 @@ implements Runnable {
     Image u(int n, int n2) {
         if (n == 23) {
             if (n2 == 0 && this.wagonType >= 0 && this.wagonType < 3) {
-                return this.tileSprites[this.c(this.tileSpriteIndex[136])];
+                return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[136])];
             }
             if (n2 == 0 && this.wagonType >= 3 && this.wagonType < 6) {
-                return this.tileSprites[this.c(this.tileSpriteIndex[146])];
+                return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[146])];
             }
             if (n2 > 0) {
                 switch (this.wagonOptionSlots[n2 - 1]) {
@@ -3612,16 +3612,16 @@ implements Runnable {
                         return null;
                     }
                     case 0: {
-                        return this.tileSprites[this.c(this.tileSpriteIndex[162])];
+                        return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[162])];
                     }
                     case 1: {
-                        return this.tileSprites[this.c(this.tileSpriteIndex[167])];
+                        return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[167])];
                     }
                     case 2: {
-                        return this.tileSprites[this.c(this.tileSpriteIndex[172])];
+                        return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[172])];
                     }
                     case 3: {
-                        return this.tileSprites[this.c(this.tileSpriteIndex[182])];
+                        return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[182])];
                     }
                 }
             }
@@ -3638,28 +3638,28 @@ implements Runnable {
                     return null;
                 }
                 case 0: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[136])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[136])];
                 }
                 case 1: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[146])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[146])];
                 }
                 case 2: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[162])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[162])];
                 }
                 case 3: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[167])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[167])];
                 }
                 case 4: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[172])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[172])];
                 }
                 case 5: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[177])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[177])];
                 }
                 case 6: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[182])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[182])];
                 }
                 case 7: {
-                    return this.tileSprites[this.c(this.tileSpriteIndex[187])];
+                    return this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[187])];
                 }
             }
         }
@@ -4099,7 +4099,7 @@ implements Runnable {
             case 60: {
                 if (n2 % 2 == 1) {
                     int n5 = n2 / 2;
-                    return this.spriteBitmapTable[this.c(this.spriteIndexTable[this.menuRowType[this.gP[n5]] + 160])];
+                    return this.spriteBitmapTable[this.byteToUnsignedInt(this.spriteIndexTable[this.menuRowType[this.gP[n5]] + 160])];
                 }
                 int n6 = (n2 - 1) / 2;
                 return this.p(this.computeMenuRowDisplayValue(this.gP[n6]), 29);
@@ -4158,7 +4158,7 @@ implements Runnable {
                     case 1: {
                         if (this.ready) {
                             this.transitionCode = 4;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 4;
@@ -4169,7 +4169,7 @@ implements Runnable {
                         this.screenParam = 1;
                         if (this.ready) {
                             this.transitionCode = 14;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 14;
@@ -4180,7 +4180,7 @@ implements Runnable {
                         this.screenParam = 0;
                         if (this.ready) {
                             this.transitionCode = 14;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 14;
@@ -4190,7 +4190,7 @@ implements Runnable {
                     case 4: {
                         if (this.ready) {
                             this.transitionCode = 10;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 10;
@@ -4200,7 +4200,7 @@ implements Runnable {
                     case 5: {
                         if (this.ready) {
                             this.transitionCode = 2;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 2;
@@ -4210,7 +4210,7 @@ implements Runnable {
                     case 6: {
                         if (this.ready) {
                             this.transitionCode = 3;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 3;
@@ -4224,7 +4224,7 @@ implements Runnable {
                     case 8: {
                         if (this.ready) {
                             this.transitionCode = 5;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 5;
@@ -4234,7 +4234,7 @@ implements Runnable {
                     case 9: {
                         if (this.ready) {
                             this.transitionCode = 28;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 28;
@@ -4245,7 +4245,7 @@ implements Runnable {
                         this.screenParam = 2;
                         if (this.ready) {
                             this.transitionCode = 14;
-                            this.o();
+                            this.resetOverlayRenderState();
                             break;
                         }
                         this.pendingTransitionCode = 14;
@@ -4267,7 +4267,7 @@ implements Runnable {
                     }
                     if (this.ready) {
                         this.transitionCode = 1;
-                        this.o();
+                        this.resetOverlayRenderState();
                         break;
                     }
                     this.pendingTransitionCode = 1;
@@ -4326,7 +4326,7 @@ implements Runnable {
             case 3: {
                 if (this.ready) {
                     this.transitionCode = 1;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = 1;
@@ -4341,7 +4341,7 @@ implements Runnable {
                 this.ready = false;
                 this.aiEnabled = true;
                 this.transitionCode = 1;
-                this.o();
+                this.resetOverlayRenderState();
                 this.setState(20);
                 break;
             }
@@ -4353,7 +4353,7 @@ implements Runnable {
                 }
                 if (this.ready) {
                     this.transitionCode = 1;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = 1;
@@ -4416,7 +4416,7 @@ implements Runnable {
                 }
                 if (this.ready) {
                     this.transitionCode = 1;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = 1;
@@ -4584,7 +4584,7 @@ implements Runnable {
                 this.persistSnapshotMode0();
                 if (this.ready) {
                     this.transitionCode = 1;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = 1;
@@ -4595,7 +4595,7 @@ implements Runnable {
             case 19: {
                 if (this.ready) {
                     this.transitionCode = 1;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = 1;
@@ -4869,7 +4869,7 @@ implements Runnable {
                 }
                 if (this.ready) {
                     this.transitionCode = n2 == 40 ? 27 : 1;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = n2 == 40 ? 27 : 1;
@@ -4925,7 +4925,7 @@ implements Runnable {
                 this.persistSnapshotMode0();
                 if (this.ready) {
                     this.transitionCode = 28;
-                    this.o();
+                    this.resetOverlayRenderState();
                     break;
                 }
                 this.pendingTransitionCode = 28;
@@ -5418,8 +5418,8 @@ implements Runnable {
             int n3 = this.findServiceVehicleAt(n, n2);
             for (int i = 0; i < 500; ++i) {
                 if ((this.trainFlags[i] & 0x80) != 128) continue;
-                int n4 = this.c(this.trainX[i]);
-                int n5 = this.c(this.trainY[i]);
+                int n4 = this.byteToUnsignedInt(this.trainX[i]);
+                int n5 = this.byteToUnsignedInt(this.trainY[i]);
                 if (n == n4 && n2 == n5) {
                     return false;
                 }
@@ -5434,21 +5434,21 @@ implements Runnable {
                 if ((this.trainFlags[i] & 0x80) != 128) continue;
                 if (this.tileMap[n][n2] == 81 || this.tileMap[n][n2] == 84 || this.tileMap[n][n2] == 85) {
                     for (n6 = n; n6 < this.mapWidth && (this.tileMap[n6][n2] == 81 || this.tileMap[n6][n2] == 84 || this.tileMap[n6][n2] == 85); ++n6) {
-                        if (this.c(this.trainX[i]) != n6 || this.c(this.trainY[i]) != n2) continue;
+                        if (this.byteToUnsignedInt(this.trainX[i]) != n6 || this.byteToUnsignedInt(this.trainY[i]) != n2) continue;
                         return false;
                     }
                     for (n6 = n - 1; n6 >= 0 && (this.tileMap[n6][n2] == 81 || this.tileMap[n6][n2] == 84 || this.tileMap[n6][n2] == 85); --n6) {
-                        if (this.c(this.trainX[i]) != n6 || this.c(this.trainY[i]) != n2) continue;
+                        if (this.byteToUnsignedInt(this.trainX[i]) != n6 || this.byteToUnsignedInt(this.trainY[i]) != n2) continue;
                         return false;
                     }
                     continue;
                 }
                 for (n6 = n2; n6 < this.mapHeight && (this.tileMap[n][n6] == 82 || this.tileMap[n][n6] == 83 || this.tileMap[n][n6] == 86); ++n6) {
-                    if (this.c(this.trainX[i]) != n || this.c(this.trainY[i]) != n6) continue;
+                    if (this.byteToUnsignedInt(this.trainX[i]) != n || this.byteToUnsignedInt(this.trainY[i]) != n6) continue;
                     return false;
                 }
                 for (n6 = n2 - 1; n6 >= 0 && (this.tileMap[n][n6] == 82 || this.tileMap[n][n6] == 83 || this.tileMap[n][n6] == 86); --n6) {
-                    if (this.c(this.trainX[i]) != n || this.c(this.trainY[i]) != n6) continue;
+                    if (this.byteToUnsignedInt(this.trainX[i]) != n || this.byteToUnsignedInt(this.trainY[i]) != n6) continue;
                     return false;
                 }
             }
@@ -5484,13 +5484,13 @@ implements Runnable {
     int findServiceVehicleAt(int n, int n2) {
         for (int i = 0; i < 250; ++i) {
             if ((this.vehicleFlags[i] & 0x80) != 128) continue;
-            if (this.c(this.serviceVehicleX[i]) == n && this.c(this.serviceVehicleY[i]) == n2) {
+            if (this.byteToUnsignedInt(this.serviceVehicleX[i]) == n && this.byteToUnsignedInt(this.serviceVehicleY[i]) == n2) {
                 return i;
             }
-            if ((this.c(this.serviceVehicleX[i]) == n - 1 || this.c(this.serviceVehicleX[i]) == n + 1) && this.c(this.serviceVehicleY[i]) == n2 && (this.vehicleFlags[i] & 0xE0) == 224) {
+            if ((this.byteToUnsignedInt(this.serviceVehicleX[i]) == n - 1 || this.byteToUnsignedInt(this.serviceVehicleX[i]) == n + 1) && this.byteToUnsignedInt(this.serviceVehicleY[i]) == n2 && (this.vehicleFlags[i] & 0xE0) == 224) {
                 return i;
             }
-            if (this.c(this.serviceVehicleY[i]) != n2 - 1 && this.c(this.serviceVehicleY[i]) != n2 + 1 || this.c(this.serviceVehicleX[i]) != n || (this.vehicleFlags[i] & 0xE0) != 160) continue;
+            if (this.byteToUnsignedInt(this.serviceVehicleY[i]) != n2 - 1 && this.byteToUnsignedInt(this.serviceVehicleY[i]) != n2 + 1 || this.byteToUnsignedInt(this.serviceVehicleX[i]) != n || (this.vehicleFlags[i] & 0xE0) != 160) continue;
             return i;
         }
         return 5000;
@@ -5617,8 +5617,8 @@ implements Runnable {
             int n;
             int n2;
             if ((this.vehicleFlags[i] & 0x80) != 128) continue;
-            int n3 = this.c(this.serviceVehicleX[i]);
-            int n4 = this.c(this.serviceVehicleY[i]);
+            int n3 = this.byteToUnsignedInt(this.serviceVehicleX[i]);
+            int n4 = this.byteToUnsignedInt(this.serviceVehicleY[i]);
             int n5 = n3 - 3;
             int n6 = n4 - 3;
             int n7 = n3 + 3;
@@ -5820,7 +5820,7 @@ implements Runnable {
             for (int i = 0; i < 500; ++i) {
                 int n;
                 int n2;
-                if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || this.trackMap[n2 = this.c(this.trainX[i])][n = this.c(this.trainY[i])] != 65) continue;
+                if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || this.trackMap[n2 = this.byteToUnsignedInt(this.trainX[i])][n = this.byteToUnsignedInt(this.trainY[i])] != 65) continue;
                 int n3 = this.countCarsInTrain(i) * 2;
                 if ((this.trainFlags[i] & 0xF) == 0) {
                     n3 += 3;
@@ -5873,7 +5873,7 @@ implements Runnable {
 
     void updateTrain(int n) {
         int n2;
-        if ((this.trainFlags[n] & 0x40) == 0 || this.c(this.trainEnergyOrCount[n]) <= 0) {
+        if ((this.trainFlags[n] & 0x40) == 0 || this.byteToUnsignedInt(this.trainEnergyOrCount[n]) <= 0) {
             int n3;
             int n4;
             int n5;
@@ -5886,8 +5886,8 @@ implements Runnable {
             if ((this.trainFlags[n] & 0x40) == 64) {
                 this.trainEnergyOrCount[n] = (byte)(this.wagonEnergyRemaining[n] + this.accumulateTrainTurns(n) / 2 + this.countCarsInTrain(n) / 2 + this.trainAgeOrTimer[n] / 3);
             }
-            int n10 = this.c(this.trainX[n]);
-            int n11 = this.c(this.trainY[n]);
+            int n10 = this.byteToUnsignedInt(this.trainX[n]);
+            int n11 = this.byteToUnsignedInt(this.trainY[n]);
             if ((this.trainFlags[n] & 0x40) == 64 && this.trainPhase[n] == 4 && (this.tileMap[n10][n11] == 87 || this.tileMap[n10][n11] == 88) && this.trackMap[n10][n11] == 65) {
                 n8 = this.findServiceVehicleAt(n10, n11);
                 n7 = 0;
@@ -5948,7 +5948,7 @@ implements Runnable {
                 this.trainPhase[n16] = (byte)(this.trainPhase[n16] + 1);
             } else {
                 byte[] byArray;
-                if (this.c(this.cargoAge[n]) < 200) {
+                if (this.byteToUnsignedInt(this.cargoAge[n]) < 200) {
                     int n17 = n;
                     this.cargoAge[n17] = (byte)(this.cargoAge[n17] + 1);
                 }
@@ -5956,8 +5956,8 @@ implements Runnable {
                 n11 = this.trainY[n];
                 n7 = this.trainDir[n];
                 this.trainPhase[n] = 0;
-                n6 = this.c(this.trainX[n]);
-                n5 = this.c(this.trainY[n]);
+                n6 = this.byteToUnsignedInt(this.trainX[n]);
+                n5 = this.byteToUnsignedInt(this.trainY[n]);
                 n4 = this.trackMap[n6][n5];
                 n3 = this.tileMap[n6][n5] - 70;
                 if (n3 == 6 && (this.trainDir[n] == 0 || this.trainDir[n] == 1)) {
@@ -6106,7 +6106,7 @@ implements Runnable {
             }
         }
         if ((this.trainFlags[n] & 0x40) == 64) {
-            n2 = this.c(this.trainEnergyOrCount[n]);
+            n2 = this.byteToUnsignedInt(this.trainEnergyOrCount[n]);
             if ((n2 -= 3) < 0) {
                 n2 = 0;
             }
@@ -6133,7 +6133,7 @@ implements Runnable {
 
     int accumulateTrainTurns(int n) {
         if (n != -1) {
-            byte by = this.tileMap[this.c(this.trainX[n])][this.c(this.trainY[n])];
+            byte by = this.tileMap[this.byteToUnsignedInt(this.trainX[n])][this.byteToUnsignedInt(this.trainY[n])];
             int n2 = 0;
             if (by == 77) {
                 int n3 = n2 = this.trainDir[n] == 0 ? -1 : 1;
@@ -6160,7 +6160,7 @@ implements Runnable {
             this.nextCar[n] = -1;
             this.trainEnergyOrCount[n] = 7;
             if (bl) {
-                this.handleCursorClickInlined(this.c(this.trainX[n]), this.c(this.trainY[n]), false, true);
+                this.handleCursorClickInlined(this.byteToUnsignedInt(this.trainX[n]), this.byteToUnsignedInt(this.trainY[n]), false, true);
             }
             this.lastViewportCenterX = -1;
             this.ready = false;
@@ -6175,12 +6175,12 @@ implements Runnable {
         int n4;
         short[] sArray = new short[8];
         System.arraycopy(this.cs[this.trainFlags[n] & 0xF], 0, sArray, 0, 8);
-        int n5 = this.c(this.trainX[n]);
-        int n6 = this.c(this.trainY[n]);
+        int n5 = this.byteToUnsignedInt(this.trainX[n]);
+        int n6 = this.byteToUnsignedInt(this.trainY[n]);
         if ((this.trainFlags[n] & 0x40) == 64) {
             int n7;
             n4 = this.tileMap[n5][n6];
-            n3 = this.c(this.trackMap[n5][n6]);
+            n3 = this.byteToUnsignedInt(this.trackMap[n5][n6]);
             n2 = 0;
             if (n4 != 76 && n3 > 65) {
                 n2 = 1;
@@ -6203,7 +6203,7 @@ implements Runnable {
                 }
             }
         }
-        n4 = this.c(this.tileMap[n5][n6]);
+        n4 = this.byteToUnsignedInt(this.tileMap[n5][n6]);
         n3 = n6 * 16 + n5 * 16 + 16 - this.viewportCenterX;
         n2 = this.mapHalfWidth - n5 * 8 + n6 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n6] + 15;
         if (this.trainPhase[n] >= 0) {
@@ -6213,14 +6213,14 @@ implements Runnable {
                         n2 -= 4;
                     }
                     if (n4 == 79) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[3]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 11 + 4 + this.trainPhase[n] - this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[3]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 11 + 4 + this.trainPhase[n] - this.trainPhase[n] / 2, 33);
                         break;
                     }
                     if (n4 == 77) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[3]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n] + this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[3]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n] + this.trainPhase[n] / 2, 33);
                         break;
                     }
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[3]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[3]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n], 33);
                     break;
                 }
                 case 1: {
@@ -6228,14 +6228,14 @@ implements Runnable {
                         n2 -= 4;
                     }
                     if (n4 == 79) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[7]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n] + this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[7]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n] + this.trainPhase[n] / 2, 33);
                         break;
                     }
                     if (n4 == 77) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[7]])], n3 + 8 - this.trainPhase[n] * 2, n2 + 1 - this.trainPhase[n] - this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[7]])], n3 + 8 - this.trainPhase[n] * 2, n2 + 1 - this.trainPhase[n] - this.trainPhase[n] / 2, 33);
                         break;
                     }
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[7]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[7]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n], 33);
                     break;
                 }
                 case 2: {
@@ -6243,14 +6243,14 @@ implements Runnable {
                         n2 -= 4;
                     }
                     if (n4 == 78) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[1]])], n3 - 8 + this.trainPhase[n] * 2, n2 + 1 - this.trainPhase[n] - this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[1]])], n3 - 8 + this.trainPhase[n] * 2, n2 + 1 - this.trainPhase[n] - this.trainPhase[n] / 2, 33);
                         break;
                     }
                     if (n4 == 80) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[1]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n] + this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[1]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n] + this.trainPhase[n] / 2, 33);
                         break;
                     }
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[1]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[1]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 3 - this.trainPhase[n], 33);
                     break;
                 }
                 case 3: {
@@ -6258,46 +6258,46 @@ implements Runnable {
                         n2 -= 4;
                     }
                     if (n4 == 78) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[5]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n] + this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[5]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n] + this.trainPhase[n] / 2, 33);
                         break;
                     }
                     if (n4 == 80) {
-                        graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[5]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 11 + 4 + this.trainPhase[n] - this.trainPhase[n] / 2, 33);
+                        graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[5]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 11 + 4 + this.trainPhase[n] - this.trainPhase[n] / 2, 33);
                         break;
                     }
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[5]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[5]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 11 + this.trainPhase[n], 33);
                     break;
                 }
                 case 4: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[2]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 12, 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[2]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 12, 33);
                     break;
                 }
                 case 5: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[6]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 12, 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[6]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 12, 33);
                     break;
                 }
                 case 6: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[2]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 4, 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[2]])], n3 - 8 + this.trainPhase[n] * 2, n2 - 4, 33);
                     break;
                 }
                 case 7: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[6]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 4, 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[6]])], n3 + 8 - this.trainPhase[n] * 2, n2 - 4, 33);
                     break;
                 }
                 case 8: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[0]])], n3 + 8, n2 - 11 + this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[0]])], n3 + 8, n2 - 11 + this.trainPhase[n], 33);
                     break;
                 }
                 case 9: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[4]])], n3 + 8, n2 - 3 - this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[4]])], n3 + 8, n2 - 3 - this.trainPhase[n], 33);
                     break;
                 }
                 case 10: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[0]])], n3 - 8, n2 - 11 + this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[0]])], n3 - 8, n2 - 11 + this.trainPhase[n], 33);
                     break;
                 }
                 case 11: {
-                    graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[sArray[4]])], n3 - 8, n2 - 3 - this.trainPhase[n], 33);
+                    graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[sArray[4]])], n3 - 8, n2 - 3 - this.trainPhase[n], 33);
                 }
             }
         }
@@ -6305,7 +6305,7 @@ implements Runnable {
 
     boolean isTrainHeadCarAt(int n, int n2, int n3) {
         if (n != -1) {
-            if (this.c(this.trainX[n]) == n2 && this.c(this.trainY[n]) == n3) {
+            if (this.byteToUnsignedInt(this.trainX[n]) == n2 && this.byteToUnsignedInt(this.trainY[n]) == n3) {
                 return true;
             }
             return this.isTrainHeadCarAt(this.nextCar[n], n2, n3);
@@ -6316,7 +6316,7 @@ implements Runnable {
     void mergeTrainAt(int n) {
         int n2 = -1;
         for (int i = 0; i < 500; ++i) {
-            if (n == i || (this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.isTrainHeadCarAt(i, this.c(this.trainX[n]), this.c(this.trainY[n]))) continue;
+            if (n == i || (this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || !this.isTrainHeadCarAt(i, this.byteToUnsignedInt(this.trainX[n]), this.byteToUnsignedInt(this.trainY[n]))) continue;
             this.removeTrainFromMapInlined(i, true);
             this.removeTrainFromMapInlined(n, true);
         }
@@ -6324,7 +6324,7 @@ implements Runnable {
 
     boolean isAnyTrainCarAt(int n, int n2, int n3) {
         if (n != -1) {
-            if (this.c(this.trainX[n]) == n2 && this.c(this.trainY[n]) == n3) {
+            if (this.byteToUnsignedInt(this.trainX[n]) == n2 && this.byteToUnsignedInt(this.trainY[n]) == n3) {
                 return true;
             }
             if (this.isAnyTrainCarAt(this.nextCar[n], n2, n3)) {
@@ -6352,7 +6352,7 @@ implements Runnable {
                         case 2: {
                             int n5;
                             if ((this.serviceUnloadFlags[n2] & 1) == 1) {
-                                n5 = this.trainEnergyOrCount[n] * 3 * (this.c(this.cargoAge[n]) / 15 + 1);
+                                n5 = this.trainEnergyOrCount[n] * 3 * (this.byteToUnsignedInt(this.cargoAge[n]) / 15 + 1);
                                 if (this.routeResourceFlags[4] > 0) {
                                     n5 *= 2;
                                 }
@@ -6361,7 +6361,7 @@ implements Runnable {
                                 this.trainEnergyOrCount[n] = 0;
                             }
                             if ((this.serviceUnloadFlags[n2] & 0x10) != 16) break;
-                            n5 = this.wagonEnergyRemaining[n] * 8 * (this.c(this.cargoAge[n]) / 15 + 1);
+                            n5 = this.wagonEnergyRemaining[n] * 8 * (this.byteToUnsignedInt(this.cargoAge[n]) / 15 + 1);
                             if (this.routeResourceFlags[5] > 0) {
                                 n5 *= 2;
                             }
@@ -6372,7 +6372,7 @@ implements Runnable {
                         }
                         case 3: {
                             if ((this.serviceUnloadFlags[n2] & 2) != 2) break;
-                            int n6 = this.trainEnergyOrCount[n] * 10 * (this.c(this.cargoAge[n]) / 15 + 1);
+                            int n6 = this.trainEnergyOrCount[n] * 10 * (this.byteToUnsignedInt(this.cargoAge[n]) / 15 + 1);
                             if (this.routeResourceFlags[3] > 0) {
                                 n6 *= 2;
                             }
@@ -6384,7 +6384,7 @@ implements Runnable {
                         case 4: 
                         case 5: {
                             if ((this.serviceUnloadFlags[n2] & 4) != 4) break;
-                            int n7 = this.trainEnergyOrCount[n] * 12 * (this.c(this.cargoAge[n]) / 15 + 1);
+                            int n7 = this.trainEnergyOrCount[n] * 12 * (this.byteToUnsignedInt(this.cargoAge[n]) / 15 + 1);
                             if (this.routeResourceFlags[2] > 0) {
                                 n7 *= 2;
                             }
@@ -6396,7 +6396,7 @@ implements Runnable {
                         case 6: 
                         case 7: {
                             if ((this.serviceUnloadFlags[n2] & 8) != 8) break;
-                            int n8 = this.trainEnergyOrCount[n] * 13 * (this.c(this.cargoAge[n]) / 15 + 1);
+                            int n8 = this.trainEnergyOrCount[n] * 13 * (this.byteToUnsignedInt(this.cargoAge[n]) / 15 + 1);
                             if (this.routeResourceFlags[1] > 0) {
                                 n8 *= 2;
                             }
@@ -6443,7 +6443,7 @@ implements Runnable {
                         this.wagonEnergyRemaining[n5] = (byte)(this.wagonEnergyRemaining[n5] + this.collectNearbyServiceResource(n2, 4, 15 - this.wagonEnergyRemaining[n]));
                         this.cargoAge[n] = 0;
                         if (n2 == this.lastServiceVehicle[n] || bl2) break;
-                        this.advanceConstructionTimers(this.c(this.trainX[n]), this.c(this.trainY[n]), 4);
+                        this.advanceConstructionTimers(this.byteToUnsignedInt(this.trainX[n]), this.byteToUnsignedInt(this.trainY[n]), 4);
                         bl2 = true;
                         break;
                     }
@@ -6600,7 +6600,7 @@ implements Runnable {
     void crcSum(String string) {
         long l = 0L;
         for (int i = 0; i < this.snapshotSize; ++i) {
-            l += (long)this.c(this.saveBuffer[i]);
+            l += (long)this.byteToUnsignedInt(this.saveBuffer[i]);
         }
     }
 
@@ -6637,7 +6637,7 @@ implements Runnable {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (int i = 0; i < this.snapshotSize; ++i) {
             if (this.saveBuffer[i] == -1) {
-                for (int j = 0; j < this.c(this.saveBuffer[i + 1]); ++j) {
+                for (int j = 0; j < this.byteToUnsignedInt(this.saveBuffer[i + 1]); ++j) {
                     byteArrayOutputStream.write(this.saveBuffer[i + 2]);
                 }
                 i += 2;
@@ -7195,7 +7195,7 @@ implements Runnable {
             }
         }
         for (n3 = 0; n3 < 500; ++n3) {
-            if ((this.trainFlags[n3] & 0x80) != 128 || this.trackMap[n2 = this.c(this.trainX[n3])][n = this.c(this.trainY[n3])] != 65) continue;
+            if ((this.trainFlags[n3] & 0x80) != 128 || this.trackMap[n2 = this.byteToUnsignedInt(this.trainX[n3])][n = this.byteToUnsignedInt(this.trainY[n3])] != 65) continue;
             if ((this.trainFlags[n3] & 0x40) == 64) {
                 switch (this.trainEraOrStage[n3]) {
                     case 0: {
@@ -7371,7 +7371,7 @@ implements Runnable {
         for (int i = 0; i < 500; ++i) {
             int n;
             int n2;
-            if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || this.trackMap[n2 = this.c(this.trainX[i])][n = this.c(this.trainY[i])] != 66 && this.trackMap[n2][n] != 67 && this.trackMap[n2][n] != 68 || this.trainEraOrStage[i] >= this.era) continue;
+            if ((this.trainFlags[i] & 0x80) != 128 || (this.trainFlags[i] & 0x40) != 64 || this.trackMap[n2 = this.byteToUnsignedInt(this.trainX[i])][n = this.byteToUnsignedInt(this.trainY[i])] != 66 && this.trackMap[n2][n] != 67 && this.trackMap[n2][n] != 68 || this.trainEraOrStage[i] >= this.era) continue;
             this.trainEraOrStage[i] = (byte)this.era;
             this.trainFlags[i] = -64;
             int n3 = i;
@@ -7385,7 +7385,7 @@ implements Runnable {
         for (int i = 0; i < 500; ++i) {
             int n;
             int n2;
-            if ((this.trainFlags[i] & 0x80) != 128 || this.trackMap[n2 = this.c(this.trainX[i])][n = this.c(this.trainY[i])] != 66 && this.trackMap[n2][n] != 67 && this.trackMap[n2][n] != 68) continue;
+            if ((this.trainFlags[i] & 0x80) != 128 || this.trackMap[n2 = this.byteToUnsignedInt(this.trainX[i])][n = this.byteToUnsignedInt(this.trainY[i])] != 66 && this.trackMap[n2][n] != 67 && this.trackMap[n2][n] != 68) continue;
             this.trainAgeOrTimer[i] = 0;
         }
     }
@@ -7918,7 +7918,7 @@ implements Runnable {
                 int n11 = 0;
                 int n12 = 0;
                 block9: for (n5 = 0; n5 < 500; ++n5) {
-                    if ((this.trainFlags[n5] & 0x80) != 128 || this.trackMap[this.c(this.trainX[n5])][this.c(this.trainY[n5])] != 65) continue;
+                    if ((this.trainFlags[n5] & 0x80) != 128 || this.trackMap[this.byteToUnsignedInt(this.trainX[n5])][this.byteToUnsignedInt(this.trainY[n5])] != 65) continue;
                     ++n8;
                     if ((this.trainFlags[n5] & 0x40) == 64) {
                         ++n7;
@@ -8020,7 +8020,7 @@ implements Runnable {
                         n5 = 0;
                     }
                     int n13 = n5 - 1;
-                    this.offerEffectNextCount[n13] = (short)(this.offerEffectNextCount[n13] + this.c(this.offerEffectSchedule[n5 - 1][1]));
+                    this.offerEffectNextCount[n13] = (short)(this.offerEffectNextCount[n13] + this.byteToUnsignedInt(this.offerEffectSchedule[n5 - 1][1]));
                     if (n5 == 1) {
                         this.menuRowEra[n4] = (byte)(30 + Math.abs(this.rng.nextInt() % 50));
                         this.menuRowRevenue[n4] = this.menuRowCost[n4] * this.menuRowEra[n4] / 100;
@@ -8222,7 +8222,7 @@ implements Runnable {
                 if (this.trackMap[i][j] != 65) continue;
                 n2 += 3;
                 for (int k = 0; k < 500; ++k) {
-                    if ((this.trainFlags[k] & 0x80) != 128 || this.c(this.trainX[k]) != i || this.c(this.trainY[k]) != j) continue;
+                    if ((this.trainFlags[k] & 0x80) != 128 || this.byteToUnsignedInt(this.trainX[k]) != i || this.byteToUnsignedInt(this.trainY[k]) != j) continue;
                     if ((this.trainFlags[k] & 0x40) == 64) {
                         n2 += 400;
                         continue;
@@ -8482,7 +8482,7 @@ implements Runnable {
             this.backbuffer = Image.createImage((int)screenWidth, (int)hs);
             this.backbufferG = this.backbuffer.getGraphics();
             eN = hs - 30;
-            fX = hs - 15;
+            bottomBarY = hs - 15;
             this.k(n, n2);
             this.eD = n;
             this.aJ = n2;
@@ -8595,7 +8595,7 @@ implements Runnable {
                     if (this.inputPending) {
                         int n13;
                         graphics.setColor(0);
-                        graphics.setClip(0, 15, screenWidth, fX - 15);
+                        graphics.setClip(0, 15, screenWidth, bottomBarY - 15);
                         for (n13 = 0; n13 < screenWidth; ++n13) {
                             graphics.drawLine(n13 * 2, 0, hs + n13 * 2, hs);
                         }
@@ -8611,7 +8611,7 @@ implements Runnable {
                     }
                     if (this.pendingTransitionCode > -1) {
                         this.transitionCode = this.pendingTransitionCode;
-                        this.o();
+                        this.resetOverlayRenderState();
                         this.pendingTransitionCode = -1;
                         this.renderPackedSprite(graphics, this.transitionCode);
                         this.setState(20);
@@ -8619,8 +8619,8 @@ implements Runnable {
                     if (this.transitionDebounce <= 0) break;
                     this.transitionDebounce = (byte)(this.transitionDebounce - 1);
                     if (this.transitionDebounce != 0) break;
-                    this.transitionCode = 80 + this.ff;
-                    this.o();
+                    this.transitionCode = 80 + this.scenarioNoticeCode;
+                    this.resetOverlayRenderState();
                     this.ready = false;
                     this.renderPackedSprite(graphics, this.transitionCode);
                     this.setState(20);
@@ -8671,7 +8671,7 @@ implements Runnable {
                     }
                     if (this.pendingTransitionCode <= -1) break;
                     this.transitionCode = this.pendingTransitionCode;
-                    this.o();
+                    this.resetOverlayRenderState();
                     this.pendingTransitionCode = -1;
                     this.renderPackedSprite(graphics, this.transitionCode);
                     this.setState(20);
@@ -8762,7 +8762,7 @@ implements Runnable {
                 break;
             }
             case 20: {
-                this.o();
+                this.resetOverlayRenderState();
                 if (!this.bC) {
                     this.cursorDragY = 2;
                 }
@@ -8834,7 +8834,7 @@ implements Runnable {
                 this.ready = true;
                 this.screenParam = 3;
                 this.transitionCode = 14;
-                this.o();
+                this.resetOverlayRenderState();
                 this.setState(20);
                 break;
             }
@@ -8965,7 +8965,7 @@ implements Runnable {
                             this.scenarioFlagAo = n21;
                             if (n21 != 0) {
                                 this.transitionDebounce = (byte)5;
-                                this.ff = (byte)n21;
+                                this.scenarioNoticeCode = (byte)n21;
                                 continue;
                             }
                             this.transitionDebounce = 0;
@@ -9070,17 +9070,17 @@ implements Runnable {
                     byte[] byArray = this.tileQueue[n27];
                     byArray[0] = (byte)(byArray[0] - 1);
                     if (this.tileQueue[n27][0] == 0) {
-                        n = this.c(this.tileQueue[n27][1]);
-                        n29 = this.c(this.tileQueue[n27][2]);
+                        n = this.byteToUnsignedInt(this.tileQueue[n27][1]);
+                        n29 = this.byteToUnsignedInt(this.tileQueue[n27][2]);
                         if (n >= 0 && n29 >= 0 && n < this.mapWidth && n29 < this.mapHeight) {
-                            this.tileMap[n][n29] = (byte)(this.c(this.tileMap[n][n29]) - 128);
+                            this.tileMap[n][n29] = (byte)(this.byteToUnsignedInt(this.tileMap[n][n29]) - 128);
                         }
                     }
                     if (this.tileQueue[n27][0] != 7) continue;
-                    n = this.c(this.tileQueue[n27][1]);
-                    n29 = this.c(this.tileQueue[n27][2]);
+                    n = this.byteToUnsignedInt(this.tileQueue[n27][1]);
+                    n29 = this.byteToUnsignedInt(this.tileQueue[n27][2]);
                     if (n < 0 || n29 < 0 || n >= this.mapWidth || n29 >= this.mapHeight) continue;
-                    int n30 = this.c(this.tileMap[n][n29]) - 128;
+                    int n30 = this.byteToUnsignedInt(this.tileMap[n][n29]) - 128;
                     if (this.go[n27]) continue;
                     if (n30 >= 29 && n30 <= 33) {
                         this.tileMap[n][n29] = -128;
@@ -9535,7 +9535,7 @@ implements Runnable {
                 n7 = n9 + this.tileOffsetX[n8];
                 int n11 = n10 + this.tileOffsetY[n8];
                 if (n7 >= 0 && n7 < this.mapWidth && n11 >= 0 && n11 < this.mapHeight) {
-                    n6 = this.c(this.tileMap[n7][n11]);
+                    n6 = this.byteToUnsignedInt(this.tileMap[n7][n11]);
                     if (n6 >= 128) {
                         n6 -= 128;
                     }
@@ -9622,8 +9622,8 @@ implements Runnable {
         this.visibleTrainCount = 0;
         for (n6 = 0; n6 < 500; ++n6) {
             if ((this.trainFlags[n6] & 0x80) != 128) continue;
-            n5 = this.c(this.trainX[n6]);
-            n4 = this.c(this.trainY[n6]);
+            n5 = this.byteToUnsignedInt(this.trainX[n6]);
+            n4 = this.byteToUnsignedInt(this.trainY[n6]);
             if (n5 < this.viewportX0 || n4 < this.viewportY0 || n5 > this.viewportX1 || n4 > this.viewportY1) continue;
             this.visibleTrains[this.visibleTrainCount++] = (short)n6;
             blArray[n5 - this.viewportX0][n4 - this.viewportY0] = true;
@@ -9633,7 +9633,7 @@ implements Runnable {
             n5 = n9 + this.tileOffsetX[n6];
             n4 = n10 + this.tileOffsetY[n6];
             if (n5 < 0 || n5 >= this.mapWidth || n4 < 0 || n4 >= this.mapHeight) continue;
-            n3 = this.c(this.tileMap[n5][n4]);
+            n3 = this.byteToUnsignedInt(this.tileMap[n5][n4]);
             n2 = n3;
             if (n2 >= 128) {
                 n2 -= 128;
@@ -9671,7 +9671,7 @@ implements Runnable {
             if (blArray[n5 - this.viewportX0][n4 - this.viewportY0]) {
                 for (n = 0; n < this.visibleTrainCount; ++n) {
                     n12 = this.visibleTrains[n];
-                    if ((this.trainFlags[n12] & 0x80) != 128 || n5 != this.c(this.trainX[n12]) || n4 != this.c(this.trainY[n12])) continue;
+                    if ((this.trainFlags[n12] & 0x80) != 128 || n5 != this.byteToUnsignedInt(this.trainX[n12]) || n4 != this.byteToUnsignedInt(this.trainY[n12])) continue;
                     this.drawSpriteSingle(graphics, n12);
                 }
             }
@@ -9680,11 +9680,11 @@ implements Runnable {
             n12 = this.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
             int n14 = -1;
             for (int i = 0; i < 50; ++i) {
-                if (this.c(this.tileQueue[i][1]) != n5 || this.c(this.tileQueue[i][2]) != n4) continue;
+                if (this.byteToUnsignedInt(this.tileQueue[i][1]) != n5 || this.byteToUnsignedInt(this.tileQueue[i][2]) != n4) continue;
                 n14 = this.tileQueue[i][0];
             }
             if (n14 <= 0) continue;
-            graphics.drawImage(this.tileSprites[this.c(this.tileSpriteIndex[250 + n14 / 3])], n, n12 - 3, 33);
+            graphics.drawImage(this.tileSprites[this.byteToUnsignedInt(this.tileSpriteIndex[250 + n14 / 3])], n, n12 - 3, 33);
         }
         if (!selectionHidden) {
             for (n6 = 0; n6 < this.numActiveTileAnimations; ++n6) {

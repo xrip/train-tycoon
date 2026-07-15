@@ -6,7 +6,7 @@
 int32_t gcs_screenWidth;
 int32_t gcs_hs;
 int32_t gcs_eN;
-int32_t gcs_fX;
+int32_t gcs_bottomBarY;
 int8_t* gcs_decodeHeaderName1;
 int8_t* gcs_decodeHeaderName2;
 int8_t* gcs_decodeHeaderName3;
@@ -30,7 +30,7 @@ void gc_fields_init(GameCanvas *gc) {
     gcs_screenWidth = 1;
     gcs_hs = 1;
     gcs_eN = gcs_hs - 30;
-    gcs_fX = gcs_hs - 15;
+    gcs_bottomBarY = gcs_hs - 15;
     static const int8_t decodeHeaderName1__d[] = {-15, 12, -41, -41, 37, 109, -35, 61, -10, 28, -25, 49, -31, 51, 15, 104, -32, 54, 51, 77, 42, 76};
     gcs_decodeHeaderName1 = (int8_t*)midp_alloc_arr(sizeof(int8_t), (int)(sizeof(decodeHeaderName1__d)/sizeof(int8_t)));
     memcpy(gcs_decodeHeaderName1, decodeHeaderName1__d, sizeof(decodeHeaderName1__d));
@@ -120,7 +120,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->blockBuildMenu = false;
     gc->menuDirty = true;
     gc->buildMenuMode = 0;
-    gc->gj = 0;
+    gc->selectedMenuRowX = 0;
     gc->confirmToggle = 0;
     gc->moneyHistory = (int32_t*)midp_alloc_arr(sizeof(int32_t), 3);
     gc->moneyTickerFrames = (int8_t*)midp_alloc_arr(sizeof(int8_t), 3);
@@ -406,16 +406,16 @@ void gc_fields_init(GameCanvas *gc) {
     gc->viewportCenterX = 0;
     gc->viewportCenterY = 0;
     gc->money = 200000;
-    gc->cy = 0;
+    gc->cachedHeaderMoney = 0;
     gc->loanBalance = 0;
     gc->loanCeiling = 600000;
     gc->interestRate = 4;
     gc->dayOfMonth = 1;
     gc->monthOfYear = 1;
     gc->year = 1950;
-    gc->fr = 0;
-    gc->fd = 0;
-    gc->dN = 0;
+    gc->cachedHeaderDay = 0;
+    gc->cachedHeaderMonth = 0;
+    gc->cachedHeaderYear = 0;
     gc->counterA = 0;
     gc->enterpriseTaxPct = 2;
     gc->scenarioStepCompare = 1;

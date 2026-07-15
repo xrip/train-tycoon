@@ -11,8 +11,8 @@ void gc_keyPressed(GameCanvas *gc, int32_t n) {
     gc->currentKey = n;
 }
 
-// public void o()
-void gc_o(GameCanvas *gc) {
+// public void resetOverlayRenderState()
+void gc_resetOverlayRenderState(GameCanvas *gc) {
     gc->cursorScale = 0;
     gc->cursorDragY = -1;
     gc->cursorSelectY = -1;
@@ -225,7 +225,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gc->backbuffer = midp_image_create_blank(gcs_screenWidth, gcs_hs);
         gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
         gcs_eN = gcs_hs - 30;
-        gcs_fX = gcs_hs - 15;
+        gcs_bottomBarY = gcs_hs - 15;
         gc_k(gc, n, n2);
         gc->eD = n;
         gc->aJ = n2;
@@ -293,7 +293,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             break;
         }
         case 20:
-            gc_o(gc);
+            gc_resetOverlayRenderState(gc);
             if (!gc->bC) gc->cursorDragY = 2;
             gc->bC = true;
             break;

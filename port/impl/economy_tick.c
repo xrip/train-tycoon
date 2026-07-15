@@ -130,8 +130,8 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         int type267_count = 0;
         for (int train = 0; train < 500; ++train) {
             if ((gc->trainFlags[train] & 0x80) != 128
-                || gc->trackMap[gc_c(gc, gc->trainX[train])]
-                               [gc_c(gc, gc->trainY[train])] != 65)
+                || gc->trackMap[gc_byteToUnsignedInt(gc, gc->trainX[train])]
+                               [gc_byteToUnsignedInt(gc, gc->trainY[train])] != 65)
                 continue;
             ++active_train_count;
             if ((gc->trainFlags[train] & 0x40) == 64) {
@@ -204,7 +204,7 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
             int effect_index = effect_code - 1;
             gc->offerEffectNextCount[effect_index] =
                 (int16_t)(gc->offerEffectNextCount[effect_index]
-                          + gc_c(gc, gc->offerEffectSchedule[effect_index][1]));
+                          + gc_byteToUnsignedInt(gc, gc->offerEffectSchedule[effect_index][1]));
             if (effect_code == 1) {
                 gc->menuRowEra[free_row] =
                     (int8_t)(30 + abs(midp_random_next_int(&gc->rng) % 50));

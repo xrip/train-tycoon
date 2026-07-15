@@ -4,7 +4,7 @@
 // int accumulateTrainTurns(int)
 int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
     if (car == -1) return 0;
-    int tile = gc->tileMap[gc_c(gc, gc->trainX[car])][gc_c(gc, gc->trainY[car])];
+    int tile = gc->tileMap[gc_byteToUnsignedInt(gc, gc->trainX[car])][gc_byteToUnsignedInt(gc, gc->trainY[car])];
     int turn = 0;
     if (tile == 77) turn = gc->trainDir[car] == 0 ? -1 : 1;
     if (tile == 79) turn = gc->trainDir[car] == 0 ? 1 : -1;
@@ -17,8 +17,8 @@ int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
 int32_t gc_findServiceVehicleAt(GameCanvas *gc, int32_t x, int32_t y) {
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
         if ((gc->vehicleFlags[vehicle] & 0x80) != 128) continue;
-        int vehicle_x = gc_c(gc, gc->serviceVehicleX[vehicle]);
-        int vehicle_y = gc_c(gc, gc->serviceVehicleY[vehicle]);
+        int vehicle_x = gc_byteToUnsignedInt(gc, gc->serviceVehicleX[vehicle]);
+        int vehicle_y = gc_byteToUnsignedInt(gc, gc->serviceVehicleY[vehicle]);
         if (vehicle_x == x && vehicle_y == y) return vehicle;
         if ((vehicle_x == x - 1 || vehicle_x == x + 1) && vehicle_y == y
             && (gc->vehicleFlags[vehicle] & 0xE0) == 224)
@@ -143,8 +143,8 @@ void gc_loadTrainAtServiceVehicle(GameCanvas *gc, int32_t car,
                                  gc, vehicle, 4, 15 - gc->wagonEnergyRemaining[car]));
                 gc->cargoAge[car] = 0;
                 if (vehicle != gc->lastServiceVehicle[car] && !construction_done) {
-                    gc_advanceConstructionTimers(gc, gc_c(gc, gc->trainX[car]),
-                                                 gc_c(gc, gc->trainY[car]), 4);
+                    gc_advanceConstructionTimers(gc, gc_byteToUnsignedInt(gc, gc->trainX[car]),
+                                                 gc_byteToUnsignedInt(gc, gc->trainY[car]), 4);
                     construction_done = true;
                 }
                 break;
@@ -214,7 +214,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
     if ((gc->trainFlags[car] & 0x40) == 0
         && gc->lastServiceVehicle[car] != vehicle
         && (gc->trainEnergyOrCount[car] > 0 || gc->wagonEnergyRemaining[car] > 0)) {
-        int age_scale = gc_c(gc, gc->cargoAge[car]) / 15 + 1;
+        int age_scale = gc_byteToUnsignedInt(gc, gc->cargoAge[car]) / 15 + 1;
         switch (gc->trainFlags[car] & 0xF) {
             case 2:
                 if ((gc->serviceUnloadFlags[vehicle] & 1) == 1) {
@@ -279,7 +279,7 @@ static int normalize_track_variant(int variant) {
 void gc_updateTrain(GameCanvas *gc, int32_t head) {
     int stop_chain = 0;
     if ((gc->trainFlags[head] & 0x40) == 0
-        || gc_c(gc, gc->trainEnergyOrCount[head]) <= 0) {
+        || gc_byteToUnsignedInt(gc, gc->trainEnergyOrCount[head]) <= 0) {
         gc->trainFlags[head] = (int8_t)(gc->trainFlags[head] & 0xEF);
         if ((gc->trainFlags[head] & 0x40) == 64) {
             gc->trainEnergyOrCount[head] =
@@ -289,8 +289,8 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
                          + gc->trainAgeOrTimer[head] / 3);
         }
 
-        int old_x = gc_c(gc, gc->trainX[head]);
-        int old_y = gc_c(gc, gc->trainY[head]);
+        int old_x = gc_byteToUnsignedInt(gc, gc->trainX[head]);
+        int old_y = gc_byteToUnsignedInt(gc, gc->trainY[head]);
         bool at_service_tile = (gc->tileMap[old_x][old_y] == 87
                                 || gc->tileMap[old_x][old_y] == 88);
         if ((gc->trainFlags[head] & 0x40) == 64 && gc->trainPhase[head] == 4
@@ -353,14 +353,14 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
         if (gc->trainPhase[head] < 8) {
             ++gc->trainPhase[head];
         } else {
-            if (gc_c(gc, gc->cargoAge[head]) < 200) ++gc->cargoAge[head];
+            if (gc_byteToUnsignedInt(gc, gc->cargoAge[head]) < 200) ++gc->cargoAge[head];
             old_x = gc->trainX[head];
             old_y = gc->trainY[head];
             int old_dir = gc->trainDir[head];
             gc->trainPhase[head] = 0;
 
-            int next_x = gc_c(gc, gc->trainX[head]);
-            int next_y = gc_c(gc, gc->trainY[head]);
+            int next_x = gc_byteToUnsignedInt(gc, gc->trainX[head]);
+            int next_y = gc_byteToUnsignedInt(gc, gc->trainY[head]);
             int current_track = gc->trackMap[next_x][next_y];
             int current_variant = gc->tileMap[next_x][next_y] - 70;
             if (current_variant == 6 && (gc->trainDir[head] == 0
@@ -435,7 +435,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
             gc_updateTrain(gc, gc->nextCar[head]);
     }
     if ((gc->trainFlags[head] & 0x40) == 64) {
-        int energy = gc_c(gc, gc->trainEnergyOrCount[head]) - 3;
+        int energy = gc_byteToUnsignedInt(gc, gc->trainEnergyOrCount[head]) - 3;
         if (energy < 0) energy = 0;
         gc->trainEnergyOrCount[head] = (int8_t)energy;
     }

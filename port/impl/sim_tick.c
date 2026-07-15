@@ -69,8 +69,8 @@ void gc_everyTwoTick(GameCanvas *gc) {
     for (int i = 0; i < 500; ++i) {
         if ((gc->trainFlags[i] & 0x80) != 128 || (gc->trainFlags[i] & 0x40) != 64)
             continue;
-        int n2 = gc_c(gc, gc->trainX[i]);
-        int n = gc_c(gc, gc->trainY[i]);
+        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
+        int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
         if (gc->trackMap[n2][n] != 65) continue;
         int n3 = gc_countCarsInTrain(gc, i) * 2;
         if ((gc->trainFlags[i] & 0xF) == 0) n3 += 3;
@@ -89,7 +89,7 @@ int32_t gc_countCarsInTrain(GameCanvas *gc, int32_t n) {
 // boolean isTrainHeadCarAt(int,int,int)
 bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     if (n == -1) return false;
-    if (gc_c(gc, gc->trainX[n]) == n2 && gc_c(gc, gc->trainY[n]) == n3)
+    if (gc_byteToUnsignedInt(gc, gc->trainX[n]) == n2 && gc_byteToUnsignedInt(gc, gc->trainY[n]) == n3)
         return true;
     return gc_isTrainHeadCarAt(gc, gc->nextCar[n], n2, n3);
 }
@@ -102,8 +102,8 @@ void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
     gc->nextCar[n] = -1;
     gc->trainEnergyOrCount[n] = 7;
     if (bl)
-        gc_handleCursorClickInlined(gc, gc_c(gc, gc->trainX[n]),
-                                    gc_c(gc, gc->trainY[n]), false, true);
+        gc_handleCursorClickInlined(gc, gc_byteToUnsignedInt(gc, gc->trainX[n]),
+                                    gc_byteToUnsignedInt(gc, gc->trainY[n]), false, true);
     gc->lastViewportCenterX = -1;
     gc->ready = false;
     gc->transitionCode = 16;
@@ -115,8 +115,8 @@ void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
     for (int i = 0; i < 500; ++i) {
         if (n == i || (gc->trainFlags[i] & 0x80) != 128
             || (gc->trainFlags[i] & 0x40) != 64
-            || !gc_isTrainHeadCarAt(gc, i, gc_c(gc, gc->trainX[n]),
-                                    gc_c(gc, gc->trainY[n])))
+            || !gc_isTrainHeadCarAt(gc, i, gc_byteToUnsignedInt(gc, gc->trainX[n]),
+                                    gc_byteToUnsignedInt(gc, gc->trainY[n])))
             continue;
         gc_removeTrainFromMapInlined(gc, i, true);
         gc_removeTrainFromMapInlined(gc, n, true);
@@ -135,8 +135,8 @@ void gc_dayResetAd(GameCanvas *gc) {
     for (int i = 0; i < 500; ++i) {
         if ((gc->trainFlags[i] & 0x80) != 128 || (gc->trainFlags[i] & 0x40) != 64)
             continue;
-        int n2 = gc_c(gc, gc->trainX[i]);
-        int n = gc_c(gc, gc->trainY[i]);
+        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
+        int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
         if ((gc->trackMap[n2][n] != 66 && gc->trackMap[n2][n] != 67
              && gc->trackMap[n2][n] != 68)
             || gc->trainEraOrStage[i] >= gc->era)
@@ -152,8 +152,8 @@ void gc_dayResetAd(GameCanvas *gc) {
 void gc_postRevenueReset(GameCanvas *gc) {
     for (int i = 0; i < 500; ++i) {
         if ((gc->trainFlags[i] & 0x80) != 128) continue;
-        int n2 = gc_c(gc, gc->trainX[i]);
-        int n = gc_c(gc, gc->trainY[i]);
+        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
+        int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
         if (gc->trackMap[n2][n] == 66 || gc->trackMap[n2][n] == 67
             || gc->trackMap[n2][n] == 68)
             gc->trainAgeOrTimer[i] = 0;
@@ -203,12 +203,12 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
     }
     for (n3 = 49; n3 >= 0; --n3) {
         if (gc->tileQueue[n3][0] != 0
-            && gc_c(gc, gc->tileQueue[n3][1]) == n
-            && gc_c(gc, gc->tileQueue[n3][2]) == n2)
+            && gc_byteToUnsignedInt(gc, gc->tileQueue[n3][1]) == n
+            && gc_byteToUnsignedInt(gc, gc->tileQueue[n3][2]) == n2)
             bl3 = false;
     }
     if (!bl3) return;
-    if (gc_c(gc, gc->tileMap[n][n2]) < 128)
+    if (gc_byteToUnsignedInt(gc, gc->tileMap[n][n2]) < 128)
         gc->tileMap[n][n2] = (int8_t)(gc->tileMap[n][n2] + 128);
     n3 = 0;
     for (int i = 49; i >= 0; --i) {
@@ -339,7 +339,7 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
                 if ((gc->trainFlags[k] & 0x80) != 128
-                    || gc_c(gc, gc->trainX[k]) != i || gc_c(gc, gc->trainY[k]) != j)
+                    || gc_byteToUnsignedInt(gc, gc->trainX[k]) != i || gc_byteToUnsignedInt(gc, gc->trainY[k]) != j)
                     continue;
                 n2 += (gc->trainFlags[k] & 0x40) == 64 ? 400 : 55;
             }
@@ -427,8 +427,8 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
     }
     for (int n3 = 0; n3 < 500; ++n3) {
         if ((gc->trainFlags[n3] & 0x80) != 128) continue;
-        int n2 = gc_c(gc, gc->trainX[n3]);
-        int n = gc_c(gc, gc->trainY[n3]);
+        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[n3]);
+        int n = gc_byteToUnsignedInt(gc, gc->trainY[n3]);
         if (gc->trackMap[n2][n] != 65) continue;
         if ((gc->trainFlags[n3] & 0x40) == 64) {
             switch (gc->trainEraOrStage[n3]) {
@@ -531,8 +531,8 @@ void gc_newYearNotify(GameCanvas *gc) {
 void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
     for (int i = 0; i < 250; ++i) {
         if ((gc->vehicleFlags[i] & 0x80) != 128) continue;
-        int n3 = gc_c(gc, gc->serviceVehicleX[i]);
-        int n4 = gc_c(gc, gc->serviceVehicleY[i]);
+        int n3 = gc_byteToUnsignedInt(gc, gc->serviceVehicleX[i]);
+        int n4 = gc_byteToUnsignedInt(gc, gc->serviceVehicleY[i]);
         int n5 = n3 - 3;
         int n6 = n4 - 3;
         int n7 = n3 + 3;

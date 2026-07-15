@@ -25,7 +25,7 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
             n7 = n9 + gc->tileOffsetX[n8];
             int n11 = n10 + gc->tileOffsetY[n8];
             if (n7 >= 0 && n7 < gc->mapWidth && n11 >= 0 && n11 < gc->mapHeight) {
-                n6 = gc_c(gc, gc->tileMap[n7][n11]);
+                n6 = gc_byteToUnsignedInt(gc, gc->tileMap[n7][n11]);
                 if (n6 >= 128) n6 -= 128;
                 if (!((n6 != 0 && n6 <= 28) || (n6 >= 77 && n6 <= 86))) {
                     n5 = n11 * 16 + n7 * 16 + 16 - gc->viewportCenterX;
@@ -84,8 +84,8 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
     gc->visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
         if ((gc->trainFlags[n6] & 0x80) != 128) continue;
-        n5 = gc_c(gc, gc->trainX[n6]);
-        n4 = gc_c(gc, gc->trainY[n6]);
+        n5 = gc_byteToUnsignedInt(gc, gc->trainX[n6]);
+        n4 = gc_byteToUnsignedInt(gc, gc->trainY[n6]);
         if (n5 < gc->viewportX0 || n4 < gc->viewportY0 || n5 > gc->viewportX1 || n4 > gc->viewportY1) continue;
         gc->visibleTrains[gc->visibleTrainCount++] = (int16_t)n6;
         BLA(n5 - gc->viewportX0, n4 - gc->viewportY0) = true;
@@ -95,7 +95,7 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
         n5 = n9 + gc->tileOffsetX[n6];
         n4 = n10 + gc->tileOffsetY[n6];
         if (n5 < 0 || n5 >= gc->mapWidth || n4 < 0 || n4 >= gc->mapHeight) continue;
-        n3 = gc_c(gc, gc->tileMap[n5][n4]);
+        n3 = gc_byteToUnsignedInt(gc, gc->tileMap[n5][n4]);
         n2 = n3;
         if (n2 >= 128) n2 -= 128;
         if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
@@ -120,7 +120,7 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
         if (BLA(n5 - gc->viewportX0, n4 - gc->viewportY0)) {
             for (n = 0; n < gc->visibleTrainCount; ++n) {
                 n12 = gc->visibleTrains[n];
-                if ((gc->trainFlags[n12] & 0x80) != 128 || n5 != gc_c(gc, gc->trainX[n12]) || n4 != gc_c(gc, gc->trainY[n12])) continue;
+                if ((gc->trainFlags[n12] & 0x80) != 128 || n5 != gc_byteToUnsignedInt(gc, gc->trainX[n12]) || n4 != gc_byteToUnsignedInt(gc, gc->trainY[n12])) continue;
                 gc_drawSpriteSingle(gc, g, n12);
             }
         }
@@ -129,11 +129,11 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
         n12 = gc->mapHalfWidth - n5 * 8 + n4 * 8 + 16 - gc->viewportCenterY - 4 * gc->tileElevation[n5][n4] + 15;
         int n14 = -1;
         for (int i = 0; i < 50; ++i) {
-            if (gc_c(gc, gc->tileQueue[i][1]) != n5 || gc_c(gc, gc->tileQueue[i][2]) != n4) continue;
+            if (gc_byteToUnsignedInt(gc, gc->tileQueue[i][1]) != n5 || gc_byteToUnsignedInt(gc, gc->tileQueue[i][2]) != n4) continue;
             n14 = gc->tileQueue[i][0];
         }
         if (n14 <= 0) continue;
-        midp_draw_image(g, gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[250 + n14 / 3])], n, n12 - 3, 33);
+        midp_draw_image(g, gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[250 + n14 / 3])], n, n12 - 3, 33);
     }
     if (!gcs_selectionHidden) {
         for (n6 = 0; n6 < gc->numActiveTileAnimations; ++n6) {

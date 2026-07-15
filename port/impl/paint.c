@@ -93,7 +93,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             if (gc->inputPending) {
                 int n13;
                 midp_set_color(g, 0);
-                midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_fX - 15);
+                midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_bottomBarY - 15);
                 for (n13 = 0; n13 < gcs_screenWidth; ++n13)
                     midp_draw_line(g, n13 * 2, 0, gcs_hs + n13 * 2, gcs_hs);
                 for (n13 = 0; n13 < gcs_hs; ++n13)
@@ -105,7 +105,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             if (gc->pauseFlag) gc_drawSpriteQuad(gc, g, 236, 0, 15, 0);
             if (gc->pendingTransitionCode > -1) {
                 gc->transitionCode = gc->pendingTransitionCode;
-                gc_o(gc);
+                gc_resetOverlayRenderState(gc);
                 gc->pendingTransitionCode = -1;
                 gc_renderPackedSprite(gc, g, gc->transitionCode);
                 gc_setState(gc, 20);
@@ -113,8 +113,8 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             if (gc->transitionDebounce <= 0) break;
             gc->transitionDebounce = (int8_t)(gc->transitionDebounce - 1);
             if (gc->transitionDebounce != 0) break;
-            gc->transitionCode = 80 + gc->ff;
-            gc_o(gc);
+            gc->transitionCode = 80 + gc->scenarioNoticeCode;
+            gc_resetOverlayRenderState(gc);
             gc->ready = false;
             gc_renderPackedSprite(gc, g, gc->transitionCode);
             gc_setState(gc, 20);
@@ -157,7 +157,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
             }
             if (gc->pendingTransitionCode <= -1) break;
             gc->transitionCode = gc->pendingTransitionCode;
-            gc_o(gc);
+            gc_resetOverlayRenderState(gc);
             gc->pendingTransitionCode = -1;
             gc_renderPackedSprite(gc, g, gc->transitionCode);
             gc_setState(gc, 20);
@@ -206,7 +206,7 @@ void gc_update(GameCanvas *gc) {
             gc->ready = true;
             gc->screenParam = 3;
             gc->transitionCode = 14;
-            gc_o(gc);
+            gc_resetOverlayRenderState(gc);
             gc_setState(gc, 20);
             break;
         case 10:
@@ -293,7 +293,7 @@ void gc_update(GameCanvas *gc) {
                         if ((a26 & 1) != 1) { gc->aiFrequency = 25; gc->aiThreshold = 100; }
                         else { gc->aiFrequency = 32; gc->aiThreshold = 29; }
                         gc->scenarioFlagAo = a21;
-                        if (a21 != 0) { gc->transitionDebounce = 5; gc->ff = (int8_t)a21; continue; }
+                        if (a21 != 0) { gc->transitionDebounce = 5; gc->scenarioNoticeCode = (int8_t)a21; continue; }
                         gc->transitionDebounce = 0;
                     }
                     midp_resource_close(in);
@@ -353,15 +353,15 @@ void gc_update(GameCanvas *gc) {
             for (int n27 = 0; n27 < 50; ++n27) {
                 if (gc->tileQueue[n27][0] <= 0) continue;
                 --gc->tileQueue[n27][0];
-                int n = gc_c(gc, gc->tileQueue[n27][1]);
-                int n29 = gc_c(gc, gc->tileQueue[n27][2]);
+                int n = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][1]);
+                int n29 = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][2]);
                 if (gc->tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
                     && n < gc->mapWidth && n29 < gc->mapHeight)
-                    gc->tileMap[n][n29] = (int8_t)(gc_c(gc, gc->tileMap[n][n29]) - 128);
+                    gc->tileMap[n][n29] = (int8_t)(gc_byteToUnsignedInt(gc, gc->tileMap[n][n29]) - 128);
                 if (gc->tileQueue[n27][0] != 7 || n < 0 || n29 < 0
                     || n >= gc->mapWidth || n29 >= gc->mapHeight)
                     continue;
-                int n30 = gc_c(gc, gc->tileMap[n][n29]) - 128;
+                int n30 = gc_byteToUnsignedInt(gc, gc->tileMap[n][n29]) - 128;
                 if (gc->go[n27]) continue;
                 if (n30 >= 29 && n30 <= 33) gc->tileMap[n][n29] = -128;
                 if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {

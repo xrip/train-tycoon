@@ -52,8 +52,8 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
         int32_t n3 = gc_findServiceVehicleAt(gc, n, n2);
         for (int i = 0; i < 500; ++i) {
             if ((gc->trainFlags[i] & 0x80) != 128) continue;
-            int32_t n4 = gc_c(gc, gc->trainX[i]);
-            int32_t n5 = gc_c(gc, gc->trainY[i]);
+            int32_t n4 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
+            int32_t n5 = gc_byteToUnsignedInt(gc, gc->trainY[i]);
             if (n == n4 && n2 == n5) return false;
             if (n3 == 5000 || n3 != gc_findServiceVehicleAt(gc, n4, n5)) continue;
             return false;
@@ -68,13 +68,13 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
                 for (n6 = n; n6 < gc->mapWidth
                      && (gc->tileMap[n6][n2] == 81 || gc->tileMap[n6][n2] == 84
                          || gc->tileMap[n6][n2] == 85); ++n6) {
-                    if (gc_c(gc, gc->trainX[i]) != n6 || gc_c(gc, gc->trainY[i]) != n2) continue;
+                    if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n2) continue;
                     return false;
                 }
                 for (n6 = n - 1; n6 >= 0
                      && (gc->tileMap[n6][n2] == 81 || gc->tileMap[n6][n2] == 84
                          || gc->tileMap[n6][n2] == 85); --n6) {
-                    if (gc_c(gc, gc->trainX[i]) != n6 || gc_c(gc, gc->trainY[i]) != n2) continue;
+                    if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n2) continue;
                     return false;
                 }
                 continue;
@@ -82,19 +82,39 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
             for (n6 = n2; n6 < gc->mapHeight
                  && (gc->tileMap[n][n6] == 82 || gc->tileMap[n][n6] == 83
                      || gc->tileMap[n][n6] == 86); ++n6) {
-                if (gc_c(gc, gc->trainX[i]) != n || gc_c(gc, gc->trainY[i]) != n6) continue;
+                if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n6) continue;
                 return false;
             }
             for (n6 = n2 - 1; n6 >= 0
                  && (gc->tileMap[n][n6] == 82 || gc->tileMap[n][n6] == 83
                      || gc->tileMap[n][n6] == 86); --n6) {
-                if (gc_c(gc, gc->trainX[i]) != n || gc_c(gc, gc->trainY[i]) != n6) continue;
+                if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n6) continue;
                 return false;
             }
         }
         return true;
     }
     return false;
+}
+
+// boolean isTileBuildable(int,int,int)
+bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
+    if (type == 5)
+        return gc_isTileBuildable(gc, x, y, 0)
+               && gc_isTileBuildable(gc, x, y - 1, 0)
+               && gc_isTileBuildable(gc, x, y + 1, 0);
+    if (type == 6)
+        return gc_isTileBuildable(gc, x, y, 0)
+               && gc_isTileBuildable(gc, x - 1, y, 0)
+               && gc_isTileBuildable(gc, x + 1, y, 0);
+    if (x < 0 || y < 0 || x >= gc->mapWidth || y >= gc->mapHeight) return false;
+    int tile = gc->tileMap[x][y];
+    bool buildable = gc->tileElevation[x][y] >= 0
+                     && (tile == 0 || (tile >= 29 && tile <= 33))
+                     && gc->trackMap[x][y] == 0;
+    if (type == 3 && (tile == 71 || tile == 21 || tile == 23)) buildable = true;
+    if (type == 4 && (tile == 70 || tile == 22 || tile == 24)) buildable = true;
+    return buildable;
 }
 
 // void commitTerrainEdit() -- copy the 10x10 edit buffer back into heightMap

@@ -10,36 +10,36 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 1:
             switch (n2) {
                 case 1:
-                    if (gc->ready) { gc->transitionCode = 4; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 4; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 4; gc_setState(gc, 30); break;
                 case 2:
                     gc->screenParam = 1;
-                    if (gc->ready) { gc->transitionCode = 14; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 14; gc_setState(gc, 30); break;
                 case 3:
                     gc->screenParam = 0;
-                    if (gc->ready) { gc->transitionCode = 14; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 14; gc_setState(gc, 30); break;
                 case 4:
-                    if (gc->ready) { gc->transitionCode = 10; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 10; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 10; gc_setState(gc, 30); break;
                 case 5:
-                    if (gc->ready) { gc->transitionCode = 2; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 2; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 2; gc_setState(gc, 30); break;
                 case 6:
-                    if (gc->ready) { gc->transitionCode = 3; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 3; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 3; gc_setState(gc, 30); break;
                 case 7:
                     gc_setState(gc, 30); break;
                 case 8:
-                    if (gc->ready) { gc->transitionCode = 5; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 5; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 5; gc_setState(gc, 30); break;
                 case 9:
-                    if (gc->ready) { gc->transitionCode = 28; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 28; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 28; gc_setState(gc, 30); break;
                 case 99:
                     gc->screenParam = 2;
-                    if (gc->ready) { gc->transitionCode = 14; gc_o(gc); break; }
+                    if (gc->ready) { gc->transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
                     gc->pendingTransitionCode = 14; gc_setState(gc, 30); break;
             }
             break;
@@ -47,7 +47,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             if (n2 == 2) {
                 if (gc->screenParam == 4) { gc->pendingTransitionCode = 26; gc_setState(gc, 30); break; }
                 if (gc->screenParam == 3) { gc_setState(gc, 10); break; }
-                if (gc->ready) { gc->transitionCode = 1; gc_o(gc); break; }
+                if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
                 gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
             }
             switch (gc->screenParam) {
@@ -76,16 +76,16 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, 30); break;
         case 2:
         case 3:
-            if (gc->ready) { gc->transitionCode = 1; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
         case 6:
             gc_setState(gc, 30); break;
         case 7:
             gc->ready = false; gc->aiEnabled = true; gc->transitionCode = 1;
-            gc_o(gc); gc_setState(gc, 20); break;
+            gc_resetOverlayRenderState(gc); gc_setState(gc, 20); break;
         case 5:
             if (n2 >= 2) { gc->activeScenario = n2; gc_setState(gc, 25); break; }
-            if (gc->ready) { gc->transitionCode = 1; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
         case 4:
             switch (n2) {
@@ -111,7 +111,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 10:
                     gc->activeScenario = gc->scenarioMilestone; gc_setState(gc, 25); goto hbms_end;
             }
-            if (gc->ready) { gc->transitionCode = 1; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
         case 20:
             gc_setState(gc, 30); break;
@@ -197,11 +197,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc_setMusicVolume(gc, gc->gameStateCounter); goto hbms_end;
             }
             gc_persistSnapshotMode0(gc);
-            if (gc->ready) { gc->transitionCode = 1; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
         case 18:
         case 19:
-            if (gc->ready) { gc->transitionCode = 1; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, 30); break;
         case 8:
         case 9:
@@ -296,7 +296,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, 30); break;
         case 28:
             if (n2 == 41) { gc->ad = false; gc_setState(gc, 120); break; }
-            if (gc->ready) { gc->transitionCode = n2 == 40 ? 27 : 1; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = n2 == 40 ? 27 : 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = n2 == 40 ? 27 : 1; gc_setState(gc, 30); break;
         case 27:
             if (n2 == 40) { gc->ad = true; gc_setState(gc, 120); break; }
@@ -321,7 +321,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             }
             if (n2 >= 0) break;
             gc_persistSnapshotMode0(gc);
-            if (gc->ready) { gc->transitionCode = 28; gc_o(gc); break; }
+            if (gc->ready) { gc->transitionCode = 28; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 28; gc_setState(gc, 30); break;
     }
 hbms_end:

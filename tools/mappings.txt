@@ -736,6 +736,21 @@ field  a eR   forwardTrackSteps       # byte[6][]; direction, delta, and next-ti
 field  a aH   reverseTrackSteps       # byte[6][]; reverse direction table
 field  a by   trainRevenueScore       # lifetime train revenue divided by 73
 method a f (III)V                     resetTrailingCars
+
+# ---- Batch 38: gameplay header and bottom bar ----
+field  a fr   cachedHeaderDay
+field  a fd   cachedHeaderMonth
+field  a dN   cachedHeaderYear
+field  a cy   cachedHeaderMoney
+field  a gj   selectedMenuRowX
+field  a fX   bottomBarY
+
+# ---- Batch 39: overlay render reset ----
+field  a ff   scenarioNoticeCode
+method a o ()V                       resetOverlayRenderState
+
+# ---- Batch 40: unsigned byte conversion ----
+method a c (B)I                       byteToUnsignedInt
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----

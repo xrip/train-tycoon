@@ -10,24 +10,8 @@ void gc_viewportZoomKey(GameCanvas *gc) {
     (void)gc; // TODO port: viewportZoomKey()  L2074-2157
 }
 
-void gc_computeIsoCornersInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t* nArray, int32_t* nArray2, bool bl) {
-    (void)gc; // TODO port: computeIsoCornersInlined(int n, int n2, int[] nArray, int[] nArray2, boolean bl)  L2163-2183
-}
-
 void gc_computeViewportBounds(GameCanvas *gc) {
     (void)gc; // TODO port: computeViewportBounds()  L2185-2247
-}
-
-void gc_drawSelectionQuad(GameCanvas *gc, MidpGraphics* graphics, int32_t* nArray, int32_t* nArray2) {
-    (void)gc; // TODO port: drawSelectionQuad(Graphics graphics, int[] nArray, int[] nArray2)  L2249-2258
-}
-
-void gc_drawBuildMenuCursor(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: drawBuildMenuCursor(Graphics graphics)  L2260-2384
-}
-
-void gc_drawBuildMenuRow(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: drawBuildMenuRow(Graphics graphics)  L2386-2474
 }
 
 void gc_demolishAtCursor(GameCanvas *gc) {
@@ -64,36 +48,6 @@ void gc_applyBackgroundCost(GameCanvas *gc) {
 
 void gc_cycleBuildMenuIndex(GameCanvas *gc, bool bl) {
     (void)gc; // TODO port: cycleBuildMenuIndex(boolean bl)  L3144-3155
-}
-
-int32_t gc_drawMenuRow(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2, int32_t n3, bool bl) {
-    (void)gc; // TODO port: drawMenuRow(Graphics graphics, int n, int n2, int n3, boolean bl)  L3157-3163
-    return 0;
-}
-
-void gc_drawConfirmBar(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: drawConfirmBar(Graphics graphics)  L3165-3174
-}
-
-void gc_drawHeaderBar(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: drawHeaderBar(Graphics graphics)  L3176-3216
-}
-
-void gc_paintMain(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: paintMain(Graphics graphics)  L3218-3248
-}
-
-int32_t gc_drawNumber(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: drawNumber(Graphics graphics, int n, int n2)  L3259-3268
-    return 0;
-}
-
-void gc_drawMoneyTicker(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: drawMoneyTicker(Graphics graphics)  L3270-3285
-}
-
-void gc_drawConfirmDialog(GameCanvas *gc, MidpGraphics* graphics) {
-    (void)gc; // TODO port: drawConfirmDialog(Graphics graphics)  L3287-3294
 }
 
 void gc_rebuildCityList(GameCanvas *gc) {
@@ -162,11 +116,6 @@ void gc_setTrackOwnerCode(GameCanvas *gc, int32_t n) {
 
 void gc_clearPathDistanceGrid(GameCanvas *gc) {
     (void)gc; // TODO port: clearPathDistanceGrid()  L5296-5377
-}
-
-bool gc_isTileBuildable(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: isTileBuildable(int n, int n2, int n3)  L5460-5482
-    return false;
 }
 
 int32_t gc_spawnWagonSlotInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl, bool bl2) {

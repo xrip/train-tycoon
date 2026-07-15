@@ -69,16 +69,16 @@ void gc_renderFontString(GameCanvas *gc, MidpGraphics *g, int32_t n, int32_t n2,
 MidpImage *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
     if (n == 23) {
         if (n2 == 0 && gc->wagonType >= 0 && gc->wagonType < 3)
-            return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[136])];
+            return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])];
         if (n2 == 0 && gc->wagonType >= 3 && gc->wagonType < 6)
-            return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[146])];
+            return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])];
         if (n2 > 0) {
             switch (gc->wagonOptionSlots[n2 - 1]) {
                 case -1: return NULL;
-                case 0: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[162])];
-                case 1: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[167])];
-                case 2: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[172])];
-                case 3: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[182])];
+                case 0: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])];
+                case 1: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])];
+                case 2: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[172])];
+                case 3: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[182])];
             }
         }
     }
@@ -88,14 +88,14 @@ MidpImage *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
         int n3 = gc->trainFlags[n4] & 0xF;
         switch (n3) {
             case -1: return NULL;
-            case 0: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[136])];
-            case 1: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[146])];
-            case 2: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[162])];
-            case 3: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[167])];
-            case 4: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[172])];
-            case 5: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[177])];
-            case 6: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[182])];
-            case 7: return gc->tileSprites[gc_c(gc, gc->tileSpriteIndex[187])];
+            case 0: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])];
+            case 1: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])];
+            case 2: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])];
+            case 3: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])];
+            case 4: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[172])];
+            case 5: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[177])];
+            case 6: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[182])];
+            case 7: return gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[187])];
         }
     }
     return NULL;
@@ -167,12 +167,12 @@ void gc_renderPackedSprite(GameCanvas *gc, MidpGraphics *g, int32_t n) {
         gc->mapRedrawPending = false;
     }
     int16_t s = gc->spriteOffsetTable[n];
-    int n14 = 65536 * gc_c(gc, gc->spriteData[s + 1]) + 256 * gc_c(gc, gc->spriteData[s + 2]) + gc_c(gc, gc->spriteData[s + 3]);
-    int n15 = 65536 * gc_c(gc, gc->spriteData[s + 4]) + 256 * gc_c(gc, gc->spriteData[s + 5]) + gc_c(gc, gc->spriteData[s + 6]);
-    int n16 = 65536 * gc_c(gc, gc->spriteData[s + 7]) + 256 * gc_c(gc, gc->spriteData[s + 8]) + gc_c(gc, gc->spriteData[s + 9]);
-    int n17 = 65536 * gc_c(gc, gc->spriteData[s + 10]) + 256 * gc_c(gc, gc->spriteData[s + 11]) + gc_c(gc, gc->spriteData[s + 12]);
-    int n18 = gc_c(gc, gc->spriteData[s + 13]);
-    int n19 = gc_c(gc, gc->spriteData[s + 14]);
+    int n14 = 65536 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 1]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 2]) + gc_byteToUnsignedInt(gc, gc->spriteData[s + 3]);
+    int n15 = 65536 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 4]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 5]) + gc_byteToUnsignedInt(gc, gc->spriteData[s + 6]);
+    int n16 = 65536 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 7]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 8]) + gc_byteToUnsignedInt(gc, gc->spriteData[s + 9]);
+    int n17 = 65536 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 10]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[s + 11]) + gc_byteToUnsignedInt(gc, gc->spriteData[s + 12]);
+    int n18 = gc_byteToUnsignedInt(gc, gc->spriteData[s + 13]);
+    int n19 = gc_byteToUnsignedInt(gc, gc->spriteData[s + 14]);
     if (gc->dialogContentHeight < n19) gc->dialogContentHeight = n19;
     else n19 = gc->dialogContentHeight;
     if (gc->cursorOverUI || gc->cursorAllowZoomOut) n18 += 6;
@@ -316,11 +316,11 @@ void gc_renderPackedSprite(GameCanvas *gc, MidpGraphics *g, int32_t n) {
         n12 = n21 + n23 - gc->cursorScale;
         by = gc->spriteData[n25++];
         n11 = by & 7;
-        n10 = 65536 * gc_c(gc, gc->spriteData[n25++]) + 256 * gc_c(gc, gc->spriteData[n25++]) + gc_c(gc, gc->spriteData[n25++]);
-        n9 = gc_c(gc, gc->spriteData[n25++]) + 256 * gc_c(gc, gc->spriteData[n25++]);
-        n8 = gc_c(gc, gc->spriteData[n25++]) + 256 * gc_c(gc, gc->spriteData[n25++]);
-        n7 = gc_c(gc, gc->spriteData[n25++]) + 256 * gc_c(gc, gc->spriteData[n25++]);
-        n6 = gc_c(gc, gc->spriteData[n25++]) + 256 * gc_c(gc, gc->spriteData[n25++]);
+        n10 = 65536 * gc_byteToUnsignedInt(gc, gc->spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[n25++]) + gc_byteToUnsignedInt(gc, gc->spriteData[n25++]);
+        n9 = gc_byteToUnsignedInt(gc, gc->spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[n25++]);
+        n8 = gc_byteToUnsignedInt(gc, gc->spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[n25++]);
+        n7 = gc_byteToUnsignedInt(gc, gc->spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[n25++]);
+        n6 = gc_byteToUnsignedInt(gc, gc->spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->spriteData[n25++]);
         n9 = (int16_t)((by & 8) == 8 ? gc_neighboursMask(gc, gc->currentSpriteId, n9) : n9);
         n8 = (int16_t)((by & 0x10) == 16 ? gc_neighboursMask(gc, gc->currentSpriteId, n8) : n8);
         n7 = (int16_t)((by & 0x20) == 32 ? gc_neighboursMask(gc, gc->currentSpriteId, n7) : n7);

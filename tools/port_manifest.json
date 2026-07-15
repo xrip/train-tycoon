@@ -701,13 +701,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "fX",
+   "java_name": "bottomBarY",
    "java_type": "int",
    "init": "hs - 15",
    "static": true,
    "final": false,
    "line": 112,
-   "c_name": "fX",
+   "c_name": "bottomBarY",
    "c_type": "int32_t"
   },
   {
@@ -1331,13 +1331,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "gj",
+   "java_name": "selectedMenuRowX",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 175,
-   "c_name": "gj",
+   "c_name": "selectedMenuRowX",
    "c_type": "int32_t"
   },
   {
@@ -3791,13 +3791,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "cy",
+   "java_name": "cachedHeaderMoney",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 421,
-   "c_name": "cy",
+   "c_name": "cachedHeaderMoney",
    "c_type": "int32_t"
   },
   {
@@ -3861,33 +3861,33 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "fr",
+   "java_name": "cachedHeaderDay",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 428,
-   "c_name": "fr",
+   "c_name": "cachedHeaderDay",
    "c_type": "int32_t"
   },
   {
-   "java_name": "fd",
+   "java_name": "cachedHeaderMonth",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 429,
-   "c_name": "fd",
+   "c_name": "cachedHeaderMonth",
    "c_type": "int32_t"
   },
   {
-   "java_name": "dN",
+   "java_name": "cachedHeaderYear",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 430,
-   "c_name": "dN",
+   "c_name": "cachedHeaderYear",
    "c_type": "int32_t"
   },
   {
@@ -4231,13 +4231,13 @@
    "c_type": "int8_t"
   },
   {
-   "java_name": "ff",
+   "java_name": "scenarioNoticeCode",
    "java_type": "byte",
    "init": "",
    "static": false,
    "final": false,
    "line": 465,
-   "c_name": "ff",
+   "c_name": "scenarioNoticeCode",
    "c_type": "int8_t"
   },
   {
@@ -4413,13 +4413,13 @@
  ],
  "methods": [
   {
-   "java_name": "c",
+   "java_name": "byteToUnsignedInt",
    "ret": "int",
    "params": "byte n",
-   "sig": "public int c(byte n)",
+   "sig": "public int byteToUnsignedInt(byte n)",
    "start": 491,
    "end": 493,
-   "c_name": "gc_c",
+   "c_name": "gc_byteToUnsignedInt",
    "status": "ported"
   },
   {
@@ -4543,13 +4543,13 @@
    "status": "ported"
   },
   {
-   "java_name": "o",
+   "java_name": "resetOverlayRenderState",
    "ret": "void",
    "params": "",
-   "sig": "public void o()",
+   "sig": "public void resetOverlayRenderState()",
    "start": 893,
    "end": 902,
-   "c_name": "gc_o",
+   "c_name": "gc_resetOverlayRenderState",
    "status": "ported"
   },
   {
@@ -4780,7 +4780,7 @@
    "start": 2163,
    "end": 2183,
    "c_name": "gc_computeIsoCornersInlined",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "computeViewportBounds",
@@ -4800,7 +4800,7 @@
    "start": 2249,
    "end": 2258,
    "c_name": "gc_drawSelectionQuad",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawBuildMenuCursor",
@@ -4810,7 +4810,7 @@
    "start": 2260,
    "end": 2384,
    "c_name": "gc_drawBuildMenuCursor",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawBuildMenuRow",
@@ -4820,7 +4820,7 @@
    "start": 2386,
    "end": 2474,
    "c_name": "gc_drawBuildMenuRow",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "demolishAtCursor",
@@ -4970,7 +4970,7 @@
    "start": 3157,
    "end": 3163,
    "c_name": "gc_drawMenuRow",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawConfirmBar",
@@ -4980,7 +4980,7 @@
    "start": 3165,
    "end": 3174,
    "c_name": "gc_drawConfirmBar",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawHeaderBar",
@@ -4990,7 +4990,7 @@
    "start": 3176,
    "end": 3216,
    "c_name": "gc_drawHeaderBar",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "paintMain",
@@ -5000,7 +5000,7 @@
    "start": 3218,
    "end": 3248,
    "c_name": "gc_paintMain",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "pushMoneyHistory",
@@ -5020,7 +5020,7 @@
    "start": 3259,
    "end": 3268,
    "c_name": "gc_drawNumber",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawMoneyTicker",
@@ -5030,7 +5030,7 @@
    "start": 3270,
    "end": 3285,
    "c_name": "gc_drawMoneyTicker",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "drawConfirmDialog",
@@ -5040,7 +5040,7 @@
    "start": 3287,
    "end": 3294,
    "c_name": "gc_drawConfirmDialog",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "registerTrain",
@@ -5380,7 +5380,7 @@
    "start": 5460,
    "end": 5482,
    "c_name": "gc_isTileBuildable",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "findServiceVehicleAt",
@@ -6340,8 +6340,7 @@
    "start": 8813,
    "end": 9510,
    "c_name": "gc_update",
-   "status": "partial",
-   "note": "boot states + 25 + full state 30 simulation tick done; menu/update states TODO"
+   "status": "partial"
   },
   {
    "java_name": "renderMap",
