@@ -4,7 +4,7 @@ Open items need their own rule test and behavior decision.
 
 ## K-001: Game lifetime does not release owned state
 
-Tests and `main` free only the outer `GameCanvas`. More than 100 pointer fields
+Tests and `main` delete only the outer `GameCanvas`. More than 100 pointer fields
 own data. The C++ ownership stage will give them normal lifetime without a game
 rule change.
 
@@ -48,3 +48,13 @@ The Java source reads left to right.
 Fixed during `BASE-05`: resource readers now read each byte in a separate
 statement, and save readers build unsigned bit patterns one byte at a time.
 Debug and Release now give the same scenario, save, and frame values.
+
+## RESOURCE-LOOP-01: scenario input read past its record count
+
+The old code read `count * 36` records, though the file has `count` records of
+36 bytes. For 15 records it made 525 extra record reads at EOF. The decompile
+has the same loop, so this was old behavior and not a C port error.
+
+Fixed during `RT-02`: the loop now reads `count` records. A direct test proves
+that `scenarios.bin` is exactly `1 + count * 36` bytes. All game digests are
+unchanged.

@@ -4,10 +4,10 @@
 #include "midp_input.h"
 #include "stable_digest.h"
 #include "support/input_queue.h"
+#include "support/resource_reader.h"
 
 #include <array>
 #include <cstdint>
-#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 
@@ -21,8 +21,7 @@ constexpr std::int64_t kFixedRandomSeed = 0x5eed1234;
 std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 
 GameCanvas* make_game() {
-    auto* game = static_cast<GameCanvas*>(std::malloc(sizeof(GameCanvas)));
-    REQUIRE(game != nullptr);
+    auto* game = new GameCanvas{};
     gc_fields_init(game);
     game->rng.set_seed(kFixedRandomSeed);
     return game;
@@ -130,55 +129,51 @@ TEST_CASE("fast: full input queue keeps its first 63 events") {
     CHECK(count == 63);
 }
 
-TEST_CASE("fast: raw resources have fixed digests") {
+TEST_CASE("fast: plain resources have fixed digests") {
     struct ExpectedResource {
         const char* name;
         std::uint64_t digest;
     };
-    constexpr std::array resources{
-        ExpectedResource{"/1", 12333131007334528179ULL},
-        ExpectedResource{"/2", 3313215035755421192ULL},
-        ExpectedResource{"/3", 10129176710171002926ULL},
-        ExpectedResource{"/4", 6400309593563470510ULL},
-        ExpectedResource{"/5", 1309244365097902259ULL},
-        ExpectedResource{"/6", 6784549803277222961ULL},
-        ExpectedResource{"/ico.png", 5309835248505004148ULL},
+    constexpr std::array expected_resources{
+        ExpectedResource{"sprite_images.bin", 7703144764765851560ULL},
+        ExpectedResource{"tile_sprite_ids.bin", 11149815025433152475ULL},
+        ExpectedResource{"sprite_image_map.bin", 13405639703315080894ULL},
+        ExpectedResource{"packed_sprites.bin", 10914531412671063909ULL},
+        ExpectedResource{"scenarios.bin", 17851964682521031332ULL},
+        ExpectedResource{"music.mid", 6784549803277222961ULL},
+        ExpectedResource{"icon.png", 5309835248505004148ULL},
     };
 
-    for (const auto& resource : resources) {
-        std::uint8_t* bytes = nullptr;
-        int size = 0;
-        REQUIRE(midp_resource_read_all(resource.name, &bytes, &size));
+    for (const auto& resource : expected_resources) {
+        const auto bytes = resources::read_all(resource.name);
+        REQUIRE(bytes);
         StableDigest digest;
-        digest.add_bytes(bytes, static_cast<std::size_t>(size));
+        digest.add_bytes(bytes->data(), bytes->size());
         INFO("resource: ", resource.name);
         CHECK(digest.value() == resource.digest);
-        std::free(bytes);
     }
 }
 
-TEST_CASE("fast: resource reader decodes bytes and reaches EOF") {
-    char path_text[1024];
-    REQUIRE(midp_resource_path("/5", path_text, sizeof(path_text)));
-    const filesystem::path path = path_text;
-    CHECK(path.filename() == "5");
+TEST_CASE("fast: resource reader reads plain bytes and reaches EOF") {
+    const filesystem::path path = resources::path_for("scenarios.bin");
+    CHECK(path.filename() == "scenarios.bin");
     CHECK(path.parent_path().filename() == "resources");
-    CHECK(midp_resource_open("/missing") == nullptr);
+    CHECK(!resources::open("missing.bin"));
 
-    MidpResource* resource = midp_resource_open("/5");
-    REQUIRE(resource != nullptr);
-    CHECK(midp_resource_read_byte(resource) == 15);
-    CHECK(midp_resource_read_byte(resource) == 0);
-    CHECK(midp_resource_read_byte(resource) == 80);
-    CHECK(midp_resource_read_byte(resource) == 30);
+    ResourceReader resource = resources::open("scenarios.bin");
+    REQUIRE(resource);
+    CHECK(resource.read_byte() == 15);
+    CHECK(filesystem::file_size(path) == 1 + 15 * 36);
+    CHECK(resource.read_byte() == 0);
+    CHECK(resource.read_byte() == 80);
+    CHECK(resource.read_byte() == 30);
 
     std::uintmax_t byte_count = 4;
-    while (midp_resource_read_byte(resource) >= 0) {
+    while (resource.read_byte() >= 0) {
         ++byte_count;
     }
     CHECK(byte_count == filesystem::file_size(path));
-    CHECK(midp_resource_read_byte(resource) == -1);
-    midp_resource_close(resource);
+    CHECK(resource.read_byte() == -1);
 }
 
 TEST_CASE("fast: record store keeps record bytes and ids") {
@@ -232,7 +227,7 @@ TEST_CASE("fast: small path search") {
     CHECK(gc_tryBuildPath(game));
     CHECK(game->trackTileCount > 0);
     CHECK(game->selectionCost > 0);
-    std::free(game);
+    delete game;
 }
 
 TEST_CASE("fast: save buffer bytes and round trip") {
@@ -275,11 +270,11 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     CHECK(game->visibleTrains[0] == -1234);
 
     std::free(plain);
-    std::free(game);
+    delete game;
 }
 
 TEST_CASE("fast: MIDI resource is valid") {
-    CHECK(midp_media_validate_midi("/6"));
+    CHECK(midp_media_validate_midi("music.mid"));
 }
 
 TEST_CASE("full: all scenario maps have fixed digests") {
@@ -303,7 +298,7 @@ TEST_CASE("full: all scenario maps have fixed digests") {
         generate_scenario(game, scenario);
         INFO(scenario);
         CHECK(map_digest(game) == expected[scenario]);
-        std::free(game);
+        delete game;
     }
 }
 
@@ -346,5 +341,5 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     CHECK(moved_frame.value() == 2749731419861486662ULL);
 
     midp_media_shutdown();
-    std::free(game);
+    delete game;
 }

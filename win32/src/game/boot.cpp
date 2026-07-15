@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int read_u16_be(MidpResource *resource) {
-    int high = midp_resource_read_byte(resource);
-    int low = midp_resource_read_byte(resource);
+static int read_u16_be(ResourceReader& resource) {
+    int high = resource.read_byte();
+    int low = resource.read_byte();
     return high * 256 + low;
 }
 
@@ -27,65 +27,63 @@ void gc_resetOverlayRenderState(GameCanvas *gc) {
     gc->needsRepaint = false;
 }
 
-// public void b(String string) -- load packed sprite offset/data tables
-void gc_b(GameCanvas *gc, char *string) {
-    MidpResource *in = midp_resource_open(string);
+void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
+    ResourceReader in = resources::open(resource_name);
     if (!in) return;
-    int n = midp_resource_read_byte(in);
-    int n2 = midp_resource_read_byte(in);
+    int n = in.read_byte();
+    int n2 = in.read_byte();
     int n3 = read_u16_be(in);
     int n4 = 0;
     gc->spriteOffsetTable = GC_NEW(int16_t, n2 + 1);
     gc->spriteData = GC_NEW(int8_t, n3);
     for (int i = 0; i < n; ++i) {
-        int n5 = midp_resource_read_byte(in);
+        int n5 = in.read_byte();
         int n6 = read_u16_be(in);
         gc->spriteOffsetTable[n5] = (int16_t)n4;
         for (int j = 0; j < n6; ++j) {
-            gc->spriteData[n4] = (int8_t)midp_resource_read_byte(in);
+            gc->spriteData[n4] = (int8_t)in.read_byte();
             ++n4;
         }
     }
-    midp_resource_close(in);
 }
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
 MidpImage *gc_decodePngFromSpriteStream(GameCanvas *gc) {
     int8_t *byArray = NULL;
     int n = 0;
-    int n3 = midp_resource_read_byte(gc->spriteStream);
+    int n3 = gc->sprite_stream.read_byte();
     if (n3 == 2) {
-        n = read_u16_be(gc->spriteStream);
+        n = read_u16_be(gc->sprite_stream);
         byArray = GC_NEW(int8_t, n);
         byArray[0] = -119; byArray[1] = 80; byArray[2] = 78; byArray[3] = 71;
         for (int n2 = 4; n2 < n; ++n2)
-            byArray[n2] = (int8_t)midp_resource_read_byte(gc->spriteStream);
+            byArray[n2] = (int8_t)gc->sprite_stream.read_byte();
     }
     if (n3 == 1) {
-        int n2 = read_u16_be(gc->spriteStream);
-        int n5 = midp_resource_read_byte(gc->spriteStream) * 3;
-        int n6 = midp_resource_read_byte(gc->spriteStream);
+        int n2 = read_u16_be(gc->sprite_stream);
+        int n5 = gc->sprite_stream.read_byte() * 3;
+        int n6 = gc->sprite_stream.read_byte();
         n = n2 + n5 + 69 + n6 * 13;
         byArray = GC_NEW(int8_t, n);
         byArray[0] = -119; byArray[1] = 80; byArray[2] = 78; byArray[3] = 71;
         byArray[4] = 13; byArray[5] = 10; byArray[6] = 26; byArray[7] = 10;
         byArray[11] = 13; byArray[12] = 73; byArray[13] = 72; byArray[14] = 68; byArray[15] = 82;
-        byArray[18] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[19] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[22] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[23] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[24] = (int8_t)midp_resource_read_byte(gc->spriteStream);
+        byArray[18] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[19] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[22] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[23] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[24] = (int8_t)gc->sprite_stream.read_byte();
         byArray[25] = 3;
-        byArray[29] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[30] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[31] = (int8_t)midp_resource_read_byte(gc->spriteStream);
-        byArray[32] = (int8_t)midp_resource_read_byte(gc->spriteStream);
+        byArray[29] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[30] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[31] = (int8_t)gc->sprite_stream.read_byte();
+        byArray[32] = (int8_t)gc->sprite_stream.read_byte();
         byArray[35] = (int8_t)(n5 >> 8 & 0xFF);
         byArray[36] = (int8_t)(n5 & 0xFF);
         byArray[37] = 80; byArray[38] = 76; byArray[39] = 84; byArray[40] = 69;
         int n4;
         for (n4 = 0; n4 < n5 + 4; ++n4)
-            byArray[41 + n4] = (int8_t)midp_resource_read_byte(gc->spriteStream);
+            byArray[41 + n4] = (int8_t)gc->sprite_stream.read_byte();
         n4 = 41 + n5 + 4;
         if (n6 == 1) {
             n4 += 3;
@@ -103,7 +101,7 @@ MidpImage *gc_decodePngFromSpriteStream(GameCanvas *gc) {
         byArray[n4++] = (int8_t)(n2 & 0xFF);
         byArray[n4++] = 73; byArray[n4++] = 68; byArray[n4++] = 65; byArray[n4++] = 84;
         for (int i = 0; i < n2 + 4; ++i)
-            byArray[n4++] = (int8_t)midp_resource_read_byte(gc->spriteStream);
+            byArray[n4++] = (int8_t)gc->sprite_stream.read_byte();
         n4 += 4;
         byArray[n4++] = 73; byArray[n4++] = 69; byArray[n4++] = 78; byArray[n4++] = 68;
         byArray[n4++] = -82; byArray[n4++] = 66; byArray[n4++] = 96; byArray[n4++] = -126;
@@ -251,8 +249,8 @@ void gc_setState(GameCanvas *gc, int32_t n) {
     gc->menuDirty = true;
     switch (n) {
         case 0:
-            gc_loadSpriteStream(gc, (char *)"/1");
-            gc_b(gc, (char *)"/4");
+            gc_openSpriteStream(gc, "sprite_images.bin");
+            gc_loadPackedSpriteData(gc, "packed_sprites.bin");
             gc->loadingTimer = 0;
             /* fall through */
         case 1:
@@ -263,34 +261,32 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             gc->loadingTimer = 0;
             break;
         case 4: {
-            MidpResource *in = midp_resource_open("/3");
+            ResourceReader in = resources::open("sprite_image_map.bin");
             if (in) {
-                int n2 = midp_resource_read_byte(in);
-                int n3 = midp_resource_read_byte(in);
+                int n2 = in.read_byte();
+                int n3 = in.read_byte();
                 gc->spriteBitmapTable = (int8_t **)midp_alloc_arr(sizeof(int8_t *), n2);
                 gc->spriteIndexTable = GC_NEW(int8_t, n3 + 1);
                 for (int i = 0; i < n2; ++i) {
-                    int n4 = midp_resource_read_byte(in);
-                    int n5 = midp_resource_read_byte(in);
+                    int n4 = in.read_byte();
+                    int n5 = in.read_byte();
                     gc->spriteBitmapTable[i] = GC_NEW(int8_t, n5);
                     gc->spriteIndexTable[n4] = (int8_t)i;
                     for (int j = 0; j < n5; ++j)
-                        gc->spriteBitmapTable[i][j] = (int8_t)midp_resource_read_byte(in);
+                        gc->spriteBitmapTable[i][j] = (int8_t)in.read_byte();
                 }
-                midp_resource_close(in);
             }
             break;
         }
         case 10: {
             gc->spriteLoadCounter = 0;
-            MidpResource *in = midp_resource_open("/2");
+            ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
-                gc->scenarioResourceCount = midp_resource_read_byte(in);
+                gc->scenarioResourceCount = in.read_byte();
                 for (int i = 0; i < gc->scenarioResourceCount; ++i) {
-                    int n6 = midp_resource_read_byte(in);
+                    int n6 = in.read_byte();
                     gc->tileSpriteIndex[n6] = (int8_t)(i - 8);
                 }
-                midp_resource_close(in);
             }
             gc->scenarioResourceCount -= 8;
             gc->tileSprites = (MidpImage **)midp_alloc_arr(sizeof(MidpImage *), gc->scenarioResourceCount);

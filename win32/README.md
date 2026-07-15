@@ -54,7 +54,7 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 - `src/midp_media_win32.cpp` — WinMM MIDI music.
 - `src/third_party/stb_image.h` — PNG reading.
 - `tests/` — fast and full behavior checks.
-- `resources/` — game pictures, data, and MIDI music.
+- `resources/` — plain game pictures and data, `music.mid`, and `icon.png`.
 
 This folder is the main source for future native work. It has no build need for
 Java, Python, the old JAR, or files outside this folder. If a game-behavior bug

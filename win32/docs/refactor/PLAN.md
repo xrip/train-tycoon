@@ -82,7 +82,8 @@ Exit: every Stage 0 check and digest is unchanged.
 ### Stage 2: ownership and support code
 
 1. `RT-01` - value types, exact `JavaRandom`, byte buffer, and input queue.
-2. `RT-02` - RAII resource reader and clear resource paths.
+2. `RT-02` - decrypt old data once, use clear resource names, and add an RAII
+   reader with path-based roots. No run-time XOR code remains.
 3. `RT-03` - owning `Image` and non-owning `Surface`.
 4. `RT-04` - RAII record store with a selected save root.
 5. `RT-05` - `WinMmMusicPlayer` and a silent test music output.

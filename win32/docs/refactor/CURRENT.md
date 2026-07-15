@@ -2,33 +2,35 @@
 
 ## Item
 
-`RT-02` - add an RAII resource reader and clear resource paths.
+`RT-03` - add owning images and non-owning drawing surfaces.
 
 ## Base
 
-- Commit: the green `RT-01` support-value commit.
+- Commit: the green `RT-02` resource commit.
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Make resource input close itself, keep the selected resource root in a path
-type, and remove raw resource ownership from first-party callers.
+Give image pixels normal ownership and make a clear split between an owned
+image and a non-owning drawing surface.
 
 ## Non-goals
 
-- Do not change image, record-store, or WinMM ownership yet.
-- Do not change XOR decoding or resource file names.
-- Do not change game model fields.
+- Do not change record-store, WinMM, or game-array ownership yet.
+- Do not change drawing rules, blend rules, PNG output, or frame order.
+- Do not split game model parts yet.
 
 ## Last proof
 
-`RT-01`: `JavaRandom`, `ByteBuffer`, `KeyEvent`, and `InputQueue` replaced their
-old C shapes. Debug and Release fast/full tests passed with all fixed values
-unchanged on 2026-07-15. `RT-02` now has direct path, missing-file, XOR byte,
-length, and EOF checks for the old reader.
+`RT-02`: resources `1` to `5` were changed once to plain data and given clear
+names. `music.mid` and `icon.png` were already plain. `ResourceReader` owns a
+plain stream, the selected root is a `std::filesystem::path`, and all old raw
+resource calls are gone. The scenario reader now reads its real record count.
+Debug and Release fast/full tests passed with all fixed game digests unchanged
+on 2026-07-15.
 
 ## Next action
 
-Add the RAII `ResourceReader` and path-based resource functions. Move callers
-one group at a time, starting with local readers before the sprite stream.
+Map every `MidpImage` and `MidpGraphics` owner, creation call, draw target, and
+free call. Add direct pixel lifetime and surface tests before changing types.

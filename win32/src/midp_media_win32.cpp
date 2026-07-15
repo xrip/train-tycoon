@@ -1,8 +1,10 @@
 // midp_media_win32.c - MIDI music through the WinMM MCI sequencer.
 #include "midp.h"
+#include "support/resource_reader.h"
 
 #include <windows.h>
 #include <mmsystem.h>
+#include <filesystem>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,37 +60,29 @@ static bool start_from_zero(void) {
 }
 
 bool midp_media_validate_midi(const char *resource_name) {
-    uint8_t *data = NULL;
-    int length = 0;
-    if (!midp_resource_read_all(resource_name, &data, &length)) return false;
-    bool valid = length >= 14 && memcmp(data, "MThd", 4) == 0 &&
-                 data[8] == 0 && data[9] <= 1 &&
-                 (data[10] != 0 || data[11] != 0) &&
-                 (data[12] & 0x80) == 0 &&
-                 (data[12] != 0 || data[13] != 0);
-    free(data);
-    return valid;
+    const auto data = resources::read_all(resource_name);
+    return data && data->size() >= 14 && memcmp(data->data(), "MThd", 4) == 0 &&
+           (*data)[8] == 0 && (*data)[9] <= 1 &&
+           ((*data)[10] != 0 || (*data)[11] != 0) &&
+           ((*data)[12] & 0x80) == 0 &&
+           ((*data)[12] != 0 || (*data)[13] != 0);
 }
 
 bool midp_media_load_midi(const char *resource_name) {
     midp_media_shutdown();
     g_last_error[0] = '\0';
 
-    char path[1024];
-    if (!midp_resource_path(resource_name, path, sizeof(path))) {
-        set_error("MIDI resource path is too long");
-        return false;
-    }
-    FILE *file = fopen(path, "rb");
-    if (!file) {
+    const std::filesystem::path path = resources::path_for(resource_name);
+    if (!std::filesystem::is_regular_file(path)) {
         set_error("MIDI resource open failed");
         return false;
     }
-    fclose(file);
+    const std::string path_text = path.string();
 
     char command[1280];
     snprintf(command, sizeof(command),
-             "open \"%s\" type sequencer alias " MUSIC_ALIAS, path);
+             "open \"%s\" type sequencer alias " MUSIC_ALIAS,
+             path_text.c_str());
     if (!send_mci("MCI open", command, NULL, 0)) return false;
 
     g_loaded = true;

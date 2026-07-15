@@ -2,6 +2,7 @@
 #include "doctest/doctest.h"
 
 #include "midp.h"
+#include "support/resource_reader.h"
 
 #include <filesystem>
 #include <iostream>
@@ -21,9 +22,8 @@ int main(int argc, char** argv) {
     filesystem::create_directories(save_root);
     filesystem::remove(save_root / "TTStore.rms");
     filesystem::remove(save_root / "RulesStore.rms");
-    const std::string resource_root_text = resource_root.string();
     const std::string save_root_text = save_root.string();
-    midp_resource_set_root(resource_root_text.c_str());
+    resources::set_root(resource_root);
     midp_rms_set_root(save_root_text.c_str());
 
     doctest::Context context(argc, argv);

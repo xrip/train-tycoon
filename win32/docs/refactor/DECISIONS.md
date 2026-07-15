@@ -49,3 +49,17 @@ not enough. Record uncertain evidence here before a rename.
   the isometric tile draw-order buffers.
 - `gc_writeRlePairInlined` -> `gc_writeRleRun`: it writes one literal or
   repeated run to the save RLE output.
+
+### Recovered in RT-02
+
+- `gc_b` -> `gc_loadPackedSpriteData`: it reads the packed sprite offset and
+  byte tables.
+- `gc_loadSpriteStream` -> `gc_openSpriteStream`: it opens the stream used to
+  rebuild sprite PNG data.
+- `spriteStream` -> `sprite_stream`: it is the owned sprite input stream.
+
+## D-006: Plain native resources
+
+The native project keeps plain resource data. Old files `1` to `5` were changed
+once with their 1-to-127 XOR key and given names based on their use. Run-time
+XOR code and numeric resource paths are not part of the native design.

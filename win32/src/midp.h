@@ -4,8 +4,8 @@
 // drawImage(anchor),
 // setClip, clipRect, drawArc, fillArc}; Image {createImage(bytes)->PNG,
 // createImage(w,h)->mutable, getGraphics, getWidth, getHeight}; java.util.Random
-// (exact LCG); Vector; RecordStore files; the XOR
-// resource reader; input (keycodes + game actions); WinMM MIDI music. High-score
+// (exact LCG); Vector; RecordStore files; input (keycodes + game actions);
+// WinMM MIDI music. High-score
 // networking is a no-op stub for this build.
 #ifndef MIDP_H
 #define MIDP_H
@@ -116,18 +116,6 @@ int midp_arr_len(const void *ptr);
 void midp_arr_set_len(const void *ptr, int count);
 void midp_arr_forget(const void *ptr); // on free, to avoid stale entries
 #define GC_NEW(type, n) ((type *)midp_alloc_arr(sizeof(type), (n)))
-
-// --- Resources ----------------------------------------------------------------
-// XorResourceInput: reads /1../5 (cycling XOR key 1..127) or plain bytes.
-typedef struct MidpResource MidpResource;
-MidpResource *midp_resource_open(const char *name); // e.g. "/1", "/ico.png"
-int midp_resource_read_byte(MidpResource *r);        // XOR-decoded byte, -1 at EOF
-void midp_resource_close(MidpResource *r);
-// Read a whole resource (raw bytes, no XOR). Caller frees *out.
-bool midp_resource_read_all(const char *name, uint8_t **out, int *out_len);
-bool midp_resource_path(const char *name, char *out, size_t out_size);
-// Where resource files live (defaults to "resources"). Set once at startup.
-void midp_resource_set_root(const char *root_dir);
 
 // --- RMS RecordStore (backed by <name>.rms in the save directory) -------------
 typedef struct MidpRecordStore MidpRecordStore;

@@ -14,7 +14,7 @@ Only one row may be `in_progress`.
 | CXX-02 | done | Strict Debug and Release full tests passed | Strict warnings |
 | CXX-03 | done | Preset Debug, Release, and ASan full tests passed | Presets and style |
 | RT-01 | done | Debug and Release full tests passed | Values, random, bytes, and input |
-| RT-02 | in_progress | RT-01 green | Resource reader and paths |
+| RT-02 | done | Debug and Release full tests passed | Plain resources, RAII reader, and paths |
 | RT-03..RT-05 | queued | - | Other support classes |
 | OWN-01..OWN-04 | queued | - | Standard ownership |
 | MODEL-01 | queued | - | Enums and constants |

@@ -152,7 +152,7 @@ int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
 }
 
 void gc_loadMusic(GameCanvas *gc) {
-    gc->musicAvailable = midp_media_load_midi("/6");
+    gc->musicAvailable = midp_media_load_midi("music.mid");
     gc->musicPlayer = gc->musicAvailable ? gc : NULL;
     gc->volumeControl = gc->musicAvailable ? gc : NULL;
     if (gc->musicAvailable)

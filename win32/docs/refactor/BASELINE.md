@@ -27,7 +27,7 @@ The one current smoke test passed in about 7.5 seconds.
 - The smoke test passed with MSVC AddressSanitizer after its runtime DLL was
   put on `PATH`.
 
-## Resource SHA-256
+## Original resource SHA-256 before RT-02
 
 | File | SHA-256 |
 |---|---|
@@ -39,10 +39,25 @@ The one current smoke test passed in about 7.5 seconds.
 | `6` | `EB931E0229A07605983FF215FABD2988244FA4CB38CA4FA077C764ECF9321DAA` |
 | `ico.png` | `07A3558E02E4A3A5371C1821893C3425C82EAF4B9646B2E29AF4E2CA0A309BFB` |
 
+RT-02 changed files `1` to `5` to plain data and gave every resource a clear
+name. The original values above stay here as conversion proof.
+
+## Plain resource SHA-256 after RT-02
+
+| File | SHA-256 |
+|---|---|
+| `sprite_images.bin` | `E987F1E597BC32608C46450B6A28715B660677897D0B856013DA206FCD4868A2` |
+| `tile_sprite_ids.bin` | `849FA389100FC0D39BDB2B3D88E8DF2B17BD5016F4575EDBDD3A3BE80E1DE6A6` |
+| `sprite_image_map.bin` | `847B2FE10F3D6D3C7DFA285D3F4F767B5A3BEBB15E8830A5BBFEDCAABF9C1E44` |
+| `packed_sprites.bin` | `4BB82ECB8834FB43B988A5758B86DB63AF63E83D76EE1033023285DAE2EDC5A5` |
+| `scenarios.bin` | `67C034FD39D94239460E3C024E6A936CD61C52C448B6BF225E9BC4C4B86DEAF2` |
+| `music.mid` | `EB931E0229A07605983FF215FABD2988244FA4CB38CA4FA077C764ECF9321DAA` |
+| `icon.png` | `07A3558E02E4A3A5371C1821893C3425C82EAF4B9646B2E29AF4E2CA0A309BFB` |
+
 ## Current automatic coverage
 
 - exact Java random values;
-- fixed raw digests for all seven resources;
+- fixed plain digests for all seven resources;
 - record-store bytes, ids, reload, and delete;
 - fixed save-buffer size and digest, compress/decompress, and restored fields;
 - one small path search;
@@ -68,6 +83,12 @@ real MIDI device test is an opt-in `device` label.
 - First-party targets use `/W4 /permissive- /WX` under MSVC.
 - Preset Debug and Release full tests passed on 2026-07-15.
 - MSVC AddressSanitizer fast/full passed on 2026-07-15.
+
+## RT-02 proof
+
+- The native resource folder has seven plain files with clear names.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- All scenario, input, save, and frame golden values are unchanged.
 
 ## Manual baseline still needed
 

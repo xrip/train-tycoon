@@ -2,16 +2,16 @@
 #include "game_methods.h"
 #include <cstdlib>
 
-static int read_u16_le(MidpResource *resource) {
-    int low = midp_resource_read_byte(resource);
-    int high = midp_resource_read_byte(resource);
+static int read_u16_le(ResourceReader& resource) {
+    int low = resource.read_byte();
+    int high = resource.read_byte();
     return low + high * 256;
 }
 
-static int read_u24_le(MidpResource *resource) {
-    int low = midp_resource_read_byte(resource);
-    int middle = midp_resource_read_byte(resource);
-    int high = midp_resource_read_byte(resource);
+static int read_u24_le(ResourceReader& resource) {
+    int low = resource.read_byte();
+    int middle = resource.read_byte();
+    int high = resource.read_byte();
     return low + middle * 256 + high * 65536;
 }
 
@@ -247,38 +247,39 @@ void gc_update(GameCanvas *gc) {
                 gc->gWagonCost = 37894; gc->gWagonCost2 = 43247; gc->gWagonCost3 = 51872;
                 gc->gWagonCost4 = 60149; gc->gWagonCost5 = 71423; gc->gWagonCost6 = 82675;
                 gc->costGroupC1 = 4578; gc->costGroupC2 = 5196; gc->costGroupC3 = 4314; gc->costGroupC4 = 5072;
-                MidpResource *in = midp_resource_open("/5");
+                ResourceReader in = resources::open("scenarios.bin");
                 if (in) {
-                    int cnt = midp_resource_read_byte(in);
-                    for (int i = 0; i < cnt * 36; ++i) {
-                        int a2 = midp_resource_read_byte(in);
-                        int a3 = midp_resource_read_byte(in);
-                        int a4 = midp_resource_read_byte(in);
-                        int a5 = midp_resource_read_byte(in);
-                        int a6 = read_u16_le(in);
-                        int a7 = midp_resource_read_byte(in);
-                        int a8 = midp_resource_read_byte(in);
-                        int a9 = midp_resource_read_byte(in);
-                        int a10 = midp_resource_read_byte(in);
-                        int a11 = midp_resource_read_byte(in);
-                        int a12 = midp_resource_read_byte(in);
-                        int a13 = midp_resource_read_byte(in);
-                        int a14 = midp_resource_read_byte(in);
-                        int a15 = midp_resource_read_byte(in);
-                        int a16 = read_u24_le(in);
-                        int a17 = read_u24_le(in);
-                        int a18 = read_u24_le(in);
-                        int a19 = midp_resource_read_byte(in);
-                        int a20 = midp_resource_read_byte(in);
-                        int a21 = midp_resource_read_byte(in);
-                        int a22 = midp_resource_read_byte(in);
-                        int a23 = read_u24_le(in);
-                        int a24 = read_u24_le(in);
-                        int a25 = midp_resource_read_byte(in);
-                        int a26 = midp_resource_read_byte(in);
-                        if (a2 != gc->activeScenario) continue;
-                        gc->scenarioStep = a2;
-                        gc->mapWidth = gc->mapHeight = a3;
+                    const int record_count = in.read_byte();
+                    for (int record_index = 0; record_index < record_count;
+                         ++record_index) {
+                        const int scenario_index = in.read_byte();
+                        const int map_size = in.read_byte();
+                        const int terrain_raise_steps = in.read_byte();
+                        const int terrain_lower_steps = in.read_byte();
+                        const int obstacle_count = read_u16_le(in);
+                        const int terrain_patch_size = in.read_byte();
+                        const int map_gen_columns = in.read_byte();
+                        const int map_gen_rows = in.read_byte();
+                        const int stage7_feature_count = in.read_byte();
+                        const int stage6_feature_count = in.read_byte();
+                        const int weight_accel_1 = in.read_byte();
+                        const int weight_accel_2 = in.read_byte();
+                        const int weight_accel_3 = in.read_byte();
+                        const int weight_accel_4 = in.read_byte();
+                        const int starting_money = read_u24_le(in);
+                        const int loan_ceiling = read_u24_le(in);
+                        const int starting_loan = read_u24_le(in);
+                        const int interest_rate = in.read_byte();
+                        const int era_number = in.read_byte();
+                        const int notice_id = in.read_byte();
+                        const int milestone_index = in.read_byte();
+                        const int milestone_score = read_u24_le(in);
+                        const int milestone_threshold = read_u24_le(in);
+                        const int build_menu_scenario = in.read_byte();
+                        const int scenario_flags = in.read_byte();
+                        if (scenario_index != gc->activeScenario) continue;
+                        gc->scenarioStep = scenario_index;
+                        gc->mapWidth = gc->mapHeight = map_size;
                         gc->mapHalfWidth = (gc->mapWidth - 1) * 8;
                         gc->mapScreenWidth = (gc->mapWidth + gc->mapHeight) * 16;
                         gc->mapScreenHeight = (gc->mapWidth + gc->mapHeight) * 8;
@@ -290,24 +291,23 @@ void gc_update(GameCanvas *gc) {
                         gc->viewportBaseY = gc->viewportCenterY;
                         gc->mapScaleX = gc->viewportBaseX * 2;
                         gc->mapScaleY = gc->viewportBaseY * 2;
-                        gc->initialObstacleCount = a6; gc->terrainRaiseStepCount = a4; gc->terrainLowerStepCount = a5; gc->terrainPatchBaseSize = a7;
-                        gc->mapGenColumns = a8; gc->mapGenRows = a9;
-                        gc->terrainFeatureStage7Count = a10; gc->terrainFeatureStage6Count = a11;
-                        gc->weightAccel = a12; gc->weightAccel2 = a13; gc->weightAccel3 = a14; gc->weightAccel4 = a15;
-                        gc->money = a16; gc->loanCeiling = a17; gc->loanBalance = a18;
-                        gc->interestRate = (int8_t)a19; gc->era = a20 - 1;
-                        gc->scenarioMilestoneIndex = (int8_t)a22;
-                        gc->currentMilestoneScore = a23; gc->milestoneCoThreshold2 = a24;
-                        gc_initBuildMenuForScenario(gc, a25);
-                        gc->flagsA = (a26 & 2) == 2;
-                        gc->flagsB = (a26 & 4) == 4;
-                        if ((a26 & 1) != 1) { gc->aiFrequency = 25; gc->aiThreshold = 100; }
+                        gc->initialObstacleCount = obstacle_count; gc->terrainRaiseStepCount = terrain_raise_steps; gc->terrainLowerStepCount = terrain_lower_steps; gc->terrainPatchBaseSize = terrain_patch_size;
+                        gc->mapGenColumns = map_gen_columns; gc->mapGenRows = map_gen_rows;
+                        gc->terrainFeatureStage7Count = stage7_feature_count; gc->terrainFeatureStage6Count = stage6_feature_count;
+                        gc->weightAccel = weight_accel_1; gc->weightAccel2 = weight_accel_2; gc->weightAccel3 = weight_accel_3; gc->weightAccel4 = weight_accel_4;
+                        gc->money = starting_money; gc->loanCeiling = loan_ceiling; gc->loanBalance = starting_loan;
+                        gc->interestRate = (int8_t)interest_rate; gc->era = era_number - 1;
+                        gc->scenarioMilestoneIndex = (int8_t)milestone_index;
+                        gc->currentMilestoneScore = milestone_score; gc->milestoneCoThreshold2 = milestone_threshold;
+                        gc_initBuildMenuForScenario(gc, build_menu_scenario);
+                        gc->flagsA = (scenario_flags & 2) == 2;
+                        gc->flagsB = (scenario_flags & 4) == 4;
+                        if ((scenario_flags & 1) != 1) { gc->aiFrequency = 25; gc->aiThreshold = 100; }
                         else { gc->aiFrequency = 32; gc->aiThreshold = 29; }
-                        gc->scenarioNoticeId = a21;
-                        if (a21 != 0) { gc->transitionDebounce = 5; gc->scenarioNoticeCode = (int8_t)a21; continue; }
+                        gc->scenarioNoticeId = notice_id;
+                        if (notice_id != 0) { gc->transitionDebounce = 5; gc->scenarioNoticeCode = (int8_t)notice_id; continue; }
                         gc->transitionDebounce = 0;
                     }
-                    midp_resource_close(in);
                 }
                 if (gc->activeScenario <= 1) {
                     if (gc->difficultySlot == 0) { gc->aiFrequency = 32; gc->aiThreshold = 29; }

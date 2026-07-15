@@ -8,9 +8,8 @@ void gc_drawSpriteQuad(GameCanvas *gc, MidpGraphics *graphics, int32_t n,
                     gc->tileSprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[n])], n2, n3, n4);
 }
 
-// void loadSpriteStream(String string)
-void gc_loadSpriteStream(GameCanvas *gc, char *string) {
-    gc->spriteStream = midp_resource_open(string);
+void gc_openSpriteStream(GameCanvas *gc, const char *resource_name) {
+    gc->sprite_stream = resources::open(resource_name);
 }
 
 // boolean spendMoney(int n)

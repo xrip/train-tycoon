@@ -3,6 +3,7 @@
 #define GAME_STATE_H
 #include "midp.h"
 #include "support/java_random.h"
+#include "support/resource_reader.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +77,7 @@ typedef struct GameCanvas {
     int32_t currentKey;
     bool ee;
     int32_t dp;
-    MidpResource* spriteStream;
+    ResourceReader sprite_stream;
     MidpImage** ca;
     int16_t* spriteOffsetTable;
     int8_t* spriteData;

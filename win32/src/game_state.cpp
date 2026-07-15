@@ -1,6 +1,5 @@
 // Train Tycoon game-state initial values.
 #include "game_state.h"
-#include <stdlib.h>
 #include <string.h>
 
 int32_t gcs_screenWidth;
@@ -23,7 +22,7 @@ bool gcs_monthlyReportEnabled;
 bool gcs_annualReportEnabled;
 
 void gc_fields_init(GameCanvas *gc) {
-    memset(gc, 0, sizeof(*gc));
+    *gc = GameCanvas{};
     // --- constructor finals (GameCanvas()) ---
     gc->at = 3; gc->cB = 33; gc->ar = 20; gc->D = 240;
     // --- static fields (declaration order) ---
@@ -87,7 +86,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->currentKey = 0;
     gc->ee = false;
     gc->dp = 255;
-    gc->spriteStream = NULL;
     gc->ca = (MidpImage**)midp_alloc_arr(sizeof(MidpImage*), 6);
     gc->cursorScale = 0;
     gc->cursorDragY = -1;
