@@ -13,8 +13,7 @@ file(GLOB GAME_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game/*.c
 )
 
-add_executable(train_tycoon
-    src/main.c
+add_library(train_tycoon_legacy STATIC
     src/midp_graphics.c
     src/midp_image.c
     src/midp_input.c
@@ -28,21 +27,27 @@ add_executable(train_tycoon
     ${GAME_SOURCES}
 )
 
-target_include_directories(train_tycoon PRIVATE
+target_include_directories(train_tycoon_legacy PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party
 )
 
-target_compile_definitions(train_tycoon PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_definitions(train_tycoon_legacy PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(train_tycoon PRIVATE -Wall -Wextra)
+    target_compile_options(train_tycoon_legacy PRIVATE -Wall -Wextra)
 elseif(MSVC)
-    target_compile_options(train_tycoon PRIVATE /std:clatest)
+    target_compile_options(train_tycoon_legacy PRIVATE /std:clatest)
 endif()
 
-target_link_libraries(train_tycoon PRIVATE user32 gdi32 winmm)
+add_executable(train_tycoon src/main.c)
+target_link_libraries(train_tycoon PRIVATE
+    train_tycoon_legacy
+    user32
+    gdi32
+    winmm
+)
 
 add_custom_command(TARGET train_tycoon POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

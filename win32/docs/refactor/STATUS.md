@@ -5,8 +5,8 @@ Only one row may be `in_progress`.
 | Item | State | Last proof | Note |
 |---|---|---|---|
 | BASE-01 | done | Debug smoke passed, 2026-07-15 | Work-control files |
-| BASE-02 | in_progress | BASE-01 green | Testable C library |
-| BASE-03 | queued | - | doctest and smoke move |
+| BASE-02 | done | Library build and old smoke passed | Testable C library |
+| BASE-03 | in_progress | BASE-02 green | doctest and smoke move |
 | BASE-04 | queued | - | Fixed test inputs |
 | BASE-05 | queued | - | Rule checks and goldens |
 | CXX-01 | queued | - | Mechanical C++20 move |
