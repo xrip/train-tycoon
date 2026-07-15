@@ -75,17 +75,6 @@ int midp_vector_size(const MidpVector *v);
 void midp_vector_remove_at(MidpVector *v, int index);
 void midp_vector_free(MidpVector *v); // frees the vector, not the elements
 
-// --- Array length registry ----------------------------------------------------
-// Java arrays carry their length; raw C pointers do not. GameCanvas methods use
-// `array.length`, so every game array is allocated through midp_alloc_arr, which
-// records its element count. midp_arr_len(ptr) recovers it (0 if unknown).
-// Use GC_NEW(type, n) in hand-ported code for length-tracked allocation.
-void *midp_alloc_arr(size_t elem_size, int count); // calloc'd, length-tracked
-int midp_arr_len(const void *ptr);
-void midp_arr_set_len(const void *ptr, int count);
-void midp_arr_forget(const void *ptr); // on free, to avoid stale entries
-#define GC_NEW(type, n) ((type *)midp_alloc_arr(sizeof(type), (n)))
-
 // --- Timing -------------------------------------------------------------------
 int64_t midp_current_time_millis(void);
 void midp_sleep(int millis);
