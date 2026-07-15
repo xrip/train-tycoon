@@ -214,10 +214,10 @@ implements Runnable {
     int activeScenario;
     int offerTypeTransitionCode;
     int offerEffectTransitionCode;
-    int gJ;
+    int currentScenarioScore;
     boolean ad = false;
-    byte[] bE = new byte[10];
-    byte[] cD = new byte[10];
+    byte[] playerNameCodes = new byte[10];
+    byte[] playerNameCursorMarker = new byte[10];
     byte routeSlotIndex = 0;
     byte spriteCycleCursor = 0;
     boolean snapshotLoadedFlag = false;
@@ -273,7 +273,7 @@ implements Runnable {
     byte[][] forwardTrackSteps = new byte[][]{{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}};
     byte[][] reverseTrackSteps = new byte[][]{{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}};
     int dI = 5;
-    short[][] cs = new short[][]{{130, 131, 132, 133, 134, 135, 136, 137}, {140, 141, 142, 143, 144, 145, 146, 147}, {160, 161, 162, 163, 160, 161, 162, 163}, {165, 166, 167, 168, 165, 166, 167, 168}, {170, 171, 172, 173, 170, 171, 172, 173}, {175, 176, 177, 178, 175, 176, 177, 178}, {180, 181, 182, 183, 180, 181, 182, 183}, {185, 186, 187, 188, 185, 186, 187, 188}};
+    short[][] trainSpriteDirectionTable = new short[][]{{130, 131, 132, 133, 134, 135, 136, 137}, {140, 141, 142, 143, 144, 145, 146, 147}, {160, 161, 162, 163, 160, 161, 162, 163}, {165, 166, 167, 168, 165, 166, 167, 168}, {170, 171, 172, 173, 170, 171, 172, 173}, {175, 176, 177, 178, 175, 176, 177, 178}, {180, 181, 182, 183, 180, 181, 182, 183}, {185, 186, 187, 188, 185, 186, 187, 188}};
     byte[] saveBuffer = null;
     int saveReadOffset = 0;
     int saveSlot = 0;
@@ -297,15 +297,15 @@ implements Runnable {
     int totalRevenue = 0;
     int terrainTotal = 0;
     int decadeEnterpriseTax = 0;
-    int xIndicator = 0;
+    int netProfit = 0;
     int decadeSpentWithCurrent = 0;
     int decadeAiSpentWithCurrent = 0;
     int decadeFuelWithCurrent = 0;
     int decadeSubsidyWithCurrent = 0;
     int decadeRevenueWithCurrent = 0;
-    int gs = 0;
+    int legacyDecadeMetric = 0;
     int decadeEnterpriseWithCurrent = 0;
-    int decadeXWithCurrent = 0;
+    int decadeProfitWithCurrent = 0;
     int prevTotalSpent = 0;
     int prevAiMoneySpent = 0;
     int prevFuelCost = 0;
@@ -313,15 +313,15 @@ implements Runnable {
     int prevTotalRevenue = 0;
     int prevTerrainTotal = 0;
     int prevEnterpriseTotal = 0;
-    int prevXIndicator = 0;
+    int previousYearProfit = 0;
     int prevDecadeSpent = 0;
     int prevDecadeAiSpent = 0;
     int prevDecadeFuel = 0;
     int prevDecadeSubsidy = 0;
     int prevDecadeRevenue = 0;
-    int prevDecadeGs = 0;
-    int prevDecadeDq = 0;
-    int prevDecadeBm = 0;
+    int previousLegacyDecadeMetric = 0;
+    int previousDecadeEnterpriseTax = 0;
+    int previousDecadeProfit = 0;
     int decadeCostTotal = 0;
     int decadeSpentTotal = 0;
     int decadeFuelCost = 0;
@@ -329,13 +329,13 @@ implements Runnable {
     int decadeRevenueTotal = 0;
     int savedLegacyMetricEb = 0;
     int decadeEnterpriseTotal = 0;
-    int decadeXTotal = 0;
+    int decadeProfitTotal = 0;
     int revenueTotal = 0;
-    int decadeOtherXTotal = 0;
+    int decadeProfitGraphTotal = 0;
     int[] yearProfitHistory = new int[12];
     int[] yearRevenueHistory = new int[12];
     int[] yearCompanyValueHistory = new int[12];
-    int[] altDecadeOtherXTotal = new int[12];
+    int[] decadeProfitHistory = new int[12];
     int[] altDecadeRevenueTotal = new int[12];
     int[] altDecadeTotalCost = new int[12];
     byte[] yearGraphOffsets = new byte[12];
@@ -392,9 +392,9 @@ implements Runnable {
     Player musicPlayer = null;
     VolumeControl volumeControl = null;
     int trainRevenueScore = 0;
-    int transientH = 0;
-    int[] gk = new int[13];
-    int[] bd = new int[14];
+    int bestScenarioScore = 0;
+    int[] scenarioScores = new int[13];
+    int[] leaderboardScores = new int[14];
     static byte[] decodeHeaderName1 = new byte[]{-15, 12, -41, -41, 37, 109, -35, 61, -10, 28, -25, 49, -31, 51, 15, 104, -32, 54, 51, 77, 42, 76};
     static byte[] decodeHeaderName2 = new byte[]{-11, 0, 17, 17, 53, 125, 28, 99, -49, 37, -4, 0, 40, 124, 68, 68, -49, -41, -26, 59, 41, 76};
     static byte[] decodeHeaderName3 = new byte[]{-46, 45, -20, 60, 60, 116, 60, 71, -24, 14, -17, 8, 44, 76, 40, 122, -8, 30, 29, 125, 57, 91};
@@ -408,10 +408,10 @@ implements Runnable {
     byte[] tileOffsetX = new byte[1];
     byte[] tileOffsetY = new byte[1];
     int numActiveTileAnimations = 0;
-    static boolean ch = false;
+    static boolean animationsDisabled = false;
     static boolean selectionHidden = false;
-    static boolean cc = true;
-    static boolean q = true;
+    static boolean monthlyReportEnabled = true;
+    static boolean annualReportEnabled = true;
     int gameState;
     byte[][] tileMap;
     byte[][] trackMap;
@@ -1064,7 +1064,7 @@ implements Runnable {
                 n3 = (by & 0x10) == 16 ? this.spriteData[n25++] : 0;
                 n2 = (by & 0x10) == 16 ? this.spriteData[n25++] : 0;
                 byte by2 = (by & 0x10) == 16 ? this.spriteData[n25++] : (byte)0;
-                byte[] byArray = n8 != 0 ? this.q(this.currentSpriteId, n6) : this.m(n25);
+                byte[] byArray = n8 != 0 ? this.resolveDialogValue(this.currentSpriteId, n6) : this.m(n25);
                 int n29 = 0;
                 if (byArray == null) continue;
                 for (n28 = 0; n28 < byArray.length; ++n28) {
@@ -3562,7 +3562,7 @@ implements Runnable {
         }
     }
 
-    byte[] b(int n) {
+    byte[] formatCurrency(int n) {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(Math.abs(n));
         stringBuffer = stringBuffer.reverse();
@@ -3779,7 +3779,7 @@ implements Runnable {
         return 0;
     }
 
-    byte[] q(int n, int n2) {
+    byte[] resolveDialogValue(int n, int n2) {
         switch (n) {
             case 14: {
                 switch (this.screenParam) {
@@ -3863,16 +3863,16 @@ implements Runnable {
             case 10: {
                 switch (n2) {
                     case 1: {
-                        return !ch ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
+                        return !animationsDisabled ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 2: {
                         return !selectionHidden ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 3: {
-                        return cc ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
+                        return monthlyReportEnabled ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 4: {
-                        return q ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
+                        return annualReportEnabled ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
                     }
                     case 5: {
                         return this.autoMusic ? this.spriteBitmapTable[this.spriteIndexTable[20]] : this.spriteBitmapTable[this.spriteIndexTable[21]];
@@ -3886,28 +3886,28 @@ implements Runnable {
             case 24: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.gWagonCost);
+                        return this.formatCurrency(this.gWagonCost);
                     }
                     case 1: {
-                        return this.b(this.gWagonCost2);
+                        return this.formatCurrency(this.gWagonCost2);
                     }
                     case 2: {
-                        return this.b(this.gWagonCost3);
+                        return this.formatCurrency(this.gWagonCost3);
                     }
                     case 3: {
-                        return this.b(this.gWagonCost4);
+                        return this.formatCurrency(this.gWagonCost4);
                     }
                     case 4: {
-                        return this.b(this.gWagonCost5);
+                        return this.formatCurrency(this.gWagonCost5);
                     }
                     case 5: {
-                        return this.b(this.gWagonCost6);
+                        return this.formatCurrency(this.gWagonCost6);
                     }
                 }
                 break;
             }
             case 23: {
-                return this.b(this.unitCost - this.currentTrainCostSnapshot);
+                return this.formatCurrency(this.unitCost - this.currentTrainCostSnapshot);
             }
             case 22: {
                 return this.formatNumberWithSuffix(this.serviceResourceStock[this.serviceVehicleAtCursor][n2], 0);
@@ -3918,19 +3918,19 @@ implements Runnable {
                     return this.spriteBitmapTable[this.spriteIndexTable[60 + this.trainEraOrStage[this.trainAtCursor]]];
                 }
                 if (n2 == 6) {
-                    return this.b(this.trainRevenue[this.trainAtCursor]);
+                    return this.formatCurrency(this.trainRevenue[this.trainAtCursor]);
                 }
                 if (n2 == 7) {
-                    return this.b(this.prevTrainRevenue[this.trainAtCursor]);
+                    return this.formatCurrency(this.prevTrainRevenue[this.trainAtCursor]);
                 }
                 if (n2 == 8) {
                     return this.formatNumberWithSuffix(this.trainAgeOrTimer[this.trainAtCursor], 0);
                 }
                 if (n2 == 9) {
-                    return this.b(this.currentTrainCostSnapshot * 70 / 100);
+                    return this.formatCurrency(this.currentTrainCostSnapshot * 70 / 100);
                 }
                 if (n2 == 10) {
-                    return this.b(this.baseTrainCostSnapshot - this.currentTrainCostSnapshot);
+                    return this.formatCurrency(this.baseTrainCostSnapshot - this.currentTrainCostSnapshot);
                 }
                 if (n2 == 20) {
                     return this.trainAiOverride[this.trainAtCursor] == 0 ? this.spriteBitmapTable[this.spriteIndexTable[21]] : this.spriteBitmapTable[this.spriteIndexTable[20]];
@@ -3953,10 +3953,10 @@ implements Runnable {
             case 30: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.loanBalance);
+                        return this.formatCurrency(this.loanBalance);
                     }
                     case 1: {
-                        return this.b(this.loanCeiling);
+                        return this.formatCurrency(this.loanCeiling);
                     }
                     case 2: {
                         return this.formatNumberWithSuffix(this.interestRate, 29);
@@ -3967,28 +3967,28 @@ implements Runnable {
             case 32: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.compareToPrevious ? this.prevTotalSpent : this.totalSpent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevTotalSpent : this.totalSpent);
                     }
                     case 1: {
-                        return this.b(this.compareToPrevious ? this.prevAiMoneySpent : this.aiMoneySpent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevAiMoneySpent : this.aiMoneySpent);
                     }
                     case 2: {
-                        return this.b(this.compareToPrevious ? this.prevFuelCost : this.fuelCostAccrued);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevFuelCost : this.fuelCostAccrued);
                     }
                     case 3: {
-                        return this.b(this.compareToPrevious ? this.prevSubsidyCost : this.subsidyCost);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevSubsidyCost : this.subsidyCost);
                     }
                     case 4: {
-                        return this.b(this.compareToPrevious ? this.prevTerrainTotal : this.terrainTotal);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevTerrainTotal : this.terrainTotal);
                     }
                     case 5: {
-                        return this.b(this.compareToPrevious ? this.prevEnterpriseTotal : this.decadeEnterpriseTax);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevEnterpriseTotal : this.decadeEnterpriseTax);
                     }
                     case 6: {
-                        return this.b(this.compareToPrevious ? this.prevTotalRevenue : this.totalRevenue);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevTotalRevenue : this.totalRevenue);
                     }
                     case 7: {
-                        return this.b(this.compareToPrevious ? this.prevXIndicator : this.xIndicator);
+                        return this.formatCurrency(this.compareToPrevious ? this.previousYearProfit : this.netProfit);
                     }
                 }
                 break;
@@ -3996,28 +3996,28 @@ implements Runnable {
             case 35: {
                 switch (n2) {
                     case 0: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeSpent : this.decadeSpentWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevDecadeSpent : this.decadeSpentWithCurrent);
                     }
                     case 1: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeAiSpent : this.decadeAiSpentWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevDecadeAiSpent : this.decadeAiSpentWithCurrent);
                     }
                     case 2: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeFuel : this.decadeFuelWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevDecadeFuel : this.decadeFuelWithCurrent);
                     }
                     case 3: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeSubsidy : this.decadeSubsidyWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevDecadeSubsidy : this.decadeSubsidyWithCurrent);
                     }
                     case 4: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeGs : this.gs);
+                        return this.formatCurrency(this.compareToPrevious ? this.previousLegacyDecadeMetric : this.legacyDecadeMetric);
                     }
                     case 5: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeDq : this.decadeEnterpriseWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.previousDecadeEnterpriseTax : this.decadeEnterpriseWithCurrent);
                     }
                     case 6: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeRevenue : this.decadeRevenueWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.prevDecadeRevenue : this.decadeRevenueWithCurrent);
                     }
                     case 7: {
-                        return this.b(this.compareToPrevious ? this.prevDecadeBm : this.decadeXWithCurrent);
+                        return this.formatCurrency(this.compareToPrevious ? this.previousDecadeProfit : this.decadeProfitWithCurrent);
                     }
                 }
                 break;
@@ -4029,23 +4029,23 @@ implements Runnable {
                 if (n2 >= 40) {
                     if (!this.yearGraphAlt) {
                         if (this.yearGraphMode == 0) {
-                            return this.b(this.yearProfitHistory[n2 - 40]);
+                            return this.formatCurrency(this.yearProfitHistory[n2 - 40]);
                         }
                         if (this.yearGraphMode == 1) {
-                            return this.b(this.yearRevenueHistory[n2 - 40]);
+                            return this.formatCurrency(this.yearRevenueHistory[n2 - 40]);
                         }
                         if (this.yearGraphMode == 2) {
-                            return this.b(this.yearCompanyValueHistory[n2 - 40]);
+                            return this.formatCurrency(this.yearCompanyValueHistory[n2 - 40]);
                         }
                     } else {
                         if (this.yearGraphMode == 0) {
-                            return this.b(this.altDecadeOtherXTotal[n2 - 40]);
+                            return this.formatCurrency(this.decadeProfitHistory[n2 - 40]);
                         }
                         if (this.yearGraphMode == 1) {
-                            return this.b(this.altDecadeRevenueTotal[n2 - 40]);
+                            return this.formatCurrency(this.altDecadeRevenueTotal[n2 - 40]);
                         }
                         if (this.yearGraphMode == 2) {
-                            return this.b(this.altDecadeTotalCost[n2 - 40]);
+                            return this.formatCurrency(this.altDecadeTotalCost[n2 - 40]);
                         }
                     }
                 } else {
@@ -4088,7 +4088,7 @@ implements Runnable {
                     return byArray6;
                 }
                 if (n2 == 2) {
-                    return this.b(this.menuRowCost[this.offerRowIndex]);
+                    return this.formatCurrency(this.menuRowCost[this.offerRowIndex]);
                 }
                 if (n2 == 3) {
                     return this.formatNumberWithSuffix(this.computeMenuRowDisplayValue(this.offerRowIndex), 29);
@@ -4120,32 +4120,32 @@ implements Runnable {
                     return this.formatNumberWithSuffix(this.menuRowEra[this.offerRowIndex], 29);
                 }
                 if (n2 == 2) {
-                    return this.b(this.menuRowRevenue[this.offerRowIndex]);
+                    return this.formatCurrency(this.menuRowRevenue[this.offerRowIndex]);
                 }
                 if (n2 != 3) break;
                 return this.formatNumberWithSuffix(this.menuRowEra[this.offerRowIndex], 0);
             }
             case 27: {
                 if (n2 == 1) {
-                    return this.bE;
+                    return this.playerNameCodes;
                 }
                 if (n2 != 0) break;
-                this.cD = new byte[10];
-                this.cD[this.routeSlotIndex] = 28;
-                return this.cD;
+                this.playerNameCursorMarker = new byte[10];
+                this.playerNameCursorMarker[this.routeSlotIndex] = 28;
+                return this.playerNameCursorMarker;
             }
             case 28: {
                 if (n2 == 0) {
-                    return this.formatNumberWithSuffix(this.transientH, 0);
+                    return this.formatNumberWithSuffix(this.bestScenarioScore, 0);
                 }
                 if (n2 >= 1 && n2 <= 13) {
-                    return this.formatNumberWithSuffix(this.gk[n2 - 1], 0);
+                    return this.formatNumberWithSuffix(this.scenarioScores[n2 - 1], 0);
                 }
                 if (n2 < 20 || n2 > 33) break;
-                return this.formatNumberWithSuffix(this.bd[n2 - 20], 0);
+                return this.formatNumberWithSuffix(this.leaderboardScores[n2 - 20], 0);
             }
             case 6: {
-                return this.formatNumberWithSuffix(this.gJ, 0);
+                return this.formatNumberWithSuffix(this.currentScenarioScore, 0);
             }
         }
         return null;
@@ -4548,7 +4548,7 @@ implements Runnable {
             case 10: {
                 switch (n2) {
                     case 1: {
-                        ch = !ch;
+                        animationsDisabled = !animationsDisabled;
                         break block0;
                     }
                     case 2: {
@@ -4556,11 +4556,11 @@ implements Runnable {
                         break block0;
                     }
                     case 3: {
-                        cc = !cc;
+                        monthlyReportEnabled = !monthlyReportEnabled;
                         break block0;
                     }
                     case 4: {
-                        q = !q;
+                        annualReportEnabled = !annualReportEnabled;
                         break block0;
                     }
                     case 5: {
@@ -4894,7 +4894,7 @@ implements Runnable {
                 if (this.routeSlotIndex == 10) {
                     this.routeSlotIndex = 0;
                 }
-                this.spriteCycleCursor = this.bE[this.routeSlotIndex];
+                this.spriteCycleCursor = this.playerNameCodes[this.routeSlotIndex];
                 if (n2 == 2) {
                     this.spriteCycleCursor = (byte)(this.spriteCycleCursor - 1);
                     if (this.spriteCycleCursor < 0) {
@@ -4906,7 +4906,7 @@ implements Runnable {
                     if (this.spriteCycleCursor == 39) {
                         this.spriteCycleCursor = (byte)17;
                     }
-                    this.bE[this.routeSlotIndex] = this.spriteCycleCursor;
+                    this.playerNameCodes[this.routeSlotIndex] = this.spriteCycleCursor;
                 }
                 if (n2 == 3) {
                     this.spriteCycleCursor = (byte)(this.spriteCycleCursor + 1);
@@ -4919,7 +4919,7 @@ implements Runnable {
                     if (this.spriteCycleCursor == 96) {
                         this.spriteCycleCursor = 0;
                     }
-                    this.bE[this.routeSlotIndex] = this.spriteCycleCursor;
+                    this.playerNameCodes[this.routeSlotIndex] = this.spriteCycleCursor;
                 }
                 if (n2 >= 0) break;
                 this.persistSnapshotMode0();
@@ -6174,7 +6174,7 @@ implements Runnable {
         int n3;
         int n4;
         short[] sArray = new short[8];
-        System.arraycopy(this.cs[this.trainFlags[n] & 0xF], 0, sArray, 0, 8);
+        System.arraycopy(this.trainSpriteDirectionTable[this.trainFlags[n] & 0xF], 0, sArray, 0, 8);
         int n5 = this.byteToUnsignedInt(this.trainX[n]);
         int n6 = this.byteToUnsignedInt(this.trainY[n]);
         if ((this.trainFlags[n] & 0x40) == 64) {
@@ -6821,7 +6821,7 @@ implements Runnable {
         this.saveOrLoadIntArrayInlined(this.yearProfitHistory);
         this.saveOrLoadIntArrayInlined(this.yearRevenueHistory);
         this.saveOrLoadIntArrayInlined(this.yearCompanyValueHistory);
-        this.saveOrLoadIntArrayInlined(this.altDecadeOtherXTotal);
+        this.saveOrLoadIntArrayInlined(this.decadeProfitHistory);
         this.saveOrLoadIntArrayInlined(this.altDecadeRevenueTotal);
         this.saveOrLoadIntArrayInlined(this.altDecadeTotalCost);
         this.saveOrLoadIntArrayInlined(this.trainRevenue);
@@ -6829,7 +6829,7 @@ implements Runnable {
         this.saveOrLoadShortArrayInlined(this.stationRevenue);
         this.saveOrLoadShortArrayInlined(this.prevStationRevenue);
         this.revenueTotal = this.saveIntToBuffer(this.revenueTotal);
-        this.decadeOtherXTotal = this.saveIntToBuffer(this.decadeOtherXTotal);
+        this.decadeProfitGraphTotal = this.saveIntToBuffer(this.decadeProfitGraphTotal);
         this.totalSpent = this.saveIntToBuffer(this.totalSpent);
         this.aiMoneySpent = this.saveIntToBuffer(this.aiMoneySpent);
         this.fuelCostAccrued = this.saveIntToBuffer(this.fuelCostAccrued);
@@ -6837,7 +6837,7 @@ implements Runnable {
         this.totalRevenue = this.saveIntToBuffer(this.totalRevenue);
         this.terrainTotal = this.saveIntToBuffer(this.terrainTotal);
         this.decadeEnterpriseTax = this.saveIntToBuffer(this.decadeEnterpriseTax);
-        this.xIndicator = this.saveIntToBuffer(this.xIndicator);
+        this.netProfit = this.saveIntToBuffer(this.netProfit);
         this.prevTotalSpent = this.saveIntToBuffer(this.prevTotalSpent);
         this.prevAiMoneySpent = this.saveIntToBuffer(this.prevAiMoneySpent);
         this.prevFuelCost = this.saveIntToBuffer(this.prevFuelCost);
@@ -6845,15 +6845,15 @@ implements Runnable {
         this.prevTotalRevenue = this.saveIntToBuffer(this.prevTotalRevenue);
         this.prevTerrainTotal = this.saveIntToBuffer(this.prevTerrainTotal);
         this.prevEnterpriseTotal = this.saveIntToBuffer(this.prevEnterpriseTotal);
-        this.prevXIndicator = this.saveIntToBuffer(this.prevXIndicator);
+        this.previousYearProfit = this.saveIntToBuffer(this.previousYearProfit);
         this.prevDecadeSpent = this.saveIntToBuffer(this.prevDecadeSpent);
         this.prevDecadeAiSpent = this.saveIntToBuffer(this.prevDecadeAiSpent);
         this.prevDecadeFuel = this.saveIntToBuffer(this.prevDecadeFuel);
         this.prevDecadeSubsidy = this.saveIntToBuffer(this.prevDecadeSubsidy);
         this.prevDecadeRevenue = this.saveIntToBuffer(this.prevDecadeRevenue);
-        this.prevDecadeGs = this.saveIntToBuffer(this.prevDecadeGs);
-        this.prevDecadeDq = this.saveIntToBuffer(this.prevDecadeDq);
-        this.prevDecadeBm = this.saveIntToBuffer(this.prevDecadeBm);
+        this.previousLegacyDecadeMetric = this.saveIntToBuffer(this.previousLegacyDecadeMetric);
+        this.previousDecadeEnterpriseTax = this.saveIntToBuffer(this.previousDecadeEnterpriseTax);
+        this.previousDecadeProfit = this.saveIntToBuffer(this.previousDecadeProfit);
         this.decadeCostTotal = this.saveIntToBuffer(this.decadeCostTotal);
         this.decadeSpentTotal = this.saveIntToBuffer(this.decadeSpentTotal);
         this.decadeFuelCost = this.saveIntToBuffer(this.decadeFuelCost);
@@ -6861,7 +6861,7 @@ implements Runnable {
         this.decadeRevenueTotal = this.saveIntToBuffer(this.decadeRevenueTotal);
         this.savedLegacyMetricEb = this.saveIntToBuffer(this.savedLegacyMetricEb);
         this.decadeEnterpriseTotal = this.saveIntToBuffer(this.decadeEnterpriseTotal);
-        this.decadeXTotal = this.saveIntToBuffer(this.decadeXTotal);
+        this.decadeProfitTotal = this.saveIntToBuffer(this.decadeProfitTotal);
         this.cityListIndex = this.saveOrLoadByte(this.cityListIndex);
         this.saveOrLoadByteArrayInlined(this.stationDirectionCode);
         this.saveOrLoadByteArrayInlined(this.cityPopulation);
@@ -6965,16 +6965,16 @@ implements Runnable {
     }
 
     void writeSaveSnapshot() {
-        ch = this.saveOrLoadBool(ch);
+        animationsDisabled = this.saveOrLoadBool(animationsDisabled);
         selectionHidden = this.saveOrLoadBool(selectionHidden);
-        cc = this.saveOrLoadBool(cc);
-        q = this.saveOrLoadBool(q);
+        monthlyReportEnabled = this.saveOrLoadBool(monthlyReportEnabled);
+        annualReportEnabled = this.saveOrLoadBool(annualReportEnabled);
         this.scenarioStepCompare = this.saveIntToBuffer(this.scenarioStepCompare);
-        this.transientH = this.saveIntToBuffer(this.transientH);
+        this.bestScenarioScore = this.saveIntToBuffer(this.bestScenarioScore);
         this.gameStateCounter = this.saveIntToBuffer(this.gameStateCounter);
-        this.saveOrLoadIntArrayInlined(this.gk);
-        this.saveOrLoadIntArrayInlined(this.bd);
-        this.saveOrLoadByteArrayInlined(this.bE);
+        this.saveOrLoadIntArrayInlined(this.scenarioScores);
+        this.saveOrLoadIntArrayInlined(this.leaderboardScores);
+        this.saveOrLoadByteArrayInlined(this.playerNameCodes);
     }
 
     void persistSnapshotMode0() {
@@ -7052,16 +7052,16 @@ implements Runnable {
 
     void computeYearEndMetrics() {
         this.archiveOrRecall();
-        this.yearProfitHistory[0] = this.xIndicator;
+        this.yearProfitHistory[0] = this.netProfit;
         this.yearRevenueHistory[0] = this.totalRevenue;
-        this.altDecadeOtherXTotal[0] = this.decadeOtherXTotal + this.xIndicator;
+        this.decadeProfitHistory[0] = this.decadeProfitGraphTotal + this.netProfit;
         this.altDecadeRevenueTotal[0] = this.revenueTotal + this.totalRevenue;
         this.decadeSpentWithCurrent = this.decadeCostTotal + this.totalSpent;
         this.decadeAiSpentWithCurrent = this.decadeSpentTotal + this.aiMoneySpent;
         this.decadeFuelWithCurrent = this.decadeFuelCost + this.fuelCostAccrued;
         this.decadeSubsidyWithCurrent = this.decadeSubsidyTotal + this.subsidyCost;
         this.decadeRevenueWithCurrent = this.decadeRevenueTotal + this.totalRevenue;
-        this.decadeXWithCurrent = this.decadeXTotal + this.xIndicator;
+        this.decadeProfitWithCurrent = this.decadeProfitTotal + this.netProfit;
         this.decadeEnterpriseWithCurrent = this.decadeEnterpriseTotal + this.decadeEnterpriseTax;
     }
 
@@ -7083,7 +7083,7 @@ implements Runnable {
         this.prevTotalRevenue = this.totalRevenue;
         this.prevTerrainTotal = this.terrainTotal;
         this.prevEnterpriseTotal = this.decadeEnterpriseTax;
-        this.prevXIndicator = this.xIndicator;
+        this.previousYearProfit = this.netProfit;
         for (n = 10; n >= 0; --n) {
             this.yearProfitHistory[n + 1] = this.yearProfitHistory[n];
             this.yearRevenueHistory[n + 1] = this.yearRevenueHistory[n];
@@ -7097,9 +7097,9 @@ implements Runnable {
         this.decadeFuelCost += this.fuelCostAccrued;
         this.decadeSubsidyTotal += this.subsidyCost;
         this.decadeRevenueTotal += this.totalRevenue;
-        this.decadeXTotal += this.xIndicator;
+        this.decadeProfitTotal += this.netProfit;
         this.decadeEnterpriseTotal += this.decadeEnterpriseTax;
-        this.decadeOtherXTotal += this.xIndicator;
+        this.decadeProfitGraphTotal += this.netProfit;
         this.revenueTotal += this.totalRevenue;
         if (this.monthOfYear == 13) {
             this.prevDecadeSpent = this.decadeSpentWithCurrent;
@@ -7107,24 +7107,24 @@ implements Runnable {
             this.prevDecadeFuel = this.decadeFuelWithCurrent;
             this.prevDecadeSubsidy = this.decadeSubsidyWithCurrent;
             this.prevDecadeRevenue = this.decadeRevenueWithCurrent;
-            this.prevDecadeGs = this.gs;
-            this.prevDecadeDq = this.decadeEnterpriseWithCurrent;
-            this.prevDecadeBm = this.decadeXWithCurrent;
+            this.previousLegacyDecadeMetric = this.legacyDecadeMetric;
+            this.previousDecadeEnterpriseTax = this.decadeEnterpriseWithCurrent;
+            this.previousDecadeProfit = this.decadeProfitWithCurrent;
             this.decadeCostTotal = 0;
             this.decadeSpentTotal = 0;
             this.decadeFuelCost = 0;
             this.decadeSubsidyTotal = 0;
             this.decadeRevenueTotal = 0;
-            this.decadeXTotal = 0;
+            this.decadeProfitTotal = 0;
             this.decadeEnterpriseTotal = 0;
             for (n = 10; n >= 0; --n) {
-                this.altDecadeOtherXTotal[n + 1] = this.altDecadeOtherXTotal[n];
+                this.decadeProfitHistory[n + 1] = this.decadeProfitHistory[n];
                 this.altDecadeRevenueTotal[n + 1] = this.altDecadeRevenueTotal[n];
                 this.altDecadeTotalCost[n + 1] = this.altDecadeTotalCost[n];
             }
-            this.decadeOtherXTotal = 0;
+            this.decadeProfitGraphTotal = 0;
             this.revenueTotal = 0;
-            this.altDecadeOtherXTotal[0] = 0;
+            this.decadeProfitHistory[0] = 0;
             this.altDecadeRevenueTotal[0] = 0;
             this.altDecadeTotalCost[0] = 0;
         }
@@ -7142,18 +7142,18 @@ implements Runnable {
         this.fuelCostAccrued = 0;
         this.subsidyCost = 0;
         this.totalRevenue = 0;
-        this.xIndicator = 0;
+        this.netProfit = 0;
         this.decadeEnterpriseTax = 0;
         this.mapRedrawPending = true;
         this.compareToPrevious = true;
         this.monthRolloverFlag = true;
         if (this.monthOfYear == 13) {
-            if (q) {
+            if (annualReportEnabled) {
                 this.ready = false;
                 this.transitionCode = 35;
                 this.setState(20);
             }
-        } else if (cc) {
+        } else if (monthlyReportEnabled) {
             this.ready = false;
             this.transitionCode = 32;
             this.setState(20);
@@ -7163,7 +7163,7 @@ implements Runnable {
     void archiveOrRecall() {
         this.terrainTotal = this.loanBalance * this.interestRate / 1200;
         this.decadeEnterpriseTax = this.totalRevenue * this.enterpriseTaxPct / 100;
-        this.xIndicator = this.totalRevenue - this.terrainTotal - this.totalSpent - this.aiMoneySpent - this.fuelCostAccrued - this.subsidyCost - this.decadeEnterpriseTax;
+        this.netProfit = this.totalRevenue - this.terrainTotal - this.totalSpent - this.aiMoneySpent - this.fuelCostAccrued - this.subsidyCost - this.decadeEnterpriseTax;
     }
 
     int scanMapForMetric() {
@@ -7274,11 +7274,11 @@ implements Runnable {
                     }
                     this.altYearArray[n3] = (byte)(this.year - n3 - 1940);
                     if (n == 0) {
-                        if (this.altDecadeOtherXTotal[n3] > n6) {
-                            n6 = this.altDecadeOtherXTotal[n3];
+                        if (this.decadeProfitHistory[n3] > n6) {
+                            n6 = this.decadeProfitHistory[n3];
                         }
-                        if (this.altDecadeOtherXTotal[n3] < n5) {
-                            n5 = this.altDecadeOtherXTotal[n3];
+                        if (this.decadeProfitHistory[n3] < n5) {
+                            n5 = this.decadeProfitHistory[n3];
                         }
                     }
                     if (n == 1) {
@@ -7316,7 +7316,7 @@ implements Runnable {
             }
             if (n == 0) {
                 for (n2 = 0; n2 < 12; ++n2) {
-                    this.yearGraphValues[n2] = this.altDecadeOtherXTotal[n2] == 0 ? (byte)0 : (byte)(30 * this.altDecadeOtherXTotal[n2] / n3);
+                    this.yearGraphValues[n2] = this.decadeProfitHistory[n2] == 0 ? (byte)0 : (byte)(30 * this.decadeProfitHistory[n2] / n3);
                 }
             }
             if (n == 1) {
@@ -7326,7 +7326,7 @@ implements Runnable {
             }
             if (n == 2) {
                 for (n2 = 0; n2 < 12; ++n2) {
-                    this.yearGraphValues[n2] = this.altDecadeOtherXTotal[n2] == 0 ? (byte)0 : (byte)(30 * this.altDecadeTotalCost[n2] / n3);
+                    this.yearGraphValues[n2] = this.decadeProfitHistory[n2] == 0 ? (byte)0 : (byte)(30 * this.altDecadeTotalCost[n2] / n3);
                 }
             }
         }
@@ -7721,7 +7721,7 @@ implements Runnable {
                     this.scenarioStepCompare = this.scenarioStep;
                 }
                 this.persistSnapshotMode0();
-                this.gJ = this.computeMapTrainMetric(this.scenarioStep - 2);
+                this.currentScenarioScore = this.computeMapTrainMetric(this.scenarioStep - 2);
             }
             this.setState(20);
         }
@@ -8233,11 +8233,11 @@ implements Runnable {
         }
         n2 += this.dayOfMonth + 30 * this.monthOfYear + 365 * (this.year - 1950);
         if (n < 0) {
-            if (n2 > this.transientH) {
-                this.transientH = n2;
+            if (n2 > this.bestScenarioScore) {
+                this.bestScenarioScore = n2;
             }
         } else {
-            this.gk[n] = n2;
+            this.scenarioScores[n] = n2;
         }
         this.persistSnapshotMode0();
         return n2;
@@ -8253,8 +8253,8 @@ implements Runnable {
 
     String buildPlayerNameString() {
         StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < this.bE.length; ++i) {
-            byte by = this.bE[i];
+        for (int i = 0; i < this.playerNameCodes.length; ++i) {
+            byte by = this.playerNameCodes[i];
             if (by == 0) {
                 stringBuffer.append(' ');
             }
@@ -8302,10 +8302,10 @@ implements Runnable {
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName3), "en");
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName4), this.buildPlayerNameString());
             httpConnection.setRequestProperty(this.decodeString(decodeHeaderName5), bl ? "S" : "D");
-            StringBuffer stringBuffer = new StringBuffer(String.valueOf(this.transientH));
-            for (n2 = 0; n2 < this.gk.length; ++n2) {
+            StringBuffer stringBuffer = new StringBuffer(String.valueOf(this.bestScenarioScore));
+            for (n2 = 0; n2 < this.scenarioScores.length; ++n2) {
                 stringBuffer.append(",");
-                stringBuffer.append(this.gk[n2]);
+                stringBuffer.append(this.scenarioScores[n2]);
             }
             n2 = 0;
             int n3 = 0;
@@ -8338,7 +8338,7 @@ implements Runnable {
                     n6 += n - 48;
                 }
                 if (n != 124) continue;
-                this.bd[n7] = n6;
+                this.leaderboardScores[n7] = n6;
                 n6 = 0;
                 ++n7;
             }
@@ -9641,7 +9641,7 @@ implements Runnable {
             if (n2 > 28 && n2 < 128 && ((n2 < 42 || n2 > 48) && n2 < 70 || n2 > 86)) {
                 n = n4 * 16 + n5 * 16 + 16 - this.viewportCenterX;
                 n12 = this.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - this.viewportCenterY - 4 * this.tileElevation[n5][n4] + 15;
-                if (!ch) {
+                if (!animationsDisabled) {
                     if (n2 == 54 || n2 == 55) {
                         graphics.drawImage(this.tileSprites[this.tileSpriteIndex[53]], n, n12, 33);
                     }

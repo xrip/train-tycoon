@@ -148,16 +148,16 @@ void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2) {
 
 // void writeSaveSnapshot()
 void gc_writeSaveSnapshot(GameCanvas *gc) {
-    gcs_ch = gc_saveOrLoadBool(gc, gcs_ch);
+    gcs_animationsDisabled = gc_saveOrLoadBool(gc, gcs_animationsDisabled);
     gcs_selectionHidden = gc_saveOrLoadBool(gc, gcs_selectionHidden);
-    gcs_cc = gc_saveOrLoadBool(gc, gcs_cc);
-    gcs_q = gc_saveOrLoadBool(gc, gcs_q);
+    gcs_monthlyReportEnabled = gc_saveOrLoadBool(gc, gcs_monthlyReportEnabled);
+    gcs_annualReportEnabled = gc_saveOrLoadBool(gc, gcs_annualReportEnabled);
     gc->scenarioStepCompare = gc_saveIntToBuffer(gc, gc->scenarioStepCompare);
-    gc->transientH = gc_saveIntToBuffer(gc, gc->transientH);
+    gc->bestScenarioScore = gc_saveIntToBuffer(gc, gc->bestScenarioScore);
     gc->gameStateCounter = gc_saveIntToBuffer(gc, gc->gameStateCounter);
-    gc_saveOrLoadIntArrayInlined(gc, gc->gk);
-    gc_saveOrLoadIntArrayInlined(gc, gc->bd);
-    gc_saveOrLoadByteArrayInlined(gc, gc->bE);
+    gc_saveOrLoadIntArrayInlined(gc, gc->scenarioScores);
+    gc_saveOrLoadIntArrayInlined(gc, gc->leaderboardScores);
+    gc_saveOrLoadByteArrayInlined(gc, gc->playerNameCodes);
 }
 
 // void persistSnapshotMode1()

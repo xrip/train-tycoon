@@ -176,10 +176,10 @@ typedef struct GameCanvas {
     int32_t activeScenario; // int activeScenario
     int32_t offerTypeTransitionCode; // int offerTypeTransitionCode
     int32_t offerEffectTransitionCode; // int offerEffectTransitionCode
-    int32_t gJ; // int gJ
+    int32_t currentScenarioScore; // int currentScenarioScore
     bool ad; // boolean ad
-    int8_t* bE; // byte[] bE
-    int8_t* cD; // byte[] cD
+    int8_t* playerNameCodes; // byte[] playerNameCodes
+    int8_t* playerNameCursorMarker; // byte[] playerNameCursorMarker
     int8_t routeSlotIndex; // byte routeSlotIndex
     int8_t spriteCycleCursor; // byte spriteCycleCursor
     bool snapshotLoadedFlag; // boolean snapshotLoadedFlag
@@ -235,7 +235,7 @@ typedef struct GameCanvas {
     int8_t** forwardTrackSteps; // byte[][] forwardTrackSteps
     int8_t** reverseTrackSteps; // byte[][] reverseTrackSteps
     int32_t dI; // int dI
-    int16_t** cs; // short[][] cs
+    int16_t** trainSpriteDirectionTable; // short[][] trainSpriteDirectionTable
     int8_t* saveBuffer; // byte[] saveBuffer
     int32_t saveReadOffset; // int saveReadOffset
     int32_t saveSlot; // int saveSlot
@@ -259,15 +259,15 @@ typedef struct GameCanvas {
     int32_t totalRevenue; // int totalRevenue
     int32_t terrainTotal; // int terrainTotal
     int32_t decadeEnterpriseTax; // int decadeEnterpriseTax
-    int32_t xIndicator; // int xIndicator
+    int32_t netProfit; // int netProfit
     int32_t decadeSpentWithCurrent; // int decadeSpentWithCurrent
     int32_t decadeAiSpentWithCurrent; // int decadeAiSpentWithCurrent
     int32_t decadeFuelWithCurrent; // int decadeFuelWithCurrent
     int32_t decadeSubsidyWithCurrent; // int decadeSubsidyWithCurrent
     int32_t decadeRevenueWithCurrent; // int decadeRevenueWithCurrent
-    int32_t gs; // int gs
+    int32_t legacyDecadeMetric; // int legacyDecadeMetric
     int32_t decadeEnterpriseWithCurrent; // int decadeEnterpriseWithCurrent
-    int32_t decadeXWithCurrent; // int decadeXWithCurrent
+    int32_t decadeProfitWithCurrent; // int decadeProfitWithCurrent
     int32_t prevTotalSpent; // int prevTotalSpent
     int32_t prevAiMoneySpent; // int prevAiMoneySpent
     int32_t prevFuelCost; // int prevFuelCost
@@ -275,15 +275,15 @@ typedef struct GameCanvas {
     int32_t prevTotalRevenue; // int prevTotalRevenue
     int32_t prevTerrainTotal; // int prevTerrainTotal
     int32_t prevEnterpriseTotal; // int prevEnterpriseTotal
-    int32_t prevXIndicator; // int prevXIndicator
+    int32_t previousYearProfit; // int previousYearProfit
     int32_t prevDecadeSpent; // int prevDecadeSpent
     int32_t prevDecadeAiSpent; // int prevDecadeAiSpent
     int32_t prevDecadeFuel; // int prevDecadeFuel
     int32_t prevDecadeSubsidy; // int prevDecadeSubsidy
     int32_t prevDecadeRevenue; // int prevDecadeRevenue
-    int32_t prevDecadeGs; // int prevDecadeGs
-    int32_t prevDecadeDq; // int prevDecadeDq
-    int32_t prevDecadeBm; // int prevDecadeBm
+    int32_t previousLegacyDecadeMetric; // int previousLegacyDecadeMetric
+    int32_t previousDecadeEnterpriseTax; // int previousDecadeEnterpriseTax
+    int32_t previousDecadeProfit; // int previousDecadeProfit
     int32_t decadeCostTotal; // int decadeCostTotal
     int32_t decadeSpentTotal; // int decadeSpentTotal
     int32_t decadeFuelCost; // int decadeFuelCost
@@ -291,13 +291,13 @@ typedef struct GameCanvas {
     int32_t decadeRevenueTotal; // int decadeRevenueTotal
     int32_t savedLegacyMetricEb; // int savedLegacyMetricEb
     int32_t decadeEnterpriseTotal; // int decadeEnterpriseTotal
-    int32_t decadeXTotal; // int decadeXTotal
+    int32_t decadeProfitTotal; // int decadeProfitTotal
     int32_t revenueTotal; // int revenueTotal
-    int32_t decadeOtherXTotal; // int decadeOtherXTotal
+    int32_t decadeProfitGraphTotal; // int decadeProfitGraphTotal
     int32_t* yearProfitHistory; // int[] yearProfitHistory
     int32_t* yearRevenueHistory; // int[] yearRevenueHistory
     int32_t* yearCompanyValueHistory; // int[] yearCompanyValueHistory
-    int32_t* altDecadeOtherXTotal; // int[] altDecadeOtherXTotal
+    int32_t* decadeProfitHistory; // int[] decadeProfitHistory
     int32_t* altDecadeRevenueTotal; // int[] altDecadeRevenueTotal
     int32_t* altDecadeTotalCost; // int[] altDecadeTotalCost
     int8_t* yearGraphOffsets; // byte[] yearGraphOffsets
@@ -354,9 +354,9 @@ typedef struct GameCanvas {
     void* musicPlayer; // Player musicPlayer
     void* volumeControl; // VolumeControl volumeControl
     int32_t trainRevenueScore; // int trainRevenueScore
-    int32_t transientH; // int transientH
-    int32_t* gk; // int[] gk
-    int32_t* bd; // int[] bd
+    int32_t bestScenarioScore; // int bestScenarioScore
+    int32_t* scenarioScores; // int[] scenarioScores
+    int32_t* leaderboardScores; // int[] leaderboardScores
     int8_t* tileOffsetX; // byte[] tileOffsetX
     int8_t* tileOffsetY; // byte[] tileOffsetY
     int32_t numActiveTileAnimations; // int numActiveTileAnimations
@@ -444,10 +444,10 @@ extern int8_t* gcs_decodeHeaderValue1; // static byte[] decodeHeaderValue1
 extern int8_t* gcs_viewportZoomStep; // static byte[] viewportZoomStep
 extern int8_t* gcs_decodeHeaderName5; // static byte[] decodeHeaderName5
 extern int8_t* gcs_decodeUrl; // static byte[] decodeUrl
-extern bool gcs_ch; // static boolean ch
+extern bool gcs_animationsDisabled; // static boolean animationsDisabled
 extern bool gcs_selectionHidden; // static boolean selectionHidden
-extern bool gcs_cc; // static boolean cc
-extern bool gcs_q; // static boolean q
+extern bool gcs_monthlyReportEnabled; // static boolean monthlyReportEnabled
+extern bool gcs_annualReportEnabled; // static boolean annualReportEnabled
 
 void gc_fields_init(GameCanvas *gc);
 

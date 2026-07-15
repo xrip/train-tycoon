@@ -252,7 +252,7 @@ void gc_renderPackedSprite(GameCanvas *gc, MidpGraphics *g, int32_t n) {
             n3 = (by & 0x10) == 16 ? gc->spriteData[n25++] : 0;
             n2 = (by & 0x10) == 16 ? gc->spriteData[n25++] : 0;
             int8_t by2 = (by & 0x10) == 16 ? gc->spriteData[n25++] : (int8_t)0;
-            int8_t *byArray = n8 != 0 ? gc_q(gc, gc->currentSpriteId, n6) : gc_m(gc, n25);
+            int8_t *byArray = n8 != 0 ? gc_resolveDialogValue(gc, gc->currentSpriteId, n6) : gc_m(gc, n25);
             int n29 = 0;
             if (byArray == NULL) continue;
             int blen = midp_arr_len(byArray);

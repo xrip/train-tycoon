@@ -313,15 +313,15 @@ field  a f    prevSubsidyCost    # int; snapshot of ho at year start
 field  a eu   prevTotalRevenue   # int; snapshot of totalRevenue at year start
 field  a dA   prevTerrainTotal   # int; snapshot of eg at year start
 field  a v    prevEnterpriseTotal # int; snapshot of eJ at year start
-field  a cM   prevXIndicator     # int; snapshot of eX at year start
+field  a cM   previousYearProfit # int; snapshot of netProfit at year start
 field  a h    decadeCostTotal    # int; +=totalSpent each year (running total)
 field  a B    decadeSpentTotal   # int; +=aiMoneySpent each year
 field  a hn   decadeFuelCost     # int; +=cF each year
 field  a ep   decadeSubsidyTotal # int; +=ho each year
 field  a bo   decadeRevenueTotal # int; +=totalRevenue each year
-field  a aq   decadeXTotal       # int; +=eX each year
+field  a aq   decadeProfitTotal  # int; accumulated net profit
 field  a dF   decadeEnterpriseTotal   # int; +=eJ each year
-field  a eh   decadeOtherXTotal  # int; +=eX/eJ/running duplicate
+field  a eh   decadeProfitGraphTotal # int; accumulated net profit for decade graph
 field  a ab   terrainLowerStepCount
 # Per-train state from dayResetAd
 field  a aw   trainAgeOrTimer    # byte[500]; per-train aging counter (incremented by revenueOrYear)
@@ -438,16 +438,16 @@ field  a cj   decadeFuelWithCurrent  # int; decadeFuelCost + fuelCostAccrued
 field  a aA   decadeSubsidyWithCurrent # int; decadeSubsidyTotal + ho
 field  a dg   decadeRevenueWithCurrent # int; decadeRevenueTotal + totalRevenue
 field  a dq   decadeEnterpriseWithCurrent # int; decadeEnterpriseTotal + eJ
-field  a bM   decadeXWithCurrent     # int; decadeXTotal + eX
+field  a bM   decadeProfitWithCurrent # int; decadeProfitTotal + netProfit
 # Previous-decade snapshots of the running totals above (case 35 in update())
 field  a bG   prevDecadeSpent        # int; previous-decade snapshot of br
 field  a he   prevDecadeAiSpent      # int; previous-decade snapshot of gV
 field  a bP   prevDecadeFuel         # int; previous-decade snapshot of cj
 field  a ht   prevDecadeSubsidy      # int; previous-decade snapshot of aA
 field  a cr   prevDecadeRevenue      # int; previous-decade snapshot of dg
-field  a cg   prevDecadeGs           # int; previous-decade snapshot of gs (loaded from save)
-field  a cm   prevDecadeDq           # int; previous-decade snapshot of dq
-field  a gq   prevDecadeBm           # int; previous-decade snapshot of bM
+field  a cg   previousLegacyDecadeMetric # previous snapshot of legacyDecadeMetric
+field  a cm   previousDecadeEnterpriseTax # previous decade enterprise-tax total
+field  a gq   previousDecadeProfit   # previous decade net-profit total
 
 # ---- Batch 16: method names anchored on key algorithms and save pipeline ----
 # int G() returns key-repeat delay derived from keySubState + hh.
@@ -609,7 +609,7 @@ field  a hj   mapHalfWidth            # int; = (mapWidth - 1) * 8 — half-width
 
 # ---- Batch 24: year-graph alt data arrays + history frames ----
 # Parallel to yrN/yrCx/yrZ but used when yearGraphAlt=true.
-field  a dG   altDecadeOtherXTotal   # int[12]; = decadeOtherXTotal + eX
+field  a dG   decadeProfitHistory    # int[12]; decade net-profit history
 field  a ef   altDecadeRevenueTotal  # int[12]; = fe + totalRevenue
 field  a L    altDecadeTotalCost     # int[12]; = yrZ[0] (alias for total-cost when alt)
 # fJ is the 3-frame counter array used by drawMoneyTicker (drawn with K[0..2]).
@@ -622,8 +622,8 @@ field  a cW   duplicateRowState      # byte; 1..4 state in duplicateRow logic
 field  a eJ   decadeEnterpriseTax    # int; enterprise tax revenue this year
 # Interest rate divisor: eg = hk * aD / 1200 (hk = loanBalance)
 field  a aD   interestRate           # byte; rate divisor for loan interest (initially 4)
-# X-indicator (financial health?) paired with prevXIndicator
-field  a eX   xIndicator             # int; current-year X indicator
+# Net profit: revenue minus interest, spending, fuel, subsidy and enterprise tax.
+field  a eX   netProfit
 # Industry-site flag (set true when pickIndustrySite finds a match).
 field  a aY   industrySiteFound      # boolean; true when industry tile is selected
 # Subsidy cost accumulator (paired with prevSubsidyCost).
@@ -719,7 +719,7 @@ field  a fe   revenueTotal           # int; running revenue total (fe += totalRe
 field  a bI   counterA               # int; generic counter (used in load timeout)
 field  a bD   lifetimeTrainRevenue   # int; total train revenue, milestone 12 value
 field  a eC   enterpriseTaxPct       # int; enterprise tax percent (eJ = totalRevenue * eC / 100)
-field  a H    transientH             # int; transient save-buffer value
+field  a H    bestScenarioScore      # highest computeMapTrainMetric result; saved and sent to scores service
 field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name collision with snapshotPending)
 field  a ay   flagAy                 # boolean; flag toggled in case 23
 field  a ao   scenarioNoticeId       # int; notice id from scenario record
@@ -900,3 +900,17 @@ method a a ([[B)V                   saveOrLoadByteMatrixInlined # inlined
 method a a ([[S)V                   saveOrLoadShortMatrixInlined # inlined
 method a a ([I)V                     saveOrLoadIntArrayInlined # inlined
 method a a (Ljava/io/ByteArrayOutputStream;II)V  writeRlePairInlined # inlined
+
+# Batch 48: final dialog-data and train-sprite names recovered during C port
+method a b (I)[B                  formatCurrency
+method a q (II)[B                 resolveDialogValue
+field  a ch                       animationsDisabled
+field  a cc                       monthlyReportEnabled
+field  a q                        annualReportEnabled
+field  a bE                       playerNameCodes
+field  a cD                       playerNameCursorMarker
+field  a gk                       scenarioScores
+field  a bd                       leaderboardScores
+field  a gJ                       currentScenarioScore
+field  a cs                       trainSpriteDirectionTable
+field  a gs                       legacyDecadeMetric # always zero; no bytecode writes beyond initialization

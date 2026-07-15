@@ -192,7 +192,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INTS(yearProfitHistory);
     IO_INTS(yearRevenueHistory);
     IO_INTS(yearCompanyValueHistory);
-    IO_INTS(altDecadeOtherXTotal);
+    IO_INTS(decadeProfitHistory);
     IO_INTS(altDecadeRevenueTotal);
     IO_INTS(altDecadeTotalCost);
     IO_INTS(trainRevenue);
@@ -200,7 +200,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_SHORTS(stationRevenue);
     IO_SHORTS(prevStationRevenue);
     IO_INT(revenueTotal);
-    IO_INT(decadeOtherXTotal);
+    IO_INT(decadeProfitGraphTotal);
     IO_INT(totalSpent);
     IO_INT(aiMoneySpent);
     IO_INT(fuelCostAccrued);
@@ -208,7 +208,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(totalRevenue);
     IO_INT(terrainTotal);
     IO_INT(decadeEnterpriseTax);
-    IO_INT(xIndicator);
+    IO_INT(netProfit);
     IO_INT(prevTotalSpent);
     IO_INT(prevAiMoneySpent);
     IO_INT(prevFuelCost);
@@ -216,15 +216,15 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(prevTotalRevenue);
     IO_INT(prevTerrainTotal);
     IO_INT(prevEnterpriseTotal);
-    IO_INT(prevXIndicator);
+    IO_INT(previousYearProfit);
     IO_INT(prevDecadeSpent);
     IO_INT(prevDecadeAiSpent);
     IO_INT(prevDecadeFuel);
     IO_INT(prevDecadeSubsidy);
     IO_INT(prevDecadeRevenue);
-    IO_INT(prevDecadeGs);
-    IO_INT(prevDecadeDq);
-    IO_INT(prevDecadeBm);
+    IO_INT(previousLegacyDecadeMetric);
+    IO_INT(previousDecadeEnterpriseTax);
+    IO_INT(previousDecadeProfit);
     IO_INT(decadeCostTotal);
     IO_INT(decadeSpentTotal);
     IO_INT(decadeFuelCost);
@@ -232,7 +232,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(decadeRevenueTotal);
     IO_INT(savedLegacyMetricEb);
     IO_INT(decadeEnterpriseTotal);
-    IO_INT(decadeXTotal);
+    IO_INT(decadeProfitTotal);
     IO_BYTE(cityListIndex);
     IO_BYTES(stationDirectionCode);
     IO_BYTES(cityPopulation);

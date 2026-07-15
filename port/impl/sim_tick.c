@@ -164,7 +164,7 @@ void gc_postRevenueReset(GameCanvas *gc) {
 void gc_archiveOrRecall(GameCanvas *gc) {
     gc->terrainTotal = gc->loanBalance * gc->interestRate / 1200;
     gc->decadeEnterpriseTax = gc->totalRevenue * gc->enterpriseTaxPct / 100;
-    gc->xIndicator = gc->totalRevenue - gc->terrainTotal - gc->totalSpent
+    gc->netProfit = gc->totalRevenue - gc->terrainTotal - gc->totalSpent
                      - gc->aiMoneySpent - gc->fuelCostAccrued - gc->subsidyCost
                      - gc->decadeEnterpriseTax;
 }
@@ -172,16 +172,16 @@ void gc_archiveOrRecall(GameCanvas *gc) {
 // void computeYearEndMetrics()
 void gc_computeYearEndMetrics(GameCanvas *gc) {
     gc_archiveOrRecall(gc);
-    gc->yearProfitHistory[0] = gc->xIndicator;
+    gc->yearProfitHistory[0] = gc->netProfit;
     gc->yearRevenueHistory[0] = gc->totalRevenue;
-    gc->altDecadeOtherXTotal[0] = gc->decadeOtherXTotal + gc->xIndicator;
+    gc->decadeProfitHistory[0] = gc->decadeProfitGraphTotal + gc->netProfit;
     gc->altDecadeRevenueTotal[0] = gc->revenueTotal + gc->totalRevenue;
     gc->decadeSpentWithCurrent = gc->decadeCostTotal + gc->totalSpent;
     gc->decadeAiSpentWithCurrent = gc->decadeSpentTotal + gc->aiMoneySpent;
     gc->decadeFuelWithCurrent = gc->decadeFuelCost + gc->fuelCostAccrued;
     gc->decadeSubsidyWithCurrent = gc->decadeSubsidyTotal + gc->subsidyCost;
     gc->decadeRevenueWithCurrent = gc->decadeRevenueTotal + gc->totalRevenue;
-    gc->decadeXWithCurrent = gc->decadeXTotal + gc->xIndicator;
+    gc->decadeProfitWithCurrent = gc->decadeProfitTotal + gc->netProfit;
     gc->decadeEnterpriseWithCurrent = gc->decadeEnterpriseTotal + gc->decadeEnterpriseTax;
 }
 
@@ -347,9 +347,9 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
     }
     n2 += gc->dayOfMonth + 30 * gc->monthOfYear + 365 * (gc->year - 1950);
     if (n < 0) {
-        if (n2 > gc->transientH) gc->transientH = n2;
+        if (n2 > gc->bestScenarioScore) gc->bestScenarioScore = n2;
     } else {
-        gc->gk[n] = n2;
+        gc->scenarioScores[n] = n2;
     }
     gc_persistSnapshotMode0(gc);
     return n2;
@@ -403,7 +403,7 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
         if (gc->scenarioStepCompare < gc->scenarioStep)
             gc->scenarioStepCompare = gc->scenarioStep;
         gc_persistSnapshotMode0(gc);
-        gc->gJ = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
+        gc->currentScenarioScore = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
     }
     gc_setState(gc, 20);
 }
@@ -465,7 +465,7 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->prevTotalRevenue = gc->totalRevenue;
     gc->prevTerrainTotal = gc->terrainTotal;
     gc->prevEnterpriseTotal = gc->decadeEnterpriseTax;
-    gc->prevXIndicator = gc->xIndicator;
+    gc->previousYearProfit = gc->netProfit;
     for (int n = 10; n >= 0; --n) {
         gc->yearProfitHistory[n + 1] = gc->yearProfitHistory[n];
         gc->yearRevenueHistory[n + 1] = gc->yearRevenueHistory[n];
@@ -477,9 +477,9 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->decadeFuelCost += gc->fuelCostAccrued;
     gc->decadeSubsidyTotal += gc->subsidyCost;
     gc->decadeRevenueTotal += gc->totalRevenue;
-    gc->decadeXTotal += gc->xIndicator;
+    gc->decadeProfitTotal += gc->netProfit;
     gc->decadeEnterpriseTotal += gc->decadeEnterpriseTax;
-    gc->decadeOtherXTotal += gc->xIndicator;
+    gc->decadeProfitGraphTotal += gc->netProfit;
     gc->revenueTotal += gc->totalRevenue;
     if (gc->monthOfYear == 13) {
         gc->prevDecadeSpent = gc->decadeSpentWithCurrent;
@@ -487,19 +487,19 @@ void gc_newYearNotify(GameCanvas *gc) {
         gc->prevDecadeFuel = gc->decadeFuelWithCurrent;
         gc->prevDecadeSubsidy = gc->decadeSubsidyWithCurrent;
         gc->prevDecadeRevenue = gc->decadeRevenueWithCurrent;
-        gc->prevDecadeGs = gc->gs;
-        gc->prevDecadeDq = gc->decadeEnterpriseWithCurrent;
-        gc->prevDecadeBm = gc->decadeXWithCurrent;
+        gc->previousLegacyDecadeMetric = gc->legacyDecadeMetric;
+        gc->previousDecadeEnterpriseTax = gc->decadeEnterpriseWithCurrent;
+        gc->previousDecadeProfit = gc->decadeProfitWithCurrent;
         gc->decadeCostTotal = gc->decadeSpentTotal = gc->decadeFuelCost = 0;
-        gc->decadeSubsidyTotal = gc->decadeRevenueTotal = gc->decadeXTotal = 0;
+        gc->decadeSubsidyTotal = gc->decadeRevenueTotal = gc->decadeProfitTotal = 0;
         gc->decadeEnterpriseTotal = 0;
         for (int n = 10; n >= 0; --n) {
-            gc->altDecadeOtherXTotal[n + 1] = gc->altDecadeOtherXTotal[n];
+            gc->decadeProfitHistory[n + 1] = gc->decadeProfitHistory[n];
             gc->altDecadeRevenueTotal[n + 1] = gc->altDecadeRevenueTotal[n];
             gc->altDecadeTotalCost[n + 1] = gc->altDecadeTotalCost[n];
         }
-        gc->decadeOtherXTotal = gc->revenueTotal = 0;
-        gc->altDecadeOtherXTotal[0] = gc->altDecadeRevenueTotal[0] = 0;
+        gc->decadeProfitGraphTotal = gc->revenueTotal = 0;
+        gc->decadeProfitHistory[0] = gc->altDecadeRevenueTotal[0] = 0;
         gc->altDecadeTotalCost[0] = 0;
     }
     gc->altDecadeTotalCost[0] = gc_scanMapForMetric(gc);
@@ -509,18 +509,18 @@ void gc_newYearNotify(GameCanvas *gc) {
     if (gc->decadeEnterpriseTax > 0)
         gc_pushMoneyHistory(gc, -gc->decadeEnterpriseTax);
     gc->totalSpent = gc->aiMoneySpent = gc->fuelCostAccrued = 0;
-    gc->subsidyCost = gc->totalRevenue = gc->xIndicator = 0;
+    gc->subsidyCost = gc->totalRevenue = gc->netProfit = 0;
     gc->decadeEnterpriseTax = 0;
     gc->mapRedrawPending = true;
     gc->compareToPrevious = true;
     gc->monthRolloverFlag = true;
     if (gc->monthOfYear == 13) {
-        if (gcs_q) {
+        if (gcs_annualReportEnabled) {
             gc->ready = false;
             gc->transitionCode = 35;
             gc_setState(gc, 20);
         }
-    } else if (gcs_cc) {
+    } else if (gcs_monthlyReportEnabled) {
         gc->ready = false;
         gc->transitionCode = 32;
         gc_setState(gc, 20);

@@ -48,7 +48,7 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
                     : gc->yearCompanyValueHistory[index];
         } else {
             gc->altYearArray[index] = (int8_t)(gc->year - index - 1940);
-            value = mode == 0 ? gc->altDecadeOtherXTotal[index]
+            value = mode == 0 ? gc->decadeProfitHistory[index]
                     : mode == 1 ? gc->altDecadeRevenueTotal[index]
                     : gc->altDecadeTotalCost[index];
         }
@@ -72,8 +72,8 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
                 : (int8_t)(30 * gc->yearCompanyValueHistory[index] / scale);
         } else if (alternate && mode == 0) {
             gc->yearGraphValues[index] =
-                gc->altDecadeOtherXTotal[index] == 0 ? 0
-                : (int8_t)(30 * gc->altDecadeOtherXTotal[index] / scale);
+                gc->decadeProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * gc->decadeProfitHistory[index] / scale);
         } else if (alternate && mode == 1) {
             gc->yearGraphValues[index] =
                 gc->altDecadeRevenueTotal[index] == 0 ? 0
@@ -81,7 +81,7 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
         } else if (alternate && mode == 2) {
             // The original tests the other-total array before scaling cost.
             gc->yearGraphValues[index] =
-                gc->altDecadeOtherXTotal[index] == 0 ? 0
+                gc->decadeProfitHistory[index] == 0 ? 0
                 : (int8_t)(30 * gc->altDecadeTotalCost[index] / scale);
         }
     }

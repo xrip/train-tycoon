@@ -1751,13 +1751,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "gJ",
+   "java_name": "currentScenarioScore",
    "java_type": "int",
    "init": "",
    "static": false,
    "final": false,
    "line": 217,
-   "c_name": "gJ",
+   "c_name": "currentScenarioScore",
    "c_type": "int32_t"
   },
   {
@@ -1771,23 +1771,23 @@
    "c_type": "bool"
   },
   {
-   "java_name": "bE",
+   "java_name": "playerNameCodes",
    "java_type": "byte[]",
    "init": "new byte[10]",
    "static": false,
    "final": false,
    "line": 219,
-   "c_name": "bE",
+   "c_name": "playerNameCodes",
    "c_type": "int8_t*"
   },
   {
-   "java_name": "cD",
+   "java_name": "playerNameCursorMarker",
    "java_type": "byte[]",
    "init": "new byte[10]",
    "static": false,
    "final": false,
    "line": 220,
-   "c_name": "cD",
+   "c_name": "playerNameCursorMarker",
    "c_type": "int8_t*"
   },
   {
@@ -2341,13 +2341,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "cs",
+   "java_name": "trainSpriteDirectionTable",
    "java_type": "short[][]",
    "init": "new short[][]{{130, 131, 132, 133, 134, 135, 136, 137}, {140, 141, 142, 143, 144, 145, 146, 147}, {160, 161, 162, 163, 160, 161, 162, 163}, {165, 166, 167, 168, 165, 166, 167, 168}, {170, 171, 172, 173, 170, 171, 172, 173}, {175, 176, 177, 178, 175, 176, 177, 178}, {180, 181, 182, 183, 180, 181, 182, 183}, {185, 186, 187, 188, 185, 186, 187, 188}}",
    "static": false,
    "final": false,
    "line": 276,
-   "c_name": "cs",
+   "c_name": "trainSpriteDirectionTable",
    "c_type": "int16_t**"
   },
   {
@@ -2581,13 +2581,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "xIndicator",
+   "java_name": "netProfit",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 300,
-   "c_name": "xIndicator",
+   "c_name": "netProfit",
    "c_type": "int32_t"
   },
   {
@@ -2641,13 +2641,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "gs",
+   "java_name": "legacyDecadeMetric",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 306,
-   "c_name": "gs",
+   "c_name": "legacyDecadeMetric",
    "c_type": "int32_t"
   },
   {
@@ -2661,13 +2661,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "decadeXWithCurrent",
+   "java_name": "decadeProfitWithCurrent",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 308,
-   "c_name": "decadeXWithCurrent",
+   "c_name": "decadeProfitWithCurrent",
    "c_type": "int32_t"
   },
   {
@@ -2741,13 +2741,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "prevXIndicator",
+   "java_name": "previousYearProfit",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 316,
-   "c_name": "prevXIndicator",
+   "c_name": "previousYearProfit",
    "c_type": "int32_t"
   },
   {
@@ -2801,33 +2801,33 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "prevDecadeGs",
+   "java_name": "previousLegacyDecadeMetric",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 322,
-   "c_name": "prevDecadeGs",
+   "c_name": "previousLegacyDecadeMetric",
    "c_type": "int32_t"
   },
   {
-   "java_name": "prevDecadeDq",
+   "java_name": "previousDecadeEnterpriseTax",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 323,
-   "c_name": "prevDecadeDq",
+   "c_name": "previousDecadeEnterpriseTax",
    "c_type": "int32_t"
   },
   {
-   "java_name": "prevDecadeBm",
+   "java_name": "previousDecadeProfit",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 324,
-   "c_name": "prevDecadeBm",
+   "c_name": "previousDecadeProfit",
    "c_type": "int32_t"
   },
   {
@@ -2901,13 +2901,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "decadeXTotal",
+   "java_name": "decadeProfitTotal",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 332,
-   "c_name": "decadeXTotal",
+   "c_name": "decadeProfitTotal",
    "c_type": "int32_t"
   },
   {
@@ -2921,13 +2921,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "decadeOtherXTotal",
+   "java_name": "decadeProfitGraphTotal",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 334,
-   "c_name": "decadeOtherXTotal",
+   "c_name": "decadeProfitGraphTotal",
    "c_type": "int32_t"
   },
   {
@@ -2961,13 +2961,13 @@
    "c_type": "int32_t*"
   },
   {
-   "java_name": "altDecadeOtherXTotal",
+   "java_name": "decadeProfitHistory",
    "java_type": "int[]",
    "init": "new int[12]",
    "static": false,
    "final": false,
    "line": 338,
-   "c_name": "altDecadeOtherXTotal",
+   "c_name": "decadeProfitHistory",
    "c_type": "int32_t*"
   },
   {
@@ -3531,33 +3531,33 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "transientH",
+   "java_name": "bestScenarioScore",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 395,
-   "c_name": "transientH",
+   "c_name": "bestScenarioScore",
    "c_type": "int32_t"
   },
   {
-   "java_name": "gk",
+   "java_name": "scenarioScores",
    "java_type": "int[]",
    "init": "new int[13]",
    "static": false,
    "final": false,
    "line": 396,
-   "c_name": "gk",
+   "c_name": "scenarioScores",
    "c_type": "int32_t*"
   },
   {
-   "java_name": "bd",
+   "java_name": "leaderboardScores",
    "java_type": "int[]",
    "init": "new int[14]",
    "static": false,
    "final": false,
    "line": 397,
-   "c_name": "bd",
+   "c_name": "leaderboardScores",
    "c_type": "int32_t*"
   },
   {
@@ -3691,13 +3691,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "ch",
+   "java_name": "animationsDisabled",
    "java_type": "boolean",
    "init": "false",
    "static": true,
    "final": false,
    "line": 411,
-   "c_name": "ch",
+   "c_name": "animationsDisabled",
    "c_type": "bool"
   },
   {
@@ -3711,23 +3711,23 @@
    "c_type": "bool"
   },
   {
-   "java_name": "cc",
+   "java_name": "monthlyReportEnabled",
    "java_type": "boolean",
    "init": "true",
    "static": true,
    "final": false,
    "line": 413,
-   "c_name": "cc",
+   "c_name": "monthlyReportEnabled",
    "c_type": "bool"
   },
   {
-   "java_name": "q",
+   "java_name": "annualReportEnabled",
    "java_type": "boolean",
    "init": "true",
    "static": true,
    "final": false,
    "line": 414,
-   "c_name": "q",
+   "c_name": "annualReportEnabled",
    "c_type": "bool"
   },
   {
@@ -5133,13 +5133,13 @@
    "status": "ported"
   },
   {
-   "java_name": "b",
+   "java_name": "formatCurrency",
    "ret": "byte[]",
    "params": "int n",
-   "sig": "byte[] b(int n)",
+   "sig": "byte[] formatCurrency(int n)",
    "start": 3565,
    "end": 3581,
-   "c_name": "gc_b__1",
+   "c_name": "gc_formatCurrency",
    "status": "ported"
   },
   {
@@ -5193,14 +5193,14 @@
    "status": "ported"
   },
   {
-   "java_name": "q",
+   "java_name": "resolveDialogValue",
    "ret": "byte[]",
    "params": "int n, int n2",
-   "sig": "byte[] q(int n, int n2)",
+   "sig": "byte[] resolveDialogValue(int n, int n2)",
    "start": 3782,
    "end": 4152,
-   "c_name": "gc_q",
-   "status": "pending"
+   "c_name": "gc_resolveDialogValue",
+   "status": "ported"
   },
   {
    "java_name": "handleBuildMenuState",
@@ -5560,7 +5560,7 @@
    "start": 6172,
    "end": 6304,
    "c_name": "gc_drawSpriteSingle",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "isTrainHeadCarAt",

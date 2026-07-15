@@ -101,7 +101,7 @@ void gc_renderMap(GameCanvas *gc, MidpGraphics *g) {
         if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
             n = n4 * 16 + n5 * 16 + 16 - gc->viewportCenterX;
             n12 = gc->mapHalfWidth - n5 * 8 + n4 * 8 + 16 - gc->viewportCenterY - 4 * gc->tileElevation[n5][n4] + 15;
-            if (!gcs_ch) {
+            if (!gcs_animationsDisabled) {
                 if (n2 == 54 || n2 == 55)
                     midp_draw_image(g, gc->tileSprites[gc->tileSpriteIndex[53]], n, n12, 33);
                 if (gc->phaseTimer == 1 && n2 >= 65 && n2 <= 68) {

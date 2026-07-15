@@ -183,10 +183,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, 30); break;
         case 10:
             switch (n2) {
-                case 1: gcs_ch = !gcs_ch; goto hbms_end;
+                case 1: gcs_animationsDisabled = !gcs_animationsDisabled; goto hbms_end;
                 case 2: gcs_selectionHidden = !gcs_selectionHidden; goto hbms_end;
-                case 3: gcs_cc = !gcs_cc; goto hbms_end;
-                case 4: gcs_q = !gcs_q; goto hbms_end;
+                case 3: gcs_monthlyReportEnabled = !gcs_monthlyReportEnabled; goto hbms_end;
+                case 4: gcs_annualReportEnabled = !gcs_annualReportEnabled; goto hbms_end;
                 case 5:
                     gc->autoMusic = !gc->autoMusic;
                     if (gc->autoMusic) { gc_playMusic(gc); goto hbms_end; }
@@ -304,20 +304,20 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             if (n2 == 1) gc->routeSlotIndex = (int8_t)(gc->routeSlotIndex + 1);
             if (gc->routeSlotIndex < 0) gc->routeSlotIndex = 9;
             if (gc->routeSlotIndex == 10) gc->routeSlotIndex = 0;
-            gc->spriteCycleCursor = gc->bE[gc->routeSlotIndex];
+            gc->spriteCycleCursor = gc->playerNameCodes[gc->routeSlotIndex];
             if (n2 == 2) {
                 gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor - 1);
                 if (gc->spriteCycleCursor < 0) gc->spriteCycleCursor = 95;
                 if (gc->spriteCycleCursor == 69) gc->spriteCycleCursor = 65;
                 if (gc->spriteCycleCursor == 39) gc->spriteCycleCursor = 17;
-                gc->bE[gc->routeSlotIndex] = gc->spriteCycleCursor;
+                gc->playerNameCodes[gc->routeSlotIndex] = gc->spriteCycleCursor;
             }
             if (n2 == 3) {
                 gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor + 1);
                 if (gc->spriteCycleCursor == 18) gc->spriteCycleCursor = 40;
                 if (gc->spriteCycleCursor == 66) gc->spriteCycleCursor = 70;
                 if (gc->spriteCycleCursor == 96) gc->spriteCycleCursor = 0;
-                gc->bE[gc->routeSlotIndex] = gc->spriteCycleCursor;
+                gc->playerNameCodes[gc->routeSlotIndex] = gc->spriteCycleCursor;
             }
             if (n2 >= 0) break;
             gc_persistSnapshotMode0(gc);

@@ -2,12 +2,3 @@
 // Stub bodies for methods not yet ported (status != 'ported').
 #include "game_methods.h"
 
-int8_t* gc_q(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: q(int n, int n2)  L3782-4152
-    return 0;
-}
-
-void gc_drawSpriteSingle(GameCanvas *gc, MidpGraphics* graphics, int32_t n) {
-    (void)gc; // TODO port: drawSpriteSingle(Graphics graphics, int n)  L6172-6304
-}
-
