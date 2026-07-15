@@ -168,12 +168,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->unitCost = 0;
     gc->currentTrainCostSnapshot = 0;
     gc->difficultyPct = 100;
-    gc->vehicleFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
-    gc->serviceVehicleX = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
-    gc->serviceVehicleY = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
     gc->serviceResourceStock = (int16_t**)midp_alloc_arr(sizeof(int16_t*), 250);
     for (int _i = 0; _i < 250; ++_i) gc->serviceResourceStock[_i] = (int16_t*)midp_alloc_arr(sizeof(int16_t), 5);
-    gc->serviceUnloadFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
     gc->era = 1;
     gc->forwardTrackSteps = {{
         {{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
