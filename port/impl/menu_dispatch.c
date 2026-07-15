@@ -295,11 +295,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             if (gc->duplicateRowState == 4) gc->pendingTransitionCode = 8;
             gc_setState(gc, 30); break;
         case 28:
-            if (n2 == 41) { gc->ad = false; gc_setState(gc, 120); break; }
+            if (n2 == 41) { gc->highScoreUploadRequested = false; gc_setState(gc, 120); break; }
             if (gc->ready) { gc->transitionCode = n2 == 40 ? 27 : 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = n2 == 40 ? 27 : 1; gc_setState(gc, 30); break;
         case 27:
-            if (n2 == 40) { gc->ad = true; gc_setState(gc, 120); break; }
+            if (n2 == 40) { gc->highScoreUploadRequested = true; gc_setState(gc, 120); break; }
             if (n2 == 0) gc->routeSlotIndex = (int8_t)(gc->routeSlotIndex - 1);
             if (n2 == 1) gc->routeSlotIndex = (int8_t)(gc->routeSlotIndex + 1);
             if (gc->routeSlotIndex < 0) gc->routeSlotIndex = 9;

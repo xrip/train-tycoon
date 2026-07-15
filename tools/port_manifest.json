@@ -1761,13 +1761,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "ad",
+   "java_name": "highScoreUploadRequested",
    "java_type": "boolean",
    "init": "false",
    "static": false,
    "final": false,
    "line": 218,
-   "c_name": "ad",
+   "c_name": "highScoreUploadRequested",
    "c_type": "bool"
   },
   {
@@ -6340,7 +6340,7 @@
    "start": 8813,
    "end": 9510,
    "c_name": "gc_update",
-   "status": "partial"
+   "status": "ported"
   },
   {
    "java_name": "renderMap",

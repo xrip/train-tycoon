@@ -914,3 +914,4 @@ field  a bd                       leaderboardScores
 field  a gJ                       currentScenarioScore
 field  a cs                       trainSpriteDirectionTable
 field  a gs                       legacyDecadeMetric # always zero; no bytecode writes beyond initialization
+field  a ad                       highScoreUploadRequested # true=submit, false=fetch; network excluded

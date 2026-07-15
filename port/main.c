@@ -86,6 +86,45 @@ static bool run_save_roundtrip_smoke(void) {
     return bytes_match && fields_match;
 }
 
+static bool run_state30_smoke(void) {
+    GameCanvas *test = (GameCanvas *)malloc(sizeof(GameCanvas));
+    if (!test) return false;
+    gc_fields_init(test);
+    gc_start(test, NULL);
+
+    // Skip the original five-second logo waits, but keep the real decode chain.
+    test->loadingStartTime = 0;
+    gc_update(test);
+    test->loadingStartTime = 0;
+    gc_update(test);
+    gc_update(test);
+    if (test->gameState != 20) { free(test); return false; }
+
+    // Load the full tile sprite stream, then build the first scenario.
+    gc_setState(test, 10);
+    for (int step = 0; test->gameState == 10 && step < 1000; ++step)
+        gc_update(test);
+    if (test->gameState != 20) { free(test); return false; }
+    test->activeScenario = 0;
+    gc_setState(test, 25);
+    for (int step = 0; test->gameState == 25 && step < 200000; ++step)
+        gc_update(test);
+    if (test->gameState != 30 || !test->tileMap || !test->trackMap) {
+        free(test);
+        return false;
+    }
+
+    MidpGraphics screen;
+    midp_gfx_init_screen(&screen, g_framebuffer, MIDP_SCREEN_W, MIDP_SCREEN_H);
+    gc_paint(test, &screen);
+    gc_keyPressed(test, 54);
+    gc_run(test);
+    gc_paint(test, &screen);
+    bool ok = test->gameState == 30 && test->backbuffer != NULL;
+    free(test);
+    return ok;
+}
+
 int main(void) {
     midp_resource_set_root("resources");
 
@@ -95,6 +134,7 @@ int main(void) {
     if (smoke) smoke_frames = atoi(smoke);
     if (smoke_frames && !run_pathfinding_smoke()) return 2;
     if (smoke_frames && !run_save_roundtrip_smoke()) return 3;
+    if (smoke_frames && !run_state30_smoke()) return 4;
 
     if (!mfb_open("Train Tycoon", MIDP_SCREEN_W, MIDP_SCREEN_H, WIN_SCALE, 32))
         return 1;

@@ -78,8 +78,8 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **196 / 196 (100%)** — 195 full + 1 partial (`update`).
-  Run `python tools/port.py status [-v]` for the live count and pending list.
+- Methods done: **196 / 196 (100%)** — 196 full, 0 partial. There are no
+  generated method stubs left.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
   (`decodePngFromSpriteStream`) → **real PNG decode (vendored `stb_image.h`)** →
@@ -99,11 +99,10 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **Isometric world renderer ported:** `renderMap` (`port/impl/render_map.c`,
   155 L) draws terrain into the offscreen backbuffer when the viewport moves,
   blits it, then overlays dynamic tiles, trains and the build menu.
-- `update()` is **partial**: boot/loading (0/1/2/4/10), map-gen (25), and the
-  full state-30 simulation branch (Java L9024-9282) are done. The train
-  movement/load/delivery chain is ported in `port/impl/train_tick.c`. The port
-  builds and passes smoke, but menu/popup update states are not done, and the
-  smoke check does not drive the game into state 30.
+- `update()` is complete, including boot/loading, map generation, simulation,
+  map overview, path result, save/load, route setup, and the excluded network
+  result state. The train movement/load/delivery chain is in
+  `port/impl/train_tick.c`.
 - **Menu system is functional** — `handleBuildMenuState` (~786 L) is ported, so
   selecting menu items drives the state transitions (new game → scenario →
   `setState(25)` map-gen, options, etc.).
@@ -117,13 +116,10 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   `dayResetAd`, `postRevenueReset`, `isTrainHeadCarAt`,
   `removeTrainFromMapInlined`, `mergeTrainAt`, `archiveOrRecall`, and
   `computeYearEndMetrics`, `handleCursorClickInlined`, `pickValidForestTile`,
-  `everyTwoTickZ`, `newYearNotify`, and `tickInputOrAi`. The milestone save path
-  still reaches the pending `saveGame`; port the save chain before save behavior is complete.
+  `everyTwoTickZ`, `newYearNotify`, and `tickInputOrAi`.
 - **The direct state-30/40 gameplay UI is ported.** `port/impl/gameplay_ui.c`
   contains the main header, money ticker, confirm dialog/bar, build-menu rows,
   and build cursor/selection drawing. `isTileBuildable` is in `terrain.c`.
-  The smoke test still does not enter state 30, so this path has build proof but
-  not end-to-end runtime proof yet.
 - **Basic state-30 control is ported.** Build-menu item cycling, map panning,
   cursor movement with view limits, zoom movement, and isometric tile picking
   are in `port/impl/input.c`.
@@ -149,9 +145,13 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   `port/impl/remaining.c` with the lifecycle callbacks. The four sound methods
   and the high-score network chain are explicit no-ops because those systems
   are outside the requested port scope.
-- **All full methods now have C bodies.** `port/impl/dialog_data.c` resolves
+- **All methods now have C bodies.** `port/impl/dialog_data.c` resolves
   data-driven dialog values and formats money; `port/impl/train_render.c`
-  draws moving train sprites. Only the known partial `update` method remains.
+  draws moving train sprites.
+- **End-to-end gameplay smoke passes.** `port.py verify` loads and decodes the
+  real resources, builds scenario 0, reaches state 30, paints the world, handles
+  a movement key, advances a game frame, and paints again. It also runs focused
+  pathfinding and in-memory save/RLE round-trip checks.
 - Raw JAR resources (`1`..`6`, `ico.png`) are extracted to `resources/`.
 
 ## 6. Known issues / flags
@@ -160,7 +160,8 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   `buildMenuItemIndex` (general menu cursor) and `offerRowIndex` (6-slot offer
   list). `port.py inventory` no longer gives a duplicate-field warning.
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded fallback.
-- No behavioural test harness yet; `verify` only checks it builds and runs.
+- The smoke suite proves the main start-to-gameplay path, but it is not a full
+  test of every menu choice or long-running simulation result.
 - CFR dropped a `break` from `computeTrackBuildInlined`: bytecode offsets
   106-134 stop at the first non-empty tile. The C port follows the bytecode,
   not the incorrect decompiled loop text.
@@ -173,19 +174,11 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   is copied into the old decade report snapshot. Its business meaning cannot
   be recovered, so the name records that limit instead of guessing.
 
-## 6a. Next-session plan: make state 30 playable
+## 6a. Next-session plan
 
-The map-gen and state-30 simulation chains are **done**. Selecting "new game"
-generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
-UI, input, building, and runtime proof are still incomplete. Continue from here:
-
-1. Finish the still-partial `update` state cases.
-2. Add a smoke path that enters state 30 and exercises one full paint/input
-   frame before treating gameplay rendering as behaviorally proved.
-
-Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 196 already
-done. `verify` after each method, then commit.
+The requested native port is complete, with sound and networking kept out of
+scope. Future work should be manual play testing and small fixes found there;
+keep using the naming rule above for any old names exposed by that work.
 
 ## 7. Build requirements
 

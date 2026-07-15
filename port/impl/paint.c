@@ -1,4 +1,4 @@
-// port/impl/paint.c - paint() (full) + update() (PARTIAL).
+// port/impl/paint.c - paint() and update().
 // paint is fully ported. update currently covers the loading/boot states
 // (0,1,2,4,10), map generation (25), and the simulation tick (30).
 // Menu/year-end states remain to be ported -- tracked as `partial` in the manifest.
@@ -186,7 +186,7 @@ void gc_paint(GameCanvas *gc, MidpGraphics *g) {
     }
 }
 
-// public void update() -- PARTIAL: boot, map generation, and simulation tick.
+// public void update()
 void gc_update(GameCanvas *gc) {
     switch (gc->gameState) {
         case 0: case 1: case 2: {
@@ -508,8 +508,131 @@ void gc_update(GameCanvas *gc) {
             gc->tickEnd = midp_current_time_millis();
             break;
         }
-        default:
-            // TODO port: menus (35/40/45/...) and remaining update states.
+        case 35: {
+            if (gc->loadStep > 0) --gc->loadStep;
+            if (gc->loadStep != 2) break;
+            midp_image_free(gc->backbuffer);
+            int size = gc->mapHeight + gc->mapWidth;
+            gc->backbuffer = midp_image_create_blank(size, size);
+            gc->backbufferG = midp_image_get_graphics(gc->backbuffer);
+            midp_set_color(gc->backbufferG, 0);
+            midp_fill_rect(gc->backbufferG, 0, 0, size, size);
+            int previous_kind = -1;
+            int kind = 0;
+            for (int x = 0; x < gc->mapWidth; ++x) {
+                for (int y = 0; y < gc->mapHeight; ++y) {
+                    int draw_y = gc->mapWidth - x + y;
+                    int draw_x = x + y;
+                    int tile = gc->tileMap[x][y];
+                    int track = gc->trackMap[x][y];
+                    if (tile == 0) kind = 1;
+                    if (tile >= 3 && tile <= 28) kind = 2;
+                    if (tile >= 29 && tile <= 33) kind = 3;
+                    if (tile >= 34 && tile <= 41) kind = 4;
+                    if (tile >= 42 && tile <= 48) kind = 5;
+                    if (tile >= 50 && tile <= 52) kind = 6;
+                    if (tile >= 53 && tile <= 55) kind = 7;
+                    if (tile >= 56 && tile <= 58) kind = 8;
+                    if (tile >= 59 && tile <= 61) kind = 9;
+                    if (tile >= 62 && tile <= 64) kind = 10;
+                    if (tile >= 65 && tile <= 68) kind = 11;
+                    if (tile >= 70 && tile <= 90) {
+                        if (track == 64 || track == 65) kind = 12;
+                        if (track == 66) kind = 13;
+                        if (track == 67) kind = 14;
+                        if (track == 68) kind = 15;
+                    }
+                    if (kind != previous_kind) {
+                        switch (kind) {
+                            case 1:
+                                if (gc->tileElevation[x][y] == -1) midp_set_color(gc->backbufferG, 3167360);
+                                if (gc->tileElevation[x][y] == 0) midp_set_color(gc->backbufferG, 5274640);
+                                if (gc->tileElevation[x][y] == 1) midp_set_color(gc->backbufferG, 6327328);
+                                if (gc->tileElevation[x][y] == 2) midp_set_color(gc->backbufferG, 7380016);
+                                if (gc->tileElevation[x][y] == 3) midp_set_color(gc->backbufferG, 8432704);
+                                break;
+                            case 2: midp_set_color(gc->backbufferG, 6327312); break;
+                            case 3: midp_set_color(gc->backbufferG, 0x909040); break;
+                            case 4: midp_set_color(gc->backbufferG, 0x606060); break;
+                            case 5: midp_set_color(gc->backbufferG, 0x404040); break;
+                            case 6: midp_set_color(gc->backbufferG, 0xFC0000); break;
+                            case 7: midp_set_color(gc->backbufferG, 0x101010); break;
+                            case 8: midp_set_color(gc->backbufferG, 0xFC9C00); break;
+                            case 9: midp_set_color(gc->backbufferG, 0x78DC1E); break;
+                            case 10: midp_set_color(gc->backbufferG, 0xFCFC00); break;
+                            case 11: midp_set_color(gc->backbufferG, 0x80C4FC); break;
+                            case 12: midp_set_color(gc->backbufferG, 0); break;
+                            case 13: midp_set_color(gc->backbufferG, 14287063); break;
+                            case 14: midp_set_color(gc->backbufferG, 16738557); break;
+                            case 15: midp_set_color(gc->backbufferG, 16040947); break;
+                        }
+                    }
+                    previous_kind = kind;
+                    midp_draw_line(gc->backbufferG, draw_x, draw_y,
+                                   draw_x + 1, draw_y);
+                }
+                previous_kind = -1;
+            }
+            gc_setState(gc, 40);
+            break;
+        }
+        case 40:
+            gc_viewportPanKey(gc);
+            break;
+        case 45:
+            if (gc->loadStep > 0) --gc->loadStep;
+            if (gc->loadStep != 2) break;
+            if (gc_tryBuildPath(gc)) {
+                gc_setState(gc, 30);
+                gc->buildMenuItemIndex = 0;
+                gc->buildCancelled = true;
+                gc->buildMenuMode = 2;
+                gc->menuDirty = true;
+                break;
+            }
+            gc->buildMenuItemIndex = 0;
+            gc->buildCancelled = true;
+            gc->buildMenuMode = 1;
+            gc->menuDirty = true;
+            gc->ready = false;
+            gc->transitionCode = 12;
+            gc_setState(gc, 20);
+            break;
+        case 55:
+            if (gc->loadStep > 0) --gc->loadStep;
+            if (gc->loadStep != 2) break;
+            gc_saveAllMapArrays(gc);
+            gc->buildMenuItemIndex = 0;
+            gc->menuDirty = true;
+            gc_setState(gc, 30);
+            break;
+        case 65:
+            if (gc->loadStep > 0) --gc->loadStep;
+            if (gc->loadStep != 2) break;
+            gc_restoreAllMapArrays(gc);
+            gc->pauseFlag = false;
+            gc->buildMenuItemIndex = 0;
+            gc->menuDirty = true;
+            gc_setState(gc, 30);
+            break;
+        case 105:
+            if (gc->loadStep > 0) --gc->loadStep;
+            if (gc->loadStep != 2) break;
+            if (gc->nextTrackPieceCode - 66 < gc->difficultyCycle) {
+                gc_placeCitiesAndIndustry(gc);
+                gc_setState(gc, 30);
+                break;
+            }
+            ++gc->nextTrackPieceCode;
+            if (gc->nextTrackPieceCode == 69) gc->nextTrackPieceCode = 66;
+            gc_setState(gc, 30);
+            break;
+        case 120:
+            if (gc->loadStep > 0) --gc->loadStep;
+            if (gc->loadStep != 2) break;
+            gc->transitionCode = gc_syncHighScores(gc, gc->highScoreUploadRequested)
+                                 ? 19 : 18;
+            gc_setState(gc, 20);
             break;
     }
 }

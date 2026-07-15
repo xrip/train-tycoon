@@ -215,7 +215,7 @@ implements Runnable {
     int offerTypeTransitionCode;
     int offerEffectTransitionCode;
     int currentScenarioScore;
-    boolean ad = false;
+    boolean highScoreUploadRequested = false;
     byte[] playerNameCodes = new byte[10];
     byte[] playerNameCursorMarker = new byte[10];
     byte routeSlotIndex = 0;
@@ -4863,7 +4863,7 @@ implements Runnable {
             }
             case 28: {
                 if (n2 == 41) {
-                    this.ad = false;
+                    this.highScoreUploadRequested = false;
                     this.setState(120);
                     break;
                 }
@@ -4878,7 +4878,7 @@ implements Runnable {
             }
             case 27: {
                 if (n2 == 40) {
-                    this.ad = true;
+                    this.highScoreUploadRequested = true;
                     this.setState(120);
                     break;
                 }
@@ -9503,7 +9503,7 @@ implements Runnable {
                     --this.loadStep;
                 }
                 if (this.loadStep != 2) break;
-                this.transitionCode = this.syncHighScores(this.ad) ? 19 : 18;
+                this.transitionCode = this.syncHighScores(this.highScoreUploadRequested) ? 19 : 18;
                 this.setState(20);
             }
         }

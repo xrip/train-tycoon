@@ -177,7 +177,7 @@ typedef struct GameCanvas {
     int32_t offerTypeTransitionCode; // int offerTypeTransitionCode
     int32_t offerEffectTransitionCode; // int offerEffectTransitionCode
     int32_t currentScenarioScore; // int currentScenarioScore
-    bool ad; // boolean ad
+    bool highScoreUploadRequested; // boolean highScoreUploadRequested
     int8_t* playerNameCodes; // byte[] playerNameCodes
     int8_t* playerNameCursorMarker; // byte[] playerNameCursorMarker
     int8_t routeSlotIndex; // byte routeSlotIndex

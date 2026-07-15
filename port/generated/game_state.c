@@ -149,7 +149,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->difficultyC = 0;
     gc->offerRowIndex = 0;
     gc->duplicateRowState = 0;
-    gc->ad = false;
+    gc->highScoreUploadRequested = false;
     gc->playerNameCodes = (int8_t*)midp_alloc_arr(sizeof(int8_t), 10);
     gc->playerNameCursorMarker = (int8_t*)midp_alloc_arr(sizeof(int8_t), 10);
     gc->routeSlotIndex = 0;

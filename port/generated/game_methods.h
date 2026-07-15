@@ -196,7 +196,7 @@ void gc_drawRectFill(GameCanvas *gc, MidpGraphics* graphics, int32_t n, int32_t 
 void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2); // setCanvasSize(int n, int n2) [ported]
 void gc_paint(GameCanvas *gc, MidpGraphics* graphics); // paint(Graphics graphics) [ported]
 void gc_setState(GameCanvas *gc, int32_t n); // setState(int n) [ported]
-void gc_update(GameCanvas *gc); // update() [partial]
+void gc_update(GameCanvas *gc); // update() [ported]
 void gc_renderMap(GameCanvas *gc, MidpGraphics* graphics); // renderMap(Graphics graphics) [ported]
 void gc_hideNotify(GameCanvas *gc); // hideNotify() [ported]
 void gc_showNotify(GameCanvas *gc); // showNotify() [ported]
