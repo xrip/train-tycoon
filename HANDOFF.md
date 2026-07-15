@@ -1,114 +1,108 @@
-# HANDOFF — Train Tycoon readable decompile and native port
+# HANDOFF — Train Tycoon readable decompile and Win32 port
 
-## 1. Project purpose and target
+## Project purpose and target
 
-This project has two connected parts:
+This project has two parts:
 
-1. Make a repeatable, readable Java decompile of the obfuscated Train Tycoon
-   J2ME game.
-2. Make a native Windows C23 port on MiniFB.
+1. Make a repeatable, readable Java decompile of the old Train Tycoon J2ME game.
+2. Make a native Windows C23 port with the same game behavior.
 
-The Java source of truth is `src/deobfuscated/GameCanvas.java`. The native port
-target is the same game behavior. MIDI music is now native WinMM work. Wave
-sound effects are the next phase. High-score network work stays out by request.
+The readable Java source of truth is `src/deobfuscated/GameCanvas.java`. The
+native target is a 240×320 game on the MiniFB Win32 back end. The port has all
+196 game methods. Native MIDI music is in place. High-score network work is a
+no-op. This game JAR has no separate sound-effect files or sound-effect calls.
 
-The native port is complete at **196/196 full methods**, with **0 partial
-methods** and no generated method bodies in `port/generated/game_stubs.c`.
+## Current Git state
 
-## 2. Current Git state
+- Branch: `master`.
+- Base commit before this handoff: `ed60bdc Add native WinMM MIDI music`.
+- Port state: 196/196 full methods, 0 partial methods, 441 fields.
+- `AGENTS.md` is an untracked user instruction file. Keep it uncommitted unless
+  the user gives a direct request.
+- `build/`, `tools/lib/`, `tools/__pycache__/`, and `TTStore.rms` are ignored
+  local files.
 
-- Branch: `master`
-- Music phase work started from `e72439f Refresh project handoff`.
-- Recent main commits:
-  - `1b7e828` — completed all `update()` states and added the state-30 smoke
-    path.
-  - `400a23f` — added the last dialog-data, money-format, and train-render
-    methods; also completed the last clear name changes.
-  - `ae30cbb` — added score, graph, text, life-cycle, and excluded-system
-    methods.
-  - `b074cca` through `f1a38fc` — added map setup, save/load, path finding,
-    train buying, build actions, and view control.
-
-`AGENTS.md` is an untracked, user-owned instruction file. It is not part of the
-project commit and must stay uncommitted unless the user gives a direct request.
-
-No other uncommitted project work was present before this handoff.
-
-The following ignored files are normal generated data and must not be put in a
-commit: `build/`, `tools/lib/`, `tools/__pycache__/`, and `TTStore.rms`.
-
-## 3. What was made and why
+## Work now in the project
 
 ### Repeatable deobfuscation
 
-- `tools/deobf.py` drives extract, bytecode name changes, CFR decompile, xref,
-  and Java proof steps.
-- `tools/mappings.txt` holds descriptor-specific class, field, and method name
-  changes.
-- `tools/Remap.java` does bytecode name changes through ASM. This keeps
-  overloaded names separate and does not make source-text substitutions.
-- `tools/Xref.java` creates `analysis/XREF_GameCanvas.md` for exact callers,
-  callees, field use, and string data.
+`tools/deobf.py` takes the old JAR through extract, bytecode name changes, CFR
+decompile, xref, and proof steps. `tools/mappings.txt` is the name map.
+`tools/Remap.java` changes names in bytecode, with JVM descriptors to keep
+overloads separate. `tools/Xref.java` makes exact member cross-references.
 
-This design makes every readable name repeatable from the original JAR and
-keeps `src/deobfuscated/` as generated source rather than hand-edited Java.
+This design keeps all readable names repeatable. Do not hand-edit
+`src/deobfuscated/GameCanvas.java`; make name changes in `tools/mappings.txt`
+and run the pipeline.
 
-### Native C23 port
+### Native game port
 
-- `tools/port.py` reads the readable Java, keeps port state in
-  `tools/port_manifest.json`, and creates `port/generated/`.
-- `port/impl/*.c` has the 196 hand-ported game methods, grouped by work area.
-- `port/midp_*.c` and `port/midp.h` give the small MIDP layer needed by this
-  game: graphics, PNG images, resources, key input, Java-style random numbers,
-  vectors, byte streams, and RecordStore files.
-- `port/main.c` owns the Windows frame loop. The old Java `run()` loop is one
-  frame at a time in native code.
-- `MiniFB.h` gives the Windows window and frame output.
-- `port/third_party/stb_image.h` gives PNG decode.
+`tools/port.py` reads the readable Java and keeps method state in
+`tools/port_manifest.json`. It makes `port/generated/`. Hand-written game
+methods are under `port/impl/`. The small MIDP layer is under `port/midp_*`.
 
-This design keeps generated state and declarations separate from hand-written
-game code. It also keeps the port close to the Java control flow, which lowers
-the risk of behavior changes.
+The native port now has:
 
-### Main game systems now present
+- game start and resource reading;
+- all screen and menu states;
+- map and scenario generation;
+- isometric map, train, menu, and dialog drawing;
+- input, map move, zoom, and tile selection;
+- track, station, train, wagon, remove, and upgrade work;
+- route finding and track preview;
+- train motion, cargo, income, AI, month, year, and era work;
+- save/load, RLE, and RecordStore file work;
+- score, graph, money, and dialog data work.
 
-- Full start and resource decode path.
-- Title and menu state machines.
-- Scenario read and map generation.
-- Isometric terrain, tile, train, menu, and dialog drawing.
-- Key input, view movement, zoom, and tile selection.
-- Track, station, train, wagon, removal, and upgrade actions.
-- Track path finding and preview work.
-- Train movement, service, cargo, income, AI, month, year, and era work.
-- Save/load state, map matrices, RLE, and RecordStore file support.
-- Map overview and all `update()` state cases.
-- Score, graph, number, money, and dynamic dialog data.
+The main game goal is complete at the method level: 196/196 full methods and no
+generated game stubs.
 
-These changes meet the main goal: a native start-to-gameplay port with no
-missing game method bodies.
+### Native MIDI music
 
-### Clear-name rule
+Commit `ed60bdc` added the native music part because the old J2ME game opens
+resource `/6` as `audio/midi`.
 
-When port work shows an old obfuscated member name, use behavior and exact
-xrefs to get a clear name. Put the name change in `tools/mappings.txt`, run the
-deobfuscation steps, then run `port.py inventory` and `port.py gen`.
+- `port/midp_media_win32.c` opens `resources/6` with the WinMM MCI sequencer.
+- `port/main.c` calls `midp_media_update()` each frame.
+- A 100 ms MCI state check starts the MIDI again when it stops.
+- Start, stop, restart, and the five game volume levels are connected.
+- MIDI device volume is saved before the first change and put back at shutdown.
+- The smoke suite checks the MIDI header.
+- `TRAIN_TYCOON_MIDI_TEST_MS` gives a short real-device test.
 
-Do not put a recoverable obfuscated name only in the C code. If evidence does
-not give one clear meaning, say so and keep the doubt in project notes. One
-example is `legacyDecadeMetric`: bytecode gives no writes after its zero start,
-so its business meaning is not known.
+MCI was used because it is a small Win32 way to play a complete MIDI file. The
+game code stays close to the old `Player` start/stop/loop behavior.
 
-## 4. Architecture and important decisions
+### Sound-effect finding from this session
 
-### Source-of-truth flow
+The present decompiles and raw bytecode were checked. All full decompiles have
+one `Manager.createPlayer` call. It opens only `/6` as `audio/midi`.
+
+No `playTone`, WAV player, second media `Player`, or sound-effect call is in the
+code. A scan of raw and XOR-decoded resources found no RIFF/WAVE, OGG, AMR,
+MP3, FLAC, AU, or second MIDI file. Resource use in the decompile shows:
+
+- `/1` is the packed image stream;
+- `/2` is sprite/scenario index data;
+- `/3` is sprite/table data;
+- `/4` is packed image metadata;
+- `/5` is game/scenario data;
+- `/6` is the only sound file, Standard MIDI, 11,573 bytes.
+
+Result: sound effects cannot be recovered from this JAR. Any wave effects will
+be a new game addition, not a faithful port of old effect data.
+
+## Architecture and key decisions
+
+### Source flow
 
 ```text
-original JAR
+Train_Tycoon_6233_N73_N95_240x320.jar
   -> tools/deobf.py + tools/mappings.txt
   -> src/deobfuscated/GameCanvas.java
   -> tools/port.py + tools/port_manifest.json
-  -> port/generated/* declarations and state
-  -> port/impl/* native method bodies
+  -> port/generated/*
+  -> port/impl/* + port/midp_* + port/main.c
 ```
 
 Do not hand-edit `port/generated/*`. Run `python tools/port.py gen` after a
@@ -116,145 +110,100 @@ manifest or Java name change.
 
 ### Runtime flow
 
-`port/main.c` does:
+`port/main.c` sets the resource root, starts `GameCanvas`, reads Win32 key
+events, runs one old game-loop step, paints, and sends the frame to MiniFB. The
+window is 240×320 game pixels at 2× size and 30 frames per second.
 
-```text
-resource root -> GameCanvas field start -> game start
--> key events -> one gc_run frame -> gc_paint -> MiniFB frame output
-```
+The old Java `run()` loop is not a second native thread. The host loop calls one
+`gc_run()` step per frame.
 
-The window is 240×320 game pixels at 2× display scale and 30 frames per second.
+### Java behavior support
 
-### Java array support
+- Game arrays use `GC_NEW` and `midp_arr_len`, because Java arrays keep length.
+- Random numbers use the same Java 48-bit process; map generation needs this.
+- PNG reading uses the local `stb_image` copy.
+- J2ME RecordStore data uses a local `.rms` file.
+- Resources `/1` through `/5` use the old cycling XOR key.
+- High-score network sync returns `false`.
 
-Native game arrays keep their length through `GC_NEW` and `midp_arr_len`.
-Use these helpers for game arrays. Do not replace them with plain `malloc` when
-code needs Java `.length` behavior.
+### Clear-name rule
 
-### Random numbers
+If port work shows an old obfuscated member name, first use behavior and exact
+xrefs to get a clear name. Put the name in `tools/mappings.txt`, run the
+deobfuscation work, then run port inventory and generation. If there is not
+enough fact for one clear name, record the doubt and ask before a rename.
 
-The MIDP layer has the Java 48-bit random-number process. Map generation needs
-this exact behavior.
+Use clear local names in hand-written C even when a Java local name is still
+short and has no known meaning.
 
-### Music, future effects, and network
+## What works
 
-- `port/midp_media_win32.c` opens `resources/6` with the WinMM MCI sequencer.
-- The main loop checks for the stopped state and starts from zero again, giving
-  an infinite music loop.
-- Stop, restart, and the five old volume levels are connected to the game.
-- A short-lived MIDI output handle changes volume without blocking MCI play.
-  The old device volume is put back at shutdown.
-- Wave sound effects are not present yet. They are the planned second phase.
-- High-score sync returns `false`, so the game takes its normal failure result
-  state.
+- The old classes decompile and build against J2ME support JARs.
+- The native target builds with Visual Studio 2022 and MSVC C23 mode.
+- The real resources decode and the PNG pictures draw.
+- The title/menu path, scenario 0 map generation, and game state 30 pass smoke.
+- Path finding passes a small 5×5 build/cost smoke test.
+- In-memory save, RLE pack/unpack, and field restore pass smoke.
+- MIDI header, load, play, stop, volume change, restart, and shutdown pass.
+- The main game has no missing port method body.
 
-## 5. What works now
+## Incomplete work and known limits
 
-- Java proof build and round-trip decompile.
-- Native MSVC C23 build.
-- Real game resource decode and PNG drawing.
-- Start screen and menu drawing/input.
-- Scenario 0 map generation to game state 30.
-- One state-30 input, update, and paint cycle in the smoke suite.
-- Small path-finding smoke check.
-- In-memory save/RLE/load round-trip smoke check.
-- Native RecordStore file support through `TTStore.rms` for normal game use.
-- Native MIDI load, play, stop, restart, loop check, and volume control.
-
-`python tools/port.py status` reports:
-
-```text
-methods done: 196/196 (100%)  [196 full, 0 partial]
-fields (all generated): 441
-```
-
-## 6. What is not complete or not proved
-
-- Wave sound effects are not present. No effect assets or original effect calls
-  have been found in the project.
+- There are no old sound effects to port. New WAV files and an event list need
+  a user decision before any sound-effect code is made.
 - High-score network work is a no-op by request.
-- The smoke suite is not a full test of every menu selection, every scenario,
-  long game play, all AI results, or every save/load path on disk.
-- A full manual play test on a normal Windows desktop is still needed.
-- The build is Windows-only. `CMakeLists.txt` gives an error on non-Windows
-  systems.
-- The old `README.md` still gives the early decompile view. Use this file,
-  `CLAUDE.md`, and `PORT_HANDOFF.md` for the current native-port state.
+- A full manual Windows play test has not been recorded.
+- Smoke is not proof for every menu, scenario, AI result, long game, or disk
+  save/load path.
+- The build is Windows-only. `CMakeLists.txt` stops on other systems.
+- MCI repeat uses a 100 ms state check, so a small end-to-start gap is possible.
+- Volume uses MIDI mapper device volume. The old value is put back at normal
+  shutdown, but a hard process stop may leave the changed device value.
+- A volume change while music is playing stops it and starts it from the start.
+- Some short smoke objects do not free every nested game allocation before the
+  test process ends. No game-loop growth path is known from this.
+- CFR has known output errors fixed by `tools/deobf.py`; see
+  `analysis/VERIFICATION.md`.
 
-No known build or smoke failure is present at handoff time.
+## Build and run
 
-## 7. Known limits, risks, and technical debt
+Needs:
 
-- MSVC does not give the C23 `nullptr` word used by MiniFB. `port/main.c` has a
-  guarded `nullptr -> NULL` definition before `MiniFB.h`.
-- CFR left out a real `break` in `computeTrackBuildInlined`. Bytecode shows that
-  the scan stops at the first non-empty tile. The C port follows bytecode.
-- `autoExtendTrackStation` checks the “track above” bit for both vertical ways.
-  Bytecode shows the same strange behavior, so the C port keeps it.
-- `pathSearchLimit` is a low-confidence name. The game sets it to 10, but
-  bytecode has no read of the field.
-- `legacyDecadeMetric` has no bytecode writes after its zero start. Its exact
-  old business meaning is not known.
-- Some smoke test objects do not free every nested game allocation before the
-  short test process ends. This is test-only process-lifetime waste, not a
-  known game-loop growth path.
-- The main smoke path directly selects scenario 0 after the real asset load.
-  It proves the main game state chain, but not every title-menu key sequence.
+- Windows;
+- CMake 3.25 or later;
+- Visual Studio 2022 C build tools and MSVC, or a Windows GCC/Clang setup;
+- Python 3;
+- JDK 8 or later;
+- project resources under `resources/`.
 
-## 8. Build, run, and check
-
-### Requirements
-
-- Windows.
-- CMake 3.25 or later.
-- Visual Studio 2022 C build tools and MSVC, or a Windows GCC/Clang setup.
-- Python 3.
-- JDK 8 or later for deobfuscation checks.
-- `resources/1` through `resources/6` and `resources/ico.png` in the project
-  tree.
-
-Pinned Java tool JARs are under ignored `tools/lib/`. If they are missing, run:
+If the ignored Java support JARs are not present:
 
 ```powershell
 python tools/deobf.py setup
 ```
 
-### Normal build
+Normal native build:
 
 ```powershell
 cmake -S . -B build/port_build -G "Visual Studio 17 2022" -A x64
 cmake --build build/port_build --config Debug
 ```
 
-Output:
-
-```text
-build/port_build/Debug/train_tycoon.exe
-```
-
-Run it from the project root so the relative `resources` path is valid:
+Run from the project root:
 
 ```powershell
 .\build\port_build\Debug\train_tycoon.exe
 ```
 
-### Port checks
+Full automatic checks:
 
 ```powershell
-python tools/port.py status
+python tools/deobf.py verify
+python tools/port.py status -v
 python tools/port.py verify
 ```
 
-`verify` builds the native target and runs 120 smoke frames. Before the window
-frame loop, it also runs:
-
-1. A 5×5 path build with track and cost checks.
-2. An in-memory state save, RLE pack/unpack byte comparison, and field restore.
-3. Real asset load, scenario 0 generation, state-30 paint, movement-key input,
-   one game frame, and a second paint.
-4. A header check for the real MIDI resource.
-
-For a short real-device music check:
+Short real MIDI-device check:
 
 ```powershell
 $env:TRAIN_TYCOON_MIDI_TEST_MS='3000'
@@ -262,84 +211,67 @@ $env:TRAIN_TYCOON_MIDI_TEST_MS='3000'
 Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 ```
 
-This plays at 20%, stops, changes to 60%, restarts from zero, then closes and
-puts the old MIDI device volume back.
+## Exact handoff checks
 
-### Java proof check
+All checks were run on 2026-07-15 in
+`E:\Train_Tycoon_readable_decompile`:
 
-```powershell
-python tools/deobf.py verify
-```
+- `python tools/deobf.py verify` — PASS, exit 0. Three classes built. The
+  round-trip difference was local-variable names only. Java gave the known
+  old-API note.
+- `python tools/port.py status -v` — PASS. 196/196 full, 0 partial, 441 fields,
+  no pending methods.
+- `python tools/port.py verify` — PASS, exit 0. MSBuild made
+  `build/port_build/Debug/train_tycoon.exe`; all 120-frame smoke work passed.
+- `TRAIN_TYCOON_MIDI_TEST_MS=3000` device check — PASS, exit 0.
+- `git diff --check` — PASS before commit. The only planned change was this
+  handoff; `AGENTS.md` stayed untracked by design.
 
-This decompiles the original classes, applies the known CFR output fixes,
-builds all three Java classes against the J2ME support JARs, and checks a stable
-round-trip decompile.
+## Current development objective
 
-### Exact handoff check results
+The faithful game port and MIDI phase are complete. The next choice is whether
+to add new sound effects even though the old JAR has none. Do not make that
+choice without the user.
 
-Run on 2026-07-15 from `E:\Train_Tycoon_readable_decompile`:
+## Next tasks, in order
 
-- `python tools/deobf.py verify` — **PASS**, exit 0. The patched decompile built
-  3 classes. Round-trip change was local-variable naming only. Java gave only
-  the known old-API note.
-- `python tools/port.py verify` — **PASS**, exit 0. MSBuild made
-  `build/port_build/Debug/train_tycoon.exe`; all smoke work returned 0.
-- `python tools/port.py status` — **PASS**: 196/196 full, 0 partial, 441 fields.
-- `TRAIN_TYCOON_MIDI_TEST_MS=3000` device test — **PASS**, exit 0. WinMM MCI
-  play/stop/volume/restart and shutdown all completed.
-- `git diff --check` — **PASS**, exit 0.
+1. Ask the user whether new sound effects are wanted after the no-old-effects
+   result.
+2. If yes, agree on game events and WAV assets before code. `PlaySound` is the
+   simple choice for one effect at a time. Use `waveOut` only if effects need
+   overlap or separate volume control.
+3. Do a full manual Windows play test: start through the title menu, build
+   track and stations, buy a train, run service, use reports and map views,
+   change music settings, save, load, and exit.
+4. For each real failure, first make a small repeatable check, then make the
+   smallest close-to-source fix.
+5. Test other scenarios and a long game if manual work shows a need.
+6. Add high-score network work only after a new direct user request.
 
-## 9. Current development objective
+## Important files
 
-The requested port and MIDI music phase are complete. The next objective is
-wave sound effects, followed by manual play and small, local fixes. High-score
-network work remains out of scope.
-
-## 10. Next tasks, in order
-
-1. **Set the wave-effect list and assets.** Give each effect a game event and a
-   ready WAV file. Use `PlaySound` first unless effects must play together.
-2. **Do a manual Windows play test.** Start a new game through the real title
-   menu. Build track and stations, buy a train, run service, open finance/map
-   views, check music controls, save, load, and exit. Keep exact steps for any
-   failure.
-3. **Add a small check for each found failure before its fix.** Keep changes
-   close to the Java and bytecode source.
-4. **Test more scenarios.** Extend the smoke suite only when a real problem or
-   high-risk path gives a reason.
-5. **Check long-run state.** Let months and years pass, then check AI, money,
-   era changes, reports, and save/load stability.
-6. **Only by a new user request:** add high-score network support.
-
-## 11. Important files and entry points
-
-- `CLAUDE.md` — project rules, tool use, and port design.
-- `PORT_HANDOFF.md` — detailed port history and known bytecode facts.
+- `CLAUDE.md` — project rules and work process.
 - `src/deobfuscated/GameCanvas.java` — readable Java source of truth.
-- `tools/mappings.txt` — repeatable bytecode name map.
-- `analysis/XREF_GameCanvas.md` — exact member cross-references.
-- `tools/deobf.py` — deobfuscation and Java proof driver.
+- `src/decompiled_cfr/` — raw CFR forms for fact checks.
+- `raw-bytecode/a.javap.txt` — full old class bytecode.
+- `tools/mappings.txt` — repeatable member name map.
+- `analysis/XREF_GameCanvas.md` — exact member xrefs.
+- `analysis/RESOURCE_FORMAT.md` — packed resource format.
+- `analysis/VERIFICATION.md` — CFR proof and known fixes.
+- `tools/deobf.py` — decompile and Java proof driver.
 - `tools/port.py` — port inventory, generation, build, and smoke driver.
-- `tools/port_manifest.json` — 196-method port state and 441-field C map.
-- `CMakeLists.txt` — Windows C23 build.
-- `port/main.c` — Windows entry, frame loop, and smoke suite.
-- `port/midp_media_win32.c` — WinMM MCI MIDI music backend.
-- `port/midp.h` and `port/midp_*.c` — MIDP support layer.
-- `port/impl/paint.c` — full paint and update state switches.
-- `port/impl/menu_dispatch.c` — menu action state changes.
-- `port/impl/map_gen.c` — terrain, city, industry, and route setup.
-- `port/impl/render_map.c` — isometric world draw.
-- `port/impl/train_tick.c` and `port/impl/sim_tick.c` — train and time work.
-- `port/impl/build_actions.c` and `port/impl/pathfinding.c` — building work.
-- `port/impl/save.c` and `port/impl/save_arrays.c` — game and map save/load.
-- `port/generated/game_state.h` — generated `GameCanvas` C state.
-- `port/generated/game_methods.h` — generated method declarations.
-- `port/generated/game_stubs.c` — generated and empty at this handoff.
-- `resources/` — required game data and extracted review material.
+- `tools/port_manifest.json` — method port state and field map.
+- `CMakeLists.txt` — native Windows build.
+- `port/main.c` — entry, frame loop, and smoke tests.
+- `port/midp_media_win32.c` — WinMM MCI MIDI back end.
+- `port/midp.h` and `port/midp_*.c` — small MIDP support layer.
+- `port/impl/` — hand-written game methods.
+- `port/generated/` — generated state, declarations, and stubs.
+- `resources/` — game data, MIDI, and decoded review files.
 
-## 12. Safe change process
+## Safe change process
 
-For a Java name change:
+For a Java member name change:
 
 ```powershell
 # edit tools/mappings.txt
@@ -351,6 +283,6 @@ python tools/port.py gen
 python tools/port.py verify
 ```
 
-For a C-only bug fix, edit only the needed `port/impl` or MIDP file, then run
-`python tools/port.py verify`. Do not edit generated C files by hand. Keep
-unrelated code and the user-owned `AGENTS.md` unchanged.
+For a native bug fix, change only the needed `port/impl` or MIDP file and run
+`python tools/port.py verify`. Keep unrelated files and user-owned
+`AGENTS.md` unchanged.
