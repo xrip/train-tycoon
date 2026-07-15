@@ -154,6 +154,23 @@ void gc_saveOrLoadShortMatrixInlined(GameCanvas *gc, int16_t** sArray);
 void gc_saveOrLoadByteArrayInlined(GameCanvas *gc, int8_t* byArray);
 void gc_saveOrLoadShortArrayInlined(GameCanvas *gc, int16_t* sArray);
 void gc_saveOrLoadIntArrayInlined(GameCanvas *gc, int32_t* nArray);
+// Explicit-length save/load: used for owned std::array state that has no
+// entry in the array-length registry. Same byte order as the raw versions.
+void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t* byArray, int len);
+void gc_saveOrLoadShortSpan(GameCanvas *gc, int16_t* sArray, int len);
+void gc_saveOrLoadIntSpan(GameCanvas *gc, int32_t* nArray, int len);
+template <std::size_t N>
+inline void gc_saveOrLoadByteArrayInlined(GameCanvas *gc, std::array<int8_t, N> &a) {
+    gc_saveOrLoadByteSpan(gc, a.data(), static_cast<int>(N));
+}
+template <std::size_t N>
+inline void gc_saveOrLoadShortArrayInlined(GameCanvas *gc, std::array<int16_t, N> &a) {
+    gc_saveOrLoadShortSpan(gc, a.data(), static_cast<int>(N));
+}
+template <std::size_t N>
+inline void gc_saveOrLoadIntArrayInlined(GameCanvas *gc, std::array<int32_t, N> &a) {
+    gc_saveOrLoadIntSpan(gc, a.data(), static_cast<int>(N));
+}
 void gc_initSaveOrLoad(GameCanvas *gc, int32_t n);
 void gc_writeSaveSnapshot(GameCanvas *gc);
 void gc_persistSnapshotMode0(GameCanvas *gc);
