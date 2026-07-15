@@ -98,19 +98,19 @@ bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
     }
     if (n == 22) {
         int slot = gc->aiWagonsLastSeen;
-        if (n2 == 0 && gc->trainOptionSlots[slot][0] == 0 && gc->trainOptionSlots[slot][1] == 0
-            && gc->trainOptionSlots[slot][2] == 0 && gc->trainOptionSlots[slot][3] == 0) return true;
-        if (n2 == 1 && gc->trainOptionSlots[slot][0] > 0) return true;
-        if (n2 == 2 && gc->trainOptionSlots[slot][1] > 0) return true;
-        if (n2 == 3 && gc->trainOptionSlots[slot][2] > 0) return true;
-        if (n2 == 4 && gc->trainOptionSlots[slot][3] > 0) return true;
-        if (n2 == 5 && gc->trainOptionSlots[slot][4] > 0) return true;
-        if (n2 == 6 && gc->trainFlagBits[slot] == 0) return true;
-        if (n2 == 7 && (gc->trainFlagBits[slot] & 1) == 1) return true;
-        if (n2 == 8 && (gc->trainFlagBits[slot] & 2) == 2) return true;
-        if (n2 == 9 && (gc->trainFlagBits[slot] & 4) == 4) return true;
-        if (n2 == 10 && (gc->trainFlagBits[slot] & 8) == 8) return true;
-        if (n2 == 11 && (gc->trainFlagBits[slot] & 0x10) == 16) return true;
+        if (n2 == 0 && gc->serviceResourceStock[slot][0] == 0 && gc->serviceResourceStock[slot][1] == 0
+            && gc->serviceResourceStock[slot][2] == 0 && gc->serviceResourceStock[slot][3] == 0) return true;
+        if (n2 == 1 && gc->serviceResourceStock[slot][0] > 0) return true;
+        if (n2 == 2 && gc->serviceResourceStock[slot][1] > 0) return true;
+        if (n2 == 3 && gc->serviceResourceStock[slot][2] > 0) return true;
+        if (n2 == 4 && gc->serviceResourceStock[slot][3] > 0) return true;
+        if (n2 == 5 && gc->serviceResourceStock[slot][4] > 0) return true;
+        if (n2 == 6 && gc->serviceUnloadFlags[slot] == 0) return true;
+        if (n2 == 7 && (gc->serviceUnloadFlags[slot] & 1) == 1) return true;
+        if (n2 == 8 && (gc->serviceUnloadFlags[slot] & 2) == 2) return true;
+        if (n2 == 9 && (gc->serviceUnloadFlags[slot] & 4) == 4) return true;
+        if (n2 == 10 && (gc->serviceUnloadFlags[slot] & 8) == 8) return true;
+        if (n2 == 11 && (gc->serviceUnloadFlags[slot] & 0x10) == 16) return true;
     }
     if (n == 24 && n2 <= gc->era) return true;
     if (n == 26) {

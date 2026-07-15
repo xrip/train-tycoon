@@ -169,11 +169,6 @@ bool gc_isTileBuildable(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     return false;
 }
 
-int32_t gc_spawnOrFindAt(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: spawnOrFindAt(int n, int n2)  L5484-5497
-    return 0;
-}
-
 int32_t gc_spawnWagonSlotInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl, bool bl2) {
     (void)gc; // TODO port: spawnWagonSlotInlined(int n, int n2, int n3, boolean bl, boolean bl2)  L5499-5525
     return 0;
@@ -196,31 +191,8 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
     return false;
 }
 
-int32_t gc_spawnTrainCar(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: spawnTrainCar(int n, int n2)  L5757-5780
-    return 0;
-}
-
 int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6) {
     (void)gc; // TODO port: allocateTrainSlot(int n, int n2, int n3, int n4, int n5, int n6)  L5782-5808
-    return 0;
-}
-
-bool gc_canRefuelAtTile(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: canRefuelAtTile(int n, int n2)  L5838-5872
-    return false;
-}
-
-void gc_updateTrain(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: updateTrain(int n)  L5874-6115
-}
-
-void gc_f(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: f(int n, int n2, int n3)  L6117-6125
-}
-
-int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: accumulateTrainTurns(int n)  L6134-6153
     return 0;
 }
 
@@ -236,25 +208,6 @@ bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
 int32_t gc_cPosLookup(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)gc; // TODO port: cPosLookup(int n, int n2)  L6337-6343
     return 0;
-}
-
-int32_t gc_xPlaceSpawn(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: xPlaceSpawn(int n, int n2)  L6345-6413
-    return 0;
-}
-
-int32_t gc_consumeWagonOption(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: consumeWagonOption(int n, int n2, int n3)  L6415-6421
-    return 0;
-}
-
-int32_t gc_computeWagonOptionCount(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    (void)gc; // TODO port: computeWagonOptionCount(int n, int n2, int n3)  L6423-6430
-    return 0;
-}
-
-void gc_applyTrainStateTick(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
-    (void)gc; // TODO port: applyTrainStateTick(int n, int n2, boolean bl)  L6432-6482
 }
 
 void gc_decrementOptionCounts(GameCanvas *gc, int32_t n) {
@@ -334,14 +287,6 @@ void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
 int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t n) {
     (void)gc; // TODO port: computeMenuRowDisplayValue(int n)  L7739-7771
     return 0;
-}
-
-void gc_incrementRowValueType1(GameCanvas *gc, int32_t n) {
-    (void)gc; // TODO port: incrementRowValueType1(int n)  L8054-8062
-}
-
-void gc_incrementRowValueTypeN(GameCanvas *gc, int32_t n, int32_t n2) {
-    (void)gc; // TODO port: incrementRowValueTypeN(int n, int n2)  L8064-8091
 }
 
 void gc_adjustRowValueByCode(GameCanvas *gc, int32_t n) {

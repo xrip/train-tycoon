@@ -211,11 +211,11 @@ typedef struct GameCanvas {
     int32_t currentTrainCostSnapshot; // int currentTrainCostSnapshot
     int32_t difficultyPct; // int difficultyPct
     int8_t* vehicleFlags; // byte[] vehicleFlags
-    int8_t* wagonAJ; // byte[] wagonAJ
-    int8_t* wagonEQ; // byte[] wagonEQ
-    int16_t** trainOptionSlots; // short[][] trainOptionSlots
-    int8_t* trainFlagBits; // byte[] trainFlagBits
-    int8_t* wagonServiceCounter; // byte[] wagonServiceCounter
+    int8_t* serviceVehicleX; // byte[] serviceVehicleX
+    int8_t* serviceVehicleY; // byte[] serviceVehicleY
+    int16_t** serviceResourceStock; // short[][] serviceResourceStock
+    int8_t* serviceUnloadFlags; // byte[] serviceUnloadFlags
+    int8_t* serviceLoadFlags; // byte[] serviceLoadFlags
     int8_t* trainX; // byte[] trainX
     int8_t* trainY; // byte[] trainY
     int8_t* trainDir; // byte[] trainDir
@@ -225,15 +225,15 @@ typedef struct GameCanvas {
     int8_t* trainAgeOrTimer; // byte[] trainAgeOrTimer
     int8_t* wagonEnergyRemaining; // byte[] wagonEnergyRemaining
     int8_t* trainEnergyOrCount; // byte[] trainEnergyOrCount
-    int8_t* wagonIorHost; // byte[] wagonIorHost
-    int8_t* trainServiceCounter; // byte[] trainServiceCounter
+    int8_t* lastServiceVehicle; // byte[] lastServiceVehicle
+    int8_t* cargoAge; // byte[] cargoAge
     int16_t* nextCar; // short[] nextCar
     int32_t* trainStateCode; // int[] trainStateCode
     int8_t* trainAiOverride; // byte[] trainAiOverride
     int32_t trainAtCursor; // int trainAtCursor
     int32_t era; // int era
-    int8_t** eR; // byte[][] eR
-    int8_t** aH; // byte[][] aH
+    int8_t** forwardTrackSteps; // byte[][] forwardTrackSteps
+    int8_t** reverseTrackSteps; // byte[][] reverseTrackSteps
     int32_t dI; // int dI
     int16_t** cs; // short[][] cs
     int8_t* saveBuffer; // byte[] saveBuffer
@@ -338,7 +338,7 @@ typedef struct GameCanvas {
     int8_t scenarioMilestoneIndex; // byte scenarioMilestoneIndex
     int32_t currentMilestoneScore; // int currentMilestoneScore
     int32_t milestoneCoThreshold2; // int milestoneCoThreshold2
-    int32_t counterB; // int counterB
+    int32_t lifetimeTrainRevenue; // int lifetimeTrainRevenue
     int32_t milestoneThreshold1; // int milestoneThreshold1
     int32_t milestoneThreshold2; // int milestoneThreshold2
     int32_t milestoneThreshold3; // int milestoneThreshold3
@@ -353,7 +353,7 @@ typedef struct GameCanvas {
     int32_t gameStateCounter; // int gameStateCounter
     void* musicPlayer; // Player musicPlayer
     void* volumeControl; // VolumeControl volumeControl
-    int32_t by; // int by
+    int32_t trainRevenueScore; // int trainRevenueScore
     int32_t transientH; // int transientH
     int32_t* gk; // int[] gk
     int32_t* bd; // int[] bd

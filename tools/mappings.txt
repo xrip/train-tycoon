@@ -259,9 +259,9 @@ field  a du   stationDirCursor     # byte; read when trackMap cursor & 0xC0==192
 field  a gL   junctionDirCursor    # byte; read when trackMap cursor & 0xC0==128
 field  a aN   trainAtCursor        # int; entity index found at cursor in I()
 field  a eT   wagonEnergyRemaining # byte[500]; remaining life/decay per car (s/l set to 0 on spawn)
-field  a aI   wagonIorHost         # byte[500]; per-car target/host entity (-1 freshly spawned)
-field  a aj   wagonAJ              # byte[500]; car coord 1 (read in H)
-field  a eq   wagonEQ              # byte[500]; car coord 2 (read in H)
+field  a aI   lastServiceVehicle   # byte[500]; service vehicle used on the last stop
+field  a aj   serviceVehicleX      # byte[250]
+field  a eq   serviceVehicleY      # byte[250]
 # Viewport key handlers (k=pan, B=zoom) and the related scaling fields
 field  a db   viewportBaseX        # long; t/2 = the map region's screen X center
 field  a aR   viewportBaseY        # long; fj/2 = the map region's screen Y center
@@ -284,10 +284,10 @@ method a l (I)V                    decCountsForOption
 method a E (I)V                    buildPlaceTrackPiece
 method a l (II)I                   spawnTrainCar   # int return: slot, or 500
 method a n (II)I                   neighboursMask    # int neighbours query (W,x used)
-method a s (II)I                   spawnOrFindAt     # int loop through 250 to find/place
+method a s (II)I                   findServiceVehicleAt
 method a h (II)I                   hPath             # int path over aQ[][] grid
 method a c (II)I                   cPosLookup        # int trained-position lookup
-method a x (II)I                   xPlaceSpawn       # int place spawn helper
+method a x (II)I                   unloadTrainRevenue
 
 # ---- Batch 9: tick economy + scenario milestones + year-end sheet ----
 # Per-tick fuel / running costs (everyTwoTick: 250 trains deducted per second)
@@ -413,11 +413,11 @@ field  a dz   selectionTileY        # int[4]; map Y of selection rect corners
 field  a hk   loanBalance           # int; outstanding loan principal
 field  a cY   loanCeiling           # int; max allowed loan (initially 600000)
 # Per-train byte[] state (size 500 = trains + cars combined)
-field  a A    trainServiceCounter   # byte[500]; ticks up to 200, gates energy-formula scaling
+field  a A    cargoAge              # byte[500]; ticks up to 200, raises delivery value
 # Per-train short[][] option slots (5 slots; matches wagonOptionSlots/wagonCountMatch arrays)
-field  a cO   trainOptionSlots      # short[250][5]; per-train option availability per slot
-field  a hq   trainFlagBits         # byte[250]; bitfield (low bits = available option flags)
-field  a gW   wagonServiceCounter   # byte[250]; per-wagon service interval counter
+field  a cO   serviceResourceStock  # short[250][5]
+field  a hq   serviceUnloadFlags    # byte[250]; resource types accepted near the service vehicle
+field  a gW   serviceLoadFlags      # byte[250]; resource types produced near the service vehicle
 # Per-menu-row tables (6 rows, indexed by cZ = build menu index)
 field  a hm   menuRowType           # byte[6]; 0=hidden, 1=cost%, 2=money-vs-cost, 4-14=other formulas
 field  a fa   menuRowAltType        # byte[6]; pendingTransitionCode = fa[cZ] + 60
@@ -579,8 +579,8 @@ method a a ()V                  rebuildMenuTypeIndexes    # gP[] = indexes of no
 method a a (I)B                 computeMenuRowDisplayValue # 100*M/aV or 100*money/aV depending on type
 method a f (II)V                placeTrainAt              # writes bh/dn/fW per train
 method a e (I)V                 duplicateMenuRow          # copies menuRowType[n] into row 5
-method a h (I)V                 incrementRowValueType1    # menuRowValue[i] += n for type==1 rows
-method a t (II)V                incrementRowValueTypeN    # menuRowValue[i] += n2 for type==3+n
+method a h (I)V                 recordTrainRevenue
+method a t (II)V                recordDeliveredResource
 method a w (I)V                 adjustRowValueByCode      # code 4 -> +1 to type 10, code 6 -> +1 to type 9
 
 # ---- Batch 22: more menu + save helpers + canvas resize ----
@@ -717,7 +717,7 @@ field  a et   trackTileCount         # int; count of trackMap tiles == 64 (used 
 field  a er   offerGenerationCount   # increments after each generated offer
 field  a fe   revenueTotal           # int; running revenue total (fe += totalRevenue)
 field  a bI   counterA               # int; generic counter (used in load timeout)
-field  a bD   counterB               # int; generic counter (used in incrementRowValueType1)
+field  a bD   lifetimeTrainRevenue   # int; total train revenue, milestone 12 value
 field  a eC   enterpriseTaxPct       # int; enterprise tax percent (eJ = totalRevenue * eC / 100)
 field  a H    transientH             # int; transient save-buffer value
 field  a S    snapshotLoadedFlag     # boolean; snapshot loaded (note: name collision with snapshotPending)
@@ -730,6 +730,12 @@ field  a dU   offerEffectNextCount   # short[12]; next offer count at which each
 field  a bv   lastOfferDateCode      # day + 32*month + 370*(year-1950)
 field  a fY   offerTypeTransitionCode
 field  a dR   offerEffectTransitionCode
+
+# ---- Batch 37: train movement and service ----
+field  a eR   forwardTrackSteps       # byte[6][]; direction, delta, and next-tile pairs
+field  a aH   reverseTrackSteps       # byte[6][]; reverse direction table
+field  a by   trainRevenueScore       # lifetime train revenue divided by 73
+method a f (III)V                     resetTrailingCars
 field  a bg   backgroundCost         # int; current background cost (used in applyBackgroundCost)
 
 # ---- Batch 29: build-menu cursor / row render methods ----
@@ -774,7 +780,7 @@ method a a (IIIIIIII)V               computeTrackBuildCost   # track-build with 
 method a a (ZIIIIIIZI)V              placeTrackAtCursor      # places track tile at tileCursorX/Y (trackMap=0x48|n9 etc.)
 method a a (IIZZ)V                   handleCursorClick      # money deduct; sets ck flag for affordability
 method a a (IIIZZI)V                 addMenuItem             # builds the menu row tables (sets buildMenuItemCode += 15)
-method a b (IIZ)V                    applyTrainStateTick     # train state tick: updates energy/counters/service
+method a b (IIZ)V                    loadTrainAtServiceVehicle
 method a m (II)V                     spawnTrainAt            # spawns a train at (n, n2) — uses spawnTrainCar
 
 # ---- Batch 34: city/track/train allocation + save-buffer helpers ----
@@ -782,7 +788,7 @@ method a a (Ljavax/microedition/lcdui/Graphics;[I[I)V  drawSelectionQuad # 4-cor
 method a a (III)V                     placeCityTile           # places random city tile with track bits
 method a a (ZIIIIIIIIIIZ)Z            isTileMatchForPath      # path-validation: tile matches df + track bits
 method a b (IIIIII)I                  allocateTrainSlot       # allocates train entry in trainFlags[]/trainX/etc.
-method a i (II)Z                      canRefuelAtTile         # refuel check via wagonServiceCounter bits
+method a i (II)Z                      trainCanLoadAtServiceVehicle
 method a b (Ljavax/microedition/lcdui/Graphics;I)V  drawTrainAtCursor # renders train sprite at cursor
 method a i (I)V                       mergeTrainAt            # merges colliding trains at (trainX[n], trainY[n])
 method a i (III)Z                     isTrainCarAtRecursive   # recursive: check if any car is at (n2,n3)
@@ -796,10 +802,10 @@ method a n (I)V                       setTrackOwnerCode       # sets trackMap co
 method a e (III)Z                     isTileBuildable         # placement validity (tileElevation>=0, etc.)
 method a a (IIIZZ)I                   spawnWagonSlot          # allocates wagon slot in vehicleFlags[]/wagonAJ/etc.
 method a y ()Z                        buyTrainAtCursor        # player-triggered train purchase
-method a c (III)I                     computeWagonOptionCount # counts matching wagons across vehicleFlags
+method a c (III)I                     collectNearbyServiceResource
 method a j (III)Z                     isTrainHeadCarAt        # only checks this car, returns directly
 method a i (III)Z                     isAnyTrainCarAt         # recursive check through entire chain (used by cPosLookup)
-method a g (III)I                     consumeWagonOption      # decrements trainOptionSlots and returns count
+method a g (III)I                     takeServiceResource
 method a h (III)S                     pathDistanceMin         # min path-distance at (n,n2)
 
 # ---- Batch 35: visible-source methods + inlined Graphics overloads ----

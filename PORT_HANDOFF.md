@@ -71,14 +71,14 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **Naming while porting:** do not add new C code with a recoverable obfuscated
   member name. Use behavior plus descriptor-precise xrefs to choose a clear
   name, add it to `tools/mappings.txt`, rerun `deobf`, then run
-  `port.py inventory` and `port.py gen` before finishing the C port. Ask when the evidence does
-  not support one clear name. Decompiler-only local names may be made clear
-  directly in C.
+  `port.py inventory` and `port.py gen` before finishing the C port. Ask when
+  the evidence does not support one clear name. Decompiler-only local names may
+  be made clear directly in C.
 
 ## 5. Current state
 
 - Toolchain: `inventory`, `gen`, `build`, `verify` all green.
-- Methods done: **103 / 196 (52%)** — 102 full + 1 partial (`update`).
+- Methods done: **115 / 196 (58%)** — 114 full + 1 partial (`update`).
   Run `python tools/port.py status [-v]` for the live count and pending list.
 - **Boots to the animated LifeWeb splash logo** — the full asset pipeline is
   proven: resource load (`/1`) → XOR decode → custom PNG reconstruction
@@ -100,15 +100,17 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
   155 L) draws terrain into the offscreen backbuffer when the viewport moves,
   blits it, then overlays dynamic tiles, trains and the build menu.
 - `update()` is **partial**: boot/loading (0/1/2/4/10), map-gen (25), and the
-  full state-30 control branch (Java L9024-9282) are done. The port builds and
-  passes smoke, but `updateTrain` is still a stub; menu/popup states are
-  not done, and the smoke check does not drive the game into state 30.
+  full state-30 simulation branch (Java L9024-9282) are done. The train
+  movement/load/delivery chain is ported in `port/impl/train_tick.c`. The port
+  builds and passes smoke, but menu/popup update states are not done, and the
+  smoke check does not drive the game into state 30.
 - **Menu system is functional** — `handleBuildMenuState` (~786 L) is ported, so
   selecting menu items drives the state transitions (new game → scenario →
   `setState(25)` map-gen, options, etc.).
-- **Biggest remaining gate to gameplay:** replace the direct stubs used by the
-  state-30 branch: `updateTrain`. `everyMonthlyTick` and its offer helpers are
-  ported in `port/impl/economy_tick.c`.
+- **The direct state-30 simulation gate is complete.** `updateTrain`,
+  `tickInputOrAi`, `everyTwoTick`, `everyMonthlyTick`,
+  `advanceConstructionTimers`, and `maybeAITick` and their direct dependency
+  chains are ported. Monthly offers live in `port/impl/economy_tick.c`.
   Twenty-four helpers are now ported in `port/impl/sim_tick.c`, including:
   `dayResetP`, `advanceConstructionTimers`, `maybeAITick`, `dayResetAg`,
   `revenueOrYear`, `everyTwoTick`, `countCarsInTrain`, `maybeAiTakeTurn`,
@@ -130,19 +132,16 @@ python tools/port.py verify      # build + headless smoke run (120 frames, exit 
 - **MSVC has no C23 `nullptr`** — `port/main.c` defines a guarded fallback.
 - No behavioural test harness yet; `verify` only checks it builds and runs.
 
-## 6a. Next-session plan: complete playable simulation (state 30)
+## 6a. Next-session plan: make state 30 playable
 
-The map-gen chain and the state-30 control branch are **done**. Selecting
-"new game" generates a world, paints it via `renderMap`, and enters the sim
-tick. Core calls are still stubs, so simulation and interaction are incomplete.
-Continue from here:
+The map-gen and state-30 simulation chains are **done**. Selecting "new game"
+generates a world, paints it via `renderMap`, and enters the sim tick. Gameplay
+UI, input, building, and runtime proof are still incomplete. Continue from here:
 
-1. Port the last direct pending helper called by state 30: `updateTrain` and its
-   leaf dependencies.
-2. The UI-draw methods called from the state-30/40 paint paths:
+1. Port the UI-draw methods called from the state-30/40 paint paths:
    `paintMain`, `drawMoneyTicker`, `drawConfirmBar`, `drawConfirmDialog`,
    `drawBuildMenuCursor`, `drawBuildMenuRow`, `drawHeaderBar`, `drawNumber`.
-3. Interaction/build: `openBuildMenu`, `cycleBuildMenuIndex`,
+2. Port interaction/build: `openBuildMenu`, `cycleBuildMenuIndex`,
    `viewportPanKey`/`viewportZoomKey`, `computeViewportBounds`,
    `demolishAtCursor`, `pickTrainsAtCursor`, `buildPlaceTrackPiece`,
    `computeTrainCost`, `buyTrainAtCursor`, and the pathfinding cluster
@@ -150,7 +149,7 @@ Continue from here:
    `hPath`, `clearPathDistanceGrid`, `q` [372 L]).
 
 Use `python tools/port.py next` (picks smallest pending leaves) and
-`show NAME` throughout. Each is a mechanical faithful port like the 103 already
+`show NAME` throughout. Each is a mechanical faithful port like the 115 already
 done. `verify` after each method, then commit.
 
 ## 7. Build requirements

@@ -49,13 +49,13 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
         || ((gc->tileMap[n][n2] == 87 || gc->tileMap[n][n2] == 88
              || gc->tileMap[n][n2] == 89 || gc->tileMap[n][n2] == 90)
             && gc->trackMap[n][n2] == 65)) {
-        int32_t n3 = gc_spawnOrFindAt(gc, n, n2);
+        int32_t n3 = gc_findServiceVehicleAt(gc, n, n2);
         for (int i = 0; i < 500; ++i) {
             if ((gc->trainFlags[i] & 0x80) != 128) continue;
             int32_t n4 = gc_c(gc, gc->trainX[i]);
             int32_t n5 = gc_c(gc, gc->trainY[i]);
             if (n == n4 && n2 == n5) return false;
-            if (n3 == 5000 || n3 != gc_spawnOrFindAt(gc, n4, n5)) continue;
+            if (n3 == 5000 || n3 != gc_findServiceVehicleAt(gc, n4, n5)) continue;
             return false;
         }
         return true;

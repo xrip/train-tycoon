@@ -2101,53 +2101,53 @@
    "c_type": "int8_t*"
   },
   {
-   "java_name": "wagonAJ",
+   "java_name": "serviceVehicleX",
    "java_type": "byte[]",
    "init": "new byte[250]",
    "static": false,
    "final": false,
    "line": 252,
-   "c_name": "wagonAJ",
+   "c_name": "serviceVehicleX",
    "c_type": "int8_t*"
   },
   {
-   "java_name": "wagonEQ",
+   "java_name": "serviceVehicleY",
    "java_type": "byte[]",
    "init": "new byte[250]",
    "static": false,
    "final": false,
    "line": 253,
-   "c_name": "wagonEQ",
+   "c_name": "serviceVehicleY",
    "c_type": "int8_t*"
   },
   {
-   "java_name": "trainOptionSlots",
+   "java_name": "serviceResourceStock",
    "java_type": "short[][]",
    "init": "new short[250][5]",
    "static": false,
    "final": false,
    "line": 254,
-   "c_name": "trainOptionSlots",
+   "c_name": "serviceResourceStock",
    "c_type": "int16_t**"
   },
   {
-   "java_name": "trainFlagBits",
+   "java_name": "serviceUnloadFlags",
    "java_type": "byte[]",
    "init": "new byte[250]",
    "static": false,
    "final": false,
    "line": 255,
-   "c_name": "trainFlagBits",
+   "c_name": "serviceUnloadFlags",
    "c_type": "int8_t*"
   },
   {
-   "java_name": "wagonServiceCounter",
+   "java_name": "serviceLoadFlags",
    "java_type": "byte[]",
    "init": "new byte[250]",
    "static": false,
    "final": false,
    "line": 256,
-   "c_name": "wagonServiceCounter",
+   "c_name": "serviceLoadFlags",
    "c_type": "int8_t*"
   },
   {
@@ -2241,23 +2241,23 @@
    "c_type": "int8_t*"
   },
   {
-   "java_name": "wagonIorHost",
+   "java_name": "lastServiceVehicle",
    "java_type": "byte[]",
    "init": "new byte[500]",
    "static": false,
    "final": false,
    "line": 266,
-   "c_name": "wagonIorHost",
+   "c_name": "lastServiceVehicle",
    "c_type": "int8_t*"
   },
   {
-   "java_name": "trainServiceCounter",
+   "java_name": "cargoAge",
    "java_type": "byte[]",
    "init": "new byte[500]",
    "static": false,
    "final": false,
    "line": 267,
-   "c_name": "trainServiceCounter",
+   "c_name": "cargoAge",
    "c_type": "int8_t*"
   },
   {
@@ -2311,23 +2311,23 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "eR",
+   "java_name": "forwardTrackSteps",
    "java_type": "byte[][]",
    "init": "new byte[][]{{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {6, 7, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}, {10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}}",
    "static": false,
    "final": false,
    "line": 273,
-   "c_name": "eR",
+   "c_name": "forwardTrackSteps",
    "c_type": "int8_t**"
   },
   {
-   "java_name": "aH",
+   "java_name": "reverseTrackSteps",
    "java_type": "byte[][]",
    "init": "new byte[][]{{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}, {7, 6, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}, {9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}, {11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}}",
    "static": false,
    "final": false,
    "line": 274,
-   "c_name": "aH",
+   "c_name": "reverseTrackSteps",
    "c_type": "int8_t**"
   },
   {
@@ -3371,13 +3371,13 @@
    "c_type": "int32_t"
   },
   {
-   "java_name": "counterB",
+   "java_name": "lifetimeTrainRevenue",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 379,
-   "c_name": "counterB",
+   "c_name": "lifetimeTrainRevenue",
    "c_type": "int32_t"
   },
   {
@@ -3521,13 +3521,13 @@
    "c_type": "void*"
   },
   {
-   "java_name": "by",
+   "java_name": "trainRevenueScore",
    "java_type": "int",
    "init": "0",
    "static": false,
    "final": false,
    "line": 394,
-   "c_name": "by",
+   "c_name": "trainRevenueScore",
    "c_type": "int32_t"
   },
   {
@@ -5383,14 +5383,14 @@
    "status": "pending"
   },
   {
-   "java_name": "spawnOrFindAt",
+   "java_name": "findServiceVehicleAt",
    "ret": "int",
    "params": "int n, int n2",
-   "sig": "int spawnOrFindAt(int n, int n2)",
+   "sig": "int findServiceVehicleAt(int n, int n2)",
    "start": 5484,
    "end": 5497,
-   "c_name": "gc_spawnOrFindAt",
-   "status": "pending"
+   "c_name": "gc_findServiceVehicleAt",
+   "status": "ported"
   },
   {
    "java_name": "spawnWagonSlotInlined",
@@ -5460,7 +5460,7 @@
    "start": 5757,
    "end": 5780,
    "c_name": "gc_spawnTrainCar",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "allocateTrainSlot",
@@ -5493,14 +5493,14 @@
    "status": "ported"
   },
   {
-   "java_name": "canRefuelAtTile",
+   "java_name": "trainCanLoadAtServiceVehicle",
    "ret": "boolean",
    "params": "int n, int n2",
-   "sig": "boolean canRefuelAtTile(int n, int n2)",
+   "sig": "boolean trainCanLoadAtServiceVehicle(int n, int n2)",
    "start": 5838,
    "end": 5872,
-   "c_name": "gc_canRefuelAtTile",
-   "status": "pending"
+   "c_name": "gc_trainCanLoadAtServiceVehicle",
+   "status": "ported"
   },
   {
    "java_name": "updateTrain",
@@ -5510,17 +5510,17 @@
    "start": 5874,
    "end": 6115,
    "c_name": "gc_updateTrain",
-   "status": "pending"
+   "status": "ported"
   },
   {
-   "java_name": "f",
+   "java_name": "resetTrailingCars",
    "ret": "void",
    "params": "int n, int n2, int n3",
-   "sig": "void f(int n, int n2, int n3)",
+   "sig": "void resetTrailingCars(int n, int n2, int n3)",
    "start": 6117,
    "end": 6125,
-   "c_name": "gc_f",
-   "status": "pending"
+   "c_name": "gc_resetTrailingCars",
+   "status": "ported"
   },
   {
    "java_name": "countCarsInTrain",
@@ -5540,7 +5540,7 @@
    "start": 6134,
    "end": 6153,
    "c_name": "gc_accumulateTrainTurns",
-   "status": "pending"
+   "status": "ported"
   },
   {
    "java_name": "removeTrainFromMapInlined",
@@ -5603,44 +5603,44 @@
    "status": "pending"
   },
   {
-   "java_name": "xPlaceSpawn",
+   "java_name": "unloadTrainRevenue",
    "ret": "int",
    "params": "int n, int n2",
-   "sig": "int xPlaceSpawn(int n, int n2)",
+   "sig": "int unloadTrainRevenue(int n, int n2)",
    "start": 6345,
    "end": 6413,
-   "c_name": "gc_xPlaceSpawn",
-   "status": "pending"
+   "c_name": "gc_unloadTrainRevenue",
+   "status": "ported"
   },
   {
-   "java_name": "consumeWagonOption",
+   "java_name": "takeServiceResource",
    "ret": "int",
    "params": "int n, int n2, int n3",
-   "sig": "int consumeWagonOption(int n, int n2, int n3)",
+   "sig": "int takeServiceResource(int n, int n2, int n3)",
    "start": 6415,
    "end": 6421,
-   "c_name": "gc_consumeWagonOption",
-   "status": "pending"
+   "c_name": "gc_takeServiceResource",
+   "status": "ported"
   },
   {
-   "java_name": "computeWagonOptionCount",
+   "java_name": "collectNearbyServiceResource",
    "ret": "int",
    "params": "int n, int n2, int n3",
-   "sig": "int computeWagonOptionCount(int n, int n2, int n3)",
+   "sig": "int collectNearbyServiceResource(int n, int n2, int n3)",
    "start": 6423,
    "end": 6430,
-   "c_name": "gc_computeWagonOptionCount",
-   "status": "pending"
+   "c_name": "gc_collectNearbyServiceResource",
+   "status": "ported"
   },
   {
-   "java_name": "applyTrainStateTick",
+   "java_name": "loadTrainAtServiceVehicle",
    "ret": "void",
    "params": "int n, int n2, boolean bl",
-   "sig": "void applyTrainStateTick(int n, int n2, boolean bl)",
+   "sig": "void loadTrainAtServiceVehicle(int n, int n2, boolean bl)",
    "start": 6432,
    "end": 6482,
-   "c_name": "gc_applyTrainStateTick",
-   "status": "pending"
+   "c_name": "gc_loadTrainAtServiceVehicle",
+   "status": "ported"
   },
   {
    "java_name": "decrementOptionCounts",
@@ -6113,24 +6113,24 @@
    "status": "ported"
   },
   {
-   "java_name": "incrementRowValueType1",
+   "java_name": "recordTrainRevenue",
    "ret": "void",
    "params": "int n",
-   "sig": "void incrementRowValueType1(int n)",
+   "sig": "void recordTrainRevenue(int n)",
    "start": 8054,
    "end": 8062,
-   "c_name": "gc_incrementRowValueType1",
-   "status": "pending"
+   "c_name": "gc_recordTrainRevenue",
+   "status": "ported"
   },
   {
-   "java_name": "incrementRowValueTypeN",
+   "java_name": "recordDeliveredResource",
    "ret": "void",
    "params": "int n, int n2",
-   "sig": "void incrementRowValueTypeN(int n, int n2)",
+   "sig": "void recordDeliveredResource(int n, int n2)",
    "start": 8064,
    "end": 8091,
-   "c_name": "gc_incrementRowValueTypeN",
-   "status": "pending"
+   "c_name": "gc_recordDeliveredResource",
+   "status": "ported"
   },
   {
    "java_name": "adjustRowValueByCode",
@@ -6341,7 +6341,7 @@
    "end": 9510,
    "c_name": "gc_update",
    "status": "partial",
-   "note": "boot states + 25 + state 30 control done; updateTrain + menus TODO"
+   "note": "boot states + 25 + full state 30 simulation tick done; menu/update states TODO"
   },
   {
    "java_name": "renderMap",
