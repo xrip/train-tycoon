@@ -148,6 +148,18 @@ real MIDI device test is an opt-in `device` label.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - All 13 scenario map digests, save/load, and frame goldens are unchanged.
 
+## OWN-04 proof
+
+- The six remaining dynamically-sized 1D raw arrays (`spriteOffsetTable`,
+  `spriteData`, `spriteIndexTable`, `tileOffsetX`, `tileOffsetY`, `saveBuffer`)
+  now use `std::vector`.
+- The dead header decode tables and dead raw save wrappers were removed.
+- The array-length registry (`midp_alloc_arr`, `midp_arr_len`, `GC_NEW`) is
+  gone; no raw owning array remains in `GameCanvas`.
+- The save buffer round trip keeps the exact compressed byte order.
+- Debug and Release fast/full tests passed on 2026-07-15.
+- All scenario, input, save, and frame goldens are unchanged.
+
 ## Manual baseline still needed
 
 - boot and menu;

@@ -2,49 +2,38 @@
 
 ## Item
 
-`OWN-04` - remove raw ownership and the array-length registry.
+`MODEL-01` - name game enums and constants.
 
 ## Base
 
-- Commit: OWN-03 closed green (maps and matrices all owned).
+- Commit: OWN-04 closed green (no raw owning array, no length registry).
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Move the last dynamically-sized raw arrays to standard ownership, then remove the
-`midp_alloc_arr`/`midp_arr_len` array-length registry and `GC_NEW`. Keep the save
-byte order and all game behavior unchanged.
+Give the game's magic numbers and state codes clear names: game states, tile and
+track codes, menu transition codes, resource kinds, and similar fixed constants.
+Keep every numeric value and all game behavior unchanged.
 
 ## Non-goals
 
-- Do not split the game model yet (that is the MODEL stage).
+- Do not split the `GameCanvas` struct or move fields between files yet.
 - Do not change save byte order or numeric game values.
+- Do not rename by guesswork; use behavior and cross-references, and record
+  uncertain evidence in `DECISIONS.md` before a rename.
 
 ## Last proof
 
-`OWN-03` is complete. All map grids and matrices use `Grid<T>` or nested
-`std::array`. No raw `**` matrix field remains. Debug and Release fast/full tests
-passed on 2026-07-15.
-
-## Remaining raw single arrays
-
-Six dynamically-sized 1D raw pointers remain in `GameCanvas`:
-
-- `spriteOffsetTable` (int16_t, n+1) and `spriteData` (int8_t, n): packed sprite
-  tables built once during boot.
-- `spriteIndexTable` (int8_t, n+1): sprite id lookup built during boot.
-- `tileOffsetX` / `tileOffsetY` (int8_t, sz): draw-order offsets rebuilt at load
-  with a computed size.
-- `saveBuffer` (int8_t): the growable save/compress buffer used by the codec.
+The ownership arc (OWN-01 through OWN-04) is complete. Every game array is
+`std::array`, `std::vector`, or `Grid<T>`, and the raw array-length registry is
+removed. Debug and Release fast/full tests passed on 2026-07-15.
 
 ## Next action
 
-Move the sprite and tile-offset arrays to `std::vector` first (they are simple
-load-time buffers). Handle `saveBuffer` last: it grows through
-`gc_ensureSaveBufferCapacity` and is read with pointer arithmetic in the save
-codec, so give it a `std::vector<int8_t>` with explicit offsets and keep the
-exact compressed byte order. After no raw owning array remains, remove the dead
-raw save wrappers, the `gc_tracked_codes(const int8_t*)` helper, and the
-`midp_alloc_arr`/`midp_arr_len` registry, then run the Debug and Release full
-gates and update the work records.
+Start with the most-used unnamed constant group: the `gc_setState`/`gameState`
+values. Read their behavior at each call site, introduce a named constant set
+(an `enum` or `constexpr` group in a small header), and replace the literals in
+small green leaves. Keep the numeric values identical. Run the strict Debug build
+and full tests, then commit each leaf. Move to tile/track codes and menu
+transition codes next.

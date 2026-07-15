@@ -20,18 +20,15 @@ resource values, and the current `.rms` save byte order.
 
 Branch: `master`.
 
-Active item: `OWN-04`, remove raw ownership and the array-length registry.
+Active item: `MODEL-01`, name game enums and constants.
 
-`OWN-02` and `OWN-03` are complete. Every fixed-size raw state array and constant
-table uses `std::array`, and every map grid and matrix uses a row-owning
-`Grid<T>` (`win32/src/support/grid.h`) or nested `std::array`. The save helpers
-gained size-explicit `*Span` cores plus `std::array`/`Grid` overloads so save
-byte order is unchanged, and dead `dk`/`j` state was removed. No raw `**` matrix
-field remains. Debug and Release full gates passed on 2026-07-15.
-
-Six dynamically-sized 1D raw arrays remain for OWN-04: `spriteOffsetTable`,
-`spriteData`, `spriteIndexTable`, `tileOffsetX`, `tileOffsetY`, and the growable
-`saveBuffer`.
+The whole ownership arc `OWN-01` through `OWN-04` is complete. Every game array
+is a `std::array`, `std::vector`, or row-owning `Grid<T>`
+(`win32/src/support/grid.h`); the save helpers keep byte order through
+size-explicit `*Span` cores plus `std::array`/`Grid` overloads; and the raw
+`midp_alloc_arr`/`midp_arr_len`/`GC_NEW` array-length registry is removed. Dead
+state (`dk`, `j`, the header decode tables) is gone. No raw owning array remains
+in `GameCanvas`. Debug and Release full gates passed on 2026-07-15.
 
 The work tree is clean except for root `AGENTS.md`. It is a user-owned,
 untracked instruction file. Do not add, change, or remove it.
@@ -144,18 +141,15 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Incomplete work and risks
 
-- `OWN-04` is in progress. Six dynamically-sized 1D raw arrays remain:
-  `spriteOffsetTable`, `spriteData`, `spriteIndexTable`, `tileOffsetX`,
-  `tileOffsetY`, and `saveBuffer`.
-- `saveBuffer` is the risky one: it grows through
-  `gc_ensureSaveBufferCapacity` and is read with pointer arithmetic and explicit
-  offsets in the save codec. Moving it to `std::vector<int8_t>` must keep the
-  exact compressed byte order.
-- After the six move, remove the dead raw save wrappers and matrix helpers, the
-  `gc_tracked_codes(const int8_t*)` inline, and the `midp_alloc_arr` /
-  `midp_arr_len` registry entirely; that is the point of OWN-04.
+- `MODEL-01` is in progress: name game enums and constants (game states, tile
+  and track codes, menu transition codes, resource kinds). Keep every numeric
+  value identical; do not rename by guesswork.
+- The ownership arc is done, but the model is still one large `GameCanvas` in
+  `game_state.h`. Splitting it belongs to the later model stages, not MODEL-01.
 - `GameCanvas`, `game_methods.h`, short state names, and Java-shape comments
-  remain until later model and clean stages.
+  remain until the later model and clean stages.
+- `gc_computeMenuRowDisplayValue` may divide by zero when money is zero. Do not
+  fix it inside refactor work; it needs a separate bug test and decision.
 - `gc_computeMenuRowDisplayValue` may divide by zero when money is zero. Do not
   fix it inside refactor work; it needs a separate bug test and decision.
 - High-score network work is a known no-op and is outside this refactor.
@@ -166,20 +160,18 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Next work, in order
 
-1. Move the sprite and tile-offset load buffers (`spriteOffsetTable`,
-   `spriteData`, `spriteIndexTable`, `tileOffsetX`, `tileOffsetY`) to
-   `std::vector`. Check every call site; they are load-time buffers.
-2. Move `saveBuffer` to `std::vector<int8_t>` with explicit offsets, keeping the
-   exact compressed save byte order. Verify with the save/load golden.
-3. Remove the dead raw save wrappers and matrix helpers, the
-   `gc_tracked_codes(const int8_t*)` inline, and the `midp_alloc_arr` /
-   `midp_arr_len` registry once nothing uses them.
-4. Close OWN-04 only after no raw owning array remains. Run Debug and Release
-   full gates and update `CURRENT.md`, `STATUS.md`, `BASELINE.md`, and
+1. Name the `gc_setState`/`gameState` values first (most-used constant group).
+   Read each call site's behavior, add a named constant set in a small header,
+   and replace the literals in small green leaves. Keep the numbers identical.
+2. Name tile and track codes, then menu transition codes and resource kinds.
+   Use behavior and cross-references; record uncertain evidence in
+   `DECISIONS.md` before a rename.
+3. Close MODEL-01 after the main constant groups are named. Run Debug and
+   Release full gates and update `CURRENT.md`, `STATUS.md`, `BASELINE.md`, and
    `DECISIONS.md`.
-5. Continue the main plan in strict order: model, save, world, path, fleet,
-   economy, scenario, simulation, build, assets, render, UI, app, clean, docs,
-   and release stages.
+4. Continue the main plan in strict order: save, world, path, fleet, economy,
+   scenario, simulation, build, assets, render, UI, app, clean, docs, and
+   release stages.
 
 ## Files to read first
 

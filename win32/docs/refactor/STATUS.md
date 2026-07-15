@@ -21,8 +21,8 @@ Only one row may be `in_progress`.
 | OWN-01 | done | Debug and Release full tests passed | Local arrays and text ownership |
 | OWN-02 | done | Debug and Release full tests passed, 2026-07-15 | Fixed state arrays and tables |
 | OWN-03 | done | Debug and Release full tests passed, 2026-07-15 | Maps and matrices |
-| OWN-04 | in_progress | OWN-03 green | Remove raw registry |
-| MODEL-01 | queued | - | Enums and constants |
+| OWN-04 | done | Debug and Release full tests passed, 2026-07-15 | Remove raw registry |
+| MODEL-01 | in_progress | OWN-04 green | Enums and constants |
 | SAVE-01 | queued | - | Legacy save codec |
 | WORLD-01..WORLD-02 | queued | - | World and generation |
 | PATH-01 | queued | - | Path search |

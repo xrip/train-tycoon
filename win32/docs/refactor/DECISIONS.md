@@ -114,6 +114,15 @@ sites. Grid rows may be jagged, which matches the padded map sizes (`mapWidth+1`
 `heightMap` `+2`) and the variable-length menu and sprite rows. The save codec
 gets a `Grid<int8_t>` matrix overload that walks rows, preserving byte order.
 
+## D-010: No array-length registry
+
+OWN-04 removed the `midp_alloc_arr` / `midp_arr_len` / `GC_NEW` array-length
+registry. It existed only because raw C pointers do not carry a length like Java
+arrays. Now every game array is a `std::array`, `std::vector`, or `Grid<T>` that
+knows its own size, so lengths come from `.size()` and the registry is gone. The
+save codec keeps byte order through the size-explicit `*Span` cores and the
+`std::array` / `Grid` overloads.
+
 ## D-006: Plain native resources
 
 The native project keeps plain resource data. Old files `1` to `5` were changed
