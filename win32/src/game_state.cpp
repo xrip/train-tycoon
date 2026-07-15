@@ -174,20 +174,6 @@ void gc_fields_init(GameCanvas *gc) {
     gc->serviceResourceStock = (int16_t**)midp_alloc_arr(sizeof(int16_t*), 250);
     for (int _i = 0; _i < 250; ++_i) gc->serviceResourceStock[_i] = (int16_t*)midp_alloc_arr(sizeof(int16_t), 5);
     gc->serviceUnloadFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 250);
-    gc->trainX = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainY = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainDir = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainPhase = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainFlags = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainEraOrStage = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainAgeOrTimer = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->wagonEnergyRemaining = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->trainEnergyOrCount = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->lastServiceVehicle = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->cargoAge = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
-    gc->nextCar = (int16_t*)midp_alloc_arr(sizeof(int16_t), 500);
-    gc->trainStateCode = (int32_t*)midp_alloc_arr(sizeof(int32_t), 500);
-    gc->trainAiOverride = (int8_t*)midp_alloc_arr(sizeof(int8_t), 500);
     gc->era = 1;
     gc->forwardTrackSteps = {{
         {{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
