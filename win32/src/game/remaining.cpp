@@ -4,23 +4,23 @@
 #include <stdio.h>
 #include <string.h>
 
-int8_t *gc_formatNumberWithSuffix(GameCanvas *gc, int32_t value,
-                                  int32_t suffix) {
+std::vector<int8_t> gc_formatNumberWithSuffix(GameCanvas *gc, int32_t value,
+                                              int32_t suffix) {
     (void)gc;
     char text[24];
     snprintf(text, sizeof(text), "%d", value);
     int length = (int)strlen(text);
-    int8_t *result = GC_NEW(int8_t, length + 1);
+    std::vector<int8_t> result(static_cast<size_t>(length + 1));
     for (int i = 0; i < length; ++i)
         result[i] = text[i] == '-' ? 22 : (int8_t)(text[i] - 47);
     result[length] = (int8_t)suffix;
     return result;
 }
 
-int8_t *gc_encodeDisplayText(GameCanvas *gc, char *text) {
+std::vector<int8_t> gc_encodeDisplayText(GameCanvas *gc, const char *text) {
     (void)gc;
     int length = (int)strlen(text);
-    int8_t *result = GC_NEW(int8_t, length);
+    std::vector<int8_t> result(static_cast<size_t>(length));
     for (int i = 0; i < length; ++i) {
         char ch = text[i];
         result[i] = ch == '-' ? 22 : ch == '.' ? 11 : ch == '/' ? 20

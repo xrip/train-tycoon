@@ -1,5 +1,6 @@
 // Direct game-map build and selection actions.
 #include "game_methods.h"
+#include <vector>
 
 void gc_enterOutOfMoneyState(GameCanvas *gc) {
     gc->ready = false;
@@ -81,8 +82,9 @@ void gc_computeTrainCost(GameCanvas *gc) {
 
 void gc_rebuildCityList(GameCanvas *gc) {
     for (int city = 0; city < 48; ++city) gc->cityIndex[city] = 0;
-    int seen_count = 64 * gc->mapWidth * gc->mapHeight;
-    bool *seen = GC_NEW(bool, seen_count);
+    const int seen_count = 64 * gc->mapWidth * gc->mapHeight;
+    std::vector<uint8_t> seen_city_tiles(
+        static_cast<std::size_t>(seen_count));
     for (int station_x = 0; station_x < gc->mapWidth; ++station_x) {
         for (int station_y = 0; station_y < gc->mapHeight; ++station_y) {
             int track = gc->trackMap[station_x][station_y];
@@ -101,8 +103,8 @@ void gc_rebuildCityList(GameCanvas *gc) {
                     if (gc->tileMap[x][y] != 87 && gc->tileMap[x][y] != 88)
                         continue;
                     int seen_index = (city * gc->mapWidth + x) * gc->mapHeight + y;
-                    if (seen[seen_index]) continue;
-                    seen[seen_index] = true;
+                    if (seen_city_tiles[seen_index]) continue;
+                    seen_city_tiles[seen_index] = 1;
                     gc->cityIndex[city] = (int8_t)(gc->cityIndex[city] + 1);
                 }
             }

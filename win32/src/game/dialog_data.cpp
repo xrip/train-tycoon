@@ -4,28 +4,36 @@
 #include <stdio.h>
 #include <string.h>
 
-static int8_t *join_codes(const int8_t *a, const int8_t *b) {
-    int a_len = midp_arr_len(a);
-    int b_len = midp_arr_len(b);
-    int8_t *result = GC_NEW(int8_t, a_len + b_len);
-    memcpy(result, a, (size_t)a_len);
-    memcpy(result + a_len, b, (size_t)b_len);
+static std::span<const int8_t> tracked_codes(const int8_t *codes) {
+    return {codes, static_cast<size_t>(midp_arr_len(codes))};
+}
+
+static std::vector<int8_t> copy_codes(const int8_t *codes) {
+    const auto source = tracked_codes(codes);
+    return {source.begin(), source.end()};
+}
+
+static std::vector<int8_t> join_codes(std::span<const int8_t> first,
+                                      std::span<const int8_t> second) {
+    std::vector<int8_t> result;
+    result.reserve(first.size() + second.size());
+    result.insert(result.end(), first.begin(), first.end());
+    result.insert(result.end(), second.begin(), second.end());
     return result;
 }
 
-static int8_t *join_three_codes(const int8_t *a, const int8_t *b,
-                                const int8_t *c) {
-    int a_len = midp_arr_len(a);
-    int b_len = midp_arr_len(b);
-    int c_len = midp_arr_len(c);
-    int8_t *result = GC_NEW(int8_t, a_len + b_len + c_len);
-    memcpy(result, a, (size_t)a_len);
-    memcpy(result + a_len, b, (size_t)b_len);
-    memcpy(result + a_len + b_len, c, (size_t)c_len);
+static std::vector<int8_t> join_three_codes(std::span<const int8_t> first,
+                                            std::span<const int8_t> second,
+                                            std::span<const int8_t> third) {
+    std::vector<int8_t> result;
+    result.reserve(first.size() + second.size() + third.size());
+    result.insert(result.end(), first.begin(), first.end());
+    result.insert(result.end(), second.begin(), second.end());
+    result.insert(result.end(), third.begin(), third.end());
     return result;
 }
 
-int8_t *gc_formatCurrency(GameCanvas *gc, int32_t value) {
+std::vector<int8_t> gc_formatCurrency(GameCanvas *gc, int32_t value) {
     (void)gc;
     uint32_t magnitude = value < 0 ? 0u - (uint32_t)value : (uint32_t)value;
     char digits[16];
@@ -33,7 +41,7 @@ int8_t *gc_formatCurrency(GameCanvas *gc, int32_t value) {
     int digit_count = (int)strlen(digits);
     int separator_count = (digit_count - 1) / 3;
     int text_count = digit_count + separator_count + (value < 0 ? 1 : 0);
-    int8_t *result = GC_NEW(int8_t, text_count + 1);
+    std::vector<int8_t> result(static_cast<size_t>(text_count + 1));
     int out = 0;
     result[out++] = 24;
     if (value < 0) result[out++] = 22;
@@ -45,22 +53,22 @@ int8_t *gc_formatCurrency(GameCanvas *gc, int32_t value) {
     return result;
 }
 
-int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
-                              int32_t field) {
+std::optional<std::vector<int8_t>> gc_resolveDialogValue(
+    GameCanvas *gc, int32_t screen, int32_t field) {
     switch (screen) {
         case 14:
             if (gc->screenParam >= 0 && gc->screenParam <= 4)
-                return gc->spriteBitmapTable[
-                    gc->spriteIndexTable[11 + gc->screenParam]];
+                return copy_codes(gc->spriteBitmapTable[
+                    gc->spriteIndexTable[11 + gc->screenParam]]);
             break;
 
         case 4:
             switch (field) {
-                case 1: return gc->spriteBitmapTable[gc->spriteIndexTable[25 + gc->scenarioMilestone]];
-                case 2: return gc->spriteBitmapTable[gc->spriteIndexTable[30 + gc->difficultyA]];
-                case 3: return gc->spriteBitmapTable[gc->spriteIndexTable[35 + gc->difficultySlot]];
-                case 4: return gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyB]];
-                case 5: return gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyC]];
+                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[25 + gc->scenarioMilestone]]);
+                case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[30 + gc->difficultyA]]);
+                case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[35 + gc->difficultySlot]]);
+                case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyB]]);
+                case 5: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyC]]);
                 case 6: return gc_formatNumberWithSuffix(gc, gc->difficultyCycle, 0);
             }
             break;
@@ -69,11 +77,11 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
             switch (field) {
                 case 0: {
                     int selection = gc->trainSelectionIndex[gc->junctionDirCursor];
-                    int8_t *engine = gc->spriteBitmapTable[
+                    const int8_t *engine = gc->spriteBitmapTable[
                         gc->spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
-                    int8_t *wagon = gc->spriteBitmapTable[
+                    const int8_t *wagon = gc->spriteBitmapTable[
                         gc->spriteIndexTable[86 + (selection & 0xff)]];
-                    return join_codes(wagon, engine);
+                    return join_codes(tracked_codes(wagon), tracked_codes(engine));
                 }
                 case 1: return gc_formatNumberWithSuffix(gc, gc->zonePopulation[gc->junctionDirCursor] * 13, 0);
                 case 2: return gc_formatNumberWithSuffix(gc, gc->constructionTimers[gc->junctionDirCursor], 29);
@@ -82,8 +90,8 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
 
         case 21:
             switch (field) {
-                case 0: return gc->spriteBitmapTable[gc->spriteIndexTable[100 + gc->stationDirectionCode[gc->stationDirCursor]]];
-                case 1: return gc->spriteBitmapTable[gc->spriteIndexTable[106 + gc->stationDirectionCode[gc->stationDirCursor] / 2]];
+                case 0: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[100 + gc->stationDirectionCode[gc->stationDirCursor]]]);
+                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[106 + gc->stationDirectionCode[gc->stationDirCursor] / 2]]);
                 case 2: return gc_formatNumberWithSuffix(gc, gc->prevStationRevenue[gc->stationDirCursor], 0);
             }
             break;
@@ -93,11 +101,11 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
 
         case 10:
             switch (field) {
-                case 1: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_animationsDisabled ? 21 : 20]];
-                case 2: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_selectionHidden ? 21 : 20]];
-                case 3: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_monthlyReportEnabled ? 20 : 21]];
-                case 4: return gc->spriteBitmapTable[gc->spriteIndexTable[gcs_annualReportEnabled ? 20 : 21]];
-                case 5: return gc->spriteBitmapTable[gc->spriteIndexTable[gc->music_enabled ? 20 : 21]];
+                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_animationsDisabled ? 21 : 20]]);
+                case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_selectionHidden ? 21 : 20]]);
+                case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_monthlyReportEnabled ? 20 : 21]]);
+                case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_annualReportEnabled ? 20 : 21]]);
+                case 5: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gc->music_enabled ? 20 : 21]]);
                 case 6: return gc_formatNumberWithSuffix(gc, gc->music_volume_level, 0);
             }
             break;
@@ -122,15 +130,15 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
 
         case 26: {
             if (field == 0)
-                return gc->spriteBitmapTable[gc->spriteIndexTable[60 + gc->trainEraOrStage[gc->trainAtCursor]]];
+                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[60 + gc->trainEraOrStage[gc->trainAtCursor]]]);
             if (field == 6) return gc_formatCurrency(gc, gc->trainRevenue[gc->trainAtCursor]);
             if (field == 7) return gc_formatCurrency(gc, gc->prevTrainRevenue[gc->trainAtCursor]);
             if (field == 8) return gc_formatNumberWithSuffix(gc, gc->trainAgeOrTimer[gc->trainAtCursor], 0);
             if (field == 9) return gc_formatCurrency(gc, gc->currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return gc_formatCurrency(gc, gc->baseTrainCostSnapshot - gc->currentTrainCostSnapshot);
             if (field == 20)
-                return gc->spriteBitmapTable[gc->spriteIndexTable[
-                    gc->trainAiOverride[gc->trainAtCursor] == 0 ? 21 : 20]];
+                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[
+                    gc->trainAiOverride[gc->trainAtCursor] == 0 ? 21 : 20]]);
             if (field <= 0 || field >= 6) break;
             int car = 0;
             if (gc_countCarsInTrain(gc, gc->trainAtCursor) > field) {
@@ -187,7 +195,7 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
 
         case 33:
             if (field == 65)
-                return gc->spriteBitmapTable[gc->spriteIndexTable[57 + gc->yearGraphMode]];
+                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[57 + gc->yearGraphMode]]);
             if (field >= 40) {
                 int index = field - 40;
                 if (!gc->yearGraphAlt) {
@@ -200,10 +208,11 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
                     if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->altDecadeTotalCost[index]);
                 }
             } else {
-                if (field >= 20)
-                    return !gc->yearGraphAlt
-                        ? gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0)
-                        : NULL;
+                if (field >= 20) {
+                    if (!gc->yearGraphAlt)
+                        return gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0);
+                    return std::nullopt;
+                }
                 return !gc->yearGraphAlt
                     ? gc_formatNumberWithSuffix(gc, gc->yearGraphOffsets[field] + 1940, 20)
                     : gc_formatNumberWithSuffix(gc, gc->altYearArray[field] + 1940, 0);
@@ -211,11 +220,12 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
             // The original falls through when the graph mode is invalid.
         case 34:
             if (field == 65)
-                return gc->spriteBitmapTable[gc->spriteIndexTable[54 + gc->yearGraphMode]];
-            if (field >= 20)
-                return !gc->yearGraphAlt
-                    ? gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0)
-                    : NULL;
+                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[54 + gc->yearGraphMode]]);
+            if (field >= 20) {
+                if (!gc->yearGraphAlt)
+                    return gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0);
+                return std::nullopt;
+            }
             return !gc->yearGraphAlt
                 ? gc_formatNumberWithSuffix(gc, gc->yearGraphOffsets[field] + 40, 20)
                 : gc_formatNumberWithSuffix(gc, gc->altYearArray[field] + 1940, 0);
@@ -223,9 +233,9 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
             if (field == 1) {
-                int8_t *day = gc_formatNumberWithSuffix(gc, gc->menuRowParamA[gc->offerRowIndex], 11);
-                int8_t *month = gc_formatNumberWithSuffix(gc, gc->menuRowParamB[gc->offerRowIndex], 11);
-                int8_t *year = gc_formatNumberWithSuffix(gc, gc->menuRowParamC[gc->offerRowIndex] + 1950, 0);
+                const auto day = gc_formatNumberWithSuffix(gc, gc->menuRowParamA[gc->offerRowIndex], 11);
+                const auto month = gc_formatNumberWithSuffix(gc, gc->menuRowParamB[gc->offerRowIndex], 11);
+                const auto year = gc_formatNumberWithSuffix(gc, gc->menuRowParamC[gc->offerRowIndex] + 1950, 0);
                 return join_three_codes(day, month, year);
             }
             if (field == 2) return gc_formatCurrency(gc, gc->menuRowCost[gc->offerRowIndex]);
@@ -236,8 +246,8 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
         case 60:
             if (field % 2 == 1) {
                 int index = field / 2;
-                return gc->spriteBitmapTable[gc_byteToUnsignedInt(
-                    gc, gc->spriteIndexTable[gc->menuRowType[gc->enabledMenuRowIndexes[index]] + 160])];
+                return copy_codes(gc->spriteBitmapTable[gc_byteToUnsignedInt(
+                    gc, gc->spriteIndexTable[gc->menuRowType[gc->enabledMenuRowIndexes[index]] + 160])]);
             } else {
                 int index = (field - 1) / 2;
                 return gc_formatNumberWithSuffix(gc,
@@ -252,11 +262,11 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
             break;
 
         case 27:
-            if (field == 1) return gc->playerNameCodes;
+            if (field == 1) return copy_codes(gc->playerNameCodes);
             if (field == 0) {
                 gc->playerNameCursorMarker = GC_NEW(int8_t, 10);
                 gc->playerNameCursorMarker[gc->routeSlotIndex] = 28;
-                return gc->playerNameCursorMarker;
+                return copy_codes(gc->playerNameCursorMarker);
             }
             break;
 
@@ -271,5 +281,5 @@ int8_t *gc_resolveDialogValue(GameCanvas *gc, int32_t screen,
         case 6:
             return gc_formatNumberWithSuffix(gc, gc->currentScenarioScore, 0);
     }
-    return NULL;
+    return std::nullopt;
 }

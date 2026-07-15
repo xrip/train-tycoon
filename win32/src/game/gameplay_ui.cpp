@@ -1,13 +1,15 @@
 // Game-map header, bottom bar, and overlays.
 #include "game_methods.h"
 
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 
-static int8_t *make_font_bytes(const char *text, bool money_prefix) {
+static std::vector<int8_t> make_font_bytes(const char *text,
+                                           bool money_prefix) {
     int text_len = (int)strlen(text);
     int offset = money_prefix ? 1 : 0;
-    int8_t *bytes = GC_NEW(int8_t, text_len + offset);
+    std::vector<int8_t> bytes(static_cast<size_t>(text_len + offset));
     if (money_prefix) bytes[0] = 24;
     for (int i = 0; i < text_len; ++i) {
         char ch = text[i];
@@ -59,7 +61,7 @@ void gc_drawHeaderBar(GameCanvas *gc, Surface *graphics) {
 
     char money_text[32];
     format_money(gc->money, money_text, sizeof(money_text));
-    int8_t *money_bytes = make_font_bytes(money_text, true);
+    const auto money_bytes = make_font_bytes(money_text, true);
     gc_renderFontString(gc, graphics, 1, 5, money_bytes, false);
 
     char date_text[24];
@@ -69,7 +71,7 @@ void gc_drawHeaderBar(GameCanvas *gc, Surface *graphics) {
     else
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
                  gc->dayOfMonth, gc->monthOfYear, gc->year);
-    int8_t *date_bytes = make_font_bytes(date_text, false);
+    const auto date_bytes = make_font_bytes(date_text, false);
     gc_renderFontString(gc, graphics, gcs_screenWidth - (gcs_screenWidth < 140 ? 49 : 61),
                         5, date_bytes, false);
 
@@ -118,12 +120,14 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
                             ? -(int64_t)gc->selectionCost : gc->selectionCost;
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
         int text_len = (int)strlen(cost_text);
-        int8_t *currency = gc->spriteBitmapTable[gc->spriteIndexTable[10]];
-        int currency_len = midp_arr_len(currency);
-        int8_t *bytes = GC_NEW(int8_t, text_len + currency_len + 1);
+        const auto currency_codes = gc_tracked_codes(
+            gc->spriteBitmapTable[gc->spriteIndexTable[10]]);
+        std::vector<int8_t> bytes(
+            static_cast<size_t>(text_len + 1) + currency_codes.size());
         bytes[0] = 24;
         for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
-        memcpy(bytes + text_len + 1, currency, (size_t)currency_len);
+        std::copy(currency_codes.begin(), currency_codes.end(),
+                  bytes.begin() + text_len + 1);
         gc_renderFontString(gc, gc->backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
     }
     gc->menuDirty = false;
@@ -135,7 +139,7 @@ int32_t gc_drawNumber(GameCanvas *gc, Surface *graphics,
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
     char text[24];
     snprintf(text, sizeof(text), "%lld", (long long)magnitude);
-    int8_t *bytes = make_font_bytes(text, true);
+    const auto bytes = make_font_bytes(text, true);
     gc_drawTextBox(gc, graphics, gcs_screenWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
     return y + 15;
 }
@@ -163,8 +167,8 @@ void gc_drawConfirmDialog(GameCanvas *gc, Surface *graphics) {
     if (gc->confirmCounter <= 0) return;
     if (gc->confirmTargetState >= 0) {
         gc_drawTextBox(gc, graphics, 10, 10, 0, 37,
-                       gc->spriteBitmapTable[gc->spriteIndexTable[
-                           120 + gc->confirmTargetState]]);
+                       gc_tracked_codes(gc->spriteBitmapTable[
+                           gc->spriteIndexTable[120 + gc->confirmTargetState]]));
     }
     --gc->confirmCounter;
 }

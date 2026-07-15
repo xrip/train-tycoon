@@ -3,6 +3,7 @@
 #include "support/record_store.h"
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 static int read_u16_be(ResourceReader& resource) {
     int high = resource.read_byte();
@@ -50,74 +51,77 @@ void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
 std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
-    int8_t *byArray = NULL;
-    int n = 0;
-    int n3 = gc->sprite_stream.read_byte();
-    if (n3 == 2) {
-        n = read_u16_be(gc->sprite_stream);
-        byArray = GC_NEW(int8_t, n);
-        byArray[0] = -119; byArray[1] = 80; byArray[2] = 78; byArray[3] = 71;
-        for (int n2 = 4; n2 < n; ++n2)
-            byArray[n2] = (int8_t)gc->sprite_stream.read_byte();
+    std::vector<int8_t> png_bytes;
+    int png_size = 0;
+    int image_format = gc->sprite_stream.read_byte();
+    if (image_format == 2) {
+        png_size = read_u16_be(gc->sprite_stream);
+        png_bytes.resize(static_cast<std::size_t>(png_size));
+        png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
+        for (int index = 4; index < png_size; ++index)
+            png_bytes[index] = (int8_t)gc->sprite_stream.read_byte();
     }
-    if (n3 == 1) {
-        int n2 = read_u16_be(gc->sprite_stream);
-        int n5 = gc->sprite_stream.read_byte() * 3;
-        int n6 = gc->sprite_stream.read_byte();
-        n = n2 + n5 + 69 + n6 * 13;
-        byArray = GC_NEW(int8_t, n);
-        byArray[0] = -119; byArray[1] = 80; byArray[2] = 78; byArray[3] = 71;
-        byArray[4] = 13; byArray[5] = 10; byArray[6] = 26; byArray[7] = 10;
-        byArray[11] = 13; byArray[12] = 73; byArray[13] = 72; byArray[14] = 68; byArray[15] = 82;
-        byArray[18] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[19] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[22] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[23] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[24] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[25] = 3;
-        byArray[29] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[30] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[31] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[32] = (int8_t)gc->sprite_stream.read_byte();
-        byArray[35] = (int8_t)(n5 >> 8 & 0xFF);
-        byArray[36] = (int8_t)(n5 & 0xFF);
-        byArray[37] = 80; byArray[38] = 76; byArray[39] = 84; byArray[40] = 69;
-        int n4;
-        for (n4 = 0; n4 < n5 + 4; ++n4)
-            byArray[41 + n4] = (int8_t)gc->sprite_stream.read_byte();
-        n4 = 41 + n5 + 4;
-        if (n6 == 1) {
-            n4 += 3;
-            byArray[n4++] = 1;
-            byArray[n4++] = 116; byArray[n4++] = 82; byArray[n4++] = 78; byArray[n4++] = 83;
-            byArray[++n4] = 64;
-            byArray[++n4] = -26;
-            byArray[++n4] = -40;
-            int n10 = ++n4;
-            ++n4;
-            byArray[n10] = 102;
+    if (image_format == 1) {
+        int image_data_size = read_u16_be(gc->sprite_stream);
+        int palette_byte_count = gc->sprite_stream.read_byte() * 3;
+        int transparency_count = gc->sprite_stream.read_byte();
+        png_size = image_data_size + palette_byte_count + 69 +
+                   transparency_count * 13;
+        png_bytes.resize(static_cast<std::size_t>(png_size));
+        png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
+        png_bytes[4] = 13; png_bytes[5] = 10; png_bytes[6] = 26; png_bytes[7] = 10;
+        png_bytes[11] = 13; png_bytes[12] = 73; png_bytes[13] = 72; png_bytes[14] = 68; png_bytes[15] = 82;
+        png_bytes[18] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[19] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[22] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[23] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[24] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[25] = 3;
+        png_bytes[29] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[30] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[31] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[32] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[35] = (int8_t)(palette_byte_count >> 8 & 0xFF);
+        png_bytes[36] = (int8_t)(palette_byte_count & 0xFF);
+        png_bytes[37] = 80; png_bytes[38] = 76; png_bytes[39] = 84; png_bytes[40] = 69;
+        int output_index;
+        for (output_index = 0; output_index < palette_byte_count + 4;
+             ++output_index) {
+            png_bytes[41 + output_index] =
+                (int8_t)gc->sprite_stream.read_byte();
         }
-        n4 += 2;
-        byArray[n4++] = (int8_t)(n2 >> 8 & 0xFF);
-        byArray[n4++] = (int8_t)(n2 & 0xFF);
-        byArray[n4++] = 73; byArray[n4++] = 68; byArray[n4++] = 65; byArray[n4++] = 84;
-        for (int i = 0; i < n2 + 4; ++i)
-            byArray[n4++] = (int8_t)gc->sprite_stream.read_byte();
-        n4 += 4;
-        byArray[n4++] = 73; byArray[n4++] = 69; byArray[n4++] = 78; byArray[n4++] = 68;
-        byArray[n4++] = -82; byArray[n4++] = 66; byArray[n4++] = 96; byArray[n4++] = -126;
+        output_index = 41 + palette_byte_count + 4;
+        if (transparency_count == 1) {
+            output_index += 3;
+            png_bytes[output_index++] = 1;
+            png_bytes[output_index++] = 116; png_bytes[output_index++] = 82; png_bytes[output_index++] = 78; png_bytes[output_index++] = 83;
+            png_bytes[++output_index] = 64;
+            png_bytes[++output_index] = -26;
+            png_bytes[++output_index] = -40;
+            int transparency_crc_index = ++output_index;
+            ++output_index;
+            png_bytes[transparency_crc_index] = 102;
+        }
+        output_index += 2;
+        png_bytes[output_index++] = (int8_t)(image_data_size >> 8 & 0xFF);
+        png_bytes[output_index++] = (int8_t)(image_data_size & 0xFF);
+        png_bytes[output_index++] = 73; png_bytes[output_index++] = 68; png_bytes[output_index++] = 65; png_bytes[output_index++] = 84;
+        for (int index = 0; index < image_data_size + 4; ++index)
+            png_bytes[output_index++] = (int8_t)gc->sprite_stream.read_byte();
+        output_index += 4;
+        png_bytes[output_index++] = 73; png_bytes[output_index++] = 69; png_bytes[output_index++] = 78; png_bytes[output_index++] = 68;
+        png_bytes[output_index++] = -82; png_bytes[output_index++] = 66; png_bytes[output_index++] = 96; png_bytes[output_index++] = -126;
     }
-    if (!byArray) return nullptr;
+    if (png_bytes.empty()) return nullptr;
     return Image::decode_png(std::span<const uint8_t>(
-        reinterpret_cast<const uint8_t*>(byArray), static_cast<std::size_t>(n)));
+        reinterpret_cast<const uint8_t*>(png_bytes.data()), png_bytes.size()));
 }
 
 // byte[] m(int n)
-int8_t *gc_m(GameCanvas *gc, int32_t n) {
-    int8_t by = gc->spriteData[n];
-    int8_t *byArray = GC_NEW(int8_t, by);
-    memcpy(byArray, gc->spriteData + n + 1, (size_t)by);
-    return byArray;
+std::vector<int8_t> gc_m(GameCanvas *gc, int32_t offset) {
+    const int code_count = gc->spriteData[offset];
+    return {gc->spriteData + offset + 1,
+            gc->spriteData + offset + 1 + code_count};
 }
 
 // void loadGame(int n, int n2)

@@ -4,6 +4,14 @@
 #include "game_state.h"
 #include "support/byte_buffer.h"
 
+#include <optional>
+#include <span>
+#include <vector>
+
+inline std::span<const int8_t> gc_tracked_codes(const int8_t* codes) {
+    return {codes, static_cast<size_t>(midp_arr_len(codes))};
+}
+
 int32_t gc_byteToUnsignedInt(GameCanvas *gc, int8_t n);
 void gc_start(GameCanvas *gc, void* gameMIDlet);
 void gc_run(GameCanvas *gc);
@@ -19,9 +27,10 @@ void gc_openSpriteStream(GameCanvas *gc, const char* resource_name);
 std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc);
 void gc_resetOverlayRenderState(GameCanvas *gc);
 void gc_loadPackedSpriteData(GameCanvas *gc, const char* resource_name);
-int8_t* gc_m(GameCanvas *gc, int32_t n);
+std::vector<int8_t> gc_m(GameCanvas *gc, int32_t n);
 void gc_renderPackedSprite(GameCanvas *gc, Surface* graphics, int32_t n);
-void gc_renderFontString(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int8_t* byArray, bool bl);
+void gc_renderFontString(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2,
+                         std::span<const int8_t> codes, bool bl);
 void gc_registerCityEntryInlined(GameCanvas *gc, int8_t by);
 void gc_setSelectionStart(GameCanvas *gc, int32_t n, int32_t n2);
 bool gc_isAdjacentTileEmpty(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl);
@@ -76,13 +85,13 @@ bool gc_pickValidForestTile(GameCanvas *gc);
 int8_t gc_addCityEntry(GameCanvas *gc, int32_t n);
 void gc_dayResetAg(GameCanvas *gc);
 void gc_rebuildCityList(GameCanvas *gc);
-int8_t* gc_formatCurrency(GameCanvas *gc, int32_t n);
-int8_t* gc_formatNumberWithSuffix(GameCanvas *gc, int32_t n, int32_t n2);
-int8_t* gc_encodeDisplayText(GameCanvas *gc, char* string);
+std::vector<int8_t> gc_formatCurrency(GameCanvas *gc, int32_t n);
+std::vector<int8_t> gc_formatNumberWithSuffix(GameCanvas *gc, int32_t n, int32_t n2);
+std::vector<int8_t> gc_encodeDisplayText(GameCanvas *gc, const char* string);
 Image* gc_u(GameCanvas *gc, int32_t n, int32_t n2);
 bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2);
 int32_t gc_neighboursMask(GameCanvas *gc, int32_t n, int32_t n2);
-int8_t* gc_resolveDialogValue(GameCanvas *gc, int32_t n, int32_t n2);
+std::optional<std::vector<int8_t>> gc_resolveDialogValue(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2);
 bool gc_tryBuildPath(GameCanvas *gc);
 void gc_validatePathStep(GameCanvas *gc);
@@ -191,7 +200,8 @@ bool gc_syncHighScores(GameCanvas *gc, bool bl);
 void gc_appendTileDrawOffset(GameCanvas *gc, ByteBuffer& x_offsets,
                              ByteBuffer& y_offsets, int32_t x, int32_t y);
 void gc_k(GameCanvas *gc, int32_t n, int32_t n2);
-void gc_drawTextBox(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4, int8_t* byArray);
+void gc_drawTextBox(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2,
+                    int32_t n3, int32_t n4, std::span<const int8_t> codes);
 void gc_enterOutOfMoneyState(GameCanvas *gc);
 void gc_drawRectFill(GameCanvas *gc, Surface* graphics, int32_t n, int32_t n2, int8_t by);
 void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2);

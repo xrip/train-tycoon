@@ -9,12 +9,12 @@ static int imax(int a, int b) { return a > b ? a : b; }
 
 // public void renderFontString(Graphics graphics, int n, int n2, byte[] byArray, boolean bl)
 void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
-                        int8_t *byArray, bool bl) {
+                        std::span<const int8_t> codes, bool bl) {
     int n3 = n;
     midp_set_color(g, 0);
-    int len = midp_arr_len(byArray);
+    const int len = static_cast<int>(codes.size());
     for (int i = 0; i < len; ++i) {
-        int8_t by = byArray[i];
+        int8_t by = codes[i];
         if (bl) {
             midp_set_clip(g, gc->clipX, gc->clipY, gc->clipWidth, gc->clipHeight);
             midp_clip_rect(g, n3, n2 - 4, 5, 12);
@@ -28,7 +28,7 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
             continue;
         }
         if (by < 40) {
-            int8_t by2 = (int8_t)(byArray[i + 1] >= 40 && byArray[i + 1] <= 65 ? 1 : 0);
+            int8_t by2 = (int8_t)(codes[i + 1] >= 40 && codes[i + 1] <= 65 ? 1 : 0);
             switch (by) {
                 case 32:
                     midp_draw_line(g, n3 + 2, n2 - 2 + by2, n3 + 2, n2 - 2 + by2);
@@ -103,11 +103,12 @@ Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
 
 // void drawTextBox(Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray)
 void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
-                    int32_t n3, int32_t n4, int8_t *byArray) {
+                    int32_t n3, int32_t n4,
+                    std::span<const int8_t> codes) {
     int n5 = 0;
-    int len = midp_arr_len(byArray);
+    const int len = static_cast<int>(codes.size());
     for (int i = 0; i < len; ++i) {
-        if (byArray[i] >= 32 && byArray[i] <= 39) continue;
+        if (codes[i] >= 32 && codes[i] <= 39) continue;
         ++n5;
     }
     n5 *= 6;
@@ -122,20 +123,22 @@ void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
     midp_set_color(g, gc->dc[3 * n3 + 2]);
     midp_draw_rect(g, n, n2 + 13, n5 + 5, 0);
     midp_draw_rect(g, n + n5 + 5, n2, 0, 13);
-    gc_renderFontString(gc, g, n + 4, n2 + 5, byArray, false);
+    gc_renderFontString(gc, g, n + 4, n2 + 5, codes, false);
 }
 
 // void drawRectFill(Graphics graphics, int n, int n2, byte by)
 void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
-    int8_t *byArray = gc->spriteBitmapTable[gc->spriteIndexTable[80 + (gc->trainSelectionIndex[by] >> 8 & 0xFF)]];
-    int8_t *byArray2 = gc->spriteBitmapTable[gc->spriteIndexTable[86 + (gc->trainSelectionIndex[by] & 0xFF)]];
-    int la = midp_arr_len(byArray), lb = midp_arr_len(byArray2);
-    int8_t *byArray3 = GC_NEW(int8_t, lb + la);
-    for (int i = 0; i < lb; ++i) byArray3[i] = byArray2[i];
-    for (int i = 0; i < la; ++i) byArray3[lb + i] = byArray[i];
+    const auto engine_codes = gc_tracked_codes(gc->spriteBitmapTable[
+        gc->spriteIndexTable[80 + (gc->trainSelectionIndex[by] >> 8 & 0xFF)]]);
+    const auto wagon_codes = gc_tracked_codes(gc->spriteBitmapTable[
+        gc->spriteIndexTable[86 + (gc->trainSelectionIndex[by] & 0xFF)]]);
+    std::vector<int8_t> train_codes;
+    train_codes.reserve(wagon_codes.size() + engine_codes.size());
+    train_codes.insert(train_codes.end(), wagon_codes.begin(), wagon_codes.end());
+    train_codes.insert(train_codes.end(), engine_codes.begin(), engine_codes.end());
     int n3 = 0;
-    for (int i = 0; i < lb + la; ++i) {
-        if (byArray3[i] >= 32 && byArray3[i] <= 39) continue;
+    for (const int8_t code : train_codes) {
+        if (code >= 32 && code <= 39) continue;
         ++n3;
     }
     midp_set_color(g, RGB3(255, 176, 98));
@@ -149,7 +152,7 @@ void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t b
     gc->clipY = 15;
     gc->clipWidth = gcs_screenWidth;
     gc->clipHeight = gcs_gameplayViewportHeight;
-    gc_renderFontString(gc, g, n + 4, n2 + 3, byArray3, true);
+    gc_renderFontString(gc, g, n + 4, n2 + 3, train_codes, true);
 }
 
 // public void renderPackedSprite(Graphics graphics, int n)
@@ -252,12 +255,14 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
             n3 = (by & 0x10) == 16 ? gc->spriteData[n25++] : 0;
             n2 = (by & 0x10) == 16 ? gc->spriteData[n25++] : 0;
             int8_t by2 = (by & 0x10) == 16 ? gc->spriteData[n25++] : (int8_t)0;
-            int8_t *byArray = n8 != 0 ? gc_resolveDialogValue(gc, gc->currentSpriteId, n6) : gc_m(gc, n25);
+            std::optional<std::vector<int8_t>> text_codes = n8 != 0
+                ? gc_resolveDialogValue(gc, gc->currentSpriteId, n6)
+                : std::optional<std::vector<int8_t>>(gc_m(gc, n25));
             int n29 = 0;
-            if (byArray == NULL) continue;
-            int blen = midp_arr_len(byArray);
+            if (!text_codes) continue;
+            const int blen = static_cast<int>(text_codes->size());
             for (n28 = 0; n28 < blen; ++n28) {
-                if (byArray[n28] >= 32 && byArray[n28] <= 39) continue;
+                if ((*text_codes)[n28] >= 32 && (*text_codes)[n28] <= 39) continue;
                 ++n29;
             }
             if (n8 == 0) n25 = n25 + gc->spriteData[n25] + 1;
@@ -290,7 +295,8 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
                     }
                 }
                 if (gc->needsRepaint)
-                    gc_renderFontString(gc, g, n26 + n11, n12 + n10, byArray, true);
+                    gc_renderFontString(gc, g, n26 + n11, n12 + n10,
+                                        *text_codes, true);
             }
             n22 += 11 + n10;
             continue;

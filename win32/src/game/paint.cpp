@@ -86,7 +86,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[0]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
             int n11 = gc->totalTilesToGenerate < 2 ? 2 : gc->totalTilesToGenerate;
@@ -133,7 +133,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
         }
         case 35:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[50]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[50]]));
             break;
         case 40: {
             int n14;
@@ -176,23 +176,23 @@ void gc_paint(GameCanvas *gc, Surface *g) {
         }
         case 45:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[51]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[51]]));
             break;
         case 55:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[52]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[52]]));
             break;
         case 65:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[53]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[53]]));
             break;
         case 105:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[49]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[49]]));
             break;
         case 120:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc->spriteBitmapTable[gc->spriteIndexTable[66]]);
+                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[66]]));
             break;
     }
 }

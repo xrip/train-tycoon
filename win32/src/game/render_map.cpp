@@ -3,6 +3,7 @@
 // blits it, then overlays dynamic tiles, trains, selections and the build menu.
 #include "game_methods.h"
 #include <stdlib.h>
+#include <vector>
 
 // public void renderMap(Graphics graphics)
 void gc_renderMap(GameCanvas *gc, Surface *g) {
@@ -75,12 +76,12 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
     midp_draw_image(g, gc->backbuffer.get(), 0, 0, 20);
     midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
     gc_drawBuildMenuCursor(gc, g);
-    int n8w = gc->viewportX1 - gc->viewportX0 + 1;
-    int n7h = gc->viewportY1 - gc->viewportY0 + 1;
-    if (n8w < 1) n8w = 1;
-    if (n7h < 1) n7h = 1;
-    bool *blArray = (bool *)calloc((size_t)n8w * n7h, sizeof(bool));
-#define BLA(a, b) blArray[(a) * n7h + (b)]
+    int visible_width = gc->viewportX1 - gc->viewportX0 + 1;
+    int visible_height = gc->viewportY1 - gc->viewportY0 + 1;
+    if (visible_width < 1) visible_width = 1;
+    if (visible_height < 1) visible_height = 1;
+    std::vector<uint8_t> visible_train_tiles(
+        static_cast<std::size_t>(visible_width * visible_height));
     gc->visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
         if ((gc->trainFlags[n6] & 0x80) != 128) continue;
@@ -88,7 +89,8 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
         n4 = gc_byteToUnsignedInt(gc, gc->trainY[n6]);
         if (n5 < gc->viewportX0 || n4 < gc->viewportY0 || n5 > gc->viewportX1 || n4 > gc->viewportY1) continue;
         gc->visibleTrains[gc->visibleTrainCount++] = (int16_t)n6;
-        BLA(n5 - gc->viewportX0, n4 - gc->viewportY0) = true;
+        visible_train_tiles[(n5 - gc->viewportX0) * visible_height +
+                            n4 - gc->viewportY0] = 1;
     }
     for (n6 = 0; n6 < gc->numActiveTileAnimations; ++n6) {
         int n12;
@@ -117,7 +119,8 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
                 midp_draw_image(g, gc->tile_sprites[gc->tileSpriteIndex[41]].get(), n, n12, 33);
             }
         }
-        if (BLA(n5 - gc->viewportX0, n4 - gc->viewportY0)) {
+        if (visible_train_tiles[(n5 - gc->viewportX0) * visible_height +
+                                n4 - gc->viewportY0]) {
             for (n = 0; n < gc->visibleTrainCount; ++n) {
                 n12 = gc->visibleTrains[n];
                 if ((gc->trainFlags[n12] & 0x80) != 128 || n5 != gc_byteToUnsignedInt(gc, gc->trainX[n12]) || n4 != gc_byteToUnsignedInt(gc, gc->trainY[n12])) continue;
@@ -150,6 +153,4 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
     gc_drawBuildMenuRow(gc, g);
     midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
     gc_drawConfirmDialog(gc, g);
-    free(blArray);
-#undef BLA
 }
