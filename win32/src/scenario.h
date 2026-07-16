@@ -26,6 +26,14 @@ struct Scenario {
     int32_t bestScenarioScore = 0;
     std::array<int32_t, 13> scenarioScores{};
     std::array<int32_t, 14> leaderboardScores{};
+
+    // AI opponent behaviour. aiEnabled is runtime-only; frequency, threshold,
+    // and the wagon-purchase counter are saved. Values and save byte order are
+    // unchanged. (The AI money/spend totals live in Economy.)
+    bool aiEnabled = false;
+    int8_t aiFrequency = 0;
+    int8_t aiThreshold = 0;
+    int32_t aiWagonsBought = 0;
 };
 
 #endif  // SCENARIO_H

@@ -125,7 +125,7 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
             current = gc->economy.year - 1950;
             target = gc->scenario.currentMilestoneScore - 1950;
             break;
-        case 15: current = gc->aiWagonsBought; break;
+        case 15: current = gc->scenario.aiWagonsBought; break;
     }
     int score = 100 * current / target;
     if (score < 0) score = 0;

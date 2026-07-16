@@ -86,7 +86,7 @@ bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
             gc->cH = gc_loadSnapshotAndReturn(gc);
             gc->snapshotLoadedFlag = true;
         }
-        if (n2 == 0 && gc->aiEnabled) return false;
+        if (n2 == 0 && gc->scenario.aiEnabled) return false;
         if (n2 == 0 && !gc->ready) return true;
         if (n2 == 1 && gc->cH) return true;
     }

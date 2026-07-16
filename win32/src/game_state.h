@@ -183,7 +183,6 @@ typedef struct GameCanvas {
     int8_t spriteCycleCursor;
     bool snapshotLoadedFlag;
     bool cH;
-    bool aiEnabled;
     int32_t screenParam;
     Pathfinder pathfinder;
     // Endpoints of the path being built. pathAnchor is the reference endpoint
@@ -236,8 +235,6 @@ typedef struct GameCanvas {
     int32_t industryTileY;
     int8_t difficultyCycle;
     int32_t nextTrackPieceCode;
-    int8_t aiFrequency;
-    int8_t aiThreshold;
     std::array<int8_t, 6> routeResourceFlags{};
     std::array<std::vector<int8_t>, 12> offerTypesByEffect{};
     std::array<std::array<int8_t, 2>, 12> offerEffectSchedule{};
@@ -260,7 +257,6 @@ typedef struct GameCanvas {
     int32_t lastOfferDateCode;
     int32_t menuRowEnabledCount;
     std::array<int8_t, 5> enabledMenuRowIndexes{};
-    int32_t aiWagonsBought;
     bool music_playing;
     bool music_available;
     bool music_auto_start;

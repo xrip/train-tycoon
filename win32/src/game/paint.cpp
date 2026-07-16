@@ -238,7 +238,7 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep == 2) {
                 gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
                 gc->economy.dayOfMonth = 1; gc->economy.monthOfYear = 1; gc->economy.year = 1950;
-                gc->scenario.milestonesEnabled = false; gc->pauseFlag = false; gc->aiEnabled = false;
+                gc->scenario.milestonesEnabled = false; gc->pauseFlag = false; gc->scenario.aiEnabled = false;
                 gc->moneyBaseA = 974; gc->moneyBaseB = 974;
                 gc->baseTrainSpeed = 173; gc->accel1 = 342; gc->brake1 = 311;
                 gc->baseTrainSpeed2 = 173; gc->accel2 = 234;
@@ -302,16 +302,16 @@ void gc_update(GameCanvas *gc) {
                         gc_initBuildMenuForScenario(gc, build_menu_scenario);
                         gc->flagsA = (scenario_flags & 2) == 2;
                         gc->flagsB = (scenario_flags & 4) == 4;
-                        if ((scenario_flags & 1) != 1) { gc->aiFrequency = 25; gc->aiThreshold = 100; }
-                        else { gc->aiFrequency = 32; gc->aiThreshold = 29; }
+                        if ((scenario_flags & 1) != 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 100; }
+                        else { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
                         gc->scenarioNoticeId = notice_id;
                         if (notice_id != 0) { gc->transitionDebounce = 5; gc->scenarioNoticeCode = (int8_t)notice_id; continue; }
                         gc->transitionDebounce = 0;
                     }
                 }
                 if (gc->activeScenario <= 1) {
-                    if (gc->difficultySlot == 0) { gc->aiFrequency = 32; gc->aiThreshold = 29; }
-                    if (gc->difficultySlot == 1) { gc->aiFrequency = 25; gc->aiThreshold = 22; }
+                    if (gc->difficultySlot == 0) { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
+                    if (gc->difficultySlot == 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 22; }
                     if (gc->difficultyA == 0) { gc->economy.interestRate = 4; gc->economy.enterpriseTaxPct = 2; }
                     if (gc->difficultyA == 1) { gc->economy.interestRate = 8; gc->economy.enterpriseTaxPct = 5; }
                     if (gc->difficultyB == 0) { gc->mapGenColumns /= 2; gc->mapGenRows /= 2; }

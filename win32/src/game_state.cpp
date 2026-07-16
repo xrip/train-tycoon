@@ -99,7 +99,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->spriteCycleCursor = 0;
     gc->snapshotLoadedFlag = false;
     gc->cH = false;
-    gc->aiEnabled = false;
+    gc->scenario.aiEnabled = false;
     gc->pathfinder.tieBreakCounter = 0;
     gc->previewTrackOwnerCode = 0;
     gc->existingTrackOwnerCode = 1;
@@ -196,8 +196,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->economy.decadeProfitGraphTotal = 0;
     gc->difficultyCycle = 1;
     gc->nextTrackPieceCode = 66;
-    gc->aiFrequency = 15;
-    gc->aiThreshold = 12;
+    gc->scenario.aiFrequency = 15;
+    gc->scenario.aiThreshold = 12;
     gc->offerTypesByEffect = {{
         {1, 3, 13},
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
@@ -235,7 +235,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->scenario.milestoneThreshold3 = 0;
     gc->scenario.milestoneThreshold4 = 0;
     gc->scenario.milestoneThreshold5 = 0;
-    gc->aiWagonsBought = 0;
+    gc->scenario.aiWagonsBought = 0;
     gc->music_playing = false;
     gc->music_available = false;
     gc->music_auto_start = false;

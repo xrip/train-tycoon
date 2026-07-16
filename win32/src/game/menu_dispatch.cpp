@@ -80,7 +80,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 6:
             gc_setState(gc, +GameState::Playing); break;
         case 7:
-            gc->ready = false; gc->aiEnabled = true; gc->transitionCode = 1;
+            gc->ready = false; gc->scenario.aiEnabled = true; gc->transitionCode = 1;
             gc_resetOverlayRenderState(gc); gc_setState(gc, +GameState::MenuOverlay); break;
         case 5:
             if (n2 >= 2) { gc->activeScenario = n2; gc_setState(gc, +GameState::GeneratingMap); break; }

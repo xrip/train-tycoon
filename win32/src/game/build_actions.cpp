@@ -753,7 +753,7 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
     gc->economy.money -= gc->unitCost;
     gc->economy.aiMoneySpent += gc->unitCost;
     gc_pushMoneyHistory(gc, -gc->unitCost);
-    ++gc->aiWagonsBought;
+    ++gc->scenario.aiWagonsBought;
     return true;
 }
 

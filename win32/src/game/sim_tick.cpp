@@ -127,7 +127,7 @@ void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
 // void maybeAiTakeTurn()
 void gc_maybeAiTakeTurn(GameCanvas *gc) {
     if (gc->buildMenuMode != 2 && gc->buildMenuMode != 4
-        && gc->rng.next_int() % gc->aiFrequency > gc->aiThreshold)
+        && gc->rng.next_int() % gc->scenario.aiFrequency > gc->scenario.aiThreshold)
         gc_setState(gc, +GameState::AiTurn);
 }
 
@@ -393,7 +393,7 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
             case 12: bl = gc->scenario.currentMilestoneScore <= gc->economy.lifetimeTrainRevenue; break;
             case 13: bl = gc->economy.loanBalance == 0; break;
             case 14: bl = gc->economy.year == gc->scenario.currentMilestoneScore; break;
-            case 15: bl = gc->scenario.currentMilestoneScore <= gc->aiWagonsBought; break;
+            case 15: bl = gc->scenario.currentMilestoneScore <= gc->scenario.aiWagonsBought; break;
         }
     }
     if (!bl) return;

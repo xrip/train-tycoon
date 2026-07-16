@@ -265,8 +265,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BOOL(industrySiteFound);
     IO_INT(nextTrackPieceCode);
     if (gc->nextTrackPieceCode == 0) gc->nextTrackPieceCode = 66;
-    IO_BYTE(aiFrequency);
-    IO_BYTE(aiThreshold);
+    IO_BYTE(scenario.aiFrequency);
+    IO_BYTE(scenario.aiThreshold);
     if (mode != save::OP_RESET_SKIP) IO_BYTE(difficultyCycle);
     IO_BYTES(menuRowType);
     IO_BYTES(placeTrainDay);
@@ -296,7 +296,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(scenario.milestoneThreshold3);
     IO_INT(scenario.milestoneThreshold4);
     IO_INT(scenario.milestoneThreshold5);
-    IO_INT(aiWagonsBought);
+    IO_INT(scenario.aiWagonsBought);
     IO_INT(economy.trainRevenueScore);
     IO_INT(scenarioStep);
     IO_INT(scenarioNoticeId);
