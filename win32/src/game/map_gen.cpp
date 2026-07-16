@@ -563,10 +563,10 @@ static bool can_extend_station_over(GameCanvas *gc, int x, int y) {
 }
 
 void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
-    bool track_left = x > 0 && gc->trackMap[x - 1][y] == 64;
-    bool track_right = x < gc->mapWidth - 1 && gc->trackMap[x + 1][y] == 64;
-    bool track_up = y > 0 && gc->trackMap[x][y - 1] == 64;
-    bool track_down = y < gc->mapHeight - 1 && gc->trackMap[x][y + 1] == 64;
+    bool track_left = x > 0 && gc->trackMap[x - 1][y] == track::PRESENT;
+    bool track_right = x < gc->mapWidth - 1 && gc->trackMap[x + 1][y] == track::PRESENT;
+    bool track_up = y > 0 && gc->trackMap[x][y - 1] == track::PRESENT;
+    bool track_down = y < gc->mapHeight - 1 && gc->trackMap[x][y + 1] == track::PRESENT;
     if (track_left || track_right) {
         gc->tileMap[x][y] = 88;
         gc->trackMap[x][y] = (int8_t)gc->nextTrackPieceCode;
@@ -634,7 +634,7 @@ void gc_placeCitiesAndIndustry(GameCanvas *gc) {
     gc_autoExtendTrackStation(gc, gc->cityStationX, gc->cityStationY);
     gc_autoExtendTrackStation(gc, gc->industryStationX, gc->industryTileY);
     gc_spawnTrainAt(gc, gc->cityStationX, gc->cityStationY);
-    gc_setTrackOwnerCode(gc, gc->nextTrackPieceCode - 64);
+    gc_setTrackOwnerCode(gc, gc->nextTrackPieceCode - track::PRESENT);
     ++gc->nextTrackPieceCode;
-    if (gc->nextTrackPieceCode == 69) gc->nextTrackPieceCode = 66;
+    if (gc->nextTrackPieceCode == track::AI_PIECE_WRAP) gc->nextTrackPieceCode = track::AI_PIECE_FIRST;
 }

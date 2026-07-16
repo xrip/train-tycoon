@@ -44,8 +44,8 @@ bool gc_isCurveTile(GameCanvas *gc, int32_t n, int32_t n2) {
 bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
     if ((gc->tileMap[n][n2] >= 29 && gc->tileMap[n][n2] <= 33)
         || (gc->tileMap[n][n2] >= 70 && gc->tileMap[n][n2] <= 80 && gc->trackMap[n][n2] == 65)
-        || (gc->tileMap[n][n2] == 76 && (gc->trackMap[n][n2] & 0x47) == 65)
-        || (gc->tileMap[n][n2] == 76 && (gc->trackMap[n][n2] & 0x78) == 72)
+        || (gc->tileMap[n][n2] == tile::CROSSING && (gc->trackMap[n][n2] & 0x47) == 65)
+        || (gc->tileMap[n][n2] == tile::CROSSING && (gc->trackMap[n][n2] & 0x78) == 72)
         || ((gc->tileMap[n][n2] == 87 || gc->tileMap[n][n2] == 88
              || gc->tileMap[n][n2] == 89 || gc->tileMap[n][n2] == 90)
             && gc->trackMap[n][n2] == 65)) {

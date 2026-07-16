@@ -628,13 +628,13 @@ void gc_update(GameCanvas *gc) {
         case +GameState::AiTurn:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            if (gc->nextTrackPieceCode - 66 < gc->difficultyCycle) {
+            if (gc->nextTrackPieceCode - track::AI_PIECE_FIRST < gc->difficultyCycle) {
                 gc_placeCitiesAndIndustry(gc);
                 gc_setState(gc, +GameState::Playing);
                 break;
             }
             ++gc->nextTrackPieceCode;
-            if (gc->nextTrackPieceCode == 69) gc->nextTrackPieceCode = 66;
+            if (gc->nextTrackPieceCode == track::AI_PIECE_WRAP) gc->nextTrackPieceCode = track::AI_PIECE_FIRST;
             gc_setState(gc, +GameState::Playing);
             break;
         case +GameState::HighScoreSync:

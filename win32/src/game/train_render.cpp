@@ -20,7 +20,7 @@ void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
     if ((gc->trainFlags[train] & 0x40) != 0) {
         int tile = gc->tileMap[tile_x][tile_y];
         int track = gc_byteToUnsignedInt(gc, gc->trackMap[tile_x][tile_y]);
-        bool lower_sprite = tile != 76 && track > 65;
+        bool lower_sprite = tile != tile::CROSSING && track > 65;
         if (tile == 76) {
             int low_track = track & 7;
             int high_track = (track >> 3) & 7;

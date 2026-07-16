@@ -37,4 +37,25 @@ constexpr int32_t operator+(GameState state) noexcept {
     return static_cast<int32_t>(state);
 }
 
+// Track-map byte encoding (GameCanvas::trackMap). A byte packs a "track present"
+// flag in bit 6 with a 6-bit owner field in the low bits. At the crossing tile
+// (tile::CROSSING) the owner field holds two 3-bit sub-owners, one per crossing
+// direction. Bits 0x80/0xC0 mark other trackMap overlays whose exact meaning is
+// not yet recovered; see DECISIONS "Recovered in MODEL-01".
+namespace track {
+inline constexpr int32_t PRESENT = 0x40;        // bit 6: a track piece is on this tile
+inline constexpr int32_t OWNER_MASK = 0x3F;     // low 6 bits: the owner field
+inline constexpr int32_t DIR_OWNER_MASK = 7;    // one crossing direction's 3-bit owner
+inline constexpr int32_t DIR_OWNER_SHIFT = 3;   // shift to the other direction's owner
+inline constexpr int32_t AI_PIECE_FIRST = 66;   // first AI route piece code (owner 2)
+inline constexpr int32_t AI_PIECE_WRAP = 69;    // one past the last AI piece code
+}  // namespace track
+
+// Tile-map sentinels (GameCanvas::tileMap). Most tile ids are track, bridge, and
+// road shape codes recorded in DECISIONS; only the strongly-evidenced sentinel
+// is named here.
+namespace tile {
+inline constexpr int32_t CROSSING = 76;  // two tracks cross; trackMap holds two owners
+}  // namespace tile
+
 #endif  // GAME_CONSTANTS_H

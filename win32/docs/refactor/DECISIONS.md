@@ -114,6 +114,32 @@ not enough. Record uncertain evidence here before a rename.
   sprite-text index, so it is not a `GameState`. `keySubState` is a key-repeat
   counter that uses 40/80 arithmetically, not a state. Both were left as-is.
 
+Track and tile codes (second MODEL-01 leaf), in `game_constants.h`:
+
+- `namespace track`: a `trackMap` byte packs `PRESENT` (bit 6, `0x40`) with a
+  6-bit `OWNER_MASK` (`0x3F`). Evidence: every track write is `0x40 | owner`;
+  `gc_scanTrackTiles` counts `trackMap == 64` (present, owner 0) as one player
+  track tile. At the crossing tile the owner field holds two 3-bit sub-owners:
+  `DIR_OWNER_MASK` (`7`) for one direction and `>> DIR_OWNER_SHIFT` (`3`) for the
+  other (`gc_findConnectedTrack`, `gc_scanTrackTiles`). AI routes cycle piece
+  codes `AI_PIECE_FIRST` (66) .. 68, wrapping at `AI_PIECE_WRAP` (69);
+  `nextTrackPieceCode - PRESENT` gives the owner code (`gc_placeCitiesAndIndustry`,
+  state `AiTurn`).
+- `namespace tile`: `CROSSING` (76) is the tile where two tracks cross and the
+  `trackMap` byte carries two owners. Evidence: dual-owner reads gated on tile
+  76, and the join code that sets tile 76 while OR-ing a second owner into the
+  high sub-field.
+- Left unnamed (uncertain, recorded for later leaves):
+  - Track overlay bits `0x80` and `0xC0` (`map_gen` sets `0x80 | n`, `terrain`
+    sets `0xC0 | n`, `sim_tick` tests `& 0xC0`). They mark non-track overlays
+    (scenery/obstacle/water); exact meaning not yet proven.
+  - Owner code `1` / `trackMap == 65` (station/service track) and the crossing
+    station masks `& 0x47`, `& 0x78` in `gc_isCityOrStationTile`.
+  - The individual tile shape ids: straight/turn/bridge codes 70..90, city and
+    terrain ranges (0, 3..28, 29..33, 34..41, 42..48, 50..68) whose minimap
+    colour grouping is in `gc_update` state `BuildingMinimap`. These need a
+    per-range evidence pass before naming.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

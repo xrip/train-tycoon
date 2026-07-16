@@ -113,8 +113,10 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
         || y < 0 || y >= gc->mapHeight)
         return connected;
     int tile = gc->tileMap[x][y];
-    int owner = gc->trackMap[x][y] & 0x3F;
-    owner = tile == 76 && high_owner ? owner >> 3 : owner & 7;
+    int owner = gc->trackMap[x][y] & track::OWNER_MASK;
+    owner = tile == tile::CROSSING && high_owner
+                ? owner >> track::DIR_OWNER_SHIFT
+                : owner & track::DIR_OWNER_MASK;
     if (owner == gc->existingTrackOwnerCode
         && (tile == tile_a || tile == tile_b || tile == tile_c
             || tile == tile_d || tile == tile_e || tile == tile_f
@@ -230,11 +232,11 @@ void gc_validatePathStep(GameCanvas *gc) {
                     gc->tileMap[map_x][map_y] = 84;
                     gc->selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 70) {
-                    gc->tileMap[map_x][map_y] = 76;
+                    gc->tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
                     gc->trackMap[map_x][map_y] = (int8_t)(
-                        0x40 | (gc->trackMap[map_x][map_y] & 0x3F)
-                        | gc->previewTrackOwnerCode << 3);
+                        track::PRESENT | (gc->trackMap[map_x][map_y] & track::OWNER_MASK)
+                        | gc->previewTrackOwnerCode << track::DIR_OWNER_SHIFT);
                 } else if (gc->tileElevation[map_x][map_y] == -1) {
                     gc->tileMap[map_x][map_y] = 81;
                     gc->selectionCost += gc->moneyBaseB;
@@ -251,10 +253,10 @@ void gc_validatePathStep(GameCanvas *gc) {
                     gc->tileMap[map_x][map_y] = 86;
                     gc->selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 71) {
-                    gc->tileMap[map_x][map_y] = 76;
+                    gc->tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
                     gc->trackMap[map_x][map_y] = (int8_t)(
-                        0x40 | (gc->trackMap[map_x][map_y] & 0x3F) << 3
+                        track::PRESENT | (gc->trackMap[map_x][map_y] & track::OWNER_MASK) << track::DIR_OWNER_SHIFT
                         | gc->previewTrackOwnerCode);
                 } else if (gc->tileElevation[map_x][map_y] == -1) {
                     gc->tileMap[map_x][map_y] = 82;
@@ -269,7 +271,7 @@ void gc_validatePathStep(GameCanvas *gc) {
 
             if (!joined_track && old_tile != gc->tileMap[map_x][map_y]) {
                 gc->trackMap[map_x][map_y] =
-                    (int8_t)(0x40 | gc->previewTrackOwnerCode);
+                    (int8_t)(track::PRESENT | gc->previewTrackOwnerCode);
                 if (cost_before_shape == gc->selectionCost)
                     gc->selectionCost += gc->accel1;
             }
@@ -284,10 +286,10 @@ void gc_scanTrackTiles(GameCanvas *gc) {
     gc->trackTileCount = 0;
     for (int x = 0; x < gc->mapWidth; ++x) {
         for (int y = 0; y < gc->mapHeight; ++y) {
-            if (gc->trackMap[x][y] == 64) ++gc->trackTileCount;
-            if (gc->tileMap[x][y] != 76) continue;
-            int low_owner = gc->trackMap[x][y] & 7;
-            int high_owner = (gc->trackMap[x][y] & 0x3F) >> 3;
+            if (gc->trackMap[x][y] == track::PRESENT) ++gc->trackTileCount;
+            if (gc->tileMap[x][y] != tile::CROSSING) continue;
+            int low_owner = gc->trackMap[x][y] & track::DIR_OWNER_MASK;
+            int high_owner = (gc->trackMap[x][y] & track::OWNER_MASK) >> track::DIR_OWNER_SHIFT;
             if (low_owner == 0) ++gc->trackTileCount;
             if (high_owner == 0) ++gc->trackTileCount;
         }

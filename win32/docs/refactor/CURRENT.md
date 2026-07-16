@@ -37,8 +37,12 @@ sites use `+GameState::Name`. The previous-state copy `hx` comparisons were name
 too. `confirmTargetState` and `keySubState` were left as-is (not states; see
 DECISIONS D-006/MODEL-01). Debug and Release full gates passed on 2026-07-16.
 
-Next: name the tile and track codes, then the menu transition codes
-(`transitionCode`/`pendingTransitionCode`) and resource kinds. Use behavior and
-cross-references; record uncertain evidence in `DECISIONS.md` before a rename.
-Keep numbers identical and commit each leaf after the strict Debug and full
-tests pass.
+Done: the track-map bitfield (`track::PRESENT`, `OWNER_MASK`, crossing
+sub-owners, AI piece-code cycle) and `tile::CROSSING` are named in
+`game_constants.h`; uncertain overlay bits and shape tile-ids are recorded in
+DECISIONS. Debug and Release full gates passed on 2026-07-16.
+
+Next: name the menu transition codes (`transitionCode`/`pendingTransitionCode`)
+and resource kinds. Use behavior and cross-references; record uncertain evidence
+in `DECISIONS.md` before a rename. Keep numbers identical and commit each leaf
+after the strict Debug and full tests pass. Then close MODEL-01.
