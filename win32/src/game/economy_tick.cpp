@@ -74,7 +74,7 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
         --gc->economy.interestRate;
     copy_menu_row_to_slot5(gc, row);
     gc->scenario.duplicateRowState = 3;
-    gc->transitionCode = 9;
+    gc->ui.transitionCode = 9;
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
@@ -82,7 +82,7 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
 void gc_duplicateMenuRow(GameCanvas *gc, int32_t row) {
     copy_menu_row_to_slot5(gc, row);
     gc->scenario.duplicateRowState = 4;
-    gc->transitionCode = 8;
+    gc->ui.transitionCode = 8;
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
@@ -228,7 +228,7 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         }
         if (gc->ui.menuRowType[free_row] != 0) {
             gc->ready = false;
-            gc->transitionCode = 40;
+            gc->ui.transitionCode = 40;
             gc->scenario.offerRowIndex = (int8_t)free_row;
             gc_setState(gc, +GameState::MenuOverlay);
             ++gc->scenario.offerGenerationCount;

@@ -241,8 +241,8 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gc->ui.menuDirty = true;
         gc->renderer.lastViewportCenterX = -1;
         if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {
-            if (gc->hx == +GameState::Playing) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::Playing; }
-            if (gc->hx == +GameState::MapOverview) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::MapOverview; }
+            if (gc->hx == +GameState::Playing) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::Playing; }
+            if (gc->hx == +GameState::MapOverview) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::MapOverview; }
         }
     }
 }
@@ -251,7 +251,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
 void gc_setState(GameCanvas *gc, int32_t n) {
     gc->hx = gc->gameState;
     if (!gc->ready) gc->assets.cycle_flag = NULL;
-    gc->snapshotLoadedFlag = false;
+    gc->ui.snapshotLoadedFlag = false;
     gc->ui.menuDirty = true;
     switch (n) {
         case +GameState::BootSplash0:
@@ -303,8 +303,8 @@ void gc_setState(GameCanvas *gc, int32_t n) {
         }
         case +GameState::MenuOverlay:
             gc_resetOverlayRenderState(gc);
-            if (!gc->useDefaultOverlaySelection) gc->cursorDragY = 2;
-            gc->useDefaultOverlaySelection = true;
+            if (!gc->ui.useDefaultOverlaySelection) gc->cursorDragY = 2;
+            gc->ui.useDefaultOverlaySelection = true;
             break;
         case +GameState::GeneratingMap:
             gc->loadStep = 0;
@@ -316,7 +316,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             gc->renderer.lastViewportCenterX = -1;
             gc->ui.menuDirty = true;
             break;
-        case +GameState::BuildingMinimap: gc->loadStep = 4; gc->confirmToggle = 0; break;
+        case +GameState::BuildingMinimap: gc->loadStep = 4; gc->ui.confirmToggle = 0; break;
         case +GameState::BuildingPath: gc->loadStep = 4; break;
         case +GameState::SavingGame: gc->loadStep = 4; break;
         case +GameState::LoadingGame: gc->loadStep = 4; break;

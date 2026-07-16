@@ -89,8 +89,8 @@ void gc_drawConfirmBar(GameCanvas *gc, Surface *graphics) {
     gc_drawMenuRow(gc, graphics, 201, 10, 0, false);
     gc_drawMenuRow(gc, graphics, 235, 10, 18, false);
     midp_set_color(graphics, 0xFFFFFF);
-    midp_draw_rect(graphics, 18 * gc->confirmToggle, gcs_bottomBarY, 14, 14);
-    midp_draw_rect(graphics, 18 * gc->confirmToggle + 1, gcs_bottomBarY + 1, 12, 12);
+    midp_draw_rect(graphics, 18 * gc->ui.confirmToggle, gcs_bottomBarY, 14, 14);
+    midp_draw_rect(graphics, 18 * gc->ui.confirmToggle + 1, gcs_bottomBarY + 1, 12, 12);
 }
 
 // void paintMain(Graphics)
@@ -164,13 +164,13 @@ void gc_drawMoneyTicker(GameCanvas *gc, Surface *graphics) {
 
 // void drawConfirmDialog(Graphics)
 void gc_drawConfirmDialog(GameCanvas *gc, Surface *graphics) {
-    if (gc->confirmCounter <= 0) return;
-    if (gc->confirmTargetState >= 0) {
+    if (gc->ui.confirmCounter <= 0) return;
+    if (gc->ui.confirmTargetState >= 0) {
         gc_drawTextBox(gc, graphics, 10, 10, 0, 37,
                        gc_tracked_codes(gc->assets.spriteBitmapTable[
-                           gc->assets.spriteIndexTable[120 + gc->confirmTargetState]]));
+                           gc->assets.spriteIndexTable[120 + gc->ui.confirmTargetState]]));
     }
-    --gc->confirmCounter;
+    --gc->ui.confirmCounter;
 }
 
 // void computeIsoCornersInlined(int,int,int[],int[],boolean)

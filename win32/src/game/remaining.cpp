@@ -201,7 +201,7 @@ void gc_hideNotify(GameCanvas *gc) {
     if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_stopMusic(gc);
     if (gc->gameState == +GameState::Playing) {
         gc->ready = false;
-        gc->transitionCode = 1;
+        gc->ui.transitionCode = 1;
         gc_setState(gc, +GameState::MenuOverlay);
     }
 }

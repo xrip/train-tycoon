@@ -9,47 +9,47 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 1:
             switch (n2) {
                 case 1:
-                    if (gc->ready) { gc->transitionCode = 4; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 4; gc_setState(gc, +GameState::Playing); break;
+                    if (gc->ready) { gc->ui.transitionCode = 4; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 4; gc_setState(gc, +GameState::Playing); break;
                 case 2:
-                    gc->screenParam = 1;
-                    if (gc->ready) { gc->transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing); break;
+                    gc->ui.screenParam = 1;
+                    if (gc->ready) { gc->ui.transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing); break;
                 case 3:
-                    gc->screenParam = 0;
-                    if (gc->ready) { gc->transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing); break;
+                    gc->ui.screenParam = 0;
+                    if (gc->ready) { gc->ui.transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing); break;
                 case 4:
-                    if (gc->ready) { gc->transitionCode = 10; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 10; gc_setState(gc, +GameState::Playing); break;
+                    if (gc->ready) { gc->ui.transitionCode = 10; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 10; gc_setState(gc, +GameState::Playing); break;
                 case 5:
-                    if (gc->ready) { gc->transitionCode = 2; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 2; gc_setState(gc, +GameState::Playing); break;
+                    if (gc->ready) { gc->ui.transitionCode = 2; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 2; gc_setState(gc, +GameState::Playing); break;
                 case 6:
-                    if (gc->ready) { gc->transitionCode = 3; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 3; gc_setState(gc, +GameState::Playing); break;
+                    if (gc->ready) { gc->ui.transitionCode = 3; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 3; gc_setState(gc, +GameState::Playing); break;
                 case 7:
                     gc_setState(gc, +GameState::Playing); break;
                 case 8:
-                    if (gc->ready) { gc->transitionCode = 5; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 5; gc_setState(gc, +GameState::Playing); break;
+                    if (gc->ready) { gc->ui.transitionCode = 5; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 5; gc_setState(gc, +GameState::Playing); break;
                 case 9:
-                    if (gc->ready) { gc->transitionCode = 28; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 28; gc_setState(gc, +GameState::Playing); break;
+                    if (gc->ready) { gc->ui.transitionCode = 28; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 28; gc_setState(gc, +GameState::Playing); break;
                 case 99:
-                    gc->screenParam = 2;
-                    if (gc->ready) { gc->transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
-                    gc->pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing); break;
+                    gc->ui.screenParam = 2;
+                    if (gc->ready) { gc->ui.transitionCode = 14; gc_resetOverlayRenderState(gc); break; }
+                    gc->ui.pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing); break;
             }
             break;
         case 14:
             if (n2 == 2) {
-                if (gc->screenParam == 4) { gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing); break; }
-                if (gc->screenParam == 3) { gc_setState(gc, +GameState::LoadingResources); break; }
-                if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
-                gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
+                if (gc->ui.screenParam == 4) { gc->ui.pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing); break; }
+                if (gc->ui.screenParam == 3) { gc_setState(gc, +GameState::LoadingResources); break; }
+                if (gc->ready) { gc->ui.transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
+                gc->ui.pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
             }
-            switch (gc->screenParam) {
+            switch (gc->ui.screenParam) {
                 case 0: gc_setState(gc, +GameState::SavingGame); break;
                 case 1: gc_setState(gc, +GameState::LoadingGame); break;
                 case 2: gc->stopRequested = true; break;
@@ -71,21 +71,21 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 36:
             gc_setState(gc, +GameState::MapOverview); break;
         case 17:
-            if (n2 == 1) gc->pendingTransitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeId;
+            if (n2 == 1) gc->ui.pendingTransitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeId;
             gc_setState(gc, +GameState::Playing); break;
         case 2:
         case 3:
-            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 6:
             gc_setState(gc, +GameState::Playing); break;
         case 7:
-            gc->ready = false; gc->scenario.aiEnabled = true; gc->transitionCode = 1;
+            gc->ready = false; gc->scenario.aiEnabled = true; gc->ui.transitionCode = 1;
             gc_resetOverlayRenderState(gc); gc_setState(gc, +GameState::MenuOverlay); break;
         case 5:
             if (n2 >= 2) { gc->scenario.activeScenario = n2; gc_setState(gc, +GameState::GeneratingMap); break; }
-            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 4:
             switch (n2) {
                 case 1:
@@ -110,8 +110,8 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 10:
                     gc->scenario.activeScenario = gc->scenario.scenarioMilestone; gc_setState(gc, +GameState::GeneratingMap); goto hbms_end;
             }
-            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 20:
             gc_setState(gc, +GameState::Playing); break;
         case 21:
@@ -126,25 +126,25 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 gc->scenario.difficultyPct = 100;
                 gc->build.discountApplied = false;
                 gc_computeTrainCost(gc);
-                gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                gc->ui.pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); goto hbms_end;
             }
             gc_setState(gc, +GameState::Playing); break;
         case 23:
-            if (n2 == 0) { gc->pendingTransitionCode = 24; gc_setState(gc, +GameState::Playing); break; }
-            if (n2 == 1) { gc->pendingTransitionCode = 25; gc_setState(gc, +GameState::Playing); break; }
+            if (n2 == 0) { gc->ui.pendingTransitionCode = 24; gc_setState(gc, +GameState::Playing); break; }
+            if (n2 == 1) { gc->ui.pendingTransitionCode = 25; gc_setState(gc, +GameState::Playing); break; }
             if (n2 == 2) {
                 if (!gc->build.discountApplied) {
                     if (!gc_buyTrainAtCursor(gc)) break;
                     gc_setState(gc, +GameState::Playing); break;
                 }
                 if (!gc_applyTrainUpgradeInlined(gc, gc->trainAtCursor, gc->build.wagonType, gc->build.wagonOptionSlots.data())) break;
-                gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing); break;
+                gc->ui.pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing); break;
             }
-            gc->pendingTransitionCode = !gc->build.discountApplied ? 22 : 26;
+            gc->ui.pendingTransitionCode = !gc->build.discountApplied ? 22 : 26;
             gc_setState(gc, +GameState::Playing); break;
         case 24:
             if (n2 >= 0 && n2 < 6) { gc->build.wagonType = n2; gc_computeTrainCost(gc); }
-            gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); break;
+            gc->ui.pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); break;
         case 25:
             if (n2 == 3) gc_addSelectedOption(gc, 0);
             else if (n2 == 1) gc_addSelectedOption(gc, 1);
@@ -152,11 +152,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             else if (n2 == 2) gc_addSelectedOption(gc, 3);
             else if (n2 == 9) gc_popSelectedOption(gc);
             gc_computeTrainCost(gc);
-            gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); break;
+            gc->ui.pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); break;
         case 26:
             if (n2 == 1) {
                 gc->build.discountApplied = true;
-                gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing);
+                gc->ui.pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing);
             } else if (n2 == 2) {
                 int n4 = gc->build.baseTrainCostSnapshot - gc->build.currentTrainCostSnapshot;
                 if (n4 <= gc->economy.money) {
@@ -167,13 +167,13 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc->scenario.difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
                     gc_computeTrainCost(gc);
                     gc->build.currentTrainCostSnapshot = gc->build.unitCost;
-                    gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing);
+                    gc->ui.pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing);
                 } else {
                     gc_enterOutOfMoneyState(gc);
                 }
             } else if (n2 == 3) {
-                gc->screenParam = 4;
-                gc->pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing);
+                gc->ui.screenParam = 4;
+                gc->ui.pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing);
             }
             if (n2 == 4) {
                 gc->fleet.trainAiOverride[gc->trainAtCursor] = (int8_t)(gc->fleet.trainAiOverride[gc->trainAtCursor] == 0 ? 1 : 0);
@@ -196,16 +196,16 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc_setMusicVolume(gc, gc->music_volume_level); goto hbms_end;
             }
             gc_persistSnapshotMode0(gc);
-            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 18:
         case 19:
-            if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 8:
         case 9:
-            if (n2 == 1) { gc->pendingTransitionCode = gc->scenario.offerTypeTransitionCode; gc_setState(gc, +GameState::Playing); break; }
-            if (n2 == 2) { gc->pendingTransitionCode = gc->scenario.offerEffectTransitionCode; gc_setState(gc, +GameState::Playing); break; }
+            if (n2 == 1) { gc->ui.pendingTransitionCode = gc->scenario.offerTypeTransitionCode; gc_setState(gc, +GameState::Playing); break; }
+            if (n2 == 2) { gc->ui.pendingTransitionCode = gc->scenario.offerEffectTransitionCode; gc_setState(gc, +GameState::Playing); break; }
             gc_setState(gc, +GameState::Playing); break;
         case 11: case 12: case 13: case 16:
             gc_setState(gc, +GameState::Playing); break;
@@ -232,71 +232,71 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 31:
             gc->monthRolloverFlag = false;
             switch (n2) {
-                case 0: gc->compareToPrevious = false; gc_archiveOrRecall(gc); gc->pendingTransitionCode = 32; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 1: gc->compareToPrevious = true; gc->pendingTransitionCode = 32; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 2: gc_setYearGraphMode(gc, 0, false); gc->pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 3: gc_setYearGraphMode(gc, 0, false); gc->pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 4: gc_setYearGraphMode(gc, 1, false); gc->pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 5: gc_setYearGraphMode(gc, 1, false); gc->pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 6: gc_setYearGraphMode(gc, 2, false); gc->pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 7: gc_setYearGraphMode(gc, 2, false); gc->pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 8: gc_setYearGraphMode(gc, 0, true); gc->pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 9: gc_setYearGraphMode(gc, 0, true); gc->pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 10: gc_setYearGraphMode(gc, 1, true); gc->pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 11: gc_setYearGraphMode(gc, 1, true); gc->pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 12: gc_setYearGraphMode(gc, 2, true); gc->pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 13: gc_setYearGraphMode(gc, 2, true); gc->pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 14: gc->compareToPrevious = false; gc_archiveOrRecall(gc); gc->pendingTransitionCode = 35; gc_setState(gc, +GameState::Playing); goto hbms_end;
-                case 15: gc->compareToPrevious = true; gc->pendingTransitionCode = 35; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 0: gc->compareToPrevious = false; gc_archiveOrRecall(gc); gc->ui.pendingTransitionCode = 32; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 1: gc->compareToPrevious = true; gc->ui.pendingTransitionCode = 32; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 2: gc_setYearGraphMode(gc, 0, false); gc->ui.pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 3: gc_setYearGraphMode(gc, 0, false); gc->ui.pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 4: gc_setYearGraphMode(gc, 1, false); gc->ui.pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 5: gc_setYearGraphMode(gc, 1, false); gc->ui.pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 6: gc_setYearGraphMode(gc, 2, false); gc->ui.pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 7: gc_setYearGraphMode(gc, 2, false); gc->ui.pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 8: gc_setYearGraphMode(gc, 0, true); gc->ui.pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 9: gc_setYearGraphMode(gc, 0, true); gc->ui.pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 10: gc_setYearGraphMode(gc, 1, true); gc->ui.pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 11: gc_setYearGraphMode(gc, 1, true); gc->ui.pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 12: gc_setYearGraphMode(gc, 2, true); gc->ui.pendingTransitionCode = 33; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 13: gc_setYearGraphMode(gc, 2, true); gc->ui.pendingTransitionCode = 34; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 14: gc->compareToPrevious = false; gc_archiveOrRecall(gc); gc->ui.pendingTransitionCode = 35; gc_setState(gc, +GameState::Playing); goto hbms_end;
+                case 15: gc->compareToPrevious = true; gc->ui.pendingTransitionCode = 35; gc_setState(gc, +GameState::Playing); goto hbms_end;
             }
             gc_setState(gc, +GameState::Playing); gc->ui.menuDirty = true;
             break;
         case 32:
         case 35:
-            if (!gc->monthRolloverFlag) { gc->pendingTransitionCode = 31; gc_setState(gc, +GameState::Playing); break; }
+            if (!gc->monthRolloverFlag) { gc->ui.pendingTransitionCode = 31; gc_setState(gc, +GameState::Playing); break; }
             gc_setState(gc, +GameState::Playing); gc->ui.menuDirty = true; break;
         case 33:
         case 34:
-            gc->pendingTransitionCode = 31; gc_setState(gc, +GameState::Playing); break;
+            gc->ui.pendingTransitionCode = 31; gc_setState(gc, +GameState::Playing); break;
         case 40:
             switch (n2) {
                 case 1:
-                    gc->pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                    gc->ui.pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
                     gc->scenario.duplicateRowState = 2; break;
                 case 2:
-                    gc->pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                    gc->ui.pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
                     gc->scenario.duplicateRowState = 2; break;
             }
             gc_setState(gc, +GameState::Playing); break;
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
-            if (gc->scenario.duplicateRowState == 1) gc->pendingTransitionCode = 60;
-            if (gc->scenario.duplicateRowState == 2) gc->pendingTransitionCode = 40;
-            if (gc->scenario.duplicateRowState == 3) gc->pendingTransitionCode = 9;
-            if (gc->scenario.duplicateRowState == 4) gc->pendingTransitionCode = 8;
+            if (gc->scenario.duplicateRowState == 1) gc->ui.pendingTransitionCode = 60;
+            if (gc->scenario.duplicateRowState == 2) gc->ui.pendingTransitionCode = 40;
+            if (gc->scenario.duplicateRowState == 3) gc->ui.pendingTransitionCode = 9;
+            if (gc->scenario.duplicateRowState == 4) gc->ui.pendingTransitionCode = 8;
             gc_setState(gc, +GameState::Playing); break;
         case 60:
             if (n2 % 2 == 1) {
                 gc->scenario.offerRowIndex = gc->ui.enabledMenuRowIndexes[n2 / 2];
-                gc->pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                gc->ui.pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
             }
             if (n2 % 2 == 0) {
                 gc->scenario.offerRowIndex = gc->ui.enabledMenuRowIndexes[(n2 - 1) / 2];
-                gc->pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                gc->ui.pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
             }
             gc->scenario.duplicateRowState = 1;
             gc_setState(gc, +GameState::Playing); break;
         case 61: case 62: case 63: case 64: case 65: case 66:
         case 67: case 68: case 69: case 70: case 71: case 72:
-            if (gc->scenario.duplicateRowState == 1) gc->pendingTransitionCode = 60;
-            if (gc->scenario.duplicateRowState == 2) gc->pendingTransitionCode = 40;
-            if (gc->scenario.duplicateRowState == 3) gc->pendingTransitionCode = 9;
-            if (gc->scenario.duplicateRowState == 4) gc->pendingTransitionCode = 8;
+            if (gc->scenario.duplicateRowState == 1) gc->ui.pendingTransitionCode = 60;
+            if (gc->scenario.duplicateRowState == 2) gc->ui.pendingTransitionCode = 40;
+            if (gc->scenario.duplicateRowState == 3) gc->ui.pendingTransitionCode = 9;
+            if (gc->scenario.duplicateRowState == 4) gc->ui.pendingTransitionCode = 8;
             gc_setState(gc, +GameState::Playing); break;
         case 28:
             if (n2 == 41) { gc->scenario.highScoreUploadRequested = false; gc_setState(gc, +GameState::HighScoreSync); break; }
-            if (gc->ready) { gc->transitionCode = n2 == 40 ? 27 : 1; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = n2 == 40 ? 27 : 1; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = n2 == 40 ? 27 : 1; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = n2 == 40 ? 27 : 1; gc_setState(gc, +GameState::Playing); break;
         case 27:
             if (n2 == 40) { gc->scenario.highScoreUploadRequested = true; gc_setState(gc, +GameState::HighScoreSync); break; }
             if (n2 == 0) gc->scenario.routeSlotIndex = (int8_t)(gc->scenario.routeSlotIndex - 1);
@@ -320,8 +320,8 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             }
             if (n2 >= 0) break;
             gc_persistSnapshotMode0(gc);
-            if (gc->ready) { gc->transitionCode = 28; gc_resetOverlayRenderState(gc); break; }
-            gc->pendingTransitionCode = 28; gc_setState(gc, +GameState::Playing); break;
+            if (gc->ready) { gc->ui.transitionCode = 28; gc_resetOverlayRenderState(gc); break; }
+            gc->ui.pendingTransitionCode = 28; gc_setState(gc, +GameState::Playing); break;
     }
 hbms_end:
     if (n > 80 && n < 100) gc_setState(gc, +GameState::Playing);

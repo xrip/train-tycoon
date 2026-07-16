@@ -74,12 +74,12 @@ void gc_paint(GameCanvas *gc, Surface *g) {
                 if (gc->assets.cycle_flag != NULL)
                     midp_draw_image(g, gc->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             }
-            if (gc->transitionCode == 36) {
+            if (gc->ui.transitionCode == 36) {
                 gc->gameState = +GameState::MapOverview;
                 gc_paint(gc, g);
                 gc->gameState = +GameState::MenuOverlay;
             }
-            gc_renderPackedSprite(gc, g, gc->transitionCode);
+            gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
             break;
         }
         case +GameState::GeneratingMap: {
@@ -114,20 +114,20 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             }
             gc_drawMoneyTicker(gc, g);
             if (gc->pauseFlag) gc_drawSpriteQuad(gc, g, 236, 0, 15, 0);
-            if (gc->pendingTransitionCode > -1) {
-                gc->transitionCode = gc->pendingTransitionCode;
+            if (gc->ui.pendingTransitionCode > -1) {
+                gc->ui.transitionCode = gc->ui.pendingTransitionCode;
                 gc_resetOverlayRenderState(gc);
-                gc->pendingTransitionCode = -1;
-                gc_renderPackedSprite(gc, g, gc->transitionCode);
+                gc->ui.pendingTransitionCode = -1;
+                gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
                 gc_setState(gc, +GameState::MenuOverlay);
             }
-            if (gc->transitionDebounce <= 0) break;
-            gc->transitionDebounce = (int8_t)(gc->transitionDebounce - 1);
-            if (gc->transitionDebounce != 0) break;
-            gc->transitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeCode;
+            if (gc->ui.transitionDebounce <= 0) break;
+            gc->ui.transitionDebounce = (int8_t)(gc->ui.transitionDebounce - 1);
+            if (gc->ui.transitionDebounce != 0) break;
+            gc->ui.transitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeCode;
             gc_resetOverlayRenderState(gc);
             gc->ready = false;
-            gc_renderPackedSprite(gc, g, gc->transitionCode);
+            gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
             gc_setState(gc, +GameState::MenuOverlay);
             break;
         }
@@ -162,15 +162,15 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             gc_drawConfirmDialog(gc, g);
             if (gc->ee) {
                 gc->ready = false;
-                gc->transitionCode = 36;
+                gc->ui.transitionCode = 36;
                 gc_setState(gc, +GameState::MenuOverlay);
                 gc->ee = false;
             }
-            if (gc->pendingTransitionCode <= -1) break;
-            gc->transitionCode = gc->pendingTransitionCode;
+            if (gc->ui.pendingTransitionCode <= -1) break;
+            gc->ui.transitionCode = gc->ui.pendingTransitionCode;
             gc_resetOverlayRenderState(gc);
-            gc->pendingTransitionCode = -1;
-            gc_renderPackedSprite(gc, g, gc->transitionCode);
+            gc->ui.pendingTransitionCode = -1;
+            gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
             gc_setState(gc, +GameState::MenuOverlay);
             break;
         }
@@ -215,8 +215,8 @@ void gc_update(GameCanvas *gc) {
         }
         case +GameState::IntroReady:
             gc->ready = true;
-            gc->screenParam = 3;
-            gc->transitionCode = 14;
+            gc->ui.screenParam = 3;
+            gc->ui.transitionCode = 14;
             gc_resetOverlayRenderState(gc);
             gc_setState(gc, +GameState::MenuOverlay);
             break;
@@ -230,7 +230,7 @@ void gc_update(GameCanvas *gc) {
             }
             if (gc->assets.spriteLoadCounter != gc->scenario.scenarioResourceCount) break;
             gc->ready = true;
-            gc->transitionCode = 1;
+            gc->ui.transitionCode = 1;
             gc_setState(gc, +GameState::MenuOverlay);
             break;
         case +GameState::GeneratingMap: {
@@ -305,8 +305,8 @@ void gc_update(GameCanvas *gc) {
                         if ((scenario_flags & 1) != 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 100; }
                         else { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
                         gc->scenario.scenarioNoticeId = notice_id;
-                        if (notice_id != 0) { gc->transitionDebounce = 5; gc->scenario.scenarioNoticeCode = (int8_t)notice_id; continue; }
-                        gc->transitionDebounce = 0;
+                        if (notice_id != 0) { gc->ui.transitionDebounce = 5; gc->scenario.scenarioNoticeCode = (int8_t)notice_id; continue; }
+                        gc->ui.transitionDebounce = 0;
                     }
                 }
                 if (gc->scenario.activeScenario <= 1) {
@@ -423,7 +423,7 @@ void gc_update(GameCanvas *gc) {
             gc->ui.buildMenuMode = 1;
             gc->ui.menuDirty = true;
             gc->ready = false;
-            gc->transitionCode = 12;
+            gc->ui.transitionCode = 12;
             gc_setState(gc, +GameState::MenuOverlay);
             break;
         case +GameState::SavingGame:
@@ -458,7 +458,7 @@ void gc_update(GameCanvas *gc) {
         case +GameState::HighScoreSync:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            gc->transitionCode = gc_syncHighScores(gc, gc->scenario.highScoreUploadRequested)
+            gc->ui.transitionCode = gc_syncHighScores(gc, gc->scenario.highScoreUploadRequested)
                                  ? 19 : 18;
             gc_setState(gc, +GameState::MenuOverlay);
             break;

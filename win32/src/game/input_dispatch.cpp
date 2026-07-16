@@ -63,7 +63,7 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
                 gc->heldKey = n;
             }
             if (n == 53) gc_registerCityEntryInlined(gc, 3);
-            if (!gc->pauseMenuOpen || n != 42) break;
+            if (!gc->ui.pauseMenuOpen || n != 42) break;
             gc->cursorDragY = -3;
             gc->cursorDragX = -1;
             gc_registerCityEntryInlined(gc, 3);
@@ -99,26 +99,26 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
             gc->lastKeyCode = n;
             gc->keySubState = 40;
             if (n == 53) {
-                if (gc->confirmToggle == 0) {
+                if (gc->ui.confirmToggle == 0) {
                     gc_setState(gc, +GameState::Playing);
                     gc->ui.buildMenuItemIndex = 0;
                     gc->ui.menuDirty = true;
                 } else {
                     gc->ready = false;
-                    gc->transitionCode = 36;
+                    gc->ui.transitionCode = 36;
                     gc_setState(gc, +GameState::MenuOverlay);
                 }
             }
             if (n != 42 && n != 35) break;
-            if (gc->confirmToggle == 0) {
-                gc->confirmToggle = 1;
-                gc->confirmTargetState = 30;
+            if (gc->ui.confirmToggle == 0) {
+                gc->ui.confirmToggle = 1;
+                gc->ui.confirmTargetState = 30;
             } else {
-                gc->confirmToggle = 0;
-                gc->confirmTargetState = 17;
+                gc->ui.confirmToggle = 0;
+                gc->ui.confirmTargetState = 17;
             }
             gc->ui.menuDirty = true;
-            gc->confirmCounter = 20;
+            gc->ui.confirmCounter = 20;
             break;
     }
 }

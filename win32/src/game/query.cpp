@@ -80,11 +80,11 @@ bool gc_isAdjacentTileEmpty(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, b
 
 // boolean isResourceTile(int n, int n2)
 bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
-    if (n != 1) gc->snapshotLoadedFlag = false;
+    if (n != 1) gc->ui.snapshotLoadedFlag = false;
     if (n == 1) {
-        if (!gc->snapshotLoadedFlag) {
+        if (!gc->ui.snapshotLoadedFlag) {
             gc->cH = gc_loadSnapshotAndReturn(gc);
-            gc->snapshotLoadedFlag = true;
+            gc->ui.snapshotLoadedFlag = true;
         }
         if (n2 == 0 && gc->scenario.aiEnabled) return false;
         if (n2 == 0 && !gc->ready) return true;

@@ -42,10 +42,10 @@ void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
     int item_count = static_cast<int>(gc->ui.buildMenuItems[gc->ui.buildMenuMode].size());
     if (gc->ui.buildMenuItemIndex < 0) gc->ui.buildMenuItemIndex = item_count - 1;
     if (gc->ui.buildMenuItemIndex == item_count) gc->ui.buildMenuItemIndex = 0;
-    gc->confirmTargetState =
+    gc->ui.confirmTargetState =
         gc->ui.buildMenuResultCodes[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
     gc->ui.menuDirty = true;
-    gc->confirmCounter = 20;
+    gc->ui.confirmCounter = 20;
 }
 
 // void viewportPanKey()

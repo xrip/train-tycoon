@@ -62,9 +62,9 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
     GameCanvas *gc, int32_t screen, int32_t field) {
     switch (screen) {
         case 14:
-            if (gc->screenParam >= 0 && gc->screenParam <= 4)
+            if (gc->ui.screenParam >= 0 && gc->ui.screenParam <= 4)
                 return copy_codes(gc->assets.spriteBitmapTable[
-                    gc->assets.spriteIndexTable[11 + gc->screenParam]]);
+                    gc->assets.spriteIndexTable[11 + gc->ui.screenParam]]);
             break;
 
         case 4:

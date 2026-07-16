@@ -194,7 +194,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         midp_set_color(g, n15); midp_draw_rect(g, n20, n21, 0, n19);
         midp_draw_rect(g, n20, n21, n18, 0);
     }
-    gc->pauseMenuOpen = false;
+    gc->ui.pauseMenuOpen = false;
     if ((gc->assets.spriteData[s] & 1) == 1) {
         if (gc->renderer.needsRepaint && gc->cursorDragY == -1) {
             midp_set_color(g, n17);
@@ -206,7 +206,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
             midp_draw_line(g, n20 + n18 - 8, n21 + 5, n20 + n18 - 5, n21 + 8);
             midp_draw_line(g, n20 + n18 - 8, n21 + 8, n20 + n18 - 5, n21 + 5);
         }
-        gc->pauseMenuOpen = true;
+        gc->ui.pauseMenuOpen = true;
         n24 = 19;
     } else if (gc->cursorDragY == -1) {
         gc->cursorDragY = -3;

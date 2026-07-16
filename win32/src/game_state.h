@@ -90,8 +90,6 @@ typedef struct GameCanvas {
     bool cursorOverUI;
     bool cursorAllowZoomOut;
     int32_t cursorDragX;
-    bool useDefaultOverlaySelection;
-    bool pauseMenuOpen;
     bool initialIndustryPlaced;
     int32_t mapGenStage;
     int32_t tilesGeneratedInStage;
@@ -110,10 +108,7 @@ typedef struct GameCanvas {
     int32_t tileCursorY;
     bool vehicleMenuSelectIndex;
     bool trainMenuSelectIndex;
-    int32_t confirmToggle;
     std::array<int8_t, 3> moneyTickerFrames{};
-    int32_t confirmCounter;
-    int32_t confirmTargetState;
     bool flagsA;
     int8_t junctionDirCursor;
     int8_t numSelectedTrains;
@@ -122,10 +117,7 @@ typedef struct GameCanvas {
     std::array<int16_t, 64> trainSelectionX{};
     int8_t stationDirCursor;
     int8_t cityListIndex;
-    int32_t pendingTransitionCode;
-    bool snapshotLoadedFlag;
     bool cH;
-    int32_t screenParam;
     Pathfinder pathfinder;
     // Endpoints of the path being built. pathAnchor is the reference endpoint
     // (the city station in AI gen, the first tile the player picks): it is the
@@ -188,7 +180,6 @@ typedef struct GameCanvas {
     JavaRandom rng;
     int64_t loadingStartTime;
     bool loadingTimeout;
-    int32_t transitionCode;
     bool ready;
     int32_t loadStep;
     int32_t timerA1;
@@ -200,7 +191,6 @@ typedef struct GameCanvas {
     std::array<int32_t, 9> dc{};
     int32_t bx;
     int32_t fR;
-    int8_t transitionDebounce;
     int32_t eD;
     int32_t aJ;
     int32_t hx;

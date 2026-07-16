@@ -46,6 +46,22 @@ struct UiController {
     int32_t selectedMenuRowX = 0;
     int32_t menuRowEnabledCount = 0;
     std::array<int8_t, 5> enabledMenuRowIndexes{};
+
+    // Confirm-dialog and screen-transition/overlay state. The confirm fields
+    // drive the yes/no bar; transitionCode / pendingTransitionCode / the debounce
+    // pick the overlay sprite and defer it; screenParam parameterises the current
+    // screen; the flags track the pause menu, default overlay selection, and
+    // whether a snapshot was loaded. All runtime-only (not saved).
+    int32_t confirmToggle = 0;
+    int32_t confirmCounter = 0;
+    int32_t confirmTargetState = 0;
+    int32_t pendingTransitionCode = 0;
+    int32_t transitionCode = 0;
+    int8_t transitionDebounce = 0;
+    int32_t screenParam = 0;
+    bool pauseMenuOpen = false;
+    bool useDefaultOverlaySelection = false;
+    bool snapshotLoadedFlag = false;
 };
 
 #endif  // UI_CONTROLLER_H

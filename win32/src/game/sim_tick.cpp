@@ -107,7 +107,7 @@ void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
                                     gc_byteToUnsignedInt(gc, gc->fleet.trainY[n]), false, true);
     gc->renderer.lastViewportCenterX = -1;
     gc->ready = false;
-    gc->transitionCode = 16;
+    gc->ui.transitionCode = 16;
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
@@ -398,7 +398,7 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
     }
     if (!bl) return;
     gc->ready = false;
-    gc->transitionCode = 6;
+    gc->ui.transitionCode = 6;
     gc->scenario.milestonesEnabled = true;
     if (gc->scenario.scenarioStep >= 2) {
         if (gc->scenario.scenarioStepCompare < gc->scenario.scenarioStep)
@@ -518,12 +518,12 @@ void gc_newYearNotify(GameCanvas *gc) {
     if (gc->economy.monthOfYear == 13) {
         if (gcs_annualReportEnabled) {
             gc->ready = false;
-            gc->transitionCode = 35;
+            gc->ui.transitionCode = 35;
             gc_setState(gc, +GameState::MenuOverlay);
         }
     } else if (gcs_monthlyReportEnabled) {
         gc->ready = false;
-        gc->transitionCode = 32;
+        gc->ui.transitionCode = 32;
         gc_setState(gc, +GameState::MenuOverlay);
     }
 }
@@ -802,7 +802,7 @@ void gc_simulationTick(GameCanvas *gc) {
                     ++gc->economy.year;
                     if (gc->economy.money < 0) {
                         gc->ready = false;
-                        gc->transitionCode = 7;
+                        gc->ui.transitionCode = 7;
                         gc_setState(gc, +GameState::MenuOverlay);
                     }
                 }
@@ -817,7 +817,7 @@ void gc_simulationTick(GameCanvas *gc) {
                     gc->era = 5;
                 if (oldEra != gc->era) {
                     gc->ready = false;
-                    gc->transitionCode = 13;
+                    gc->ui.transitionCode = 13;
                     gc_setState(gc, +GameState::MenuOverlay);
                 }
             } else {
