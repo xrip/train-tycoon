@@ -141,7 +141,7 @@ void gc_decrementTrainCargoOptionCounts(GameCanvas *gc, int32_t n);
 bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t* nArray);
 void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode);
 void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n);
-int32_t gc_readShortFromBuffer(GameCanvas *gc);
+int32_t gc_readSaveByteUnsigned(GameCanvas *gc);
 void gc_saveGame(GameCanvas *gc);
 void gc_writeRleRun(GameCanvas *gc, ByteBuffer& output, int32_t value, int32_t count);
 void gc_checkSaveByteSum(GameCanvas *gc, const char* string);

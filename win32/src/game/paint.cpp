@@ -236,7 +236,7 @@ void gc_update(GameCanvas *gc) {
         case +GameState::GeneratingMap: {
             ++gc->loadStep;
             if (gc->loadStep == 2) {
-                gc_initSaveOrLoad(gc, 2);
+                gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
                 gc->dayOfMonth = 1; gc->monthOfYear = 1; gc->year = 1950;
                 gc->milestonesEnabled = false; gc->pauseFlag = false; gc->aiEnabled = false;
                 gc->moneyBaseA = 974; gc->moneyBaseB = 974;

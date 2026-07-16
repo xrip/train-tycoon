@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-// private int readShortFromBuffer()
-int32_t gc_readShortFromBuffer(GameCanvas *gc) {
+// Read one byte from the save buffer as an unsigned value (0..255).
+int32_t gc_readSaveByteUnsigned(GameCanvas *gc) {
     return gc->saveBuffer[gc->saveReadOffset] >= 0
                ? gc->saveBuffer[gc->saveReadOffset++]
                : 256 + gc->saveBuffer[gc->saveReadOffset++];
@@ -41,10 +41,10 @@ int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n) {
         gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
         gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
     } else if (gc->snapshotLoaded) {
-        uint32_t bits = (uint32_t)gc_readShortFromBuffer(gc);
-        bits |= (uint32_t)gc_readShortFromBuffer(gc) << 8;
-        bits |= (uint32_t)gc_readShortFromBuffer(gc) << 16;
-        bits |= (uint32_t)gc_readShortFromBuffer(gc) << 24;
+        uint32_t bits = (uint32_t)gc_readSaveByteUnsigned(gc);
+        bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 8;
+        bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 16;
+        bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 24;
         memcpy(&n2, &bits, sizeof(n2));
     }
     return n2;
@@ -138,9 +138,9 @@ void gc_decompressSaveBuffer(GameCanvas *gc) {
 }
 
 void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
-    if (mode == 0) gc_loadGame(gc, 0, save::MODE_WRITE);
-    if (mode == 1) gc_loadGame(gc, 0, save::MODE_READ);
-    if (mode == 2) gc->savePendingMode = save::MODE_SKIP;
+    if (mode == save::OP_SAVE_MAIN) gc_loadGame(gc, 0, save::MODE_WRITE);
+    if (mode == save::OP_LOAD_MAIN) gc_loadGame(gc, 0, save::MODE_READ);
+    if (mode == save::OP_RESET_SKIP) gc->savePendingMode = save::MODE_SKIP;
     if (mode == 4) {
         gc->snapshotSize = 0;
         gc->saveBuffer.clear();
@@ -151,7 +151,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
         gc->savePendingMode = save::MODE_READ;
         gc->snapshotLoaded = true;
     }
-    if (mode == 1) gc_decompressSaveBuffer(gc);
+    if (mode == save::OP_LOAD_MAIN) gc_decompressSaveBuffer(gc);
 
 #define IO_INT(field) \
     (gc->field = gc_saveIntToBuffer(gc, gc->field))
@@ -267,7 +267,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     if (gc->nextTrackPieceCode == 0) gc->nextTrackPieceCode = 66;
     IO_BYTE(aiFrequency);
     IO_BYTE(aiThreshold);
-    if (mode != 2) IO_BYTE(difficultyCycle);
+    if (mode != save::OP_RESET_SKIP) IO_BYTE(difficultyCycle);
     IO_BYTES(menuRowType);
     IO_BYTES(placeTrainDay);
     IO_BYTES(menuRowParamA);
@@ -330,7 +330,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
 #undef IO_SHORTS
 #undef IO_INTS
 
-    if (mode == 0) {
+    if (mode == save::OP_SAVE_MAIN) {
         gc_compressSaveBuffer(gc);
         gc_saveGame(gc);
     }
@@ -339,7 +339,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
 void gc_saveAllMapArrays(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
-    gc_initSaveOrLoad(gc, 0);
+    gc_initSaveOrLoad(gc, save::OP_SAVE_MAIN);
     gc_loadGame(gc, 1, save::MODE_WRITE);
     gc_saveOrLoadByteMatrixInlined(gc, gc->tileMap);
     gc_compressSaveBuffer(gc);
@@ -361,7 +361,7 @@ void gc_saveAllMapArrays(GameCanvas *gc) {
 void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
-    gc_initSaveOrLoad(gc, 1);
+    gc_initSaveOrLoad(gc, save::OP_LOAD_MAIN);
     gc->tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
     gc->trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
     gc->tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);

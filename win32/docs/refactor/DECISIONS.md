@@ -172,9 +172,14 @@ direction lives in `GameCanvas::savePendingMode` and in the `mode` argument of
 deserializes, `MODE_SKIP` (2) touches nothing (returns 0, zeros arrays). Applied
 at every `savePendingMode` compare/assign and every `gc_loadGame` call, and the
 `gc_loadGame` parameters were renamed `n`/`n2` -> `slot`/`mode`. Values and byte
-order are unchanged. The higher-level `gc_initSaveOrLoad(mode)` selector (0/1/2/
-4/5) and the misleading primitive name `gc_readShortFromBuffer` (it reads one
-unsigned byte) are left for later SAVE-01 leaves.
+order are unchanged.
+
+A second leaf named the higher-level `gc_initSaveOrLoad` operation selector as
+`save::OP_SAVE_MAIN` (0), `OP_LOAD_MAIN` (1), and `OP_RESET_SKIP` (2), and renamed
+the misleading `gc_readShortFromBuffer` -> `gc_readSaveByteUnsigned` (it reads one
+unsigned byte, not a short). Selector values 4 and 5 exist in `gc_initSaveOrLoad`
+but are never called; this dead branch is recorded as a smell for a separate
+cleanup item, not removed under a refactor commit.
 
 ## D-007: Music output boundary
 

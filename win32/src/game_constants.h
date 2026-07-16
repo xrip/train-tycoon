@@ -75,6 +75,13 @@ namespace save {
 inline constexpr int32_t MODE_WRITE = 0;  // serialize fields into the buffer
 inline constexpr int32_t MODE_READ = 1;   // deserialize fields from the buffer
 inline constexpr int32_t MODE_SKIP = 2;   // touch nothing: return 0 and zero arrays
+
+// gc_initSaveOrLoad operation selector. Only these three values are reached.
+// Selector values 4 and 5 exist in gc_initSaveOrLoad but are never called; that
+// dead branch is a smell recorded for a separate cleanup, not removed here.
+inline constexpr int32_t OP_SAVE_MAIN = 0;   // write the main snapshot to slot 0
+inline constexpr int32_t OP_LOAD_MAIN = 1;   // read the main snapshot from slot 0
+inline constexpr int32_t OP_RESET_SKIP = 2;  // reset the codec in skip mode (no I/O)
 }  // namespace save
 
 #endif  // GAME_CONSTANTS_H

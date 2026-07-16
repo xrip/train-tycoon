@@ -37,8 +37,8 @@ void gc_saveOrLoadShortSpan(GameCanvas *gc, int16_t *sArray, int len) {
         }
     } else if (gc->snapshotLoaded) {
         for (int i = 0; i < len; ++i) {
-            uint16_t bits = (uint16_t)gc_readShortFromBuffer(gc);
-            bits |= (uint16_t)((uint16_t)gc_readShortFromBuffer(gc) << 8);
+            uint16_t bits = (uint16_t)gc_readSaveByteUnsigned(gc);
+            bits |= (uint16_t)((uint16_t)gc_readSaveByteUnsigned(gc) << 8);
             memcpy(&sArray[i], &bits, sizeof(sArray[i]));
         }
     }
@@ -58,10 +58,10 @@ void gc_saveOrLoadIntSpan(GameCanvas *gc, int32_t *nArray, int len) {
         }
     } else if (gc->snapshotLoaded) {
         for (int i = 0; i < len; ++i) {
-            uint32_t bits = (uint32_t)gc_readShortFromBuffer(gc);
-            bits |= (uint32_t)gc_readShortFromBuffer(gc) << 8;
-            bits |= (uint32_t)gc_readShortFromBuffer(gc) << 16;
-            bits |= (uint32_t)gc_readShortFromBuffer(gc) << 24;
+            uint32_t bits = (uint32_t)gc_readSaveByteUnsigned(gc);
+            bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 8;
+            bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 16;
+            bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 24;
             memcpy(&nArray[i], &bits, sizeof(nArray[i]));
         }
     }

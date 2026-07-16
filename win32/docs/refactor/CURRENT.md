@@ -34,14 +34,19 @@ change. Constants live in `game_constants.h`.
 
 - Verified the codec: the `*MatrixInlined` helpers already forward to the
   size-explicit `*Span` cores (done in OWN-04), so no matrix split is left.
-- Done (D-011): named the codec direction with `save::MODE_WRITE/READ/SKIP` and
-  renamed `gc_loadGame(n, n2)` -> `(slot, mode)`. Debug and Release full gates
-  passed on 2026-07-16, no golden change.
+- Done (D-011): named the codec direction (`save::MODE_WRITE/READ/SKIP`), the
+  `gc_initSaveOrLoad` selector (`save::OP_SAVE_MAIN/OP_LOAD_MAIN/OP_RESET_SKIP`),
+  renamed `gc_loadGame(n, n2)` -> `(slot, mode)` and
+  `gc_readShortFromBuffer` -> `gc_readSaveByteUnsigned`. Debug and Release full
+  gates passed on 2026-07-16, no golden change. Noted: `gc_initSaveOrLoad` modes
+  4/5 are dead branches (smell, separate cleanup).
 
 ## Next action
 
-Continue making the codec explicit: name the `gc_initSaveOrLoad(mode)` selector
-values (0/1/2/4/5) and rename the misleading `gc_readShortFromBuffer` (it reads
-one unsigned byte). Consider grouping the codec into a `SaveCodec` boundary once
-the field walk reads clearly. Keep byte order identical; commit each leaf after
-the strict Debug and full tests pass.
+The codec now reads explicitly. Remaining SAVE-01 judgement: whether to lift the
+field walk into a `SaveCodec` boundary now or after the model classes exist.
+Recommend deferring the class extraction until WORLD/FLEET/ECON own their fields
+(so the codec reads their state, not `GameCanvas`), and closing SAVE-01 on the
+explicit-codec basis. Next concrete step: review whether any remaining save
+primitive names or the `saveReadOffset` dual read/write cursor need clearer
+names, then close SAVE-01 and open WORLD-01.
