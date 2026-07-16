@@ -131,8 +131,8 @@ void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
         gc_setSelectionStart(gc, n, n2);
         if (gc_isAdjacentTileEmpty(gc, n, n2, gc->world.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
             if (gc->initialIndustryPlaced) {
-                if (gc->terrainSmoothCost <= gc->money) {
-                    gc->money -= gc->terrainSmoothCost;
+                if (gc->terrainSmoothCost <= gc->economy.money) {
+                    gc->economy.money -= gc->terrainSmoothCost;
                     gc_pushMoneyHistory(gc, -gc->terrainSmoothCost);
                     gc->subsidyCost += gc->terrainSmoothCost;
                     gc_toggleFlagInlined(gc, true);

@@ -162,9 +162,9 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 30:
             switch (field) {
-                case 0: return gc_formatCurrency(gc, gc->loanBalance);
-                case 1: return gc_formatCurrency(gc, gc->loanCeiling);
-                case 2: return gc_formatNumberWithSuffix(gc, gc->interestRate, 29);
+                case 0: return gc_formatCurrency(gc, gc->economy.loanBalance);
+                case 1: return gc_formatCurrency(gc, gc->economy.loanCeiling);
+                case 2: return gc_formatNumberWithSuffix(gc, gc->economy.interestRate, 29);
             }
             break;
 

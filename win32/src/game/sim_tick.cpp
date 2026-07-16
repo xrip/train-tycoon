@@ -4,7 +4,7 @@
 
 // void dayResetP()
 void gc_dayResetP(GameCanvas *gc) {
-    if (gc->monthOfYear % 4 == 0) {
+    if (gc->economy.monthOfYear % 4 == 0) {
         for (int i = 0; i < 64; ++i) {
             if (gc->constructionTimers[i] > 0)
                 --gc->constructionTimers[i];
@@ -77,7 +77,7 @@ void gc_everyTwoTick(GameCanvas *gc) {
         if ((gc->fleet.trainFlags[i] & 0xF) == 0) n3 += 3;
         else if ((gc->fleet.trainFlags[i] & 0xF) == 1) n3 += 7;
         gc->fleet.trainRevenue[i] -= n3;
-        gc->money -= n3;
+        gc->economy.money -= n3;
         gc->fuelCostAccrued += n3;
     }
 }
@@ -163,8 +163,8 @@ void gc_postRevenueReset(GameCanvas *gc) {
 
 // void archiveOrRecall()
 void gc_archiveOrRecall(GameCanvas *gc) {
-    gc->terrainTotal = gc->loanBalance * gc->interestRate / 1200;
-    gc->decadeEnterpriseTax = gc->totalRevenue * gc->enterpriseTaxPct / 100;
+    gc->terrainTotal = gc->economy.loanBalance * gc->economy.interestRate / 1200;
+    gc->decadeEnterpriseTax = gc->totalRevenue * gc->economy.enterpriseTaxPct / 100;
     gc->netProfit = gc->totalRevenue - gc->terrainTotal - gc->totalSpent
                      - gc->aiMoneySpent - gc->fuelCostAccrued - gc->subsidyCost
                      - gc->decadeEnterpriseTax;
@@ -194,7 +194,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
     if (bl) {
         n3 = gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST
              ? gc->baseTrainSpeed2 : -gc->accel2;
-        if (gc->money >= n3 || gc->money < 0) {
+        if (gc->economy.money >= n3 || gc->economy.money < 0) {
             gc->backgroundCost += n3;
             bl3 = true;
             gc->demolitionAffordable = true;
@@ -346,7 +346,7 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
             }
         }
     }
-    n2 += gc->dayOfMonth + 30 * gc->monthOfYear + 365 * (gc->year - 1950);
+    n2 += gc->economy.dayOfMonth + 30 * gc->economy.monthOfYear + 365 * (gc->economy.year - 1950);
     if (n < 0) {
         if (n2 > gc->bestScenarioScore) gc->bestScenarioScore = n2;
     } else {
@@ -391,8 +391,8 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
                      && gc->milestoneCoThreshold2 <= gc->milestoneThreshold5;
                 break;
             case 12: bl = gc->currentMilestoneScore <= gc->lifetimeTrainRevenue; break;
-            case 13: bl = gc->loanBalance == 0; break;
-            case 14: bl = gc->year == gc->currentMilestoneScore; break;
+            case 13: bl = gc->economy.loanBalance == 0; break;
+            case 14: bl = gc->economy.year == gc->currentMilestoneScore; break;
             case 15: bl = gc->currentMilestoneScore <= gc->aiWagonsBought; break;
         }
     }
@@ -445,7 +445,7 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
                    + gc->costGroupC4) / 4;
         }
     }
-    return n4 - gc->loanBalance;
+    return n4 - gc->economy.loanBalance;
 }
 
 // void newYearNotify()
@@ -482,7 +482,7 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->decadeEnterpriseTotal += gc->decadeEnterpriseTax;
     gc->decadeProfitGraphTotal += gc->netProfit;
     gc->revenueTotal += gc->totalRevenue;
-    if (gc->monthOfYear == 13) {
+    if (gc->economy.monthOfYear == 13) {
         gc->prevDecadeSpent = gc->decadeSpentWithCurrent;
         gc->prevDecadeAiSpent = gc->decadeAiSpentWithCurrent;
         gc->prevDecadeFuel = gc->decadeFuelWithCurrent;
@@ -504,9 +504,9 @@ void gc_newYearNotify(GameCanvas *gc) {
         gc->altDecadeTotalCost[0] = 0;
     }
     gc->altDecadeTotalCost[0] = gc_scanMapForMetric(gc);
-    gc->money -= gc->terrainTotal;
+    gc->economy.money -= gc->terrainTotal;
     if (gc->terrainTotal > 0) gc_pushMoneyHistory(gc, -gc->terrainTotal);
-    gc->money -= gc->decadeEnterpriseTax;
+    gc->economy.money -= gc->decadeEnterpriseTax;
     if (gc->decadeEnterpriseTax > 0)
         gc_pushMoneyHistory(gc, -gc->decadeEnterpriseTax);
     gc->totalSpent = gc->aiMoneySpent = gc->fuelCostAccrued = 0;
@@ -515,7 +515,7 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->mapRedrawPending = true;
     gc->compareToPrevious = true;
     gc->monthRolloverFlag = true;
-    if (gc->monthOfYear == 13) {
+    if (gc->economy.monthOfYear == 13) {
         if (gcs_annualReportEnabled) {
             gc->ready = false;
             gc->transitionCode = 35;

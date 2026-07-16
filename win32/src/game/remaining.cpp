@@ -37,8 +37,8 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
     for (int index = 0; index < 12; ++index) {
         int value;
         if (!alternate) {
-            gc->yearGraphOffsets[index] = (int8_t)(gc->year - 1940);
-            gc->altYearArray[index] = (int8_t)(gc->monthOfYear - index);
+            gc->yearGraphOffsets[index] = (int8_t)(gc->economy.year - 1940);
+            gc->altYearArray[index] = (int8_t)(gc->economy.monthOfYear - index);
             if (gc->altYearArray[index] < 1) {
                 gc->altYearArray[index] = (int8_t)(12 + gc->altYearArray[index]);
                 --gc->yearGraphOffsets[index];
@@ -47,7 +47,7 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
                     : mode == 1 ? gc->yearRevenueHistory[index]
                     : gc->yearCompanyValueHistory[index];
         } else {
-            gc->altYearArray[index] = (int8_t)(gc->year - index - 1940);
+            gc->altYearArray[index] = (int8_t)(gc->economy.year - index - 1940);
             value = mode == 0 ? gc->decadeProfitHistory[index]
                     : mode == 1 ? gc->altDecadeRevenueTotal[index]
                     : gc->altDecadeTotalCost[index];
@@ -118,11 +118,11 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
             break;
         case 12: current = gc->lifetimeTrainRevenue; break;
         case 13:
-            current = gc->loanCeiling - gc->loanBalance;
-            target = gc->loanCeiling;
+            current = gc->economy.loanCeiling - gc->economy.loanBalance;
+            target = gc->economy.loanCeiling;
             break;
         case 14:
-            current = gc->year - 1950;
+            current = gc->economy.year - 1950;
             target = gc->currentMilestoneScore - 1950;
             break;
         case 15: current = gc->aiWagonsBought; break;
@@ -138,9 +138,9 @@ int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
     if (gc->menuRowType[row] == 1) {
         value = 100 * gc->menuRowValue[row] / gc->menuRowCost[row];
     } else if (gc->menuRowType[row] == 2) {
-        value = gc->money > 0
-                ? 100 * gc->money / gc->menuRowCost[row]
-                : 100 * gc->menuRowCost[row] / gc->money;
+        value = gc->economy.money > 0
+                ? 100 * gc->economy.money / gc->menuRowCost[row]
+                : 100 * gc->menuRowCost[row] / gc->economy.money;
     } else if (gc->menuRowType[row] >= 4 && gc->menuRowType[row] <= 14) {
         value = 100 * gc->menuRowValue[row] / gc->menuRowCost[row];
     } else {

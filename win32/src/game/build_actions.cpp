@@ -115,7 +115,7 @@ void gc_rebuildCityList(GameCanvas *gc) {
 void gc_applyBackgroundCost(GameCanvas *gc) {
     if (gc->demolitionAffordable) {
         gc->subsidyCost += gc->backgroundCost;
-        gc->money -= gc->backgroundCost;
+        gc->economy.money -= gc->backgroundCost;
         gc_pushMoneyHistory(gc, -gc->backgroundCost);
     } else {
         gc_enterOutOfMoneyState(gc);
@@ -391,7 +391,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
     cost += gc->accel1;
     if (join_track && tile == join_tile) {
         cost += gc->brake1;
-        if (cost > gc->money) {
+        if (cost > gc->economy.money) {
             gc_enterOutOfMoneyState(gc);
             return;
         }
@@ -400,7 +400,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
         track = join_tile == 70 ? 0x48 | track : 0x41 | track << 3;
         gc->world.trackMap[x][y] = (int8_t)track;
     } else {
-        if (cost > gc->money) {
+        if (cost > gc->economy.money) {
             gc_enterOutOfMoneyState(gc);
             return;
         }
@@ -410,7 +410,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
             : (int8_t)(first_direction ? first_tile : second_tile);
         gc->world.trackMap[x][y] = 65;
     }
-    gc->money -= cost;
+    gc->economy.money -= cost;
     gc->totalSpent += cost;
     gc->lastViewportCenterX = -1;
     gc_pushMoneyHistory(gc, -cost);
@@ -575,9 +575,9 @@ void gc_openBuildMenu(GameCanvas *gc) {
             break;
         case 2:
             if (item == 0) {
-                if (gc->selectionCost <= gc->money) {
+                if (gc->selectionCost <= gc->economy.money) {
                     gc_setTrackOwnerCode(gc, 1);
-                    gc->money -= gc->selectionCost;
+                    gc->economy.money -= gc->selectionCost;
                     gc->totalSpent += gc->selectionCost;
                     gc_pushMoneyHistory(gc, -gc->selectionCost);
                     gc_incrementRowValueType13(gc, gc->selectionCost);
@@ -733,7 +733,7 @@ void gc_incrementRowValueType14(GameCanvas *gc, int32_t amount) {
 }
 
 bool gc_buyTrainAtCursor(GameCanvas *gc) {
-    if (gc->money < gc->unitCost) {
+    if (gc->economy.money < gc->unitCost) {
         gc_enterOutOfMoneyState(gc);
         return false;
     }
@@ -750,7 +750,7 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
         train = gc_spawnTrainCar(gc, train, car_type);
         gc_incrementCargoOptionCount(gc, car_type);
     }
-    gc->money -= gc->unitCost;
+    gc->economy.money -= gc->unitCost;
     gc->aiMoneySpent += gc->unitCost;
     gc_pushMoneyHistory(gc, -gc->unitCost);
     ++gc->aiWagonsBought;
@@ -760,7 +760,7 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
 bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t train,
                                  int32_t state_code, int32_t *options) {
     int cost = gc->unitCost - gc->currentTrainCostSnapshot;
-    if (gc->money < cost) {
+    if (gc->economy.money < cost) {
         gc_enterOutOfMoneyState(gc);
         return false;
     }
@@ -776,7 +776,7 @@ bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t train,
             gc->fleet.trainStateCode[train]
             | (options[option] & 7) << (3 + 3 * option));
     }
-    gc->money -= cost;
+    gc->economy.money -= cost;
     gc->aiMoneySpent += cost;
     if (cost != 0) gc_pushMoneyHistory(gc, -cost);
     return true;

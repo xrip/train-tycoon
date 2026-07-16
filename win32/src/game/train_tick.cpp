@@ -332,7 +332,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
             }
             if (service_vehicle != gc->fleet.lastServiceVehicle[head]) {
                 if (revenue > 0) {
-                    gc->money += revenue;
+                    gc->economy.money += revenue;
                     gc_pushMoneyHistory(gc, revenue);
                     gc->totalRevenue += revenue;
                     gc->fleet.trainRevenue[head] += revenue;

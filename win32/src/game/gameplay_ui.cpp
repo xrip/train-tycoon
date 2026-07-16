@@ -45,10 +45,10 @@ int32_t gc_drawMenuRow(GameCanvas *gc, Surface *graphics, int32_t sprite,
 
 // void drawHeaderBar(Graphics)
 void gc_drawHeaderBar(GameCanvas *gc, Surface *graphics) {
-    if (gc->cachedHeaderDay == gc->dayOfMonth
-        && gc->cachedHeaderMonth == gc->monthOfYear
-        && gc->cachedHeaderYear == gc->year
-        && gc->cachedHeaderMoney == gc->money && !gc->menuDirty)
+    if (gc->cachedHeaderDay == gc->economy.dayOfMonth
+        && gc->cachedHeaderMonth == gc->economy.monthOfYear
+        && gc->cachedHeaderYear == gc->economy.year
+        && gc->cachedHeaderMoney == gc->economy.money && !gc->menuDirty)
         return;
 
     midp_set_color(graphics, 0x909090);
@@ -60,25 +60,25 @@ void gc_drawHeaderBar(GameCanvas *gc, Surface *graphics) {
     midp_draw_line(graphics, gcs_screenWidth - 1, 1, gcs_screenWidth - 1, 14);
 
     char money_text[32];
-    format_money(gc->money, money_text, sizeof(money_text));
+    format_money(gc->economy.money, money_text, sizeof(money_text));
     const auto money_bytes = make_font_bytes(money_text, true);
     gc_renderFontString(gc, graphics, 1, 5, money_bytes, false);
 
     char date_text[24];
     if (gcs_screenWidth < 140)
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
-                 gc->dayOfMonth, gc->monthOfYear, gc->year - 1900);
+                 gc->economy.dayOfMonth, gc->economy.monthOfYear, gc->economy.year - 1900);
     else
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
-                 gc->dayOfMonth, gc->monthOfYear, gc->year);
+                 gc->economy.dayOfMonth, gc->economy.monthOfYear, gc->economy.year);
     const auto date_bytes = make_font_bytes(date_text, false);
     gc_renderFontString(gc, graphics, gcs_screenWidth - (gcs_screenWidth < 140 ? 49 : 61),
                         5, date_bytes, false);
 
-    gc->cachedHeaderMoney = gc->money;
-    gc->cachedHeaderDay = gc->dayOfMonth;
-    gc->cachedHeaderMonth = gc->monthOfYear;
-    gc->cachedHeaderYear = gc->year;
+    gc->cachedHeaderMoney = gc->economy.money;
+    gc->cachedHeaderDay = gc->economy.dayOfMonth;
+    gc->cachedHeaderMonth = gc->economy.monthOfYear;
+    gc->cachedHeaderYear = gc->economy.year;
 }
 
 // void drawConfirmBar(Graphics)

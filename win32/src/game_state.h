@@ -5,6 +5,7 @@
 #include "world.h"
 #include "pathfinder.h"
 #include "fleet.h"
+#include "economy.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -339,19 +340,12 @@ typedef struct GameCanvas {
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
     int32_t viewportCenterX;
     int32_t viewportCenterY;
-    int32_t money;
+    Economy economy;
     int32_t cachedHeaderMoney;
-    int32_t loanBalance;
-    int32_t loanCeiling;
-    int8_t interestRate;
-    int32_t dayOfMonth;
-    int32_t monthOfYear;
-    int32_t year;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;
     int32_t cachedHeaderYear;
     int32_t counterA;
-    int32_t enterpriseTaxPct;
     int32_t scenarioStepCompare;
     int32_t scenarioStep;
     int32_t scenarioNoticeId;

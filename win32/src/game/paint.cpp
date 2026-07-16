@@ -237,7 +237,7 @@ void gc_update(GameCanvas *gc) {
             ++gc->loadStep;
             if (gc->loadStep == 2) {
                 gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
-                gc->dayOfMonth = 1; gc->monthOfYear = 1; gc->year = 1950;
+                gc->economy.dayOfMonth = 1; gc->economy.monthOfYear = 1; gc->economy.year = 1950;
                 gc->milestonesEnabled = false; gc->pauseFlag = false; gc->aiEnabled = false;
                 gc->moneyBaseA = 974; gc->moneyBaseB = 974;
                 gc->baseTrainSpeed = 173; gc->accel1 = 342; gc->brake1 = 311;
@@ -295,8 +295,8 @@ void gc_update(GameCanvas *gc) {
                         gc->mapGenColumns = map_gen_columns; gc->mapGenRows = map_gen_rows;
                         gc->terrainFeatureStage7Count = stage7_feature_count; gc->terrainFeatureStage6Count = stage6_feature_count;
                         gc->weightAccel = weight_accel_1; gc->weightAccel2 = weight_accel_2; gc->weightAccel3 = weight_accel_3; gc->weightAccel4 = weight_accel_4;
-                        gc->money = starting_money; gc->loanCeiling = loan_ceiling; gc->loanBalance = starting_loan;
-                        gc->interestRate = (int8_t)interest_rate; gc->era = era_number - 1;
+                        gc->economy.money = starting_money; gc->economy.loanCeiling = loan_ceiling; gc->economy.loanBalance = starting_loan;
+                        gc->economy.interestRate = (int8_t)interest_rate; gc->era = era_number - 1;
                         gc->scenarioMilestoneIndex = (int8_t)milestone_index;
                         gc->currentMilestoneScore = milestone_score; gc->milestoneCoThreshold2 = milestone_threshold;
                         gc_initBuildMenuForScenario(gc, build_menu_scenario);
@@ -312,8 +312,8 @@ void gc_update(GameCanvas *gc) {
                 if (gc->activeScenario <= 1) {
                     if (gc->difficultySlot == 0) { gc->aiFrequency = 32; gc->aiThreshold = 29; }
                     if (gc->difficultySlot == 1) { gc->aiFrequency = 25; gc->aiThreshold = 22; }
-                    if (gc->difficultyA == 0) { gc->interestRate = 4; gc->enterpriseTaxPct = 2; }
-                    if (gc->difficultyA == 1) { gc->interestRate = 8; gc->enterpriseTaxPct = 5; }
+                    if (gc->difficultyA == 0) { gc->economy.interestRate = 4; gc->economy.enterpriseTaxPct = 2; }
+                    if (gc->difficultyA == 1) { gc->economy.interestRate = 8; gc->economy.enterpriseTaxPct = 5; }
                     if (gc->difficultyB == 0) { gc->mapGenColumns /= 2; gc->mapGenRows /= 2; }
                     if (gc->difficultyC == 0) {
                         gc->terrainFeatureStage7Count /= 2; gc->terrainFeatureStage6Count /= 2;
@@ -434,11 +434,11 @@ void gc_update(GameCanvas *gc) {
                 gc_computeYearEndMetrics(gc);
                 if (gc->frameIndex > 0) --gc->frameIndex;
                 gc->counterA = 0;
-                ++gc->dayOfMonth;
+                ++gc->economy.dayOfMonth;
                 gc_everyMonthlyTick(gc);
-                if (gc->dayOfMonth % 4 == 0) gc_maybeAiTakeTurn(gc);
-                if (gc->dayOfMonth % 2 == 0) {
-                    if (gc->dayOfMonth % 10 == 0) gc_everyTenTick(gc);
+                if (gc->economy.dayOfMonth % 4 == 0) gc_maybeAiTakeTurn(gc);
+                if (gc->economy.dayOfMonth % 2 == 0) {
+                    if (gc->economy.dayOfMonth % 10 == 0) gc_everyTenTick(gc);
                     gc_everyTwoTick(gc);
                     gc_everyTwoTickZ(gc);
                     if (gc->flagsA) {
@@ -449,22 +449,22 @@ void gc_update(GameCanvas *gc) {
                     }
                     gc_tickInputOrAi(gc, false);
                 }
-                int oldMonth = gc->monthOfYear;
-                switch (gc->monthOfYear) {
+                int oldMonth = gc->economy.monthOfYear;
+                switch (gc->economy.monthOfYear) {
                     case 1: case 3: case 5: case 7: case 8: case 10: case 12:
-                        if (gc->dayOfMonth == 32) ++gc->monthOfYear;
+                        if (gc->economy.dayOfMonth == 32) ++gc->economy.monthOfYear;
                         break;
                     case 2:
-                        if ((gc->year % 4 != 0 && gc->dayOfMonth == 29)
-                            || (gc->year % 4 == 0 && gc->dayOfMonth == 30))
-                            ++gc->monthOfYear;
+                        if ((gc->economy.year % 4 != 0 && gc->economy.dayOfMonth == 29)
+                            || (gc->economy.year % 4 == 0 && gc->economy.dayOfMonth == 30))
+                            ++gc->economy.monthOfYear;
                         break;
                     case 4: case 6: case 9: case 11:
-                        if (gc->dayOfMonth == 31) ++gc->monthOfYear;
+                        if (gc->economy.dayOfMonth == 31) ++gc->economy.monthOfYear;
                         break;
                 }
-                if (oldMonth != gc->monthOfYear) {
-                    gc->dayOfMonth = 1;
+                if (oldMonth != gc->economy.monthOfYear) {
+                    gc->economy.dayOfMonth = 1;
                     gc_newYearNotify(gc);
                     gc_dayResetP(gc);
                     gc_dayResetAg(gc);
@@ -488,25 +488,25 @@ void gc_update(GameCanvas *gc) {
                             break;
                     }
                 }
-                if (gc->monthOfYear == 13) {
+                if (gc->economy.monthOfYear == 13) {
                     gc_revenueOrYear(gc);
                     gc_postRevenueReset(gc);
-                    gc->monthOfYear = 1;
-                    ++gc->year;
-                    if (gc->money < 0) {
+                    gc->economy.monthOfYear = 1;
+                    ++gc->economy.year;
+                    if (gc->economy.money < 0) {
                         gc->ready = false;
                         gc->transitionCode = 7;
                         gc_setState(gc, +GameState::MenuOverlay);
                     }
                 }
                 int oldEra = gc->era;
-                if (gc->dayOfMonth == 5 && gc->monthOfYear == 3 && gc->year == 1951 && gc->era < 2)
+                if (gc->economy.dayOfMonth == 5 && gc->economy.monthOfYear == 3 && gc->economy.year == 1951 && gc->era < 2)
                     gc->era = 2;
-                if (gc->dayOfMonth == 17 && gc->monthOfYear == 7 && gc->year == 1953 && gc->era < 3)
+                if (gc->economy.dayOfMonth == 17 && gc->economy.monthOfYear == 7 && gc->economy.year == 1953 && gc->era < 3)
                     gc->era = 3;
-                if (gc->dayOfMonth == 4 && gc->monthOfYear == 12 && gc->year == 1957 && gc->era < 4)
+                if (gc->economy.dayOfMonth == 4 && gc->economy.monthOfYear == 12 && gc->economy.year == 1957 && gc->era < 4)
                     gc->era = 4;
-                if (gc->dayOfMonth == 26 && gc->monthOfYear == 2 && gc->year == 1962 && gc->era < 5)
+                if (gc->economy.dayOfMonth == 26 && gc->economy.monthOfYear == 2 && gc->economy.year == 1962 && gc->era < 5)
                     gc->era = 5;
                 if (oldEra != gc->era) {
                     gc->ready = false;

@@ -35,9 +35,9 @@ std::uint64_t map_digest(const GameCanvas* game) {
     digest.add_i32(game->activeScenario);
     digest.add_i32(game->world.mapWidth);
     digest.add_i32(game->world.mapHeight);
-    digest.add_i32(game->money);
-    digest.add_i32(game->loanCeiling);
-    digest.add_i32(game->loanBalance);
+    digest.add_i32(game->economy.money);
+    digest.add_i32(game->economy.loanCeiling);
+    digest.add_i32(game->economy.loanBalance);
     for (int x = 0; x < game->world.mapWidth; ++x) {
         digest.add_bytes(game->world.tileMap[x].data(), static_cast<std::size_t>(game->world.mapHeight));
         digest.add_bytes(game->world.trackMap[x].data(), static_cast<std::size_t>(game->world.mapHeight));
@@ -271,11 +271,11 @@ TEST_CASE("fast: small path search") {
 
 TEST_CASE("fast: save buffer bytes and round trip") {
     GameCanvas* game = make_game();
-    game->money = 123456;
-    game->dayOfMonth = 17;
-    game->monthOfYear = 8;
-    game->year = 1973;
-    game->loanBalance = -7654321;
+    game->economy.money = 123456;
+    game->economy.dayOfMonth = 17;
+    game->economy.monthOfYear = 8;
+    game->economy.year = 1973;
+    game->economy.loanBalance = -7654321;
     game->visibleTrains[0] = -1234;
     gc_initSaveOrLoad(game, 4);
 
@@ -294,18 +294,18 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     CHECK(game->snapshotSize == plain_size);
     CHECK(std::memcmp(game->saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
 
-    game->money = 0;
-    game->dayOfMonth = 0;
-    game->monthOfYear = 0;
-    game->year = 0;
-    game->loanBalance = 0;
+    game->economy.money = 0;
+    game->economy.dayOfMonth = 0;
+    game->economy.monthOfYear = 0;
+    game->economy.year = 0;
+    game->economy.loanBalance = 0;
     game->visibleTrains[0] = 0;
     gc_initSaveOrLoad(game, 5);
-    CHECK(game->money == 123456);
-    CHECK(game->dayOfMonth == 17);
-    CHECK(game->monthOfYear == 8);
-    CHECK(game->year == 1973);
-    CHECK(game->loanBalance == -7654321);
+    CHECK(game->economy.money == 123456);
+    CHECK(game->economy.dayOfMonth == 17);
+    CHECK(game->economy.monthOfYear == 8);
+    CHECK(game->economy.year == 1973);
+    CHECK(game->economy.loanBalance == -7654321);
     CHECK(game->visibleTrains[0] == -1234);
 
     std::free(plain);
