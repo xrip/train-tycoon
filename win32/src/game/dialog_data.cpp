@@ -117,12 +117,12 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 24:
             switch (field) {
-                case 0: return gc_formatCurrency(gc, gc->gWagonCost);
-                case 1: return gc_formatCurrency(gc, gc->gWagonCost2);
-                case 2: return gc_formatCurrency(gc, gc->gWagonCost3);
-                case 3: return gc_formatCurrency(gc, gc->gWagonCost4);
-                case 4: return gc_formatCurrency(gc, gc->gWagonCost5);
-                case 5: return gc_formatCurrency(gc, gc->gWagonCost6);
+                case 0: return gc_formatCurrency(gc, gc->economy.gWagonCost);
+                case 1: return gc_formatCurrency(gc, gc->economy.gWagonCost2);
+                case 2: return gc_formatCurrency(gc, gc->economy.gWagonCost3);
+                case 3: return gc_formatCurrency(gc, gc->economy.gWagonCost4);
+                case 4: return gc_formatCurrency(gc, gc->economy.gWagonCost5);
+                case 5: return gc_formatCurrency(gc, gc->economy.gWagonCost6);
             }
             break;
 

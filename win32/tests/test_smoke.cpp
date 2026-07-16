@@ -261,7 +261,7 @@ TEST_CASE("fast: small path search") {
     game->pathfinder.anchorY = 2;
     game->pathfinder.targetX = 3;
     game->pathfinder.targetY = 2;
-    game->accel1 = 10;
+    game->economy.accel1 = 10;
 
     CHECK(gc_tryBuildPath(game));
     CHECK(game->build.trackTileCount > 0);

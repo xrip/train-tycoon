@@ -55,12 +55,12 @@ int32_t gc_allocateServiceVehicleSlot(GameCanvas *gc, int32_t type,
 
 void gc_computeTrainCost(GameCanvas *gc) {
     switch (gc->build.wagonType) {
-        case 0: gc->build.unitCost = gc->gWagonCost; break;
-        case 1: gc->build.unitCost = gc->gWagonCost2; break;
-        case 2: gc->build.unitCost = gc->gWagonCost3; break;
-        case 3: gc->build.unitCost = gc->gWagonCost4; break;
-        case 4: gc->build.unitCost = gc->gWagonCost5; break;
-        case 5: gc->build.unitCost = gc->gWagonCost6; break;
+        case 0: gc->build.unitCost = gc->economy.gWagonCost; break;
+        case 1: gc->build.unitCost = gc->economy.gWagonCost2; break;
+        case 2: gc->build.unitCost = gc->economy.gWagonCost3; break;
+        case 3: gc->build.unitCost = gc->economy.gWagonCost4; break;
+        case 4: gc->build.unitCost = gc->economy.gWagonCost5; break;
+        case 5: gc->build.unitCost = gc->economy.gWagonCost6; break;
     }
     if (gc->build.wagonType == gc->build.wagonDiscountType)
         gc->build.unitCost = gc->build.unitCost * gc->scenario.difficultyPct / 100;
@@ -68,10 +68,10 @@ void gc_computeTrainCost(GameCanvas *gc) {
     for (int option = 0; option < 5; ++option) {
         int option_cost;
         switch (gc->build.wagonOptionSlots[option]) {
-            case 0: option_cost = gc->costGroupC1; break;
-            case 1: option_cost = gc->costGroupC2; break;
-            case 2: option_cost = gc->costGroupC3; break;
-            case 3: option_cost = gc->costGroupC4; break;
+            case 0: option_cost = gc->economy.costGroupC1; break;
+            case 1: option_cost = gc->economy.costGroupC2; break;
+            case 2: option_cost = gc->economy.costGroupC3; break;
+            case 3: option_cost = gc->economy.costGroupC4; break;
             default: continue;
         }
         if (gc->build.wagonOptionSlots[option] == gc->build.wagonCountMatch[option])
@@ -260,31 +260,31 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
                 || (slot = gc_allocateServiceVehicleSlot(
                         gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, false, false))
                        == 5000
-                || !gc_spendMoney(gc, gc->costPower))
+                || !gc_spendMoney(gc, gc->economy.costPower))
                 break;
             gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 87;
             gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 65;
             gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -8);
-            gc_incrementRowValueType13(gc, gc->costPower);
+            gc_incrementRowValueType13(gc, gc->economy.costPower);
             break;
         case 1:
             if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 0)
                 || (slot = gc_allocateServiceVehicleSlot(
                         gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, true, false))
                        == 5000
-                || !gc_spendMoney(gc, gc->costPower))
+                || !gc_spendMoney(gc, gc->economy.costPower))
                 break;
             gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 88;
             gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 65;
             gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -8);
-            gc_incrementRowValueType13(gc, gc->costPower);
+            gc_incrementRowValueType13(gc, gc->economy.costPower);
             break;
         case 2:
             if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 5)
                 || (slot = gc_allocateServiceVehicleSlot(
                         gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, false, true))
                        == 5000
-                || !gc_spendMoney(gc, gc->costStruct))
+                || !gc_spendMoney(gc, gc->economy.costStruct))
                 break;
             gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 87;
             gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY - 1] = 89;
@@ -293,14 +293,14 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
             gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY - 1] = 65;
             gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY + 1] = 65;
             gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -11);
-            gc_incrementRowValueType13(gc, gc->costStruct);
+            gc_incrementRowValueType13(gc, gc->economy.costStruct);
             break;
         case 3:
             if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 6)
                 || (slot = gc_allocateServiceVehicleSlot(
                         gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, true, true))
                        == 5000
-                || !gc_spendMoney(gc, gc->costStruct))
+                || !gc_spendMoney(gc, gc->economy.costStruct))
                 break;
             gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 88;
             gc->world.tileMap[gc->ui.tileCursorX - 1][gc->ui.tileCursorY] = 90;
@@ -309,7 +309,7 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
             gc->world.trackMap[gc->ui.tileCursorX - 1][gc->ui.tileCursorY] = 65;
             gc->world.trackMap[gc->ui.tileCursorX + 1][gc->ui.tileCursorY] = 65;
             gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -11);
-            gc_incrementRowValueType13(gc, gc->costStruct);
+            gc_incrementRowValueType13(gc, gc->economy.costStruct);
             break;
     }
     gc_tickInputOrAi(gc, true);
@@ -324,14 +324,14 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     int end_x = start_x;
     int end_y = start_y;
     bool found_target = false;
-    int cost = gc->moneyBaseA;
+    int cost = gc->economy.moneyBaseA;
     gc->build.trackStartX = start_x;
     gc->build.trackStartY = start_y;
     gc->build.trackStepX = step_x;
     gc->build.trackStepY = step_y;
     while ((end_x += step_x) >= 0 && (end_y += step_y) >= 0
            && end_x < gc->world.mapWidth && end_y < gc->world.mapHeight) {
-        cost += gc->moneyBaseB;
+        cost += gc->economy.moneyBaseB;
         if (gc->world.tileMap[end_x][end_y] == target_tile) found_target = true;
         if (gc->world.tileMap[end_x][end_y] != 0 || gc->world.trackMap[end_x][end_y] != 0)
             break;
@@ -387,10 +387,10 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
              || tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST)))
         return;
 
-    int cost = tile == 0 ? 0 : gc->baseTrainSpeed;
-    cost += gc->accel1;
+    int cost = tile == 0 ? 0 : gc->economy.baseTrainSpeed;
+    cost += gc->economy.accel1;
     if (join_track && tile == join_tile) {
-        cost += gc->brake1;
+        cost += gc->economy.brake1;
         if (cost > gc->economy.money) {
             gc_enterOutOfMoneyState(gc);
             return;

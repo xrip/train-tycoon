@@ -219,17 +219,17 @@ void gc_validatePathStep(GameCanvas *gc) {
             int old_tile = gc->world.tileMap[map_x][map_y];
             bool joined_track = false;
             if (old_tile != 0 && old_tile > 28)
-                gc->build.selectionCost += gc->baseTrainSpeed;
+                gc->build.selectionCost += gc->economy.baseTrainSpeed;
             int cost_before_shape = gc->build.selectionCost;
             if (left && right) {
                 if (old_tile == 22) gc->world.tileMap[map_x][map_y] = 78;
                 else if (old_tile == 24) gc->world.tileMap[map_x][map_y] = 80;
                 else if (old_tile == 9) {
                     gc->world.tileMap[map_x][map_y] = 85;
-                    gc->build.selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->economy.moneyBaseA;
                 } else if (old_tile == 8) {
                     gc->world.tileMap[map_x][map_y] = 84;
-                    gc->build.selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->economy.moneyBaseA;
                 } else if (old_tile == 70) {
                     gc->world.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
@@ -238,7 +238,7 @@ void gc_validatePathStep(GameCanvas *gc) {
                         | gc->build.previewTrackOwnerCode << track::DIR_OWNER_SHIFT);
                 } else if (gc->world.tileElevation[map_x][map_y] == -1) {
                     gc->world.tileMap[map_x][map_y] = 81;
-                    gc->build.selectionCost += gc->moneyBaseB;
+                    gc->build.selectionCost += gc->economy.moneyBaseB;
                 } else {
                     gc->world.tileMap[map_x][map_y] = 71;
                 }
@@ -247,10 +247,10 @@ void gc_validatePathStep(GameCanvas *gc) {
                 else if (old_tile == 23) gc->world.tileMap[map_x][map_y] = 79;
                 else if (old_tile == 7) {
                     gc->world.tileMap[map_x][map_y] = 83;
-                    gc->build.selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->economy.moneyBaseA;
                 } else if (old_tile == 10) {
                     gc->world.tileMap[map_x][map_y] = 86;
-                    gc->build.selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->economy.moneyBaseA;
                 } else if (old_tile == 71) {
                     gc->world.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
@@ -259,7 +259,7 @@ void gc_validatePathStep(GameCanvas *gc) {
                         | gc->build.previewTrackOwnerCode);
                 } else if (gc->world.tileElevation[map_x][map_y] == -1) {
                     gc->world.tileMap[map_x][map_y] = 82;
-                    gc->build.selectionCost += gc->moneyBaseB;
+                    gc->build.selectionCost += gc->economy.moneyBaseB;
                 } else {
                     gc->world.tileMap[map_x][map_y] = 70;
                 }
@@ -272,11 +272,11 @@ void gc_validatePathStep(GameCanvas *gc) {
                 gc->world.trackMap[map_x][map_y] =
                     (int8_t)(track::PRESENT | gc->build.previewTrackOwnerCode);
                 if (cost_before_shape == gc->build.selectionCost)
-                    gc->build.selectionCost += gc->accel1;
+                    gc->build.selectionCost += gc->economy.accel1;
             }
             if (joined_track)
                 gc->build.selectionCost +=
-                    gc->brake1 + gc->accel1 + gc->baseTrainSpeed;
+                    gc->economy.brake1 + gc->economy.accel1 + gc->economy.baseTrainSpeed;
         }
     }
 }

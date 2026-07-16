@@ -239,14 +239,14 @@ void gc_update(GameCanvas *gc) {
                 gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
                 gc->economy.dayOfMonth = 1; gc->economy.monthOfYear = 1; gc->economy.year = 1950;
                 gc->scenario.milestonesEnabled = false; gc->ui.pauseFlag = false; gc->scenario.aiEnabled = false;
-                gc->moneyBaseA = 974; gc->moneyBaseB = 974;
-                gc->baseTrainSpeed = 173; gc->accel1 = 342; gc->brake1 = 311;
-                gc->baseTrainSpeed2 = 173; gc->accel2 = 234;
-                gc->costPower = 4759; gc->costStruct = 9845; gc->costOverhead = 347;
-                gc->costMaintenance = 5982; gc->costCrew = 481;
-                gc->gWagonCost = 37894; gc->gWagonCost2 = 43247; gc->gWagonCost3 = 51872;
-                gc->gWagonCost4 = 60149; gc->gWagonCost5 = 71423; gc->gWagonCost6 = 82675;
-                gc->costGroupC1 = 4578; gc->costGroupC2 = 5196; gc->costGroupC3 = 4314; gc->costGroupC4 = 5072;
+                gc->economy.moneyBaseA = 974; gc->economy.moneyBaseB = 974;
+                gc->economy.baseTrainSpeed = 173; gc->economy.accel1 = 342; gc->economy.brake1 = 311;
+                gc->economy.baseTrainSpeed2 = 173; gc->economy.accel2 = 234;
+                gc->economy.costPower = 4759; gc->economy.costStruct = 9845; gc->economy.costOverhead = 347;
+                gc->economy.costMaintenance = 5982; gc->economy.costCrew = 481;
+                gc->economy.gWagonCost = 37894; gc->economy.gWagonCost2 = 43247; gc->economy.gWagonCost3 = 51872;
+                gc->economy.gWagonCost4 = 60149; gc->economy.gWagonCost5 = 71423; gc->economy.gWagonCost6 = 82675;
+                gc->economy.costGroupC1 = 4578; gc->economy.costGroupC2 = 5196; gc->economy.costGroupC3 = 4314; gc->economy.costGroupC4 = 5072;
                 ResourceReader in = resources::open("scenarios.bin");
                 if (in) {
                     const int record_count = in.read_byte();

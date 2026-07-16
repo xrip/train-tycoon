@@ -45,6 +45,34 @@ struct Economy {
     std::array<int32_t, 12> altDecadeRevenueTotal{};
     std::array<int32_t, 3> moneyHistory{};
 
+    // Era-scaled cost and train-performance model, loaded per scenario in map
+    // generation and nudged by the yearly random economy event. moneyBase* are
+    // the fare base; baseTrainSpeed/accel/brake are the two engine performance
+    // tiers; cost* and gWagonCost*/costGroupC* are the build and wagon prices.
+    // All saved as one consecutive block; save byte order is unchanged.
+    int32_t moneyBaseA = 0;
+    int32_t moneyBaseB = 0;
+    int32_t baseTrainSpeed = 0;
+    int32_t accel1 = 0;
+    int32_t brake1 = 0;
+    int32_t baseTrainSpeed2 = 0;
+    int32_t accel2 = 0;
+    int32_t costPower = 0;
+    int32_t costStruct = 0;
+    int32_t costOverhead = 0;
+    int32_t costMaintenance = 0;
+    int32_t costCrew = 0;
+    int32_t gWagonCost = 0;
+    int32_t gWagonCost2 = 0;
+    int32_t gWagonCost3 = 0;
+    int32_t gWagonCost4 = 0;
+    int32_t gWagonCost5 = 0;
+    int32_t gWagonCost6 = 0;
+    int32_t costGroupC1 = 0;
+    int32_t costGroupC2 = 0;
+    int32_t costGroupC3 = 0;
+    int32_t costGroupC4 = 0;
+
     // Period/decade financial report aggregates. The "WithCurrent" running
     // accumulators (and legacyDecadeMetric) are runtime-only and are not saved;
     // all other fields here are saved. Values and save byte order are unchanged.

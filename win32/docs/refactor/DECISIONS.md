@@ -34,10 +34,12 @@ constants (`moneyBaseA/B`, `baseTrainSpeed`, `accel1/2`, `brake1`,
 loaded together in `GeneratingMap` and inflated together by the yearly random
 event, and they feed train-buy cost, train physics, and the economy alike. They
 form one cross-cutting parameter block, so forcing them into `BuildController`
-would be wrong. They stay on `GameCanvas` for now; their owner (likely
-`Scenario` as scenario-loaded parameters, or a small shared model) is decided
-later. The build/menu *display* rows (`buildMenu*`, `menuRow*`,
-`trainSelection*`) stay for UI-01.
+would be wrong. Resolved (stage-3-exit prep): the whole consecutive saved block moved into
+`Economy` as one "era-scaled cost and train-performance model" section, since the
+constants are loaded together, saved consecutively, and inflated together by the
+yearly random economy event. Splitting train physics from prices would have
+created two save-site groups for no gain. The build/menu *display* rows
+(`buildMenu*`, `menuRow*`, `trainSelection*`) moved to `UiController` in UI-01.
 
 ## D-013: Stage-3 exit signature refactor is gated on shared-state homing
 

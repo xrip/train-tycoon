@@ -193,7 +193,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
     int n3;
     if (bl) {
         n3 = gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST
-             ? gc->baseTrainSpeed2 : -gc->accel2;
+             ? gc->economy.baseTrainSpeed2 : -gc->economy.accel2;
         if (gc->economy.money >= n3 || gc->economy.money < 0) {
             gc->build.backgroundCost += n3;
             bl3 = true;
@@ -421,9 +421,9 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
                 n4 += 196;
             }
             if (n == 76) n4 += 168;
-            if (n >= 81 && n <= 86) n4 += gc->accel1;
-            if (n == 87 || n == 88) n4 += gc->costPower;
-            if (n == 89 || n == 90) n4 += gc->costPower / 2;
+            if (n >= 81 && n <= 86) n4 += gc->economy.accel1;
+            if (n == 87 || n == 88) n4 += gc->economy.costPower;
+            if (n == 89 || n == 90) n4 += gc->economy.costPower / 2;
         }
     }
     for (int n3 = 0; n3 < 500; ++n3) {
@@ -433,16 +433,16 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
         if (gc->world.trackMap[n2][n] != 65) continue;
         if ((gc->fleet.trainFlags[n3] & 0x40) == 64) {
             switch (gc->fleet.trainEraOrStage[n3]) {
-                case 0: n4 += gc->gWagonCost; break;
-                case 1: n4 += gc->gWagonCost2; break;
-                case 2: n4 += gc->gWagonCost3; break;
-                case 3: n4 += gc->gWagonCost4; break;
-                case 4: n4 += gc->gWagonCost5; break;
-                case 5: n4 += gc->gWagonCost6; break;
+                case 0: n4 += gc->economy.gWagonCost; break;
+                case 1: n4 += gc->economy.gWagonCost2; break;
+                case 2: n4 += gc->economy.gWagonCost3; break;
+                case 3: n4 += gc->economy.gWagonCost4; break;
+                case 4: n4 += gc->economy.gWagonCost5; break;
+                case 5: n4 += gc->economy.gWagonCost6; break;
             }
         } else {
-            n4 += (gc->costGroupC1 + gc->costGroupC2 + gc->costGroupC3
-                   + gc->costGroupC4) / 4;
+            n4 += (gc->economy.costGroupC1 + gc->economy.costGroupC2 + gc->economy.costGroupC3
+                   + gc->economy.costGroupC4) / 4;
         }
     }
     return n4 - gc->economy.loanBalance;
@@ -777,21 +777,21 @@ void gc_simulationTick(GameCanvas *gc) {
                     gc_dayResetAg(gc);
                     gc_dayResetAd(gc);
                     switch (std::abs(gc->rng.next_int() % 7)) {
-                        case 0: gc->moneyBaseA += 9; gc->moneyBaseB += 9; break;
-                        case 1: ++gc->baseTrainSpeed; gc->accel1 += 3; gc->brake1 += 3; break;
-                        case 2: ++gc->baseTrainSpeed2; gc->accel2 += 2; break;
-                        case 3: gc->costPower += 47; gc->costStruct += 98; break;
+                        case 0: gc->economy.moneyBaseA += 9; gc->economy.moneyBaseB += 9; break;
+                        case 1: ++gc->economy.baseTrainSpeed; gc->economy.accel1 += 3; gc->economy.brake1 += 3; break;
+                        case 2: ++gc->economy.baseTrainSpeed2; gc->economy.accel2 += 2; break;
+                        case 3: gc->economy.costPower += 47; gc->economy.costStruct += 98; break;
                         case 4:
-                            gc->costOverhead += 3; gc->costMaintenance += 59; gc->costCrew += 4;
+                            gc->economy.costOverhead += 3; gc->economy.costMaintenance += 59; gc->economy.costCrew += 4;
                             break;
                         case 5:
-                            gc->gWagonCost += 378; gc->gWagonCost2 += 432;
-                            gc->gWagonCost3 += 518; gc->gWagonCost4 += 601;
-                            gc->gWagonCost5 += 714; gc->gWagonCost6 += 826;
+                            gc->economy.gWagonCost += 378; gc->economy.gWagonCost2 += 432;
+                            gc->economy.gWagonCost3 += 518; gc->economy.gWagonCost4 += 601;
+                            gc->economy.gWagonCost5 += 714; gc->economy.gWagonCost6 += 826;
                             break;
                         case 6:
-                            gc->costGroupC1 += 45; gc->costGroupC2 += 51;
-                            gc->costGroupC3 += 43; gc->costGroupC4 += 50;
+                            gc->economy.costGroupC1 += 45; gc->economy.costGroupC2 += 51;
+                            gc->economy.costGroupC3 += 43; gc->economy.costGroupC4 += 50;
                             break;
                     }
                 }
