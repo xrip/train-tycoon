@@ -37,11 +37,17 @@ change.
   `gc->world.tileMap`. Debug and Release full gates passed on 2026-07-16, no
   golden change.
 
+## Progress
+
+- Done (D-012, leaf 1): `World` owns the four map grids.
+- Done (D-012, leaf 2): `World` owns `mapWidth`, `mapHeight`, `mapHalfWidth`,
+  `mapScreenWidth`, `mapScreenHeight`; save macros repointed to `world.*`. Debug
+  and Release full gates passed on 2026-07-16, no golden change.
+
 ## Next action
 
-Continue the extraction, data first. Next leaves: move the core map dimensions
-(`mapWidth`, `mapHeight`, `mapHalfWidth`, `mapScreenWidth/Height`, and the map
-half-extent/scale) onto `World`, then move the pure map-query helpers
-(`gc_isCityOrStationTile`, connected-track scans, in-bounds checks) to take a
-`World&`. Keep values and byte order identical; commit each leaf after the strict
-Debug and full tests pass.
+Operations next: move the pure map-query helpers (`gc_isCityOrStationTile`, the
+connected-track scans, in-bounds checks, and coordinate/geometry math) to read a
+`World&` rather than reaching through `GameCanvas`. Keep values and byte order
+identical; commit each leaf after the strict Debug and full tests pass, then close
+WORLD-01 and open WORLD-02 (terrain and generation).

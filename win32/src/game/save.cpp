@@ -163,8 +163,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
 #define IO_SHORTS(field) gc_saveOrLoadShortArrayInlined(gc, gc->field)
 #define IO_INTS(field) gc_saveOrLoadIntArrayInlined(gc, gc->field)
 
-    IO_INT(mapWidth);
-    IO_INT(mapHeight);
+    IO_INT(world.mapWidth);
+    IO_INT(world.mapHeight);
     IO_INT(viewportCenterX);
     IO_INT(viewportCenterY);
     IO_INT(money);
@@ -362,15 +362,15 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
     gc_initSaveOrLoad(gc, save::OP_LOAD_MAIN);
-    gc->world.tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-    gc->world.trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-    gc->world.tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-    gc->world.heightMap.resize(gc->mapWidth + 2, gc->mapHeight + 2);
-    gc->mapHalfWidth = (gc->mapWidth - 1) * 8;
-    gc->mapScreenWidth = (gc->mapWidth + gc->mapHeight) * 16;
-    gc->mapScreenHeight = (gc->mapWidth + gc->mapHeight) * 8;
-    gc->viewportHalfWidth = gc->mapScreenWidth / 2;
-    gc->viewportHalfHeight = gc->mapScreenHeight / 2;
+    gc->world.tileMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
+    gc->world.trackMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
+    gc->world.tileElevation.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
+    gc->world.heightMap.resize(gc->world.mapWidth + 2, gc->world.mapHeight + 2);
+    gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
+    gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
+    gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
+    gc->viewportHalfWidth = gc->world.mapScreenWidth / 2;
+    gc->viewportHalfHeight = gc->world.mapScreenHeight / 2;
     gc_initBuildMenuForScenario(gc, -1);
     gc_loadGame(gc, 1, save::MODE_READ);
     gc_decompressSaveBuffer(gc);

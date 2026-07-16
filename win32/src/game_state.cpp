@@ -26,11 +26,11 @@ void gc_fields_init(GameCanvas *gc) {
     gcs_annualReportEnabled = true;
     // --- instance fields (declaration order) ---
     gc->stopRequested = false;
-    gc->mapHalfWidth = (gc->mapWidth - 1) * 8;
-    gc->mapScreenWidth = (gc->mapWidth + gc->mapHeight) * 16;
-    gc->mapScreenHeight = (gc->mapWidth + gc->mapHeight) * 8;
-    gc->viewportHalfWidth = gc->mapScreenWidth / 2;
-    gc->viewportHalfHeight = gc->mapScreenHeight / 2;
+    gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
+    gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
+    gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
+    gc->viewportHalfWidth = gc->world.mapScreenWidth / 2;
+    gc->viewportHalfHeight = gc->world.mapScreenHeight / 2;
     gc->simSpeed = 1;
     gc->frameCount = 0;
     gc->frameIndex = 0;

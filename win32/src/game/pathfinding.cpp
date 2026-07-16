@@ -6,7 +6,7 @@
 int16_t gc_pathDistanceMin(GameCanvas *gc, int32_t x, int32_t y,
                            int32_t current_min) {
     int16_t result = (int16_t)current_min;
-    if (x >= 0 && x < gc->mapWidth && y >= 0 && y < gc->mapHeight
+    if (x >= 0 && x < gc->world.mapWidth && y >= 0 && y < gc->world.mapHeight
         && gc->pathDistanceGrid[x][y] >= 20
         && gc->pathDistanceGrid[x][y] < result)
         result = gc->pathDistanceGrid[x][y];
@@ -67,21 +67,21 @@ void gc_floodFillPath(GameCanvas *gc) {
                 destination_found |= result == 2;
             }
         }
-        for (int x = gc->placementX; x < gc->mapWidth; ++x) {
-            for (int y = gc->placementY; y < gc->mapHeight; ++y) {
+        for (int x = gc->placementX; x < gc->world.mapWidth; ++x) {
+            for (int y = gc->placementY; y < gc->world.mapHeight; ++y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
         for (int x = gc->placementX; x >= 0; --x) {
-            for (int y = gc->placementY; y < gc->mapHeight; ++y) {
+            for (int y = gc->placementY; y < gc->world.mapHeight; ++y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = gc->placementX; x < gc->mapWidth; ++x) {
+        for (int x = gc->placementX; x < gc->world.mapWidth; ++x) {
             for (int y = gc->placementY; y >= 0; --y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
@@ -93,7 +93,7 @@ void gc_floodFillPath(GameCanvas *gc) {
 
 bool gc_findPathStep(GameCanvas *gc, int32_t x, int32_t y,
                      int32_t current_distance) {
-    if (x < 0 || x >= gc->mapWidth || y < 0 || y >= gc->mapHeight
+    if (x < 0 || x >= gc->world.mapWidth || y < 0 || y >= gc->world.mapHeight
         || gc->pathDistanceGrid[x][y] < 20
         || gc->pathDistanceGrid[x][y] >= current_distance)
         return false;
@@ -109,8 +109,8 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
                                   int32_t tile_e, int32_t tile_f,
                                   int32_t tile_g, int32_t tile_h,
                                   bool high_owner) {
-    if (connected || x < 0 || x >= gc->mapWidth
-        || y < 0 || y >= gc->mapHeight)
+    if (connected || x < 0 || x >= gc->world.mapWidth
+        || y < 0 || y >= gc->world.mapHeight)
         return connected;
     int tile = gc->world.tileMap[x][y];
     int owner = gc->world.trackMap[x][y] & track::OWNER_MASK;
@@ -184,22 +184,22 @@ void gc_validatePathStep(GameCanvas *gc) {
         }
     } while (walking);
 
-    for (int map_x = 0; map_x < gc->mapWidth; ++map_x)
-        for (int map_y = 0; map_y < gc->mapHeight; ++map_y)
+    for (int map_x = 0; map_x < gc->world.mapWidth; ++map_x)
+        for (int map_y = 0; map_y < gc->world.mapHeight; ++map_y)
             if (gc->pathDistanceGrid[map_x][map_y] != 9)
                 gc->pathDistanceGrid[map_x][map_y] = 0;
     if (!path_complete) return;
 
-    for (int map_x = 0; map_x < gc->mapWidth; ++map_x) {
-        for (int map_y = 0; map_y < gc->mapHeight; ++map_y) {
+    for (int map_x = 0; map_x < gc->world.mapWidth; ++map_x) {
+        for (int map_y = 0; map_y < gc->world.mapHeight; ++map_y) {
             if (gc->pathDistanceGrid[map_x][map_y] != 9) continue;
             bool left = map_x > 0
                         && gc->pathDistanceGrid[map_x - 1][map_y] == 9;
-            bool right = map_x < gc->mapWidth - 1
+            bool right = map_x < gc->world.mapWidth - 1
                          && gc->pathDistanceGrid[map_x + 1][map_y] == 9;
             bool up = map_y > 0
                       && gc->pathDistanceGrid[map_x][map_y - 1] == 9;
-            bool down = map_y < gc->mapHeight - 1
+            bool down = map_y < gc->world.mapHeight - 1
                         && gc->pathDistanceGrid[map_x][map_y + 1] == 9;
             if ((left ? 1 : 0) + (right ? 1 : 0)
                 + (up ? 1 : 0) + (down ? 1 : 0) == 1) {
@@ -284,8 +284,8 @@ void gc_validatePathStep(GameCanvas *gc) {
 
 void gc_scanTrackTiles(GameCanvas *gc) {
     gc->trackTileCount = 0;
-    for (int x = 0; x < gc->mapWidth; ++x) {
-        for (int y = 0; y < gc->mapHeight; ++y) {
+    for (int x = 0; x < gc->world.mapWidth; ++x) {
+        for (int y = 0; y < gc->world.mapHeight; ++y) {
             if (gc->world.trackMap[x][y] == track::PRESENT) ++gc->trackTileCount;
             if (gc->world.tileMap[x][y] != tile::CROSSING) continue;
             int low_owner = gc->world.trackMap[x][y] & track::DIR_OWNER_MASK;
@@ -297,12 +297,12 @@ void gc_scanTrackTiles(GameCanvas *gc) {
 }
 
 void gc_clearPathDistanceGrid(GameCanvas *gc) {
-    for (int x = 0; x < gc->mapWidth; ++x)
-        for (int y = 0; y < gc->mapHeight; ++y)
+    for (int x = 0; x < gc->world.mapWidth; ++x)
+        for (int y = 0; y < gc->world.mapHeight; ++y)
             gc->pathDistanceGrid[x][y] = 0;
 
-    for (int x = 0; x < gc->mapWidth; ++x) {
-        for (int y = 0; y < gc->mapHeight; ++y) {
+    for (int x = 0; x < gc->world.mapWidth; ++x) {
+        for (int y = 0; y < gc->world.mapHeight; ++y) {
             if (gc->pathDistanceGrid[x][y] != 0) continue;
             int16_t passable = gc->world.trackMap[x][y] == 0 ? 1 : 0;
             int tile = gc->world.tileMap[x][y];
@@ -313,11 +313,11 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
                     && (tile < 29 || tile > 33))
                     passable = 0;
             }
-            if (tile == 71 && x > 0 && x < gc->mapWidth - 1
+            if (tile == 71 && x > 0 && x < gc->world.mapWidth - 1
                 && gc->world.trackMap[x][y] == gc->world.trackMap[x - 1][y]
                 && gc->world.trackMap[x][y] == gc->world.trackMap[x + 1][y])
                 passable = 1;
-            if (tile == 70 && y > 0 && y < gc->mapHeight - 1
+            if (tile == 70 && y > 0 && y < gc->world.mapHeight - 1
                 && gc->world.trackMap[x][y] == gc->world.trackMap[x][y - 1]
                 && gc->world.trackMap[x][y] == gc->world.trackMap[x][y + 1])
                 passable = 1;
@@ -374,7 +374,7 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
 }
 
 bool gc_tryBuildPath(GameCanvas *gc) {
-    gc->pathDistanceGrid.resize(gc->mapWidth, gc->mapHeight);
+    gc->pathDistanceGrid.resize(gc->world.mapWidth, gc->world.mapHeight);
     gc->pathSearchLimit = 10;
     gc->selectionCost = 0;
     gc_clearPathDistanceGrid(gc);

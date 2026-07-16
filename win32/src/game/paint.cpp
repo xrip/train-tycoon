@@ -142,7 +142,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_fill_rect(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
             int n15 = gc->viewportCenterX / 16;
             int n16 = gc->viewportCenterY / 8;
-            int n17 = gc->mapWidth + gc->mapHeight;
+            int n17 = gc->world.mapWidth + gc->world.mapHeight;
             int n18 = gcs_screenWidth / 2 - n15 - gcs_screenWidth / 32;
             if (gcs_screenWidth - n18 > n17) n18 = gcs_screenWidth - n17;
             if (n18 > 0) n18 = 0;
@@ -151,9 +151,9 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             int n19 = n17 < gcs_screenWidth ? (gcs_screenWidth - n17) / 2 : 0;
             int n20 = n17 < gcs_gameplayViewportHeight ? (gcs_gameplayViewportHeight - n17) / 2 : 0;
             midp_draw_image(g, gc->backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
-            int n21 = gc->viewportCenterX - 2 * gc->viewportCenterY + 16 + 2 * gc->mapHalfWidth;
-            int n22 = gc->viewportCenterX + 2 * gc->viewportCenterY - 16 - 2 * gc->mapHalfWidth;
-            int n23 = gc->mapWidth - (n21 /= 32) + (n22 /= 32);
+            int n21 = gc->viewportCenterX - 2 * gc->viewportCenterY + 16 + 2 * gc->world.mapHalfWidth;
+            int n22 = gc->viewportCenterX + 2 * gc->viewportCenterY - 16 - 2 * gc->world.mapHalfWidth;
+            int n23 = gc->world.mapWidth - (n21 /= 32) + (n22 /= 32);
             int n24 = n21 + n22;
             midp_set_color(g, 0xFFFFFF);
             midp_draw_rect(g, n24 + n18 + n19, 15 + n23 + n14 + n20, gcs_screenWidth / 16, gcs_gameplayViewportHeight / 8);
@@ -279,12 +279,12 @@ void gc_update(GameCanvas *gc) {
                         const int scenario_flags = in.read_byte();
                         if (scenario_index != gc->activeScenario) continue;
                         gc->scenarioStep = scenario_index;
-                        gc->mapWidth = gc->mapHeight = map_size;
-                        gc->mapHalfWidth = (gc->mapWidth - 1) * 8;
-                        gc->mapScreenWidth = (gc->mapWidth + gc->mapHeight) * 16;
-                        gc->mapScreenHeight = (gc->mapWidth + gc->mapHeight) * 8;
-                        gc->viewportHalfWidth = gc->mapScreenWidth / 2;
-                        gc->viewportHalfHeight = gc->mapScreenHeight / 2;
+                        gc->world.mapWidth = gc->world.mapHeight = map_size;
+                        gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
+                        gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
+                        gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
+                        gc->viewportHalfWidth = gc->world.mapScreenWidth / 2;
+                        gc->viewportHalfHeight = gc->world.mapScreenHeight / 2;
                         gc->viewportCenterX = gc->viewportHalfWidth;
                         gc->viewportCenterY = gc->viewportHalfHeight;
                         gc->viewportBaseX = gc->viewportCenterX;
@@ -348,8 +348,8 @@ void gc_update(GameCanvas *gc) {
                 if (++gc->timerC2 == 3) gc->timerC2 = 0;
             }
             if (++gc->woodAgeTimer == 150) {
-                for (int n27 = 0; n27 < gc->mapWidth; ++n27) {
-                    for (int n = 0; n < gc->mapHeight; ++n) {
+                for (int n27 = 0; n27 < gc->world.mapWidth; ++n27) {
+                    for (int n = 0; n < gc->world.mapHeight; ++n) {
                         if (gc->world.tileMap[n27][n] < 59 || gc->world.tileMap[n27][n] > 61
                             || gc->rng.next_int() % 3 != 0)
                             continue;
@@ -367,10 +367,10 @@ void gc_update(GameCanvas *gc) {
                 int n = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][1]);
                 int n29 = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][2]);
                 if (gc->tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
-                    && n < gc->mapWidth && n29 < gc->mapHeight)
+                    && n < gc->world.mapWidth && n29 < gc->world.mapHeight)
                     gc->world.tileMap[n][n29] = (int8_t)(gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128);
                 if (gc->tileQueue[n27][0] != 7 || n < 0 || n29 < 0
-                    || n >= gc->mapWidth || n29 >= gc->mapHeight)
+                    || n >= gc->world.mapWidth || n29 >= gc->world.mapHeight)
                     continue;
                 int n30 = gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128;
                 if (gc->tileQueueVisualOnly[n27]) continue;
@@ -522,16 +522,16 @@ void gc_update(GameCanvas *gc) {
         case +GameState::BuildingMinimap: {
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            int size = gc->mapHeight + gc->mapWidth;
+            int size = gc->world.mapHeight + gc->world.mapWidth;
             gc->backbuffer = Image::create_blank(size, size);
             gc->backbuffer_surface = gc->backbuffer->drawing_surface();
             midp_set_color(gc->backbuffer_surface, 0);
             midp_fill_rect(gc->backbuffer_surface, 0, 0, size, size);
             int previous_kind = -1;
             int kind = 0;
-            for (int x = 0; x < gc->mapWidth; ++x) {
-                for (int y = 0; y < gc->mapHeight; ++y) {
-                    int draw_y = gc->mapWidth - x + y;
+            for (int x = 0; x < gc->world.mapWidth; ++x) {
+                for (int y = 0; y < gc->world.mapHeight; ++y) {
+                    int draw_y = gc->world.mapWidth - x + y;
                     int draw_x = x + y;
                     int tile = gc->world.tileMap[x][y];
                     int track = gc->world.trackMap[x][y];

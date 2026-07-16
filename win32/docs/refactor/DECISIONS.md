@@ -192,6 +192,13 @@ query helpers, move onto `World` in later WORLD-01 leaves. The terrain-edit
 scratch grid `terrainEditBuffer` stays in `GameCanvas` for now; it is edit state,
 not map data.
 
+A second leaf moved the core map dimensions (`mapWidth`, `mapHeight`,
+`mapHalfWidth`, `mapScreenWidth`, `mapScreenHeight`) onto `World`. The save codec
+keeps byte order: `IO_INT(mapWidth)`/`IO_INT(mapHeight)` became
+`IO_INT(world.mapWidth)`/`IO_INT(world.mapHeight)` (same `gc->world.field`
+expansion, same bytes). The `viewport*` camera fields stay in `GameCanvas`; they
+are view state, not map data.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

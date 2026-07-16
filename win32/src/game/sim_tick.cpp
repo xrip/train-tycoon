@@ -17,7 +17,7 @@ void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t
     bool seen[64] = {false};
     for (int i = n - 5; i <= n + 5; ++i) {
         for (int j = n2 - 5; j <= n2 + 5; ++j) {
-            if (i < 0 || j < 0 || i >= gc->mapWidth || j >= gc->mapHeight
+            if (i < 0 || j < 0 || i >= gc->world.mapWidth || j >= gc->world.mapHeight
                 || (gc->world.trackMap[i][j] & 0xC0) != 128)
                 continue;
             int n4 = gc->world.trackMap[i][j] & 0x3F;
@@ -41,8 +41,8 @@ void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t
 // void maybeAITick()
 void gc_maybeAITick(GameCanvas *gc) {
     for (int n = 0; n < 64; ++n) gc->zonePopulation[n] = 0;
-    for (int n = 0; n < gc->mapWidth; ++n) {
-        for (int i = 0; i < gc->mapHeight; ++i) {
+    for (int n = 0; n < gc->world.mapWidth; ++n) {
+        for (int i = 0; i < gc->world.mapHeight; ++i) {
             if (gc->world.tileMap[n][i] < 34 || gc->world.tileMap[n][i] > 40) continue;
             int n2 = gc->world.trackMap[n][i] & 0x3F;
             ++gc->zonePopulation[n2];
@@ -235,8 +235,8 @@ void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) 
 
 // boolean pickValidForestTile()
 bool gc_pickValidForestTile(GameCanvas *gc) {
-    int n2 = std::abs(gc->rng.next_int() % (gc->mapWidth - 2)) + 1;
-    int n = std::abs(gc->rng.next_int() % (gc->mapHeight - 2)) + 1;
+    int n2 = std::abs(gc->rng.next_int() % (gc->world.mapWidth - 2)) + 1;
+    int n = std::abs(gc->rng.next_int() % (gc->world.mapHeight - 2)) + 1;
     if (gc->world.tileMap[n2][n] != 0
         && (gc->world.tileMap[n2][n] < 29 || gc->world.tileMap[n2][n] > 33))
         return false;
@@ -334,8 +334,8 @@ void gc_persistSnapshotMode0(GameCanvas *gc) {
 // int computeMapTrainMetric(int)
 int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
     int n2 = gc->trainRevenueScore;
-    for (int i = 0; i < gc->mapWidth; ++i) {
-        for (int j = 0; j < gc->mapHeight; ++j) {
+    for (int i = 0; i < gc->world.mapWidth; ++i) {
+        for (int j = 0; j < gc->world.mapHeight; ++j) {
             if (gc->world.trackMap[i][j] != 65) continue;
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
@@ -412,8 +412,8 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
 // int scanMapForMetric()
 int32_t gc_scanMapForMetric(GameCanvas *gc) {
     int n4 = 0;
-    for (int n3 = 0; n3 < gc->mapWidth; ++n3) {
-        for (int n2 = 0; n2 < gc->mapHeight; ++n2) {
+    for (int n3 = 0; n3 < gc->world.mapWidth; ++n3) {
+        for (int n2 = 0; n2 < gc->world.mapHeight; ++n2) {
             if (gc->world.trackMap[n3][n2] != 65) continue;
             int n = gc->world.tileMap[n3][n2];
             if (n >= 70 && n <= 80) {
@@ -540,8 +540,8 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
         int n8 = n4 + 3;
         if (n5 < 0) n5 = 0;
         if (n6 < 0) n6 = 0;
-        if (n7 >= gc->mapWidth) n7 = gc->mapWidth - 1;
-        if (n8 >= gc->mapHeight) n8 = gc->mapHeight - 1;
+        if (n7 >= gc->world.mapWidth) n7 = gc->world.mapWidth - 1;
+        if (n8 >= gc->world.mapHeight) n8 = gc->world.mapHeight - 1;
         int n9 = 0;
         bool seenZones[64] = {false};
         bool seenIndustry1[64] = {false};

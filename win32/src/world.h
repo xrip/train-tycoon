@@ -13,6 +13,12 @@ struct World {
     Grid<int8_t> trackMap;       // track byte per cell (see namespace track)
     Grid<int8_t> tileElevation;  // elevation step per cell
     Grid<int8_t> heightMap;      // height field, padded by two
+
+    int32_t mapWidth = 0;        // map cell columns
+    int32_t mapHeight = 0;       // map cell rows
+    int32_t mapHalfWidth = 0;    // (mapWidth - 1) * 8
+    int32_t mapScreenWidth = 0;  // (mapWidth + mapHeight) * 16
+    int32_t mapScreenHeight = 0; // (mapWidth + mapHeight) * 8
 };
 
 #endif  // WORLD_H

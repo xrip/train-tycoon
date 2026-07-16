@@ -382,7 +382,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
             next_x += step[2];
             next_y += step[3];
             if (next_x >= 0 && next_y >= 0
-                && next_x < gc->mapWidth && next_y < gc->mapHeight) {
+                && next_x < gc->world.mapWidth && next_y < gc->world.mapHeight) {
                 bool moved = false;
                 int next_track = gc->world.trackMap[next_x][next_y];
                 int next_variant = normalize_track_variant(gc->world.tileMap[next_x][next_y] - 70);

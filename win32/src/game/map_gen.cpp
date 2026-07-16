@@ -60,7 +60,7 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
         n4 = gc->selectionStartX; n3 = gc->selectionStartY;
         n2 = gc->selectionStartX + 10; n = gc->selectionStartY + 10;
     } else {
-        n4 = 0; n3 = 0; n2 = gc->mapWidth; n = gc->mapHeight;
+        n4 = 0; n3 = 0; n2 = gc->world.mapWidth; n = gc->world.mapHeight;
     }
     for (int i = n4; i < n2; ++i) {
         for (int j = n3; j < n; ++j) {
@@ -82,7 +82,7 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
             if (by == by4 && by2 == by3 && by < by2) { gc->world.tileElevation[i][j] = by2; gc->world.tileMap[i][j] = 15; }
             if (by == by2 && by3 == by4 && by3 < by) {
                 gc->world.tileElevation[i][j] = by;
-                gc->world.tileMap[i][j] = (int8_t)(by3 == -1 && i + 2 <= gc->mapWidth && (gc->world.heightMap[i + 2][j] == -1 || gc->world.heightMap[i + 2][j + 1] == -1) ? 9 : 24);
+                gc->world.tileMap[i][j] = (int8_t)(by3 == -1 && i + 2 <= gc->world.mapWidth && (gc->world.heightMap[i + 2][j] == -1 || gc->world.heightMap[i + 2][j + 1] == -1) ? 9 : 24);
             }
             if (by == by2 && by3 == by4 && by < by3) {
                 gc->world.tileElevation[i][j] = by3;
@@ -90,7 +90,7 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
             }
             if (by == by3 && by2 == by4 && by2 < by) {
                 gc->world.tileElevation[i][j] = by;
-                gc->world.tileMap[i][j] = (int8_t)(by2 == -1 && j + 2 <= gc->mapHeight && (gc->world.heightMap[i][j + 2] == -1 || gc->world.heightMap[i + 1][j + 2] == -1) ? 10 : 21);
+                gc->world.tileMap[i][j] = (int8_t)(by2 == -1 && j + 2 <= gc->world.mapHeight && (gc->world.heightMap[i][j + 2] == -1 || gc->world.heightMap[i + 1][j + 2] == -1) ? 10 : 21);
             }
             if (by == by3 && by2 == by4 && by < by2) {
                 gc->world.tileElevation[i][j] = by2;
@@ -135,13 +135,13 @@ void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
 void gc_raiseTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
-            if (i <= 0 || j <= 0 || i > gc->mapWidth || j > gc->mapHeight) continue;
+            if (i <= 0 || j <= 0 || i > gc->world.mapWidth || j > gc->world.mapHeight) continue;
             gc_setSelectionStart(gc, i, j);
             gc_isAdjacentTileEmpty(gc, i, j, n5, true);
             if (rint(gc) % 2 < 0 && i > 0) gc_isAdjacentTileEmpty(gc, i - 1, j, n5, true);
             if (rint(gc) % 2 < 0 && j > 0) gc_isAdjacentTileEmpty(gc, i, j - 1, n5, true);
-            if (rint(gc) % 2 < 0 && i < gc->mapWidth) gc_isAdjacentTileEmpty(gc, i + 1, j, n5, true);
-            if (rint(gc) % 2 < 0 && j < gc->mapHeight) gc_isAdjacentTileEmpty(gc, i, j + 1, n5, true);
+            if (rint(gc) % 2 < 0 && i < gc->world.mapWidth) gc_isAdjacentTileEmpty(gc, i + 1, j, n5, true);
+            if (rint(gc) % 2 < 0 && j < gc->world.mapHeight) gc_isAdjacentTileEmpty(gc, i, j + 1, n5, true);
             gc_commitTerrainEdit(gc);
         }
     }
@@ -152,12 +152,12 @@ void gc_lowerTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int3
     (void)n5;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
-            if (i <= 0 || j <= 0 || i > gc->mapWidth || j > gc->mapHeight) continue;
+            if (i <= 0 || j <= 0 || i > gc->world.mapWidth || j > gc->world.mapHeight) continue;
             for (int k = 0; k < 3; ++k) gc_smoothTileAtInlined(gc, i, j, false);
             if (rint(gc) % 2 < 0 && i > 0) gc_smoothTileAtInlined(gc, i - 1, j, false);
             if (rint(gc) % 2 < 0 && j > 0) gc_smoothTileAtInlined(gc, i, j - 1, false);
-            if (rint(gc) % 2 < 0 && i < gc->mapWidth) gc_smoothTileAtInlined(gc, i + 1, j, false);
-            if (rint(gc) % 2 >= 0 || j >= gc->mapHeight) continue;
+            if (rint(gc) % 2 < 0 && i < gc->world.mapWidth) gc_smoothTileAtInlined(gc, i + 1, j, false);
+            if (rint(gc) % 2 >= 0 || j >= gc->world.mapHeight) continue;
             gc_smoothTileAtInlined(gc, i, j + 1, false);
         }
     }
@@ -168,7 +168,7 @@ void gc_trackBuildStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
     int8_t by = -2;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
-            if (i >= gc->mapWidth || j >= gc->mapHeight) continue;
+            if (i >= gc->world.mapWidth || j >= gc->world.mapHeight) continue;
             if (by == -2 && (by = gc->world.heightMap[i][j]) < 0) by = 0;
             while (by != gc->world.heightMap[i][j]) gc_smoothTileAtInlined(gc, i, j, by > gc->world.heightMap[i][j]);
             while (by != gc->world.heightMap[i + 1][j]) gc_smoothTileAtInlined(gc, i + 1, j, by > gc->world.heightMap[i + 1][j]);
@@ -252,7 +252,7 @@ void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
     n5 = -2;
     for (by4 = 0; by4 < n7; ++by4) {
         for (by3 = 0; by3 < by5; ++by3) {
-            if (n + by4 >= gc->mapWidth || n2 + by3 >= gc->mapHeight
+            if (n + by4 >= gc->world.mapWidth || n2 + by3 >= gc->world.mapHeight
                 || (patch_tiles[by4][by3] == 0 && (patch_tiles[by4][by3] != 0 || rint(gc) % 3 >= 0))) continue;
             if (n5 == -2 && (n5 = gc->world.heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
             int64_t l = midp_current_time_millis();
@@ -288,7 +288,7 @@ void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
     by3 = gc_registerTrain(gc, by4, n + n7 / 2, n2 + by5 / 2);
     for (int i = 0; i < n7; ++i) {
         for (n4 = 0; n4 < by5; ++n4) {
-            if (n + i >= gc->mapWidth || n2 + n4 >= gc->mapHeight || patch_tiles[i][n4] == 0) continue;
+            if (n + i >= gc->world.mapWidth || n2 + n4 >= gc->world.mapHeight || patch_tiles[i][n4] == 0) continue;
             gc->world.tileMap[n + i][n2 + n4] = patch_tiles[i][n4];
             gc->world.trackMap[n + i][n2 + n4] = (int8_t)(0x80 | by3);
         }
@@ -303,8 +303,8 @@ void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
     int64_t l = midp_current_time_millis();
     do {
         bl = true;
-        n7 = abs(rint(gc) % (gc->mapWidth - 8)) + 4;
-        n6 = abs(rint(gc) % (gc->mapHeight - 8)) + 4;
+        n7 = abs(rint(gc) % (gc->world.mapWidth - 8)) + 4;
+        n6 = abs(rint(gc) % (gc->world.mapHeight - 8)) + 4;
         n5 = rint(gc) % 2 <= 0 ? 3 : 2;
         n4 = rint(gc) % 2 <= 0 ? 3 : 2;
         if (n == 2) { n5 = 2; n4 = 2; }
@@ -399,10 +399,10 @@ void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
 // void loadState25Setup(int n) -- the incremental map generator
 void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
     if (n == 0) {
-        gc->world.tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-        gc->world.trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-        gc->world.tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-        gc->world.heightMap.resize(gc->mapWidth + 2, gc->mapHeight + 2);
+        gc->world.tileMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
+        gc->world.trackMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
+        gc->world.tileElevation.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
+        gc->world.heightMap.resize(gc->world.mapWidth + 2, gc->world.mapHeight + 2);
         gc->initialIndustryPlaced = false;
         gc->mapGenStage = 0;
         gc->tilesGeneratedInStage = 0;
@@ -424,8 +424,8 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
         if (gc->mapGenStage == 8 && gc->tilesGeneratedInStage == gc->weightAccel4) { gc->mapGenStage = 9; gc->tilesGeneratedInStage = 0; }
         if (gc->mapGenStage == 9 && gc->tilesGeneratedInStage == gc->weightAccel3) { gc->mapGenStage = 10; gc->tilesGeneratedInStage = 0; }
         if (gc->mapGenStage == 1) {
-            int center_x = abs(rint(gc) % gc->mapWidth);
-            int center_y = abs(rint(gc) % gc->mapHeight);
+            int center_x = abs(rint(gc) % gc->world.mapWidth);
+            int center_y = abs(rint(gc) % gc->world.mapHeight);
             int width = abs(rint(gc) % 20) + 1;
             int height = abs(rint(gc) % 20) + 1;
             int elevation_step = abs(rint(gc) % 2) + 1;
@@ -433,8 +433,8 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
                                 elevation_step);
         }
         if (gc->mapGenStage == 2) {
-            int center_x = abs(rint(gc) % gc->mapWidth);
-            int center_y = abs(rint(gc) % gc->mapHeight);
+            int center_x = abs(rint(gc) % gc->world.mapWidth);
+            int center_y = abs(rint(gc) % gc->world.mapHeight);
             int width = abs(rint(gc) % 20) + 1;
             int height = abs(rint(gc) % 20) + 1;
             gc_lowerTerrainArea(gc, center_x, center_y, width, height, -1);
@@ -445,8 +445,8 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
                 bool done = false;
                 for (n3 = 0; n3 < gc->mapGenRows && !done; ++n3) {
                     if (gc->tilesGeneratedInStage != gc->mapGenColumns * n4 + n3) continue;
-                    n2 = gc->mapWidth / gc->mapGenColumns;
-                    int n5 = gc->mapHeight / gc->mapGenRows;
+                    n2 = gc->world.mapWidth / gc->mapGenColumns;
+                    int n5 = gc->world.mapHeight / gc->mapGenRows;
                     int n6 = n4 * n2 + abs(rint(gc) % (n2 / 2));
                     int n7 = n3 * n5 + abs(rint(gc) % (n5 / 2));
                     gc_placeTerrainPatch(gc, n6, n7);
@@ -464,8 +464,8 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
         if (gc->trackBuildInProgress) gc->loadStep = 0;
         if (gc->mapGenStage == 10) {
             for (n4 = 0; n4 < gc->initialObstacleCount; ++n4) {
-                n3 = abs(rint(gc) % gc->mapWidth);
-                n2 = abs(rint(gc) % gc->mapHeight);
+                n3 = abs(rint(gc) % gc->world.mapWidth);
+                n2 = abs(rint(gc) % gc->world.mapHeight);
                 if (gc->world.tileMap[n3][n2] != 0 || gc->world.tileElevation[n3][n2] < 0) continue;
                 gc->world.tileMap[n3][n2] = (int8_t)(29 + abs(rint(gc) % 5));
             }
@@ -477,8 +477,8 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
 }
 
 void gc_pickCitySite(GameCanvas *gc) {
-    int x = abs(rint(gc) % gc->mapWidth);
-    int y = abs(rint(gc) % gc->mapHeight);
+    int x = abs(rint(gc) % gc->world.mapWidth);
+    int y = abs(rint(gc) % gc->world.mapHeight);
     gc->industryCategory = -1;
     int tile = gc->world.tileMap[x][y];
     if (tile != 0 && (tile < 29 || tile > 33)) return;
@@ -488,8 +488,8 @@ void gc_pickCitySite(GameCanvas *gc) {
     int max_y = y + 2;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= gc->mapWidth) max_x = gc->mapWidth - 1;
-    if (max_y >= gc->mapHeight) max_y = gc->mapHeight - 1;
+    if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
+    if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
     for (int near_x = min_x;
          near_x <= max_x && gc->industryCategory <= 0; ++near_x) {
         for (int near_y = min_y;
@@ -508,8 +508,8 @@ void gc_pickCitySite(GameCanvas *gc) {
 }
 
 void gc_pickIndustrySite(GameCanvas *gc) {
-    int x = abs(rint(gc) % gc->mapWidth);
-    int y = abs(rint(gc) % gc->mapHeight);
+    int x = abs(rint(gc) % gc->world.mapWidth);
+    int y = abs(rint(gc) % gc->world.mapHeight);
     gc->industrySiteFound = false;
     int tile = gc->world.tileMap[x][y];
     if (tile != 0 && (tile < 29 || tile > 33)) return;
@@ -519,8 +519,8 @@ void gc_pickIndustrySite(GameCanvas *gc) {
     int max_y = y + 2;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= gc->mapWidth) max_x = gc->mapWidth - 1;
-    if (max_y >= gc->mapHeight) max_y = gc->mapHeight - 1;
+    if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
+    if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
     for (int near_x = min_x;
          near_x <= max_x && !gc->industrySiteFound; ++near_x) {
         for (int near_y = min_y;
@@ -564,9 +564,9 @@ static bool can_extend_station_over(GameCanvas *gc, int x, int y) {
 
 void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
     bool track_left = x > 0 && gc->world.trackMap[x - 1][y] == track::PRESENT;
-    bool track_right = x < gc->mapWidth - 1 && gc->world.trackMap[x + 1][y] == track::PRESENT;
+    bool track_right = x < gc->world.mapWidth - 1 && gc->world.trackMap[x + 1][y] == track::PRESENT;
     bool track_up = y > 0 && gc->world.trackMap[x][y - 1] == track::PRESENT;
-    bool track_down = y < gc->mapHeight - 1 && gc->world.trackMap[x][y + 1] == track::PRESENT;
+    bool track_down = y < gc->world.mapHeight - 1 && gc->world.trackMap[x][y + 1] == track::PRESENT;
     if (track_left || track_right) {
         gc->world.tileMap[x][y] = 88;
         gc->world.trackMap[x][y] = (int8_t)gc->nextTrackPieceCode;
@@ -579,7 +579,7 @@ void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
             gc->world.trackMap[x - 1][y] = (int8_t)gc->nextTrackPieceCode;
             gc->world.trackMap[x - 2][y] = (int8_t)gc->nextTrackPieceCode;
         }
-        if (track_left && x < gc->mapWidth - 2
+        if (track_left && x < gc->world.mapWidth - 2
             && can_extend_station_over(gc, x + 1, y)
             && can_extend_station_over(gc, x + 2, y)) {
             gc->world.tileMap[x][y] = 90;
@@ -602,7 +602,7 @@ void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
             gc->world.trackMap[x][y - 2] = (int8_t)gc->nextTrackPieceCode;
         }
         // The original bytecode tests track_up here too (not track_down).
-        if (track_up && y < gc->mapHeight - 2
+        if (track_up && y < gc->world.mapHeight - 2
             && can_extend_station_over(gc, x, y + 1)
             && can_extend_station_over(gc, x, y + 2)) {
             gc->world.tileMap[x][y] = 89;

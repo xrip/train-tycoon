@@ -19,11 +19,6 @@ typedef struct GameCanvas {
     int32_t cB;
     int32_t ar;
     int32_t D;
-    int32_t mapWidth;
-    int32_t mapHeight;
-    int32_t mapHalfWidth;
-    int32_t mapScreenWidth;
-    int32_t mapScreenHeight;
     int32_t viewportHalfWidth;
     int32_t viewportHalfHeight;
     int32_t initialObstacleCount;

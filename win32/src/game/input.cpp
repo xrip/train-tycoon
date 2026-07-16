@@ -73,10 +73,10 @@ void gc_viewportPanKey(GameCanvas *gc) {
     }
     if (gc->viewportCenterX < 0) gc->viewportCenterX = 0;
     if (gc->viewportCenterY < 0) gc->viewportCenterY = 0;
-    if (gc->viewportCenterX > gc->mapScreenWidth - gcs_screenWidth)
-        gc->viewportCenterX = gc->mapScreenWidth - gcs_screenWidth;
-    if (gc->viewportCenterY > gc->mapScreenHeight - gcs_gameplayViewportHeight)
-        gc->viewportCenterY = gc->mapScreenHeight - gcs_gameplayViewportHeight;
+    if (gc->viewportCenterX > gc->world.mapScreenWidth - gcs_screenWidth)
+        gc->viewportCenterX = gc->world.mapScreenWidth - gcs_screenWidth;
+    if (gc->viewportCenterY > gc->world.mapScreenHeight - gcs_gameplayViewportHeight)
+        gc->viewportCenterY = gc->world.mapScreenHeight - gcs_gameplayViewportHeight;
     gc->viewportBaseX = gc->viewportCenterX + gcs_screenWidth / 2;
     gc->viewportBaseY =
         gc->viewportCenterY + gcs_gameplayViewportHeight / 2;
@@ -111,10 +111,10 @@ void gc_viewportZoomKey(GameCanvas *gc) {
 
     gc->viewportBaseX = gc->mapScaleX / 2;
     gc->viewportBaseY = gc->mapScaleY / 2;
-    if (gc->viewportBaseX > gc->mapScreenWidth - 8)
-        gc->viewportBaseX = gc->mapScreenWidth - 8;
-    if (gc->viewportBaseY > gc->mapScreenHeight - 4)
-        gc->viewportBaseY = gc->mapScreenHeight - 4;
+    if (gc->viewportBaseX > gc->world.mapScreenWidth - 8)
+        gc->viewportBaseX = gc->world.mapScreenWidth - 8;
+    if (gc->viewportBaseY > gc->world.mapScreenHeight - 4)
+        gc->viewportBaseY = gc->world.mapScreenHeight - 4;
 
     bool moved_view = false;
     if (gc->viewportCenterX > 0
@@ -147,14 +147,14 @@ void gc_viewportZoomKey(GameCanvas *gc) {
         gc->viewportCenterY = 0;
         moved_view = false;
     }
-    if (gc->viewportCenterX > gc->mapScreenWidth - gcs_screenWidth) {
-        gc->viewportCenterX = gc->mapScreenWidth - gcs_screenWidth;
+    if (gc->viewportCenterX > gc->world.mapScreenWidth - gcs_screenWidth) {
+        gc->viewportCenterX = gc->world.mapScreenWidth - gcs_screenWidth;
         moved_view = false;
     }
     if (gc->viewportCenterY
-        > gc->mapScreenHeight - gcs_gameplayViewportHeight) {
+        > gc->world.mapScreenHeight - gcs_gameplayViewportHeight) {
         gc->viewportCenterY =
-            gc->mapScreenHeight - gcs_gameplayViewportHeight;
+            gc->world.mapScreenHeight - gcs_gameplayViewportHeight;
         moved_view = false;
     }
     if (moved_view) gc->keySubState = 80;
@@ -168,19 +168,19 @@ void gc_computeViewportBounds(GameCanvas *gc) {
     int tile_center_x = 0;
     int tile_center_y = 0;
     int tile_x = gc->viewportBaseX - 2 * gc->viewportBaseY
-                 + 16 + 2 * gc->mapHalfWidth;
+                 + 16 + 2 * gc->world.mapHalfWidth;
     int tile_y = gc->viewportBaseX + 2 * gc->viewportBaseY
-                 - 16 - 2 * gc->mapHalfWidth;
+                 - 16 - 2 * gc->world.mapHalfWidth;
     tile_x /= 32;
     tile_y /= 32;
     gc->blockBuildMenu = true;
 
     for (int x = tile_x - 1; x <= tile_x + 1 && gc->blockBuildMenu; ++x) {
         for (int y = tile_y - 1; y <= tile_y + 1; ++y) {
-            if (x < 0 || x >= gc->mapWidth || y < 0 || y >= gc->mapHeight)
+            if (x < 0 || x >= gc->world.mapWidth || y < 0 || y >= gc->world.mapHeight)
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
-            tile_center_y = gc->mapHalfWidth - x * 8 + y * 8 + 8;
+            tile_center_y = gc->world.mapHalfWidth - x * 8 + y * 8 + 8;
             gc_computeIsoCornersInlined(gc, x, y, gc->selectionTileX.data(),
                                         gc->selectionTileY.data(), false);
             int opposite_edges =

@@ -23,7 +23,7 @@ void gc_pushMoneyHistory(GameCanvas *gc, int32_t n) {
 bool gc_isTrackStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
                           int32_t n4, int32_t n5) {
     bool bl = false;
-    while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < gc->mapWidth && n2 < gc->mapHeight) {
+    while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < gc->world.mapWidth && n2 < gc->world.mapHeight) {
         if (gc->world.tileMap[n][n2] == n5) bl = true;
         if (gc->world.tileMap[n][n2] == 0 && gc->world.trackMap[n][n2] == 0) continue;
         break;

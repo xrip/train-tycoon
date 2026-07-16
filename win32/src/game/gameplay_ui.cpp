@@ -178,7 +178,7 @@ void gc_computeIsoCornersInlined(GameCanvas *gc, int32_t x, int32_t y,
                                  int32_t *screen_x, int32_t *screen_y,
                                  bool viewport_relative) {
     int center_x = x * 16 + y * 16 + 16;
-    int center_y = gc->mapHalfWidth - x * 8 + y * 8 + 8;
+    int center_y = gc->world.mapHalfWidth - x * 8 + y * 8 + 8;
     screen_x[0] = center_x - 16;
     screen_x[1] = center_x;
     screen_x[2] = center_x;
@@ -236,7 +236,7 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
             }
-            if (gc->tileCursorY < gc->mapWidth - 1) {
+            if (gc->tileCursorY < gc->world.mapWidth - 1) {
                 gc_computeIsoCornersInlined(gc, gc->tileCursorX, gc->tileCursorY + 1,
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
@@ -247,7 +247,7 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
             }
-            if (gc->tileCursorX < gc->mapWidth - 1) {
+            if (gc->tileCursorX < gc->world.mapWidth - 1) {
                 gc_computeIsoCornersInlined(gc, gc->tileCursorX + 1, gc->tileCursorY,
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
@@ -277,7 +277,7 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
             int32_t quad_x[4];
             int32_t quad_y[4];
             while ((x += dx) >= 0 && (y += dy) >= 0
-                   && x < gc->mapWidth && y < gc->mapHeight) {
+                   && x < gc->world.mapWidth && y < gc->world.mapHeight) {
                 gc_computeIsoCornersInlined(gc, x, y, quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
                 if (gc->world.tileMap[x][y] != 0 || gc->world.trackMap[x][y] != 0) break;
@@ -323,8 +323,8 @@ void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
     int max_y = gc->tileCursorY + 3;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= gc->mapWidth) max_x = gc->mapWidth - 1;
-    if (max_y >= gc->mapHeight) max_y = gc->mapHeight - 1;
+    if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
+    if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
     int population_tiles = 0;
     bool has_type_50_55 = false;
     bool has_type_56_61 = false;
