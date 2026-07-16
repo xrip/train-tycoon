@@ -5,7 +5,7 @@
 // int accumulateTrainTurns(int)
 int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
     if (car == -1) return 0;
-    int tile = gc->tileMap[gc_byteToUnsignedInt(gc, gc->trainX[car])][gc_byteToUnsignedInt(gc, gc->trainY[car])];
+    int tile = gc->world.tileMap[gc_byteToUnsignedInt(gc, gc->trainX[car])][gc_byteToUnsignedInt(gc, gc->trainY[car])];
     int turn = 0;
     if (tile == 77) turn = gc->trainDir[car] == 0 ? -1 : 1;
     if (tile == 79) turn = gc->trainDir[car] == 0 ? 1 : -1;
@@ -292,10 +292,10 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
 
         int old_x = gc_byteToUnsignedInt(gc, gc->trainX[head]);
         int old_y = gc_byteToUnsignedInt(gc, gc->trainY[head]);
-        bool at_service_tile = (gc->tileMap[old_x][old_y] == 87
-                                || gc->tileMap[old_x][old_y] == 88);
+        bool at_service_tile = (gc->world.tileMap[old_x][old_y] == 87
+                                || gc->world.tileMap[old_x][old_y] == 88);
         if ((gc->trainFlags[head] & 0x40) == 64 && gc->trainPhase[head] == 4
-            && at_service_tile && gc->trackMap[old_x][old_y] == 65) {
+            && at_service_tile && gc->world.trackMap[old_x][old_y] == 65) {
             int service_vehicle = gc_findServiceVehicleAt(gc, old_x, old_y);
             int revenue = 0;
             if (service_vehicle != gc->lastServiceVehicle[head])
@@ -345,7 +345,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
             gc->trainFlags[head] = (int8_t)(gc->trainFlags[head] | 0x10);
         }
         if ((gc->trainFlags[head] & 0x40) == 64 && gc->trainPhase[head] == 4
-            && at_service_tile && gc->trackMap[old_x][old_y] != 65) {
+            && at_service_tile && gc->world.trackMap[old_x][old_y] != 65) {
             gc->trainEnergyOrCount[head] =
                 (int8_t)(gc_countCarsInTrain(gc, head) * 40);
         }
@@ -362,8 +362,8 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
 
             int next_x = gc_byteToUnsignedInt(gc, gc->trainX[head]);
             int next_y = gc_byteToUnsignedInt(gc, gc->trainY[head]);
-            int current_track = gc->trackMap[next_x][next_y];
-            int current_variant = gc->tileMap[next_x][next_y] - 70;
+            int current_track = gc->world.trackMap[next_x][next_y];
+            int current_variant = gc->world.tileMap[next_x][next_y] - 70;
             if (current_variant == 6 && (gc->trainDir[head] == 0
                                          || gc->trainDir[head] == 1)) {
                 current_track = 0x40 | (current_track & 7);
@@ -384,8 +384,8 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
             if (next_x >= 0 && next_y >= 0
                 && next_x < gc->mapWidth && next_y < gc->mapHeight) {
                 bool moved = false;
-                int next_track = gc->trackMap[next_x][next_y];
-                int next_variant = normalize_track_variant(gc->tileMap[next_x][next_y] - 70);
+                int next_track = gc->world.trackMap[next_x][next_y];
+                int next_variant = normalize_track_variant(gc->world.tileMap[next_x][next_y] - 70);
                 for (int pair = 2; pair < static_cast<int>(step.size()) / 2; ++pair) {
                     if (step[2 * pair] != next_variant) continue;
                     int next_dir = step[2 * pair + 1];

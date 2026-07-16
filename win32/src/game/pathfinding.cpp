@@ -29,10 +29,10 @@ int32_t gc_relaxPathCell(GameCanvas *gc, int32_t x, int32_t y) {
                 int step_y = 0;
                 int tunnel_x = x;
                 int tunnel_y = y;
-                if (gc->tileMap[x][y] == 7) step_y = -1;
-                if (gc->tileMap[x][y] == 8) step_x = -1;
-                if (gc->tileMap[x][y] == 9) step_x = 1;
-                if (gc->tileMap[x][y] == 10) step_y = 1;
+                if (gc->world.tileMap[x][y] == 7) step_y = -1;
+                if (gc->world.tileMap[x][y] == 8) step_x = -1;
+                if (gc->world.tileMap[x][y] == 9) step_x = 1;
+                if (gc->world.tileMap[x][y] == 10) step_y = 1;
                 if (step_x != 0 || step_y != 0) {
                     int tunnel_distance = distance;
                     do {
@@ -112,8 +112,8 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
     if (connected || x < 0 || x >= gc->mapWidth
         || y < 0 || y >= gc->mapHeight)
         return connected;
-    int tile = gc->tileMap[x][y];
-    int owner = gc->trackMap[x][y] & track::OWNER_MASK;
+    int tile = gc->world.tileMap[x][y];
+    int owner = gc->world.trackMap[x][y] & track::OWNER_MASK;
     owner = tile == tile::CROSSING && high_owner
                 ? owner >> track::DIR_OWNER_SHIFT
                 : owner & track::DIR_OWNER_MASK;
@@ -134,7 +134,7 @@ void gc_validatePathStep(GameCanvas *gc) {
         walking = true;
         gc->nextPathX = x;
         gc->nextPathY = y;
-        int tile = gc->tileMap[x][y];
+        int tile = gc->world.tileMap[x][y];
         if (tile == 7 || tile == 10 || tile == 21 || tile == 23 || tile == 71) {
             gc_clearBuildPathTile(gc, x - 1, y);
             gc_clearBuildPathTile(gc, x + 1, y);
@@ -171,10 +171,10 @@ void gc_validatePathStep(GameCanvas *gc) {
 
         int step_x = 0;
         int step_y = 0;
-        if (gc->tileMap[x][y] == 7) step_y = -1;
-        if (gc->tileMap[x][y] == 8) step_x = -1;
-        if (gc->tileMap[x][y] == 9) step_x = 1;
-        if (gc->tileMap[x][y] == 10) step_y = 1;
+        if (gc->world.tileMap[x][y] == 7) step_y = -1;
+        if (gc->world.tileMap[x][y] == 8) step_x = -1;
+        if (gc->world.tileMap[x][y] == 9) step_x = 1;
+        if (gc->world.tileMap[x][y] == 10) step_y = 1;
         if (step_x != 0 || step_y != 0) {
             do {
                 gc->pathDistanceGrid[x][y] = 9;
@@ -217,60 +217,60 @@ void gc_validatePathStep(GameCanvas *gc) {
                     70, 72, 75, 77, 79, 86, 87, 89, false);
             }
 
-            int old_tile = gc->tileMap[map_x][map_y];
+            int old_tile = gc->world.tileMap[map_x][map_y];
             bool joined_track = false;
             if (old_tile != 0 && old_tile > 28)
                 gc->selectionCost += gc->baseTrainSpeed;
             int cost_before_shape = gc->selectionCost;
             if (left && right) {
-                if (old_tile == 22) gc->tileMap[map_x][map_y] = 78;
-                else if (old_tile == 24) gc->tileMap[map_x][map_y] = 80;
+                if (old_tile == 22) gc->world.tileMap[map_x][map_y] = 78;
+                else if (old_tile == 24) gc->world.tileMap[map_x][map_y] = 80;
                 else if (old_tile == 9) {
-                    gc->tileMap[map_x][map_y] = 85;
+                    gc->world.tileMap[map_x][map_y] = 85;
                     gc->selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 8) {
-                    gc->tileMap[map_x][map_y] = 84;
+                    gc->world.tileMap[map_x][map_y] = 84;
                     gc->selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 70) {
-                    gc->tileMap[map_x][map_y] = tile::CROSSING;
+                    gc->world.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
-                    gc->trackMap[map_x][map_y] = (int8_t)(
-                        track::PRESENT | (gc->trackMap[map_x][map_y] & track::OWNER_MASK)
+                    gc->world.trackMap[map_x][map_y] = (int8_t)(
+                        track::PRESENT | (gc->world.trackMap[map_x][map_y] & track::OWNER_MASK)
                         | gc->previewTrackOwnerCode << track::DIR_OWNER_SHIFT);
-                } else if (gc->tileElevation[map_x][map_y] == -1) {
-                    gc->tileMap[map_x][map_y] = 81;
+                } else if (gc->world.tileElevation[map_x][map_y] == -1) {
+                    gc->world.tileMap[map_x][map_y] = 81;
                     gc->selectionCost += gc->moneyBaseB;
                 } else {
-                    gc->tileMap[map_x][map_y] = 71;
+                    gc->world.tileMap[map_x][map_y] = 71;
                 }
             } else if (up && down) {
-                if (old_tile == 21) gc->tileMap[map_x][map_y] = 77;
-                else if (old_tile == 23) gc->tileMap[map_x][map_y] = 79;
+                if (old_tile == 21) gc->world.tileMap[map_x][map_y] = 77;
+                else if (old_tile == 23) gc->world.tileMap[map_x][map_y] = 79;
                 else if (old_tile == 7) {
-                    gc->tileMap[map_x][map_y] = 83;
+                    gc->world.tileMap[map_x][map_y] = 83;
                     gc->selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 10) {
-                    gc->tileMap[map_x][map_y] = 86;
+                    gc->world.tileMap[map_x][map_y] = 86;
                     gc->selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 71) {
-                    gc->tileMap[map_x][map_y] = tile::CROSSING;
+                    gc->world.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
-                    gc->trackMap[map_x][map_y] = (int8_t)(
-                        track::PRESENT | (gc->trackMap[map_x][map_y] & track::OWNER_MASK) << track::DIR_OWNER_SHIFT
+                    gc->world.trackMap[map_x][map_y] = (int8_t)(
+                        track::PRESENT | (gc->world.trackMap[map_x][map_y] & track::OWNER_MASK) << track::DIR_OWNER_SHIFT
                         | gc->previewTrackOwnerCode);
-                } else if (gc->tileElevation[map_x][map_y] == -1) {
-                    gc->tileMap[map_x][map_y] = 82;
+                } else if (gc->world.tileElevation[map_x][map_y] == -1) {
+                    gc->world.tileMap[map_x][map_y] = 82;
                     gc->selectionCost += gc->moneyBaseB;
                 } else {
-                    gc->tileMap[map_x][map_y] = 70;
+                    gc->world.tileMap[map_x][map_y] = 70;
                 }
-            } else if (left && up) gc->tileMap[map_x][map_y] = 75;
-            else if (right && up) gc->tileMap[map_x][map_y] = 72;
-            else if (left && down) gc->tileMap[map_x][map_y] = 73;
-            else if (right && down) gc->tileMap[map_x][map_y] = 74;
+            } else if (left && up) gc->world.tileMap[map_x][map_y] = 75;
+            else if (right && up) gc->world.tileMap[map_x][map_y] = 72;
+            else if (left && down) gc->world.tileMap[map_x][map_y] = 73;
+            else if (right && down) gc->world.tileMap[map_x][map_y] = 74;
 
-            if (!joined_track && old_tile != gc->tileMap[map_x][map_y]) {
-                gc->trackMap[map_x][map_y] =
+            if (!joined_track && old_tile != gc->world.tileMap[map_x][map_y]) {
+                gc->world.trackMap[map_x][map_y] =
                     (int8_t)(track::PRESENT | gc->previewTrackOwnerCode);
                 if (cost_before_shape == gc->selectionCost)
                     gc->selectionCost += gc->accel1;
@@ -286,10 +286,10 @@ void gc_scanTrackTiles(GameCanvas *gc) {
     gc->trackTileCount = 0;
     for (int x = 0; x < gc->mapWidth; ++x) {
         for (int y = 0; y < gc->mapHeight; ++y) {
-            if (gc->trackMap[x][y] == track::PRESENT) ++gc->trackTileCount;
-            if (gc->tileMap[x][y] != tile::CROSSING) continue;
-            int low_owner = gc->trackMap[x][y] & track::DIR_OWNER_MASK;
-            int high_owner = (gc->trackMap[x][y] & track::OWNER_MASK) >> track::DIR_OWNER_SHIFT;
+            if (gc->world.trackMap[x][y] == track::PRESENT) ++gc->trackTileCount;
+            if (gc->world.tileMap[x][y] != tile::CROSSING) continue;
+            int low_owner = gc->world.trackMap[x][y] & track::DIR_OWNER_MASK;
+            int high_owner = (gc->world.trackMap[x][y] & track::OWNER_MASK) >> track::DIR_OWNER_SHIFT;
             if (low_owner == 0) ++gc->trackTileCount;
             if (high_owner == 0) ++gc->trackTileCount;
         }
@@ -304,22 +304,22 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
     for (int x = 0; x < gc->mapWidth; ++x) {
         for (int y = 0; y < gc->mapHeight; ++y) {
             if (gc->pathDistanceGrid[x][y] != 0) continue;
-            int16_t passable = gc->trackMap[x][y] == 0 ? 1 : 0;
-            int tile = gc->tileMap[x][y];
+            int16_t passable = gc->world.trackMap[x][y] == 0 ? 1 : 0;
+            int tile = gc->world.tileMap[x][y];
             if (passable == 1) {
-                if (gc->tileElevation[x][y] == -1) passable = 0;
+                if (gc->world.tileElevation[x][y] == -1) passable = 0;
                 if (tile != 0 && tile != 21 && tile != 22
                     && tile != 23 && tile != 24
                     && (tile < 29 || tile > 33))
                     passable = 0;
             }
             if (tile == 71 && x > 0 && x < gc->mapWidth - 1
-                && gc->trackMap[x][y] == gc->trackMap[x - 1][y]
-                && gc->trackMap[x][y] == gc->trackMap[x + 1][y])
+                && gc->world.trackMap[x][y] == gc->world.trackMap[x - 1][y]
+                && gc->world.trackMap[x][y] == gc->world.trackMap[x + 1][y])
                 passable = 1;
             if (tile == 70 && y > 0 && y < gc->mapHeight - 1
-                && gc->trackMap[x][y] == gc->trackMap[x][y - 1]
-                && gc->trackMap[x][y] == gc->trackMap[x][y + 1])
+                && gc->world.trackMap[x][y] == gc->world.trackMap[x][y - 1]
+                && gc->world.trackMap[x][y] == gc->world.trackMap[x][y + 1])
                 passable = 1;
             gc->pathDistanceGrid[x][y] = passable;
 
@@ -330,12 +330,12 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
                 do {
                     stop = false;
                     --other_y;
-                    if (gc->tileElevation[x][other_y] != -1
-                        || gc->tileMap[x][other_y] != 0
-                        || gc->trackMap[x][other_y] != 0)
+                    if (gc->world.tileElevation[x][other_y] != -1
+                        || gc->world.tileMap[x][other_y] != 0
+                        || gc->world.trackMap[x][other_y] != 0)
                         stop = true;
                     if (other_y == 0) stop = true;
-                    if (gc->tileMap[x][other_y] == 10) {
+                    if (gc->world.tileMap[x][other_y] == 10) {
                         stop = true;
                         found_exit = true;
                     }
@@ -354,12 +354,12 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
             do {
                 stop = false;
                 --other_x;
-                if (gc->tileElevation[other_x][y] != -1
-                    || gc->tileMap[other_x][y] != 0
-                    || gc->trackMap[other_x][y] != 0)
+                if (gc->world.tileElevation[other_x][y] != -1
+                    || gc->world.tileMap[other_x][y] != 0
+                    || gc->world.trackMap[other_x][y] != 0)
                     stop = true;
                 if (other_x == 0) stop = true;
-                if (gc->tileMap[other_x][y] == 9) {
+                if (gc->world.tileMap[other_x][y] == 9) {
                     stop = true;
                     found_exit = true;
                 }

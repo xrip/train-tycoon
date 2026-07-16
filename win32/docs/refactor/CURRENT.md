@@ -30,11 +30,18 @@ every read identical and the save byte order unchanged.
 SAVE-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
 change.
 
+## Progress
+
+- Done (D-012): `struct World` in `world.h` owns the four map grids; `GameCanvas`
+  holds one `World world;` and all `gc->tileMap` style access moved to
+  `gc->world.tileMap`. Debug and Release full gates passed on 2026-07-16, no
+  golden change.
+
 ## Next action
 
-Follow the standard extraction loop, data first. First leaf: introduce
-`struct World` owning the four `Grid<int8_t>` map grids, make it a `GameCanvas`
-member, and mechanically move `gc->tileMap` etc. to `gc->world.tileMap` (a pure
-member-path change the goldens verify). Then move map dimensions and the map
-query/geometry helpers in later leaves. Run the strict Debug build and full
-tests, and commit each leaf.
+Continue the extraction, data first. Next leaves: move the core map dimensions
+(`mapWidth`, `mapHeight`, `mapHalfWidth`, `mapScreenWidth/Height`, and the map
+half-extent/scale) onto `World`, then move the pure map-query helpers
+(`gc_isCityOrStationTile`, connected-track scans, in-bounds checks) to take a
+`World&`. Keep values and byte order identical; commit each leaf after the strict
+Debug and full tests pass.

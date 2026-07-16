@@ -341,19 +341,19 @@ void gc_saveAllMapArrays(GameCanvas *gc) {
     gc->bytesCompressed = 0;
     gc_initSaveOrLoad(gc, save::OP_SAVE_MAIN);
     gc_loadGame(gc, 1, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->tileMap);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileMap);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
     gc_loadGame(gc, 2, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->trackMap);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.trackMap);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
     gc_loadGame(gc, 3, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->tileElevation);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileElevation);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
     gc_loadGame(gc, 4, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->heightMap);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.heightMap);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
 }
@@ -362,10 +362,10 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
     gc_initSaveOrLoad(gc, save::OP_LOAD_MAIN);
-    gc->tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-    gc->trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-    gc->tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);
-    gc->heightMap.resize(gc->mapWidth + 2, gc->mapHeight + 2);
+    gc->world.tileMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+    gc->world.trackMap.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+    gc->world.tileElevation.resize(gc->mapWidth + 1, gc->mapHeight + 1);
+    gc->world.heightMap.resize(gc->mapWidth + 2, gc->mapHeight + 2);
     gc->mapHalfWidth = (gc->mapWidth - 1) * 8;
     gc->mapScreenWidth = (gc->mapWidth + gc->mapHeight) * 16;
     gc->mapScreenHeight = (gc->mapWidth + gc->mapHeight) * 8;
@@ -374,15 +374,15 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc_initBuildMenuForScenario(gc, -1);
     gc_loadGame(gc, 1, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->tileMap);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileMap);
     gc_loadGame(gc, 2, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->trackMap);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.trackMap);
     gc_loadGame(gc, 3, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->tileElevation);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileElevation);
     gc_loadGame(gc, 4, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->heightMap);
+    gc_saveOrLoadByteMatrixInlined(gc, gc->world.heightMap);
     gc->lastViewportCenterX = -1;
 }

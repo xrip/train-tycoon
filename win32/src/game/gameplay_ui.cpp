@@ -183,10 +183,10 @@ void gc_computeIsoCornersInlined(GameCanvas *gc, int32_t x, int32_t y,
     screen_x[1] = center_x;
     screen_x[2] = center_x;
     screen_x[3] = center_x + 16;
-    screen_y[0] = center_y - 4 * gc->heightMap[x][y];
-    screen_y[1] = center_y - 8 - 4 * gc->heightMap[x + 1][y];
-    screen_y[2] = center_y + 8 - 4 * gc->heightMap[x][y + 1];
-    screen_y[3] = center_y - 4 * gc->heightMap[x + 1][y + 1];
+    screen_y[0] = center_y - 4 * gc->world.heightMap[x][y];
+    screen_y[1] = center_y - 8 - 4 * gc->world.heightMap[x + 1][y];
+    screen_y[2] = center_y + 8 - 4 * gc->world.heightMap[x][y + 1];
+    screen_y[3] = center_y - 4 * gc->world.heightMap[x + 1][y + 1];
     if (viewport_relative) {
         for (int corner = 0; corner < 4; ++corner) {
             screen_x[corner] -= gc->viewportCenterX;
@@ -269,10 +269,10 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
             int y = gc->tileCursorY;
             int dx = 0;
             int dy = 0;
-            if (gc->tileMap[x][y] == 7) dy = -1;
-            if (gc->tileMap[x][y] == 10) dy = 1;
-            if (gc->tileMap[x][y] == 8) dx = -1;
-            if (gc->tileMap[x][y] == 9) dx = 1;
+            if (gc->world.tileMap[x][y] == 7) dy = -1;
+            if (gc->world.tileMap[x][y] == 10) dy = 1;
+            if (gc->world.tileMap[x][y] == 8) dx = -1;
+            if (gc->world.tileMap[x][y] == 9) dx = 1;
             midp_set_color(graphics, 0x00FF00);
             int32_t quad_x[4];
             int32_t quad_y[4];
@@ -280,7 +280,7 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
                    && x < gc->mapWidth && y < gc->mapHeight) {
                 gc_computeIsoCornersInlined(gc, x, y, quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
-                if (gc->tileMap[x][y] != 0 || gc->trackMap[x][y] != 0) break;
+                if (gc->world.tileMap[x][y] != 0 || gc->world.trackMap[x][y] != 0) break;
             }
         } else {
             midp_set_color(graphics, 0xFF0000);
@@ -331,7 +331,7 @@ void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
     bool has_type_62_68 = false;
     for (int x = min_x; x <= max_x; ++x) {
         for (int y = min_y; y <= max_y; ++y) {
-            int tile = gc->tileMap[x][y];
+            int tile = gc->world.tileMap[x][y];
             if (tile >= 50 && tile <= 55) has_type_50_55 = true;
             if (tile >= 56 && tile <= 61) has_type_56_61 = true;
             if (tile >= 62 && tile <= 68) has_type_62_68 = true;

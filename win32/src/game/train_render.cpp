@@ -18,8 +18,8 @@ void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
     int tile_x = gc_byteToUnsignedInt(gc, gc->trainX[train]);
     int tile_y = gc_byteToUnsignedInt(gc, gc->trainY[train]);
     if ((gc->trainFlags[train] & 0x40) != 0) {
-        int tile = gc->tileMap[tile_x][tile_y];
-        int track = gc_byteToUnsignedInt(gc, gc->trackMap[tile_x][tile_y]);
+        int tile = gc->world.tileMap[tile_x][tile_y];
+        int track = gc_byteToUnsignedInt(gc, gc->world.trackMap[tile_x][tile_y]);
         bool lower_sprite = tile != tile::CROSSING && track > 65;
         if (tile == 76) {
             int low_track = track & 7;
@@ -35,10 +35,10 @@ void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
             for (int i = 0; i < 8; ++i) sprites[i] = (int16_t)(sprites[i] - 30);
     }
 
-    int tile = gc_byteToUnsignedInt(gc, gc->tileMap[tile_x][tile_y]);
+    int tile = gc_byteToUnsignedInt(gc, gc->world.tileMap[tile_x][tile_y]);
     int x = tile_y * 16 + tile_x * 16 + 16 - gc->viewportCenterX;
     int y = gc->mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
-            gc->viewportCenterY - 4 * gc->tileElevation[tile_x][tile_y] + 15;
+            gc->viewportCenterY - 4 * gc->world.tileElevation[tile_x][tile_y] + 15;
     int phase = gc->trainPhase[train];
     if (phase < 0) return;
 

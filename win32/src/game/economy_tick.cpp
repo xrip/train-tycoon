@@ -131,7 +131,7 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         int type267_count = 0;
         for (int train = 0; train < 500; ++train) {
             if ((gc->trainFlags[train] & 0x80) != 128
-                || gc->trackMap[gc_byteToUnsignedInt(gc, gc->trainX[train])]
+                || gc->world.trackMap[gc_byteToUnsignedInt(gc, gc->trainX[train])]
                                [gc_byteToUnsignedInt(gc, gc->trainY[train])] != 65)
                 continue;
             ++active_train_count;

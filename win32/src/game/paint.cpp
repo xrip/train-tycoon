@@ -350,11 +350,11 @@ void gc_update(GameCanvas *gc) {
             if (++gc->woodAgeTimer == 150) {
                 for (int n27 = 0; n27 < gc->mapWidth; ++n27) {
                     for (int n = 0; n < gc->mapHeight; ++n) {
-                        if (gc->tileMap[n27][n] < 59 || gc->tileMap[n27][n] > 61
+                        if (gc->world.tileMap[n27][n] < 59 || gc->world.tileMap[n27][n] > 61
                             || gc->rng.next_int() % 3 != 0)
                             continue;
-                        ++gc->tileMap[n27][n];
-                        if (gc->tileMap[n27][n] == 62) gc->tileMap[n27][n] = 59;
+                        ++gc->world.tileMap[n27][n];
+                        if (gc->world.tileMap[n27][n] == 62) gc->world.tileMap[n27][n] = 59;
                     }
                 }
                 gc->woodAgeTimer = 0;
@@ -368,45 +368,45 @@ void gc_update(GameCanvas *gc) {
                 int n29 = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][2]);
                 if (gc->tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
                     && n < gc->mapWidth && n29 < gc->mapHeight)
-                    gc->tileMap[n][n29] = (int8_t)(gc_byteToUnsignedInt(gc, gc->tileMap[n][n29]) - 128);
+                    gc->world.tileMap[n][n29] = (int8_t)(gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128);
                 if (gc->tileQueue[n27][0] != 7 || n < 0 || n29 < 0
                     || n >= gc->mapWidth || n29 >= gc->mapHeight)
                     continue;
-                int n30 = gc_byteToUnsignedInt(gc, gc->tileMap[n][n29]) - 128;
+                int n30 = gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128;
                 if (gc->tileQueueVisualOnly[n27]) continue;
-                if (n30 >= 29 && n30 <= 33) gc->tileMap[n][n29] = -128;
+                if (n30 >= 29 && n30 <= 33) gc->world.tileMap[n][n29] = -128;
                 if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
-                    gc->trackMap[n][n29] = 0;
-                    gc->tileMap[n][n29] = -128;
+                    gc->world.trackMap[n][n29] = 0;
+                    gc->world.tileMap[n][n29] = -128;
                     gc->lastViewportCenterX = -1;
                 }
                 if (n30 >= 77 && n30 <= 80) {
-                    gc->tileMap[n][n29] = (int8_t)(128 + n30 - 56);
-                    gc->trackMap[n][n29] = 0;
+                    gc->world.tileMap[n][n29] = (int8_t)(128 + n30 - 56);
+                    gc->world.trackMap[n][n29] = 0;
                     gc->lastViewportCenterX = -1;
                 }
                 if (n30 == 81 || n30 == 82) {
-                    gc->tileMap[n][n29] = -128;
-                    gc->trackMap[n][n29] = 0;
+                    gc->world.tileMap[n][n29] = -128;
+                    gc->world.trackMap[n][n29] = 0;
                     gc->lastViewportCenterX = -1;
                 }
                 if (n30 >= 83 && n30 <= 86) {
-                    gc->tileMap[n][n29] = (int8_t)(128 + n30 - 76);
-                    gc->trackMap[n][n29] = 0;
+                    gc->world.tileMap[n][n29] = (int8_t)(128 + n30 - 76);
+                    gc->world.trackMap[n][n29] = 0;
                     gc->lastViewportCenterX = -1;
                 }
                 if (n30 == 76) {
-                    int n31 = gc->trackMap[n][n29] & 7;
-                    int n32 = (gc->trackMap[n][n29] & 0x3F) >> 3;
+                    int n31 = gc->world.trackMap[n][n29] & 7;
+                    int n32 = (gc->world.trackMap[n][n29] & 0x3F) >> 3;
                     if (n31 == 1 && n32 == 1) {
-                        gc->tileMap[n][n29] = -128;
-                        gc->trackMap[n][n29] = 0;
+                        gc->world.tileMap[n][n29] = -128;
+                        gc->world.trackMap[n][n29] = 0;
                     } else if (n31 == 1) {
-                        gc->tileMap[n][n29] = -57;
-                        gc->trackMap[n][n29] = (int8_t)(0x40 | n32);
+                        gc->world.tileMap[n][n29] = -57;
+                        gc->world.trackMap[n][n29] = (int8_t)(0x40 | n32);
                     } else if (n32 == 1) {
-                        gc->tileMap[n][n29] = -58;
-                        gc->trackMap[n][n29] = (int8_t)(0x40 | n31);
+                        gc->world.tileMap[n][n29] = -58;
+                        gc->world.trackMap[n][n29] = (int8_t)(0x40 | n31);
                     }
                     gc->lastViewportCenterX = -1;
                 }
@@ -533,8 +533,8 @@ void gc_update(GameCanvas *gc) {
                 for (int y = 0; y < gc->mapHeight; ++y) {
                     int draw_y = gc->mapWidth - x + y;
                     int draw_x = x + y;
-                    int tile = gc->tileMap[x][y];
-                    int track = gc->trackMap[x][y];
+                    int tile = gc->world.tileMap[x][y];
+                    int track = gc->world.trackMap[x][y];
                     if (tile == 0) kind = 1;
                     if (tile >= 3 && tile <= 28) kind = 2;
                     if (tile >= 29 && tile <= 33) kind = 3;
@@ -555,11 +555,11 @@ void gc_update(GameCanvas *gc) {
                     if (kind != previous_kind) {
                         switch (kind) {
                             case 1:
-                                if (gc->tileElevation[x][y] == -1) midp_set_color(gc->backbuffer_surface, 3167360);
-                                if (gc->tileElevation[x][y] == 0) midp_set_color(gc->backbuffer_surface, 5274640);
-                                if (gc->tileElevation[x][y] == 1) midp_set_color(gc->backbuffer_surface, 6327328);
-                                if (gc->tileElevation[x][y] == 2) midp_set_color(gc->backbuffer_surface, 7380016);
-                                if (gc->tileElevation[x][y] == 3) midp_set_color(gc->backbuffer_surface, 8432704);
+                                if (gc->world.tileElevation[x][y] == -1) midp_set_color(gc->backbuffer_surface, 3167360);
+                                if (gc->world.tileElevation[x][y] == 0) midp_set_color(gc->backbuffer_surface, 5274640);
+                                if (gc->world.tileElevation[x][y] == 1) midp_set_color(gc->backbuffer_surface, 6327328);
+                                if (gc->world.tileElevation[x][y] == 2) midp_set_color(gc->backbuffer_surface, 7380016);
+                                if (gc->world.tileElevation[x][y] == 3) midp_set_color(gc->backbuffer_surface, 8432704);
                                 break;
                             case 2: midp_set_color(gc->backbuffer_surface, 6327312); break;
                             case 3: midp_set_color(gc->backbuffer_surface, 0x909040); break;

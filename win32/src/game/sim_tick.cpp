@@ -18,9 +18,9 @@ void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t
     for (int i = n - 5; i <= n + 5; ++i) {
         for (int j = n2 - 5; j <= n2 + 5; ++j) {
             if (i < 0 || j < 0 || i >= gc->mapWidth || j >= gc->mapHeight
-                || (gc->trackMap[i][j] & 0xC0) != 128)
+                || (gc->world.trackMap[i][j] & 0xC0) != 128)
                 continue;
-            int n4 = gc->trackMap[i][j] & 0x3F;
+            int n4 = gc->world.trackMap[i][j] & 0x3F;
             if (seen[n4]) continue;
             seen[n4] = true;
             int n5;
@@ -43,8 +43,8 @@ void gc_maybeAITick(GameCanvas *gc) {
     for (int n = 0; n < 64; ++n) gc->zonePopulation[n] = 0;
     for (int n = 0; n < gc->mapWidth; ++n) {
         for (int i = 0; i < gc->mapHeight; ++i) {
-            if (gc->tileMap[n][i] < 34 || gc->tileMap[n][i] > 40) continue;
-            int n2 = gc->trackMap[n][i] & 0x3F;
+            if (gc->world.tileMap[n][i] < 34 || gc->world.tileMap[n][i] > 40) continue;
+            int n2 = gc->world.trackMap[n][i] & 0x3F;
             ++gc->zonePopulation[n2];
         }
     }
@@ -72,7 +72,7 @@ void gc_everyTwoTick(GameCanvas *gc) {
             continue;
         int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
         int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
-        if (gc->trackMap[n2][n] != 65) continue;
+        if (gc->world.trackMap[n2][n] != 65) continue;
         int n3 = gc_countCarsInTrain(gc, i) * 2;
         if ((gc->trainFlags[i] & 0xF) == 0) n3 += 3;
         else if ((gc->trainFlags[i] & 0xF) == 1) n3 += 7;
@@ -138,8 +138,8 @@ void gc_dayResetAd(GameCanvas *gc) {
             continue;
         int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
         int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
-        if ((gc->trackMap[n2][n] != 66 && gc->trackMap[n2][n] != 67
-             && gc->trackMap[n2][n] != 68)
+        if ((gc->world.trackMap[n2][n] != 66 && gc->world.trackMap[n2][n] != 67
+             && gc->world.trackMap[n2][n] != 68)
             || gc->trainEraOrStage[i] >= gc->era)
             continue;
         gc->trainEraOrStage[i] = (int8_t)gc->era;
@@ -155,8 +155,8 @@ void gc_postRevenueReset(GameCanvas *gc) {
         if ((gc->trainFlags[i] & 0x80) != 128) continue;
         int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
         int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
-        if (gc->trackMap[n2][n] == 66 || gc->trackMap[n2][n] == 67
-            || gc->trackMap[n2][n] == 68)
+        if (gc->world.trackMap[n2][n] == 66 || gc->world.trackMap[n2][n] == 67
+            || gc->world.trackMap[n2][n] == 68)
             gc->trainAgeOrTimer[i] = 0;
     }
 }
@@ -192,7 +192,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
     bool bl3 = !bl;
     int n3;
     if (bl) {
-        n3 = gc->tileMap[n][n2] >= 29 && gc->tileMap[n][n2] <= 33
+        n3 = gc->world.tileMap[n][n2] >= 29 && gc->world.tileMap[n][n2] <= 33
              ? gc->baseTrainSpeed2 : -gc->accel2;
         if (gc->money >= n3 || gc->money < 0) {
             gc->backgroundCost += n3;
@@ -209,8 +209,8 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
             bl3 = false;
     }
     if (!bl3) return;
-    if (gc_byteToUnsignedInt(gc, gc->tileMap[n][n2]) < 128)
-        gc->tileMap[n][n2] = (int8_t)(gc->tileMap[n][n2] + 128);
+    if (gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n2]) < 128)
+        gc->world.tileMap[n][n2] = (int8_t)(gc->world.tileMap[n][n2] + 128);
     n3 = 0;
     for (int i = 49; i >= 0; --i) {
         if (gc->tileQueue[i][0] == 0) {
@@ -226,10 +226,10 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
 
 // void placeCityTileInlined(int,int,int)
 void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
-    if (gc->tileMap[n][n2] == 0
-        || (gc->tileMap[n][n2] >= 29 && gc->tileMap[n][n2] <= 33)) {
-        gc->tileMap[n][n2] = gc_randomCityTile(gc);
-        gc->trackMap[n][n2] = (int8_t)n3;
+    if (gc->world.tileMap[n][n2] == 0
+        || (gc->world.tileMap[n][n2] >= 29 && gc->world.tileMap[n][n2] <= 33)) {
+        gc->world.tileMap[n][n2] = gc_randomCityTile(gc);
+        gc->world.trackMap[n][n2] = (int8_t)n3;
     }
 }
 
@@ -237,14 +237,14 @@ void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) 
 bool gc_pickValidForestTile(GameCanvas *gc) {
     int n2 = std::abs(gc->rng.next_int() % (gc->mapWidth - 2)) + 1;
     int n = std::abs(gc->rng.next_int() % (gc->mapHeight - 2)) + 1;
-    if (gc->tileMap[n2][n] != 0
-        && (gc->tileMap[n2][n] < 29 || gc->tileMap[n2][n] > 33))
+    if (gc->world.tileMap[n2][n] != 0
+        && (gc->world.tileMap[n2][n] < 29 || gc->world.tileMap[n2][n] > 33))
         return false;
 
-    int8_t by = gc->tileMap[n2 - 1][n];
-    int8_t by2 = gc->tileMap[n2 + 1][n];
-    int8_t by3 = gc->tileMap[n2][n - 1];
-    int8_t by4 = gc->tileMap[n2][n + 1];
+    int8_t by = gc->world.tileMap[n2 - 1][n];
+    int8_t by2 = gc->world.tileMap[n2 + 1][n];
+    int8_t by3 = gc->world.tileMap[n2][n - 1];
+    int8_t by4 = gc->world.tileMap[n2][n + 1];
     bool bl2 = by == 43 || by == 44 || by == 45 || by == 46;
     bool bl3 = by2 == 43 || by2 == 44 || by2 == 47 || by2 == 48;
     bool bl4 = by3 == 42 || by3 == 44 || by3 == 46 || by3 == 47;
@@ -252,45 +252,45 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
     if (!bl2 && !bl3 && !bl4 && !bl) return false;
 
     int n3;
-    if (bl2) n3 = gc->trackMap[n2 - 1][n];
-    else if (bl3) n3 = gc->trackMap[n2 + 1][n];
-    else if (bl4) n3 = gc->trackMap[n2][n - 1];
-    else n3 = gc->trackMap[n2][n + 1];
+    if (bl2) n3 = gc->world.trackMap[n2 - 1][n];
+    else if (bl3) n3 = gc->world.trackMap[n2 + 1][n];
+    else if (bl4) n3 = gc->world.trackMap[n2][n - 1];
+    else n3 = gc->world.trackMap[n2][n + 1];
     int n4 = n3 & 0x3F;
     if (n4 <= -1) return false;
 
     if ((bl2 && bl3 && bl4) || (bl2 && bl3 && bl)
         || (bl2 && bl4 && bl) || (bl3 && bl4 && bl)) {
-        gc->tileMap[n2][n] = 44;
+        gc->world.tileMap[n2][n] = 44;
     } else if (bl2 && bl4) {
-        gc->tileMap[n2][n] = 48;
+        gc->world.tileMap[n2][n] = 48;
     } else if (bl2 && bl) {
-        gc->tileMap[n2][n] = 47;
+        gc->world.tileMap[n2][n] = 47;
     } else if (bl3 && bl4) {
-        gc->tileMap[n2][n] = 45;
+        gc->world.tileMap[n2][n] = 45;
     } else if (bl3 && bl) {
-        gc->tileMap[n2][n] = 46;
+        gc->world.tileMap[n2][n] = 46;
     } else {
         int n5 = std::abs(gc->rng.next_int() % 13);
         if (n5 == 12) {
-            gc->tileMap[n2][n] = 44;
+            gc->world.tileMap[n2][n] = 44;
         } else if (n5 == 11) {
-            if (bl2) gc->tileMap[n2][n] = 47;
-            if (bl3) gc->tileMap[n2][n] = 46;
-            if (bl4) gc->tileMap[n2][n] = 45;
-            if (bl) gc->tileMap[n2][n] = 46;
+            if (bl2) gc->world.tileMap[n2][n] = 47;
+            if (bl3) gc->world.tileMap[n2][n] = 46;
+            if (bl4) gc->world.tileMap[n2][n] = 45;
+            if (bl) gc->world.tileMap[n2][n] = 46;
         } else if (n5 == 10) {
-            if (bl2) gc->tileMap[n2][n] = 48;
-            if (bl3) gc->tileMap[n2][n] = 45;
-            if (bl4) gc->tileMap[n2][n] = 48;
-            if (bl) gc->tileMap[n2][n] = 47;
+            if (bl2) gc->world.tileMap[n2][n] = 48;
+            if (bl3) gc->world.tileMap[n2][n] = 45;
+            if (bl4) gc->world.tileMap[n2][n] = 48;
+            if (bl) gc->world.tileMap[n2][n] = 47;
         } else {
-            if (bl2 || bl3) gc->tileMap[n2][n] = 43;
-            if (bl4 || bl) gc->tileMap[n2][n] = 42;
+            if (bl2 || bl3) gc->world.tileMap[n2][n] = 43;
+            if (bl4 || bl) gc->world.tileMap[n2][n] = 42;
         }
     }
 
-    switch (gc->tileMap[n2][n]) {
+    switch (gc->world.tileMap[n2][n]) {
         case 42:
             gc_placeCityTileInlined(gc, n2 - 1, n, n3);
             gc_placeCityTileInlined(gc, n2 + 1, n, n3);
@@ -320,7 +320,7 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
             gc_placeCityTileInlined(gc, n2 + 1, n + 1, n3);
             break;
     }
-    gc->trackMap[n2][n] = (int8_t)n3;
+    gc->world.trackMap[n2][n] = (int8_t)n3;
     return true;
 }
 
@@ -336,7 +336,7 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
     int n2 = gc->trainRevenueScore;
     for (int i = 0; i < gc->mapWidth; ++i) {
         for (int j = 0; j < gc->mapHeight; ++j) {
-            if (gc->trackMap[i][j] != 65) continue;
+            if (gc->world.trackMap[i][j] != 65) continue;
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
                 if ((gc->trainFlags[k] & 0x80) != 128
@@ -414,8 +414,8 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
     int n4 = 0;
     for (int n3 = 0; n3 < gc->mapWidth; ++n3) {
         for (int n2 = 0; n2 < gc->mapHeight; ++n2) {
-            if (gc->trackMap[n3][n2] != 65) continue;
-            int n = gc->tileMap[n3][n2];
+            if (gc->world.trackMap[n3][n2] != 65) continue;
+            int n = gc->world.tileMap[n3][n2];
             if (n >= 70 && n <= 80) {
                 if (n > 76) n4 += 94;
                 n4 += 196;
@@ -430,7 +430,7 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
         if ((gc->trainFlags[n3] & 0x80) != 128) continue;
         int n2 = gc_byteToUnsignedInt(gc, gc->trainX[n3]);
         int n = gc_byteToUnsignedInt(gc, gc->trainY[n3]);
-        if (gc->trackMap[n2][n] != 65) continue;
+        if (gc->world.trackMap[n2][n] != 65) continue;
         if ((gc->trainFlags[n3] & 0x40) == 64) {
             switch (gc->trainEraOrStage[n3]) {
                 case 0: n4 += gc->gWagonCost; break;
@@ -549,10 +549,10 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
         bool seenIndustry3[64] = {false};
         for (int n2 = n5; n2 <= n7; ++n2) {
             for (int n = n6; n <= n8; ++n) {
-                int tile = gc->tileMap[n2][n];
-                int n11 = gc->trackMap[n2][n] & 0x3F;
+                int tile = gc->world.tileMap[n2][n];
+                int n11 = gc->world.trackMap[n2][n] & 0x3F;
                 if (tile >= 34 && tile <= 40) {
-                    if ((gc->trackMap[n2][n] & 0xC0) == 128 && !bl
+                    if ((gc->world.trackMap[n2][n] & 0xC0) == 128 && !bl
                         && !seenZones[n11]) {
                         seenZones[n11] = true;
                         if ((gc->serviceUnloadFlags[i] & 1) == 1) {
@@ -578,7 +578,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     ++n9;
                 }
                 if (tile >= 65 && tile <= 68 && !bl
-                    && (gc->trackMap[n2][n] & 0xC0) == 192
+                    && (gc->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry1[n11]) {
                     seenIndustry1[n11] = true;
                     int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
@@ -589,7 +589,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 4);
                 }
                 if (tile >= 53 && tile <= 55 && !bl
-                    && (gc->trackMap[n2][n] & 0xC0) == 192
+                    && (gc->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry2[n11]) {
                     seenIndustry2[n11] = true;
                     int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
@@ -600,7 +600,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 8);
                 }
                 if (tile >= 59 && tile <= 61 && !bl
-                    && (gc->trackMap[n2][n] & 0xC0) == 192
+                    && (gc->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry3[n11]) {
                     seenIndustry3[n11] = true;
                     int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];

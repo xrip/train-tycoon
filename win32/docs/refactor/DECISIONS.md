@@ -181,6 +181,17 @@ unsigned byte, not a short). Selector values 4 and 5 exist in `gc_initSaveOrLoad
 but are never called; this dead branch is recorded as a smell for a separate
 cleanup item, not removed under a refactor commit.
 
+## D-012: World owns the map grids (WORLD-01)
+
+`world.h` defines `struct World` owning the four map grids (`tileMap`, `trackMap`,
+`tileElevation`, `heightMap` as `Grid<int8_t>`). `GameCanvas` now has one `World
+world;` member instead of the four loose grid fields, and every `gc->tileMap`
+style access became `gc->world.tileMap` (a pure member-path change; the golden
+map and save digests did not move). Map dimensions and geometry, and the map
+query helpers, move onto `World` in later WORLD-01 leaves. The terrain-edit
+scratch grid `terrainEditBuffer` stays in `GameCanvas` for now; it is edit state,
+not map data.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

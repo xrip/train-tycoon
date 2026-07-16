@@ -87,7 +87,7 @@ void gc_rebuildCityList(GameCanvas *gc) {
         static_cast<std::size_t>(seen_count));
     for (int station_x = 0; station_x < gc->mapWidth; ++station_x) {
         for (int station_y = 0; station_y < gc->mapHeight; ++station_y) {
-            int track = gc->trackMap[station_x][station_y];
+            int track = gc->world.trackMap[station_x][station_y];
             if ((track & 0xC0) != 192) continue;
             int city = track & 0x3F;
             int min_x = station_x - 3;
@@ -100,7 +100,7 @@ void gc_rebuildCityList(GameCanvas *gc) {
             if (max_y >= gc->mapHeight) max_y = gc->mapHeight - 1;
             for (int x = min_x; x <= max_x; ++x) {
                 for (int y = min_y; y <= max_y; ++y) {
-                    if (gc->tileMap[x][y] != 87 && gc->tileMap[x][y] != 88)
+                    if (gc->world.tileMap[x][y] != 87 && gc->world.tileMap[x][y] != 88)
                         continue;
                     int seen_index = (city * gc->mapWidth + x) * gc->mapHeight + y;
                     if (seen_city_tiles[seen_index]) continue;
@@ -129,40 +129,40 @@ void gc_demolishAtCursor(GameCanvas *gc) {
         return;
 
     gc->backgroundCost = 0;
-    int tile = gc->tileMap[cursor_x][cursor_y];
+    int tile = gc->world.tileMap[cursor_x][cursor_y];
     if (tile >= 81 && tile <= 86) {
         gc_advanceConstructionTimers(gc, cursor_x, cursor_y, -3);
-        tile = gc->tileMap[cursor_x][cursor_y];
+        tile = gc->world.tileMap[cursor_x][cursor_y];
         if (tile == 81 || tile == 84 || tile == 85) {
             int x;
             for (x = cursor_x;
                  x < gc->mapWidth
-                 && (gc->tileMap[x][cursor_y] == 81
-                     || gc->tileMap[x][cursor_y] == 84
-                     || gc->tileMap[x][cursor_y] == 85);
+                 && (gc->world.tileMap[x][cursor_y] == 81
+                     || gc->world.tileMap[x][cursor_y] == 84
+                     || gc->world.tileMap[x][cursor_y] == 85);
                  ++x)
                 gc_handleCursorClickInlined(gc, x, cursor_y, true, false);
             for (x = cursor_x - 1;
                  x >= 0
-                 && (gc->tileMap[x][cursor_y] == 81
-                     || gc->tileMap[x][cursor_y] == 84
-                     || gc->tileMap[x][cursor_y] == 85);
+                 && (gc->world.tileMap[x][cursor_y] == 81
+                     || gc->world.tileMap[x][cursor_y] == 84
+                     || gc->world.tileMap[x][cursor_y] == 85);
                  --x)
                 gc_handleCursorClickInlined(gc, x, cursor_y, true, false);
         } else {
             int y;
             for (y = cursor_y;
                  y < gc->mapHeight
-                 && (gc->tileMap[cursor_x][y] == 82
-                     || gc->tileMap[cursor_x][y] == 83
-                     || gc->tileMap[cursor_x][y] == 86);
+                 && (gc->world.tileMap[cursor_x][y] == 82
+                     || gc->world.tileMap[cursor_x][y] == 83
+                     || gc->world.tileMap[cursor_x][y] == 86);
                  ++y)
                 gc_handleCursorClickInlined(gc, cursor_x, y, true, false);
             for (y = cursor_y - 1;
                  y >= 0
-                 && (gc->tileMap[cursor_x][y] == 82
-                     || gc->tileMap[cursor_x][y] == 83
-                     || gc->tileMap[cursor_x][y] == 86);
+                 && (gc->world.tileMap[cursor_x][y] == 82
+                     || gc->world.tileMap[cursor_x][y] == 83
+                     || gc->world.tileMap[cursor_x][y] == 86);
                  --y)
                 gc_handleCursorClickInlined(gc, cursor_x, y, true, false);
         }
@@ -173,20 +173,20 @@ void gc_demolishAtCursor(GameCanvas *gc) {
             int y = gc_byteToUnsignedInt(gc, gc->serviceVehicleY[vehicle]);
             if ((gc->vehicleFlags[vehicle] & 0x20) == 32) {
                 if ((gc->vehicleFlags[vehicle] & 0x40) == 0) {
-                    gc->trackMap[x][y - 1] = 0;
-                    gc->trackMap[x][y + 1] = 0;
+                    gc->world.trackMap[x][y - 1] = 0;
+                    gc->world.trackMap[x][y + 1] = 0;
                     gc_handleCursorClickInlined(gc, x, y - 1, true, false);
                     gc_handleCursorClickInlined(gc, x, y + 1, true, false);
                 } else {
-                    gc->trackMap[x - 1][y] = 0;
-                    gc->trackMap[x + 1][y] = 0;
+                    gc->world.trackMap[x - 1][y] = 0;
+                    gc->world.trackMap[x + 1][y] = 0;
                     gc_handleCursorClickInlined(gc, x - 1, y, true, false);
                     gc_handleCursorClickInlined(gc, x + 1, y, true, false);
                 }
             }
             gc_handleCursorClickInlined(gc, x, y, true, false);
             gc_advanceConstructionTimers(gc, x, y, -6);
-            gc->trackMap[x][y] = 0;
+            gc->world.trackMap[x][y] = 0;
             gc->vehicleFlags[vehicle] = 0;
         }
     } else {
@@ -198,7 +198,7 @@ void gc_demolishAtCursor(GameCanvas *gc) {
 
 void gc_pickTrainsAtCursor(GameCanvas *gc) {
     if (gc->blockBuildMenu) return;
-    int track = gc->trackMap[gc->tileCursorX][gc->tileCursorY];
+    int track = gc->world.trackMap[gc->tileCursorX][gc->tileCursorY];
     if ((track & 0xC0) == 128) {
         gc->junctionDirCursor = (int8_t)(track & 0x3F);
         gc->ready = false;
@@ -262,8 +262,8 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
                        == 5000
                 || !gc_spendMoney(gc, gc->costPower))
                 break;
-            gc->tileMap[gc->tileCursorX][gc->tileCursorY] = 87;
-            gc->trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
+            gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] = 87;
+            gc->world.trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
             gc_advanceConstructionTimers(gc, gc->tileCursorX, gc->tileCursorY, -8);
             gc_incrementRowValueType13(gc, gc->costPower);
             break;
@@ -274,8 +274,8 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
                        == 5000
                 || !gc_spendMoney(gc, gc->costPower))
                 break;
-            gc->tileMap[gc->tileCursorX][gc->tileCursorY] = 88;
-            gc->trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
+            gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] = 88;
+            gc->world.trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
             gc_advanceConstructionTimers(gc, gc->tileCursorX, gc->tileCursorY, -8);
             gc_incrementRowValueType13(gc, gc->costPower);
             break;
@@ -286,12 +286,12 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
                        == 5000
                 || !gc_spendMoney(gc, gc->costStruct))
                 break;
-            gc->tileMap[gc->tileCursorX][gc->tileCursorY] = 87;
-            gc->tileMap[gc->tileCursorX][gc->tileCursorY - 1] = 89;
-            gc->tileMap[gc->tileCursorX][gc->tileCursorY + 1] = 89;
-            gc->trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
-            gc->trackMap[gc->tileCursorX][gc->tileCursorY - 1] = 65;
-            gc->trackMap[gc->tileCursorX][gc->tileCursorY + 1] = 65;
+            gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] = 87;
+            gc->world.tileMap[gc->tileCursorX][gc->tileCursorY - 1] = 89;
+            gc->world.tileMap[gc->tileCursorX][gc->tileCursorY + 1] = 89;
+            gc->world.trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
+            gc->world.trackMap[gc->tileCursorX][gc->tileCursorY - 1] = 65;
+            gc->world.trackMap[gc->tileCursorX][gc->tileCursorY + 1] = 65;
             gc_advanceConstructionTimers(gc, gc->tileCursorX, gc->tileCursorY, -11);
             gc_incrementRowValueType13(gc, gc->costStruct);
             break;
@@ -302,12 +302,12 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
                        == 5000
                 || !gc_spendMoney(gc, gc->costStruct))
                 break;
-            gc->tileMap[gc->tileCursorX][gc->tileCursorY] = 88;
-            gc->tileMap[gc->tileCursorX - 1][gc->tileCursorY] = 90;
-            gc->tileMap[gc->tileCursorX + 1][gc->tileCursorY] = 90;
-            gc->trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
-            gc->trackMap[gc->tileCursorX - 1][gc->tileCursorY] = 65;
-            gc->trackMap[gc->tileCursorX + 1][gc->tileCursorY] = 65;
+            gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] = 88;
+            gc->world.tileMap[gc->tileCursorX - 1][gc->tileCursorY] = 90;
+            gc->world.tileMap[gc->tileCursorX + 1][gc->tileCursorY] = 90;
+            gc->world.trackMap[gc->tileCursorX][gc->tileCursorY] = 65;
+            gc->world.trackMap[gc->tileCursorX - 1][gc->tileCursorY] = 65;
+            gc->world.trackMap[gc->tileCursorX + 1][gc->tileCursorY] = 65;
             gc_advanceConstructionTimers(gc, gc->tileCursorX, gc->tileCursorY, -11);
             gc_incrementRowValueType13(gc, gc->costStruct);
             break;
@@ -332,8 +332,8 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     while ((end_x += step_x) >= 0 && (end_y += step_y) >= 0
            && end_x < gc->mapWidth && end_y < gc->mapHeight) {
         cost += gc->moneyBaseB;
-        if (gc->tileMap[end_x][end_y] == target_tile) found_target = true;
-        if (gc->tileMap[end_x][end_y] != 0 || gc->trackMap[end_x][end_y] != 0)
+        if (gc->world.tileMap[end_x][end_y] == target_tile) found_target = true;
+        if (gc->world.tileMap[end_x][end_y] != 0 || gc->world.trackMap[end_x][end_y] != 0)
             break;
     }
     if (!found_target) return;
@@ -343,14 +343,14 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     gc->menuDirty = true;
     gc->buildMenuItemIndex = 0;
     gc->buildCancelled = false;
-    gc->tileMap[end_x][end_y] = (int8_t)end_tile;
-    gc->trackMap[end_x][end_y] = 65;
-    gc->tileMap[start_x][start_y] = (int8_t)start_tile;
-    gc->trackMap[start_x][start_y] = 65;
+    gc->world.tileMap[end_x][end_y] = (int8_t)end_tile;
+    gc->world.trackMap[end_x][end_y] = 65;
+    gc->world.tileMap[start_x][start_y] = (int8_t)start_tile;
+    gc->world.trackMap[start_x][start_y] = 65;
     while ((start_x += step_x) != end_x || (start_y += step_y) != end_y) {
-        gc->tileMap[start_x][start_y] = (int8_t)middle_tile;
+        gc->world.tileMap[start_x][start_y] = (int8_t)middle_tile;
         gc_advanceConstructionTimers(gc, start_x, start_y, -4);
-        gc->trackMap[start_x][start_y] = 65;
+        gc->world.trackMap[start_x][start_y] = 65;
     }
     gc->lastViewportCenterX = -1;
 }
@@ -359,14 +359,14 @@ void gc_revertTrackTiles(GameCanvas *gc) {
     int x = gc->trackStartX;
     int y = gc->trackStartY;
     for (;;) {
-        int tile = gc->tileMap[x][y];
+        int tile = gc->world.tileMap[x][y];
         if (tile < 81 || tile > 86) break;
-        if (tile == 83) gc->tileMap[x][y] = 7;
-        if (tile == 86) gc->tileMap[x][y] = 10;
-        if (tile == 84) gc->tileMap[x][y] = 8;
-        if (tile == 85) gc->tileMap[x][y] = 9;
-        if (tile == 81 || tile == 82) gc->tileMap[x][y] = 0;
-        gc->trackMap[x][y] = 0;
+        if (tile == 83) gc->world.tileMap[x][y] = 7;
+        if (tile == 86) gc->world.tileMap[x][y] = 10;
+        if (tile == 84) gc->world.tileMap[x][y] = 8;
+        if (tile == 85) gc->world.tileMap[x][y] = 9;
+        if (tile == 81 || tile == 82) gc->world.tileMap[x][y] = 0;
+        gc->world.trackMap[x][y] = 0;
         x += gc->trackStepX;
         y += gc->trackStepY;
         if (x < 0 || y < 0 || x >= gc->mapWidth || y >= gc->mapHeight) break;
@@ -380,9 +380,9 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
                                   bool join_track, int32_t join_tile) {
     int x = gc->tileCursorX;
     int y = gc->tileCursorY;
-    int tile = gc->tileMap[x][y];
-    if (gc->blockBuildMenu || gc->tileElevation[x][y] < 0
-        || (gc->trackMap[x][y] != 0 && !(join_track && tile == join_tile))
+    int tile = gc->world.tileMap[x][y];
+    if (gc->blockBuildMenu || gc->world.tileElevation[x][y] < 0
+        || (gc->world.trackMap[x][y] != 0 && !(join_track && tile == join_tile))
         || !(tile == join_tile || tile == match_tile_a || tile == match_tile_b
              || tile == 0 || (tile >= 29 && tile <= 33)))
         return;
@@ -395,20 +395,20 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
             gc_enterOutOfMoneyState(gc);
             return;
         }
-        gc->tileMap[x][y] = 76;
-        int track = gc->trackMap[x][y] & 0x3F;
+        gc->world.tileMap[x][y] = 76;
+        int track = gc->world.trackMap[x][y] & 0x3F;
         track = join_tile == 70 ? 0x48 | track : 0x41 | track << 3;
-        gc->trackMap[x][y] = (int8_t)track;
+        gc->world.trackMap[x][y] = (int8_t)track;
     } else {
         if (cost > gc->money) {
             gc_enterOutOfMoneyState(gc);
             return;
         }
-        gc->tileMap[x][y] =
+        gc->world.tileMap[x][y] =
             tile == match_tile_a ? (int8_t)result_tile_a
             : tile == match_tile_b ? (int8_t)result_tile_b
             : (int8_t)(first_direction ? first_tile : second_tile);
-        gc->trackMap[x][y] = 65;
+        gc->world.trackMap[x][y] = 65;
     }
     gc->money -= cost;
     gc->totalSpent += cost;
@@ -421,26 +421,26 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
 void gc_normalizeTrackBits(GameCanvas *gc) {
     for (int x = 0; x < gc->mapWidth; ++x) {
         for (int y = 0; y < gc->mapHeight; ++y) {
-            if (gc->trackMap[x][y] == 64) {
-                int tile = gc->tileMap[x][y];
-                gc->tileMap[x][y] =
+            if (gc->world.trackMap[x][y] == 64) {
+                int tile = gc->world.tileMap[x][y];
+                gc->world.tileMap[x][y] =
                     tile == 78 ? 22 : tile == 80 ? 24 : tile == 85 ? 9
                     : tile == 84 ? 8 : tile == 77 ? 21 : tile == 79 ? 23
                     : tile == 83 ? 7 : tile == 86 ? 10 : 0;
-                gc->trackMap[x][y] = 0;
+                gc->world.trackMap[x][y] = 0;
             }
-            if (gc->tileMap[x][y] != 76) continue;
-            int low_owner = gc->trackMap[x][y] & 7;
-            int high_owner = (gc->trackMap[x][y] & 0x3F) >> 3;
+            if (gc->world.tileMap[x][y] != 76) continue;
+            int low_owner = gc->world.trackMap[x][y] & 7;
+            int high_owner = (gc->world.trackMap[x][y] & 0x3F) >> 3;
             if (low_owner == 0 && high_owner == 0) {
-                gc->tileMap[x][y] = 0;
-                gc->trackMap[x][y] = 0;
+                gc->world.tileMap[x][y] = 0;
+                gc->world.trackMap[x][y] = 0;
             } else if (low_owner == 0) {
-                gc->tileMap[x][y] = 71;
-                gc->trackMap[x][y] = (int8_t)(0x40 | high_owner);
+                gc->world.tileMap[x][y] = 71;
+                gc->world.trackMap[x][y] = (int8_t)(0x40 | high_owner);
             } else if (high_owner == 0) {
-                gc->tileMap[x][y] = 70;
-                gc->trackMap[x][y] = (int8_t)(0x40 | low_owner);
+                gc->world.tileMap[x][y] = 70;
+                gc->world.trackMap[x][y] = (int8_t)(0x40 | low_owner);
             }
         }
     }
@@ -449,16 +449,16 @@ void gc_normalizeTrackBits(GameCanvas *gc) {
 void gc_setTrackOwnerCode(GameCanvas *gc, int32_t owner) {
     for (int x = 0; x < gc->mapWidth; ++x) {
         for (int y = 0; y < gc->mapHeight; ++y) {
-            if (gc->trackMap[x][y] == 64) {
+            if (gc->world.trackMap[x][y] == 64) {
                 if (owner == 1) gc_advanceConstructionTimers(gc, x, y, -4);
-                gc->trackMap[x][y] = (int8_t)(0x40 | owner);
+                gc->world.trackMap[x][y] = (int8_t)(0x40 | owner);
             }
-            if (gc->tileMap[x][y] != 76) continue;
-            int low_owner = gc->trackMap[x][y] & 7;
-            int high_owner = (gc->trackMap[x][y] & 0x3F) >> 3;
+            if (gc->world.tileMap[x][y] != 76) continue;
+            int low_owner = gc->world.trackMap[x][y] & 7;
+            int high_owner = (gc->world.trackMap[x][y] & 0x3F) >> 3;
             if (low_owner == 0) low_owner = owner;
             if (high_owner == 0) high_owner = owner;
-            gc->trackMap[x][y] =
+            gc->world.trackMap[x][y] =
                 (int8_t)(0x40 | low_owner | high_owner << 3);
         }
     }
@@ -521,7 +521,7 @@ void gc_openBuildMenu(GameCanvas *gc) {
                         break;
                     gc->placementX = gc->tileCursorX;
                     gc->placementY = gc->tileCursorY;
-                    gc->tileMap[gc->placementX][gc->placementY] = 127;
+                    gc->world.tileMap[gc->placementX][gc->placementY] = 127;
                     gc->buildMenuMode = 4;
                     gc->menuDirty = true;
                     gc->buildMenuItemIndex = 0;
@@ -533,19 +533,19 @@ void gc_openBuildMenu(GameCanvas *gc) {
                     break;
                 case 2:
                     if (gc->blockBuildMenu) break;
-                    if (gc->tileMap[gc->tileCursorX][gc->tileCursorY] == 7)
+                    if (gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] == 7)
                         gc_computeTrackBuildInlined(
                             gc, gc->tileCursorX, gc->tileCursorY,
                             0, -1, 10, 83, 86, 82);
-                    if (gc->tileMap[gc->tileCursorX][gc->tileCursorY] == 10)
+                    if (gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] == 10)
                         gc_computeTrackBuildInlined(
                             gc, gc->tileCursorX, gc->tileCursorY,
                             0, 1, 7, 86, 83, 82);
-                    if (gc->tileMap[gc->tileCursorX][gc->tileCursorY] == 8)
+                    if (gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] == 8)
                         gc_computeTrackBuildInlined(
                             gc, gc->tileCursorX, gc->tileCursorY,
                             -1, 0, 9, 84, 85, 81);
-                    if (gc->tileMap[gc->tileCursorX][gc->tileCursorY] == 9)
+                    if (gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] == 9)
                         gc_computeTrackBuildInlined(
                             gc, gc->tileCursorX, gc->tileCursorY,
                             1, 0, 8, 85, 84, 81);
@@ -611,10 +611,10 @@ void gc_openBuildMenu(GameCanvas *gc) {
                     break;
                 gc->demolishX = gc->tileCursorX;
                 gc->demolishY = gc->tileCursorY;
-                gc->tileMap[gc->placementX][gc->placementY] = 0;
+                gc->world.tileMap[gc->placementX][gc->placementY] = 0;
                 gc_setState(gc, +GameState::BuildingPath);
             } else if (item == 9) {
-                gc->tileMap[gc->placementX][gc->placementY] = 0;
+                gc->world.tileMap[gc->placementX][gc->placementY] = 0;
                 gc->buildMenuMode = 1;
                 gc->menuDirty = true;
                 gc->buildMenuItemIndex = 0;

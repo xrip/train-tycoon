@@ -39,12 +39,12 @@ std::uint64_t map_digest(const GameCanvas* game) {
     digest.add_i32(game->loanCeiling);
     digest.add_i32(game->loanBalance);
     for (int x = 0; x < game->mapWidth; ++x) {
-        digest.add_bytes(game->tileMap[x].data(), static_cast<std::size_t>(game->mapHeight));
-        digest.add_bytes(game->trackMap[x].data(), static_cast<std::size_t>(game->mapHeight));
-        digest.add_bytes(game->tileElevation[x].data(), static_cast<std::size_t>(game->mapHeight));
+        digest.add_bytes(game->world.tileMap[x].data(), static_cast<std::size_t>(game->mapHeight));
+        digest.add_bytes(game->world.trackMap[x].data(), static_cast<std::size_t>(game->mapHeight));
+        digest.add_bytes(game->world.tileElevation[x].data(), static_cast<std::size_t>(game->mapHeight));
     }
     for (int x = 0; x < game->mapWidth + 2; ++x) {
-        digest.add_bytes(game->heightMap[x].data(), static_cast<std::size_t>(game->mapHeight + 2));
+        digest.add_bytes(game->world.heightMap[x].data(), static_cast<std::size_t>(game->mapHeight + 2));
     }
     return digest.value();
 }
@@ -56,8 +56,8 @@ void generate_scenario(GameCanvas* game, int scenario) {
         gc_update(game);
     }
     REQUIRE(game->gameState == 30);
-    REQUIRE(!game->tileMap.empty());
-    REQUIRE(!game->trackMap.empty());
+    REQUIRE(!game->world.tileMap.empty());
+    REQUIRE(!game->world.trackMap.empty());
 }
 
 } // namespace
@@ -254,9 +254,9 @@ TEST_CASE("fast: small path search") {
     GameCanvas* game = make_game();
     game->mapWidth = 5;
     game->mapHeight = 5;
-    game->tileMap.resize(game->mapWidth, game->mapHeight);
-    game->trackMap.resize(game->mapWidth, game->mapHeight);
-    game->tileElevation.resize(game->mapWidth, game->mapHeight);
+    game->world.tileMap.resize(game->mapWidth, game->mapHeight);
+    game->world.trackMap.resize(game->mapWidth, game->mapHeight);
+    game->world.tileElevation.resize(game->mapWidth, game->mapHeight);
     game->placementX = 1;
     game->placementY = 2;
     game->demolishX = 3;

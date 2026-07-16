@@ -2,6 +2,7 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 #include "game_constants.h"
+#include "world.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -102,8 +103,6 @@ typedef struct GameCanvas {
     int32_t currentSpriteId;
     int32_t lastRenderedSpriteId;
     int32_t spriteJustChanged;
-    Grid<int8_t> tileElevation;
-    Grid<int8_t> heightMap;
     int32_t terrainSmoothCost;
     bool initialIndustryPlaced;
     Grid<int8_t> terrainEditBuffer;
@@ -365,8 +364,7 @@ typedef struct GameCanvas {
     std::vector<int8_t> tileOffsetY;
     int32_t numActiveTileAnimations;
     int32_t gameState;
-    Grid<int8_t> tileMap;
-    Grid<int8_t> trackMap;
+    World world;  // owns tileMap, trackMap, tileElevation, heightMap
     int32_t viewportCenterX;
     int32_t viewportCenterY;
     int32_t money;

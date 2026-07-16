@@ -235,7 +235,7 @@ void gc_computeViewportBounds(GameCanvas *gc) {
         ++gc->swapMapY;
     }
     tile_center_y -= gc->viewportCenterY
-                     + 4 * gc->heightMap[gc->swapMapX][gc->swapMapY];
+                     + 4 * gc->world.heightMap[gc->swapMapX][gc->swapMapY];
     gc->cursorScreenX = tile_center_x - gc->viewportCenterX;
     gc->cursorScreenY = tile_center_y;
     for (int corner = 0; corner < 4; ++corner) {
