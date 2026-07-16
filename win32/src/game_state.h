@@ -8,6 +8,7 @@
 #include "economy.h"
 #include "scenario.h"
 #include "build_controller.h"
+#include "assets.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -82,8 +83,6 @@ typedef struct GameCanvas {
     int32_t dp;
     ResourceReader sprite_stream;
     std::array<std::unique_ptr<Image>, 6> font_images;
-    std::vector<int16_t> spriteOffsetTable;
-    std::vector<int8_t> spriteData;
     int32_t cursorScale;
     int32_t cursorDragY;
     int32_t cursorSelectY;
@@ -167,7 +166,6 @@ typedef struct GameCanvas {
     int32_t trainAtCursor;
     int32_t era;
     int32_t dI;
-    std::array<std::array<int16_t, 8>, 8> trainSpriteDirectionTable{};
     std::vector<int8_t> saveBuffer;
     int32_t saveReadOffset;
     int32_t saveSlot;
@@ -211,9 +209,6 @@ typedef struct GameCanvas {
     bool music_enabled;
     int32_t music_volume_level;
     std::unique_ptr<MusicOutput> music_output;
-    std::vector<int8_t> tileOffsetX;
-    std::vector<int8_t> tileOffsetY;
-    int32_t numActiveTileAnimations;
     int32_t gameState;
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
     int32_t viewportCenterX;
@@ -221,6 +216,7 @@ typedef struct GameCanvas {
     Economy economy;
     Scenario scenario;
     BuildController build;
+    Assets assets;
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;
@@ -230,7 +226,6 @@ typedef struct GameCanvas {
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface;
     std::vector<std::unique_ptr<Image>> tile_sprites;
-    std::array<int8_t, 255> tileSpriteIndex{};
     std::unique_ptr<Image> cycle_flag;
     int64_t loadingStartTime;
     bool loadingTimeout;
@@ -238,8 +233,6 @@ typedef struct GameCanvas {
     int32_t transitionCode;
     bool ready;
     int32_t loadStep;
-    std::vector<int8_t> spriteIndexTable;
-    Grid<int8_t> spriteBitmapTable;
     int32_t timerA1;
     int32_t timerA2;
     int32_t timerB1;
@@ -258,7 +251,6 @@ typedef struct GameCanvas {
     int64_t tickStart;
     int64_t tickEnd;
     int64_t gw;
-    std::array<int8_t, 26> tileSpriteYOffsetByCode{};
     int32_t lastViewportCenterX;
     int32_t viewportCenterYCached;
     std::array<int16_t, 500> visibleTrains{};

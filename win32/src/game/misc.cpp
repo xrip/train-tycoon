@@ -5,7 +5,7 @@
 void gc_drawSpriteQuad(GameCanvas *gc, Surface *graphics, int32_t n,
                        int32_t n2, int32_t n3, int32_t n4) {
     midp_draw_image(graphics,
-                    gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[n])].get(), n2, n3, n4);
+                    gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[n])].get(), n2, n3, n4);
 }
 
 void gc_openSpriteStream(GameCanvas *gc, const char *resource_name) {

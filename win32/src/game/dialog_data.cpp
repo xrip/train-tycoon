@@ -63,17 +63,17 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
     switch (screen) {
         case 14:
             if (gc->screenParam >= 0 && gc->screenParam <= 4)
-                return copy_codes(gc->spriteBitmapTable[
-                    gc->spriteIndexTable[11 + gc->screenParam]]);
+                return copy_codes(gc->assets.spriteBitmapTable[
+                    gc->assets.spriteIndexTable[11 + gc->screenParam]]);
             break;
 
         case 4:
             switch (field) {
-                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[25 + gc->scenario.scenarioMilestone]]);
-                case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[30 + gc->scenario.difficultyA]]);
-                case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[35 + gc->scenario.difficultySlot]]);
-                case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->scenario.difficultyB]]);
-                case 5: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->scenario.difficultyC]]);
+                case 1: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[25 + gc->scenario.scenarioMilestone]]);
+                case 2: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[30 + gc->scenario.difficultyA]]);
+                case 3: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[35 + gc->scenario.difficultySlot]]);
+                case 4: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[40 + gc->scenario.difficultyB]]);
+                case 5: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[40 + gc->scenario.difficultyC]]);
                 case 6: return gc_formatNumberWithSuffix(gc, gc->scenario.difficultyCycle, 0);
             }
             break;
@@ -82,10 +82,10 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             switch (field) {
                 case 0: {
                     int selection = gc->trainSelectionIndex[gc->junctionDirCursor];
-                    const std::vector<int8_t> &engine = gc->spriteBitmapTable[
-                        gc->spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
-                    const std::vector<int8_t> &wagon = gc->spriteBitmapTable[
-                        gc->spriteIndexTable[86 + (selection & 0xff)]];
+                    const std::vector<int8_t> &engine = gc->assets.spriteBitmapTable[
+                        gc->assets.spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
+                    const std::vector<int8_t> &wagon = gc->assets.spriteBitmapTable[
+                        gc->assets.spriteIndexTable[86 + (selection & 0xff)]];
                     return join_codes(tracked_codes(wagon), tracked_codes(engine));
                 }
                 case 1: return gc_formatNumberWithSuffix(gc, gc->world.zonePopulation[gc->junctionDirCursor] * 13, 0);
@@ -95,8 +95,8 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 21:
             switch (field) {
-                case 0: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[100 + gc->world.stationDirectionCode[gc->stationDirCursor]]]);
-                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[106 + gc->world.stationDirectionCode[gc->stationDirCursor] / 2]]);
+                case 0: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[100 + gc->world.stationDirectionCode[gc->stationDirCursor]]]);
+                case 1: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[106 + gc->world.stationDirectionCode[gc->stationDirCursor] / 2]]);
                 case 2: return gc_formatNumberWithSuffix(gc, gc->economy.prevStationRevenue[gc->stationDirCursor], 0);
             }
             break;
@@ -106,11 +106,11 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 10:
             switch (field) {
-                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_animationsDisabled ? 21 : 20]]);
-                case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_selectionHidden ? 21 : 20]]);
-                case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_monthlyReportEnabled ? 20 : 21]]);
-                case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gcs_annualReportEnabled ? 20 : 21]]);
-                case 5: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[gc->music_enabled ? 20 : 21]]);
+                case 1: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[gcs_animationsDisabled ? 21 : 20]]);
+                case 2: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[gcs_selectionHidden ? 21 : 20]]);
+                case 3: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[gcs_monthlyReportEnabled ? 20 : 21]]);
+                case 4: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[gcs_annualReportEnabled ? 20 : 21]]);
+                case 5: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[gc->music_enabled ? 20 : 21]]);
                 case 6: return gc_formatNumberWithSuffix(gc, gc->music_volume_level, 0);
             }
             break;
@@ -135,14 +135,14 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 26: {
             if (field == 0)
-                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[60 + gc->fleet.trainEraOrStage[gc->trainAtCursor]]]);
+                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[60 + gc->fleet.trainEraOrStage[gc->trainAtCursor]]]);
             if (field == 6) return gc_formatCurrency(gc, gc->fleet.trainRevenue[gc->trainAtCursor]);
             if (field == 7) return gc_formatCurrency(gc, gc->fleet.prevTrainRevenue[gc->trainAtCursor]);
             if (field == 8) return gc_formatNumberWithSuffix(gc, gc->fleet.trainAgeOrTimer[gc->trainAtCursor], 0);
             if (field == 9) return gc_formatCurrency(gc, gc->build.currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return gc_formatCurrency(gc, gc->build.baseTrainCostSnapshot - gc->build.currentTrainCostSnapshot);
             if (field == 20)
-                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[
+                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[
                     gc->fleet.trainAiOverride[gc->trainAtCursor] == 0 ? 21 : 20]]);
             if (field <= 0 || field >= 6) break;
             int car = 0;
@@ -200,7 +200,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 33:
             if (field == 65)
-                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[57 + gc->yearGraphMode]]);
+                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[57 + gc->yearGraphMode]]);
             if (field >= 40) {
                 int index = field - 40;
                 if (!gc->yearGraphAlt) {
@@ -225,7 +225,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             // The original falls through when the graph mode is invalid.
         case 34:
             if (field == 65)
-                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[54 + gc->yearGraphMode]]);
+                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[54 + gc->yearGraphMode]]);
             if (field >= 20) {
                 if (!gc->yearGraphAlt)
                     return gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0);
@@ -251,8 +251,8 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
         case 60:
             if (field % 2 == 1) {
                 int index = field / 2;
-                return copy_codes(gc->spriteBitmapTable[gc_byteToUnsignedInt(
-                    gc, gc->spriteIndexTable[gc->menuRowType[gc->enabledMenuRowIndexes[index]] + 160])]);
+                return copy_codes(gc->assets.spriteBitmapTable[gc_byteToUnsignedInt(
+                    gc, gc->assets.spriteIndexTable[gc->menuRowType[gc->enabledMenuRowIndexes[index]] + 160])]);
             } else {
                 int index = (field - 1) / 2;
                 return gc_formatNumberWithSuffix(gc,

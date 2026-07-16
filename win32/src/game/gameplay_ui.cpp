@@ -121,7 +121,7 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
         int text_len = (int)strlen(cost_text);
         const auto currency_codes = gc_tracked_codes(
-            gc->spriteBitmapTable[gc->spriteIndexTable[10]]);
+            gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[10]]);
         std::vector<int8_t> bytes(
             static_cast<size_t>(text_len + 1) + currency_codes.size());
         bytes[0] = 24;
@@ -167,8 +167,8 @@ void gc_drawConfirmDialog(GameCanvas *gc, Surface *graphics) {
     if (gc->confirmCounter <= 0) return;
     if (gc->confirmTargetState >= 0) {
         gc_drawTextBox(gc, graphics, 10, 10, 0, 37,
-                       gc_tracked_codes(gc->spriteBitmapTable[
-                           gc->spriteIndexTable[120 + gc->confirmTargetState]]));
+                       gc_tracked_codes(gc->assets.spriteBitmapTable[
+                           gc->assets.spriteIndexTable[120 + gc->confirmTargetState]]));
     }
     --gc->confirmCounter;
 }

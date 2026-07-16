@@ -86,7 +86,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[0]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
             int n11 = gc->totalTilesToGenerate < 2 ? 2 : gc->totalTilesToGenerate;
@@ -133,7 +133,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
         }
         case +GameState::BuildingMinimap:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[50]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[50]]));
             break;
         case +GameState::MapOverview: {
             int n14;
@@ -176,23 +176,23 @@ void gc_paint(GameCanvas *gc, Surface *g) {
         }
         case +GameState::BuildingPath:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[51]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[51]]));
             break;
         case +GameState::SavingGame:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[52]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[52]]));
             break;
         case +GameState::LoadingGame:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[53]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[53]]));
             break;
         case +GameState::AiTurn:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[49]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[49]]));
             break;
         case +GameState::HighScoreSync:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[66]]));
+                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[66]]));
             break;
     }
 }

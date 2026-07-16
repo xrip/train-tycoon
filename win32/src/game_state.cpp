@@ -130,7 +130,7 @@ void gc_fields_init(GameCanvas *gc) {
         {{11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
     }};
     gc->dI = 5;
-    gc->trainSpriteDirectionTable = {{
+    gc->assets.trainSpriteDirectionTable = {{
         {{130, 131, 132, 133, 134, 135, 136, 137}},
         {{140, 141, 142, 143, 144, 145, 146, 147}},
         {{160, 161, 162, 163, 160, 161, 162, 163}},
@@ -243,7 +243,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->music_volume_level = 2;
     gc->economy.trainRevenueScore = 0;
     gc->scenario.bestScenarioScore = 0;
-    gc->numActiveTileAnimations = 0;
+    gc->assets.numActiveTileAnimations = 0;
     gc->viewportCenterX = 0;
     gc->viewportCenterY = 0;
     gc->economy.money = 200000;
@@ -286,7 +286,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->loadingTimer = 0;
     gc->dH = 50;
     gc->gw = 0;
-    gc->tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
+    gc->assets.tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
     gc->lastViewportCenterX = -1;
     gc->viewportCenterYCached = -1;
     gc->visibleTrainCount = 0;
