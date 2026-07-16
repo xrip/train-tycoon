@@ -136,7 +136,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     if (!game_buyTrainAtCursor(game)) break;
                     game_setState(game, GameState::Playing); break;
                 }
-                if (!game_applyTrainUpgradeInlined(game, game->trainAtCursor, game->build.wagonType, game->build.wagonOptionSlots.data())) break;
+                if (!game_applyTrainUpgradeInlined(game, game->trainAtCursor, game->build.wagonType, game->build.wagonOptionSlots)) break;
                 game->ui.pendingTransitionCode = 26; game_setState(game, GameState::Playing); break;
             }
             game->ui.pendingTransitionCode = !game->build.discountApplied ? 22 : 26;

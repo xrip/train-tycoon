@@ -18,13 +18,12 @@
 #include "support/java_random.h"
 #include "support/music_output.h"
 #include "support/resource_reader.h"
-#include <array>
 #include <memory>
 #include <vector>
 
 typedef struct Game {
     bool stopRequested;
-    int32_t simSpeed;
+    int32_t simSpeed = 1;
     int32_t frameIndex;
     bool displayInitialized;
     bool confirmCloseRequested;  // one-shot: close confirm dialog to the menu overlay
@@ -33,7 +32,7 @@ typedef struct Game {
     int32_t serviceVehicleAtCursor;
     Fleet fleet;
     int32_t trainAtCursor;
-    int32_t era;
+    int32_t era = 1;
     bool compareToPrevious;
     bool monthRolloverFlag;
     int32_t savedLegacyMetricBq;
@@ -41,7 +40,7 @@ typedef struct Game {
     bool music_available;
     bool music_auto_start;
     bool music_enabled;
-    int32_t music_volume_level;
+    int32_t music_volume_level = 2;
     std::unique_ptr<MusicOutput> music_output;
     int32_t gameState;
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
@@ -61,7 +60,7 @@ typedef struct Game {
     JavaRandom rng;
     int64_t loadingStartTime;
     bool loadingTimeout;
-    bool ready;
+    bool ready = true;
     int32_t loadStep;
     int32_t timerA1;
     int32_t timerA2;
@@ -69,12 +68,12 @@ typedef struct Game {
     int32_t timerB2;
     int32_t timerC1;
     int32_t timerC2;
-    std::array<int32_t, 9> graphColors{};  // 3 series x 3 ARGB colors for report graphs
-    int32_t lastCanvasWidth;   // last size passed to game_setCanvasSize
-    int32_t lastCanvasHeight;
+    int32_t graphColors[kGraphColorCount]{};  // 3 series x 3 colors for report graphs
+    int32_t lastCanvasWidth = -1;   // last size passed to game_setCanvasSize
+    int32_t lastCanvasHeight = -1;
     int32_t savedGameState;  // game state stashed for return after an overlay
     int32_t loadingTimer;
-    int32_t dayTickThreshold;  // frames per game-day (counterA counts up to this)
+    int32_t dayTickThreshold = 50;  // frames per game-day (counterA counts up to this)
 } Game;
 
 extern int32_t gcs_screenWidth;

@@ -3,8 +3,8 @@
 // the build/menu display rows stay on Game for UI-01.
 #ifndef BUILD_CONTROLLER_H
 #define BUILD_CONTROLLER_H
+#include "game_constants.h"
 #include "support/grid.h"
-#include <array>
 #include <cstdint>
 
 // BuildController owns the transient state of a build action. Track-laying leaf:
@@ -20,9 +20,9 @@ struct BuildController {
     bool trackBuildInProgress = false;
     int32_t trackTileCount = 0;
     int8_t previewTrackOwnerCode = 0;
-    int8_t existingTrackOwnerCode = 0;
-    int32_t nextTrackPieceCode = 0;
-    bool buildCancelled = false;
+    int8_t existingTrackOwnerCode = 1;
+    int32_t nextTrackPieceCode = 66;
+    bool buildCancelled = true;
     int32_t selectionCost = 0;
 
     // Train-buy dialog state and the terrain/removal action costs. All
@@ -32,8 +32,8 @@ struct BuildController {
     // terrain and removal actions. Save byte order is unchanged.
     int32_t wagonType = 0;
     int32_t wagonDiscountType = 0;
-    std::array<int32_t, 5> wagonOptionSlots{};
-    std::array<int32_t, 5> wagonCountMatch{};
+    int32_t wagonOptionSlots[kWagonOptionCount]{};
+    int32_t wagonCountMatch[kWagonOptionCount]{};
     int32_t unitCost = 0;
     int32_t currentTrainCostSnapshot = 0;
     int32_t baseTrainCostSnapshot = 0;
@@ -49,8 +49,8 @@ struct BuildController {
     Grid<int8_t> terrainEditBuffer;
     int32_t selectionStartX = 0;
     int32_t selectionStartY = 0;
-    std::array<int32_t, 4> selectionTileX{};
-    std::array<int32_t, 4> selectionTileY{};
+    int32_t selectionTileX[kSelectionCornerCount]{};
+    int32_t selectionTileY[kSelectionCornerCount]{};
     int32_t swapMapX = 0;
     int32_t swapMapY = 0;
 

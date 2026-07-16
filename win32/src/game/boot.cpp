@@ -158,9 +158,9 @@ void game_writeSaveSnapshot(Game *game) {
     game->scenario.scenarioStepCompare = game_saveIntToBuffer(game, game->scenario.scenarioStepCompare);
     game->scenario.bestScenarioScore = game_saveIntToBuffer(game, game->scenario.bestScenarioScore);
     game->music_volume_level = game_saveIntToBuffer(game, game->music_volume_level);
-    game_saveOrLoadIntArrayInlined(game, game->scenario.scenarioScores);
-    game_saveOrLoadIntArrayInlined(game, game->scenario.leaderboardScores);
-    game_saveOrLoadByteArrayInlined(game, game->scenario.playerNameCodes);
+    game_saveOrLoadInts(game, game->scenario.scenarioScores, kScenarioCount);
+    game_saveOrLoadInts(game, game->scenario.leaderboardScores, kLeaderboardScoreCount);
+    game_saveOrLoadBytes(game, game->scenario.playerNameCodes, kPlayerNameCodeCount);
 }
 
 void game_persistSnapshotMode1(Game *game) {

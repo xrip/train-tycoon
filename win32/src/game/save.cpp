@@ -142,9 +142,10 @@ void game_initSaveOrLoad(Game *game, int32_t mode) {
     (game->field = game_saveOrLoadByte(game, game->field))
 #define IO_BOOL(field) \
     (game->field = game_saveOrLoadBool(game, game->field))
-#define IO_BYTES(field) game_saveOrLoadByteArrayInlined(game, game->field)
-#define IO_SHORTS(field) game_saveOrLoadShortArrayInlined(game, game->field)
-#define IO_INTS(field) game_saveOrLoadIntArrayInlined(game, game->field)
+#define FIELD_COUNT(field) static_cast<int>(sizeof(game->field) / sizeof(game->field[0]))
+#define IO_BYTES(field) game_saveOrLoadBytes(game, game->field, FIELD_COUNT(field))
+#define IO_SHORTS(field) game_saveOrLoadShorts(game, game->field, FIELD_COUNT(field))
+#define IO_INTS(field) game_saveOrLoadInts(game, game->field, FIELD_COUNT(field))
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
@@ -221,7 +222,8 @@ void game_initSaveOrLoad(Game *game, int32_t mode) {
     IO_BYTES(fleet.serviceVehicleX);
     IO_BYTES(fleet.serviceVehicleY);
     IO_BYTES(fleet.serviceUnloadFlags);
-    game_saveOrLoadShortMatrixInlined(game, game->fleet.serviceResourceStock);
+    game_saveOrLoadShorts(game, &game->fleet.serviceResourceStock[0][0],
+                          kServiceVehicleSlotCount * kResourceTypeCount);
     IO_BYTE(ui.numSelectedTrains);
     IO_BOOL(scenario.aiExpansionEnabled);
     IO_BYTES(world.constructionTimers);
@@ -312,6 +314,7 @@ void game_initSaveOrLoad(Game *game, int32_t mode) {
 #undef IO_BYTES
 #undef IO_SHORTS
 #undef IO_INTS
+#undef FIELD_COUNT
 
     if (mode == save::OP_SAVE_MAIN) {
         game_compressSaveBuffer(game);
@@ -324,19 +327,19 @@ void game_saveAllMapArrays(Game *game) {
     game->saveCodec.bytesCompressed = 0;
     game_initSaveOrLoad(game, save::OP_SAVE_MAIN);
     game_loadGame(game, 1, save::MODE_WRITE);
-    game_saveOrLoadByteMatrixInlined(game, game->world.tileMap);
+    game_saveOrLoadByteGrid(game, game->world.tileMap);
     game_compressSaveBuffer(game);
     game_saveGame(game);
     game_loadGame(game, 2, save::MODE_WRITE);
-    game_saveOrLoadByteMatrixInlined(game, game->world.trackMap);
+    game_saveOrLoadByteGrid(game, game->world.trackMap);
     game_compressSaveBuffer(game);
     game_saveGame(game);
     game_loadGame(game, 3, save::MODE_WRITE);
-    game_saveOrLoadByteMatrixInlined(game, game->world.tileElevation);
+    game_saveOrLoadByteGrid(game, game->world.tileElevation);
     game_compressSaveBuffer(game);
     game_saveGame(game);
     game_loadGame(game, 4, save::MODE_WRITE);
-    game_saveOrLoadByteMatrixInlined(game, game->world.heightMap);
+    game_saveOrLoadByteGrid(game, game->world.heightMap);
     game_compressSaveBuffer(game);
     game_saveGame(game);
 }
@@ -357,15 +360,15 @@ void game_restoreAllMapArrays(Game *game) {
     game_initBuildMenuForScenario(game, -1);
     game_loadGame(game, 1, save::MODE_READ);
     game_decompressSaveBuffer(game);
-    game_saveOrLoadByteMatrixInlined(game, game->world.tileMap);
+    game_saveOrLoadByteGrid(game, game->world.tileMap);
     game_loadGame(game, 2, save::MODE_READ);
     game_decompressSaveBuffer(game);
-    game_saveOrLoadByteMatrixInlined(game, game->world.trackMap);
+    game_saveOrLoadByteGrid(game, game->world.trackMap);
     game_loadGame(game, 3, save::MODE_READ);
     game_decompressSaveBuffer(game);
-    game_saveOrLoadByteMatrixInlined(game, game->world.tileElevation);
+    game_saveOrLoadByteGrid(game, game->world.tileElevation);
     game_loadGame(game, 4, save::MODE_READ);
     game_decompressSaveBuffer(game);
-    game_saveOrLoadByteMatrixInlined(game, game->world.heightMap);
+    game_saveOrLoadByteGrid(game, game->world.heightMap);
     game->renderer.lastViewportCenterX = -1;
 }

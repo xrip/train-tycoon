@@ -363,7 +363,7 @@ void game_updateTrain(Game *game, int32_t head) {
                 current_variant = 1;
             }
             current_variant = normalize_track_variant(current_variant);
-            const std::array<int8_t, 12> &step =
+            const int8_t* step =
                 game->fleet.forwardTrackSteps[current_variant][0] == game->fleet.trainDir[head]
                 ? game->fleet.forwardTrackSteps[current_variant]
                 : game->fleet.reverseTrackSteps[current_variant];
@@ -374,7 +374,7 @@ void game_updateTrain(Game *game, int32_t head) {
                 bool moved = false;
                 int next_track = game->world.trackMap[next_x][next_y];
                 int next_variant = normalize_track_variant(game->world.tileMap[next_x][next_y] - 70);
-                for (int pair = 2; pair < static_cast<int>(step.size()) / 2; ++pair) {
+                for (int pair = 2; pair < kTrackStepValueCount / 2; ++pair) {
                     if (step[2 * pair] != next_variant) continue;
                     int next_dir = step[2 * pair + 1];
                     if (next_variant == 6) {

@@ -1,8 +1,8 @@
 // The game map and its owned grids.
 #ifndef WORLD_H
 #define WORLD_H
+#include "game_constants.h"
 #include "support/grid.h"
-#include <array>
 #include <cstdint>
 
 // World owns the four map grids. Each is a Grid<int8_t> indexed [x][y]; rows may
@@ -25,17 +25,17 @@ struct World {
     // stationDirectionCode is the track approach direction; cityPopulation and
     // cityIndex describe the city. Per-station revenue history
     // (stationRevenue/prevStationRevenue) is economy state and lives elsewhere.
-    std::array<int8_t, 48> stationDirectionCode{};
-    std::array<int8_t, 48> cityPopulation{};
-    std::array<int8_t, 48> cityIndex{};
+    int8_t stationDirectionCode[kCitySlotCount]{};
+    int8_t cityPopulation[kCitySlotCount]{};
+    int8_t cityIndex[kCitySlotCount]{};
 
     // Tile-map animation state. tileQueue holds up to 50 pending tile changes
     // (each: countdown, x, y) applied to tileMap during the tick;
     // tileQueueVisualOnly marks the ones that are display-only. woodAgeTimer
     // ages forest tiles and phaseTimer cycles the tile animation phase. All
     // runtime-only (not saved). Values and tick order are unchanged.
-    std::array<std::array<int8_t, 3>, 50> tileQueue{};
-    std::array<bool, 50> tileQueueVisualOnly{};
+    int8_t tileQueue[kTileQueueCount][kTileQueueFieldCount]{};
+    bool tileQueueVisualOnly[kTileQueueCount]{};
     int32_t woodAgeTimer = 0;
     int32_t phaseTimer = 0;
 
@@ -43,8 +43,8 @@ struct World {
     // is recomputed each growth pass by counting populated tiles; constructionTimers
     // is the per-zone construction level. Both are saved. Values and save byte order
     // are unchanged.
-    std::array<int8_t, 64> constructionTimers{};
-    std::array<int16_t, 64> zonePopulation{};
+    int8_t constructionTimers[kZoneCount]{};
+    int16_t zonePopulation[kZoneCount]{};
 
     // Map-generation parameters (loaded per scenario), the generation progress
     // counters, and the industry/city placement bookkeeping used while building
@@ -72,7 +72,7 @@ struct World {
     int32_t cityStationY = 0;
     int32_t industryStationX = 0;
     int32_t industryTileY = 0;
-    bool initialIndustryPlaced = false;
+    bool initialIndustryPlaced = true;
 
     // True when (x, y) is a valid map cell.
     bool in_bounds(int32_t x, int32_t y) const {

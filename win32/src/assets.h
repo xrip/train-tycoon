@@ -3,10 +3,10 @@
 // reads it stays in the renderer.
 #ifndef ASSETS_H
 #define ASSETS_H
+#include "game_constants.h"
 #include "midp.h"  // Image
 #include "support/grid.h"
 #include "support/resource_reader.h"
-#include <array>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -21,9 +21,9 @@ struct Assets {
     std::vector<int8_t> spriteData;
     std::vector<int8_t> spriteIndexTable;
     Grid<int8_t> spriteBitmapTable;
-    std::array<int8_t, 255> tileSpriteIndex{};
-    std::array<int8_t, 26> tileSpriteYOffsetByCode{};
-    std::array<std::array<int16_t, 8>, 8> trainSpriteDirectionTable{};
+    int8_t tileSpriteIndex[kTileSpriteCodeCount]{};
+    int8_t tileSpriteYOffsetByCode[kTileYOffsetCount]{};
+    int16_t trainSpriteDirectionTable[kTrainSpriteTypeCount][kTrainSpriteDirectionCount]{};
     std::vector<int8_t> tileOffsetX;
     std::vector<int8_t> tileOffsetY;
     int32_t numActiveTileAnimations = 0;
@@ -34,7 +34,7 @@ struct Assets {
     // counter and cycle cursor track decoding/animation progress. All
     // runtime-only. Resource read order is unchanged.
     ResourceReader sprite_stream;
-    std::array<std::unique_ptr<Image>, 6> font_images;
+    std::unique_ptr<Image> font_images[kFontPageCount];
     std::vector<std::unique_ptr<Image>> tile_sprites;
     std::unique_ptr<Image> cycle_flag;
     int32_t spriteLoadCounter = 0;

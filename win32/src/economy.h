@@ -1,7 +1,7 @@
 // Player economy: money, loans, and the calendar (see game/economy_tick.cpp).
 #ifndef ECONOMY_H
 #define ECONOMY_H
-#include <array>
+#include "game_constants.h"
 #include <cstdint>
 
 // Economy owns the player's money, loan state, tax/interest parameters, and the
@@ -9,14 +9,14 @@
 // as-is from the prior Game layout. Revenue history, station revenue, and
 // report aggregates move into Economy in a later ECON-01 leaf.
 struct Economy {
-    int32_t money = 0;
+    int32_t money = 200000;
     int32_t loanBalance = 0;
-    int32_t loanCeiling = 0;
-    int8_t interestRate = 0;
-    int32_t dayOfMonth = 0;
-    int32_t monthOfYear = 0;
-    int32_t year = 0;
-    int32_t enterpriseTaxPct = 0;
+    int32_t loanCeiling = 600000;
+    int8_t interestRate = 4;
+    int32_t dayOfMonth = 1;
+    int32_t monthOfYear = 1;
+    int32_t year = 1950;
+    int32_t enterpriseTaxPct = 2;
 
     // Spending and revenue aggregates (lifetime and per-period totals).
     int32_t totalSpent = 0;
@@ -31,19 +31,19 @@ struct Economy {
     // Per-station revenue history and the yearly/decade report series used by
     // the graphs. moneyHistory and decadeRevenueWithCurrent are runtime-only
     // (not saved). Values and save byte order are unchanged.
-    std::array<int16_t, 48> stationRevenue{};
-    std::array<int16_t, 48> prevStationRevenue{};
+    int16_t stationRevenue[kCitySlotCount]{};
+    int16_t prevStationRevenue[kCitySlotCount]{};
     int32_t decadeRevenueWithCurrent = 0;
     int32_t previousYearProfit = 0;
     int32_t prevDecadeRevenue = 0;
     int32_t decadeRevenueTotal = 0;
     int32_t decadeProfitGraphTotal = 0;
-    std::array<int32_t, 12> yearProfitHistory{};
-    std::array<int32_t, 12> yearRevenueHistory{};
-    std::array<int32_t, 12> yearCompanyValueHistory{};
-    std::array<int32_t, 12> decadeProfitHistory{};
-    std::array<int32_t, 12> altDecadeRevenueTotal{};
-    std::array<int32_t, 3> moneyHistory{};
+    int32_t yearProfitHistory[kHistoryCount]{};
+    int32_t yearRevenueHistory[kHistoryCount]{};
+    int32_t yearCompanyValueHistory[kHistoryCount]{};
+    int32_t decadeProfitHistory[kHistoryCount]{};
+    int32_t altDecadeRevenueTotal[kHistoryCount]{};
+    int32_t moneyHistory[3]{};
 
     // Era-scaled cost and train-performance model, loaded per scenario in map
     // generation and nudged by the yearly random economy event. moneyBase* are
@@ -107,7 +107,7 @@ struct Economy {
     int32_t savedLegacyMetricEb = 0;
     int32_t decadeEnterpriseTotal = 0;
     int32_t decadeProfitTotal = 0;
-    std::array<int32_t, 12> altDecadeTotalCost{};
+    int32_t altDecadeTotalCost[kHistoryCount]{};
 };
 
 #endif  // ECONOMY_H

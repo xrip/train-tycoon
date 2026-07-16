@@ -9,9 +9,8 @@ static std::vector<int8_t> copy_codes(const std::vector<int8_t> &codes) {
 }
 
 // Owned code arrays carry their own length, so copy the whole array.
-template <std::size_t N>
-static std::vector<int8_t> copy_codes(const std::array<int8_t, N> &codes) {
-    return {codes.begin(), codes.end()};
+static std::vector<int8_t> copy_codes(const int8_t* codes, int count) {
+    return {codes, codes + count};
 }
 
 static std::vector<int8_t> join_codes(std::span<const int8_t> first,
@@ -262,11 +261,13 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             break;
 
         case 27:
-            if (field == 1) return copy_codes(game->scenario.playerNameCodes);
+            if (field == 1)
+                return copy_codes(game->scenario.playerNameCodes, kPlayerNameCodeCount);
             if (field == 0) {
-                game->scenario.playerNameCursorMarker.fill(0);
+                memset(game->scenario.playerNameCursorMarker, 0,
+                       sizeof(game->scenario.playerNameCursorMarker));
                 game->scenario.playerNameCursorMarker[game->scenario.routeSlotIndex] = 28;
-                return copy_codes(game->scenario.playerNameCursorMarker);
+                return copy_codes(game->scenario.playerNameCursorMarker, kPlayerNameCodeCount);
             }
             break;
 

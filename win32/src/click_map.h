@@ -8,7 +8,6 @@
 // from packed-sprite data at draw time, so those are the ones we capture.
 #ifndef TRAIN_TYCOON_CLICK_MAP_H
 #define TRAIN_TYCOON_CLICK_MAP_H
-#include <array>
 #include <cstdint>
 
 enum ClickKind : std::uint8_t {
@@ -27,7 +26,7 @@ struct ClickTarget {
 struct ClickMap {
     static constexpr std::size_t kCapacity = 48;
 
-    std::array<ClickTarget, kCapacity> targets{};
+    ClickTarget targets[kCapacity]{};
     std::size_t count = 0;
 
     void clear() { count = 0; }

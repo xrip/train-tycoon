@@ -151,35 +151,10 @@ void game_decompressSaveBuffer(Game *game);
 bool game_saveOrLoadBool(Game *game, bool bl);
 int8_t game_saveOrLoadByte(Game *game, int8_t by);
 int32_t game_saveIntToBuffer(Game *game, int32_t n);
-// Explicit-length save/load cores. The std::array, matrix, and Grid overloads
-// below forward here; the owned containers carry their own length.
-void game_saveOrLoadByteSpan(Game *game, int8_t* byArray, int len);
-void game_saveOrLoadShortSpan(Game *game, int16_t* sArray, int len);
-void game_saveOrLoadIntSpan(Game *game, int32_t* nArray, int len);
-template <std::size_t N>
-inline void game_saveOrLoadByteArrayInlined(Game *game, std::array<int8_t, N> &a) {
-    game_saveOrLoadByteSpan(game, a.data(), static_cast<int>(N));
-}
-template <std::size_t N>
-inline void game_saveOrLoadShortArrayInlined(Game *game, std::array<int16_t, N> &a) {
-    game_saveOrLoadShortSpan(game, a.data(), static_cast<int>(N));
-}
-template <std::size_t N>
-inline void game_saveOrLoadIntArrayInlined(Game *game, std::array<int32_t, N> &a) {
-    game_saveOrLoadIntSpan(game, a.data(), static_cast<int>(N));
-}
-template <std::size_t Rows, std::size_t Cols>
-inline void game_saveOrLoadByteMatrixInlined(Game *game, std::array<std::array<int8_t, Cols>, Rows> &m) {
-    for (auto &row : m) game_saveOrLoadByteSpan(game, row.data(), static_cast<int>(Cols));
-}
-template <std::size_t Rows, std::size_t Cols>
-inline void game_saveOrLoadShortMatrixInlined(Game *game, std::array<std::array<int16_t, Cols>, Rows> &m) {
-    for (auto &row : m) game_saveOrLoadShortSpan(game, row.data(), static_cast<int>(Cols));
-}
-inline void game_saveOrLoadByteMatrixInlined(Game *game, Grid<int8_t> &m) {
-    for (auto &row : m.storage())
-        game_saveOrLoadByteSpan(game, row.data(), static_cast<int>(row.size()));
-}
+void game_saveOrLoadBytes(Game* game, int8_t* values, int count);
+void game_saveOrLoadShorts(Game* game, int16_t* values, int count);
+void game_saveOrLoadInts(Game* game, int32_t* values, int count);
+void game_saveOrLoadByteGrid(Game* game, Grid<int8_t>& grid);
 void game_initSaveOrLoad(Game *game, int32_t n);
 void game_writeSaveSnapshot(Game *game);
 void game_persistSnapshotMode0(Game *game);

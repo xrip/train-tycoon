@@ -276,8 +276,8 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
             midp_set_color(graphics, 0xFF0000);
         }
     }
-    game_drawSelectionQuad(game, graphics, game->build.selectionTileX.data(),
-                         game->build.selectionTileY.data());
+    game_drawSelectionQuad(game, graphics, game->build.selectionTileX,
+                         game->build.selectionTileY);
 }
 
 void game_drawBuildMenuRow(Game *game, Surface *graphics) {

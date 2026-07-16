@@ -9,9 +9,7 @@ void game_ensureSaveBufferCapacity(Game *game, int32_t n) {
     game->saveCodec.snapshotSize += n;
 }
 
-// Byte array save/load over an explicit length. The std::array and Grid
-// overloads forward here so the byte order stays identical.
-void game_saveOrLoadByteSpan(Game *game, int8_t *byArray, int len) {
+void game_saveOrLoadBytes(Game *game, int8_t *byArray, int len) {
     if (game->saveCodec.savePendingMode == save::MODE_SKIP) {
         for (int i = 0; i < len; ++i) byArray[i] = 0;
     } else if (game->saveCodec.savePendingMode == save::MODE_WRITE) {
@@ -25,7 +23,7 @@ void game_saveOrLoadByteSpan(Game *game, int8_t *byArray, int len) {
 }
 
 // Short array save/load over an explicit length.
-void game_saveOrLoadShortSpan(Game *game, int16_t *sArray, int len) {
+void game_saveOrLoadShorts(Game *game, int16_t *sArray, int len) {
     if (game->saveCodec.savePendingMode == save::MODE_SKIP) {
         for (int i = 0; i < len; ++i) sArray[i] = 0;
     } else if (game->saveCodec.savePendingMode == save::MODE_WRITE) {
@@ -44,7 +42,7 @@ void game_saveOrLoadShortSpan(Game *game, int16_t *sArray, int len) {
 }
 
 // Int array save/load over an explicit length.
-void game_saveOrLoadIntSpan(Game *game, int32_t *nArray, int len) {
+void game_saveOrLoadInts(Game *game, int32_t *nArray, int len) {
     if (game->saveCodec.savePendingMode == save::MODE_SKIP) {
         for (int i = 0; i < len; ++i) nArray[i] = 0;
     } else if (game->saveCodec.savePendingMode == save::MODE_WRITE) {
@@ -63,6 +61,12 @@ void game_saveOrLoadIntSpan(Game *game, int32_t *nArray, int len) {
             bits |= (uint32_t)game_readSaveByteUnsigned(game) << 24;
             memcpy(&nArray[i], &bits, sizeof(nArray[i]));
         }
+    }
+}
+
+void game_saveOrLoadByteGrid(Game *game, Grid<int8_t>& grid) {
+    for (auto& row : grid.storage()) {
+        game_saveOrLoadBytes(game, row.data(), static_cast<int>(row.size()));
     }
 }
 

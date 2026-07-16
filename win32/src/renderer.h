@@ -4,8 +4,8 @@
 // state.
 #ifndef RENDERER_H
 #define RENDERER_H
+#include "game_constants.h"
 #include "midp.h"  // Image, Surface
-#include <array>
 #include <cstdint>
 #include <memory>
 
@@ -19,16 +19,16 @@ struct Renderer {
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface = nullptr;
     int32_t currentSpriteId = 0;
-    int32_t lastRenderedSpriteId = 0;
+    int32_t lastRenderedSpriteId = -1;
     int32_t spriteJustChanged = 0;
-    std::array<int16_t, 500> visibleTrains{};
+    int16_t visibleTrains[kTrainSlotCount]{};
     int32_t visibleTrainCount = 0;
     int32_t viewportX0 = 0;
     int32_t viewportX1 = 0;
     int32_t viewportY0 = 0;
     int32_t viewportY1 = 0;
-    int32_t lastViewportCenterX = 0;
-    int32_t viewportCenterYCached = 0;
+    int32_t lastViewportCenterX = -1;
+    int32_t viewportCenterYCached = -1;
 
     // Per-frame draw bookkeeping: the active clip rectangle, the repaint and
     // map-redraw request flags, and the measured dialog content height. All

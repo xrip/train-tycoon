@@ -12,7 +12,7 @@ static void draw_train_image(Game *game, Surface *graphics,
 void game_drawSpriteSingle(Game *game, Surface *graphics,
                          int32_t train) {
     int16_t sprites[8];
-    memcpy(sprites, game->assets.trainSpriteDirectionTable[game->fleet.trainFlags[train] & 0x0f].data(),
+    memcpy(sprites, game->assets.trainSpriteDirectionTable[game->fleet.trainFlags[train] & 0x0f],
            sizeof(sprites));
 
     int tile_x = unsignedByte(game->fleet.trainX[train]);

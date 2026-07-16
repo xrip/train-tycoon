@@ -96,6 +96,12 @@ void load_game_resources(Game* game) {
 } // namespace
 
 TEST_CASE("fast: game initialization restores all non-zero defaults") {
+    Game defaults{};
+    CHECK(defaults.simSpeed == 1);
+    CHECK(defaults.economy.money == 200000);
+    CHECK(defaults.ui.cursorDragX == -1);
+    CHECK(defaults.renderer.lastRenderedSpriteId == -1);
+
     Game* game = make_game();
 
     CHECK(game->simSpeed == 1);

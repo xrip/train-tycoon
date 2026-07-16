@@ -4,6 +4,33 @@
 #define GAME_CONSTANTS_H
 #include <cstdint>
 
+inline constexpr int kTrainSlotCount = 500;
+inline constexpr int kServiceVehicleSlotCount = 250;
+inline constexpr int kCitySlotCount = 48;
+inline constexpr int kZoneCount = 64;
+inline constexpr int kTileQueueCount = 50;
+inline constexpr int kTileQueueFieldCount = 3;
+inline constexpr int kResourceTypeCount = 5;
+inline constexpr int kMenuRowCount = 6;
+inline constexpr int kEnabledMenuRowCount = 5;
+inline constexpr int kHistoryCount = 12;
+inline constexpr int kTrainSelectionCount = 64;
+inline constexpr int kWagonOptionCount = 5;
+inline constexpr int kSelectionCornerCount = 4;
+inline constexpr int kTileSpriteCodeCount = 255;
+inline constexpr int kTileYOffsetCount = 26;
+inline constexpr int kTrainSpriteTypeCount = 8;
+inline constexpr int kTrainSpriteDirectionCount = 8;
+inline constexpr int kFontPageCount = 6;
+inline constexpr int kTrackDirectionCount = 6;
+inline constexpr int kTrackStepValueCount = 12;
+inline constexpr int kScenarioCount = 13;
+inline constexpr int kLeaderboardScoreCount = 14;
+inline constexpr int kOfferEffectCount = 12;
+inline constexpr int kOfferScheduleFieldCount = 2;
+inline constexpr int kPlayerNameCodeCount = 10;
+inline constexpr int kGraphColorCount = 9;
+
 // Values for Game::gameState and its saved previous-state copy. The field stays
 // int32_t because it is part of the save stream.
 //

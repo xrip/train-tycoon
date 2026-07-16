@@ -159,8 +159,8 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
             tile_center_y = game->world.mapHalfWidth - x * 8 + y * 8 + 8;
-            game_computeIsoCornersInlined(game, x, y, game->build.selectionTileX.data(),
-                                        game->build.selectionTileY.data(), false);
+            game_computeIsoCornersInlined(game, x, y, game->build.selectionTileX,
+                                        game->build.selectionTileY, false);
             int opposite_edges =
                 game_crossProduct2D(anchorX, anchorY,
                                   game->build.selectionTileX[0], game->build.selectionTileY[0],

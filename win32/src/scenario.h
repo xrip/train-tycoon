@@ -3,7 +3,7 @@
 // move into Scenario in later SCENARIO-01 leaves.
 #ifndef SCENARIO_H
 #define SCENARIO_H
-#include <array>
+#include "game_constants.h"
 #include <cstdint>
 #include <vector>
 
@@ -25,15 +25,15 @@ struct Scenario {
     int32_t milestoneThreshold5 = 0;
     bool milestonesEnabled = false;
     int32_t bestScenarioScore = 0;
-    std::array<int32_t, 13> scenarioScores{};
-    std::array<int32_t, 14> leaderboardScores{};
+    int32_t scenarioScores[kScenarioCount]{};
+    int32_t leaderboardScores[kLeaderboardScoreCount]{};
 
     // AI opponent behaviour. aiEnabled is runtime-only; frequency, threshold,
     // and the wagon-purchase counter are saved. Values and save byte order are
     // unchanged. (The AI money/spend totals live in Economy.)
     bool aiEnabled = false;
-    int8_t aiFrequency = 0;
-    int8_t aiThreshold = 0;
+    int8_t aiFrequency = 15;
+    int8_t aiThreshold = 12;
     int32_t aiWagonsBought = 0;
 
     // Periodic contract/subsidy offer generation. offerEffectNextCount,
@@ -45,11 +45,11 @@ struct Scenario {
     int32_t offerTypeTransitionCode = 0;
     int32_t offerEffectTransitionCode = 0;
     int8_t routeSlotIndex = 0;
-    std::array<int8_t, 6> routeResourceFlags{};
-    std::array<std::vector<int8_t>, 12> offerTypesByEffect{};
-    std::array<std::array<int8_t, 2>, 12> offerEffectSchedule{};
+    int8_t routeResourceFlags[kMenuRowCount]{};
+    std::vector<int8_t> offerTypesByEffect[kOfferEffectCount]{};
+    int8_t offerEffectSchedule[kOfferEffectCount][kOfferScheduleFieldCount]{};
     int32_t offerGenerationCount = 0;
-    std::array<int16_t, 12> offerEffectNextCount{};
+    int16_t offerEffectNextCount[kOfferEffectCount]{};
     int32_t lastOfferDateCode = 0;
 
     // Scenario identity, difficulty setup, run progression, and high-score name
@@ -64,22 +64,22 @@ struct Scenario {
     int8_t difficultySlot = 0;
     int8_t difficultyB = 0;
     int8_t difficultyC = 0;
-    int32_t difficultyPct = 0;
-    int8_t difficultyCycle = 0;
-    int32_t scenarioStepCompare = 0;
+    int32_t difficultyPct = 100;
+    int8_t difficultyCycle = 1;
+    int32_t scenarioStepCompare = 1;
     int32_t scenarioStep = 0;
     int32_t scenarioNoticeId = 0;
     int32_t scenarioResourceCount = 0;
     int8_t scenarioNoticeCode = 0;
     bool highScoreUploadRequested = false;
-    std::array<int8_t, 10> playerNameCodes{};
-    std::array<int8_t, 10> playerNameCursorMarker{};
+    int8_t playerNameCodes[kPlayerNameCodeCount]{};
+    int8_t playerNameCursorMarker[kPlayerNameCodeCount]{};
 
     // Scenario feature flags (from the scenario_flags byte). aiExpansionEnabled
     // turns on the AI opponent's forest expansion and turns; monthlyOffersEnabled
     // turns on the monthly offer/economy tick. Both are saved; save byte order is
     // unchanged.
-    bool aiExpansionEnabled = false;
+    bool aiExpansionEnabled = true;
     bool monthlyOffersEnabled = false;
 };
 
