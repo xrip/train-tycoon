@@ -12,22 +12,22 @@ static void draw_train_image(GameCanvas *gc, Surface *graphics,
 void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
                          int32_t train) {
     int16_t sprites[8];
-    memcpy(sprites, gc->trainSpriteDirectionTable[gc->trainFlags[train] & 0x0f].data(),
+    memcpy(sprites, gc->trainSpriteDirectionTable[gc->fleet.trainFlags[train] & 0x0f].data(),
            sizeof(sprites));
 
-    int tile_x = gc_byteToUnsignedInt(gc, gc->trainX[train]);
-    int tile_y = gc_byteToUnsignedInt(gc, gc->trainY[train]);
-    if ((gc->trainFlags[train] & 0x40) != 0) {
+    int tile_x = gc_byteToUnsignedInt(gc, gc->fleet.trainX[train]);
+    int tile_y = gc_byteToUnsignedInt(gc, gc->fleet.trainY[train]);
+    if ((gc->fleet.trainFlags[train] & 0x40) != 0) {
         int tile = gc->world.tileMap[tile_x][tile_y];
         int track = gc_byteToUnsignedInt(gc, gc->world.trackMap[tile_x][tile_y]);
         bool lower_sprite = tile != tile::CROSSING && track > 65;
         if (tile == 76) {
             int low_track = track & 7;
             int high_track = (track >> 3) & 7;
-            if ((gc->trainDir[train] == 0 || gc->trainDir[train] == 1) &&
+            if ((gc->fleet.trainDir[train] == 0 || gc->fleet.trainDir[train] == 1) &&
                 low_track > 1)
                 lower_sprite = true;
-            if ((gc->trainDir[train] == 2 || gc->trainDir[train] == 3) &&
+            if ((gc->fleet.trainDir[train] == 2 || gc->fleet.trainDir[train] == 3) &&
                 high_track > 1)
                 lower_sprite = true;
         }
@@ -39,10 +39,10 @@ void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
     int x = tile_y * 16 + tile_x * 16 + 16 - gc->viewportCenterX;
     int y = gc->world.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
             gc->viewportCenterY - 4 * gc->world.tileElevation[tile_x][tile_y] + 15;
-    int phase = gc->trainPhase[train];
+    int phase = gc->fleet.trainPhase[train];
     if (phase < 0) return;
 
-    switch (gc->trainDir[train]) {
+    switch (gc->fleet.trainDir[train]) {
         case 0:
             if (tile == 82) y -= 4;
             if (tile == 79)

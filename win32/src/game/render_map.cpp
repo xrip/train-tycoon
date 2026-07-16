@@ -83,9 +83,9 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
         static_cast<std::size_t>(visible_width * visible_height));
     gc->visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
-        if ((gc->trainFlags[n6] & 0x80) != 128) continue;
-        n5 = gc_byteToUnsignedInt(gc, gc->trainX[n6]);
-        n4 = gc_byteToUnsignedInt(gc, gc->trainY[n6]);
+        if ((gc->fleet.trainFlags[n6] & 0x80) != 128) continue;
+        n5 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[n6]);
+        n4 = gc_byteToUnsignedInt(gc, gc->fleet.trainY[n6]);
         if (n5 < gc->viewportX0 || n4 < gc->viewportY0 || n5 > gc->viewportX1 || n4 > gc->viewportY1) continue;
         gc->visibleTrains[gc->visibleTrainCount++] = (int16_t)n6;
         visible_train_tiles[(n5 - gc->viewportX0) * visible_height +
@@ -122,7 +122,7 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
                                 n4 - gc->viewportY0]) {
             for (n = 0; n < gc->visibleTrainCount; ++n) {
                 n12 = gc->visibleTrains[n];
-                if ((gc->trainFlags[n12] & 0x80) != 128 || n5 != gc_byteToUnsignedInt(gc, gc->trainX[n12]) || n4 != gc_byteToUnsignedInt(gc, gc->trainY[n12])) continue;
+                if ((gc->fleet.trainFlags[n12] & 0x80) != 128 || n5 != gc_byteToUnsignedInt(gc, gc->fleet.trainX[n12]) || n4 != gc_byteToUnsignedInt(gc, gc->fleet.trainY[n12])) continue;
                 gc_drawSpriteSingle(gc, g, n12);
             }
         }

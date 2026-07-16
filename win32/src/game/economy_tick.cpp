@@ -130,16 +130,16 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         int type3_count = 0;
         int type267_count = 0;
         for (int train = 0; train < 500; ++train) {
-            if ((gc->trainFlags[train] & 0x80) != 128
-                || gc->world.trackMap[gc_byteToUnsignedInt(gc, gc->trainX[train])]
-                               [gc_byteToUnsignedInt(gc, gc->trainY[train])] != 65)
+            if ((gc->fleet.trainFlags[train] & 0x80) != 128
+                || gc->world.trackMap[gc_byteToUnsignedInt(gc, gc->fleet.trainX[train])]
+                               [gc_byteToUnsignedInt(gc, gc->fleet.trainY[train])] != 65)
                 continue;
             ++active_train_count;
-            if ((gc->trainFlags[train] & 0x40) == 64) {
+            if ((gc->fleet.trainFlags[train] & 0x40) == 64) {
                 ++engine_count;
                 continue;
             }
-            switch (gc->trainFlags[train] & 7) {
+            switch (gc->fleet.trainFlags[train] & 7) {
                 case 2: ++type267_count; break;
                 case 3: ++type3_count; break;
                 case 4: case 5: ++type45_count; break;

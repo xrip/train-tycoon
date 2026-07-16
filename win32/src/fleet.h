@@ -1,0 +1,33 @@
+// Per-slot train records (see game/train_tick.cpp).
+#ifndef FLEET_H
+#define FLEET_H
+#include <array>
+#include <cstdint>
+
+// Fleet owns the per-train-slot records. Each slot id is one train/car; a train
+// is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
+// across the save and the simulation, and the save byte order is unchanged.
+//
+// Field meanings are inherited as-is from the prior GameCanvas layout; several
+// (e.g. trainEraOrStage, trainAgeOrTimer) carry recorded uncertainty and are
+// recovered in a later FLEET-01 sub-leaf once the tick code is re-read.
+struct Fleet {
+    std::array<int8_t, 500> trainX{};
+    std::array<int8_t, 500> trainY{};
+    std::array<int8_t, 500> trainDir{};
+    std::array<int8_t, 500> trainPhase{};
+    std::array<int8_t, 500> trainFlags{};
+    std::array<int8_t, 500> trainEraOrStage{};
+    std::array<int8_t, 500> trainAgeOrTimer{};
+    std::array<int8_t, 500> wagonEnergyRemaining{};
+    std::array<int8_t, 500> trainEnergyOrCount{};
+    std::array<int8_t, 500> lastServiceVehicle{};
+    std::array<int8_t, 500> cargoAge{};
+    std::array<int16_t, 500> nextCar{};
+    std::array<int32_t, 500> trainStateCode{};
+    std::array<int8_t, 500> trainAiOverride{};
+    std::array<int32_t, 500> trainRevenue{};
+    std::array<int32_t, 500> prevTrainRevenue{};
+};
+
+#endif  // FLEET_H

@@ -61,22 +61,22 @@ void gc_dayResetAg(GameCanvas *gc) {
 
 // void revenueOrYear()
 void gc_revenueOrYear(GameCanvas *gc) {
-    for (int n = 0; n < 500; ++n) ++gc->trainAgeOrTimer[n];
+    for (int n = 0; n < 500; ++n) ++gc->fleet.trainAgeOrTimer[n];
 }
 
 // void everyTwoTick()
 void gc_everyTwoTick(GameCanvas *gc) {
     if (gc->routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
-        if ((gc->trainFlags[i] & 0x80) != 128 || (gc->trainFlags[i] & 0x40) != 64)
+        if ((gc->fleet.trainFlags[i] & 0x80) != 128 || (gc->fleet.trainFlags[i] & 0x40) != 64)
             continue;
-        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
-        int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
+        int n2 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]);
+        int n = gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]);
         if (gc->world.trackMap[n2][n] != 65) continue;
         int n3 = gc_countCarsInTrain(gc, i) * 2;
-        if ((gc->trainFlags[i] & 0xF) == 0) n3 += 3;
-        else if ((gc->trainFlags[i] & 0xF) == 1) n3 += 7;
-        gc->trainRevenue[i] -= n3;
+        if ((gc->fleet.trainFlags[i] & 0xF) == 0) n3 += 3;
+        else if ((gc->fleet.trainFlags[i] & 0xF) == 1) n3 += 7;
+        gc->fleet.trainRevenue[i] -= n3;
         gc->money -= n3;
         gc->fuelCostAccrued += n3;
     }
@@ -84,27 +84,27 @@ void gc_everyTwoTick(GameCanvas *gc) {
 
 // int countCarsInTrain(int)
 int32_t gc_countCarsInTrain(GameCanvas *gc, int32_t n) {
-    return n != -1 ? gc_countCarsInTrain(gc, gc->nextCar[n]) + 1 : 0;
+    return n != -1 ? gc_countCarsInTrain(gc, gc->fleet.nextCar[n]) + 1 : 0;
 }
 
 // boolean isTrainHeadCarAt(int,int,int)
 bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     if (n == -1) return false;
-    if (gc_byteToUnsignedInt(gc, gc->trainX[n]) == n2 && gc_byteToUnsignedInt(gc, gc->trainY[n]) == n3)
+    if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[n]) == n2 && gc_byteToUnsignedInt(gc, gc->fleet.trainY[n]) == n3)
         return true;
-    return gc_isTrainHeadCarAt(gc, gc->nextCar[n], n2, n3);
+    return gc_isTrainHeadCarAt(gc, gc->fleet.nextCar[n], n2, n3);
 }
 
 // void removeTrainFromMapInlined(int,boolean)
 void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
     if (n == -1) return;
-    gc_removeTrainFromMapInlined(gc, gc->nextCar[n], bl);
-    gc->trainFlags[n] = (int8_t)(gc->trainFlags[n] | 0xE0);
-    gc->nextCar[n] = -1;
-    gc->trainEnergyOrCount[n] = 7;
+    gc_removeTrainFromMapInlined(gc, gc->fleet.nextCar[n], bl);
+    gc->fleet.trainFlags[n] = (int8_t)(gc->fleet.trainFlags[n] | 0xE0);
+    gc->fleet.nextCar[n] = -1;
+    gc->fleet.trainEnergyOrCount[n] = 7;
     if (bl)
-        gc_handleCursorClickInlined(gc, gc_byteToUnsignedInt(gc, gc->trainX[n]),
-                                    gc_byteToUnsignedInt(gc, gc->trainY[n]), false, true);
+        gc_handleCursorClickInlined(gc, gc_byteToUnsignedInt(gc, gc->fleet.trainX[n]),
+                                    gc_byteToUnsignedInt(gc, gc->fleet.trainY[n]), false, true);
     gc->lastViewportCenterX = -1;
     gc->ready = false;
     gc->transitionCode = 16;
@@ -114,10 +114,10 @@ void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
 // void mergeTrainAt(int)
 void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
     for (int i = 0; i < 500; ++i) {
-        if (n == i || (gc->trainFlags[i] & 0x80) != 128
-            || (gc->trainFlags[i] & 0x40) != 64
-            || !gc_isTrainHeadCarAt(gc, i, gc_byteToUnsignedInt(gc, gc->trainX[n]),
-                                    gc_byteToUnsignedInt(gc, gc->trainY[n])))
+        if (n == i || (gc->fleet.trainFlags[i] & 0x80) != 128
+            || (gc->fleet.trainFlags[i] & 0x40) != 64
+            || !gc_isTrainHeadCarAt(gc, i, gc_byteToUnsignedInt(gc, gc->fleet.trainX[n]),
+                                    gc_byteToUnsignedInt(gc, gc->fleet.trainY[n])))
             continue;
         gc_removeTrainFromMapInlined(gc, i, true);
         gc_removeTrainFromMapInlined(gc, n, true);
@@ -134,17 +134,17 @@ void gc_maybeAiTakeTurn(GameCanvas *gc) {
 // void dayResetAd()
 void gc_dayResetAd(GameCanvas *gc) {
     for (int i = 0; i < 500; ++i) {
-        if ((gc->trainFlags[i] & 0x80) != 128 || (gc->trainFlags[i] & 0x40) != 64)
+        if ((gc->fleet.trainFlags[i] & 0x80) != 128 || (gc->fleet.trainFlags[i] & 0x40) != 64)
             continue;
-        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
-        int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
+        int n2 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]);
+        int n = gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]);
         if ((gc->world.trackMap[n2][n] != 66 && gc->world.trackMap[n2][n] != 67
              && gc->world.trackMap[n2][n] != 68)
-            || gc->trainEraOrStage[i] >= gc->era)
+            || gc->fleet.trainEraOrStage[i] >= gc->era)
             continue;
-        gc->trainEraOrStage[i] = (int8_t)gc->era;
-        gc->trainFlags[i] = (int8_t)(0xC0 | gc->era / 3);
-        gc->wagonEnergyRemaining[i] = (int8_t)(8 - gc->era);
+        gc->fleet.trainEraOrStage[i] = (int8_t)gc->era;
+        gc->fleet.trainFlags[i] = (int8_t)(0xC0 | gc->era / 3);
+        gc->fleet.wagonEnergyRemaining[i] = (int8_t)(8 - gc->era);
         break;
     }
 }
@@ -152,12 +152,12 @@ void gc_dayResetAd(GameCanvas *gc) {
 // void postRevenueReset()
 void gc_postRevenueReset(GameCanvas *gc) {
     for (int i = 0; i < 500; ++i) {
-        if ((gc->trainFlags[i] & 0x80) != 128) continue;
-        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
-        int n = gc_byteToUnsignedInt(gc, gc->trainY[i]);
+        if ((gc->fleet.trainFlags[i] & 0x80) != 128) continue;
+        int n2 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]);
+        int n = gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]);
         if (gc->world.trackMap[n2][n] == 66 || gc->world.trackMap[n2][n] == 67
             || gc->world.trackMap[n2][n] == 68)
-            gc->trainAgeOrTimer[i] = 0;
+            gc->fleet.trainAgeOrTimer[i] = 0;
     }
 }
 
@@ -339,10 +339,10 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
             if (gc->world.trackMap[i][j] != 65) continue;
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
-                if ((gc->trainFlags[k] & 0x80) != 128
-                    || gc_byteToUnsignedInt(gc, gc->trainX[k]) != i || gc_byteToUnsignedInt(gc, gc->trainY[k]) != j)
+                if ((gc->fleet.trainFlags[k] & 0x80) != 128
+                    || gc_byteToUnsignedInt(gc, gc->fleet.trainX[k]) != i || gc_byteToUnsignedInt(gc, gc->fleet.trainY[k]) != j)
                     continue;
-                n2 += (gc->trainFlags[k] & 0x40) == 64 ? 400 : 55;
+                n2 += (gc->fleet.trainFlags[k] & 0x40) == 64 ? 400 : 55;
             }
         }
     }
@@ -427,12 +427,12 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
         }
     }
     for (int n3 = 0; n3 < 500; ++n3) {
-        if ((gc->trainFlags[n3] & 0x80) != 128) continue;
-        int n2 = gc_byteToUnsignedInt(gc, gc->trainX[n3]);
-        int n = gc_byteToUnsignedInt(gc, gc->trainY[n3]);
+        if ((gc->fleet.trainFlags[n3] & 0x80) != 128) continue;
+        int n2 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[n3]);
+        int n = gc_byteToUnsignedInt(gc, gc->fleet.trainY[n3]);
         if (gc->world.trackMap[n2][n] != 65) continue;
-        if ((gc->trainFlags[n3] & 0x40) == 64) {
-            switch (gc->trainEraOrStage[n3]) {
+        if ((gc->fleet.trainFlags[n3] & 0x40) == 64) {
+            switch (gc->fleet.trainEraOrStage[n3]) {
                 case 0: n4 += gc->gWagonCost; break;
                 case 1: n4 += gc->gWagonCost2; break;
                 case 2: n4 += gc->gWagonCost3; break;
@@ -451,8 +451,8 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
 // void newYearNotify()
 void gc_newYearNotify(GameCanvas *gc) {
     for (int n = 0; n < 500; ++n) {
-        gc->prevTrainRevenue[n] = gc->trainRevenue[n];
-        gc->trainRevenue[n] = 0;
+        gc->fleet.prevTrainRevenue[n] = gc->fleet.trainRevenue[n];
+        gc->fleet.trainRevenue[n] = 0;
     }
     for (int n = 0; n < 48; ++n) {
         gc->prevStationRevenue[n] = gc->stationRevenue[n];

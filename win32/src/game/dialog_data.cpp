@@ -135,28 +135,28 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 26: {
             if (field == 0)
-                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[60 + gc->trainEraOrStage[gc->trainAtCursor]]]);
-            if (field == 6) return gc_formatCurrency(gc, gc->trainRevenue[gc->trainAtCursor]);
-            if (field == 7) return gc_formatCurrency(gc, gc->prevTrainRevenue[gc->trainAtCursor]);
-            if (field == 8) return gc_formatNumberWithSuffix(gc, gc->trainAgeOrTimer[gc->trainAtCursor], 0);
+                return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[60 + gc->fleet.trainEraOrStage[gc->trainAtCursor]]]);
+            if (field == 6) return gc_formatCurrency(gc, gc->fleet.trainRevenue[gc->trainAtCursor]);
+            if (field == 7) return gc_formatCurrency(gc, gc->fleet.prevTrainRevenue[gc->trainAtCursor]);
+            if (field == 8) return gc_formatNumberWithSuffix(gc, gc->fleet.trainAgeOrTimer[gc->trainAtCursor], 0);
             if (field == 9) return gc_formatCurrency(gc, gc->currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return gc_formatCurrency(gc, gc->baseTrainCostSnapshot - gc->currentTrainCostSnapshot);
             if (field == 20)
                 return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[
-                    gc->trainAiOverride[gc->trainAtCursor] == 0 ? 21 : 20]]);
+                    gc->fleet.trainAiOverride[gc->trainAtCursor] == 0 ? 21 : 20]]);
             if (field <= 0 || field >= 6) break;
             int car = 0;
             if (gc_countCarsInTrain(gc, gc->trainAtCursor) > field) {
                 car = gc->trainAtCursor;
-                for (int i = 0; i < field; ++i) car = gc->nextCar[car];
+                for (int i = 0; i < field; ++i) car = gc->fleet.nextCar[car];
             }
-            int type = gc->trainFlags[car] & 0x0f;
+            int type = gc->fleet.trainFlags[car] & 0x0f;
             char text[32];
             if (type == 2)
-                snprintf(text, sizeof(text), "%d/%d", gc->trainEnergyOrCount[car],
-                         gc->wagonEnergyRemaining[car]);
+                snprintf(text, sizeof(text), "%d/%d", gc->fleet.trainEnergyOrCount[car],
+                         gc->fleet.wagonEnergyRemaining[car]);
             else
-                snprintf(text, sizeof(text), "%d", gc->trainEnergyOrCount[car]);
+                snprintf(text, sizeof(text), "%d", gc->fleet.trainEnergyOrCount[car]);
             return gc_encodeDisplayText(gc, text);
         }
 

@@ -84,8 +84,8 @@ Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
     }
     if (n == 26 && gc_countCarsInTrain(gc, gc->trainAtCursor) > n2) {
         int n4 = gc->trainAtCursor;
-        for (int i = 0; i < n2; ++i) n4 = gc->nextCar[n4];
-        int n3 = gc->trainFlags[n4] & 0xF;
+        for (int i = 0; i < n2; ++i) n4 = gc->fleet.nextCar[n4];
+        int n3 = gc->fleet.trainFlags[n4] & 0xF;
         switch (n3) {
             case -1: return NULL;
             case 0: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])].get();

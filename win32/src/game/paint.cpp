@@ -413,21 +413,21 @@ void gc_update(GameCanvas *gc) {
             }
 
             for (int n27 = 0; n27 < 500; ++n27) {
-                if ((gc->trainFlags[n27] & 0x80) != 128
-                    || (gc->trainFlags[n27] & 0x40) != 64)
+                if ((gc->fleet.trainFlags[n27] & 0x80) != 128
+                    || (gc->fleet.trainFlags[n27] & 0x40) != 64)
                     continue;
-                if ((gc->trainFlags[n27] & 0x20) == 32) {
-                    if (gc->trainEnergyOrCount[n27] > 0) {
-                        --gc->trainEnergyOrCount[n27];
+                if ((gc->fleet.trainFlags[n27] & 0x20) == 32) {
+                    if (gc->fleet.trainEnergyOrCount[n27] > 0) {
+                        --gc->fleet.trainEnergyOrCount[n27];
                         continue;
                     }
-                    gc->trainPhase[n27] = 0;
-                    gc->trainFlags[n27] = 0;
+                    gc->fleet.trainPhase[n27] = 0;
+                    gc->fleet.trainFlags[n27] = 0;
                     continue;
                 }
                 gc_updateTrain(gc, n27);
                 gc_updateTrain(gc, n27);
-                if (gc->trainPhase[n27] == 0) gc_mergeTrainAt(gc, n27);
+                if (gc->fleet.trainPhase[n27] == 0) gc_mergeTrainAt(gc, n27);
             }
 
             if (gc->counterA >= gc->dH) {

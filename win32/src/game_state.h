@@ -4,6 +4,7 @@
 #include "game_constants.h"
 #include "world.h"
 #include "pathfinder.h"
+#include "fleet.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -217,20 +218,7 @@ typedef struct GameCanvas {
     std::array<std::array<int16_t, 5>, 250> serviceResourceStock{};
     std::array<int8_t, 250> serviceUnloadFlags{};
     std::array<int8_t, 250> serviceLoadFlags{};
-    std::array<int8_t, 500> trainX{};
-    std::array<int8_t, 500> trainY{};
-    std::array<int8_t, 500> trainDir{};
-    std::array<int8_t, 500> trainPhase{};
-    std::array<int8_t, 500> trainFlags{};
-    std::array<int8_t, 500> trainEraOrStage{};
-    std::array<int8_t, 500> trainAgeOrTimer{};
-    std::array<int8_t, 500> wagonEnergyRemaining{};
-    std::array<int8_t, 500> trainEnergyOrCount{};
-    std::array<int8_t, 500> lastServiceVehicle{};
-    std::array<int8_t, 500> cargoAge{};
-    std::array<int16_t, 500> nextCar{};
-    std::array<int32_t, 500> trainStateCode{};
-    std::array<int8_t, 500> trainAiOverride{};
+    Fleet fleet;
     int32_t trainAtCursor;
     int32_t era;
     std::array<std::array<int8_t, 12>, 6> forwardTrackSteps{};
@@ -245,8 +233,6 @@ typedef struct GameCanvas {
     bool snapshotLoaded;
     int32_t bytesUncompressed;
     int32_t bytesCompressed;
-    std::array<int32_t, 500> trainRevenue{};
-    std::array<int32_t, 500> prevTrainRevenue{};
     std::array<int16_t, 48> stationRevenue{};
     std::array<int16_t, 48> prevStationRevenue{};
     bool compareToPrevious;

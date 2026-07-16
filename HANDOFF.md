@@ -36,7 +36,7 @@ Progress in stage 3 (game model):
 | WORLD-01 | done | `World` owns map grids/dimensions |
 | WORLD-02 | done | Generation stages + tile-range taxonomy |
 | PATH-01 | done | Endpoints named `pathAnchor/Target`; cost/owner deferred to BUILD-01 |
-| FLEET-01 | **next** | Train/service/city records (not yet started) |
+| FLEET-01 | **in progress** | Train records in `Fleet` (leaf 1); service/city records + name recovery pending |
 | FLEET-02…RELEASE-01 | queued | Not started |
 
 Authoritative status is `win32/docs/refactor/STATUS.md`. The active leaf and next
@@ -117,6 +117,16 @@ golden moved). Range `bf87d96..HEAD`:
   are deferred to BUILD-01 (build/preview state, not search scratch). **PATH-01
   closed**; Debug and Release full gates green, no golden moved.
 
+**FLEET-01 leaf 1 — train records (`win32/src/fleet.h`):**
+- (this session) — `struct Fleet` owning the sixteen per-train-slot record
+  arrays (position/dir/phase/flags, state, the `nextCar` car linked-list
+  pointer, revenue history). `GameCanvas` holds one `Fleet fleet;` member; ~280
+  `gc->field` sites became `gc->fleet.field` across 14 files, and the
+  `IO_BYTES/SHORTS/INTS` save sites became `fleet.<field>` (same byte order).
+  Pure ownership move; names inherited as-is. Service-site (250-slot) and
+  city/station (48-slot) records, plus train-field name recovery, are later
+  FLEET-01 leaves. Debug and Release full gates green, no golden moved.
+
 ## Current architecture and key design decisions
 
 - `win32/src/main.cpp` — Win32 start and the frame loop.
@@ -154,10 +164,12 @@ Decisions worth knowing (full list in `DECISIONS.md`):
 
 ## What is incomplete or deferred
 
-- **FLEET-01 is the active item** (not yet started). Extract train, service-site,
-  and city-record state into a `Fleet` owned type with stable slot IDs, reusing
-  the proven extraction pattern. This also unblocks the entangled map queries
-  deferred from WORLD-01.
+- **FLEET-01 is in progress** (leaf 1 done). `struct Fleet` (`fleet.h`) owns the
+  sixteen per-train-slot record arrays (position/dir/phase/flags, state, the
+  `nextCar` linked-list pointer, revenue history); `GameCanvas` has one `Fleet
+  fleet;` member. Service-site records (250-slot) and city/station records
+  (48-slot), plus train-field name recovery, remain as later leaves. This will
+  also unblock the entangled map queries deferred from WORLD-01.
 - Deferred, recorded work: path cost/owner fields (`selectionCost`,
   `previewTrackOwnerCode`, `existingTrackOwnerCode`) → BUILD-01; per-screen menu
   transition ids (→ UI-01); the isometric slope/cliff tile ids 3..28 (need sprite
@@ -198,19 +210,21 @@ the executable). Short real-MIDI device check:
 $env:TRAIN_TYCOON_MIDI_TEST_MS='3000'; .\build\Debug\train_tycoon.exe; Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 ```
 
-### Verification at this handoff (2026-07-16, after PATH-01 close)
+### Verification at this handoff (2026-07-16, after FLEET-01 leaf 1)
 
 - Debug build clean under strict first-party `/W4 /permissive- /WX`.
-- Debug tests: 2/2 passed (fast 0.02 s, full 0.37 s).
+- Debug tests: 2/2 passed (fast 0.02 s, full 0.38 s).
 - Release build clean.
 - Release tests: 2/2 passed (fast 0.01 s, full 0.05 s).
 - No test failed; no golden value changed.
 
 ## Current objective and next tasks (priority order)
 
-1. **FLEET-01** — trains, service, and city records with stable slot ids. Reuse
-   the proven extraction pattern (owned type → member → mechanical rename →
-   gates). This also unblocks the deferred entangled map queries in `World`.
+1. **FLEET-01 (in progress, leaf 1 done)** — train records now in `Fleet`. Next
+   leaves: service-site records (250-slot), city/station records (48-slot), then
+   train-field name recovery. Reuse the proven extraction pattern (owned type →
+   member → mechanical rename → gates). This also unblocks the deferred
+   entangled map queries in `World`.
 2. **FLEET-02, ECON-01, SCENARIO-01, SIM-01, BUILD-01** — remaining stage-3
    model classes, in that order. (BUILD-01 also picks up the deferred path
    cost/owner fields.)

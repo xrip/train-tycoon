@@ -267,6 +267,35 @@ path-search scratch. Moving them onto `Pathfinder` now would couple the search
 to unextracted build state against the "one caller group at a time" rule; they
 land with the `BuildController`. PATH-01 closes here.
 
+## D-015: Fleet owns the train records (FLEET-01 leaf 1)
+
+`fleet.h` defines `struct Fleet` owning the sixteen per-train-slot record arrays
+that were loose on `GameCanvas`: position/dir/phase/flags (`trainX`, `trainY`,
+`trainDir`, `trainPhase`, `trainFlags`), state (`trainEraOrStage`,
+`trainAgeOrTimer`, `wagonEnergyRemaining`, `trainEnergyOrCount`, `cargoAge`,
+`trainStateCode`, `trainAiOverride`), the car linked-list pointer `nextCar`
+(`-1` terminator; a train is a chain of car slots), the last service site each
+train visited (`lastServiceVehicle`), and revenue history (`trainRevenue`,
+`prevTrainRevenue`). `GameCanvas` now has one `Fleet fleet;` member and the
+fields were renamed onto it (`gc->trainX` -> `gc->fleet.trainX`, etc., ~280
+sites across 14 files). The `IO_BYTES`/`IO_SHORTS`/`IO_INTS` save sites became
+`fleet.<field>`, so the save walks `gc->fleet.<field>` in the same byte order.
+Stable slot ids, save bytes, tick order, and draw order are unchanged; goldens
+did not move.
+
+A pure ownership move: the field names are inherited as-is. Some carry recorded
+uncertainty (`trainEraOrStage`, `trainAgeOrTimer`, `trainEnergyOrCount`) and are
+recovered in a later FLEET-01 sub-leaf once the tick code is re-read. The
+service-site records (250-slot: `vehicleFlags`, `serviceVehicleX/Y`,
+`serviceResourceStock`, `serviceUnload/LoadFlags`) and the city/station records
+(48-slot: `stationDirectionCode`, `cityPopulation`, `cityIndex`,
+`stationRevenue`, `prevStationRevenue`) are later FLEET-01 leaves; their final
+owner (`Fleet` vs. a city/station type vs. `World`/`Economy`) is decided when
+those leaves land, since city revenue overlaps `Economy`. Related per-train
+scalars not tied to a slot (`trainAtCursor`, `trainRevenueScore`,
+`lifetimeTrainRevenue`, `visibleTrains`, `trainSelection*`,
+`trainSpriteDirectionTable`) stay on `GameCanvas` for now as UI/economy/state.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

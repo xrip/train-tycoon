@@ -59,10 +59,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc->aiMoneySpent -= gc->currentTrainCostSnapshot * 70 / 100;
                     if (gc->currentTrainCostSnapshot != 0)
                         gc_pushMoneyHistory(gc, gc->currentTrainCostSnapshot * 70 / 100);
-                    int16_t s = gc->nextCar[gc->trainAtCursor];
+                    int16_t s = gc->fleet.nextCar[gc->trainAtCursor];
                     gc_decrementTrainCargoOptionCounts(gc, s);
-                    gc->trainFlags[gc->trainAtCursor] = 0;
-                    while (s != -1) { gc->trainFlags[s] = 0; s = gc->nextCar[s]; }
+                    gc->fleet.trainFlags[gc->trainAtCursor] = 0;
+                    while (s != -1) { gc->fleet.trainFlags[s] = 0; s = gc->fleet.nextCar[s]; }
                     gc_setState(gc, +GameState::Playing);
                     break;
                 }
@@ -160,11 +160,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             } else if (n2 == 2) {
                 int n4 = gc->baseTrainCostSnapshot - gc->currentTrainCostSnapshot;
                 if (n4 <= gc->money) {
-                    gc->trainAgeOrTimer[gc->trainAtCursor] = 0;
+                    gc->fleet.trainAgeOrTimer[gc->trainAtCursor] = 0;
                     gc->money -= n4;
                     gc_pushMoneyHistory(gc, -n4);
                     gc->aiMoneySpent += n4;
-                    gc->difficultyPct = 100 - 3 * gc->trainAgeOrTimer[gc->trainAtCursor];
+                    gc->difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
                     gc_computeTrainCost(gc);
                     gc->currentTrainCostSnapshot = gc->unitCost;
                     gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing);
@@ -176,7 +176,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 gc->pendingTransitionCode = 14; gc_setState(gc, +GameState::Playing);
             }
             if (n2 == 4) {
-                gc->trainAiOverride[gc->trainAtCursor] = (int8_t)(gc->trainAiOverride[gc->trainAtCursor] == 0 ? 1 : 0);
+                gc->fleet.trainAiOverride[gc->trainAtCursor] = (int8_t)(gc->fleet.trainAiOverride[gc->trainAtCursor] == 0 ? 1 : 0);
                 break;
             }
             gc_setState(gc, +GameState::Playing); break;

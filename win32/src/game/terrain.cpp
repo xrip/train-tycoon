@@ -51,9 +51,9 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
             && gc->world.trackMap[n][n2] == 65)) {
         int32_t n3 = gc_findServiceVehicleAt(gc, n, n2);
         for (int i = 0; i < 500; ++i) {
-            if ((gc->trainFlags[i] & 0x80) != 128) continue;
-            int32_t n4 = gc_byteToUnsignedInt(gc, gc->trainX[i]);
-            int32_t n5 = gc_byteToUnsignedInt(gc, gc->trainY[i]);
+            if ((gc->fleet.trainFlags[i] & 0x80) != 128) continue;
+            int32_t n4 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]);
+            int32_t n5 = gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]);
             if (n == n4 && n2 == n5) return false;
             if (n3 == 5000 || n3 != gc_findServiceVehicleAt(gc, n4, n5)) continue;
             return false;
@@ -63,18 +63,18 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
     if (gc->world.tileMap[n][n2] >= 81 && gc->world.tileMap[n][n2] <= 86 && gc->world.trackMap[n][n2] == 65) {
         for (int i = 0; i < 500; ++i) {
             int32_t n6;
-            if ((gc->trainFlags[i] & 0x80) != 128) continue;
+            if ((gc->fleet.trainFlags[i] & 0x80) != 128) continue;
             if (gc->world.tileMap[n][n2] == 81 || gc->world.tileMap[n][n2] == 84 || gc->world.tileMap[n][n2] == 85) {
                 for (n6 = n; n6 < gc->world.mapWidth
                      && (gc->world.tileMap[n6][n2] == 81 || gc->world.tileMap[n6][n2] == 84
                          || gc->world.tileMap[n6][n2] == 85); ++n6) {
-                    if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n2) continue;
+                    if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n2) continue;
                     return false;
                 }
                 for (n6 = n - 1; n6 >= 0
                      && (gc->world.tileMap[n6][n2] == 81 || gc->world.tileMap[n6][n2] == 84
                          || gc->world.tileMap[n6][n2] == 85); --n6) {
-                    if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n2) continue;
+                    if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n2) continue;
                     return false;
                 }
                 continue;
@@ -82,13 +82,13 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
             for (n6 = n2; n6 < gc->world.mapHeight
                  && (gc->world.tileMap[n][n6] == 82 || gc->world.tileMap[n][n6] == 83
                      || gc->world.tileMap[n][n6] == 86); ++n6) {
-                if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n6) continue;
+                if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n6) continue;
                 return false;
             }
             for (n6 = n2 - 1; n6 >= 0
                  && (gc->world.tileMap[n][n6] == 82 || gc->world.tileMap[n][n6] == 83
                      || gc->world.tileMap[n][n6] == 86); --n6) {
-                if (gc_byteToUnsignedInt(gc, gc->trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->trainY[i]) != n6) continue;
+                if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n6) continue;
                 return false;
             }
         }
