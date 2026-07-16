@@ -170,7 +170,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     }
     if (gc->renderer.spriteJustChanged != 0) gc->renderer.needsRepaint = false;
     if (gc->renderer.mapRedrawPending) {
-        gc->menuDirty = true;
+        gc->ui.menuDirty = true;
         gc_renderMap(gc, g);
         gc->renderer.mapRedrawPending = false;
     }

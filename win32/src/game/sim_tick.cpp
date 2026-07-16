@@ -126,7 +126,7 @@ void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
 
 // void maybeAiTakeTurn()
 void gc_maybeAiTakeTurn(GameCanvas *gc) {
-    if (gc->buildMenuMode != 2 && gc->buildMenuMode != 4
+    if (gc->ui.buildMenuMode != 2 && gc->ui.buildMenuMode != 4
         && gc->rng.next_int() % gc->scenario.aiFrequency > gc->scenario.aiThreshold)
         gc_setState(gc, +GameState::AiTurn);
 }

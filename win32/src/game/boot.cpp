@@ -238,7 +238,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gc_k(gc, n, n2);
         gc->eD = n;
         gc->aJ = n2;
-        gc->menuDirty = true;
+        gc->ui.menuDirty = true;
         gc->renderer.lastViewportCenterX = -1;
         if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {
             if (gc->hx == +GameState::Playing) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::Playing; }
@@ -252,7 +252,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
     gc->hx = gc->gameState;
     if (!gc->ready) gc->assets.cycle_flag = NULL;
     gc->snapshotLoadedFlag = false;
-    gc->menuDirty = true;
+    gc->ui.menuDirty = true;
     switch (n) {
         case +GameState::BootSplash0:
             gc_openSpriteStream(gc, "sprite_images.bin");
@@ -314,7 +314,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
             gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
             gc->renderer.lastViewportCenterX = -1;
-            gc->menuDirty = true;
+            gc->ui.menuDirty = true;
             break;
         case +GameState::BuildingMinimap: gc->loadStep = 4; gc->confirmToggle = 0; break;
         case +GameState::BuildingPath: gc->loadStep = 4; break;
@@ -364,7 +364,7 @@ void gc_run(GameCanvas *gc) {
     if (gc->gameState == +GameState::Playing) {
         for (int n = 0; n < gc->simSpeed; ++n) {
             if (!gc->pauseFlag) gc_update(gc);
-            if (!gc->menuRowEnabled[gc->buildMenuMode][gc->buildMenuItemIndex]) continue;
+            if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) continue;
             gc_viewportZoomKey(gc);
         }
     } else {

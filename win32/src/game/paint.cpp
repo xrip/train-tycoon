@@ -322,8 +322,8 @@ void gc_update(GameCanvas *gc) {
                 }
             }
             if (gc->loadStep == 3) {
-                gc->buildMenuItemIndex = 0;
-                gc->buildMenuMode = 0;
+                gc->ui.buildMenuItemIndex = 0;
+                gc->ui.buildMenuMode = 0;
                 gc_loadState25Setup(gc, 0);
             }
             if (gc->loadStep <= 3) break;
@@ -412,16 +412,16 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep != 2) break;
             if (gc_tryBuildPath(gc)) {
                 gc_setState(gc, +GameState::Playing);
-                gc->buildMenuItemIndex = 0;
+                gc->ui.buildMenuItemIndex = 0;
                 gc->build.buildCancelled = true;
-                gc->buildMenuMode = 2;
-                gc->menuDirty = true;
+                gc->ui.buildMenuMode = 2;
+                gc->ui.menuDirty = true;
                 break;
             }
-            gc->buildMenuItemIndex = 0;
+            gc->ui.buildMenuItemIndex = 0;
             gc->build.buildCancelled = true;
-            gc->buildMenuMode = 1;
-            gc->menuDirty = true;
+            gc->ui.buildMenuMode = 1;
+            gc->ui.menuDirty = true;
             gc->ready = false;
             gc->transitionCode = 12;
             gc_setState(gc, +GameState::MenuOverlay);
@@ -430,8 +430,8 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             gc_saveAllMapArrays(gc);
-            gc->buildMenuItemIndex = 0;
-            gc->menuDirty = true;
+            gc->ui.buildMenuItemIndex = 0;
+            gc->ui.menuDirty = true;
             gc_setState(gc, +GameState::Playing);
             break;
         case +GameState::LoadingGame:
@@ -439,8 +439,8 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep != 2) break;
             gc_restoreAllMapArrays(gc);
             gc->pauseFlag = false;
-            gc->buildMenuItemIndex = 0;
-            gc->menuDirty = true;
+            gc->ui.buildMenuItemIndex = 0;
+            gc->ui.menuDirty = true;
             gc_setState(gc, +GameState::Playing);
             break;
         case +GameState::AiTurn:

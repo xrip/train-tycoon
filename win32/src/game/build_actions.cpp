@@ -125,7 +125,7 @@ void gc_applyBackgroundCost(GameCanvas *gc) {
 void gc_demolishAtCursor(GameCanvas *gc) {
     int cursor_x = gc->tileCursorX;
     int cursor_y = gc->tileCursorY;
-    if (gc->blockBuildMenu || !gc_isCityOrStationTile(gc, cursor_x, cursor_y))
+    if (gc->ui.blockBuildMenu || !gc_isCityOrStationTile(gc, cursor_x, cursor_y))
         return;
 
     gc->build.backgroundCost = 0;
@@ -197,7 +197,7 @@ void gc_demolishAtCursor(GameCanvas *gc) {
 }
 
 void gc_pickTrainsAtCursor(GameCanvas *gc) {
-    if (gc->blockBuildMenu) return;
+    if (gc->ui.blockBuildMenu) return;
     int track = gc->world.trackMap[gc->tileCursorX][gc->tileCursorY];
     if ((track & 0xC0) == 128) {
         gc->junctionDirCursor = (int8_t)(track & 0x3F);
@@ -339,9 +339,9 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     if (!found_target) return;
 
     gc->build.selectionCost = cost;
-    gc->buildMenuMode = 2;
-    gc->menuDirty = true;
-    gc->buildMenuItemIndex = 0;
+    gc->ui.buildMenuMode = 2;
+    gc->ui.menuDirty = true;
+    gc->ui.buildMenuItemIndex = 0;
     gc->build.buildCancelled = false;
     gc->world.tileMap[end_x][end_y] = (int8_t)end_tile;
     gc->world.trackMap[end_x][end_y] = 65;
@@ -381,7 +381,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
     int x = gc->tileCursorX;
     int y = gc->tileCursorY;
     int tile = gc->world.tileMap[x][y];
-    if (gc->blockBuildMenu || gc->world.tileElevation[x][y] < 0
+    if (gc->ui.blockBuildMenu || gc->world.tileElevation[x][y] < 0
         || (gc->world.trackMap[x][y] != 0 && !(join_track && tile == join_tile))
         || !(tile == join_tile || tile == match_tile_a || tile == match_tile_b
              || tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST)))
@@ -465,30 +465,30 @@ void gc_setTrackOwnerCode(GameCanvas *gc, int32_t owner) {
 }
 
 void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
-    gc->menuRowEnabledCount = 0;
+    gc->ui.menuRowEnabledCount = 0;
     for (int row = 0; row < 5; ++row) {
         if (gc->ui.menuRowType[row] == 0) continue;
-        gc->enabledMenuRowIndexes[gc->menuRowEnabledCount++] = (int8_t)row;
+        gc->ui.enabledMenuRowIndexes[gc->ui.menuRowEnabledCount++] = (int8_t)row;
     }
 }
 
 void gc_openBuildMenu(GameCanvas *gc) {
-    int item = gc->buildMenuItems[gc->buildMenuMode][gc->buildMenuItemIndex];
+    int item = gc->ui.buildMenuItems[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
     bool allowed_while_paused =
-        (gc->buildMenuMode == 0 && (item == 11 || item == 1 || item == 9))
-        || (gc->buildMenuMode == 1 && (item == 1 || item == 3 || item == 9))
-        || (gc->buildMenuMode == 3 && item == 9)
-        || (gc->buildMenuMode == 5 && item == 9);
+        (gc->ui.buildMenuMode == 0 && (item == 11 || item == 1 || item == 9))
+        || (gc->ui.buildMenuMode == 1 && (item == 1 || item == 3 || item == 9))
+        || (gc->ui.buildMenuMode == 3 && item == 9)
+        || (gc->ui.buildMenuMode == 5 && item == 9);
     if (gc->pauseFlag && !allowed_while_paused) return;
 
-    switch (gc->buildMenuMode) {
+    switch (gc->ui.buildMenuMode) {
         case 0:
             switch (item) {
                 case 0: gc_pickTrainsAtCursor(gc); break;
                 case 1:
-                    gc->buildMenuMode = 1;
-                    gc->menuDirty = true;
-                    gc->buildMenuItemIndex = 0;
+                    gc->ui.buildMenuMode = 1;
+                    gc->ui.menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 0;
                     break;
                 case 2:
                     gc->ready = false; gc->transitionCode = 30;
@@ -515,24 +515,24 @@ void gc_openBuildMenu(GameCanvas *gc) {
         case 1:
             switch (item) {
                 case 0:
-                    if (gc->blockBuildMenu
+                    if (gc->ui.blockBuildMenu
                         || !gc_isPlaceableTerrain(gc, gc->tileCursorX,
                                                   gc->tileCursorY))
                         break;
                     gc->pathAnchorX = gc->tileCursorX;
                     gc->pathAnchorY = gc->tileCursorY;
                     gc->world.tileMap[gc->pathAnchorX][gc->pathAnchorY] = 127;
-                    gc->buildMenuMode = 4;
-                    gc->menuDirty = true;
-                    gc->buildMenuItemIndex = 0;
+                    gc->ui.buildMenuMode = 4;
+                    gc->ui.menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 0;
                     break;
                 case 1:
-                    gc->buildMenuMode = 5;
-                    gc->menuDirty = true;
-                    gc->buildMenuItemIndex = 0;
+                    gc->ui.buildMenuMode = 5;
+                    gc->ui.menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 0;
                     break;
                 case 2:
-                    if (gc->blockBuildMenu) break;
+                    if (gc->ui.blockBuildMenu) break;
                     if (gc->world.tileMap[gc->tileCursorX][gc->tileCursorY] == 7)
                         gc_computeTrackBuildInlined(
                             gc, gc->tileCursorX, gc->tileCursorY,
@@ -551,25 +551,25 @@ void gc_openBuildMenu(GameCanvas *gc) {
                             1, 0, 8, 85, 84, 81);
                     break;
                 case 3:
-                    gc->buildMenuMode = 3;
-                    gc->menuDirty = true;
-                    gc->buildMenuItemIndex = 0;
+                    gc->ui.buildMenuMode = 3;
+                    gc->ui.menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 0;
                     break;
                 case 4: gc_demolishAtCursor(gc); break;
                 case 5:
-                    if (!gc->blockBuildMenu)
+                    if (!gc->ui.blockBuildMenu)
                         gc_smoothTileAtInlined(gc, gc->build.swapMapX, gc->build.swapMapY,
                                                false);
                     break;
                 case 6:
-                    if (!gc->blockBuildMenu)
+                    if (!gc->ui.blockBuildMenu)
                         gc_smoothTileAtInlined(gc, gc->build.swapMapX, gc->build.swapMapY,
                                                true);
                     break;
                 case 9:
-                    gc->buildMenuMode = 0;
-                    gc->menuDirty = true;
-                    gc->buildMenuItemIndex = 1;
+                    gc->ui.buildMenuMode = 0;
+                    gc->ui.menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 1;
                     break;
             }
             break;
@@ -589,9 +589,9 @@ void gc_openBuildMenu(GameCanvas *gc) {
                 if (gc->build.buildCancelled) gc_normalizeTrackBits(gc);
                 else gc_revertTrackTiles(gc);
             }
-            gc->buildMenuMode = 1;
-            gc->buildMenuItemIndex = gc->build.buildCancelled ? 0 : 2;
-            gc->menuDirty = true;
+            gc->ui.buildMenuMode = 1;
+            gc->ui.buildMenuItemIndex = gc->build.buildCancelled ? 0 : 2;
+            gc->ui.menuDirty = true;
             gc->renderer.lastViewportCenterX = -1;
             break;
         case 3:
@@ -599,13 +599,13 @@ void gc_openBuildMenu(GameCanvas *gc) {
                 gc_buildPlaceTrackPiece(gc, item);
                 return;
             }
-            gc->buildMenuMode = 1;
-            gc->menuDirty = true;
-            gc->buildMenuItemIndex = 3;
+            gc->ui.buildMenuMode = 1;
+            gc->ui.menuDirty = true;
+            gc->ui.buildMenuItemIndex = 3;
             break;
         case 4:
             if (item == 0) {
-                if (gc->blockBuildMenu
+                if (gc->ui.blockBuildMenu
                     || !gc_isPlaceableTerrain(gc, gc->tileCursorX,
                                               gc->tileCursorY))
                     break;
@@ -615,9 +615,9 @@ void gc_openBuildMenu(GameCanvas *gc) {
                 gc_setState(gc, +GameState::BuildingPath);
             } else if (item == 9) {
                 gc->world.tileMap[gc->pathAnchorX][gc->pathAnchorY] = 0;
-                gc->buildMenuMode = 1;
-                gc->menuDirty = true;
-                gc->buildMenuItemIndex = 0;
+                gc->ui.buildMenuMode = 1;
+                gc->ui.menuDirty = true;
+                gc->ui.buildMenuItemIndex = 0;
             }
             break;
         case 5:
@@ -641,9 +641,9 @@ void gc_openBuildMenu(GameCanvas *gc) {
                         gc, true, 71, 0, 22, 24, 78, 80, true, 70);
                     return;
                 case 9:
-                    gc->buildMenuMode = 1;
-                    gc->menuDirty = true;
-                    gc->buildMenuItemIndex = 1;
+                    gc->ui.buildMenuMode = 1;
+                    gc->ui.menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 1;
                     break;
             }
             break;

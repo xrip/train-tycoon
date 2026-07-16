@@ -225,7 +225,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc_incrementRowValueType14(gc, 20000);
                     break;
                 default:
-                    gc_setState(gc, +GameState::Playing); gc->menuDirty = true;
+                    gc_setState(gc, +GameState::Playing); gc->ui.menuDirty = true;
             }
             gc->renderer.mapRedrawPending = true;
             break;
@@ -249,12 +249,12 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 14: gc->compareToPrevious = false; gc_archiveOrRecall(gc); gc->pendingTransitionCode = 35; gc_setState(gc, +GameState::Playing); goto hbms_end;
                 case 15: gc->compareToPrevious = true; gc->pendingTransitionCode = 35; gc_setState(gc, +GameState::Playing); goto hbms_end;
             }
-            gc_setState(gc, +GameState::Playing); gc->menuDirty = true;
+            gc_setState(gc, +GameState::Playing); gc->ui.menuDirty = true;
             break;
         case 32:
         case 35:
             if (!gc->monthRolloverFlag) { gc->pendingTransitionCode = 31; gc_setState(gc, +GameState::Playing); break; }
-            gc_setState(gc, +GameState::Playing); gc->menuDirty = true; break;
+            gc_setState(gc, +GameState::Playing); gc->ui.menuDirty = true; break;
         case 33:
         case 34:
             gc->pendingTransitionCode = 31; gc_setState(gc, +GameState::Playing); break;
@@ -277,11 +277,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, +GameState::Playing); break;
         case 60:
             if (n2 % 2 == 1) {
-                gc->scenario.offerRowIndex = gc->enabledMenuRowIndexes[n2 / 2];
+                gc->scenario.offerRowIndex = gc->ui.enabledMenuRowIndexes[n2 / 2];
                 gc->pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
             }
             if (n2 % 2 == 0) {
-                gc->scenario.offerRowIndex = gc->enabledMenuRowIndexes[(n2 - 1) / 2];
+                gc->scenario.offerRowIndex = gc->ui.enabledMenuRowIndexes[(n2 - 1) / 2];
                 gc->pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
             }
             gc->scenario.duplicateRowState = 1;

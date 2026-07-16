@@ -39,7 +39,7 @@ static void format_money(int32_t value, char *out, int out_size) {
 int32_t gc_drawMenuRow(GameCanvas *gc, Surface *graphics, int32_t sprite,
                        int32_t item_index, int32_t x, bool spaced) {
     gc_drawSpriteQuad(gc, graphics, sprite, x, gcs_bottomBarY, 20);
-    if (gc->buildMenuItemIndex == item_index) gc->selectedMenuRowX = x;
+    if (gc->ui.buildMenuItemIndex == item_index) gc->ui.selectedMenuRowX = x;
     return x + 15 + (spaced ? 3 : 0);
 }
 
@@ -48,7 +48,7 @@ void gc_drawHeaderBar(GameCanvas *gc, Surface *graphics) {
     if (gc->cachedHeaderDay == gc->economy.dayOfMonth
         && gc->cachedHeaderMonth == gc->economy.monthOfYear
         && gc->cachedHeaderYear == gc->economy.year
-        && gc->cachedHeaderMoney == gc->economy.money && !gc->menuDirty)
+        && gc->cachedHeaderMoney == gc->economy.money && !gc->ui.menuDirty)
         return;
 
     midp_set_color(graphics, 0x909090);
@@ -97,24 +97,24 @@ void gc_drawConfirmBar(GameCanvas *gc, Surface *graphics) {
 void gc_paintMain(GameCanvas *gc, Surface *graphics) {
     (void)graphics;
     gc_drawHeaderBar(gc, gc->renderer.backbuffer_surface);
-    if (!gc->menuDirty) return;
+    if (!gc->ui.menuDirty) return;
     midp_set_color(gc->renderer.backbuffer_surface, 0x606060);
     midp_fill_rect(gc->renderer.backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
-    int selected_x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode]
-                                               [gc->buildMenuItemIndex]);
+    int selected_x = gc_byteToUnsignedInt(gc, gc->ui.menuItemCode[gc->ui.buildMenuMode]
+                                               [gc->ui.buildMenuItemIndex]);
     int scroll = selected_x + 15 - gcs_screenWidth;
     if (scroll < 0) scroll = 0;
-    int item_count = static_cast<int>(gc->buildMenuItems[gc->buildMenuMode].size());
+    int item_count = static_cast<int>(gc->ui.buildMenuItems[gc->ui.buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
-        int x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode][item]) - scroll;
-        int sprite = gc_byteToUnsignedInt(gc, gc->menuTextIndex[gc->buildMenuMode][item]);
+        int x = gc_byteToUnsignedInt(gc, gc->ui.menuItemCode[gc->ui.buildMenuMode][item]) - scroll;
+        int sprite = gc_byteToUnsignedInt(gc, gc->ui.menuTextIndex[gc->ui.buildMenuMode][item]);
         gc_drawSpriteQuad(gc, gc->renderer.backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
-        if (item != gc->buildMenuItemIndex) continue;
+        if (item != gc->ui.buildMenuItemIndex) continue;
         midp_set_color(gc->renderer.backbuffer_surface, 0xFFFFFF);
         midp_draw_rect(gc->renderer.backbuffer_surface, x, gcs_bottomBarY, 14, 14);
         midp_draw_rect(gc->renderer.backbuffer_surface, x + 1, gcs_bottomBarY + 1, 12, 12);
     }
-    if (gc->buildMenuMode == 2) {
+    if (gc->ui.buildMenuMode == 2) {
         char cost_text[24];
         int64_t magnitude = gc->build.selectionCost < 0
                             ? -(int64_t)gc->build.selectionCost : gc->build.selectionCost;
@@ -130,7 +130,7 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
                   bytes.begin() + text_len + 1);
         gc_renderFontString(gc, gc->renderer.backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
     }
-    gc->menuDirty = false;
+    gc->ui.menuDirty = false;
 }
 
 // int drawNumber(Graphics,int,int)
@@ -219,8 +219,8 @@ void gc_drawSelectionQuad(GameCanvas *gc, Surface *graphics,
 
 // void drawBuildMenuCursor(Graphics)
 void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
-    if (gc->blockBuildMenu) return;
-    int action = gc->menuTransitionCode[gc->buildMenuMode][gc->buildMenuItemIndex];
+    if (gc->ui.blockBuildMenu) return;
+    int action = gc->ui.menuTransitionCode[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
     if (action == 0) return;
     if (action >= 1 && action <= 7) {
         bool buildable = gc_isTileBuildable(gc, gc->tileCursorX, gc->tileCursorY,
@@ -292,10 +292,10 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
 
 // void drawBuildMenuRow(Graphics)
 void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
-    if (!gc->menuRowEnabled[gc->buildMenuMode][gc->buildMenuItemIndex]) return;
+    if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) return;
     int menu_x = gc->viewportBaseX - gc->viewportCenterX;
     int menu_y = gc->viewportBaseY - gc->viewportCenterY;
-    if (gc->blockBuildMenu) {
+    if (gc->ui.blockBuildMenu) {
         gc_drawSpriteQuad(gc, graphics, 200, menu_x, menu_y + 15, 20);
         midp_set_color(graphics, 0xFF0000);
         midp_draw_arc(graphics, menu_x + 5, menu_y + 20, 7, 7, 0, 360);
@@ -303,18 +303,18 @@ void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
                        menu_x + 10, menu_y + 22);
         return;
     }
-    if (gc->buildMenuMode == 1
-        && (gc->buildMenuItemIndex == 5 || gc->buildMenuItemIndex == 6))
+    if (gc->ui.buildMenuMode == 1
+        && (gc->ui.buildMenuItemIndex == 5 || gc->ui.buildMenuItemIndex == 6))
         gc_drawSpriteQuad(gc, graphics, 249, gc->cursorScreenX - 2,
                           gc->cursorScreenY + 13, 20);
     gc_drawSpriteQuad(gc, graphics, 200, menu_x, menu_y + 15, 20);
-    if (gc->buildMenuMode != 0 || gc->buildMenuItemIndex != 0) {
-        int sprite = gc_byteToUnsignedInt(gc, gc->menuTextIndex[gc->buildMenuMode]
-                                               [gc->buildMenuItemIndex]);
+    if (gc->ui.buildMenuMode != 0 || gc->ui.buildMenuItemIndex != 0) {
+        int sprite = gc_byteToUnsignedInt(gc, gc->ui.menuTextIndex[gc->ui.buildMenuMode]
+                                               [gc->ui.buildMenuItemIndex]);
         gc_drawSpriteQuad(gc, graphics, sprite, menu_x + 5, menu_y + 19, 20);
     }
-    if (gc->buildMenuMode != 3 || gc->buildMenuItemIndex >= 4) return;
-    gc_drawSpriteQuad(gc, graphics, gc->buildMenuItemIndex + 230,
+    if (gc->ui.buildMenuMode != 3 || gc->ui.buildMenuItemIndex >= 4) return;
+    gc_drawSpriteQuad(gc, graphics, gc->ui.buildMenuItemIndex + 230,
                       menu_x + 5, menu_y + 19, 20);
 
     int min_x = gc->tileCursorX - 3;

@@ -80,16 +80,16 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
                 break;
             }
             if (gc->inputSubState == 1) {
-                if (n == 42 && gc->buildMenuMode != 4 && gc->buildMenuMode != 2) {
-                    gc->buildMenuMode = 0;
-                    gc->buildMenuItemIndex = 0;
-                    gc->menuDirty = true;
+                if (n == 42 && gc->ui.buildMenuMode != 4 && gc->ui.buildMenuMode != 2) {
+                    gc->ui.buildMenuMode = 0;
+                    gc->ui.buildMenuItemIndex = 0;
+                    gc->ui.menuDirty = true;
                 }
                 if (n != 35) break;
-                if (gc->buildMenuMode == 1) { gc->buildMenuMode = 0; gc->buildMenuItemIndex = 1; }
-                if (gc->buildMenuMode == 3) { gc->buildMenuMode = 1; gc->buildMenuItemIndex = 3; }
-                if (gc->buildMenuMode == 5) { gc->buildMenuMode = 1; gc->buildMenuItemIndex = 1; }
-                gc->menuDirty = true;
+                if (gc->ui.buildMenuMode == 1) { gc->ui.buildMenuMode = 0; gc->ui.buildMenuItemIndex = 1; }
+                if (gc->ui.buildMenuMode == 3) { gc->ui.buildMenuMode = 1; gc->ui.buildMenuItemIndex = 3; }
+                if (gc->ui.buildMenuMode == 5) { gc->ui.buildMenuMode = 1; gc->ui.buildMenuItemIndex = 1; }
+                gc->ui.menuDirty = true;
                 break;
             }
             if (n != 42 && n != 35) break;
@@ -101,8 +101,8 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
             if (n == 53) {
                 if (gc->confirmToggle == 0) {
                     gc_setState(gc, +GameState::Playing);
-                    gc->buildMenuItemIndex = 0;
-                    gc->menuDirty = true;
+                    gc->ui.buildMenuItemIndex = 0;
+                    gc->ui.menuDirty = true;
                 } else {
                     gc->ready = false;
                     gc->transitionCode = 36;
@@ -117,7 +117,7 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
                 gc->confirmToggle = 0;
                 gc->confirmTargetState = 17;
             }
-            gc->menuDirty = true;
+            gc->ui.menuDirty = true;
             gc->confirmCounter = 20;
             break;
     }

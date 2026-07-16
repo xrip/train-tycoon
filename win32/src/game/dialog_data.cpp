@@ -252,11 +252,11 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             if (field % 2 == 1) {
                 int index = field / 2;
                 return copy_codes(gc->assets.spriteBitmapTable[gc_byteToUnsignedInt(
-                    gc, gc->assets.spriteIndexTable[gc->ui.menuRowType[gc->enabledMenuRowIndexes[index]] + 160])]);
+                    gc, gc->assets.spriteIndexTable[gc->ui.menuRowType[gc->ui.enabledMenuRowIndexes[index]] + 160])]);
             } else {
                 int index = (field - 1) / 2;
                 return gc_formatNumberWithSuffix(gc,
-                    gc_computeMenuRowDisplayValue(gc, gc->enabledMenuRowIndexes[index]), 29);
+                    gc_computeMenuRowDisplayValue(gc, gc->ui.enabledMenuRowIndexes[index]), 29);
             }
 
         case 61: case 62: case 63: case 64: case 65: case 66:

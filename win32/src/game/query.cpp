@@ -119,5 +119,5 @@ bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
         if (n2 == 7 && gc->fleet.trainStateCode[gc->trainAtCursor] != 7) return true;
         if (n2 == 8 && gc->fleet.trainAgeOrTimer[gc->trainAtCursor] > 0) return true;
     }
-    return n == 60 && (n2 != 0 ? n2 <= gc->menuRowEnabledCount : gc->menuRowEnabledCount == 0);
+    return n == 60 && (n2 != 0 ? n2 <= gc->ui.menuRowEnabledCount : gc->ui.menuRowEnabledCount == 0);
 }

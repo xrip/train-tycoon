@@ -71,11 +71,11 @@ void gc_fields_init(GameCanvas *gc) {
     gc->keySubState = 0;
     gc->lastKeyCode = 0;
     gc->keyRepeatStep = 3;
-    gc->buildMenuItemIndex = 0;
-    gc->blockBuildMenu = false;
-    gc->menuDirty = true;
-    gc->buildMenuMode = 0;
-    gc->selectedMenuRowX = 0;
+    gc->ui.buildMenuItemIndex = 0;
+    gc->ui.blockBuildMenu = false;
+    gc->ui.menuDirty = true;
+    gc->ui.buildMenuMode = 0;
+    gc->ui.selectedMenuRowX = 0;
     gc->confirmToggle = 0;
     gc->confirmCounter = 0;
     gc->confirmTargetState = -1;
@@ -228,7 +228,7 @@ void gc_fields_init(GameCanvas *gc) {
     }};
     gc->scenario.offerGenerationCount = 0;
     gc->scenario.lastOfferDateCode = 0;
-    gc->menuRowEnabledCount = 0;
+    gc->ui.menuRowEnabledCount = 0;
     gc->economy.lifetimeTrainRevenue = 0;
     gc->scenario.milestoneThreshold1 = 0;
     gc->scenario.milestoneThreshold2 = 0;

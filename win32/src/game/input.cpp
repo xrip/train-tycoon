@@ -38,13 +38,13 @@ void gc_resetKeyState(GameCanvas *gc, int32_t n) {
 
 // void cycleBuildMenuIndex(boolean forward)
 void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
-    gc->buildMenuItemIndex += forward ? 1 : -1;
-    int item_count = static_cast<int>(gc->buildMenuItems[gc->buildMenuMode].size());
-    if (gc->buildMenuItemIndex < 0) gc->buildMenuItemIndex = item_count - 1;
-    if (gc->buildMenuItemIndex == item_count) gc->buildMenuItemIndex = 0;
+    gc->ui.buildMenuItemIndex += forward ? 1 : -1;
+    int item_count = static_cast<int>(gc->ui.buildMenuItems[gc->ui.buildMenuMode].size());
+    if (gc->ui.buildMenuItemIndex < 0) gc->ui.buildMenuItemIndex = item_count - 1;
+    if (gc->ui.buildMenuItemIndex == item_count) gc->ui.buildMenuItemIndex = 0;
     gc->confirmTargetState =
-        gc->buildMenuResultCodes[gc->buildMenuMode][gc->buildMenuItemIndex];
-    gc->menuDirty = true;
+        gc->ui.buildMenuResultCodes[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
+    gc->ui.menuDirty = true;
     gc->confirmCounter = 20;
 }
 
@@ -173,9 +173,9 @@ void gc_computeViewportBounds(GameCanvas *gc) {
                  - 16 - 2 * gc->world.mapHalfWidth;
     tile_x /= 32;
     tile_y /= 32;
-    gc->blockBuildMenu = true;
+    gc->ui.blockBuildMenu = true;
 
-    for (int x = tile_x - 1; x <= tile_x + 1 && gc->blockBuildMenu; ++x) {
+    for (int x = tile_x - 1; x <= tile_x + 1 && gc->ui.blockBuildMenu; ++x) {
         for (int y = tile_y - 1; y <= tile_y + 1; ++y) {
             if (!gc->world.in_bounds(x, y))
                 continue;
@@ -200,11 +200,11 @@ void gc_computeViewportBounds(GameCanvas *gc) {
             if (opposite_edges > 0 || other_edges > 0) continue;
             tile_x = x;
             tile_y = y;
-            gc->blockBuildMenu = false;
+            gc->ui.blockBuildMenu = false;
             break;
         }
     }
-    if (gc->blockBuildMenu) return;
+    if (gc->ui.blockBuildMenu) return;
 
     gc->build.swapMapX = tile_x;
     gc->build.swapMapY = tile_y;
