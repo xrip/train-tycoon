@@ -106,16 +106,9 @@ typedef struct GameCanvas {
     int32_t cursorScreenY;
     int32_t tileCursorX;
     int32_t tileCursorY;
-    bool vehicleMenuSelectIndex;
-    bool trainMenuSelectIndex;
     bool flagsA;
     int8_t junctionDirCursor;
-    int8_t numSelectedTrains;
-    std::array<int16_t, 64> trainSelectionIndex{};
-    std::array<int16_t, 64> trainSelectionY{};
-    std::array<int16_t, 64> trainSelectionX{};
     int8_t stationDirCursor;
-    int8_t cityListIndex;
     bool cH;
     Pathfinder pathfinder;
     // Endpoints of the path being built. pathAnchor is the reference endpoint

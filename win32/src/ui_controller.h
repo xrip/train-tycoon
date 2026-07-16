@@ -73,6 +73,19 @@ struct UiController {
     std::array<int8_t, 12> altYearArray{};
     std::array<int8_t, 12> yearGraphValues{};
     std::array<int8_t, 3> moneyTickerFrames{};
+
+    // On-map train/vehicle/city selection state. numSelectedTrains and the
+    // trainSelection screen-position lists track the trains picked under the
+    // cursor; cityListIndex is the highlighted city; the two menu-select flags
+    // pick the vehicle/train sub-menu. cityListIndex, numSelectedTrains, and the
+    // three trainSelection lists are saved and keep their exact byte order.
+    int8_t numSelectedTrains = 0;
+    std::array<int16_t, 64> trainSelectionIndex{};
+    std::array<int16_t, 64> trainSelectionY{};
+    std::array<int16_t, 64> trainSelectionX{};
+    int8_t cityListIndex = 0;
+    bool vehicleMenuSelectIndex = false;
+    bool trainMenuSelectIndex = false;
 };
 
 #endif  // UI_CONTROLLER_H

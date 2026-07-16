@@ -81,7 +81,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
         case 20:
             switch (field) {
                 case 0: {
-                    int selection = gc->trainSelectionIndex[gc->junctionDirCursor];
+                    int selection = gc->ui.trainSelectionIndex[gc->junctionDirCursor];
                     const std::vector<int8_t> &engine = gc->assets.spriteBitmapTable[
                         gc->assets.spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
                     const std::vector<int8_t> &wagon = gc->assets.spriteBitmapTable[

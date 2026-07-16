@@ -230,7 +230,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(economy.savedLegacyMetricEb);
     IO_INT(economy.decadeEnterpriseTotal);
     IO_INT(economy.decadeProfitTotal);
-    IO_BYTE(cityListIndex);
+    IO_BYTE(ui.cityListIndex);
     IO_BYTES(world.stationDirectionCode);
     IO_BYTES(world.cityPopulation);
     IO_BYTES(world.cityIndex);
@@ -239,13 +239,13 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BYTES(fleet.serviceVehicleY);
     IO_BYTES(fleet.serviceUnloadFlags);
     gc_saveOrLoadShortMatrixInlined(gc, gc->fleet.serviceResourceStock);
-    IO_BYTE(numSelectedTrains);
+    IO_BYTE(ui.numSelectedTrains);
     IO_BOOL(flagsA);
     IO_BYTES(world.constructionTimers);
     IO_SHORTS(world.zonePopulation);
-    IO_SHORTS(trainSelectionIndex);
-    IO_SHORTS(trainSelectionY);
-    IO_SHORTS(trainSelectionX);
+    IO_SHORTS(ui.trainSelectionIndex);
+    IO_SHORTS(ui.trainSelectionY);
+    IO_SHORTS(ui.trainSelectionX);
     IO_INT(era);
     IO_BYTES(fleet.trainX);
     IO_BYTES(fleet.trainY);

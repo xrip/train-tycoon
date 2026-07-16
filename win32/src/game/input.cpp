@@ -219,8 +219,8 @@ void gc_computeViewportBounds(GameCanvas *gc) {
     int nearest = corner_distance[0];
     for (int corner = 1; corner < 4; ++corner)
         if (corner_distance[corner] < nearest) nearest = corner_distance[corner];
-    gc->vehicleMenuSelectIndex = corner_distance[0] < corner_distance[3];
-    gc->trainMenuSelectIndex = corner_distance[1] < corner_distance[2];
+    gc->ui.vehicleMenuSelectIndex = corner_distance[0] < corner_distance[3];
+    gc->ui.trainMenuSelectIndex = corner_distance[1] < corner_distance[2];
     if (nearest == corner_distance[0]) {
         tile_center_x -= 16;
     } else if (nearest == corner_distance[1]) {

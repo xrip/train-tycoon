@@ -141,8 +141,8 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
         for (n6 = 0; n6 < gc->assets.numActiveTileAnimations; ++n6) {
             n5 = n9 + gc->assets.tileOffsetX[n6];
             n4 = n10 + gc->assets.tileOffsetY[n6];
-            for (n3 = 0; n3 < gc->numSelectedTrains; ++n3) {
-                if (gc->trainSelectionY[n3] != n5 || gc->trainSelectionX[n3] != n4) continue;
+            for (n3 = 0; n3 < gc->ui.numSelectedTrains; ++n3) {
+                if (gc->ui.trainSelectionY[n3] != n5 || gc->ui.trainSelectionX[n3] != n4) continue;
                 n2 = n4 * 16 + n5 * 16 + 16 - gc->viewportCenterX;
                 n = gc->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n5][n4] + 15;
                 gc_drawRectFill(gc, g, n2, n - 16, (int8_t)n3);

@@ -39,19 +39,19 @@ int8_t gc_randomCityTile(GameCanvas *gc) {
 
 // byte addCityEntry(int n)
 int8_t gc_addCityEntry(GameCanvas *gc, int32_t n) {
-    gc->world.stationDirectionCode[gc->cityListIndex] = (int8_t)n;
-    gc->world.cityPopulation[gc->cityListIndex] = (int8_t)(50 + nextRngInt(gc) % 20);
-    gc->world.cityIndex[gc->cityListIndex] = 0;
-    gc->cityListIndex = (int8_t)(gc->cityListIndex + 1);
-    return (int8_t)(gc->cityListIndex - 1);
+    gc->world.stationDirectionCode[gc->ui.cityListIndex] = (int8_t)n;
+    gc->world.cityPopulation[gc->ui.cityListIndex] = (int8_t)(50 + nextRngInt(gc) % 20);
+    gc->world.cityIndex[gc->ui.cityListIndex] = 0;
+    gc->ui.cityListIndex = (int8_t)(gc->ui.cityListIndex + 1);
+    return (int8_t)(gc->ui.cityListIndex - 1);
 }
 
 // byte registerTrain(byte by, int n, int n2)
 int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2) {
-    gc->world.constructionTimers[gc->numSelectedTrains] = 50;
-    gc->world.zonePopulation[gc->numSelectedTrains] = by;
-    gc->trainSelectionY[gc->numSelectedTrains] = (int16_t)n;
-    gc->trainSelectionX[gc->numSelectedTrains] = (int16_t)n2;
+    gc->world.constructionTimers[gc->ui.numSelectedTrains] = 50;
+    gc->world.zonePopulation[gc->ui.numSelectedTrains] = by;
+    gc->ui.trainSelectionY[gc->ui.numSelectedTrains] = (int16_t)n;
+    gc->ui.trainSelectionX[gc->ui.numSelectedTrains] = (int16_t)n2;
     int16_t s = 0;
     bool bl;
     do {
@@ -59,12 +59,12 @@ int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2) {
         int8_t by3 = (int8_t)abs(nextRngInt(gc) % 14);
         s = (int16_t)(256 * by2 + by3);
         bl = true;
-        for (int i = 0; i < gc->numSelectedTrains; ++i)
-            if (s == gc->trainSelectionIndex[i]) bl = false;
+        for (int i = 0; i < gc->ui.numSelectedTrains; ++i)
+            if (s == gc->ui.trainSelectionIndex[i]) bl = false;
     } while (!bl);
-    gc->trainSelectionIndex[gc->numSelectedTrains] = s;
-    gc->numSelectedTrains = (int8_t)(gc->numSelectedTrains + 1);
-    return (int8_t)(gc->numSelectedTrains - 1);
+    gc->ui.trainSelectionIndex[gc->ui.numSelectedTrains] = s;
+    gc->ui.numSelectedTrains = (int8_t)(gc->ui.numSelectedTrains + 1);
+    return (int8_t)(gc->ui.numSelectedTrains - 1);
 }
 
 // void toggleFlagInlined(boolean bl) -- recompute slope tiles from heightMap

@@ -624,12 +624,12 @@ void gc_openBuildMenu(GameCanvas *gc) {
             switch (item) {
                 case 0:
                     gc_placeTrackAtCursorInlined(
-                        gc, gc->vehicleMenuSelectIndex, 75, 74,
+                        gc, gc->ui.vehicleMenuSelectIndex, 75, 74,
                         -1, -1, -1, -1, false, 0);
                     return;
                 case 1:
                     gc_placeTrackAtCursorInlined(
-                        gc, gc->trainMenuSelectIndex, 72, 73,
+                        gc, gc->ui.trainMenuSelectIndex, 72, 73,
                         -1, -1, -1, -1, false, 0);
                     return;
                 case 2:

@@ -134,9 +134,9 @@ void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
 // void drawRectFill(Graphics graphics, int n, int n2, byte by)
 void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
     const auto engine_codes = gc_tracked_codes(gc->assets.spriteBitmapTable[
-        gc->assets.spriteIndexTable[80 + (gc->trainSelectionIndex[by] >> 8 & 0xFF)]]);
+        gc->assets.spriteIndexTable[80 + (gc->ui.trainSelectionIndex[by] >> 8 & 0xFF)]]);
     const auto wagon_codes = gc_tracked_codes(gc->assets.spriteBitmapTable[
-        gc->assets.spriteIndexTable[86 + (gc->trainSelectionIndex[by] & 0xFF)]]);
+        gc->assets.spriteIndexTable[86 + (gc->ui.trainSelectionIndex[by] & 0xFF)]]);
     std::vector<int8_t> train_codes;
     train_codes.reserve(wagon_codes.size() + engine_codes.size());
     train_codes.insert(train_codes.end(), wagon_codes.begin(), wagon_codes.end());
