@@ -4,27 +4,27 @@
 #include "midp_input.h"
 
 // public void registerCityEntryInlined(byte by)  -- 1=down/right 2=up/left 3=select
-void gc_registerCityEntryInlined(Game *gc, int8_t by) {
+void game_registerCityEntryInlined(Game *game, int8_t by) {
     switch (by) {
         case 1:
-            if (gc->ui.cursorSelectX != -2) { gc->ui.cursorDragY = gc->ui.cursorSelectX; break; }
-            if (!gc->ui.cursorAllowZoomOut) break;
-            gc->ui.cursorScale += 10;
+            if (game->ui.cursorSelectX != -2) { game->ui.cursorDragY = game->ui.cursorSelectX; break; }
+            if (!game->ui.cursorAllowZoomOut) break;
+            game->ui.cursorScale += 10;
             break;
         case 2:
-            if (gc->ui.cursorSelectY > -1) gc->ui.cursorDragY = gc->ui.cursorSelectY;
-            else if (gc->ui.cursorOverUI) gc->ui.cursorScale -= 10;
-            else gc->ui.cursorDragY = -1;
-            if (gc->ui.cursorScale >= 0) break;
-            gc->ui.cursorScale = 0;
+            if (game->ui.cursorSelectY > -1) game->ui.cursorDragY = game->ui.cursorSelectY;
+            else if (game->ui.cursorOverUI) game->ui.cursorScale -= 10;
+            else game->ui.cursorDragY = -1;
+            if (game->ui.cursorScale >= 0) break;
+            game->ui.cursorScale = 0;
             break;
         case 3:
-            gc_handleBuildMenuState(gc, gc->renderer.currentSpriteId, gc->ui.cursorDragX);
+            game_handleBuildMenuState(game, game->renderer.currentSpriteId, game->ui.cursorDragX);
             break;
     }
 }
 
-void gc_handleKey(Game *gc, int32_t n) {
+void game_handleKey(Game *game, int32_t n) {
     int n2;
     if (n == 65 || n == 97) n = 48;
     if (n == 89 || n == 121) n = 42;
@@ -43,81 +43,81 @@ void gc_handleKey(Game *gc, int32_t n) {
     if (n2 == 1) n = 50;
     if (n2 == 6) n = 56;
     if (n2 == 8) n = 53;
-    gc->ui.currentKey = 0;
-    gc->ui.keyRepeatDelay = 0;
-    gc->ui.heldKey = 0;
-    switch (gc->gameState) {
+    game->ui.currentKey = 0;
+    game->ui.keyRepeatDelay = 0;
+    game->ui.heldKey = 0;
+    switch (game->gameState) {
         case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3:
-            gc->loadingTimeout = true;
+            game->loadingTimeout = true;
             break;
         case +GameState::MenuOverlay:
             if (n == 56 || n == 54) {
-                gc_registerCityEntryInlined(gc, 1);
-                gc->ui.keyRepeatDelay = 4;
-                gc->ui.heldKey = n;
+                game_registerCityEntryInlined(game, 1);
+                game->ui.keyRepeatDelay = 4;
+                game->ui.heldKey = n;
             }
             if (n == 50 || n == 52) {
-                gc_registerCityEntryInlined(gc, 2);
-                gc->ui.keyRepeatDelay = 4;
-                gc->ui.heldKey = n;
+                game_registerCityEntryInlined(game, 2);
+                game->ui.keyRepeatDelay = 4;
+                game->ui.heldKey = n;
             }
-            if (n == 53) gc_registerCityEntryInlined(gc, 3);
-            if (!gc->ui.pauseMenuOpen || n != 42) break;
-            gc->ui.cursorDragY = -3;
-            gc->ui.cursorDragX = -1;
-            gc_registerCityEntryInlined(gc, 3);
+            if (n == 53) game_registerCityEntryInlined(game, 3);
+            if (!game->ui.pauseMenuOpen || n != 42) break;
+            game->ui.cursorDragY = -3;
+            game->ui.cursorDragX = -1;
+            game_registerCityEntryInlined(game, 3);
             break;
         case +GameState::Playing:
-            gc->ui.lastKeyCode = n;
-            gc->ui.keySubState = 0;
-            if (gc->ui.inputSubState == 0) {
-                if (n == 42) { gc_cycleBuildMenuIndex(gc, false); gc->ui.inputSubState = 7; gc->ui.currentKey = n; }
-                if (n == 35) { gc_cycleBuildMenuIndex(gc, true); gc->ui.inputSubState = 7; gc->ui.currentKey = n; }
-                if (n == 53) gc_openBuildMenu(gc);
-                if (n != 48 || gc->gameState != +GameState::Playing) break;
-                gc_setState(gc, +GameState::BuildingMinimap);
+            game->ui.lastKeyCode = n;
+            game->ui.keySubState = 0;
+            if (game->ui.inputSubState == 0) {
+                if (n == 42) { game_cycleBuildMenuIndex(game, false); game->ui.inputSubState = 7; game->ui.currentKey = n; }
+                if (n == 35) { game_cycleBuildMenuIndex(game, true); game->ui.inputSubState = 7; game->ui.currentKey = n; }
+                if (n == 53) game_openBuildMenu(game);
+                if (n != 48 || game->gameState != +GameState::Playing) break;
+                game_setState(game, +GameState::BuildingMinimap);
                 break;
             }
-            if (gc->ui.inputSubState == 1) {
-                if (n == 42 && gc->ui.buildMenuMode != 4 && gc->ui.buildMenuMode != 2) {
-                    gc->ui.buildMenuMode = 0;
-                    gc->ui.buildMenuItemIndex = 0;
-                    gc->ui.menuDirty = true;
+            if (game->ui.inputSubState == 1) {
+                if (n == 42 && game->ui.buildMenuMode != 4 && game->ui.buildMenuMode != 2) {
+                    game->ui.buildMenuMode = 0;
+                    game->ui.buildMenuItemIndex = 0;
+                    game->ui.menuDirty = true;
                 }
                 if (n != 35) break;
-                if (gc->ui.buildMenuMode == 1) { gc->ui.buildMenuMode = 0; gc->ui.buildMenuItemIndex = 1; }
-                if (gc->ui.buildMenuMode == 3) { gc->ui.buildMenuMode = 1; gc->ui.buildMenuItemIndex = 3; }
-                if (gc->ui.buildMenuMode == 5) { gc->ui.buildMenuMode = 1; gc->ui.buildMenuItemIndex = 1; }
-                gc->ui.menuDirty = true;
+                if (game->ui.buildMenuMode == 1) { game->ui.buildMenuMode = 0; game->ui.buildMenuItemIndex = 1; }
+                if (game->ui.buildMenuMode == 3) { game->ui.buildMenuMode = 1; game->ui.buildMenuItemIndex = 3; }
+                if (game->ui.buildMenuMode == 5) { game->ui.buildMenuMode = 1; game->ui.buildMenuItemIndex = 1; }
+                game->ui.menuDirty = true;
                 break;
             }
             if (n != 42 && n != 35) break;
-            gc->ui.currentKey = n;
+            game->ui.currentKey = n;
             break;
         case +GameState::MapOverview:
-            gc->ui.lastKeyCode = n;
-            gc->ui.keySubState = 40;
+            game->ui.lastKeyCode = n;
+            game->ui.keySubState = 40;
             if (n == 53) {
-                if (gc->ui.confirmToggle == 0) {
-                    gc_setState(gc, +GameState::Playing);
-                    gc->ui.buildMenuItemIndex = 0;
-                    gc->ui.menuDirty = true;
+                if (game->ui.confirmToggle == 0) {
+                    game_setState(game, +GameState::Playing);
+                    game->ui.buildMenuItemIndex = 0;
+                    game->ui.menuDirty = true;
                 } else {
-                    gc->ready = false;
-                    gc->ui.transitionCode = 36;
-                    gc_setState(gc, +GameState::MenuOverlay);
+                    game->ready = false;
+                    game->ui.transitionCode = 36;
+                    game_setState(game, +GameState::MenuOverlay);
                 }
             }
             if (n != 42 && n != 35) break;
-            if (gc->ui.confirmToggle == 0) {
-                gc->ui.confirmToggle = 1;
-                gc->ui.confirmTargetState = 30;
+            if (game->ui.confirmToggle == 0) {
+                game->ui.confirmToggle = 1;
+                game->ui.confirmTargetState = 30;
             } else {
-                gc->ui.confirmToggle = 0;
-                gc->ui.confirmTargetState = 17;
+                game->ui.confirmToggle = 0;
+                game->ui.confirmTargetState = 17;
             }
-            gc->ui.menuDirty = true;
-            gc->ui.confirmCounter = 20;
+            game->ui.menuDirty = true;
+            game->ui.confirmCounter = 20;
             break;
     }
 }

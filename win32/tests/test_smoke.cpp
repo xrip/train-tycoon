@@ -24,7 +24,7 @@ std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 
 Game* make_game() {
     auto* game = new Game{};
-    gc_fields_init(game);
+    game_fields_init(game);
     game->music_output = std::make_unique<SilentMusicOutput>();
     game->rng.set_seed(kFixedRandomSeed);
     return game;
@@ -51,9 +51,9 @@ std::uint64_t map_digest(const Game* game) {
 
 void generate_scenario(Game* game, int scenario) {
     game->scenario.activeScenario = scenario;
-    gc_setState(game, 25);
+    game_setState(game, 25);
     for (int step = 0; game->gameState == 25 && step < 200000; ++step) {
-        gc_update(game);
+        game_update(game);
     }
     REQUIRE(game->gameState == 30);
     REQUIRE(!game->world.tileMap.empty());
@@ -263,7 +263,7 @@ TEST_CASE("fast: small path search") {
     game->pathfinder.targetY = 2;
     game->economy.accel1 = 10;
 
-    CHECK(gc_tryBuildPath(game));
+    CHECK(game_tryBuildPath(game));
     CHECK(game->build.trackTileCount > 0);
     CHECK(game->build.selectionCost > 0);
     delete game;
@@ -277,7 +277,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->economy.year = 1973;
     game->economy.loanBalance = -7654321;
     game->renderer.visibleTrains[0] = -1234;
-    gc_initSaveOrLoad(game, 4);
+    game_initSaveOrLoad(game, 4);
 
     const int plain_size = game->saveCodec.snapshotSize;
     REQUIRE(plain_size > 0);
@@ -289,8 +289,8 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     REQUIRE(plain != nullptr);
     std::memcpy(plain, game->saveCodec.saveBuffer.data(), static_cast<std::size_t>(plain_size));
 
-    gc_compressSaveBuffer(game);
-    gc_decompressSaveBuffer(game);
+    game_compressSaveBuffer(game);
+    game_decompressSaveBuffer(game);
     CHECK(game->saveCodec.snapshotSize == plain_size);
     CHECK(std::memcmp(game->saveCodec.saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
 
@@ -300,7 +300,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->economy.year = 0;
     game->economy.loanBalance = 0;
     game->renderer.visibleTrains[0] = 0;
-    gc_initSaveOrLoad(game, 5);
+    game_initSaveOrLoad(game, 5);
     CHECK(game->economy.money == 123456);
     CHECK(game->economy.dayOfMonth == 17);
     CHECK(game->economy.monthOfYear == 8);
@@ -322,23 +322,23 @@ TEST_CASE("fast: game music rules use a silent output") {
     Game* game = make_game();
     auto* output = static_cast<SilentMusicOutput*>(game->music_output.get());
 
-    gc_loadMusic(game);
+    game_loadMusic(game);
     CHECK(game->music_available);
     CHECK_FALSE(game->music_playing);
     CHECK(output->volume() == 40);
 
-    gc_playMusic(game);
+    game_playMusic(game);
     CHECK(output->play_count() == 0);
     game->music_enabled = true;
-    gc_playMusic(game);
+    game_playMusic(game);
     CHECK(game->music_playing);
     CHECK(output->play_count() == 1);
-    gc_playMusic(game);
+    game_playMusic(game);
     CHECK(output->play_count() == 1);
 
-    gc_setMusicVolume(game, 5);
+    game_setMusicVolume(game, 5);
     CHECK(output->volume() == 100);
-    gc_stopMusic(game);
+    game_stopMusic(game);
     CHECK_FALSE(game->music_playing);
     CHECK(output->stop_count() == 1);
 
@@ -372,18 +372,18 @@ TEST_CASE("full: all scenario maps have fixed digests") {
 
 TEST_CASE("full: scenario zero input and frames have fixed digests") {
     Game* game = make_game();
-    gc_start(game, nullptr);
+    game_start(game, nullptr);
 
     game->loadingStartTime = 0;
-    gc_update(game);
+    game_update(game);
     game->loadingStartTime = 0;
-    gc_update(game);
-    gc_update(game);
+    game_update(game);
+    game_update(game);
     REQUIRE(game->gameState == 20);
 
-    gc_setState(game, 10);
+    game_setState(game, 10);
     for (int step = 0; game->gameState == 10 && step < 1000; ++step) {
-        gc_update(game);
+        game_update(game);
     }
     REQUIRE(game->gameState == 20);
 
@@ -392,15 +392,15 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     std::memset(framebuffer, 0, sizeof(framebuffer));
     Surface screen;
     midp_gfx_init_screen(&screen, framebuffer, kScreenWidth, kScreenHeight);
-    gc_paint(game, &screen);
+    game_paint(game, &screen);
     StableDigest first_frame;
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(first_frame.value() == 13699798000239068498ULL);
 
     const int old_viewport_x = game->renderer.viewportCenterX;
-    gc_keyPressed(game, 54);
-    gc_run(game);
-    gc_paint(game, &screen);
+    game_keyPressed(game, 54);
+    game_run(game);
+    game_paint(game, &screen);
     CHECK(game->gameState == 30);
     CHECK(game->renderer.backbuffer != nullptr);
     CHECK(game->renderer.viewportCenterX != old_viewport_x);

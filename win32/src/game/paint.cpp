@@ -19,36 +19,36 @@ static int read_u24_le(ResourceReader& resource) {
 #define WIDTH  MIDP_SCREEN_W   // this.getWidth()
 #define HEIGHT MIDP_SCREEN_H   // this.getHeight()
 
-void gc_paint(Game *gc, Surface *g) {
+void game_paint(Game *game, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
-    if (gc->paintSuspended) return;
-    gc_setCanvasSize(gc, n, n2);
-    if (gc->gameState != +GameState::MapOverview && gc->gameState != +GameState::BuildingMinimap && gc->gameState != +GameState::BuildingPath
-        && gc->gameState != +GameState::SavingGame && gc->gameState != +GameState::LoadingGame && gc->gameState != +GameState::AiTurn
-        && gc->gameState != +GameState::HighScoreSync && (gc->gameState != +GameState::MenuOverlay || gc->ready)) {
+    if (game->paintSuspended) return;
+    game_setCanvasSize(game, n, n2);
+    if (game->gameState != +GameState::MapOverview && game->gameState != +GameState::BuildingMinimap && game->gameState != +GameState::BuildingPath
+        && game->gameState != +GameState::SavingGame && game->gameState != +GameState::LoadingGame && game->gameState != +GameState::AiTurn
+        && game->gameState != +GameState::HighScoreSync && (game->gameState != +GameState::MenuOverlay || game->ready)) {
         midp_set_color(g, 0);
         midp_fill_rect(g, 0, 0, n, n2);
     }
     midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
-    switch (gc->gameState) {
+    switch (game->gameState) {
         case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3: {
             midp_set_color(g, 0xFFFFFF);
-            if (gc->gameState == +GameState::BootSplash0) midp_set_color(g, 0);
+            if (game->gameState == +GameState::BootSplash0) midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             int n3 = gcs_screenWidth / 2;
             int n4 = gcs_hs / 2;
-            int n5 = gc->assets.cycle_flag->width() / 2;
-            int n6 = gc->assets.cycle_flag->height();
+            int n5 = game->assets.cycle_flag->width() / 2;
+            int n6 = game->assets.cycle_flag->height();
             int n7 = n6 / 10 + 1;
             for (int i = 0; i < 10; ++i) {
-                int n8 = (n3 + n5 + 30) * (gc->loadingTimer - 5 * (i / 2)) / 10;
+                int n8 = (n3 + n5 + 30) * (game->loadingTimer - 5 * (i / 2)) / 10;
                 if (n8 < 0) n8 = 0;
                 if (n8 > n3 + n5 + 30) n8 = n3 + n5 + 30;
                 int n9 = n3 - (n3 + n5 + 30 - n8);
                 if (i % 2 == 1) n9 = n3 + (n3 + n5 + 30 - n8);
                 midp_set_clip(g, n9 - n5, n4 - n6 / 2 + i * n7, n5 * 2, n7);
-                midp_draw_image(g, gc->assets.cycle_flag.get(), n9, n4, 3);
+                midp_draw_image(g, game->assets.cycle_flag.get(), n9, n4, 3);
             }
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
             break;
@@ -56,10 +56,10 @@ void gc_paint(Game *gc, Surface *g) {
         case +GameState::LoadingResources: {
             midp_set_color(g, 0xFFFFFF);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            midp_draw_image(g, gc->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
+            midp_draw_image(g, game->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
-            int n10 = gc->assets.spriteLoadCounter * (gcs_screenWidth - 20) / (gc->scenario.scenarioResourceCount - 1);
+            int n10 = game->assets.spriteLoadCounter * (gcs_screenWidth - 20) / (game->scenario.scenarioResourceCount - 1);
             midp_set_color(g, RGB3(60, 105, 144));
             midp_fill_rect(g, 10, gcs_hs - 13, n10, 9);
             midp_set_color(g, RGB3(49, 64, 90));
@@ -67,29 +67,29 @@ void gc_paint(Game *gc, Surface *g) {
             break;
         }
         case +GameState::MenuOverlay: {
-            if (gc->ready) {
+            if (game->ready) {
                 midp_set_color(g, 0xFFFFFF);
                 midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-                if (gc->assets.cycle_flag != NULL)
-                    midp_draw_image(g, gc->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
+                if (game->assets.cycle_flag != NULL)
+                    midp_draw_image(g, game->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             }
-            if (gc->ui.transitionCode == 36) {
-                gc->gameState = +GameState::MapOverview;
-                gc_paint(gc, g);
-                gc->gameState = +GameState::MenuOverlay;
+            if (game->ui.transitionCode == 36) {
+                game->gameState = +GameState::MapOverview;
+                game_paint(game, g);
+                game->gameState = +GameState::MenuOverlay;
             }
-            gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
+            game_renderPackedSprite(game, g, game->ui.transitionCode);
             break;
         }
         case +GameState::GeneratingMap: {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[0]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
-            int n11 = gc->world.totalTilesToGenerate < 2 ? 2 : gc->world.totalTilesToGenerate;
-            int n12 = gc->world.mapGenTilesDone * (gcs_screenWidth - 20) / (n11 - 1);
+            int n11 = game->world.totalTilesToGenerate < 2 ? 2 : game->world.totalTilesToGenerate;
+            int n12 = game->world.mapGenTilesDone * (gcs_screenWidth - 20) / (n11 - 1);
             midp_set_color(g, RGB3(60, 105, 144));
             midp_fill_rect(g, 10, gcs_hs - 23, n12, 9);
             midp_set_color(g, 0xFFFFFF);
@@ -97,10 +97,10 @@ void gc_paint(Game *gc, Surface *g) {
             break;
         }
         case +GameState::Playing: {
-            gc->tickStart = midp_current_time_millis();
-            gc_renderMap(gc, g);
-            gc->tickEnd = midp_current_time_millis();
-            if (gc->ui.inputPending) {
+            game->tickStart = midp_current_time_millis();
+            game_renderMap(game, g);
+            game->tickEnd = midp_current_time_millis();
+            if (game->ui.inputPending) {
                 int n13;
                 midp_set_color(g, 0);
                 midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_bottomBarY - 15);
@@ -109,39 +109,39 @@ void gc_paint(Game *gc, Surface *g) {
                 for (n13 = 0; n13 < gcs_hs; ++n13)
                     midp_draw_line(g, 0, n13 * 2, gcs_screenWidth, gcs_screenWidth + n13 * 2);
                 midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
-                gc_drawSpriteQuad(gc, g, 234, 0, 15, 20);
+                game_drawSpriteQuad(game, g, 234, 0, 15, 20);
             }
-            gc_drawMoneyTicker(gc, g);
-            if (gc->ui.pauseFlag) gc_drawSpriteQuad(gc, g, 236, 0, 15, 0);
-            if (gc->ui.pendingTransitionCode > -1) {
-                gc->ui.transitionCode = gc->ui.pendingTransitionCode;
-                gc_resetOverlayRenderState(gc);
-                gc->ui.pendingTransitionCode = -1;
-                gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
-                gc_setState(gc, +GameState::MenuOverlay);
+            game_drawMoneyTicker(game, g);
+            if (game->ui.pauseFlag) game_drawSpriteQuad(game, g, 236, 0, 15, 0);
+            if (game->ui.pendingTransitionCode > -1) {
+                game->ui.transitionCode = game->ui.pendingTransitionCode;
+                game_resetOverlayRenderState(game);
+                game->ui.pendingTransitionCode = -1;
+                game_renderPackedSprite(game, g, game->ui.transitionCode);
+                game_setState(game, +GameState::MenuOverlay);
             }
-            if (gc->ui.transitionDebounce <= 0) break;
-            gc->ui.transitionDebounce = (int8_t)(gc->ui.transitionDebounce - 1);
-            if (gc->ui.transitionDebounce != 0) break;
-            gc->ui.transitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeCode;
-            gc_resetOverlayRenderState(gc);
-            gc->ready = false;
-            gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
-            gc_setState(gc, +GameState::MenuOverlay);
+            if (game->ui.transitionDebounce <= 0) break;
+            game->ui.transitionDebounce = (int8_t)(game->ui.transitionDebounce - 1);
+            if (game->ui.transitionDebounce != 0) break;
+            game->ui.transitionCode = transition::SCENARIO_NOTICE_BASE + game->scenario.scenarioNoticeCode;
+            game_resetOverlayRenderState(game);
+            game->ready = false;
+            game_renderPackedSprite(game, g, game->ui.transitionCode);
+            game_setState(game, +GameState::MenuOverlay);
             break;
         }
         case +GameState::BuildingMinimap:
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[50]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
             break;
         case +GameState::MapOverview: {
             int n14;
             midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
-            int n15 = gc->renderer.viewportCenterX / 16;
-            int n16 = gc->renderer.viewportCenterY / 8;
-            int n17 = gc->world.mapWidth + gc->world.mapHeight;
+            int n15 = game->renderer.viewportCenterX / 16;
+            int n16 = game->renderer.viewportCenterY / 8;
+            int n17 = game->world.mapWidth + game->world.mapHeight;
             int n18 = gcs_screenWidth / 2 - n15 - gcs_screenWidth / 32;
             if (gcs_screenWidth - n18 > n17) n18 = gcs_screenWidth - n17;
             if (n18 > 0) n18 = 0;
@@ -149,102 +149,102 @@ void gc_paint(Game *gc, Surface *g) {
             if (n14 > 0) n14 = 0;
             int n19 = n17 < gcs_screenWidth ? (gcs_screenWidth - n17) / 2 : 0;
             int n20 = n17 < gcs_gameplayViewportHeight ? (gcs_gameplayViewportHeight - n17) / 2 : 0;
-            midp_draw_image(g, gc->renderer.backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
-            int n21 = gc->renderer.viewportCenterX - 2 * gc->renderer.viewportCenterY + 16 + 2 * gc->world.mapHalfWidth;
-            int n22 = gc->renderer.viewportCenterX + 2 * gc->renderer.viewportCenterY - 16 - 2 * gc->world.mapHalfWidth;
-            int n23 = gc->world.mapWidth - (n21 /= 32) + (n22 /= 32);
+            midp_draw_image(g, game->renderer.backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
+            int n21 = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.mapHalfWidth;
+            int n22 = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.mapHalfWidth;
+            int n23 = game->world.mapWidth - (n21 /= 32) + (n22 /= 32);
             int n24 = n21 + n22;
             midp_set_color(g, 0xFFFFFF);
             midp_draw_rect(g, n24 + n18 + n19, 15 + n23 + n14 + n20, gcs_screenWidth / 16, gcs_gameplayViewportHeight / 8);
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
-            gc_drawConfirmBar(gc, g);
-            gc_drawConfirmDialog(gc, g);
-            if (gc->confirmCloseRequested) {
-                gc->ready = false;
-                gc->ui.transitionCode = 36;
-                gc_setState(gc, +GameState::MenuOverlay);
-                gc->confirmCloseRequested = false;
+            game_drawConfirmBar(game, g);
+            game_drawConfirmDialog(game, g);
+            if (game->confirmCloseRequested) {
+                game->ready = false;
+                game->ui.transitionCode = 36;
+                game_setState(game, +GameState::MenuOverlay);
+                game->confirmCloseRequested = false;
             }
-            if (gc->ui.pendingTransitionCode <= -1) break;
-            gc->ui.transitionCode = gc->ui.pendingTransitionCode;
-            gc_resetOverlayRenderState(gc);
-            gc->ui.pendingTransitionCode = -1;
-            gc_renderPackedSprite(gc, g, gc->ui.transitionCode);
-            gc_setState(gc, +GameState::MenuOverlay);
+            if (game->ui.pendingTransitionCode <= -1) break;
+            game->ui.transitionCode = game->ui.pendingTransitionCode;
+            game_resetOverlayRenderState(game);
+            game->ui.pendingTransitionCode = -1;
+            game_renderPackedSprite(game, g, game->ui.transitionCode);
+            game_setState(game, +GameState::MenuOverlay);
             break;
         }
         case +GameState::BuildingPath:
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[51]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
             break;
         case +GameState::SavingGame:
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[52]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[52]]));
             break;
         case +GameState::LoadingGame:
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[53]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[53]]));
             break;
         case +GameState::AiTurn:
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[49]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[49]]));
             break;
         case +GameState::HighScoreSync:
-            gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[66]]));
+            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[66]]));
             break;
     }
 }
 
-void gc_update(Game *gc) {
-    switch (gc->gameState) {
+void game_update(Game *game) {
+    switch (game->gameState) {
         case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: {
-            if (midp_current_time_millis() - gc->loadingStartTime > 5000L)
-                gc->loadingTimeout = true;
-            ++gc->loadingTimer;
-            if (!gc->loadingTimeout) break;
-            if (gc->gameState == +GameState::BootSplash1) {
-                for (int i = 0; i < 6; ++i) gc->assets.font_images[i] = gc_decodePngFromSpriteStream(gc);
-                gc_setState(gc, +GameState::IntroReady);
+            if (midp_current_time_millis() - game->loadingStartTime > 5000L)
+                game->loadingTimeout = true;
+            ++game->loadingTimer;
+            if (!game->loadingTimeout) break;
+            if (game->gameState == +GameState::BootSplash1) {
+                for (int i = 0; i < 6; ++i) game->assets.font_images[i] = game_decodePngFromSpriteStream(game);
+                game_setState(game, +GameState::IntroReady);
                 break;
             }
-            gc_setState(gc, gc->gameState + 1);
+            game_setState(game, game->gameState + 1);
             break;
         }
         case +GameState::IntroReady:
-            gc->ready = true;
-            gc->ui.screenParam = 3;
-            gc->ui.transitionCode = 14;
-            gc_resetOverlayRenderState(gc);
-            gc_setState(gc, +GameState::MenuOverlay);
+            game->ready = true;
+            game->ui.screenParam = 3;
+            game->ui.transitionCode = 14;
+            game_resetOverlayRenderState(game);
+            game_setState(game, +GameState::MenuOverlay);
             break;
         case +GameState::LoadingResources:
-            gc->assets.tile_sprites[gc->assets.spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
-            ++gc->assets.spriteLoadCounter;
-            if (gc->assets.spriteLoadCounter == gc->scenario.scenarioResourceCount / 2) {
-                gc_loadMusic(gc);
-                if (gc->music_auto_start) { gc_playMusic(gc); gc->music_enabled = true; }
-                else gc->music_enabled = false;
+            game->assets.tile_sprites[game->assets.spriteLoadCounter] = game_decodePngFromSpriteStream(game);
+            ++game->assets.spriteLoadCounter;
+            if (game->assets.spriteLoadCounter == game->scenario.scenarioResourceCount / 2) {
+                game_loadMusic(game);
+                if (game->music_auto_start) { game_playMusic(game); game->music_enabled = true; }
+                else game->music_enabled = false;
             }
-            if (gc->assets.spriteLoadCounter != gc->scenario.scenarioResourceCount) break;
-            gc->ready = true;
-            gc->ui.transitionCode = 1;
-            gc_setState(gc, +GameState::MenuOverlay);
+            if (game->assets.spriteLoadCounter != game->scenario.scenarioResourceCount) break;
+            game->ready = true;
+            game->ui.transitionCode = 1;
+            game_setState(game, +GameState::MenuOverlay);
             break;
         case +GameState::GeneratingMap: {
-            ++gc->loadStep;
-            if (gc->loadStep == 2) {
-                gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
-                gc->economy.dayOfMonth = 1; gc->economy.monthOfYear = 1; gc->economy.year = 1950;
-                gc->scenario.milestonesEnabled = false; gc->ui.pauseFlag = false; gc->scenario.aiEnabled = false;
-                gc->economy.moneyBaseA = 974; gc->economy.moneyBaseB = 974;
-                gc->economy.baseTrainSpeed = 173; gc->economy.accel1 = 342; gc->economy.brake1 = 311;
-                gc->economy.baseTrainSpeed2 = 173; gc->economy.accel2 = 234;
-                gc->economy.costPower = 4759; gc->economy.costStruct = 9845; gc->economy.costOverhead = 347;
-                gc->economy.costMaintenance = 5982; gc->economy.costCrew = 481;
-                gc->economy.gWagonCost = 37894; gc->economy.gWagonCost2 = 43247; gc->economy.gWagonCost3 = 51872;
-                gc->economy.gWagonCost4 = 60149; gc->economy.gWagonCost5 = 71423; gc->economy.gWagonCost6 = 82675;
-                gc->economy.costGroupC1 = 4578; gc->economy.costGroupC2 = 5196; gc->economy.costGroupC3 = 4314; gc->economy.costGroupC4 = 5072;
+            ++game->loadStep;
+            if (game->loadStep == 2) {
+                game_initSaveOrLoad(game, save::OP_RESET_SKIP);
+                game->economy.dayOfMonth = 1; game->economy.monthOfYear = 1; game->economy.year = 1950;
+                game->scenario.milestonesEnabled = false; game->ui.pauseFlag = false; game->scenario.aiEnabled = false;
+                game->economy.moneyBaseA = 974; game->economy.moneyBaseB = 974;
+                game->economy.baseTrainSpeed = 173; game->economy.accel1 = 342; game->economy.brake1 = 311;
+                game->economy.baseTrainSpeed2 = 173; game->economy.accel2 = 234;
+                game->economy.costPower = 4759; game->economy.costStruct = 9845; game->economy.costOverhead = 347;
+                game->economy.costMaintenance = 5982; game->economy.costCrew = 481;
+                game->economy.gWagonCost = 37894; game->economy.gWagonCost2 = 43247; game->economy.gWagonCost3 = 51872;
+                game->economy.gWagonCost4 = 60149; game->economy.gWagonCost5 = 71423; game->economy.gWagonCost6 = 82675;
+                game->economy.costGroupC1 = 4578; game->economy.costGroupC2 = 5196; game->economy.costGroupC3 = 4314; game->economy.costGroupC4 = 5072;
                 ResourceReader in = resources::open("scenarios.bin");
                 if (in) {
                     const int record_count = in.read_byte();
@@ -275,82 +275,82 @@ void gc_update(Game *gc) {
                         const int milestone_threshold = read_u24_le(in);
                         const int build_menu_scenario = in.read_byte();
                         const int scenario_flags = in.read_byte();
-                        if (scenario_index != gc->scenario.activeScenario) continue;
-                        gc->scenario.scenarioStep = scenario_index;
-                        gc->world.mapWidth = gc->world.mapHeight = map_size;
-                        gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
-                        gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
-                        gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
-                        gc->renderer.viewportHalfWidth = gc->world.mapScreenWidth / 2;
-                        gc->renderer.viewportHalfHeight = gc->world.mapScreenHeight / 2;
-                        gc->renderer.viewportCenterX = gc->renderer.viewportHalfWidth;
-                        gc->renderer.viewportCenterY = gc->renderer.viewportHalfHeight;
-                        gc->renderer.viewportBaseX = gc->renderer.viewportCenterX;
-                        gc->renderer.viewportBaseY = gc->renderer.viewportCenterY;
-                        gc->renderer.mapScaleX = gc->renderer.viewportBaseX * 2;
-                        gc->renderer.mapScaleY = gc->renderer.viewportBaseY * 2;
-                        gc->world.initialObstacleCount = obstacle_count; gc->world.terrainRaiseStepCount = terrain_raise_steps; gc->world.terrainLowerStepCount = terrain_lower_steps; gc->world.terrainPatchBaseSize = terrain_patch_size;
-                        gc->world.mapGenColumns = map_gen_columns; gc->world.mapGenRows = map_gen_rows;
-                        gc->world.terrainFeatureStage7Count = stage7_feature_count; gc->world.terrainFeatureStage6Count = stage6_feature_count;
-                        gc->world.weightAccel = weight_accel_1; gc->world.weightAccel2 = weight_accel_2; gc->world.weightAccel3 = weight_accel_3; gc->world.weightAccel4 = weight_accel_4;
-                        gc->economy.money = starting_money; gc->economy.loanCeiling = loan_ceiling; gc->economy.loanBalance = starting_loan;
-                        gc->economy.interestRate = (int8_t)interest_rate; gc->era = era_number - 1;
-                        gc->scenario.scenarioMilestoneIndex = (int8_t)milestone_index;
-                        gc->scenario.currentMilestoneScore = milestone_score; gc->scenario.milestoneCoThreshold2 = milestone_threshold;
-                        gc_initBuildMenuForScenario(gc, build_menu_scenario);
-                        gc->scenario.aiExpansionEnabled = (scenario_flags & 2) == 2;
-                        gc->scenario.monthlyOffersEnabled = (scenario_flags & 4) == 4;
-                        if ((scenario_flags & 1) != 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 100; }
-                        else { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
-                        gc->scenario.scenarioNoticeId = notice_id;
-                        if (notice_id != 0) { gc->ui.transitionDebounce = 5; gc->scenario.scenarioNoticeCode = (int8_t)notice_id; continue; }
-                        gc->ui.transitionDebounce = 0;
+                        if (scenario_index != game->scenario.activeScenario) continue;
+                        game->scenario.scenarioStep = scenario_index;
+                        game->world.mapWidth = game->world.mapHeight = map_size;
+                        game->world.mapHalfWidth = (game->world.mapWidth - 1) * 8;
+                        game->world.mapScreenWidth = (game->world.mapWidth + game->world.mapHeight) * 16;
+                        game->world.mapScreenHeight = (game->world.mapWidth + game->world.mapHeight) * 8;
+                        game->renderer.viewportHalfWidth = game->world.mapScreenWidth / 2;
+                        game->renderer.viewportHalfHeight = game->world.mapScreenHeight / 2;
+                        game->renderer.viewportCenterX = game->renderer.viewportHalfWidth;
+                        game->renderer.viewportCenterY = game->renderer.viewportHalfHeight;
+                        game->renderer.viewportBaseX = game->renderer.viewportCenterX;
+                        game->renderer.viewportBaseY = game->renderer.viewportCenterY;
+                        game->renderer.mapScaleX = game->renderer.viewportBaseX * 2;
+                        game->renderer.mapScaleY = game->renderer.viewportBaseY * 2;
+                        game->world.initialObstacleCount = obstacle_count; game->world.terrainRaiseStepCount = terrain_raise_steps; game->world.terrainLowerStepCount = terrain_lower_steps; game->world.terrainPatchBaseSize = terrain_patch_size;
+                        game->world.mapGenColumns = map_gen_columns; game->world.mapGenRows = map_gen_rows;
+                        game->world.terrainFeatureStage7Count = stage7_feature_count; game->world.terrainFeatureStage6Count = stage6_feature_count;
+                        game->world.weightAccel = weight_accel_1; game->world.weightAccel2 = weight_accel_2; game->world.weightAccel3 = weight_accel_3; game->world.weightAccel4 = weight_accel_4;
+                        game->economy.money = starting_money; game->economy.loanCeiling = loan_ceiling; game->economy.loanBalance = starting_loan;
+                        game->economy.interestRate = (int8_t)interest_rate; game->era = era_number - 1;
+                        game->scenario.scenarioMilestoneIndex = (int8_t)milestone_index;
+                        game->scenario.currentMilestoneScore = milestone_score; game->scenario.milestoneCoThreshold2 = milestone_threshold;
+                        game_initBuildMenuForScenario(game, build_menu_scenario);
+                        game->scenario.aiExpansionEnabled = (scenario_flags & 2) == 2;
+                        game->scenario.monthlyOffersEnabled = (scenario_flags & 4) == 4;
+                        if ((scenario_flags & 1) != 1) { game->scenario.aiFrequency = 25; game->scenario.aiThreshold = 100; }
+                        else { game->scenario.aiFrequency = 32; game->scenario.aiThreshold = 29; }
+                        game->scenario.scenarioNoticeId = notice_id;
+                        if (notice_id != 0) { game->ui.transitionDebounce = 5; game->scenario.scenarioNoticeCode = (int8_t)notice_id; continue; }
+                        game->ui.transitionDebounce = 0;
                     }
                 }
-                if (gc->scenario.activeScenario <= 1) {
-                    if (gc->scenario.difficultySlot == 0) { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
-                    if (gc->scenario.difficultySlot == 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 22; }
-                    if (gc->scenario.difficultyA == 0) { gc->economy.interestRate = 4; gc->economy.enterpriseTaxPct = 2; }
-                    if (gc->scenario.difficultyA == 1) { gc->economy.interestRate = 8; gc->economy.enterpriseTaxPct = 5; }
-                    if (gc->scenario.difficultyB == 0) { gc->world.mapGenColumns /= 2; gc->world.mapGenRows /= 2; }
-                    if (gc->scenario.difficultyC == 0) {
-                        gc->world.terrainFeatureStage7Count /= 2; gc->world.terrainFeatureStage6Count /= 2;
-                        gc->world.weightAccel /= 2; gc->world.weightAccel2 /= 2; gc->world.weightAccel3 /= 2; gc->world.weightAccel4 /= 2;
+                if (game->scenario.activeScenario <= 1) {
+                    if (game->scenario.difficultySlot == 0) { game->scenario.aiFrequency = 32; game->scenario.aiThreshold = 29; }
+                    if (game->scenario.difficultySlot == 1) { game->scenario.aiFrequency = 25; game->scenario.aiThreshold = 22; }
+                    if (game->scenario.difficultyA == 0) { game->economy.interestRate = 4; game->economy.enterpriseTaxPct = 2; }
+                    if (game->scenario.difficultyA == 1) { game->economy.interestRate = 8; game->economy.enterpriseTaxPct = 5; }
+                    if (game->scenario.difficultyB == 0) { game->world.mapGenColumns /= 2; game->world.mapGenRows /= 2; }
+                    if (game->scenario.difficultyC == 0) {
+                        game->world.terrainFeatureStage7Count /= 2; game->world.terrainFeatureStage6Count /= 2;
+                        game->world.weightAccel /= 2; game->world.weightAccel2 /= 2; game->world.weightAccel3 /= 2; game->world.weightAccel4 /= 2;
                     }
                 }
             }
-            if (gc->loadStep == 3) {
-                gc->ui.buildMenuItemIndex = 0;
-                gc->ui.buildMenuMode = 0;
-                gc_loadState25Setup(gc, 0);
+            if (game->loadStep == 3) {
+                game->ui.buildMenuItemIndex = 0;
+                game->ui.buildMenuMode = 0;
+                game_loadState25Setup(game, 0);
             }
-            if (gc->loadStep <= 3) break;
-            gc_loadState25Setup(gc, 1);
-            if (gc->world.mapGenTilesDone != gc->world.totalTilesToGenerate) break;
-            gc->world.mapGenTilesDone = 0;
-            gc_setState(gc, +GameState::Playing);
+            if (game->loadStep <= 3) break;
+            game_loadState25Setup(game, 1);
+            if (game->world.mapGenTilesDone != game->world.totalTilesToGenerate) break;
+            game->world.mapGenTilesDone = 0;
+            game_setState(game, +GameState::Playing);
             break;
         }
         case +GameState::Playing: {
-            gc_simulationTick(gc);
+            game_simulationTick(game);
             break;
         }
         case +GameState::BuildingMinimap: {
-            if (gc->loadStep > 0) --gc->loadStep;
-            if (gc->loadStep != 2) break;
-            int size = gc->world.mapHeight + gc->world.mapWidth;
-            gc->renderer.backbuffer = Image::create_blank(size, size);
-            gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
-            midp_set_color(gc->renderer.backbuffer_surface, 0);
-            midp_fill_rect(gc->renderer.backbuffer_surface, 0, 0, size, size);
+            if (game->loadStep > 0) --game->loadStep;
+            if (game->loadStep != 2) break;
+            int size = game->world.mapHeight + game->world.mapWidth;
+            game->renderer.backbuffer = Image::create_blank(size, size);
+            game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
+            midp_set_color(game->renderer.backbuffer_surface, 0);
+            midp_fill_rect(game->renderer.backbuffer_surface, 0, 0, size, size);
             int previous_kind = -1;
             int kind = 0;
-            for (int x = 0; x < gc->world.mapWidth; ++x) {
-                for (int y = 0; y < gc->world.mapHeight; ++y) {
-                    int draw_y = gc->world.mapWidth - x + y;
+            for (int x = 0; x < game->world.mapWidth; ++x) {
+                for (int y = 0; y < game->world.mapHeight; ++y) {
+                    int draw_y = game->world.mapWidth - x + y;
                     int draw_x = x + y;
-                    int tile = gc->world.tileMap[x][y];
-                    int track = gc->world.trackMap[x][y];
+                    int tile = game->world.tileMap[x][y];
+                    int track = game->world.trackMap[x][y];
                     if (tile == 0) kind = 1;
                     if (tile >= 3 && tile <= 28) kind = 2;
                     if (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST) kind = 3;
@@ -371,94 +371,94 @@ void gc_update(Game *gc) {
                     if (kind != previous_kind) {
                         switch (kind) {
                             case 1:
-                                if (gc->world.tileElevation[x][y] == -1) midp_set_color(gc->renderer.backbuffer_surface, 3167360);
-                                if (gc->world.tileElevation[x][y] == 0) midp_set_color(gc->renderer.backbuffer_surface, 5274640);
-                                if (gc->world.tileElevation[x][y] == 1) midp_set_color(gc->renderer.backbuffer_surface, 6327328);
-                                if (gc->world.tileElevation[x][y] == 2) midp_set_color(gc->renderer.backbuffer_surface, 7380016);
-                                if (gc->world.tileElevation[x][y] == 3) midp_set_color(gc->renderer.backbuffer_surface, 8432704);
+                                if (game->world.tileElevation[x][y] == -1) midp_set_color(game->renderer.backbuffer_surface, 3167360);
+                                if (game->world.tileElevation[x][y] == 0) midp_set_color(game->renderer.backbuffer_surface, 5274640);
+                                if (game->world.tileElevation[x][y] == 1) midp_set_color(game->renderer.backbuffer_surface, 6327328);
+                                if (game->world.tileElevation[x][y] == 2) midp_set_color(game->renderer.backbuffer_surface, 7380016);
+                                if (game->world.tileElevation[x][y] == 3) midp_set_color(game->renderer.backbuffer_surface, 8432704);
                                 break;
-                            case 2: midp_set_color(gc->renderer.backbuffer_surface, 6327312); break;
-                            case 3: midp_set_color(gc->renderer.backbuffer_surface, 0x909040); break;
-                            case 4: midp_set_color(gc->renderer.backbuffer_surface, 0x606060); break;
-                            case 5: midp_set_color(gc->renderer.backbuffer_surface, 0x404040); break;
-                            case 6: midp_set_color(gc->renderer.backbuffer_surface, 0xFC0000); break;
-                            case 7: midp_set_color(gc->renderer.backbuffer_surface, 0x101010); break;
-                            case 8: midp_set_color(gc->renderer.backbuffer_surface, 0xFC9C00); break;
-                            case 9: midp_set_color(gc->renderer.backbuffer_surface, 0x78DC1E); break;
-                            case 10: midp_set_color(gc->renderer.backbuffer_surface, 0xFCFC00); break;
-                            case 11: midp_set_color(gc->renderer.backbuffer_surface, 0x80C4FC); break;
-                            case 12: midp_set_color(gc->renderer.backbuffer_surface, 0); break;
-                            case 13: midp_set_color(gc->renderer.backbuffer_surface, 14287063); break;
-                            case 14: midp_set_color(gc->renderer.backbuffer_surface, 16738557); break;
-                            case 15: midp_set_color(gc->renderer.backbuffer_surface, 16040947); break;
+                            case 2: midp_set_color(game->renderer.backbuffer_surface, 6327312); break;
+                            case 3: midp_set_color(game->renderer.backbuffer_surface, 0x909040); break;
+                            case 4: midp_set_color(game->renderer.backbuffer_surface, 0x606060); break;
+                            case 5: midp_set_color(game->renderer.backbuffer_surface, 0x404040); break;
+                            case 6: midp_set_color(game->renderer.backbuffer_surface, 0xFC0000); break;
+                            case 7: midp_set_color(game->renderer.backbuffer_surface, 0x101010); break;
+                            case 8: midp_set_color(game->renderer.backbuffer_surface, 0xFC9C00); break;
+                            case 9: midp_set_color(game->renderer.backbuffer_surface, 0x78DC1E); break;
+                            case 10: midp_set_color(game->renderer.backbuffer_surface, 0xFCFC00); break;
+                            case 11: midp_set_color(game->renderer.backbuffer_surface, 0x80C4FC); break;
+                            case 12: midp_set_color(game->renderer.backbuffer_surface, 0); break;
+                            case 13: midp_set_color(game->renderer.backbuffer_surface, 14287063); break;
+                            case 14: midp_set_color(game->renderer.backbuffer_surface, 16738557); break;
+                            case 15: midp_set_color(game->renderer.backbuffer_surface, 16040947); break;
                         }
                     }
                     previous_kind = kind;
-                    midp_draw_line(gc->renderer.backbuffer_surface, draw_x, draw_y,
+                    midp_draw_line(game->renderer.backbuffer_surface, draw_x, draw_y,
                                    draw_x + 1, draw_y);
                 }
                 previous_kind = -1;
             }
-            gc_setState(gc, +GameState::MapOverview);
+            game_setState(game, +GameState::MapOverview);
             break;
         }
         case +GameState::MapOverview:
-            gc_viewportPanKey(gc);
+            game_viewportPanKey(game);
             break;
         case +GameState::BuildingPath:
-            if (gc->loadStep > 0) --gc->loadStep;
-            if (gc->loadStep != 2) break;
-            if (gc_tryBuildPath(gc)) {
-                gc_setState(gc, +GameState::Playing);
-                gc->ui.buildMenuItemIndex = 0;
-                gc->build.buildCancelled = true;
-                gc->ui.buildMenuMode = 2;
-                gc->ui.menuDirty = true;
+            if (game->loadStep > 0) --game->loadStep;
+            if (game->loadStep != 2) break;
+            if (game_tryBuildPath(game)) {
+                game_setState(game, +GameState::Playing);
+                game->ui.buildMenuItemIndex = 0;
+                game->build.buildCancelled = true;
+                game->ui.buildMenuMode = 2;
+                game->ui.menuDirty = true;
                 break;
             }
-            gc->ui.buildMenuItemIndex = 0;
-            gc->build.buildCancelled = true;
-            gc->ui.buildMenuMode = 1;
-            gc->ui.menuDirty = true;
-            gc->ready = false;
-            gc->ui.transitionCode = 12;
-            gc_setState(gc, +GameState::MenuOverlay);
+            game->ui.buildMenuItemIndex = 0;
+            game->build.buildCancelled = true;
+            game->ui.buildMenuMode = 1;
+            game->ui.menuDirty = true;
+            game->ready = false;
+            game->ui.transitionCode = 12;
+            game_setState(game, +GameState::MenuOverlay);
             break;
         case +GameState::SavingGame:
-            if (gc->loadStep > 0) --gc->loadStep;
-            if (gc->loadStep != 2) break;
-            gc_saveAllMapArrays(gc);
-            gc->ui.buildMenuItemIndex = 0;
-            gc->ui.menuDirty = true;
-            gc_setState(gc, +GameState::Playing);
+            if (game->loadStep > 0) --game->loadStep;
+            if (game->loadStep != 2) break;
+            game_saveAllMapArrays(game);
+            game->ui.buildMenuItemIndex = 0;
+            game->ui.menuDirty = true;
+            game_setState(game, +GameState::Playing);
             break;
         case +GameState::LoadingGame:
-            if (gc->loadStep > 0) --gc->loadStep;
-            if (gc->loadStep != 2) break;
-            gc_restoreAllMapArrays(gc);
-            gc->ui.pauseFlag = false;
-            gc->ui.buildMenuItemIndex = 0;
-            gc->ui.menuDirty = true;
-            gc_setState(gc, +GameState::Playing);
+            if (game->loadStep > 0) --game->loadStep;
+            if (game->loadStep != 2) break;
+            game_restoreAllMapArrays(game);
+            game->ui.pauseFlag = false;
+            game->ui.buildMenuItemIndex = 0;
+            game->ui.menuDirty = true;
+            game_setState(game, +GameState::Playing);
             break;
         case +GameState::AiTurn:
-            if (gc->loadStep > 0) --gc->loadStep;
-            if (gc->loadStep != 2) break;
-            if (gc->build.nextTrackPieceCode - track::AI_PIECE_FIRST < gc->scenario.difficultyCycle) {
-                gc_placeCitiesAndIndustry(gc);
-                gc_setState(gc, +GameState::Playing);
+            if (game->loadStep > 0) --game->loadStep;
+            if (game->loadStep != 2) break;
+            if (game->build.nextTrackPieceCode - track::AI_PIECE_FIRST < game->scenario.difficultyCycle) {
+                game_placeCitiesAndIndustry(game);
+                game_setState(game, +GameState::Playing);
                 break;
             }
-            ++gc->build.nextTrackPieceCode;
-            if (gc->build.nextTrackPieceCode == track::AI_PIECE_WRAP) gc->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
-            gc_setState(gc, +GameState::Playing);
+            ++game->build.nextTrackPieceCode;
+            if (game->build.nextTrackPieceCode == track::AI_PIECE_WRAP) game->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
+            game_setState(game, +GameState::Playing);
             break;
         case +GameState::HighScoreSync:
-            if (gc->loadStep > 0) --gc->loadStep;
-            if (gc->loadStep != 2) break;
-            gc->ui.transitionCode = gc_syncHighScores(gc, gc->scenario.highScoreUploadRequested)
+            if (game->loadStep > 0) --game->loadStep;
+            if (game->loadStep != 2) break;
+            game->ui.transitionCode = game_syncHighScores(game, game->scenario.highScoreUploadRequested)
                                  ? 19 : 18;
-            gc_setState(gc, +GameState::MenuOverlay);
+            game_setState(game, +GameState::MenuOverlay);
             break;
     }
 }

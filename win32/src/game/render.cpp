@@ -7,7 +7,7 @@
 static int imin(int a, int b) { return a < b ? a : b; }
 static int imax(int a, int b) { return a > b ? a : b; }
 
-void gc_renderFontString(Game *gc, Surface *g, int32_t n, int32_t n2,
+void game_renderFontString(Game *game, Surface *g, int32_t n, int32_t n2,
                         std::span<const int8_t> codes, bool bl) {
     int n3 = n;
     midp_set_color(g, 0);
@@ -15,14 +15,14 @@ void gc_renderFontString(Game *gc, Surface *g, int32_t n, int32_t n2,
     for (int i = 0; i < len; ++i) {
         int8_t by = codes[i];
         if (bl) {
-            midp_set_clip(g, gc->renderer.clipX, gc->renderer.clipY, gc->renderer.clipWidth, gc->renderer.clipHeight);
+            midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
             midp_clip_rect(g, n3, n2 - 4, 5, 12);
         } else {
             midp_set_clip(g, n3, n2 - 4, 5, 12);
         }
         if (by == 0) { n3 += 6; continue; }
         if (by < 32) {
-            midp_draw_image(g, gc->assets.font_images[(by - 1) / 16].get(), n3 - 5 * ((by - 1) % 16), n2, 20);
+            midp_draw_image(g, game->assets.font_images[(by - 1) / 16].get(), n3 - 5 * ((by - 1) % 16), n2, 20);
             n3 += 6;
             continue;
         }
@@ -49,16 +49,16 @@ void gc_renderFontString(Game *gc, Surface *g, int32_t n, int32_t n2,
             continue;
         }
         if (by < 70) {
-            midp_draw_image(g, gc->assets.font_images[2 + (by - 40) / 16].get(), n3 - 5 * ((by - 40) % 16), n2, 20);
+            midp_draw_image(g, game->assets.font_images[2 + (by - 40) / 16].get(), n3 - 5 * ((by - 40) % 16), n2, 20);
             n3 += 6;
             continue;
         }
         if (by >= 100) continue;
-        midp_draw_image(g, gc->assets.font_images[4 + (by - 70) / 16].get(), n3 - 5 * ((by - 70) % 16), n2, 20);
+        midp_draw_image(g, game->assets.font_images[4 + (by - 70) / 16].get(), n3 - 5 * ((by - 70) % 16), n2, 20);
         n3 += 6;
     }
     if (bl) {
-        midp_set_clip(g, gc->renderer.clipX, gc->renderer.clipY, gc->renderer.clipWidth, gc->renderer.clipHeight);
+        midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
     } else {
         midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
     }
@@ -69,42 +69,42 @@ void gc_renderFontString(Game *gc, Surface *g, int32_t n, int32_t n2,
 // slots = the offered wagon in wagonOptionSlots); contextCode 26 is the
 // slotIndex-th car of the train under the cursor. Returns NULL when the slot has
 // no sprite.
-Image *gc_wagonCarSprite(Game *gc, int32_t contextCode, int32_t slotIndex) {
+Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
     if (contextCode == 23) {
-        if (slotIndex == 0 && gc->build.wagonType >= 0 && gc->build.wagonType < 3)
-            return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
-        if (slotIndex == 0 && gc->build.wagonType >= 3 && gc->build.wagonType < 6)
-            return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
+        if (slotIndex == 0 && game->build.wagonType >= 0 && game->build.wagonType < 3)
+            return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[136])].get();
+        if (slotIndex == 0 && game->build.wagonType >= 3 && game->build.wagonType < 6)
+            return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[146])].get();
         if (slotIndex > 0) {
-            switch (gc->build.wagonOptionSlots[slotIndex - 1]) {
+            switch (game->build.wagonOptionSlots[slotIndex - 1]) {
                 case -1: return NULL;
-                case 0: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
-                case 1: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
-                case 2: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[172])].get();
-                case 3: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[182])].get();
+                case 0: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[162])].get();
+                case 1: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[167])].get();
+                case 2: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[172])].get();
+                case 3: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[182])].get();
             }
         }
     }
-    if (contextCode == 26 && gc_countCarsInTrain(gc, gc->trainAtCursor) > slotIndex) {
-        int carSlot = gc->trainAtCursor;
-        for (int i = 0; i < slotIndex; ++i) carSlot = gc->fleet.nextCar[carSlot];
-        int carType = gc->fleet.trainFlags[carSlot] & 0xF;
+    if (contextCode == 26 && game_countCarsInTrain(game, game->trainAtCursor) > slotIndex) {
+        int carSlot = game->trainAtCursor;
+        for (int i = 0; i < slotIndex; ++i) carSlot = game->fleet.nextCar[carSlot];
+        int carType = game->fleet.trainFlags[carSlot] & 0xF;
         switch (carType) {
             case -1: return NULL;
-            case 0: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
-            case 1: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
-            case 2: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
-            case 3: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
-            case 4: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[172])].get();
-            case 5: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[177])].get();
-            case 6: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[182])].get();
-            case 7: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[187])].get();
+            case 0: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[136])].get();
+            case 1: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[146])].get();
+            case 2: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[162])].get();
+            case 3: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[167])].get();
+            case 4: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[172])].get();
+            case 5: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[177])].get();
+            case 6: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[182])].get();
+            case 7: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[187])].get();
         }
     }
     return NULL;
 }
 
-void gc_drawTextBox(Game *gc, Surface *g, int32_t n, int32_t n2,
+void game_drawTextBox(Game *game, Surface *g, int32_t n, int32_t n2,
                     int32_t n3, int32_t n4,
                     std::span<const int8_t> codes) {
     int n5 = 0;
@@ -118,21 +118,21 @@ void gc_drawTextBox(Game *gc, Surface *g, int32_t n, int32_t n2,
     if ((n4 & 2) == 2) n2 -= 5;
     if ((n4 & 4) == 4) n -= n5 + 6;
     if (n4 == 37) { n = 0; n2 = 15 + gcs_gameplayViewportHeight - 15; }
-    midp_set_color(g, gc->graphColors[3 * n3]);
+    midp_set_color(g, game->graphColors[3 * n3]);
     midp_fill_rect(g, n, n2, n5 + 5, 13);
-    midp_set_color(g, gc->graphColors[3 * n3 + 1]);
+    midp_set_color(g, game->graphColors[3 * n3 + 1]);
     midp_draw_rect(g, n, n2, n5 + 5, 13);
-    midp_set_color(g, gc->graphColors[3 * n3 + 2]);
+    midp_set_color(g, game->graphColors[3 * n3 + 2]);
     midp_draw_rect(g, n, n2 + 13, n5 + 5, 0);
     midp_draw_rect(g, n + n5 + 5, n2, 0, 13);
-    gc_renderFontString(gc, g, n + 4, n2 + 5, codes, false);
+    game_renderFontString(game, g, n + 4, n2 + 5, codes, false);
 }
 
-void gc_drawRectFill(Game *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
-    const auto engine_codes = gc_tracked_codes(gc->assets.spriteBitmapTable[
-        gc->assets.spriteIndexTable[80 + (gc->ui.trainSelectionIndex[by] >> 8 & 0xFF)]]);
-    const auto wagon_codes = gc_tracked_codes(gc->assets.spriteBitmapTable[
-        gc->assets.spriteIndexTable[86 + (gc->ui.trainSelectionIndex[by] & 0xFF)]]);
+void game_drawRectFill(Game *game, Surface *g, int32_t n, int32_t n2, int8_t by) {
+    const auto engine_codes = game_tracked_codes(game->assets.spriteBitmapTable[
+        game->assets.spriteIndexTable[80 + (game->ui.trainSelectionIndex[by] >> 8 & 0xFF)]]);
+    const auto wagon_codes = game_tracked_codes(game->assets.spriteBitmapTable[
+        game->assets.spriteIndexTable[86 + (game->ui.trainSelectionIndex[by] & 0xFF)]]);
     std::vector<int8_t> train_codes;
     train_codes.reserve(wagon_codes.size() + engine_codes.size());
     train_codes.insert(train_codes.end(), wagon_codes.begin(), wagon_codes.end());
@@ -149,117 +149,117 @@ void gc_drawRectFill(Game *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
     midp_set_color(g, RGB3(255, 130, 0));
     midp_draw_rect(g, n, n2 + 11, n3 + 5, 0);
     midp_draw_rect(g, n + n3 + 5, n2, 0, 11);
-    gc->renderer.clipX = 0;
-    gc->renderer.clipY = 15;
-    gc->renderer.clipWidth = gcs_screenWidth;
-    gc->renderer.clipHeight = gcs_gameplayViewportHeight;
-    gc_renderFontString(gc, g, n + 4, n2 + 3, train_codes, true);
+    game->renderer.clipX = 0;
+    game->renderer.clipY = 15;
+    game->renderer.clipWidth = gcs_screenWidth;
+    game->renderer.clipHeight = gcs_gameplayViewportHeight;
+    game_renderFontString(game, g, n + 4, n2 + 3, train_codes, true);
 }
 
-void gc_renderPackedSprite(Game *gc, Surface *g, int32_t n) {
+void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
     int n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13;
     int8_t by;
-    if (gc->renderer.lastRenderedSpriteId != n) {
-        gc->renderer.spriteJustChanged = 1;
-        gc->renderer.lastRenderedSpriteId = n;
+    if (game->renderer.lastRenderedSpriteId != n) {
+        game->renderer.spriteJustChanged = 1;
+        game->renderer.lastRenderedSpriteId = n;
     }
-    if (gc->renderer.spriteJustChanged != 0) gc->renderer.needsRepaint = false;
-    if (gc->renderer.mapRedrawPending) {
-        gc->ui.menuDirty = true;
-        gc_renderMap(gc, g);
-        gc->renderer.mapRedrawPending = false;
+    if (game->renderer.spriteJustChanged != 0) game->renderer.needsRepaint = false;
+    if (game->renderer.mapRedrawPending) {
+        game->ui.menuDirty = true;
+        game_renderMap(game, g);
+        game->renderer.mapRedrawPending = false;
     }
-    int16_t s = gc->assets.spriteOffsetTable[n];
-    int n14 = 65536 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 1]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 2]) + gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 3]);
-    int n15 = 65536 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 4]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 5]) + gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 6]);
-    int n16 = 65536 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 7]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 8]) + gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 9]);
-    int n17 = 65536 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 10]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 11]) + gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 12]);
-    int n18 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 13]);
-    int n19 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 14]);
-    if (gc->renderer.dialogContentHeight < n19) gc->renderer.dialogContentHeight = n19;
-    else n19 = gc->renderer.dialogContentHeight;
-    if (gc->ui.cursorOverUI || gc->ui.cursorAllowZoomOut) n18 += 6;
-    gc->renderer.currentSpriteId = gc->assets.spriteData[s + 15];
+    int16_t s = game->assets.spriteOffsetTable[n];
+    int n14 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 1]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 2]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 3]);
+    int n15 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 4]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 5]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 6]);
+    int n16 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 7]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 8]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 9]);
+    int n17 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 10]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 11]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 12]);
+    int n18 = game_byteToUnsignedInt(game, game->assets.spriteData[s + 13]);
+    int n19 = game_byteToUnsignedInt(game, game->assets.spriteData[s + 14]);
+    if (game->renderer.dialogContentHeight < n19) game->renderer.dialogContentHeight = n19;
+    else n19 = game->renderer.dialogContentHeight;
+    if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) n18 += 6;
+    game->renderer.currentSpriteId = game->assets.spriteData[s + 15];
     int n20 = (gcs_screenWidth - n18) / 2;
     int n21 = (gcs_hs - n19) / 2;
     int n22 = 6, n23 = 6, n24 = 6;
-    if (gc->renderer.needsRepaint) {
+    if (game->renderer.needsRepaint) {
         midp_set_color(g, n14); midp_fill_rect(g, n20, n21, n18, n19);
         midp_set_color(g, n16); midp_draw_rect(g, n20, n21, n18, n19);
         midp_set_color(g, n15); midp_draw_rect(g, n20, n21, 0, n19);
         midp_draw_rect(g, n20, n21, n18, 0);
     }
-    gc->ui.pauseMenuOpen = false;
-    if ((gc->assets.spriteData[s] & 1) == 1) {
-        if (gc->renderer.needsRepaint && gc->ui.cursorDragY == -1) {
+    game->ui.pauseMenuOpen = false;
+    if ((game->assets.spriteData[s] & 1) == 1) {
+        if (game->renderer.needsRepaint && game->ui.cursorDragY == -1) {
             midp_set_color(g, n17);
             midp_fill_rect(g, n20 + n18 - 10, n21 + 3, 7, 7);
         }
-        if (gc->renderer.needsRepaint) {
+        if (game->renderer.needsRepaint) {
             midp_set_color(g, n16);
             midp_draw_rect(g, n20 + n18 - 10, n21 + 3, 7, 7);
             midp_draw_line(g, n20 + n18 - 8, n21 + 5, n20 + n18 - 5, n21 + 8);
             midp_draw_line(g, n20 + n18 - 8, n21 + 8, n20 + n18 - 5, n21 + 5);
         }
-        gc->ui.pauseMenuOpen = true;
+        game->ui.pauseMenuOpen = true;
         n24 = 19;
-    } else if (gc->ui.cursorDragY == -1) {
-        gc->ui.cursorDragY = -3;
+    } else if (game->ui.cursorDragY == -1) {
+        game->ui.cursorDragY = -3;
     }
     int n25 = s + 16;
-    if ((gc->assets.spriteData[s] & 2) == 2) {
-        if (gc->renderer.needsRepaint) midp_set_color(g, n16);
-        if (gc->renderer.needsRepaint) midp_draw_rect(g, n20 + 2, n21 + 13, n18 - 4, 0);
-        gc->renderer.clipX = n20; gc->renderer.clipY = n21; gc->renderer.clipWidth = n18; gc->renderer.clipHeight = n19;
-        if (gc->renderer.needsRepaint)
-            gc_renderFontString(gc, g, n20 + 3, n21 + 5,
-                                gc_readPackedTextCodes(gc, s + 16), true);
-        n25 += 1 + gc->assets.spriteData[s + 16];
+    if ((game->assets.spriteData[s] & 2) == 2) {
+        if (game->renderer.needsRepaint) midp_set_color(g, n16);
+        if (game->renderer.needsRepaint) midp_draw_rect(g, n20 + 2, n21 + 13, n18 - 4, 0);
+        game->renderer.clipX = n20; game->renderer.clipY = n21; game->renderer.clipWidth = n18; game->renderer.clipHeight = n19;
+        if (game->renderer.needsRepaint)
+            game_renderFontString(game, g, n20 + 3, n21 + 5,
+                                game_readPackedTextCodes(game, s + 16), true);
+        n25 += 1 + game->assets.spriteData[s + 16];
         n22 = 19; n23 = 19; n24 = 19;
     }
     int n26 = n20 + 4;
-    gc->renderer.clipX = n20 + 1;
-    gc->renderer.clipY = n21 + n22 - 4;
-    gc->renderer.clipWidth = n18 - 2;
-    gc->renderer.clipHeight = n19 - n22 + 3;
-    midp_set_clip(g, gc->renderer.clipX, gc->renderer.clipY, gc->renderer.clipWidth, gc->renderer.clipHeight);
-    if (gc->renderer.needsRepaint && gc->ui.cursorOverUI) {
+    game->renderer.clipX = n20 + 1;
+    game->renderer.clipY = n21 + n22 - 4;
+    game->renderer.clipWidth = n18 - 2;
+    game->renderer.clipHeight = n19 - n22 + 3;
+    midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
+    if (game->renderer.needsRepaint && game->ui.cursorOverUI) {
         midp_set_color(g, n16);
         midp_draw_rect(g, n20 + n18 - 6, n21 + n24 - 1, 4, 0);
         midp_draw_rect(g, n20 + n18 - 5, n21 + n24 - 2, 2, 0);
         midp_draw_rect(g, n20 + n18 - 4, n21 + n24 - 3, 0, 0);
     }
-    if (gc->renderer.needsRepaint && gc->ui.cursorAllowZoomOut) {
+    if (game->renderer.needsRepaint && game->ui.cursorAllowZoomOut) {
         midp_set_color(g, n16);
         midp_draw_rect(g, n20 + n18 - 6, n21 + n19 - 5, 4, 0);
         midp_draw_rect(g, n20 + n18 - 5, n21 + n19 - 4, 2, 0);
         midp_draw_rect(g, n20 + n18 - 4, n21 + n19 - 3, 0, 0);
     }
-    gc->ui.cursorSelectY = -2;
-    gc->ui.cursorSelectX = -2;
-    gc->ui.cursorOverUI = false;
-    gc->ui.cursorAllowZoomOut = false;
-    gc->ui.cursorDragX = -1;
-    int n27 = gc->assets.spriteData[n25++];
+    game->ui.cursorSelectY = -2;
+    game->ui.cursorSelectX = -2;
+    game->ui.cursorOverUI = false;
+    game->ui.cursorAllowZoomOut = false;
+    game->ui.cursorDragX = -1;
+    int n27 = game->assets.spriteData[n25++];
     for (n13 = 0; n13 < n27; ++n13) {
-        n12 = n21 + n22 - gc->ui.cursorScale;
-        if (((by = gc->assets.spriteData[n25++]) & 0x80) == 0) {
+        n12 = n21 + n22 - game->ui.cursorScale;
+        if (((by = game->assets.spriteData[n25++]) & 0x80) == 0) {
             int n28;
-            n11 = (by & 4) == 4 ? 0 : gc->assets.spriteData[n25++];
-            n10 = (by & 2) == 2 ? 0 : gc->assets.spriteData[n25++];
+            n11 = (by & 4) == 4 ? 0 : game->assets.spriteData[n25++];
+            n10 = (by & 2) == 2 ? 0 : game->assets.spriteData[n25++];
             n9 = (by & 0x40) == 64 ? 1 : 0;
             n8 = (by & 0x20) == 32 ? 1 : 0;
-            n7 = n9 != 0 ? gc->assets.spriteData[n25++] : 0;
-            n6 = n8 != 0 ? gc->assets.spriteData[n25++] : 0;
-            n5 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : 0;
-            n4 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : 0;
-            n3 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : 0;
-            n2 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : 0;
-            int8_t by2 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : (int8_t)0;
+            n7 = n9 != 0 ? game->assets.spriteData[n25++] : 0;
+            n6 = n8 != 0 ? game->assets.spriteData[n25++] : 0;
+            n5 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
+            n4 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
+            n3 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
+            n2 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
+            int8_t by2 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : (int8_t)0;
             std::optional<std::vector<int8_t>> text_codes = n8 != 0
-                ? gc_resolveDialogValue(gc, gc->renderer.currentSpriteId, n6)
+                ? game_resolveDialogValue(game, game->renderer.currentSpriteId, n6)
                 : std::optional<std::vector<int8_t>>(
-                    gc_readPackedTextCodes(gc, n25));
+                    game_readPackedTextCodes(game, n25));
             int n29 = 0;
             if (!text_codes) continue;
             const int blen = static_cast<int>(text_codes->size());
@@ -267,28 +267,28 @@ void gc_renderPackedSprite(Game *gc, Surface *g, int32_t n) {
                 if ((*text_codes)[n28] >= 32 && (*text_codes)[n28] <= 39) continue;
                 ++n29;
             }
-            if (n8 == 0) n25 = n25 + gc->assets.spriteData[n25] + 1;
-            if (n12 + n10 + 6 + by2 >= gc->renderer.clipY + gc->renderer.clipHeight) {
-                n28 = n19 + (n12 + n10 + 6 + by2 + n3 + 3 - (gc->renderer.clipHeight + gc->renderer.clipY));
-                if (gc->renderer.dialogContentHeight < n28) gc->renderer.dialogContentHeight = n28;
-                if (gc->renderer.dialogContentHeight > gcs_hs - 20) gc->renderer.dialogContentHeight = gcs_hs - 20;
+            if (n8 == 0) n25 = n25 + game->assets.spriteData[n25] + 1;
+            if (n12 + n10 + 6 + by2 >= game->renderer.clipY + game->renderer.clipHeight) {
+                n28 = n19 + (n12 + n10 + 6 + by2 + n3 + 3 - (game->renderer.clipHeight + game->renderer.clipY));
+                if (game->renderer.dialogContentHeight < n28) game->renderer.dialogContentHeight = n28;
+                if (game->renderer.dialogContentHeight > gcs_hs - 20) game->renderer.dialogContentHeight = gcs_hs - 20;
             }
-            if (gc->renderer.needsRepaint && n12 + n10 + 6 + by2 >= gc->renderer.clipY + gc->renderer.clipHeight)
-                gc->ui.cursorAllowZoomOut = true;
-            if (n9 != 0 && (n9 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n7))) continue;
-            if (n12 + n10 - n3 - 3 <= gc->renderer.clipY + gc->renderer.clipHeight && n12 + n10 + 8 + by2 >= gc->renderer.clipY) {
+            if (game->renderer.needsRepaint && n12 + n10 + 6 + by2 >= game->renderer.clipY + game->renderer.clipHeight)
+                game->ui.cursorAllowZoomOut = true;
+            if (n9 != 0 && (n9 == 0 || !game_isResourceTile(game, game->renderer.currentSpriteId, n7))) continue;
+            if (n12 + n10 - n3 - 3 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 + 8 + by2 >= game->renderer.clipY) {
                 if ((by & 0x10) == 16) {
-                    if (gc->ui.cursorDragY == -3) gc->ui.cursorDragY = n13;
-                    if (n12 + n10 + 8 + by2 <= gc->renderer.clipY + gc->renderer.clipHeight && n12 + n10 - 3 - n3 >= gc->renderer.clipY) {
-                        if (n13 < gc->ui.cursorDragY) gc->ui.cursorSelectY = n13;
-                        if (gc->ui.cursorSelectX == -2 && n13 > gc->ui.cursorDragY) gc->ui.cursorSelectX = n13;
+                    if (game->ui.cursorDragY == -3) game->ui.cursorDragY = n13;
+                    if (n12 + n10 + 8 + by2 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 - 3 - n3 >= game->renderer.clipY) {
+                        if (n13 < game->ui.cursorDragY) game->ui.cursorSelectY = n13;
+                        if (game->ui.cursorSelectX == -2 && n13 > game->ui.cursorDragY) game->ui.cursorSelectX = n13;
                     }
-                    if (gc->renderer.needsRepaint && gc->ui.cursorDragY == n13) {
+                    if (game->renderer.needsRepaint && game->ui.cursorDragY == n13) {
                         midp_set_color(g, n17);
                         midp_fill_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
-                        gc->ui.cursorDragX = n5;
+                        game->ui.cursorDragX = n5;
                     }
-                    if (gc->renderer.needsRepaint && (by & 8) == 8) {
+                    if (game->renderer.needsRepaint && (by & 8) == 8) {
                         midp_set_color(g, n16);
                         midp_draw_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
                         midp_set_color(g, n15);
@@ -296,48 +296,48 @@ void gc_renderPackedSprite(Game *gc, Surface *g, int32_t n) {
                         midp_draw_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 0);
                     }
                 }
-                if (gc->renderer.needsRepaint)
-                    gc_renderFontString(gc, g, n26 + n11, n12 + n10,
+                if (game->renderer.needsRepaint)
+                    game_renderFontString(game, g, n26 + n11, n12 + n10,
                                         *text_codes, true);
             }
             n22 += 11 + n10;
             continue;
         }
         n11 = (by & 0x40) == 64 ? 1 : 0;
-        n10 = gc->assets.spriteData[n25++];
-        n9 = (by & 0x20) == 32 ? 0 : gc->assets.spriteData[n25++];
-        n8 = (by & 0x10) == 16 ? 0 : gc->assets.spriteData[n25++];
-        n7 = n11 != 0 ? gc->assets.spriteData[n25++] : 0;
-        Image *image = gc_wagonCarSprite(gc, gc->renderer.currentSpriteId, n10);
+        n10 = game->assets.spriteData[n25++];
+        n9 = (by & 0x20) == 32 ? 0 : game->assets.spriteData[n25++];
+        n8 = (by & 0x10) == 16 ? 0 : game->assets.spriteData[n25++];
+        n7 = n11 != 0 ? game->assets.spriteData[n25++] : 0;
+        Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, n10);
         if (image == NULL) continue;
         n5 = image->width();
         n4 = image->height();
-        if (n11 != 0 && (n11 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n7))) continue;
-        if (gc->renderer.needsRepaint && n12 + n8 <= gc->renderer.clipY + gc->renderer.clipHeight && n12 + n8 + n4 >= gc->renderer.clipY)
+        if (n11 != 0 && (n11 == 0 || !game_isResourceTile(game, game->renderer.currentSpriteId, n7))) continue;
+        if (game->renderer.needsRepaint && n12 + n8 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n8 + n4 >= game->renderer.clipY)
             midp_draw_image(g, image, n26 + n9, n12 + n8, 20);
-        if (gc->renderer.needsRepaint && n12 + n8 + n4 >= gc->renderer.clipY + gc->renderer.clipHeight)
-            gc->ui.cursorAllowZoomOut = true;
+        if (game->renderer.needsRepaint && n12 + n8 + n4 >= game->renderer.clipY + game->renderer.clipHeight)
+            game->ui.cursorAllowZoomOut = true;
         n22 += n4 + n8;
     }
-    n27 = gc->assets.spriteData[n25++];
+    n27 = game->assets.spriteData[n25++];
     for (n13 = 0; n13 < n27; ++n13) {
-        n12 = n21 + n23 - gc->ui.cursorScale;
-        by = gc->assets.spriteData[n25++];
+        n12 = n21 + n23 - game->ui.cursorScale;
+        by = game->assets.spriteData[n25++];
         n11 = by & 7;
-        n10 = 65536 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
-        n9 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
-        n8 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
-        n7 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
-        n6 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
-        n9 = (int16_t)((by & 8) == 8 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n9) : n9);
-        n8 = (int16_t)((by & 0x10) == 16 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n8) : n8);
-        n7 = (int16_t)((by & 0x20) == 32 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n7) : n7);
-        n6 = (int16_t)((by & 0x40) == 64 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n6) : n6);
+        n10 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
+        n9 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
+        n8 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
+        n7 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
+        n6 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
+        n9 = (int16_t)((by & 8) == 8 ? game_neighboursMask(game, game->renderer.currentSpriteId, n9) : n9);
+        n8 = (int16_t)((by & 0x10) == 16 ? game_neighboursMask(game, game->renderer.currentSpriteId, n8) : n8);
+        n7 = (int16_t)((by & 0x20) == 32 ? game_neighboursMask(game, game->renderer.currentSpriteId, n7) : n7);
+        n6 = (int16_t)((by & 0x40) == 64 ? game_neighboursMask(game, game->renderer.currentSpriteId, n6) : n6);
         n5 = (by & 0x80) == 128 ? 1 : 0;
-        n4 = n5 != 0 ? gc->assets.spriteData[n25++] : 0;
+        n4 = n5 != 0 ? game->assets.spriteData[n25++] : 0;
         n3 = n12 + n8;
         n2 = n3 + n6;
-        if (!gc->renderer.needsRepaint || (n5 != 0 && (n5 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n4)))) continue;
+        if (!game->renderer.needsRepaint || (n5 != 0 && (n5 == 0 || !game_isResourceTile(game, game->renderer.currentSpriteId, n4)))) continue;
         switch (n11) {
             case 0:
                 midp_set_color(g, n10);
@@ -362,13 +362,13 @@ void gc_renderPackedSprite(Game *gc, Surface *g, int32_t n) {
                 midp_fill_arc(g, n26 + n9, n12 + n8, n7, n6, 0, 360);
                 break;
         }
-        if (!gc->renderer.needsRepaint || n2 < gc->renderer.clipY + gc->renderer.clipHeight) continue;
-        gc->ui.cursorAllowZoomOut = true;
+        if (!game->renderer.needsRepaint || n2 < game->renderer.clipY + game->renderer.clipHeight) continue;
+        game->ui.cursorAllowZoomOut = true;
     }
-    if (gc->renderer.needsRepaint) {
-        if (gc->ui.cursorScale == 0 && gc->ui.cursorSelectY == -2) gc->ui.cursorSelectY = -1;
-        if (gc->ui.cursorScale > 0) gc->ui.cursorOverUI = true;
+    if (game->renderer.needsRepaint) {
+        if (game->ui.cursorScale == 0 && game->ui.cursorSelectY == -2) game->ui.cursorSelectY = -1;
+        if (game->ui.cursorScale > 0) game->ui.cursorOverUI = true;
     }
-    gc->renderer.needsRepaint = true;
-    if (gc->renderer.spriteJustChanged > 0) --gc->renderer.spriteJustChanged;
+    game->renderer.needsRepaint = true;
+    if (game->renderer.spriteJustChanged > 0) --game->renderer.spriteJustChanged;
 }

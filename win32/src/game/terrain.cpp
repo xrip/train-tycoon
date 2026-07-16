@@ -3,87 +3,87 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool gc_isPlaceableTerrain(Game *gc, int32_t n, int32_t n2) {
-    return gc->world.tileElevation[n][n2] >= 0
-           && (gc->world.tileMap[n][n2] == 0
-               || (gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST))
-           && gc->world.trackMap[n][n2] == 0;
+bool game_isPlaceableTerrain(Game *game, int32_t n, int32_t n2) {
+    return game->world.tileElevation[n][n2] >= 0
+           && (game->world.tileMap[n][n2] == 0
+               || (game->world.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.tileMap[n][n2] <= tile::SCENERY_LAST))
+           && game->world.trackMap[n][n2] == 0;
 }
 
-void gc_placeTrackTile(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
-    gc->world.tileMap[n][n2] = (int8_t)n3;
-    gc->world.trackMap[n][n2] = (int8_t)(0xC0 | n4);
+void game_placeTrackTile(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
+    game->world.tileMap[n][n2] = (int8_t)n3;
+    game->world.trackMap[n][n2] = (int8_t)(0xC0 | n4);
 }
 
-void gc_clearBuildPathTile(Game *gc, int32_t n, int32_t n2) {
-    if (n > 0 && n < gc->world.mapWidth && n2 > 0 && n2 < gc->world.mapHeight
-        && ((gc->world.tileMap[n][n2] >= 7 && gc->world.tileMap[n][n2] <= 10)
-            || (gc->world.tileMap[n][n2] >= 21 && gc->world.tileMap[n][n2] <= 24)
-            || gc->world.tileMap[n][n2] == 70 || gc->world.tileMap[n][n2] == 71)
-        && gc->pathfinder.distanceGrid[n][n2] > 0) {
-        gc->pathfinder.distanceGrid[n][n2] = 0;
+void game_clearBuildPathTile(Game *game, int32_t n, int32_t n2) {
+    if (n > 0 && n < game->world.mapWidth && n2 > 0 && n2 < game->world.mapHeight
+        && ((game->world.tileMap[n][n2] >= 7 && game->world.tileMap[n][n2] <= 10)
+            || (game->world.tileMap[n][n2] >= 21 && game->world.tileMap[n][n2] <= 24)
+            || game->world.tileMap[n][n2] == 70 || game->world.tileMap[n][n2] == 71)
+        && game->pathfinder.distanceGrid[n][n2] > 0) {
+        game->pathfinder.distanceGrid[n][n2] = 0;
     }
 }
 
-bool gc_isCurveTile(Game *gc, int32_t n, int32_t n2) {
-    int8_t by = gc->world.tileMap[n][n2];
+bool game_isCurveTile(Game *game, int32_t n, int32_t n2) {
+    int8_t by = game->world.tileMap[n][n2];
     if (by < 7 || by > 10) return false;
     bool bl = false;
-    if (by == 7)  bl |= gc_isTrackStepInlined(gc, n, n2, 0, -1, 10);
-    if (by == 10) bl |= gc_isTrackStepInlined(gc, n, n2, 0, 1, 7);
-    if (by == 8)  bl |= gc_isTrackStepInlined(gc, n, n2, -1, 0, 9);
-    if (by == 9)  bl |= gc_isTrackStepInlined(gc, n, n2, 1, 0, 8);
+    if (by == 7)  bl |= game_isTrackStepInlined(game, n, n2, 0, -1, 10);
+    if (by == 10) bl |= game_isTrackStepInlined(game, n, n2, 0, 1, 7);
+    if (by == 8)  bl |= game_isTrackStepInlined(game, n, n2, -1, 0, 9);
+    if (by == 9)  bl |= game_isTrackStepInlined(game, n, n2, 1, 0, 8);
     return bl;
 }
 
-bool gc_isCityOrStationTile(Game *gc, int32_t n, int32_t n2) {
-    if ((gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST)
-        || (gc->world.tileMap[n][n2] >= 70 && gc->world.tileMap[n][n2] <= 80 && gc->world.trackMap[n][n2] == 65)
-        || (gc->world.tileMap[n][n2] == tile::CROSSING && (gc->world.trackMap[n][n2] & 0x47) == 65)
-        || (gc->world.tileMap[n][n2] == tile::CROSSING && (gc->world.trackMap[n][n2] & 0x78) == 72)
-        || ((gc->world.tileMap[n][n2] == 87 || gc->world.tileMap[n][n2] == 88
-             || gc->world.tileMap[n][n2] == 89 || gc->world.tileMap[n][n2] == 90)
-            && gc->world.trackMap[n][n2] == 65)) {
-        int32_t n3 = gc_findServiceVehicleAt(gc, n, n2);
+bool game_isCityOrStationTile(Game *game, int32_t n, int32_t n2) {
+    if ((game->world.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.tileMap[n][n2] <= tile::SCENERY_LAST)
+        || (game->world.tileMap[n][n2] >= 70 && game->world.tileMap[n][n2] <= 80 && game->world.trackMap[n][n2] == 65)
+        || (game->world.tileMap[n][n2] == tile::CROSSING && (game->world.trackMap[n][n2] & 0x47) == 65)
+        || (game->world.tileMap[n][n2] == tile::CROSSING && (game->world.trackMap[n][n2] & 0x78) == 72)
+        || ((game->world.tileMap[n][n2] == 87 || game->world.tileMap[n][n2] == 88
+             || game->world.tileMap[n][n2] == 89 || game->world.tileMap[n][n2] == 90)
+            && game->world.trackMap[n][n2] == 65)) {
+        int32_t n3 = game_findServiceVehicleAt(game, n, n2);
         for (int i = 0; i < 500; ++i) {
-            if ((gc->fleet.trainFlags[i] & 0x80) != 128) continue;
-            int32_t n4 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]);
-            int32_t n5 = gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]);
+            if ((game->fleet.trainFlags[i] & 0x80) != 128) continue;
+            int32_t n4 = game_byteToUnsignedInt(game, game->fleet.trainX[i]);
+            int32_t n5 = game_byteToUnsignedInt(game, game->fleet.trainY[i]);
             if (n == n4 && n2 == n5) return false;
-            if (n3 == 5000 || n3 != gc_findServiceVehicleAt(gc, n4, n5)) continue;
+            if (n3 == 5000 || n3 != game_findServiceVehicleAt(game, n4, n5)) continue;
             return false;
         }
         return true;
     }
-    if (gc->world.tileMap[n][n2] >= 81 && gc->world.tileMap[n][n2] <= 86 && gc->world.trackMap[n][n2] == 65) {
+    if (game->world.tileMap[n][n2] >= 81 && game->world.tileMap[n][n2] <= 86 && game->world.trackMap[n][n2] == 65) {
         for (int i = 0; i < 500; ++i) {
             int32_t n6;
-            if ((gc->fleet.trainFlags[i] & 0x80) != 128) continue;
-            if (gc->world.tileMap[n][n2] == 81 || gc->world.tileMap[n][n2] == 84 || gc->world.tileMap[n][n2] == 85) {
-                for (n6 = n; n6 < gc->world.mapWidth
-                     && (gc->world.tileMap[n6][n2] == 81 || gc->world.tileMap[n6][n2] == 84
-                         || gc->world.tileMap[n6][n2] == 85); ++n6) {
-                    if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n2) continue;
+            if ((game->fleet.trainFlags[i] & 0x80) != 128) continue;
+            if (game->world.tileMap[n][n2] == 81 || game->world.tileMap[n][n2] == 84 || game->world.tileMap[n][n2] == 85) {
+                for (n6 = n; n6 < game->world.mapWidth
+                     && (game->world.tileMap[n6][n2] == 81 || game->world.tileMap[n6][n2] == 84
+                         || game->world.tileMap[n6][n2] == 85); ++n6) {
+                    if (game_byteToUnsignedInt(game, game->fleet.trainX[i]) != n6 || game_byteToUnsignedInt(game, game->fleet.trainY[i]) != n2) continue;
                     return false;
                 }
                 for (n6 = n - 1; n6 >= 0
-                     && (gc->world.tileMap[n6][n2] == 81 || gc->world.tileMap[n6][n2] == 84
-                         || gc->world.tileMap[n6][n2] == 85); --n6) {
-                    if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n6 || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n2) continue;
+                     && (game->world.tileMap[n6][n2] == 81 || game->world.tileMap[n6][n2] == 84
+                         || game->world.tileMap[n6][n2] == 85); --n6) {
+                    if (game_byteToUnsignedInt(game, game->fleet.trainX[i]) != n6 || game_byteToUnsignedInt(game, game->fleet.trainY[i]) != n2) continue;
                     return false;
                 }
                 continue;
             }
-            for (n6 = n2; n6 < gc->world.mapHeight
-                 && (gc->world.tileMap[n][n6] == 82 || gc->world.tileMap[n][n6] == 83
-                     || gc->world.tileMap[n][n6] == 86); ++n6) {
-                if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n6) continue;
+            for (n6 = n2; n6 < game->world.mapHeight
+                 && (game->world.tileMap[n][n6] == 82 || game->world.tileMap[n][n6] == 83
+                     || game->world.tileMap[n][n6] == 86); ++n6) {
+                if (game_byteToUnsignedInt(game, game->fleet.trainX[i]) != n || game_byteToUnsignedInt(game, game->fleet.trainY[i]) != n6) continue;
                 return false;
             }
             for (n6 = n2 - 1; n6 >= 0
-                 && (gc->world.tileMap[n][n6] == 82 || gc->world.tileMap[n][n6] == 83
-                     || gc->world.tileMap[n][n6] == 86); --n6) {
-                if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]) != n || gc_byteToUnsignedInt(gc, gc->fleet.trainY[i]) != n6) continue;
+                 && (game->world.tileMap[n][n6] == 82 || game->world.tileMap[n][n6] == 83
+                     || game->world.tileMap[n][n6] == 86); --n6) {
+                if (game_byteToUnsignedInt(game, game->fleet.trainX[i]) != n || game_byteToUnsignedInt(game, game->fleet.trainY[i]) != n6) continue;
                 return false;
             }
         }
@@ -92,45 +92,45 @@ bool gc_isCityOrStationTile(Game *gc, int32_t n, int32_t n2) {
     return false;
 }
 
-bool gc_isTileBuildable(Game *gc, int32_t x, int32_t y, int32_t type) {
+bool game_isTileBuildable(Game *game, int32_t x, int32_t y, int32_t type) {
     if (type == 5)
-        return gc_isTileBuildable(gc, x, y, 0)
-               && gc_isTileBuildable(gc, x, y - 1, 0)
-               && gc_isTileBuildable(gc, x, y + 1, 0);
+        return game_isTileBuildable(game, x, y, 0)
+               && game_isTileBuildable(game, x, y - 1, 0)
+               && game_isTileBuildable(game, x, y + 1, 0);
     if (type == 6)
-        return gc_isTileBuildable(gc, x, y, 0)
-               && gc_isTileBuildable(gc, x - 1, y, 0)
-               && gc_isTileBuildable(gc, x + 1, y, 0);
-    if (!gc->world.in_bounds(x, y)) return false;
-    int tile = gc->world.tileMap[x][y];
-    bool buildable = gc->world.tileElevation[x][y] >= 0
+        return game_isTileBuildable(game, x, y, 0)
+               && game_isTileBuildable(game, x - 1, y, 0)
+               && game_isTileBuildable(game, x + 1, y, 0);
+    if (!game->world.in_bounds(x, y)) return false;
+    int tile = game->world.tileMap[x][y];
+    bool buildable = game->world.tileElevation[x][y] >= 0
                      && (tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST))
-                     && gc->world.trackMap[x][y] == 0;
+                     && game->world.trackMap[x][y] == 0;
     if (type == 3 && (tile == 71 || tile == 21 || tile == 23)) buildable = true;
     if (type == 4 && (tile == 70 || tile == 22 || tile == 24)) buildable = true;
     return buildable;
 }
 
 // void commitTerrainEdit() -- copy the 10x10 edit buffer back into heightMap
-void gc_commitTerrainEdit(Game *gc) {
+void game_commitTerrainEdit(Game *game) {
     for (int i = 0; i < 10; ++i) {
-        memcpy(gc->world.heightMap[gc->build.selectionStartX + i].data() + gc->build.selectionStartY,
-               gc->build.terrainEditBuffer[i].data(), 10);
+        memcpy(game->world.heightMap[game->build.selectionStartX + i].data() + game->build.selectionStartY,
+               game->build.terrainEditBuffer[i].data(), 10);
     }
 }
 
-void gc_setSelectionStart(Game *gc, int32_t n, int32_t n2) {
-    gc->build.selectionStartX = n - 5;
-    gc->build.selectionStartY = n2 - 5;
-    if (gc->build.selectionStartX < 0) gc->build.selectionStartX = 0;
-    if (gc->build.selectionStartY < 0) gc->build.selectionStartY = 0;
-    if (gc->build.selectionStartX + 10 >= gc->world.mapWidth)  gc->build.selectionStartX = gc->world.mapWidth - 9;
-    if (gc->build.selectionStartY + 10 >= gc->world.mapHeight) gc->build.selectionStartY = gc->world.mapHeight - 9;
+void game_setSelectionStart(Game *game, int32_t n, int32_t n2) {
+    game->build.selectionStartX = n - 5;
+    game->build.selectionStartY = n2 - 5;
+    if (game->build.selectionStartX < 0) game->build.selectionStartX = 0;
+    if (game->build.selectionStartY < 0) game->build.selectionStartY = 0;
+    if (game->build.selectionStartX + 10 >= game->world.mapWidth)  game->build.selectionStartX = game->world.mapWidth - 9;
+    if (game->build.selectionStartY + 10 >= game->world.mapHeight) game->build.selectionStartY = game->world.mapHeight - 9;
     // this.terrainEditBuffer = new byte[10][10];
-    gc->build.terrainEditBuffer.resize(10, 10);
+    game->build.terrainEditBuffer.resize(10, 10);
     for (int i = 0; i < 10; ++i) {
-        memcpy(gc->build.terrainEditBuffer[i].data(),
-               gc->world.heightMap[gc->build.selectionStartX + i].data() + gc->build.selectionStartY, 10);
+        memcpy(game->build.terrainEditBuffer[i].data(),
+               game->world.heightMap[game->build.selectionStartX + i].data() + game->build.selectionStartY, 10);
     }
-    gc->build.terrainSmoothCost = 0;
+    game->build.terrainSmoothCost = 0;
 }

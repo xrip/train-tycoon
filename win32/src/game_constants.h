@@ -7,7 +7,7 @@
 // Values for Game::gameState (and its saved previous-state copy `hx`).
 // The field stays int32_t for save and arithmetic safety; these names replace
 // the raw state literals at read and write sites. Use unary `+` to get the
-// int32_t value, e.g. gc_setState(gc, +GameState::Playing).
+// int32_t value, e.g. game_setState(game, +GameState::Playing).
 //
 // Flow: BootSplash0 -> BootSplash1 (loads fonts) -> IntroReady -> MenuOverlay.
 // Splash states 2 and 3 are defined by the switches but unreached in the
@@ -73,15 +73,15 @@ inline constexpr int32_t SCENARIO_NOTICE_BASE = 80; // scenarioNotice id   + thi
 }  // namespace transition
 
 // Save-codec direction (Game::savePendingMode, also the mode argument of
-// gc_loadGame). One IO_* field walk serves save and load; the mode decides which
+// game_loadGame). One IO_* field walk serves save and load; the mode decides which
 // way bytes move. See save.cpp / save_arrays.cpp.
 namespace save {
 inline constexpr int32_t MODE_WRITE = 0;  // serialize fields into the buffer
 inline constexpr int32_t MODE_READ = 1;   // deserialize fields from the buffer
 inline constexpr int32_t MODE_SKIP = 2;   // touch nothing: return 0 and zero arrays
 
-// gc_initSaveOrLoad operation selector. Only these three values are reached.
-// Selector values 4 and 5 exist in gc_initSaveOrLoad but are never called; that
+// game_initSaveOrLoad operation selector. Only these three values are reached.
+// Selector values 4 and 5 exist in game_initSaveOrLoad but are never called; that
 // dead branch is a smell recorded for a separate cleanup, not removed here.
 inline constexpr int32_t OP_SAVE_MAIN = 0;   // write the main snapshot to slot 0
 inline constexpr int32_t OP_LOAD_MAIN = 1;   // read the main snapshot from slot 0

@@ -1,29 +1,29 @@
 // Small general game functions.
 #include "game_methods.h"
 
-void gc_drawSpriteQuad(Game *gc, Surface *graphics, int32_t n,
+void game_drawSpriteQuad(Game *game, Surface *graphics, int32_t n,
                        int32_t n2, int32_t n3, int32_t n4) {
     midp_draw_image(graphics,
-                    gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[n])].get(), n2, n3, n4);
+                    game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[n])].get(), n2, n3, n4);
 }
 
-void gc_openSpriteStream(Game *gc, const char *resource_name) {
-    gc->assets.sprite_stream = resources::open(resource_name);
+void game_openSpriteStream(Game *game, const char *resource_name) {
+    game->assets.sprite_stream = resources::open(resource_name);
 }
 
-bool gc_spendMoney(Game *gc, int32_t n) {
-    if (n <= gc->economy.money) {
-        gc->economy.money -= n;
-        gc->renderer.lastViewportCenterX = -1;
-        gc->economy.totalSpent += n;
-        gc_pushMoneyHistory(gc, -n);
+bool game_spendMoney(Game *game, int32_t n) {
+    if (n <= game->economy.money) {
+        game->economy.money -= n;
+        game->renderer.lastViewportCenterX = -1;
+        game->economy.totalSpent += n;
+        game_pushMoneyHistory(game, -n);
         return true;
     }
-    gc_enterOutOfMoneyState(gc);
+    game_enterOutOfMoneyState(game);
     return false;
 }
 
-void gc_everyTenTick(Game *gc) {
-    gc->economy.yearCompanyValueHistory[0] = gc_scanMapForMetric(gc);
-    gc->economy.altDecadeTotalCost[0] = gc->economy.yearCompanyValueHistory[0];
+void game_everyTenTick(Game *game) {
+    game->economy.yearCompanyValueHistory[0] = game_scanMapForMetric(game);
+    game->economy.altDecadeTotalCost[0] = game->economy.yearCompanyValueHistory[0];
 }

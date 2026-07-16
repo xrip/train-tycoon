@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
-std::vector<int8_t> gc_formatNumberWithSuffix(Game *gc, int32_t value,
+std::vector<int8_t> game_formatNumberWithSuffix(Game *game, int32_t value,
                                               int32_t suffix) {
-    (void)gc;
+    (void)game;
     char text[24];
     snprintf(text, sizeof(text), "%d", value);
     int length = (int)strlen(text);
@@ -17,8 +17,8 @@ std::vector<int8_t> gc_formatNumberWithSuffix(Game *gc, int32_t value,
     return result;
 }
 
-std::vector<int8_t> gc_encodeDisplayText(Game *gc, const char *text) {
-    (void)gc;
+std::vector<int8_t> game_encodeDisplayText(Game *game, const char *text) {
+    (void)game;
     int length = (int)strlen(text);
     std::vector<int8_t> result(static_cast<size_t>(length));
     for (int i = 0; i < length; ++i) {
@@ -29,28 +29,28 @@ std::vector<int8_t> gc_encodeDisplayText(Game *gc, const char *text) {
     return result;
 }
 
-void gc_setYearGraphMode(Game *gc, int32_t mode, bool alternate) {
-    gc->ui.yearGraphMode = mode;
-    gc->ui.yearGraphAlt = alternate;
+void game_setYearGraphMode(Game *game, int32_t mode, bool alternate) {
+    game->ui.yearGraphMode = mode;
+    game->ui.yearGraphAlt = alternate;
     int minimum = 0;
     int maximum = 0;
     for (int index = 0; index < 12; ++index) {
         int value;
         if (!alternate) {
-            gc->ui.yearGraphOffsets[index] = (int8_t)(gc->economy.year - 1940);
-            gc->ui.altYearArray[index] = (int8_t)(gc->economy.monthOfYear - index);
-            if (gc->ui.altYearArray[index] < 1) {
-                gc->ui.altYearArray[index] = (int8_t)(12 + gc->ui.altYearArray[index]);
-                --gc->ui.yearGraphOffsets[index];
+            game->ui.yearGraphOffsets[index] = (int8_t)(game->economy.year - 1940);
+            game->ui.altYearArray[index] = (int8_t)(game->economy.monthOfYear - index);
+            if (game->ui.altYearArray[index] < 1) {
+                game->ui.altYearArray[index] = (int8_t)(12 + game->ui.altYearArray[index]);
+                --game->ui.yearGraphOffsets[index];
             }
-            value = mode == 0 ? gc->economy.yearProfitHistory[index]
-                    : mode == 1 ? gc->economy.yearRevenueHistory[index]
-                    : gc->economy.yearCompanyValueHistory[index];
+            value = mode == 0 ? game->economy.yearProfitHistory[index]
+                    : mode == 1 ? game->economy.yearRevenueHistory[index]
+                    : game->economy.yearCompanyValueHistory[index];
         } else {
-            gc->ui.altYearArray[index] = (int8_t)(gc->economy.year - index - 1940);
-            value = mode == 0 ? gc->economy.decadeProfitHistory[index]
-                    : mode == 1 ? gc->economy.altDecadeRevenueTotal[index]
-                    : gc->economy.altDecadeTotalCost[index];
+            game->ui.altYearArray[index] = (int8_t)(game->economy.year - index - 1940);
+            value = mode == 0 ? game->economy.decadeProfitHistory[index]
+                    : mode == 1 ? game->economy.altDecadeRevenueTotal[index]
+                    : game->economy.altDecadeTotalCost[index];
         }
         if (value > maximum) maximum = value;
         if (value < minimum) minimum = value;
@@ -58,74 +58,74 @@ void gc_setYearGraphMode(Game *gc, int32_t mode, bool alternate) {
     int scale = maximum > -minimum ? maximum : -minimum;
     for (int index = 0; index < 12; ++index) {
         if (!alternate && mode == 0) {
-            gc->ui.yearGraphValues[index] =
-                gc->economy.yearProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->economy.yearProfitHistory[index] / scale);
+            game->ui.yearGraphValues[index] =
+                game->economy.yearProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * game->economy.yearProfitHistory[index] / scale);
         } else if (!alternate && mode == 1) {
-            gc->ui.yearGraphValues[index] =
-                gc->economy.yearRevenueHistory[index] == 0 ? 0
-                : (int8_t)(60 * gc->economy.yearRevenueHistory[index] / scale);
+            game->ui.yearGraphValues[index] =
+                game->economy.yearRevenueHistory[index] == 0 ? 0
+                : (int8_t)(60 * game->economy.yearRevenueHistory[index] / scale);
         } else if (!alternate && mode == 2) {
             // The original tests profit for zero before scaling company value.
-            gc->ui.yearGraphValues[index] =
-                gc->economy.yearProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->economy.yearCompanyValueHistory[index] / scale);
+            game->ui.yearGraphValues[index] =
+                game->economy.yearProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * game->economy.yearCompanyValueHistory[index] / scale);
         } else if (alternate && mode == 0) {
-            gc->ui.yearGraphValues[index] =
-                gc->economy.decadeProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->economy.decadeProfitHistory[index] / scale);
+            game->ui.yearGraphValues[index] =
+                game->economy.decadeProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * game->economy.decadeProfitHistory[index] / scale);
         } else if (alternate && mode == 1) {
-            gc->ui.yearGraphValues[index] =
-                gc->economy.altDecadeRevenueTotal[index] == 0 ? 0
-                : (int8_t)(60 * gc->economy.altDecadeRevenueTotal[index] / scale);
+            game->ui.yearGraphValues[index] =
+                game->economy.altDecadeRevenueTotal[index] == 0 ? 0
+                : (int8_t)(60 * game->economy.altDecadeRevenueTotal[index] / scale);
         } else if (alternate && mode == 2) {
             // The original tests the other-total array before scaling cost.
-            gc->ui.yearGraphValues[index] =
-                gc->economy.decadeProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->economy.altDecadeTotalCost[index] / scale);
+            game->ui.yearGraphValues[index] =
+                game->economy.decadeProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * game->economy.altDecadeTotalCost[index] / scale);
         }
     }
 }
 
-int32_t gc_computeMilestoneScore(Game *gc) {
-    int target = gc->scenario.currentMilestoneScore;
+int32_t game_computeMilestoneScore(Game *game) {
+    int target = game->scenario.currentMilestoneScore;
     int current = 0;
-    if (gc->scenario.scenarioMilestoneIndex >= 6 && gc->scenario.scenarioMilestoneIndex <= 11)
-        target += gc->scenario.milestoneCoThreshold2;
-    switch (gc->scenario.scenarioMilestoneIndex) {
-        case 1: current = gc->scenario.milestoneThreshold1; break;
-        case 2: current = gc->scenario.milestoneThreshold2; break;
-        case 3: current = gc->scenario.milestoneThreshold3; break;
-        case 4: current = gc->scenario.milestoneThreshold4; break;
-        case 5: current = gc->scenario.milestoneThreshold5; break;
+    if (game->scenario.scenarioMilestoneIndex >= 6 && game->scenario.scenarioMilestoneIndex <= 11)
+        target += game->scenario.milestoneCoThreshold2;
+    switch (game->scenario.scenarioMilestoneIndex) {
+        case 1: current = game->scenario.milestoneThreshold1; break;
+        case 2: current = game->scenario.milestoneThreshold2; break;
+        case 3: current = game->scenario.milestoneThreshold3; break;
+        case 4: current = game->scenario.milestoneThreshold4; break;
+        case 5: current = game->scenario.milestoneThreshold5; break;
         case 6:
-            current = gc->scenario.milestoneThreshold1 + gc->scenario.milestoneThreshold2;
+            current = game->scenario.milestoneThreshold1 + game->scenario.milestoneThreshold2;
             break;
         case 7:
-            current = gc->scenario.milestoneThreshold1 + gc->scenario.milestoneThreshold3;
+            current = game->scenario.milestoneThreshold1 + game->scenario.milestoneThreshold3;
             break;
         case 8:
-            current = gc->scenario.milestoneThreshold1 + gc->scenario.milestoneThreshold4;
+            current = game->scenario.milestoneThreshold1 + game->scenario.milestoneThreshold4;
             break;
         case 9:
-            current = gc->scenario.milestoneThreshold2 + gc->scenario.milestoneThreshold3;
+            current = game->scenario.milestoneThreshold2 + game->scenario.milestoneThreshold3;
             break;
         case 10:
-            current = gc->scenario.milestoneThreshold2 + gc->scenario.milestoneThreshold4;
+            current = game->scenario.milestoneThreshold2 + game->scenario.milestoneThreshold4;
             break;
         case 11:
-            current = gc->scenario.milestoneThreshold4 + gc->scenario.milestoneThreshold5;
+            current = game->scenario.milestoneThreshold4 + game->scenario.milestoneThreshold5;
             break;
-        case 12: current = gc->economy.lifetimeTrainRevenue; break;
+        case 12: current = game->economy.lifetimeTrainRevenue; break;
         case 13:
-            current = gc->economy.loanCeiling - gc->economy.loanBalance;
-            target = gc->economy.loanCeiling;
+            current = game->economy.loanCeiling - game->economy.loanBalance;
+            target = game->economy.loanCeiling;
             break;
         case 14:
-            current = gc->economy.year - 1950;
-            target = gc->scenario.currentMilestoneScore - 1950;
+            current = game->economy.year - 1950;
+            target = game->scenario.currentMilestoneScore - 1950;
             break;
-        case 15: current = gc->scenario.aiWagonsBought; break;
+        case 15: current = game->scenario.aiWagonsBought; break;
     }
     int score = 100 * current / target;
     if (score < 0) score = 0;
@@ -133,16 +133,16 @@ int32_t gc_computeMilestoneScore(Game *gc) {
     return score;
 }
 
-int8_t gc_computeMenuRowDisplayValue(Game *gc, int32_t row) {
+int8_t game_computeMenuRowDisplayValue(Game *game, int32_t row) {
     int value;
-    if (gc->ui.menuRowType[row] == 1) {
-        value = 100 * gc->ui.menuRowValue[row] / gc->ui.menuRowCost[row];
-    } else if (gc->ui.menuRowType[row] == 2) {
-        value = gc->economy.money > 0
-                ? 100 * gc->economy.money / gc->ui.menuRowCost[row]
-                : 100 * gc->ui.menuRowCost[row] / gc->economy.money;
-    } else if (gc->ui.menuRowType[row] >= 4 && gc->ui.menuRowType[row] <= 14) {
-        value = 100 * gc->ui.menuRowValue[row] / gc->ui.menuRowCost[row];
+    if (game->ui.menuRowType[row] == 1) {
+        value = 100 * game->ui.menuRowValue[row] / game->ui.menuRowCost[row];
+    } else if (game->ui.menuRowType[row] == 2) {
+        value = game->economy.money > 0
+                ? 100 * game->economy.money / game->ui.menuRowCost[row]
+                : 100 * game->ui.menuRowCost[row] / game->economy.money;
+    } else if (game->ui.menuRowType[row] >= 4 && game->ui.menuRowType[row] <= 14) {
+        value = 100 * game->ui.menuRowValue[row] / game->ui.menuRowCost[row];
     } else {
         return 0;
     }
@@ -151,62 +151,62 @@ int8_t gc_computeMenuRowDisplayValue(Game *gc, int32_t row) {
     return (int8_t)value;
 }
 
-void gc_loadMusic(Game *gc) {
-    gc->music_available = gc->music_output &&
-        gc->music_output->load(resources::path_for("music.mid"));
-    if (gc->music_available) {
-        gc->music_output->set_volume(20 * gc->music_volume_level);
+void game_loadMusic(Game *game) {
+    game->music_available = game->music_output &&
+        game->music_output->load(resources::path_for("music.mid"));
+    if (game->music_available) {
+        game->music_output->set_volume(20 * game->music_volume_level);
     }
-    gc->music_playing = false;
+    game->music_playing = false;
 }
 
-void gc_playMusic(Game *gc) {
-    if (gc->music_available && !gc->music_playing && gc->music_enabled &&
-        gc->music_output->play()) {
-        gc->music_playing = true;
-    }
-}
-
-void gc_setMusicVolume(Game *gc, int32_t level) {
-    if (gc->music_available) {
-        gc->music_output->set_volume(level * 20);
+void game_playMusic(Game *game) {
+    if (game->music_available && !game->music_playing && game->music_enabled &&
+        game->music_output->play()) {
+        game->music_playing = true;
     }
 }
 
-void gc_stopMusic(Game *gc) {
-    if (gc->music_available && gc->music_playing) {
-        gc->music_output->stop();
+void game_setMusicVolume(Game *game, int32_t level) {
+    if (game->music_available) {
+        game->music_output->set_volume(level * 20);
     }
-    gc->music_playing = false;
+}
+
+void game_stopMusic(Game *game) {
+    if (game->music_available && game->music_playing) {
+        game->music_output->stop();
+    }
+    game->music_playing = false;
 }
 
 // These helpers are used only by the excluded high-score network request.
-char *gc_decodeString(Game *gc, int8_t *bytes) {
-    (void)gc; (void)bytes;
+char *game_decodeString(Game *game, int8_t *bytes) {
+    (void)game; (void)bytes;
     return NULL;
 }
 
-char *gc_buildPlayerNameString(Game *gc) {
-    (void)gc;
+char *game_buildPlayerNameString(Game *game) {
+    (void)game;
     return NULL;
 }
 
-bool gc_syncHighScores(Game *gc, bool upload) {
-    (void)gc; (void)upload;
+bool game_syncHighScores(Game *game, bool upload) {
+    (void)game; (void)upload;
     return false;
 }
 
-void gc_hideNotify(Game *gc) {
-    gc->ui.paused = true;
-    if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_stopMusic(gc);
-    if (gc->gameState == +GameState::Playing) {
-        gc->ready = false;
-        gc->ui.transitionCode = 1;
-        gc_setState(gc, +GameState::MenuOverlay);
+void game_hideNotify(Game *game) {
+    game->ui.paused = true;
+    if (game->gameState > +GameState::LoadingResources && game->gameState != +GameState::HighScoreSync) game_stopMusic(game);
+    if (game->gameState == +GameState::Playing) {
+        game->ready = false;
+        game->ui.transitionCode = 1;
+        game_setState(game, +GameState::MenuOverlay);
     }
 }
 
-void gc_showNotify(Game *gc) {
-    if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_playMusic(gc);
-    gc->ui.paused = false;
+void game_showNotify(Game *game) {
+    if (game->gameState > +GameState::LoadingResources && game->gameState != +GameState::HighScoreSync) game_playMusic(game);
+    game->ui.paused = false;
 }

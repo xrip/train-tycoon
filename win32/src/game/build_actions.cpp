@@ -2,92 +2,92 @@
 #include "game_methods.h"
 #include <vector>
 
-void gc_enterOutOfMoneyState(Game *gc) {
-    gc->ready = false;
-    gc->ui.transitionCode = 11;
-    gc_setState(gc, +GameState::MenuOverlay);
+void game_enterOutOfMoneyState(Game *game) {
+    game->ready = false;
+    game->ui.transitionCode = 11;
+    game_setState(game, +GameState::MenuOverlay);
 }
 
-void gc_incrementRowValueType13(Game *gc, int32_t amount) {
+void game_incrementRowValueType13(Game *game, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (gc->ui.menuRowType[row] == 13) gc->ui.menuRowValue[row] += amount;
+        if (game->ui.menuRowType[row] == 13) game->ui.menuRowValue[row] += amount;
 }
 
-bool gc_isAnyTrainCarAt(Game *gc, int32_t car, int32_t x, int32_t y) {
+bool game_isAnyTrainCarAt(Game *game, int32_t car, int32_t x, int32_t y) {
     if (car == -1) return false;
-    if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[car]) == x
-        && gc_byteToUnsignedInt(gc, gc->fleet.trainY[car]) == y)
+    if (game_byteToUnsignedInt(game, game->fleet.trainX[car]) == x
+        && game_byteToUnsignedInt(game, game->fleet.trainY[car]) == y)
         return true;
-    return gc_isAnyTrainCarAt(gc, gc->fleet.nextCar[car], x, y);
+    return game_isAnyTrainCarAt(game, game->fleet.nextCar[car], x, y);
 }
 
-int32_t gc_findTrainHeadAt(Game *gc, int32_t x, int32_t y) {
+int32_t game_findTrainHeadAt(Game *game, int32_t x, int32_t y) {
     for (int train = 0; train < 500; ++train) {
-        if ((gc->fleet.trainFlags[train] & 0x80) == 128
-            && (gc->fleet.trainFlags[train] & 0x40) == 64
-            && gc_isAnyTrainCarAt(gc, train, x, y))
+        if ((game->fleet.trainFlags[train] & 0x80) == 128
+            && (game->fleet.trainFlags[train] & 0x40) == 64
+            && game_isAnyTrainCarAt(game, train, x, y))
             return train;
     }
     return 5000;
 }
 
-int32_t gc_allocateServiceVehicleSlot(Game *gc, int32_t type,
+int32_t game_allocateServiceVehicleSlot(Game *game, int32_t type,
                                       int32_t x, int32_t y,
                                       bool horizontal, bool extended) {
     int slot = 5000;
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
-        if ((gc->fleet.vehicleFlags[vehicle] & 0x80) == 0) {
+        if ((game->fleet.vehicleFlags[vehicle] & 0x80) == 0) {
             slot = vehicle;
             break;
         }
     }
     if (slot == 5000) return slot;
 
-    gc->fleet.vehicleFlags[slot] = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
+    game->fleet.vehicleFlags[slot] = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
                                       | (extended ? 0x20 : 0) | type);
-    gc->fleet.serviceVehicleX[slot] = (int8_t)x;
-    gc->fleet.serviceVehicleY[slot] = (int8_t)y;
-    gc->fleet.serviceUnloadFlags[slot] = 0;
+    game->fleet.serviceVehicleX[slot] = (int8_t)x;
+    game->fleet.serviceVehicleY[slot] = (int8_t)y;
+    game->fleet.serviceUnloadFlags[slot] = 0;
     for (int resource = 0; resource < 5; ++resource)
-        gc->fleet.serviceResourceStock[slot][resource] = 0;
+        game->fleet.serviceResourceStock[slot][resource] = 0;
     return slot;
 }
 
-void gc_computeTrainCost(Game *gc) {
-    switch (gc->build.wagonType) {
-        case 0: gc->build.unitCost = gc->economy.gWagonCost; break;
-        case 1: gc->build.unitCost = gc->economy.gWagonCost2; break;
-        case 2: gc->build.unitCost = gc->economy.gWagonCost3; break;
-        case 3: gc->build.unitCost = gc->economy.gWagonCost4; break;
-        case 4: gc->build.unitCost = gc->economy.gWagonCost5; break;
-        case 5: gc->build.unitCost = gc->economy.gWagonCost6; break;
+void game_computeTrainCost(Game *game) {
+    switch (game->build.wagonType) {
+        case 0: game->build.unitCost = game->economy.gWagonCost; break;
+        case 1: game->build.unitCost = game->economy.gWagonCost2; break;
+        case 2: game->build.unitCost = game->economy.gWagonCost3; break;
+        case 3: game->build.unitCost = game->economy.gWagonCost4; break;
+        case 4: game->build.unitCost = game->economy.gWagonCost5; break;
+        case 5: game->build.unitCost = game->economy.gWagonCost6; break;
     }
-    if (gc->build.wagonType == gc->build.wagonDiscountType)
-        gc->build.unitCost = gc->build.unitCost * gc->scenario.difficultyPct / 100;
+    if (game->build.wagonType == game->build.wagonDiscountType)
+        game->build.unitCost = game->build.unitCost * game->scenario.difficultyPct / 100;
 
     for (int option = 0; option < 5; ++option) {
         int option_cost;
-        switch (gc->build.wagonOptionSlots[option]) {
-            case 0: option_cost = gc->economy.costGroupC1; break;
-            case 1: option_cost = gc->economy.costGroupC2; break;
-            case 2: option_cost = gc->economy.costGroupC3; break;
-            case 3: option_cost = gc->economy.costGroupC4; break;
+        switch (game->build.wagonOptionSlots[option]) {
+            case 0: option_cost = game->economy.costGroupC1; break;
+            case 1: option_cost = game->economy.costGroupC2; break;
+            case 2: option_cost = game->economy.costGroupC3; break;
+            case 3: option_cost = game->economy.costGroupC4; break;
             default: continue;
         }
-        if (gc->build.wagonOptionSlots[option] == gc->build.wagonCountMatch[option])
-            option_cost = option_cost * gc->scenario.difficultyPct / 100;
-        gc->build.unitCost += option_cost;
+        if (game->build.wagonOptionSlots[option] == game->build.wagonCountMatch[option])
+            option_cost = option_cost * game->scenario.difficultyPct / 100;
+        game->build.unitCost += option_cost;
     }
 }
 
-void gc_rebuildCityList(Game *gc) {
-    for (int city = 0; city < 48; ++city) gc->world.cityIndex[city] = 0;
-    const int seen_count = 64 * gc->world.mapWidth * gc->world.mapHeight;
+void game_rebuildCityList(Game *game) {
+    for (int city = 0; city < 48; ++city) game->world.cityIndex[city] = 0;
+    const int seen_count = 64 * game->world.mapWidth * game->world.mapHeight;
     std::vector<uint8_t> seen_city_tiles(
         static_cast<std::size_t>(seen_count));
-    for (int station_x = 0; station_x < gc->world.mapWidth; ++station_x) {
-        for (int station_y = 0; station_y < gc->world.mapHeight; ++station_y) {
-            int track = gc->world.trackMap[station_x][station_y];
+    for (int station_x = 0; station_x < game->world.mapWidth; ++station_x) {
+        for (int station_y = 0; station_y < game->world.mapHeight; ++station_y) {
+            int track = game->world.trackMap[station_x][station_y];
             if ((track & 0xC0) != 192) continue;
             int city = track & 0x3F;
             int min_x = station_x - 3;
@@ -96,227 +96,227 @@ void gc_rebuildCityList(Game *gc) {
             int max_y = station_y + 3;
             if (min_x < 0) min_x = 0;
             if (min_y < 0) min_y = 0;
-            if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
-            if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
+            if (max_x >= game->world.mapWidth) max_x = game->world.mapWidth - 1;
+            if (max_y >= game->world.mapHeight) max_y = game->world.mapHeight - 1;
             for (int x = min_x; x <= max_x; ++x) {
                 for (int y = min_y; y <= max_y; ++y) {
-                    if (gc->world.tileMap[x][y] != 87 && gc->world.tileMap[x][y] != 88)
+                    if (game->world.tileMap[x][y] != 87 && game->world.tileMap[x][y] != 88)
                         continue;
-                    int seen_index = (city * gc->world.mapWidth + x) * gc->world.mapHeight + y;
+                    int seen_index = (city * game->world.mapWidth + x) * game->world.mapHeight + y;
                     if (seen_city_tiles[seen_index]) continue;
                     seen_city_tiles[seen_index] = 1;
-                    gc->world.cityIndex[city] = (int8_t)(gc->world.cityIndex[city] + 1);
+                    game->world.cityIndex[city] = (int8_t)(game->world.cityIndex[city] + 1);
                 }
             }
         }
     }
 }
 
-void gc_applyBackgroundCost(Game *gc) {
-    if (gc->build.demolitionAffordable) {
-        gc->economy.subsidyCost += gc->build.backgroundCost;
-        gc->economy.money -= gc->build.backgroundCost;
-        gc_pushMoneyHistory(gc, -gc->build.backgroundCost);
+void game_applyBackgroundCost(Game *game) {
+    if (game->build.demolitionAffordable) {
+        game->economy.subsidyCost += game->build.backgroundCost;
+        game->economy.money -= game->build.backgroundCost;
+        game_pushMoneyHistory(game, -game->build.backgroundCost);
     } else {
-        gc_enterOutOfMoneyState(gc);
+        game_enterOutOfMoneyState(game);
     }
 }
 
-void gc_demolishAtCursor(Game *gc) {
-    int cursor_x = gc->ui.tileCursorX;
-    int cursor_y = gc->ui.tileCursorY;
-    if (gc->ui.blockBuildMenu || !gc_isCityOrStationTile(gc, cursor_x, cursor_y))
+void game_demolishAtCursor(Game *game) {
+    int cursor_x = game->ui.tileCursorX;
+    int cursor_y = game->ui.tileCursorY;
+    if (game->ui.blockBuildMenu || !game_isCityOrStationTile(game, cursor_x, cursor_y))
         return;
 
-    gc->build.backgroundCost = 0;
-    int tile = gc->world.tileMap[cursor_x][cursor_y];
+    game->build.backgroundCost = 0;
+    int tile = game->world.tileMap[cursor_x][cursor_y];
     if (tile >= 81 && tile <= 86) {
-        gc_advanceConstructionTimers(gc, cursor_x, cursor_y, -3);
-        tile = gc->world.tileMap[cursor_x][cursor_y];
+        game_advanceConstructionTimers(game, cursor_x, cursor_y, -3);
+        tile = game->world.tileMap[cursor_x][cursor_y];
         if (tile == 81 || tile == 84 || tile == 85) {
             int x;
             for (x = cursor_x;
-                 x < gc->world.mapWidth
-                 && (gc->world.tileMap[x][cursor_y] == 81
-                     || gc->world.tileMap[x][cursor_y] == 84
-                     || gc->world.tileMap[x][cursor_y] == 85);
+                 x < game->world.mapWidth
+                 && (game->world.tileMap[x][cursor_y] == 81
+                     || game->world.tileMap[x][cursor_y] == 84
+                     || game->world.tileMap[x][cursor_y] == 85);
                  ++x)
-                gc_handleCursorClickInlined(gc, x, cursor_y, true, false);
+                game_handleCursorClickInlined(game, x, cursor_y, true, false);
             for (x = cursor_x - 1;
                  x >= 0
-                 && (gc->world.tileMap[x][cursor_y] == 81
-                     || gc->world.tileMap[x][cursor_y] == 84
-                     || gc->world.tileMap[x][cursor_y] == 85);
+                 && (game->world.tileMap[x][cursor_y] == 81
+                     || game->world.tileMap[x][cursor_y] == 84
+                     || game->world.tileMap[x][cursor_y] == 85);
                  --x)
-                gc_handleCursorClickInlined(gc, x, cursor_y, true, false);
+                game_handleCursorClickInlined(game, x, cursor_y, true, false);
         } else {
             int y;
             for (y = cursor_y;
-                 y < gc->world.mapHeight
-                 && (gc->world.tileMap[cursor_x][y] == 82
-                     || gc->world.tileMap[cursor_x][y] == 83
-                     || gc->world.tileMap[cursor_x][y] == 86);
+                 y < game->world.mapHeight
+                 && (game->world.tileMap[cursor_x][y] == 82
+                     || game->world.tileMap[cursor_x][y] == 83
+                     || game->world.tileMap[cursor_x][y] == 86);
                  ++y)
-                gc_handleCursorClickInlined(gc, cursor_x, y, true, false);
+                game_handleCursorClickInlined(game, cursor_x, y, true, false);
             for (y = cursor_y - 1;
                  y >= 0
-                 && (gc->world.tileMap[cursor_x][y] == 82
-                     || gc->world.tileMap[cursor_x][y] == 83
-                     || gc->world.tileMap[cursor_x][y] == 86);
+                 && (game->world.tileMap[cursor_x][y] == 82
+                     || game->world.tileMap[cursor_x][y] == 83
+                     || game->world.tileMap[cursor_x][y] == 86);
                  --y)
-                gc_handleCursorClickInlined(gc, cursor_x, y, true, false);
+                game_handleCursorClickInlined(game, cursor_x, y, true, false);
         }
     } else if (tile >= 87 && tile <= 90) {
-        int vehicle = gc_findServiceVehicleAt(gc, cursor_x, cursor_y);
+        int vehicle = game_findServiceVehicleAt(game, cursor_x, cursor_y);
         if (vehicle != 5000) {
-            int x = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleX[vehicle]);
-            int y = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleY[vehicle]);
-            if ((gc->fleet.vehicleFlags[vehicle] & 0x20) == 32) {
-                if ((gc->fleet.vehicleFlags[vehicle] & 0x40) == 0) {
-                    gc->world.trackMap[x][y - 1] = 0;
-                    gc->world.trackMap[x][y + 1] = 0;
-                    gc_handleCursorClickInlined(gc, x, y - 1, true, false);
-                    gc_handleCursorClickInlined(gc, x, y + 1, true, false);
+            int x = game_byteToUnsignedInt(game, game->fleet.serviceVehicleX[vehicle]);
+            int y = game_byteToUnsignedInt(game, game->fleet.serviceVehicleY[vehicle]);
+            if ((game->fleet.vehicleFlags[vehicle] & 0x20) == 32) {
+                if ((game->fleet.vehicleFlags[vehicle] & 0x40) == 0) {
+                    game->world.trackMap[x][y - 1] = 0;
+                    game->world.trackMap[x][y + 1] = 0;
+                    game_handleCursorClickInlined(game, x, y - 1, true, false);
+                    game_handleCursorClickInlined(game, x, y + 1, true, false);
                 } else {
-                    gc->world.trackMap[x - 1][y] = 0;
-                    gc->world.trackMap[x + 1][y] = 0;
-                    gc_handleCursorClickInlined(gc, x - 1, y, true, false);
-                    gc_handleCursorClickInlined(gc, x + 1, y, true, false);
+                    game->world.trackMap[x - 1][y] = 0;
+                    game->world.trackMap[x + 1][y] = 0;
+                    game_handleCursorClickInlined(game, x - 1, y, true, false);
+                    game_handleCursorClickInlined(game, x + 1, y, true, false);
                 }
             }
-            gc_handleCursorClickInlined(gc, x, y, true, false);
-            gc_advanceConstructionTimers(gc, x, y, -6);
-            gc->world.trackMap[x][y] = 0;
-            gc->fleet.vehicleFlags[vehicle] = 0;
+            game_handleCursorClickInlined(game, x, y, true, false);
+            game_advanceConstructionTimers(game, x, y, -6);
+            game->world.trackMap[x][y] = 0;
+            game->fleet.vehicleFlags[vehicle] = 0;
         }
     } else {
-        gc_handleCursorClickInlined(gc, cursor_x, cursor_y, true, false);
-        gc_advanceConstructionTimers(gc, cursor_x, cursor_y, -6);
+        game_handleCursorClickInlined(game, cursor_x, cursor_y, true, false);
+        game_advanceConstructionTimers(game, cursor_x, cursor_y, -6);
     }
-    gc_applyBackgroundCost(gc);
+    game_applyBackgroundCost(game);
 }
 
-void gc_pickTrainsAtCursor(Game *gc) {
-    if (gc->ui.blockBuildMenu) return;
-    int track = gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY];
+void game_pickTrainsAtCursor(Game *game) {
+    if (game->ui.blockBuildMenu) return;
+    int track = game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY];
     if ((track & 0xC0) == 128) {
-        gc->build.junctionDirCursor = (int8_t)(track & 0x3F);
-        gc->ready = false;
-        gc->ui.transitionCode = 20;
-        gc_setState(gc, +GameState::MenuOverlay);
+        game->build.junctionDirCursor = (int8_t)(track & 0x3F);
+        game->ready = false;
+        game->ui.transitionCode = 20;
+        game_setState(game, +GameState::MenuOverlay);
     }
     if ((track & 0xC0) == 192) {
-        gc->build.stationDirCursor = (int8_t)(track & 0x3F);
-        gc->ready = false;
-        gc->ui.transitionCode = 21;
-        gc_setState(gc, +GameState::MenuOverlay);
+        game->build.stationDirCursor = (int8_t)(track & 0x3F);
+        game->ready = false;
+        game->ui.transitionCode = 21;
+        game_setState(game, +GameState::MenuOverlay);
     }
     if (track != 65) return;
 
-    gc->trainAtCursor =
-        gc_findTrainHeadAt(gc, gc->ui.tileCursorX, gc->ui.tileCursorY);
-    if (gc->trainAtCursor == 5000) {
-        gc->serviceVehicleAtCursor =
-            gc_findServiceVehicleAt(gc, gc->ui.tileCursorX, gc->ui.tileCursorY);
-        if (gc->serviceVehicleAtCursor != 5000) {
-            gc->ready = false;
-            gc->ui.transitionCode = 22;
-            gc_setState(gc, +GameState::MenuOverlay);
+    game->trainAtCursor =
+        game_findTrainHeadAt(game, game->ui.tileCursorX, game->ui.tileCursorY);
+    if (game->trainAtCursor == 5000) {
+        game->serviceVehicleAtCursor =
+            game_findServiceVehicleAt(game, game->ui.tileCursorX, game->ui.tileCursorY);
+        if (game->serviceVehicleAtCursor != 5000) {
+            game->ready = false;
+            game->ui.transitionCode = 22;
+            game_setState(game, +GameState::MenuOverlay);
         }
         return;
     }
 
-    gc->build.wagonType = gc->fleet.trainEraOrStage[gc->trainAtCursor];
-    for (int option = 0; option < 5; ++option) gc->build.wagonOptionSlots[option] = -1;
-    int car = gc->fleet.nextCar[gc->trainAtCursor];
+    game->build.wagonType = game->fleet.trainEraOrStage[game->trainAtCursor];
+    for (int option = 0; option < 5; ++option) game->build.wagonOptionSlots[option] = -1;
+    int car = game->fleet.nextCar[game->trainAtCursor];
     for (int option = 0; option < 5 && car != -1; ++option) {
-        switch (gc->fleet.trainFlags[car] & 0xF) {
-            case 2: gc->build.wagonOptionSlots[option] = 0; break;
-            case 3: gc->build.wagonOptionSlots[option] = 1; break;
-            case 4: case 5: gc->build.wagonOptionSlots[option] = 2; break;
-            case 6: case 7: gc->build.wagonOptionSlots[option] = 3; break;
+        switch (game->fleet.trainFlags[car] & 0xF) {
+            case 2: game->build.wagonOptionSlots[option] = 0; break;
+            case 3: game->build.wagonOptionSlots[option] = 1; break;
+            case 4: case 5: game->build.wagonOptionSlots[option] = 2; break;
+            case 6: case 7: game->build.wagonOptionSlots[option] = 3; break;
         }
-        car = gc->fleet.nextCar[car];
+        car = game->fleet.nextCar[car];
     }
     for (int option = 0; option < 5; ++option)
-        gc->build.wagonCountMatch[option] = gc->build.wagonOptionSlots[option];
-    gc->build.wagonDiscountType = gc->build.wagonType;
-    gc->scenario.difficultyPct = 100;
-    gc_computeTrainCost(gc);
-    gc->build.baseTrainCostSnapshot = gc->build.unitCost;
-    gc->scenario.difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
-    gc_computeTrainCost(gc);
-    gc->build.currentTrainCostSnapshot = gc->build.unitCost;
-    gc->ready = false;
-    gc->ui.transitionCode = 26;
-    gc_setState(gc, +GameState::MenuOverlay);
+        game->build.wagonCountMatch[option] = game->build.wagonOptionSlots[option];
+    game->build.wagonDiscountType = game->build.wagonType;
+    game->scenario.difficultyPct = 100;
+    game_computeTrainCost(game);
+    game->build.baseTrainCostSnapshot = game->build.unitCost;
+    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeOrTimer[game->trainAtCursor];
+    game_computeTrainCost(game);
+    game->build.currentTrainCostSnapshot = game->build.unitCost;
+    game->ready = false;
+    game->ui.transitionCode = 26;
+    game_setState(game, +GameState::MenuOverlay);
 }
 
-void gc_buildPlaceTrackPiece(Game *gc, int32_t piece) {
+void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
     int slot;
     switch (piece) {
         case 0:
-            if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 0)
-                || (slot = gc_allocateServiceVehicleSlot(
-                        gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, false, false))
+            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 0)
+                || (slot = game_allocateServiceVehicleSlot(
+                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, false, false))
                        == 5000
-                || !gc_spendMoney(gc, gc->economy.costPower))
+                || !game_spendMoney(game, game->economy.costPower))
                 break;
-            gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 87;
-            gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 65;
-            gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -8);
-            gc_incrementRowValueType13(gc, gc->economy.costPower);
+            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
+            game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
+            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -8);
+            game_incrementRowValueType13(game, game->economy.costPower);
             break;
         case 1:
-            if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 0)
-                || (slot = gc_allocateServiceVehicleSlot(
-                        gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, true, false))
+            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 0)
+                || (slot = game_allocateServiceVehicleSlot(
+                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, true, false))
                        == 5000
-                || !gc_spendMoney(gc, gc->economy.costPower))
+                || !game_spendMoney(game, game->economy.costPower))
                 break;
-            gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 88;
-            gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 65;
-            gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -8);
-            gc_incrementRowValueType13(gc, gc->economy.costPower);
+            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
+            game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
+            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -8);
+            game_incrementRowValueType13(game, game->economy.costPower);
             break;
         case 2:
-            if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 5)
-                || (slot = gc_allocateServiceVehicleSlot(
-                        gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, false, true))
+            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 5)
+                || (slot = game_allocateServiceVehicleSlot(
+                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, false, true))
                        == 5000
-                || !gc_spendMoney(gc, gc->economy.costStruct))
+                || !game_spendMoney(game, game->economy.costStruct))
                 break;
-            gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 87;
-            gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY - 1] = 89;
-            gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY + 1] = 89;
-            gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 65;
-            gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY - 1] = 65;
-            gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY + 1] = 65;
-            gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -11);
-            gc_incrementRowValueType13(gc, gc->economy.costStruct);
+            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
+            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 89;
+            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 89;
+            game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
+            game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 65;
+            game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 65;
+            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -11);
+            game_incrementRowValueType13(game, game->economy.costStruct);
             break;
         case 3:
-            if (!gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, 6)
-                || (slot = gc_allocateServiceVehicleSlot(
-                        gc, 1, gc->ui.tileCursorX, gc->ui.tileCursorY, true, true))
+            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 6)
+                || (slot = game_allocateServiceVehicleSlot(
+                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, true, true))
                        == 5000
-                || !gc_spendMoney(gc, gc->economy.costStruct))
+                || !game_spendMoney(game, game->economy.costStruct))
                 break;
-            gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 88;
-            gc->world.tileMap[gc->ui.tileCursorX - 1][gc->ui.tileCursorY] = 90;
-            gc->world.tileMap[gc->ui.tileCursorX + 1][gc->ui.tileCursorY] = 90;
-            gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY] = 65;
-            gc->world.trackMap[gc->ui.tileCursorX - 1][gc->ui.tileCursorY] = 65;
-            gc->world.trackMap[gc->ui.tileCursorX + 1][gc->ui.tileCursorY] = 65;
-            gc_advanceConstructionTimers(gc, gc->ui.tileCursorX, gc->ui.tileCursorY, -11);
-            gc_incrementRowValueType13(gc, gc->economy.costStruct);
+            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
+            game->world.tileMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 90;
+            game->world.tileMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 90;
+            game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
+            game->world.trackMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 65;
+            game->world.trackMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 65;
+            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -11);
+            game_incrementRowValueType13(game, game->economy.costStruct);
             break;
     }
-    gc_tickInputOrAi(gc, true);
-    gc_rebuildCityList(gc);
+    game_tickInputOrAi(game, true);
+    game_rebuildCityList(game);
 }
 
-void gc_computeTrackBuildInlined(Game *gc, int32_t start_x,
+void game_computeTrackBuildInlined(Game *game, int32_t start_x,
                                  int32_t start_y, int32_t step_x,
                                  int32_t step_y, int32_t target_tile,
                                  int32_t start_tile, int32_t end_tile,
@@ -324,460 +324,460 @@ void gc_computeTrackBuildInlined(Game *gc, int32_t start_x,
     int end_x = start_x;
     int end_y = start_y;
     bool found_target = false;
-    int cost = gc->economy.moneyBaseA;
-    gc->build.trackStartX = start_x;
-    gc->build.trackStartY = start_y;
-    gc->build.trackStepX = step_x;
-    gc->build.trackStepY = step_y;
+    int cost = game->economy.moneyBaseA;
+    game->build.trackStartX = start_x;
+    game->build.trackStartY = start_y;
+    game->build.trackStepX = step_x;
+    game->build.trackStepY = step_y;
     while ((end_x += step_x) >= 0 && (end_y += step_y) >= 0
-           && end_x < gc->world.mapWidth && end_y < gc->world.mapHeight) {
-        cost += gc->economy.moneyBaseB;
-        if (gc->world.tileMap[end_x][end_y] == target_tile) found_target = true;
-        if (gc->world.tileMap[end_x][end_y] != 0 || gc->world.trackMap[end_x][end_y] != 0)
+           && end_x < game->world.mapWidth && end_y < game->world.mapHeight) {
+        cost += game->economy.moneyBaseB;
+        if (game->world.tileMap[end_x][end_y] == target_tile) found_target = true;
+        if (game->world.tileMap[end_x][end_y] != 0 || game->world.trackMap[end_x][end_y] != 0)
             break;
     }
     if (!found_target) return;
 
-    gc->build.selectionCost = cost;
-    gc->ui.buildMenuMode = 2;
-    gc->ui.menuDirty = true;
-    gc->ui.buildMenuItemIndex = 0;
-    gc->build.buildCancelled = false;
-    gc->world.tileMap[end_x][end_y] = (int8_t)end_tile;
-    gc->world.trackMap[end_x][end_y] = 65;
-    gc->world.tileMap[start_x][start_y] = (int8_t)start_tile;
-    gc->world.trackMap[start_x][start_y] = 65;
+    game->build.selectionCost = cost;
+    game->ui.buildMenuMode = 2;
+    game->ui.menuDirty = true;
+    game->ui.buildMenuItemIndex = 0;
+    game->build.buildCancelled = false;
+    game->world.tileMap[end_x][end_y] = (int8_t)end_tile;
+    game->world.trackMap[end_x][end_y] = 65;
+    game->world.tileMap[start_x][start_y] = (int8_t)start_tile;
+    game->world.trackMap[start_x][start_y] = 65;
     while ((start_x += step_x) != end_x || (start_y += step_y) != end_y) {
-        gc->world.tileMap[start_x][start_y] = (int8_t)middle_tile;
-        gc_advanceConstructionTimers(gc, start_x, start_y, -4);
-        gc->world.trackMap[start_x][start_y] = 65;
+        game->world.tileMap[start_x][start_y] = (int8_t)middle_tile;
+        game_advanceConstructionTimers(game, start_x, start_y, -4);
+        game->world.trackMap[start_x][start_y] = 65;
     }
-    gc->renderer.lastViewportCenterX = -1;
+    game->renderer.lastViewportCenterX = -1;
 }
 
-void gc_revertTrackTiles(Game *gc) {
-    int x = gc->build.trackStartX;
-    int y = gc->build.trackStartY;
+void game_revertTrackTiles(Game *game) {
+    int x = game->build.trackStartX;
+    int y = game->build.trackStartY;
     for (;;) {
-        int tile = gc->world.tileMap[x][y];
+        int tile = game->world.tileMap[x][y];
         if (tile < 81 || tile > 86) break;
-        if (tile == 83) gc->world.tileMap[x][y] = 7;
-        if (tile == 86) gc->world.tileMap[x][y] = 10;
-        if (tile == 84) gc->world.tileMap[x][y] = 8;
-        if (tile == 85) gc->world.tileMap[x][y] = 9;
-        if (tile == 81 || tile == 82) gc->world.tileMap[x][y] = 0;
-        gc->world.trackMap[x][y] = 0;
-        x += gc->build.trackStepX;
-        y += gc->build.trackStepY;
-        if (!gc->world.in_bounds(x, y)) break;
+        if (tile == 83) game->world.tileMap[x][y] = 7;
+        if (tile == 86) game->world.tileMap[x][y] = 10;
+        if (tile == 84) game->world.tileMap[x][y] = 8;
+        if (tile == 85) game->world.tileMap[x][y] = 9;
+        if (tile == 81 || tile == 82) game->world.tileMap[x][y] = 0;
+        game->world.trackMap[x][y] = 0;
+        x += game->build.trackStepX;
+        y += game->build.trackStepY;
+        if (!game->world.in_bounds(x, y)) break;
     }
 }
 
-void gc_placeTrackAtCursorInlined(Game *gc, bool first_direction,
+void game_placeTrackAtCursorInlined(Game *game, bool first_direction,
                                   int32_t first_tile, int32_t second_tile,
                                   int32_t match_tile_a, int32_t match_tile_b,
                                   int32_t result_tile_a, int32_t result_tile_b,
                                   bool join_track, int32_t join_tile) {
-    int x = gc->ui.tileCursorX;
-    int y = gc->ui.tileCursorY;
-    int tile = gc->world.tileMap[x][y];
-    if (gc->ui.blockBuildMenu || gc->world.tileElevation[x][y] < 0
-        || (gc->world.trackMap[x][y] != 0 && !(join_track && tile == join_tile))
+    int x = game->ui.tileCursorX;
+    int y = game->ui.tileCursorY;
+    int tile = game->world.tileMap[x][y];
+    if (game->ui.blockBuildMenu || game->world.tileElevation[x][y] < 0
+        || (game->world.trackMap[x][y] != 0 && !(join_track && tile == join_tile))
         || !(tile == join_tile || tile == match_tile_a || tile == match_tile_b
              || tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST)))
         return;
 
-    int cost = tile == 0 ? 0 : gc->economy.baseTrainSpeed;
-    cost += gc->economy.accel1;
+    int cost = tile == 0 ? 0 : game->economy.baseTrainSpeed;
+    cost += game->economy.accel1;
     if (join_track && tile == join_tile) {
-        cost += gc->economy.brake1;
-        if (cost > gc->economy.money) {
-            gc_enterOutOfMoneyState(gc);
+        cost += game->economy.brake1;
+        if (cost > game->economy.money) {
+            game_enterOutOfMoneyState(game);
             return;
         }
-        gc->world.tileMap[x][y] = 76;
-        int track = gc->world.trackMap[x][y] & 0x3F;
+        game->world.tileMap[x][y] = 76;
+        int track = game->world.trackMap[x][y] & 0x3F;
         track = join_tile == 70 ? 0x48 | track : 0x41 | track << 3;
-        gc->world.trackMap[x][y] = (int8_t)track;
+        game->world.trackMap[x][y] = (int8_t)track;
     } else {
-        if (cost > gc->economy.money) {
-            gc_enterOutOfMoneyState(gc);
+        if (cost > game->economy.money) {
+            game_enterOutOfMoneyState(game);
             return;
         }
-        gc->world.tileMap[x][y] =
+        game->world.tileMap[x][y] =
             tile == match_tile_a ? (int8_t)result_tile_a
             : tile == match_tile_b ? (int8_t)result_tile_b
             : (int8_t)(first_direction ? first_tile : second_tile);
-        gc->world.trackMap[x][y] = 65;
+        game->world.trackMap[x][y] = 65;
     }
-    gc->economy.money -= cost;
-    gc->economy.totalSpent += cost;
-    gc->renderer.lastViewportCenterX = -1;
-    gc_pushMoneyHistory(gc, -cost);
-    gc_incrementRowValueType13(gc, cost);
-    gc_advanceConstructionTimers(gc, x, y, -4);
+    game->economy.money -= cost;
+    game->economy.totalSpent += cost;
+    game->renderer.lastViewportCenterX = -1;
+    game_pushMoneyHistory(game, -cost);
+    game_incrementRowValueType13(game, cost);
+    game_advanceConstructionTimers(game, x, y, -4);
 }
 
-void gc_normalizeTrackBits(Game *gc) {
-    for (int x = 0; x < gc->world.mapWidth; ++x) {
-        for (int y = 0; y < gc->world.mapHeight; ++y) {
-            if (gc->world.trackMap[x][y] == 64) {
-                int tile = gc->world.tileMap[x][y];
-                gc->world.tileMap[x][y] =
+void game_normalizeTrackBits(Game *game) {
+    for (int x = 0; x < game->world.mapWidth; ++x) {
+        for (int y = 0; y < game->world.mapHeight; ++y) {
+            if (game->world.trackMap[x][y] == 64) {
+                int tile = game->world.tileMap[x][y];
+                game->world.tileMap[x][y] =
                     tile == 78 ? 22 : tile == 80 ? 24 : tile == 85 ? 9
                     : tile == 84 ? 8 : tile == 77 ? 21 : tile == 79 ? 23
                     : tile == 83 ? 7 : tile == 86 ? 10 : 0;
-                gc->world.trackMap[x][y] = 0;
+                game->world.trackMap[x][y] = 0;
             }
-            if (gc->world.tileMap[x][y] != 76) continue;
-            int low_owner = gc->world.trackMap[x][y] & 7;
-            int high_owner = (gc->world.trackMap[x][y] & 0x3F) >> 3;
+            if (game->world.tileMap[x][y] != 76) continue;
+            int low_owner = game->world.trackMap[x][y] & 7;
+            int high_owner = (game->world.trackMap[x][y] & 0x3F) >> 3;
             if (low_owner == 0 && high_owner == 0) {
-                gc->world.tileMap[x][y] = 0;
-                gc->world.trackMap[x][y] = 0;
+                game->world.tileMap[x][y] = 0;
+                game->world.trackMap[x][y] = 0;
             } else if (low_owner == 0) {
-                gc->world.tileMap[x][y] = 71;
-                gc->world.trackMap[x][y] = (int8_t)(0x40 | high_owner);
+                game->world.tileMap[x][y] = 71;
+                game->world.trackMap[x][y] = (int8_t)(0x40 | high_owner);
             } else if (high_owner == 0) {
-                gc->world.tileMap[x][y] = 70;
-                gc->world.trackMap[x][y] = (int8_t)(0x40 | low_owner);
+                game->world.tileMap[x][y] = 70;
+                game->world.trackMap[x][y] = (int8_t)(0x40 | low_owner);
             }
         }
     }
 }
 
-void gc_setTrackOwnerCode(Game *gc, int32_t owner) {
-    for (int x = 0; x < gc->world.mapWidth; ++x) {
-        for (int y = 0; y < gc->world.mapHeight; ++y) {
-            if (gc->world.trackMap[x][y] == 64) {
-                if (owner == 1) gc_advanceConstructionTimers(gc, x, y, -4);
-                gc->world.trackMap[x][y] = (int8_t)(0x40 | owner);
+void game_setTrackOwnerCode(Game *game, int32_t owner) {
+    for (int x = 0; x < game->world.mapWidth; ++x) {
+        for (int y = 0; y < game->world.mapHeight; ++y) {
+            if (game->world.trackMap[x][y] == 64) {
+                if (owner == 1) game_advanceConstructionTimers(game, x, y, -4);
+                game->world.trackMap[x][y] = (int8_t)(0x40 | owner);
             }
-            if (gc->world.tileMap[x][y] != 76) continue;
-            int low_owner = gc->world.trackMap[x][y] & 7;
-            int high_owner = (gc->world.trackMap[x][y] & 0x3F) >> 3;
+            if (game->world.tileMap[x][y] != 76) continue;
+            int low_owner = game->world.trackMap[x][y] & 7;
+            int high_owner = (game->world.trackMap[x][y] & 0x3F) >> 3;
             if (low_owner == 0) low_owner = owner;
             if (high_owner == 0) high_owner = owner;
-            gc->world.trackMap[x][y] =
+            game->world.trackMap[x][y] =
                 (int8_t)(0x40 | low_owner | high_owner << 3);
         }
     }
 }
 
-void gc_rebuildMenuTypeIndexes(Game *gc) {
-    gc->ui.menuRowEnabledCount = 0;
+void game_rebuildMenuTypeIndexes(Game *game) {
+    game->ui.menuRowEnabledCount = 0;
     for (int row = 0; row < 5; ++row) {
-        if (gc->ui.menuRowType[row] == 0) continue;
-        gc->ui.enabledMenuRowIndexes[gc->ui.menuRowEnabledCount++] = (int8_t)row;
+        if (game->ui.menuRowType[row] == 0) continue;
+        game->ui.enabledMenuRowIndexes[game->ui.menuRowEnabledCount++] = (int8_t)row;
     }
 }
 
-void gc_openBuildMenu(Game *gc) {
-    int item = gc->ui.buildMenuItems[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
+void game_openBuildMenu(Game *game) {
+    int item = game->ui.buildMenuItems[game->ui.buildMenuMode][game->ui.buildMenuItemIndex];
     bool allowed_while_paused =
-        (gc->ui.buildMenuMode == 0 && (item == 11 || item == 1 || item == 9))
-        || (gc->ui.buildMenuMode == 1 && (item == 1 || item == 3 || item == 9))
-        || (gc->ui.buildMenuMode == 3 && item == 9)
-        || (gc->ui.buildMenuMode == 5 && item == 9);
-    if (gc->ui.pauseFlag && !allowed_while_paused) return;
+        (game->ui.buildMenuMode == 0 && (item == 11 || item == 1 || item == 9))
+        || (game->ui.buildMenuMode == 1 && (item == 1 || item == 3 || item == 9))
+        || (game->ui.buildMenuMode == 3 && item == 9)
+        || (game->ui.buildMenuMode == 5 && item == 9);
+    if (game->ui.pauseFlag && !allowed_while_paused) return;
 
-    switch (gc->ui.buildMenuMode) {
+    switch (game->ui.buildMenuMode) {
         case 0:
             switch (item) {
-                case 0: gc_pickTrainsAtCursor(gc); break;
+                case 0: game_pickTrainsAtCursor(game); break;
                 case 1:
-                    gc->ui.buildMenuMode = 1;
-                    gc->ui.menuDirty = true;
-                    gc->ui.buildMenuItemIndex = 0;
+                    game->ui.buildMenuMode = 1;
+                    game->ui.menuDirty = true;
+                    game->ui.buildMenuItemIndex = 0;
                     break;
                 case 2:
-                    gc->ready = false; gc->ui.transitionCode = 30;
-                    gc_setState(gc, +GameState::MenuOverlay); break;
+                    game->ready = false; game->ui.transitionCode = 30;
+                    game_setState(game, +GameState::MenuOverlay); break;
                 case 3:
-                    gc->ready = false; gc->ui.transitionCode = 31;
-                    gc_setState(gc, +GameState::MenuOverlay); break;
+                    game->ready = false; game->ui.transitionCode = 31;
+                    game_setState(game, +GameState::MenuOverlay); break;
                 case 4:
-                    gc_rebuildMenuTypeIndexes(gc);
-                    gc->ready = false; gc->ui.transitionCode = 60;
-                    gc_setState(gc, +GameState::MenuOverlay); break;
+                    game_rebuildMenuTypeIndexes(game);
+                    game->ready = false; game->ui.transitionCode = 60;
+                    game_setState(game, +GameState::MenuOverlay); break;
                 case 5:
-                    gc->ready = false; gc->ui.transitionCode = 17;
-                    gc_setState(gc, +GameState::MenuOverlay); break;
-                case 8: gc->ui.inputPending = true; break;
+                    game->ready = false; game->ui.transitionCode = 17;
+                    game_setState(game, +GameState::MenuOverlay); break;
+                case 8: game->ui.inputPending = true; break;
                 case 9:
-                    gc_computeMapTrainMetric(gc, gc->scenario.scenarioStep - 2);
-                    gc->ui.useDefaultOverlaySelection = false;
-                    gc->ready = false; gc->ui.transitionCode = 1;
-                    gc_setState(gc, +GameState::MenuOverlay); break;
-                case 11: gc->ui.pauseFlag = !gc->ui.pauseFlag; break;
+                    game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
+                    game->ui.useDefaultOverlaySelection = false;
+                    game->ready = false; game->ui.transitionCode = 1;
+                    game_setState(game, +GameState::MenuOverlay); break;
+                case 11: game->ui.pauseFlag = !game->ui.pauseFlag; break;
             }
             break;
         case 1:
             switch (item) {
                 case 0:
-                    if (gc->ui.blockBuildMenu
-                        || !gc_isPlaceableTerrain(gc, gc->ui.tileCursorX,
-                                                  gc->ui.tileCursorY))
+                    if (game->ui.blockBuildMenu
+                        || !game_isPlaceableTerrain(game, game->ui.tileCursorX,
+                                                  game->ui.tileCursorY))
                         break;
-                    gc->pathfinder.anchorX = gc->ui.tileCursorX;
-                    gc->pathfinder.anchorY = gc->ui.tileCursorY;
-                    gc->world.tileMap[gc->pathfinder.anchorX][gc->pathfinder.anchorY] = 127;
-                    gc->ui.buildMenuMode = 4;
-                    gc->ui.menuDirty = true;
-                    gc->ui.buildMenuItemIndex = 0;
+                    game->pathfinder.anchorX = game->ui.tileCursorX;
+                    game->pathfinder.anchorY = game->ui.tileCursorY;
+                    game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 127;
+                    game->ui.buildMenuMode = 4;
+                    game->ui.menuDirty = true;
+                    game->ui.buildMenuItemIndex = 0;
                     break;
                 case 1:
-                    gc->ui.buildMenuMode = 5;
-                    gc->ui.menuDirty = true;
-                    gc->ui.buildMenuItemIndex = 0;
+                    game->ui.buildMenuMode = 5;
+                    game->ui.menuDirty = true;
+                    game->ui.buildMenuItemIndex = 0;
                     break;
                 case 2:
-                    if (gc->ui.blockBuildMenu) break;
-                    if (gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] == 7)
-                        gc_computeTrackBuildInlined(
-                            gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
+                    if (game->ui.blockBuildMenu) break;
+                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 7)
+                        game_computeTrackBuildInlined(
+                            game, game->ui.tileCursorX, game->ui.tileCursorY,
                             0, -1, 10, 83, 86, 82);
-                    if (gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] == 10)
-                        gc_computeTrackBuildInlined(
-                            gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
+                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 10)
+                        game_computeTrackBuildInlined(
+                            game, game->ui.tileCursorX, game->ui.tileCursorY,
                             0, 1, 7, 86, 83, 82);
-                    if (gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] == 8)
-                        gc_computeTrackBuildInlined(
-                            gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
+                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 8)
+                        game_computeTrackBuildInlined(
+                            game, game->ui.tileCursorX, game->ui.tileCursorY,
                             -1, 0, 9, 84, 85, 81);
-                    if (gc->world.tileMap[gc->ui.tileCursorX][gc->ui.tileCursorY] == 9)
-                        gc_computeTrackBuildInlined(
-                            gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
+                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 9)
+                        game_computeTrackBuildInlined(
+                            game, game->ui.tileCursorX, game->ui.tileCursorY,
                             1, 0, 8, 85, 84, 81);
                     break;
                 case 3:
-                    gc->ui.buildMenuMode = 3;
-                    gc->ui.menuDirty = true;
-                    gc->ui.buildMenuItemIndex = 0;
+                    game->ui.buildMenuMode = 3;
+                    game->ui.menuDirty = true;
+                    game->ui.buildMenuItemIndex = 0;
                     break;
-                case 4: gc_demolishAtCursor(gc); break;
+                case 4: game_demolishAtCursor(game); break;
                 case 5:
-                    if (!gc->ui.blockBuildMenu)
-                        gc_smoothTileAtInlined(gc, gc->build.swapMapX, gc->build.swapMapY,
+                    if (!game->ui.blockBuildMenu)
+                        game_smoothTileAtInlined(game, game->build.swapMapX, game->build.swapMapY,
                                                false);
                     break;
                 case 6:
-                    if (!gc->ui.blockBuildMenu)
-                        gc_smoothTileAtInlined(gc, gc->build.swapMapX, gc->build.swapMapY,
+                    if (!game->ui.blockBuildMenu)
+                        game_smoothTileAtInlined(game, game->build.swapMapX, game->build.swapMapY,
                                                true);
                     break;
                 case 9:
-                    gc->ui.buildMenuMode = 0;
-                    gc->ui.menuDirty = true;
-                    gc->ui.buildMenuItemIndex = 1;
+                    game->ui.buildMenuMode = 0;
+                    game->ui.menuDirty = true;
+                    game->ui.buildMenuItemIndex = 1;
                     break;
             }
             break;
         case 2:
             if (item == 0) {
-                if (gc->build.selectionCost <= gc->economy.money) {
-                    gc_setTrackOwnerCode(gc, 1);
-                    gc->economy.money -= gc->build.selectionCost;
-                    gc->economy.totalSpent += gc->build.selectionCost;
-                    gc_pushMoneyHistory(gc, -gc->build.selectionCost);
-                    gc_incrementRowValueType13(gc, gc->build.selectionCost);
+                if (game->build.selectionCost <= game->economy.money) {
+                    game_setTrackOwnerCode(game, 1);
+                    game->economy.money -= game->build.selectionCost;
+                    game->economy.totalSpent += game->build.selectionCost;
+                    game_pushMoneyHistory(game, -game->build.selectionCost);
+                    game_incrementRowValueType13(game, game->build.selectionCost);
                 } else {
-                    gc_normalizeTrackBits(gc);
-                    gc_enterOutOfMoneyState(gc);
+                    game_normalizeTrackBits(game);
+                    game_enterOutOfMoneyState(game);
                 }
             } else if (item == 9) {
-                if (gc->build.buildCancelled) gc_normalizeTrackBits(gc);
-                else gc_revertTrackTiles(gc);
+                if (game->build.buildCancelled) game_normalizeTrackBits(game);
+                else game_revertTrackTiles(game);
             }
-            gc->ui.buildMenuMode = 1;
-            gc->ui.buildMenuItemIndex = gc->build.buildCancelled ? 0 : 2;
-            gc->ui.menuDirty = true;
-            gc->renderer.lastViewportCenterX = -1;
+            game->ui.buildMenuMode = 1;
+            game->ui.buildMenuItemIndex = game->build.buildCancelled ? 0 : 2;
+            game->ui.menuDirty = true;
+            game->renderer.lastViewportCenterX = -1;
             break;
         case 3:
             if (item != 9) {
-                gc_buildPlaceTrackPiece(gc, item);
+                game_buildPlaceTrackPiece(game, item);
                 return;
             }
-            gc->ui.buildMenuMode = 1;
-            gc->ui.menuDirty = true;
-            gc->ui.buildMenuItemIndex = 3;
+            game->ui.buildMenuMode = 1;
+            game->ui.menuDirty = true;
+            game->ui.buildMenuItemIndex = 3;
             break;
         case 4:
             if (item == 0) {
-                if (gc->ui.blockBuildMenu
-                    || !gc_isPlaceableTerrain(gc, gc->ui.tileCursorX,
-                                              gc->ui.tileCursorY))
+                if (game->ui.blockBuildMenu
+                    || !game_isPlaceableTerrain(game, game->ui.tileCursorX,
+                                              game->ui.tileCursorY))
                     break;
-                gc->pathfinder.targetX = gc->ui.tileCursorX;
-                gc->pathfinder.targetY = gc->ui.tileCursorY;
-                gc->world.tileMap[gc->pathfinder.anchorX][gc->pathfinder.anchorY] = 0;
-                gc_setState(gc, +GameState::BuildingPath);
+                game->pathfinder.targetX = game->ui.tileCursorX;
+                game->pathfinder.targetY = game->ui.tileCursorY;
+                game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
+                game_setState(game, +GameState::BuildingPath);
             } else if (item == 9) {
-                gc->world.tileMap[gc->pathfinder.anchorX][gc->pathfinder.anchorY] = 0;
-                gc->ui.buildMenuMode = 1;
-                gc->ui.menuDirty = true;
-                gc->ui.buildMenuItemIndex = 0;
+                game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
+                game->ui.buildMenuMode = 1;
+                game->ui.menuDirty = true;
+                game->ui.buildMenuItemIndex = 0;
             }
             break;
         case 5:
             switch (item) {
                 case 0:
-                    gc_placeTrackAtCursorInlined(
-                        gc, gc->ui.vehicleMenuSelectIndex, 75, 74,
+                    game_placeTrackAtCursorInlined(
+                        game, game->ui.vehicleMenuSelectIndex, 75, 74,
                         -1, -1, -1, -1, false, 0);
                     return;
                 case 1:
-                    gc_placeTrackAtCursorInlined(
-                        gc, gc->ui.trainMenuSelectIndex, 72, 73,
+                    game_placeTrackAtCursorInlined(
+                        game, game->ui.trainMenuSelectIndex, 72, 73,
                         -1, -1, -1, -1, false, 0);
                     return;
                 case 2:
-                    gc_placeTrackAtCursorInlined(
-                        gc, true, 70, 0, 21, 23, 77, 79, true, 71);
+                    game_placeTrackAtCursorInlined(
+                        game, true, 70, 0, 21, 23, 77, 79, true, 71);
                     return;
                 case 3:
-                    gc_placeTrackAtCursorInlined(
-                        gc, true, 71, 0, 22, 24, 78, 80, true, 70);
+                    game_placeTrackAtCursorInlined(
+                        game, true, 71, 0, 22, 24, 78, 80, true, 70);
                     return;
                 case 9:
-                    gc->ui.buildMenuMode = 1;
-                    gc->ui.menuDirty = true;
-                    gc->ui.buildMenuItemIndex = 1;
+                    game->ui.buildMenuMode = 1;
+                    game->ui.menuDirty = true;
+                    game->ui.buildMenuItemIndex = 1;
                     break;
             }
             break;
     }
 }
 
-void gc_addSelectedOption(Game *gc, int32_t option) {
+void game_addSelectedOption(Game *game, int32_t option) {
     for (int slot = 0; slot < 5; ++slot) {
-        if (gc->build.wagonOptionSlots[slot] != -1) continue;
-        gc->build.wagonOptionSlots[slot] = option;
+        if (game->build.wagonOptionSlots[slot] != -1) continue;
+        game->build.wagonOptionSlots[slot] = option;
         break;
     }
 }
 
-void gc_popSelectedOption(Game *gc) {
+void game_popSelectedOption(Game *game) {
     for (int slot = 4; slot >= 0; --slot) {
-        if (gc->build.wagonOptionSlots[slot] == -1) continue;
-        gc->build.wagonOptionSlots[slot] = -1;
+        if (game->build.wagonOptionSlots[slot] == -1) continue;
+        game->build.wagonOptionSlots[slot] = -1;
         break;
     }
 }
 
-int32_t gc_allocateTrainSlot(Game *gc, int32_t x, int32_t y,
+int32_t game_allocateTrainSlot(Game *game, int32_t x, int32_t y,
                              int32_t engine_type, int32_t era,
                              int32_t direction, int32_t energy) {
     int train = 500;
     for (int slot = 0; slot < 500; ++slot) {
-        if ((gc->fleet.trainFlags[slot] & 0x80) == 0) {
+        if ((game->fleet.trainFlags[slot] & 0x80) == 0) {
             train = slot;
             break;
         }
     }
     if (train != 500) {
-        gc->fleet.trainFlags[train] = (int8_t)(0xC0 | engine_type);
-        gc->fleet.nextCar[train] = -1;
-        gc->fleet.trainX[train] = (int8_t)x;
-        gc->fleet.trainY[train] = (int8_t)y;
-        gc->fleet.trainDir[train] = (int8_t)direction;
-        gc->fleet.wagonEnergyRemaining[train] = (int8_t)energy;
-        gc->fleet.trainPhase[train] = 0;
-        gc->fleet.trainEnergyOrCount[train] = 1;
-        gc->fleet.lastServiceVehicle[train] = -1;
-        gc->fleet.trainEraOrStage[train] = (int8_t)era;
-        gc->fleet.trainAgeOrTimer[train] = 0;
-        gc->fleet.trainStateCode[train] = 7;
-        gc->fleet.trainAiOverride[train] = 0;
+        game->fleet.trainFlags[train] = (int8_t)(0xC0 | engine_type);
+        game->fleet.nextCar[train] = -1;
+        game->fleet.trainX[train] = (int8_t)x;
+        game->fleet.trainY[train] = (int8_t)y;
+        game->fleet.trainDir[train] = (int8_t)direction;
+        game->fleet.wagonEnergyRemaining[train] = (int8_t)energy;
+        game->fleet.trainPhase[train] = 0;
+        game->fleet.trainEnergyOrCount[train] = 1;
+        game->fleet.lastServiceVehicle[train] = -1;
+        game->fleet.trainEraOrStage[train] = (int8_t)era;
+        game->fleet.trainAgeOrTimer[train] = 0;
+        game->fleet.trainStateCode[train] = 7;
+        game->fleet.trainAiOverride[train] = 0;
     }
-    gc->renderer.lastViewportCenterX = -1;
+    game->renderer.lastViewportCenterX = -1;
     return train;
 }
 
-void gc_incrementCargoOptionCount(Game *gc, int32_t car_type) {
+void game_incrementCargoOptionCount(Game *game, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
-        if (car_type == 6 && gc->ui.menuRowType[row] == 9)
-            ++gc->ui.menuRowValue[row];
-        if (car_type == 4 && gc->ui.menuRowType[row] == 10)
-            ++gc->ui.menuRowValue[row];
-        if (car_type == 3 && gc->ui.menuRowType[row] == 11)
-            ++gc->ui.menuRowValue[row];
-        if (car_type == 2 && gc->ui.menuRowType[row] == 12)
-            ++gc->ui.menuRowValue[row];
+        if (car_type == 6 && game->ui.menuRowType[row] == 9)
+            ++game->ui.menuRowValue[row];
+        if (car_type == 4 && game->ui.menuRowType[row] == 10)
+            ++game->ui.menuRowValue[row];
+        if (car_type == 3 && game->ui.menuRowType[row] == 11)
+            ++game->ui.menuRowValue[row];
+        if (car_type == 2 && game->ui.menuRowType[row] == 12)
+            ++game->ui.menuRowValue[row];
     }
 }
 
-void gc_decrementCargoOptionCount(Game *gc, int32_t car_type) {
+void game_decrementCargoOptionCount(Game *game, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
-        if ((car_type == 7 || car_type == 6) && gc->ui.menuRowType[row] == 9)
-            --gc->ui.menuRowValue[row];
-        if ((car_type == 5 || car_type == 4) && gc->ui.menuRowType[row] == 10)
-            --gc->ui.menuRowValue[row];
-        if (car_type == 3 && gc->ui.menuRowType[row] == 11)
-            --gc->ui.menuRowValue[row];
-        if (car_type == 2 && gc->ui.menuRowType[row] == 12)
-            --gc->ui.menuRowValue[row];
+        if ((car_type == 7 || car_type == 6) && game->ui.menuRowType[row] == 9)
+            --game->ui.menuRowValue[row];
+        if ((car_type == 5 || car_type == 4) && game->ui.menuRowType[row] == 10)
+            --game->ui.menuRowValue[row];
+        if (car_type == 3 && game->ui.menuRowType[row] == 11)
+            --game->ui.menuRowValue[row];
+        if (car_type == 2 && game->ui.menuRowType[row] == 12)
+            --game->ui.menuRowValue[row];
     }
 }
 
-void gc_decrementTrainCargoOptionCounts(Game *gc, int32_t car) {
+void game_decrementTrainCargoOptionCounts(Game *game, int32_t car) {
     if (car == -1) return;
-    gc_decrementCargoOptionCount(gc, gc->fleet.trainFlags[car] & 7);
-    gc_decrementTrainCargoOptionCounts(gc, gc->fleet.nextCar[car]);
+    game_decrementCargoOptionCount(game, game->fleet.trainFlags[car] & 7);
+    game_decrementTrainCargoOptionCounts(game, game->fleet.nextCar[car]);
 }
 
-void gc_incrementRowValueType14(Game *gc, int32_t amount) {
+void game_incrementRowValueType14(Game *game, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (gc->ui.menuRowType[row] == 14) gc->ui.menuRowValue[row] += amount;
+        if (game->ui.menuRowType[row] == 14) game->ui.menuRowValue[row] += amount;
 }
 
-bool gc_buyTrainAtCursor(Game *gc) {
-    if (gc->economy.money < gc->build.unitCost) {
-        gc_enterOutOfMoneyState(gc);
+bool game_buyTrainAtCursor(Game *game) {
+    if (game->economy.money < game->build.unitCost) {
+        game_enterOutOfMoneyState(game);
         return false;
     }
     int direction =
-        (gc->fleet.vehicleFlags[gc->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
-    int train = gc_allocateTrainSlot(
-        gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
-        gc->build.wagonType < 3 ? 0 : 1, gc->build.wagonType,
-        direction, 8 - gc->build.wagonType);
+        (game->fleet.vehicleFlags[game->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
+    int train = game_allocateTrainSlot(
+        game, game->ui.tileCursorX, game->ui.tileCursorY,
+        game->build.wagonType < 3 ? 0 : 1, game->build.wagonType,
+        direction, 8 - game->build.wagonType);
     for (int option = 0; option < 5; ++option) {
-        if (gc->build.wagonOptionSlots[option] < 0) continue;
-        int car_type = 2 + gc->build.wagonOptionSlots[option];
+        if (game->build.wagonOptionSlots[option] < 0) continue;
+        int car_type = 2 + game->build.wagonOptionSlots[option];
         if (car_type == 5) ++car_type;
-        train = gc_spawnTrainCar(gc, train, car_type);
-        gc_incrementCargoOptionCount(gc, car_type);
+        train = game_spawnTrainCar(game, train, car_type);
+        game_incrementCargoOptionCount(game, car_type);
     }
-    gc->economy.money -= gc->build.unitCost;
-    gc->economy.aiMoneySpent += gc->build.unitCost;
-    gc_pushMoneyHistory(gc, -gc->build.unitCost);
-    ++gc->scenario.aiWagonsBought;
+    game->economy.money -= game->build.unitCost;
+    game->economy.aiMoneySpent += game->build.unitCost;
+    game_pushMoneyHistory(game, -game->build.unitCost);
+    ++game->scenario.aiWagonsBought;
     return true;
 }
 
-bool gc_applyTrainUpgradeInlined(Game *gc, int32_t train,
+bool game_applyTrainUpgradeInlined(Game *game, int32_t train,
                                  int32_t state_code, int32_t *options) {
-    int cost = gc->build.unitCost - gc->build.currentTrainCostSnapshot;
-    if (gc->economy.money < cost) {
-        gc_enterOutOfMoneyState(gc);
+    int cost = game->build.unitCost - game->build.currentTrainCostSnapshot;
+    if (game->economy.money < cost) {
+        game_enterOutOfMoneyState(game);
         return false;
     }
-    gc->fleet.trainStateCode[train] = (int16_t)state_code;
-    gc_decrementTrainCargoOptionCounts(gc, gc->fleet.nextCar[train]);
+    game->fleet.trainStateCode[train] = (int16_t)state_code;
+    game_decrementTrainCargoOptionCounts(game, game->fleet.nextCar[train]);
     for (int option = 0; option < 5; ++option) {
         if (options[option] > -1) {
             int car_type = options[option] + 2;
             if (car_type == 5) ++car_type;
-            gc_incrementCargoOptionCount(gc, car_type);
+            game_incrementCargoOptionCount(game, car_type);
         }
-        gc->fleet.trainStateCode[train] = (int16_t)(
-            gc->fleet.trainStateCode[train]
+        game->fleet.trainStateCode[train] = (int16_t)(
+            game->fleet.trainStateCode[train]
             | (options[option] & 7) << (3 + 3 * option));
     }
-    gc->economy.money -= cost;
-    gc->economy.aiMoneySpent += cost;
-    if (cost != 0) gc_pushMoneyHistory(gc, -cost);
+    game->economy.money -= cost;
+    game->economy.aiMoneySpent += cost;
+    if (cost != 0) game_pushMoneyHistory(game, -cost);
     return true;
 }

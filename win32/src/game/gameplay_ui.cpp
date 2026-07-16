@@ -35,18 +35,18 @@ static void format_money(int32_t value, char *out, int out_size) {
     out[pos] = '\0';
 }
 
-int32_t gc_drawMenuRow(Game *gc, Surface *graphics, int32_t sprite,
+int32_t game_drawMenuRow(Game *game, Surface *graphics, int32_t sprite,
                        int32_t item_index, int32_t x, bool spaced) {
-    gc_drawSpriteQuad(gc, graphics, sprite, x, gcs_bottomBarY, 20);
-    if (gc->ui.buildMenuItemIndex == item_index) gc->ui.selectedMenuRowX = x;
+    game_drawSpriteQuad(game, graphics, sprite, x, gcs_bottomBarY, 20);
+    if (game->ui.buildMenuItemIndex == item_index) game->ui.selectedMenuRowX = x;
     return x + 15 + (spaced ? 3 : 0);
 }
 
-void gc_drawHeaderBar(Game *gc, Surface *graphics) {
-    if (gc->cachedHeaderDay == gc->economy.dayOfMonth
-        && gc->cachedHeaderMonth == gc->economy.monthOfYear
-        && gc->cachedHeaderYear == gc->economy.year
-        && gc->cachedHeaderMoney == gc->economy.money && !gc->ui.menuDirty)
+void game_drawHeaderBar(Game *game, Surface *graphics) {
+    if (game->cachedHeaderDay == game->economy.dayOfMonth
+        && game->cachedHeaderMonth == game->economy.monthOfYear
+        && game->cachedHeaderYear == game->economy.year
+        && game->cachedHeaderMoney == game->economy.money && !game->ui.menuDirty)
         return;
 
     midp_set_color(graphics, 0x909090);
@@ -58,138 +58,138 @@ void gc_drawHeaderBar(Game *gc, Surface *graphics) {
     midp_draw_line(graphics, gcs_screenWidth - 1, 1, gcs_screenWidth - 1, 14);
 
     char money_text[32];
-    format_money(gc->economy.money, money_text, sizeof(money_text));
+    format_money(game->economy.money, money_text, sizeof(money_text));
     const auto money_bytes = make_font_bytes(money_text, true);
-    gc_renderFontString(gc, graphics, 1, 5, money_bytes, false);
+    game_renderFontString(game, graphics, 1, 5, money_bytes, false);
 
     char date_text[24];
     if (gcs_screenWidth < 140)
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
-                 gc->economy.dayOfMonth, gc->economy.monthOfYear, gc->economy.year - 1900);
+                 game->economy.dayOfMonth, game->economy.monthOfYear, game->economy.year - 1900);
     else
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
-                 gc->economy.dayOfMonth, gc->economy.monthOfYear, gc->economy.year);
+                 game->economy.dayOfMonth, game->economy.monthOfYear, game->economy.year);
     const auto date_bytes = make_font_bytes(date_text, false);
-    gc_renderFontString(gc, graphics, gcs_screenWidth - (gcs_screenWidth < 140 ? 49 : 61),
+    game_renderFontString(game, graphics, gcs_screenWidth - (gcs_screenWidth < 140 ? 49 : 61),
                         5, date_bytes, false);
 
-    gc->cachedHeaderMoney = gc->economy.money;
-    gc->cachedHeaderDay = gc->economy.dayOfMonth;
-    gc->cachedHeaderMonth = gc->economy.monthOfYear;
-    gc->cachedHeaderYear = gc->economy.year;
+    game->cachedHeaderMoney = game->economy.money;
+    game->cachedHeaderDay = game->economy.dayOfMonth;
+    game->cachedHeaderMonth = game->economy.monthOfYear;
+    game->cachedHeaderYear = game->economy.year;
 }
 
-void gc_drawConfirmBar(Game *gc, Surface *graphics) {
-    gc_drawHeaderBar(gc, graphics);
+void game_drawConfirmBar(Game *game, Surface *graphics) {
+    game_drawHeaderBar(game, graphics);
     midp_set_color(graphics, 0x606060);
     midp_fill_rect(graphics, 0, gcs_bottomBarY, gcs_screenWidth, 15);
-    gc_drawMenuRow(gc, graphics, 201, 10, 0, false);
-    gc_drawMenuRow(gc, graphics, 235, 10, 18, false);
+    game_drawMenuRow(game, graphics, 201, 10, 0, false);
+    game_drawMenuRow(game, graphics, 235, 10, 18, false);
     midp_set_color(graphics, 0xFFFFFF);
-    midp_draw_rect(graphics, 18 * gc->ui.confirmToggle, gcs_bottomBarY, 14, 14);
-    midp_draw_rect(graphics, 18 * gc->ui.confirmToggle + 1, gcs_bottomBarY + 1, 12, 12);
+    midp_draw_rect(graphics, 18 * game->ui.confirmToggle, gcs_bottomBarY, 14, 14);
+    midp_draw_rect(graphics, 18 * game->ui.confirmToggle + 1, gcs_bottomBarY + 1, 12, 12);
 }
 
-void gc_paintMain(Game *gc, Surface *graphics) {
+void game_paintMain(Game *game, Surface *graphics) {
     (void)graphics;
-    gc_drawHeaderBar(gc, gc->renderer.backbuffer_surface);
-    if (!gc->ui.menuDirty) return;
-    midp_set_color(gc->renderer.backbuffer_surface, 0x606060);
-    midp_fill_rect(gc->renderer.backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
-    int selected_x = gc_byteToUnsignedInt(gc, gc->ui.menuItemCode[gc->ui.buildMenuMode]
-                                               [gc->ui.buildMenuItemIndex]);
+    game_drawHeaderBar(game, game->renderer.backbuffer_surface);
+    if (!game->ui.menuDirty) return;
+    midp_set_color(game->renderer.backbuffer_surface, 0x606060);
+    midp_fill_rect(game->renderer.backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
+    int selected_x = game_byteToUnsignedInt(game, game->ui.menuItemCode[game->ui.buildMenuMode]
+                                               [game->ui.buildMenuItemIndex]);
     int scroll = selected_x + 15 - gcs_screenWidth;
     if (scroll < 0) scroll = 0;
-    int item_count = static_cast<int>(gc->ui.buildMenuItems[gc->ui.buildMenuMode].size());
+    int item_count = static_cast<int>(game->ui.buildMenuItems[game->ui.buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
-        int x = gc_byteToUnsignedInt(gc, gc->ui.menuItemCode[gc->ui.buildMenuMode][item]) - scroll;
-        int sprite = gc_byteToUnsignedInt(gc, gc->ui.menuTextIndex[gc->ui.buildMenuMode][item]);
-        gc_drawSpriteQuad(gc, gc->renderer.backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
-        if (item != gc->ui.buildMenuItemIndex) continue;
-        midp_set_color(gc->renderer.backbuffer_surface, 0xFFFFFF);
-        midp_draw_rect(gc->renderer.backbuffer_surface, x, gcs_bottomBarY, 14, 14);
-        midp_draw_rect(gc->renderer.backbuffer_surface, x + 1, gcs_bottomBarY + 1, 12, 12);
+        int x = game_byteToUnsignedInt(game, game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
+        int sprite = game_byteToUnsignedInt(game, game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
+        game_drawSpriteQuad(game, game->renderer.backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
+        if (item != game->ui.buildMenuItemIndex) continue;
+        midp_set_color(game->renderer.backbuffer_surface, 0xFFFFFF);
+        midp_draw_rect(game->renderer.backbuffer_surface, x, gcs_bottomBarY, 14, 14);
+        midp_draw_rect(game->renderer.backbuffer_surface, x + 1, gcs_bottomBarY + 1, 12, 12);
     }
-    if (gc->ui.buildMenuMode == 2) {
+    if (game->ui.buildMenuMode == 2) {
         char cost_text[24];
-        int64_t magnitude = gc->build.selectionCost < 0
-                            ? -(int64_t)gc->build.selectionCost : gc->build.selectionCost;
+        int64_t magnitude = game->build.selectionCost < 0
+                            ? -(int64_t)game->build.selectionCost : game->build.selectionCost;
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
         int text_len = (int)strlen(cost_text);
-        const auto currency_codes = gc_tracked_codes(
-            gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[10]]);
+        const auto currency_codes = game_tracked_codes(
+            game->assets.spriteBitmapTable[game->assets.spriteIndexTable[10]]);
         std::vector<int8_t> bytes(
             static_cast<size_t>(text_len + 1) + currency_codes.size());
         bytes[0] = 24;
         for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
         std::copy(currency_codes.begin(), currency_codes.end(),
                   bytes.begin() + text_len + 1);
-        gc_renderFontString(gc, gc->renderer.backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
+        game_renderFontString(game, game->renderer.backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
     }
-    gc->ui.menuDirty = false;
+    game->ui.menuDirty = false;
 }
 
-int32_t gc_drawNumber(Game *gc, Surface *graphics,
+int32_t game_drawNumber(Game *game, Surface *graphics,
                       int32_t value, int32_t y) {
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
     char text[24];
     snprintf(text, sizeof(text), "%lld", (long long)magnitude);
     const auto bytes = make_font_bytes(text, true);
-    gc_drawTextBox(gc, graphics, gcs_screenWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
+    game_drawTextBox(game, graphics, gcs_screenWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
     return y + 15;
 }
 
-void gc_drawMoneyTicker(Game *gc, Surface *graphics) {
+void game_drawMoneyTicker(Game *game, Surface *graphics) {
     midp_set_color(graphics, 0xFF0000);
     int y = 0;
-    if (gc->ui.moneyTickerFrames[2] > 0) {
-        --gc->ui.moneyTickerFrames[2];
-        y = gc_drawNumber(gc, graphics, gc->economy.moneyHistory[2], y);
+    if (game->ui.moneyTickerFrames[2] > 0) {
+        --game->ui.moneyTickerFrames[2];
+        y = game_drawNumber(game, graphics, game->economy.moneyHistory[2], y);
     }
-    if (gc->ui.moneyTickerFrames[1] > 0) {
-        --gc->ui.moneyTickerFrames[1];
-        y = gc_drawNumber(gc, graphics, gc->economy.moneyHistory[1], y);
+    if (game->ui.moneyTickerFrames[1] > 0) {
+        --game->ui.moneyTickerFrames[1];
+        y = game_drawNumber(game, graphics, game->economy.moneyHistory[1], y);
     }
-    if (gc->ui.moneyTickerFrames[0] > 0) {
-        --gc->ui.moneyTickerFrames[0];
-        gc_drawNumber(gc, graphics, gc->economy.moneyHistory[0], y);
+    if (game->ui.moneyTickerFrames[0] > 0) {
+        --game->ui.moneyTickerFrames[0];
+        game_drawNumber(game, graphics, game->economy.moneyHistory[0], y);
     }
 }
 
-void gc_drawConfirmDialog(Game *gc, Surface *graphics) {
-    if (gc->ui.confirmCounter <= 0) return;
-    if (gc->ui.confirmTargetState >= 0) {
-        gc_drawTextBox(gc, graphics, 10, 10, 0, 37,
-                       gc_tracked_codes(gc->assets.spriteBitmapTable[
-                           gc->assets.spriteIndexTable[120 + gc->ui.confirmTargetState]]));
+void game_drawConfirmDialog(Game *game, Surface *graphics) {
+    if (game->ui.confirmCounter <= 0) return;
+    if (game->ui.confirmTargetState >= 0) {
+        game_drawTextBox(game, graphics, 10, 10, 0, 37,
+                       game_tracked_codes(game->assets.spriteBitmapTable[
+                           game->assets.spriteIndexTable[120 + game->ui.confirmTargetState]]));
     }
-    --gc->ui.confirmCounter;
+    --game->ui.confirmCounter;
 }
 
-void gc_computeIsoCornersInlined(Game *gc, int32_t x, int32_t y,
+void game_computeIsoCornersInlined(Game *game, int32_t x, int32_t y,
                                  int32_t *screen_x, int32_t *screen_y,
                                  bool viewport_relative) {
     int center_x = x * 16 + y * 16 + 16;
-    int center_y = gc->world.mapHalfWidth - x * 8 + y * 8 + 8;
+    int center_y = game->world.mapHalfWidth - x * 8 + y * 8 + 8;
     screen_x[0] = center_x - 16;
     screen_x[1] = center_x;
     screen_x[2] = center_x;
     screen_x[3] = center_x + 16;
-    screen_y[0] = center_y - 4 * gc->world.heightMap[x][y];
-    screen_y[1] = center_y - 8 - 4 * gc->world.heightMap[x + 1][y];
-    screen_y[2] = center_y + 8 - 4 * gc->world.heightMap[x][y + 1];
-    screen_y[3] = center_y - 4 * gc->world.heightMap[x + 1][y + 1];
+    screen_y[0] = center_y - 4 * game->world.heightMap[x][y];
+    screen_y[1] = center_y - 8 - 4 * game->world.heightMap[x + 1][y];
+    screen_y[2] = center_y + 8 - 4 * game->world.heightMap[x][y + 1];
+    screen_y[3] = center_y - 4 * game->world.heightMap[x + 1][y + 1];
     if (viewport_relative) {
         for (int corner = 0; corner < 4; ++corner) {
-            screen_x[corner] -= gc->renderer.viewportCenterX;
-            screen_y[corner] -= gc->renderer.viewportCenterY;
+            screen_x[corner] -= game->renderer.viewportCenterX;
+            screen_y[corner] -= game->renderer.viewportCenterY;
         }
     }
 }
 
-void gc_drawSelectionQuad(Game *gc, Surface *graphics,
+void game_drawSelectionQuad(Game *game, Surface *graphics,
                           int32_t *screen_x, int32_t *screen_y) {
-    (void)gc;
+    (void)game;
     midp_draw_line(graphics, screen_x[0], screen_y[0] + 15,
                    screen_x[1], screen_y[1] + 15);
     midp_draw_line(graphics, screen_x[0] + 1, screen_y[0] + 15,
@@ -208,12 +208,12 @@ void gc_drawSelectionQuad(Game *gc, Surface *graphics,
                    screen_x[3] + 1, screen_y[3] + 15);
 }
 
-void gc_drawBuildMenuCursor(Game *gc, Surface *graphics) {
-    if (gc->ui.blockBuildMenu) return;
-    int action = gc->ui.menuTransitionCode[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
+void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
+    if (game->ui.blockBuildMenu) return;
+    int action = game->ui.menuTransitionCode[game->ui.buildMenuMode][game->ui.buildMenuItemIndex];
     if (action == 0) return;
     if (action >= 1 && action <= 7) {
-        bool buildable = gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
+        bool buildable = game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY,
                                             action - 1);
         midp_set_color(graphics, buildable ? 0x00FF00 : 0xFF0000);
     }
@@ -221,106 +221,106 @@ void gc_drawBuildMenuCursor(Game *gc, Surface *graphics) {
         int32_t quad_x[4];
         int32_t quad_y[4];
         if (action == 6) {
-            if (gc->ui.tileCursorY > 0) {
-                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX, gc->ui.tileCursorY - 1,
+            if (game->ui.tileCursorY > 0) {
+                game_computeIsoCornersInlined(game, game->ui.tileCursorX, game->ui.tileCursorY - 1,
                                             quad_x, quad_y, true);
-                gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
+                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
             }
-            if (gc->ui.tileCursorY < gc->world.mapWidth - 1) {
-                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX, gc->ui.tileCursorY + 1,
+            if (game->ui.tileCursorY < game->world.mapWidth - 1) {
+                game_computeIsoCornersInlined(game, game->ui.tileCursorX, game->ui.tileCursorY + 1,
                                             quad_x, quad_y, true);
-                gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
+                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
             }
         } else {
-            if (gc->ui.tileCursorX > 0) {
-                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX - 1, gc->ui.tileCursorY,
+            if (game->ui.tileCursorX > 0) {
+                game_computeIsoCornersInlined(game, game->ui.tileCursorX - 1, game->ui.tileCursorY,
                                             quad_x, quad_y, true);
-                gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
+                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
             }
-            if (gc->ui.tileCursorX < gc->world.mapWidth - 1) {
-                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX + 1, gc->ui.tileCursorY,
+            if (game->ui.tileCursorX < game->world.mapWidth - 1) {
+                game_computeIsoCornersInlined(game, game->ui.tileCursorX + 1, game->ui.tileCursorY,
                                             quad_x, quad_y, true);
-                gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
+                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
             }
         }
     }
     if (action == 8)
         midp_set_color(graphics,
-                       gc_isPlaceableTerrain(gc, gc->ui.tileCursorX, gc->ui.tileCursorY)
+                       game_isPlaceableTerrain(game, game->ui.tileCursorX, game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action == 9)
         midp_set_color(graphics,
-                       gc_isCityOrStationTile(gc, gc->ui.tileCursorX, gc->ui.tileCursorY)
+                       game_isCityOrStationTile(game, game->ui.tileCursorX, game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action == 10) midp_set_color(graphics, 0xFFFFFF);
     if (action == 11) {
-        if (gc_isCurveTile(gc, gc->ui.tileCursorX, gc->ui.tileCursorY)) {
-            int x = gc->ui.tileCursorX;
-            int y = gc->ui.tileCursorY;
+        if (game_isCurveTile(game, game->ui.tileCursorX, game->ui.tileCursorY)) {
+            int x = game->ui.tileCursorX;
+            int y = game->ui.tileCursorY;
             int dx = 0;
             int dy = 0;
-            if (gc->world.tileMap[x][y] == 7) dy = -1;
-            if (gc->world.tileMap[x][y] == 10) dy = 1;
-            if (gc->world.tileMap[x][y] == 8) dx = -1;
-            if (gc->world.tileMap[x][y] == 9) dx = 1;
+            if (game->world.tileMap[x][y] == 7) dy = -1;
+            if (game->world.tileMap[x][y] == 10) dy = 1;
+            if (game->world.tileMap[x][y] == 8) dx = -1;
+            if (game->world.tileMap[x][y] == 9) dx = 1;
             midp_set_color(graphics, 0x00FF00);
             int32_t quad_x[4];
             int32_t quad_y[4];
             while ((x += dx) >= 0 && (y += dy) >= 0
-                   && x < gc->world.mapWidth && y < gc->world.mapHeight) {
-                gc_computeIsoCornersInlined(gc, x, y, quad_x, quad_y, true);
-                gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
-                if (gc->world.tileMap[x][y] != 0 || gc->world.trackMap[x][y] != 0) break;
+                   && x < game->world.mapWidth && y < game->world.mapHeight) {
+                game_computeIsoCornersInlined(game, x, y, quad_x, quad_y, true);
+                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
+                if (game->world.tileMap[x][y] != 0 || game->world.trackMap[x][y] != 0) break;
             }
         } else {
             midp_set_color(graphics, 0xFF0000);
         }
     }
-    gc_drawSelectionQuad(gc, graphics, gc->build.selectionTileX.data(),
-                         gc->build.selectionTileY.data());
+    game_drawSelectionQuad(game, graphics, game->build.selectionTileX.data(),
+                         game->build.selectionTileY.data());
 }
 
-void gc_drawBuildMenuRow(Game *gc, Surface *graphics) {
-    if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) return;
-    int menu_x = gc->renderer.viewportBaseX - gc->renderer.viewportCenterX;
-    int menu_y = gc->renderer.viewportBaseY - gc->renderer.viewportCenterY;
-    if (gc->ui.blockBuildMenu) {
-        gc_drawSpriteQuad(gc, graphics, 200, menu_x, menu_y + 15, 20);
+void game_drawBuildMenuRow(Game *game, Surface *graphics) {
+    if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
+    int menu_x = game->renderer.viewportBaseX - game->renderer.viewportCenterX;
+    int menu_y = game->renderer.viewportBaseY - game->renderer.viewportCenterY;
+    if (game->ui.blockBuildMenu) {
+        game_drawSpriteQuad(game, graphics, 200, menu_x, menu_y + 15, 20);
         midp_set_color(graphics, 0xFF0000);
         midp_draw_arc(graphics, menu_x + 5, menu_y + 20, 7, 7, 0, 360);
         midp_draw_line(graphics, menu_x + 7, menu_y + 25,
                        menu_x + 10, menu_y + 22);
         return;
     }
-    if (gc->ui.buildMenuMode == 1
-        && (gc->ui.buildMenuItemIndex == 5 || gc->ui.buildMenuItemIndex == 6))
-        gc_drawSpriteQuad(gc, graphics, 249, gc->ui.cursorScreenX - 2,
-                          gc->ui.cursorScreenY + 13, 20);
-    gc_drawSpriteQuad(gc, graphics, 200, menu_x, menu_y + 15, 20);
-    if (gc->ui.buildMenuMode != 0 || gc->ui.buildMenuItemIndex != 0) {
-        int sprite = gc_byteToUnsignedInt(gc, gc->ui.menuTextIndex[gc->ui.buildMenuMode]
-                                               [gc->ui.buildMenuItemIndex]);
-        gc_drawSpriteQuad(gc, graphics, sprite, menu_x + 5, menu_y + 19, 20);
+    if (game->ui.buildMenuMode == 1
+        && (game->ui.buildMenuItemIndex == 5 || game->ui.buildMenuItemIndex == 6))
+        game_drawSpriteQuad(game, graphics, 249, game->ui.cursorScreenX - 2,
+                          game->ui.cursorScreenY + 13, 20);
+    game_drawSpriteQuad(game, graphics, 200, menu_x, menu_y + 15, 20);
+    if (game->ui.buildMenuMode != 0 || game->ui.buildMenuItemIndex != 0) {
+        int sprite = game_byteToUnsignedInt(game, game->ui.menuTextIndex[game->ui.buildMenuMode]
+                                               [game->ui.buildMenuItemIndex]);
+        game_drawSpriteQuad(game, graphics, sprite, menu_x + 5, menu_y + 19, 20);
     }
-    if (gc->ui.buildMenuMode != 3 || gc->ui.buildMenuItemIndex >= 4) return;
-    gc_drawSpriteQuad(gc, graphics, gc->ui.buildMenuItemIndex + 230,
+    if (game->ui.buildMenuMode != 3 || game->ui.buildMenuItemIndex >= 4) return;
+    game_drawSpriteQuad(game, graphics, game->ui.buildMenuItemIndex + 230,
                       menu_x + 5, menu_y + 19, 20);
 
-    int min_x = gc->ui.tileCursorX - 3;
-    int min_y = gc->ui.tileCursorY - 3;
-    int max_x = gc->ui.tileCursorX + 3;
-    int max_y = gc->ui.tileCursorY + 3;
+    int min_x = game->ui.tileCursorX - 3;
+    int min_y = game->ui.tileCursorY - 3;
+    int max_x = game->ui.tileCursorX + 3;
+    int max_y = game->ui.tileCursorY + 3;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
-    if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
+    if (max_x >= game->world.mapWidth) max_x = game->world.mapWidth - 1;
+    if (max_y >= game->world.mapHeight) max_y = game->world.mapHeight - 1;
     int population_tiles = 0;
     bool has_type_50_55 = false;
     bool has_type_56_61 = false;
     bool has_type_62_68 = false;
     for (int x = min_x; x <= max_x; ++x) {
         for (int y = min_y; y <= max_y; ++y) {
-            int tile = gc->world.tileMap[x][y];
+            int tile = game->world.tileMap[x][y];
             if (tile >= 50 && tile <= 55) has_type_50_55 = true;
             if (tile >= 56 && tile <= 61) has_type_56_61 = true;
             if (tile >= 62 && tile <= 68) has_type_62_68 = true;
@@ -329,21 +329,21 @@ void gc_drawBuildMenuRow(Game *gc, Surface *graphics) {
     }
     int icon_x = 0;
     if (population_tiles / 3 > 0) {
-        gc_drawSpriteQuad(gc, graphics, 190, icon_x, 15, 20);
+        game_drawSpriteQuad(game, graphics, 190, icon_x, 15, 20);
         icon_x += 15;
     }
     if (population_tiles / 7 > 0) {
-        gc_drawSpriteQuad(gc, graphics, 191, icon_x, 15, 20);
+        game_drawSpriteQuad(game, graphics, 191, icon_x, 15, 20);
         icon_x += 15;
     }
     if (has_type_62_68) {
-        gc_drawSpriteQuad(gc, graphics, 192, icon_x, 15, 20);
+        game_drawSpriteQuad(game, graphics, 192, icon_x, 15, 20);
         icon_x += 15;
     }
     if (has_type_56_61) {
-        gc_drawSpriteQuad(gc, graphics, 194, icon_x, 15, 20);
+        game_drawSpriteQuad(game, graphics, 194, icon_x, 15, 20);
         icon_x += 15;
     }
     if (has_type_50_55)
-        gc_drawSpriteQuad(gc, graphics, 193, icon_x, 15, 20);
+        game_drawSpriteQuad(game, graphics, 193, icon_x, 15, 20);
 }

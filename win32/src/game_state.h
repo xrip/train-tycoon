@@ -32,7 +32,7 @@ typedef struct Game {
     int32_t frameCount;
     int32_t frameIndex;
     int64_t frameTime;
-    bool paintSuspended;   // when true, gc_paint returns without drawing
+    bool paintSuspended;   // when true, game_paint returns without drawing
     bool displayInitialized;
     bool confirmCloseRequested;  // one-shot: close confirm dialog to the menu overlay
     bool snapshotLoadSucceeded;
@@ -76,7 +76,7 @@ typedef struct Game {
     int32_t timerC1;
     int32_t timerC2;
     std::array<int32_t, 9> graphColors{};  // 3 series x 3 ARGB colors for report graphs
-    int32_t lastCanvasWidth;   // last size passed to gc_setCanvasSize
+    int32_t lastCanvasWidth;   // last size passed to game_setCanvasSize
     int32_t lastCanvasHeight;
     int32_t savedGameState;  // game state stashed for return after an overlay
     int32_t loadingTimer;
@@ -94,6 +94,6 @@ extern bool gcs_selectionHidden;
 extern bool gcs_monthlyReportEnabled;
 extern bool gcs_annualReportEnabled;
 
-void gc_fields_init(Game *gc);
+void game_fields_init(Game *game);
 
 #endif

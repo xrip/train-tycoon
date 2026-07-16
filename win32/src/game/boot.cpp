@@ -11,74 +11,74 @@ static int read_u16_be(ResourceReader& resource) {
     return high * 256 + low;
 }
 
-void gc_keyPressed(Game *gc, int32_t n) {
-    if (gc->ui.inputPending) { gc->ui.inputPending = false; return; }
-    gc->ui.currentKey = n;
+void game_keyPressed(Game *game, int32_t n) {
+    if (game->ui.inputPending) { game->ui.inputPending = false; return; }
+    game->ui.currentKey = n;
 }
 
-void gc_resetOverlayRenderState(Game *gc) {
-    gc->ui.cursorScale = 0;
-    gc->ui.cursorDragY = -1;
-    gc->ui.cursorSelectY = -1;
-    gc->ui.cursorSelectX = -1;
-    gc->ui.cursorOverUI = false;
-    gc->ui.cursorAllowZoomOut = false;
-    gc->renderer.dialogContentHeight = 0;
-    gc->renderer.needsRepaint = false;
+void game_resetOverlayRenderState(Game *game) {
+    game->ui.cursorScale = 0;
+    game->ui.cursorDragY = -1;
+    game->ui.cursorSelectY = -1;
+    game->ui.cursorSelectX = -1;
+    game->ui.cursorOverUI = false;
+    game->ui.cursorAllowZoomOut = false;
+    game->renderer.dialogContentHeight = 0;
+    game->renderer.needsRepaint = false;
 }
 
-void gc_loadPackedSpriteData(Game *gc, const char *resource_name) {
+void game_loadPackedSpriteData(Game *game, const char *resource_name) {
     ResourceReader in = resources::open(resource_name);
     if (!in) return;
     int n = in.read_byte();
     int n2 = in.read_byte();
     int n3 = read_u16_be(in);
     int n4 = 0;
-    gc->assets.spriteOffsetTable.assign(static_cast<std::size_t>(n2 + 1), 0);
-    gc->assets.spriteData.assign(static_cast<std::size_t>(n3), 0);
+    game->assets.spriteOffsetTable.assign(static_cast<std::size_t>(n2 + 1), 0);
+    game->assets.spriteData.assign(static_cast<std::size_t>(n3), 0);
     for (int i = 0; i < n; ++i) {
         int n5 = in.read_byte();
         int n6 = read_u16_be(in);
-        gc->assets.spriteOffsetTable[n5] = (int16_t)n4;
+        game->assets.spriteOffsetTable[n5] = (int16_t)n4;
         for (int j = 0; j < n6; ++j) {
-            gc->assets.spriteData[n4] = (int8_t)in.read_byte();
+            game->assets.spriteData[n4] = (int8_t)in.read_byte();
             ++n4;
         }
     }
 }
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
-std::unique_ptr<Image> gc_decodePngFromSpriteStream(Game *gc) {
+std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game) {
     std::vector<int8_t> png_bytes;
     int png_size = 0;
-    int image_format = gc->assets.sprite_stream.read_byte();
+    int image_format = game->assets.sprite_stream.read_byte();
     if (image_format == 2) {
-        png_size = read_u16_be(gc->assets.sprite_stream);
+        png_size = read_u16_be(game->assets.sprite_stream);
         png_bytes.resize(static_cast<std::size_t>(png_size));
         png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
         for (int index = 4; index < png_size; ++index)
-            png_bytes[index] = (int8_t)gc->assets.sprite_stream.read_byte();
+            png_bytes[index] = (int8_t)game->assets.sprite_stream.read_byte();
     }
     if (image_format == 1) {
-        int image_data_size = read_u16_be(gc->assets.sprite_stream);
-        int palette_byte_count = gc->assets.sprite_stream.read_byte() * 3;
-        int transparency_count = gc->assets.sprite_stream.read_byte();
+        int image_data_size = read_u16_be(game->assets.sprite_stream);
+        int palette_byte_count = game->assets.sprite_stream.read_byte() * 3;
+        int transparency_count = game->assets.sprite_stream.read_byte();
         png_size = image_data_size + palette_byte_count + 69 +
                    transparency_count * 13;
         png_bytes.resize(static_cast<std::size_t>(png_size));
         png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
         png_bytes[4] = 13; png_bytes[5] = 10; png_bytes[6] = 26; png_bytes[7] = 10;
         png_bytes[11] = 13; png_bytes[12] = 73; png_bytes[13] = 72; png_bytes[14] = 68; png_bytes[15] = 82;
-        png_bytes[18] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[19] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[22] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[23] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[24] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[18] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[19] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[22] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[23] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[24] = (int8_t)game->assets.sprite_stream.read_byte();
         png_bytes[25] = 3;
-        png_bytes[29] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[30] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[31] = (int8_t)gc->assets.sprite_stream.read_byte();
-        png_bytes[32] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[29] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[30] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[31] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[32] = (int8_t)game->assets.sprite_stream.read_byte();
         png_bytes[35] = (int8_t)(palette_byte_count >> 8 & 0xFF);
         png_bytes[36] = (int8_t)(palette_byte_count & 0xFF);
         png_bytes[37] = 80; png_bytes[38] = 76; png_bytes[39] = 84; png_bytes[40] = 69;
@@ -86,7 +86,7 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(Game *gc) {
         for (output_index = 0; output_index < palette_byte_count + 4;
              ++output_index) {
             png_bytes[41 + output_index] =
-                (int8_t)gc->assets.sprite_stream.read_byte();
+                (int8_t)game->assets.sprite_stream.read_byte();
         }
         output_index = 41 + palette_byte_count + 4;
         if (transparency_count == 1) {
@@ -105,7 +105,7 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(Game *gc) {
         png_bytes[output_index++] = (int8_t)(image_data_size & 0xFF);
         png_bytes[output_index++] = 73; png_bytes[output_index++] = 68; png_bytes[output_index++] = 65; png_bytes[output_index++] = 84;
         for (int index = 0; index < image_data_size + 4; ++index)
-            png_bytes[output_index++] = (int8_t)gc->assets.sprite_stream.read_byte();
+            png_bytes[output_index++] = (int8_t)game->assets.sprite_stream.read_byte();
         output_index += 4;
         png_bytes[output_index++] = 73; png_bytes[output_index++] = 69; png_bytes[output_index++] = 78; png_bytes[output_index++] = 68;
         png_bytes[output_index++] = -82; png_bytes[output_index++] = 66; png_bytes[output_index++] = 96; png_bytes[output_index++] = -126;
@@ -115,19 +115,19 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(Game *gc) {
         reinterpret_cast<const uint8_t*>(png_bytes.data()), png_bytes.size()));
 }
 
-std::vector<int8_t> gc_readPackedTextCodes(Game *gc, int32_t offset) {
-    const int code_count = gc->assets.spriteData[offset];
-    return {gc->assets.spriteData.data() + offset + 1,
-            gc->assets.spriteData.data() + offset + 1 + code_count};
+std::vector<int8_t> game_readPackedTextCodes(Game *game, int32_t offset) {
+    const int code_count = game->assets.spriteData[offset];
+    return {game->assets.spriteData.data() + offset + 1,
+            game->assets.spriteData.data() + offset + 1 + code_count};
 }
 
-void gc_loadGame(Game *gc, int32_t slot, int32_t mode) {
-    gc->saveCodec.saveSlot = slot;
-    gc->saveCodec.savePendingMode = mode;
-    gc->saveCodec.saveReadOffset = 0;
-    gc->saveCodec.snapshotSize = 0;
-    gc->saveCodec.snapshotLoaded = false;
-    if (gc->saveCodec.savePendingMode == save::MODE_READ) {
+void game_loadGame(Game *game, int32_t slot, int32_t mode) {
+    game->saveCodec.saveSlot = slot;
+    game->saveCodec.savePendingMode = mode;
+    game->saveCodec.saveReadOffset = 0;
+    game->saveCodec.snapshotSize = 0;
+    game->saveCodec.snapshotLoaded = false;
+    if (game->saveCodec.savePendingMode == save::MODE_READ) {
         std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
         if (store) {
             int nr = store->record_count();
@@ -137,48 +137,48 @@ void gc_loadGame(Game *gc, int32_t slot, int32_t mode) {
                 if (!record) continue;
                 const int len = static_cast<int>(record->size());
                 if (len > 0 && (int8_t)(*record)[0] == slot) {
-                    gc->saveCodec.saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
-                    memcpy(gc->saveCodec.saveBuffer.data(), record->data() + 1,
+                    game->saveCodec.saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
+                    memcpy(game->saveCodec.saveBuffer.data(), record->data() + 1,
                            (size_t)(len - 1));
-                    gc->saveCodec.snapshotSize = len - 1;
-                    gc->saveCodec.snapshotLoaded = true;
+                    game->saveCodec.snapshotSize = len - 1;
+                    game->saveCodec.snapshotLoaded = true;
                 }
             }
         }
     } else {
-        gc->saveCodec.snapshotLoaded = true;
+        game->saveCodec.snapshotLoaded = true;
     }
 }
 
-void gc_writeSaveSnapshot(Game *gc) {
-    gcs_animationsDisabled = gc_saveOrLoadBool(gc, gcs_animationsDisabled);
-    gcs_selectionHidden = gc_saveOrLoadBool(gc, gcs_selectionHidden);
-    gcs_monthlyReportEnabled = gc_saveOrLoadBool(gc, gcs_monthlyReportEnabled);
-    gcs_annualReportEnabled = gc_saveOrLoadBool(gc, gcs_annualReportEnabled);
-    gc->scenario.scenarioStepCompare = gc_saveIntToBuffer(gc, gc->scenario.scenarioStepCompare);
-    gc->scenario.bestScenarioScore = gc_saveIntToBuffer(gc, gc->scenario.bestScenarioScore);
-    gc->music_volume_level = gc_saveIntToBuffer(gc, gc->music_volume_level);
-    gc_saveOrLoadIntArrayInlined(gc, gc->scenario.scenarioScores);
-    gc_saveOrLoadIntArrayInlined(gc, gc->scenario.leaderboardScores);
-    gc_saveOrLoadByteArrayInlined(gc, gc->scenario.playerNameCodes);
+void game_writeSaveSnapshot(Game *game) {
+    gcs_animationsDisabled = game_saveOrLoadBool(game, gcs_animationsDisabled);
+    gcs_selectionHidden = game_saveOrLoadBool(game, gcs_selectionHidden);
+    gcs_monthlyReportEnabled = game_saveOrLoadBool(game, gcs_monthlyReportEnabled);
+    gcs_annualReportEnabled = game_saveOrLoadBool(game, gcs_annualReportEnabled);
+    game->scenario.scenarioStepCompare = game_saveIntToBuffer(game, game->scenario.scenarioStepCompare);
+    game->scenario.bestScenarioScore = game_saveIntToBuffer(game, game->scenario.bestScenarioScore);
+    game->music_volume_level = game_saveIntToBuffer(game, game->music_volume_level);
+    game_saveOrLoadIntArrayInlined(game, game->scenario.scenarioScores);
+    game_saveOrLoadIntArrayInlined(game, game->scenario.leaderboardScores);
+    game_saveOrLoadByteArrayInlined(game, game->scenario.playerNameCodes);
 }
 
-void gc_persistSnapshotMode1(Game *gc) {
-    gc_loadGame(gc, 5, save::MODE_READ);
-    gc_writeSaveSnapshot(gc);
-    gc_setMusicVolume(gc, gc->music_volume_level);
+void game_persistSnapshotMode1(Game *game) {
+    game_loadGame(game, 5, save::MODE_READ);
+    game_writeSaveSnapshot(game);
+    game_setMusicVolume(game, game->music_volume_level);
 }
 
 // Add one isometric tile-draw offset pair.
-void gc_appendTileDrawOffset(Game *gc, ByteBuffer& x_offsets,
+void game_appendTileDrawOffset(Game *game, ByteBuffer& x_offsets,
                              ByteBuffer& y_offsets, int32_t x, int32_t y) {
-    (void)gc;
+    (void)game;
     x_offsets.write(x);
     y_offsets.write(y);
 }
 
 // public void k(int n, int n2) -- build+sort the iso tile-draw order tables
-void gc_k(Game *gc, int32_t n, int32_t n2) {
+void game_k(Game *game, int32_t n, int32_t n2) {
     ByteBuffer x_offsets;
     ByteBuffer y_offsets;
     int n3, n4, n5;
@@ -189,178 +189,178 @@ void gc_k(Game *gc, int32_t n, int32_t n2) {
         for (n4 = -1; n4 < n7; ++n4) {
             n3 = n4 - n5 / 2;
             int n8 = n5 % 2 == 0 ? 0 + n4 + n5 / 2 : -1 + n4 + n5 / 2;
-            gc_appendTileDrawOffset(gc, x_offsets, y_offsets, n3, n8);
+            game_appendTileDrawOffset(game, x_offsets, y_offsets, n3, n8);
         }
     }
     const auto x_offset_bytes = x_offsets.bytes();
     const auto y_offset_bytes = y_offsets.bytes();
     int sz = static_cast<int>(x_offset_bytes.size());
-    gc->assets.tileOffsetX.resize(static_cast<std::size_t>(sz));
-    memcpy(gc->assets.tileOffsetX.data(), x_offset_bytes.data(), (size_t)sz);
-    gc->assets.tileOffsetY.resize(static_cast<std::size_t>(sz));
-    memcpy(gc->assets.tileOffsetY.data(), y_offset_bytes.data(), (size_t)sz);
-    gc->assets.numActiveTileAnimations = sz;
+    game->assets.tileOffsetX.resize(static_cast<std::size_t>(sz));
+    memcpy(game->assets.tileOffsetX.data(), x_offset_bytes.data(), (size_t)sz);
+    game->assets.tileOffsetY.resize(static_cast<std::size_t>(sz));
+    memcpy(game->assets.tileOffsetY.data(), y_offset_bytes.data(), (size_t)sz);
+    game->assets.numActiveTileAnimations = sz;
     do {
         n5 = 0;
-        for (n4 = 0; n4 < gc->assets.numActiveTileAnimations - 1; ++n4) {
-            if (gc->assets.tileOffsetY[n4] <= gc->assets.tileOffsetY[n4 + 1]) continue;
-            n3 = gc->assets.tileOffsetY[n4]; gc->assets.tileOffsetY[n4] = gc->assets.tileOffsetY[n4 + 1]; gc->assets.tileOffsetY[n4 + 1] = (int8_t)n3;
-            n3 = gc->assets.tileOffsetX[n4]; gc->assets.tileOffsetX[n4] = gc->assets.tileOffsetX[n4 + 1]; gc->assets.tileOffsetX[n4 + 1] = (int8_t)n3;
+        for (n4 = 0; n4 < game->assets.numActiveTileAnimations - 1; ++n4) {
+            if (game->assets.tileOffsetY[n4] <= game->assets.tileOffsetY[n4 + 1]) continue;
+            n3 = game->assets.tileOffsetY[n4]; game->assets.tileOffsetY[n4] = game->assets.tileOffsetY[n4 + 1]; game->assets.tileOffsetY[n4 + 1] = (int8_t)n3;
+            n3 = game->assets.tileOffsetX[n4]; game->assets.tileOffsetX[n4] = game->assets.tileOffsetX[n4 + 1]; game->assets.tileOffsetX[n4 + 1] = (int8_t)n3;
             n5 = 1;
         }
     } while (n5 != 0);
     do {
         n5 = 0;
-        for (n4 = 1; n4 < gc->assets.numActiveTileAnimations; ++n4) {
-            if (gc->assets.tileOffsetX[n4] <= gc->assets.tileOffsetX[n4 - 1] || gc->assets.tileOffsetY[n4] != gc->assets.tileOffsetY[n4 - 1]) continue;
-            n3 = gc->assets.tileOffsetY[n4]; gc->assets.tileOffsetY[n4] = gc->assets.tileOffsetY[n4 - 1]; gc->assets.tileOffsetY[n4 - 1] = (int8_t)n3;
-            n3 = gc->assets.tileOffsetX[n4]; gc->assets.tileOffsetX[n4] = gc->assets.tileOffsetX[n4 - 1]; gc->assets.tileOffsetX[n4 - 1] = (int8_t)n3;
+        for (n4 = 1; n4 < game->assets.numActiveTileAnimations; ++n4) {
+            if (game->assets.tileOffsetX[n4] <= game->assets.tileOffsetX[n4 - 1] || game->assets.tileOffsetY[n4] != game->assets.tileOffsetY[n4 - 1]) continue;
+            n3 = game->assets.tileOffsetY[n4]; game->assets.tileOffsetY[n4] = game->assets.tileOffsetY[n4 - 1]; game->assets.tileOffsetY[n4 - 1] = (int8_t)n3;
+            n3 = game->assets.tileOffsetX[n4]; game->assets.tileOffsetX[n4] = game->assets.tileOffsetX[n4 - 1]; game->assets.tileOffsetX[n4 - 1] = (int8_t)n3;
             n5 = 1;
         }
     } while (n5 != 0);
 }
 
-void gc_setCanvasSize(Game *gc, int32_t n, int32_t n2) {
-    if (gc->lastCanvasWidth != n || gc->lastCanvasHeight != n2) {
+void game_setCanvasSize(Game *game, int32_t n, int32_t n2) {
+    if (game->lastCanvasWidth != n || game->lastCanvasHeight != n2) {
         gcs_screenWidth = n;
         gcs_hs = n2;
-        gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
-        gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
+        game->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+        game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
         gcs_gameplayViewportHeight = gcs_hs - 30;
         gcs_bottomBarY = gcs_hs - 15;
-        gc_k(gc, n, n2);
-        gc->lastCanvasWidth = n;
-        gc->lastCanvasHeight = n2;
-        gc->ui.menuDirty = true;
-        gc->renderer.lastViewportCenterX = -1;
-        if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {
-            if (gc->savedGameState == +GameState::Playing) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::Playing; }
-            if (gc->savedGameState == +GameState::MapOverview) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::MapOverview; }
+        game_k(game, n, n2);
+        game->lastCanvasWidth = n;
+        game->lastCanvasHeight = n2;
+        game->ui.menuDirty = true;
+        game->renderer.lastViewportCenterX = -1;
+        if (game->gameState == +GameState::MenuOverlay && !game->ready) {
+            if (game->savedGameState == +GameState::Playing) { game->ui.pendingTransitionCode = game->ui.transitionCode; game->gameState = +GameState::Playing; }
+            if (game->savedGameState == +GameState::MapOverview) { game->ui.pendingTransitionCode = game->ui.transitionCode; game->gameState = +GameState::MapOverview; }
         }
     }
 }
 
-void gc_setState(Game *gc, int32_t n) {
-    gc->savedGameState = gc->gameState;
-    if (!gc->ready) gc->assets.cycle_flag = NULL;
-    gc->ui.snapshotLoadedFlag = false;
-    gc->ui.menuDirty = true;
+void game_setState(Game *game, int32_t n) {
+    game->savedGameState = game->gameState;
+    if (!game->ready) game->assets.cycle_flag = NULL;
+    game->ui.snapshotLoadedFlag = false;
+    game->ui.menuDirty = true;
     switch (n) {
         case +GameState::BootSplash0:
-            gc_openSpriteStream(gc, "sprite_images.bin");
-            gc_loadPackedSpriteData(gc, "packed_sprites.bin");
-            gc->loadingTimer = 0;
+            game_openSpriteStream(game, "sprite_images.bin");
+            game_loadPackedSpriteData(game, "packed_sprites.bin");
+            game->loadingTimer = 0;
             /* fall through */
         case +GameState::BootSplash1:
         case +GameState::BootSplash2:
-            gc->assets.cycle_flag = gc_decodePngFromSpriteStream(gc);
-            gc->loadingStartTime = midp_current_time_millis();
-            gc->loadingTimeout = false;
-            gc->loadingTimer = 0;
+            game->assets.cycle_flag = game_decodePngFromSpriteStream(game);
+            game->loadingStartTime = midp_current_time_millis();
+            game->loadingTimeout = false;
+            game->loadingTimer = 0;
             break;
         case +GameState::IntroReady: {
             ResourceReader in = resources::open("sprite_image_map.bin");
             if (in) {
                 int n2 = in.read_byte();
                 int n3 = in.read_byte();
-                gc->assets.spriteBitmapTable.resize(n2, 0);
-                gc->assets.spriteIndexTable.assign(static_cast<std::size_t>(n3 + 1), 0);
+                game->assets.spriteBitmapTable.resize(n2, 0);
+                game->assets.spriteIndexTable.assign(static_cast<std::size_t>(n3 + 1), 0);
                 for (int i = 0; i < n2; ++i) {
                     int n4 = in.read_byte();
                     int n5 = in.read_byte();
-                    gc->assets.spriteBitmapTable[i].assign(static_cast<std::size_t>(n5), 0);
-                    gc->assets.spriteIndexTable[n4] = (int8_t)i;
+                    game->assets.spriteBitmapTable[i].assign(static_cast<std::size_t>(n5), 0);
+                    game->assets.spriteIndexTable[n4] = (int8_t)i;
                     for (int j = 0; j < n5; ++j)
-                        gc->assets.spriteBitmapTable[i][j] = (int8_t)in.read_byte();
+                        game->assets.spriteBitmapTable[i][j] = (int8_t)in.read_byte();
                 }
             }
             break;
         }
         case +GameState::LoadingResources: {
-            gc->assets.spriteLoadCounter = 0;
+            game->assets.spriteLoadCounter = 0;
             ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
-                gc->scenario.scenarioResourceCount = in.read_byte();
-                for (int i = 0; i < gc->scenario.scenarioResourceCount; ++i) {
+                game->scenario.scenarioResourceCount = in.read_byte();
+                for (int i = 0; i < game->scenario.scenarioResourceCount; ++i) {
                     int n6 = in.read_byte();
-                    gc->assets.tileSpriteIndex[n6] = (int8_t)(i - 8);
+                    game->assets.tileSpriteIndex[n6] = (int8_t)(i - 8);
                 }
             }
-            gc->scenario.scenarioResourceCount -= 8;
-            gc->assets.tile_sprites.clear();
-            gc->assets.tile_sprites.resize(
-                static_cast<std::size_t>(gc->scenario.scenarioResourceCount));
-            gc->assets.tileSpriteIndex[68] = gc->assets.tileSpriteIndex[66];
+            game->scenario.scenarioResourceCount -= 8;
+            game->assets.tile_sprites.clear();
+            game->assets.tile_sprites.resize(
+                static_cast<std::size_t>(game->scenario.scenarioResourceCount));
+            game->assets.tileSpriteIndex[68] = game->assets.tileSpriteIndex[66];
             break;
         }
         case +GameState::MenuOverlay:
-            gc_resetOverlayRenderState(gc);
-            if (!gc->ui.useDefaultOverlaySelection) gc->ui.cursorDragY = 2;
-            gc->ui.useDefaultOverlaySelection = true;
+            game_resetOverlayRenderState(game);
+            if (!game->ui.useDefaultOverlaySelection) game->ui.cursorDragY = 2;
+            game->ui.useDefaultOverlaySelection = true;
             break;
         case +GameState::GeneratingMap:
-            gc->loadStep = 0;
+            game->loadStep = 0;
             break;
         case +GameState::Playing:
-            gc->renderer.backbuffer = NULL;
-            gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
-            gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
-            gc->renderer.lastViewportCenterX = -1;
-            gc->ui.menuDirty = true;
+            game->renderer.backbuffer = NULL;
+            game->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+            game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
+            game->renderer.lastViewportCenterX = -1;
+            game->ui.menuDirty = true;
             break;
-        case +GameState::BuildingMinimap: gc->loadStep = 4; gc->ui.confirmToggle = 0; break;
-        case +GameState::BuildingPath: gc->loadStep = 4; break;
-        case +GameState::SavingGame: gc->loadStep = 4; break;
-        case +GameState::LoadingGame: gc->loadStep = 4; break;
-        case +GameState::AiTurn: gc->loadStep = 4; break;
-        case +GameState::HighScoreSync: gc->loadStep = 4; break;
+        case +GameState::BuildingMinimap: game->loadStep = 4; game->ui.confirmToggle = 0; break;
+        case +GameState::BuildingPath: game->loadStep = 4; break;
+        case +GameState::SavingGame: game->loadStep = 4; break;
+        case +GameState::LoadingGame: game->loadStep = 4; break;
+        case +GameState::AiTurn: game->loadStep = 4; break;
+        case +GameState::HighScoreSync: game->loadStep = 4; break;
     }
-    gc->gameState = n;
+    game->gameState = n;
 }
 
 // public void start(GameMIDlet gameMIDlet) -- host owns the loop, no thread
-void gc_start(Game *gc, void *gameMIDlet) {
-    gc->midlet = gameMIDlet;
-    gc_persistSnapshotMode1(gc);
-    gc_setState(gc, +GameState::BootSplash0);
+void game_start(Game *game, void *gameMIDlet) {
+    game->midlet = gameMIDlet;
+    game_persistSnapshotMode1(game);
+    game_setState(game, +GameState::BootSplash0);
     // Display.setCurrent + Thread(this).start() are replaced by the host loop.
 }
 
 // public void run() -- ONE iteration of the original game-thread loop.
 // The host (main.c) calls this each frame; timing/repaint/sleep are host-owned.
-void gc_run(Game *gc) {
-    if (gc->stopRequested || gc->ui.paused) return;
-    gc->frameStartTime = midp_current_time_millis();
-    if (gc->ui.keyRepeatDelay == 0) {
-        if (gc->ui.heldKey != 0) gc->ui.currentKey = gc->ui.heldKey;
+void game_run(Game *game) {
+    if (game->stopRequested || game->ui.paused) return;
+    game->frameStartTime = midp_current_time_millis();
+    if (game->ui.keyRepeatDelay == 0) {
+        if (game->ui.heldKey != 0) game->ui.currentKey = game->ui.heldKey;
     } else {
-        --gc->ui.keyRepeatDelay;
+        --game->ui.keyRepeatDelay;
     }
-    if (gc->ui.currentKey != 0 && gc->ui.currentKey != -999) gc_handleKey(gc, gc->ui.currentKey);
-    if (gc->ui.currentKey == -999) gc_resetKeyState(gc, gc->ui.currentKey);
-    if (gc->ui.inputSubState > 0) --gc->ui.inputSubState;
-    ++gc->frameCount;
-    if (gc->ui.inputPending) {
-        gc->frameIndex = 1;
-        while (gc->frameIndex > 0) {
-            gc_update(gc);
-            if (gc->gameState != +GameState::MenuOverlay && gc->gameState != +GameState::MapOverview) continue;
-            gc->ui.inputPending = false;
+    if (game->ui.currentKey != 0 && game->ui.currentKey != -999) game_handleKey(game, game->ui.currentKey);
+    if (game->ui.currentKey == -999) game_resetKeyState(game, game->ui.currentKey);
+    if (game->ui.inputSubState > 0) --game->ui.inputSubState;
+    ++game->frameCount;
+    if (game->ui.inputPending) {
+        game->frameIndex = 1;
+        while (game->frameIndex > 0) {
+            game_update(game);
+            if (game->gameState != +GameState::MenuOverlay && game->gameState != +GameState::MapOverview) continue;
+            game->ui.inputPending = false;
             break;
         }
-        gc->frameIndex = 0;
+        game->frameIndex = 0;
     }
-    if (gc->gameState == +GameState::LoadingResources) {
-        for (int n = 0; n < 5; ++n) gc_update(gc);
+    if (game->gameState == +GameState::LoadingResources) {
+        for (int n = 0; n < 5; ++n) game_update(game);
     }
-    if (gc->gameState == +GameState::Playing) {
-        for (int n = 0; n < gc->simSpeed; ++n) {
-            if (!gc->ui.pauseFlag) gc_update(gc);
-            if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) continue;
-            gc_viewportZoomKey(gc);
+    if (game->gameState == +GameState::Playing) {
+        for (int n = 0; n < game->simSpeed; ++n) {
+            if (!game->ui.pauseFlag) game_update(game);
+            if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) continue;
+            game_viewportZoomKey(game);
         }
     } else {
-        gc_update(gc);
+        game_update(game);
     }
-    gc->frameTime = midp_current_time_millis() - gc->frameStartTime;
+    game->frameTime = midp_current_time_millis() - game->frameStartTime;
 }

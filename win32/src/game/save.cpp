@@ -6,67 +6,67 @@
 #include <string.h>
 
 // Read one byte from the save buffer as an unsigned value (0..255).
-int32_t gc_readSaveByteUnsigned(Game *gc) {
-    return gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset] >= 0
-               ? gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++]
-               : 256 + gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++];
+int32_t game_readSaveByteUnsigned(Game *game) {
+    return game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset] >= 0
+               ? game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++]
+               : 256 + game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++];
 }
 
-bool gc_saveOrLoadBool(Game *gc, bool bl) {
-    return gc_saveOrLoadByte(gc, (int8_t)(bl ? 1 : 0)) == 1;
+bool game_saveOrLoadBool(Game *game, bool bl) {
+    return game_saveOrLoadByte(game, (int8_t)(bl ? 1 : 0)) == 1;
 }
 
-int8_t gc_saveOrLoadByte(Game *gc, int8_t by) {
-    if (gc->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
+int8_t game_saveOrLoadByte(Game *game, int8_t by) {
+    if (game->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
     int8_t by2 = by;
-    if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
-        gc_ensureSaveBufferCapacity(gc, 1);
-        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = by;
-    } else if (gc->saveCodec.snapshotLoaded) {
-        by2 = gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++];
+    if (game->saveCodec.savePendingMode == save::MODE_WRITE) {
+        game_ensureSaveBufferCapacity(game, 1);
+        game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++] = by;
+    } else if (game->saveCodec.snapshotLoaded) {
+        by2 = game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++];
     }
     return by2;
 }
 
-int32_t gc_saveIntToBuffer(Game *gc, int32_t n) {
-    if (gc->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
+int32_t game_saveIntToBuffer(Game *game, int32_t n) {
+    if (game->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
     int32_t n2 = n;
-    if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
-        gc_ensureSaveBufferCapacity(gc, 4);
-        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n & 0xFF);
-        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n >> 8 & 0xFF);
-        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
-        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
-    } else if (gc->saveCodec.snapshotLoaded) {
-        uint32_t bits = (uint32_t)gc_readSaveByteUnsigned(gc);
-        bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 8;
-        bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 16;
-        bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 24;
+    if (game->saveCodec.savePendingMode == save::MODE_WRITE) {
+        game_ensureSaveBufferCapacity(game, 4);
+        game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++] = (int8_t)(n & 0xFF);
+        game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++] = (int8_t)(n >> 8 & 0xFF);
+        game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
+        game->saveCodec.saveBuffer[game->saveCodec.saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
+    } else if (game->saveCodec.snapshotLoaded) {
+        uint32_t bits = (uint32_t)game_readSaveByteUnsigned(game);
+        bits |= (uint32_t)game_readSaveByteUnsigned(game) << 8;
+        bits |= (uint32_t)game_readSaveByteUnsigned(game) << 16;
+        bits |= (uint32_t)game_readSaveByteUnsigned(game) << 24;
         memcpy(&n2, &bits, sizeof(n2));
     }
     return n2;
 }
 
-void gc_saveGame(Game *gc) {
-    if (gc->saveCodec.savePendingMode != 0) return;
+void game_saveGame(Game *game) {
+    if (game->saveCodec.savePendingMode != 0) return;
     std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
     if (!store) return;
     for (int index = store->record_count() - 1; index >= 0; --index) {
         int id = store->record_id_at(index);
         const auto record = store->record(id);
         if (!record) continue;
-        bool same_slot = !record->empty() && (int8_t)(*record)[0] == gc->saveCodec.saveSlot;
+        bool same_slot = !record->empty() && (int8_t)(*record)[0] == game->saveCodec.saveSlot;
         if (same_slot) store->delete_record(id);
     }
-    std::vector<uint8_t> record(static_cast<std::size_t>(gc->saveCodec.snapshotSize) + 1);
-    record[0] = (uint8_t)gc->saveCodec.saveSlot;
-    memcpy(record.data() + 1, gc->saveCodec.saveBuffer.data(), (size_t)gc->saveCodec.snapshotSize);
+    std::vector<uint8_t> record(static_cast<std::size_t>(game->saveCodec.snapshotSize) + 1);
+    record[0] = (uint8_t)game->saveCodec.saveSlot;
+    memcpy(record.data() + 1, game->saveCodec.saveBuffer.data(), (size_t)game->saveCodec.snapshotSize);
     store->add_record(record);
 }
 
-void gc_writeRleRun(Game *gc, ByteBuffer& output,
+void game_writeRleRun(Game *game, ByteBuffer& output,
                     int32_t value, int32_t count) {
-    (void)gc;
+    (void)game;
     if (count == 1) {
         if (value == -1) {
             output.write(255);
@@ -80,85 +80,85 @@ void gc_writeRleRun(Game *gc, ByteBuffer& output,
     }
 }
 
-void gc_checkSaveByteSum(Game *gc, const char *label) {
+void game_checkSaveByteSum(Game *game, const char *label) {
     (void)label;
     uint64_t sum = 0;
-    for (int i = 0; i < gc->saveCodec.snapshotSize; ++i)
-        sum += (uint64_t)gc_byteToUnsignedInt(gc, gc->saveCodec.saveBuffer[i]);
+    for (int i = 0; i < game->saveCodec.snapshotSize; ++i)
+        sum += (uint64_t)game_byteToUnsignedInt(game, game->saveCodec.saveBuffer[i]);
     (void)sum;
 }
 
-void gc_compressSaveBuffer(Game *gc) {
-    gc_checkSaveByteSum(gc, "Compress pre");
+void game_compressSaveBuffer(Game *game) {
+    game_checkSaveByteSum(game, "Compress pre");
     ByteBuffer output;
-    int value = gc->saveCodec.saveBuffer[0];
+    int value = game->saveCodec.saveBuffer[0];
     int count = 1;
-    for (int i = 1; i < gc->saveCodec.snapshotSize; ++i) {
-        if (value != gc->saveCodec.saveBuffer[i] || count == 254) {
-            gc_writeRleRun(gc, output, value, count);
-            value = gc->saveCodec.saveBuffer[i];
+    for (int i = 1; i < game->saveCodec.snapshotSize; ++i) {
+        if (value != game->saveCodec.saveBuffer[i] || count == 254) {
+            game_writeRleRun(game, output, value, count);
+            value = game->saveCodec.saveBuffer[i];
             count = 1;
         } else {
             ++count;
         }
     }
-    gc_writeRleRun(gc, output, value, count);
-    gc->saveCodec.bytesUncompressed += gc->saveCodec.snapshotSize;
+    game_writeRleRun(game, output, value, count);
+    game->saveCodec.bytesUncompressed += game->saveCodec.snapshotSize;
     const auto compressed = output.bytes();
-    gc->saveCodec.snapshotSize = static_cast<int>(compressed.size());
-    gc->saveCodec.saveBuffer.assign(static_cast<std::size_t>(gc->saveCodec.snapshotSize), 0);
-    memcpy(gc->saveCodec.saveBuffer.data(), compressed.data(), (size_t)gc->saveCodec.snapshotSize);
-    gc->saveCodec.bytesCompressed += gc->saveCodec.snapshotSize;
-    gc_checkSaveByteSum(gc, "Compress post");
+    game->saveCodec.snapshotSize = static_cast<int>(compressed.size());
+    game->saveCodec.saveBuffer.assign(static_cast<std::size_t>(game->saveCodec.snapshotSize), 0);
+    memcpy(game->saveCodec.saveBuffer.data(), compressed.data(), (size_t)game->saveCodec.snapshotSize);
+    game->saveCodec.bytesCompressed += game->saveCodec.snapshotSize;
+    game_checkSaveByteSum(game, "Compress post");
 }
 
-void gc_decompressSaveBuffer(Game *gc) {
-    gc_checkSaveByteSum(gc, "Decompress pre");
+void game_decompressSaveBuffer(Game *game) {
+    game_checkSaveByteSum(game, "Decompress pre");
     ByteBuffer output;
-    for (int i = 0; i < gc->saveCodec.snapshotSize; ++i) {
-        if (gc->saveCodec.saveBuffer[i] == -1) {
-            int count = gc_byteToUnsignedInt(gc, gc->saveCodec.saveBuffer[i + 1]);
+    for (int i = 0; i < game->saveCodec.snapshotSize; ++i) {
+        if (game->saveCodec.saveBuffer[i] == -1) {
+            int count = game_byteToUnsignedInt(game, game->saveCodec.saveBuffer[i + 1]);
             for (int j = 0; j < count; ++j)
-                output.write(gc->saveCodec.saveBuffer[i + 2]);
+                output.write(game->saveCodec.saveBuffer[i + 2]);
             i += 2;
         } else {
-            output.write(gc->saveCodec.saveBuffer[i]);
+            output.write(game->saveCodec.saveBuffer[i]);
         }
     }
-    gc->saveCodec.bytesCompressed += gc->saveCodec.snapshotSize;
+    game->saveCodec.bytesCompressed += game->saveCodec.snapshotSize;
     const auto decompressed = output.bytes();
-    gc->saveCodec.snapshotSize = static_cast<int>(decompressed.size());
-    gc->saveCodec.saveBuffer.assign(static_cast<std::size_t>(gc->saveCodec.snapshotSize), 0);
-    memcpy(gc->saveCodec.saveBuffer.data(), decompressed.data(), (size_t)gc->saveCodec.snapshotSize);
-    gc->saveCodec.bytesUncompressed += gc->saveCodec.snapshotSize;
-    gc_checkSaveByteSum(gc, "Decompress post");
+    game->saveCodec.snapshotSize = static_cast<int>(decompressed.size());
+    game->saveCodec.saveBuffer.assign(static_cast<std::size_t>(game->saveCodec.snapshotSize), 0);
+    memcpy(game->saveCodec.saveBuffer.data(), decompressed.data(), (size_t)game->saveCodec.snapshotSize);
+    game->saveCodec.bytesUncompressed += game->saveCodec.snapshotSize;
+    game_checkSaveByteSum(game, "Decompress post");
 }
 
-void gc_initSaveOrLoad(Game *gc, int32_t mode) {
-    if (mode == save::OP_SAVE_MAIN) gc_loadGame(gc, 0, save::MODE_WRITE);
-    if (mode == save::OP_LOAD_MAIN) gc_loadGame(gc, 0, save::MODE_READ);
-    if (mode == save::OP_RESET_SKIP) gc->saveCodec.savePendingMode = save::MODE_SKIP;
+void game_initSaveOrLoad(Game *game, int32_t mode) {
+    if (mode == save::OP_SAVE_MAIN) game_loadGame(game, 0, save::MODE_WRITE);
+    if (mode == save::OP_LOAD_MAIN) game_loadGame(game, 0, save::MODE_READ);
+    if (mode == save::OP_RESET_SKIP) game->saveCodec.savePendingMode = save::MODE_SKIP;
     if (mode == 4) {
-        gc->saveCodec.snapshotSize = 0;
-        gc->saveCodec.saveBuffer.clear();
-        gc->saveCodec.savePendingMode = save::MODE_WRITE;
+        game->saveCodec.snapshotSize = 0;
+        game->saveCodec.saveBuffer.clear();
+        game->saveCodec.savePendingMode = save::MODE_WRITE;
     }
     if (mode == 5) {
-        gc->saveCodec.saveReadOffset = 0;
-        gc->saveCodec.savePendingMode = save::MODE_READ;
-        gc->saveCodec.snapshotLoaded = true;
+        game->saveCodec.saveReadOffset = 0;
+        game->saveCodec.savePendingMode = save::MODE_READ;
+        game->saveCodec.snapshotLoaded = true;
     }
-    if (mode == save::OP_LOAD_MAIN) gc_decompressSaveBuffer(gc);
+    if (mode == save::OP_LOAD_MAIN) game_decompressSaveBuffer(game);
 
 #define IO_INT(field) \
-    (gc->field = gc_saveIntToBuffer(gc, gc->field))
+    (game->field = game_saveIntToBuffer(game, game->field))
 #define IO_BYTE(field) \
-    (gc->field = gc_saveOrLoadByte(gc, gc->field))
+    (game->field = game_saveOrLoadByte(game, game->field))
 #define IO_BOOL(field) \
-    (gc->field = gc_saveOrLoadBool(gc, gc->field))
-#define IO_BYTES(field) gc_saveOrLoadByteArrayInlined(gc, gc->field)
-#define IO_SHORTS(field) gc_saveOrLoadShortArrayInlined(gc, gc->field)
-#define IO_INTS(field) gc_saveOrLoadIntArrayInlined(gc, gc->field)
+    (game->field = game_saveOrLoadBool(game, game->field))
+#define IO_BYTES(field) game_saveOrLoadByteArrayInlined(game, game->field)
+#define IO_SHORTS(field) game_saveOrLoadShortArrayInlined(game, game->field)
+#define IO_INTS(field) game_saveOrLoadIntArrayInlined(game, game->field)
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
@@ -235,7 +235,7 @@ void gc_initSaveOrLoad(Game *gc, int32_t mode) {
     IO_BYTES(fleet.serviceVehicleX);
     IO_BYTES(fleet.serviceVehicleY);
     IO_BYTES(fleet.serviceUnloadFlags);
-    gc_saveOrLoadShortMatrixInlined(gc, gc->fleet.serviceResourceStock);
+    game_saveOrLoadShortMatrixInlined(game, game->fleet.serviceResourceStock);
     IO_BYTE(ui.numSelectedTrains);
     IO_BOOL(scenario.aiExpansionEnabled);
     IO_BYTES(world.constructionTimers);
@@ -261,7 +261,7 @@ void gc_initSaveOrLoad(Game *gc, int32_t mode) {
     IO_INT(world.industryCategory);
     IO_BOOL(world.industrySiteFound);
     IO_INT(build.nextTrackPieceCode);
-    if (gc->build.nextTrackPieceCode == 0) gc->build.nextTrackPieceCode = 66;
+    if (game->build.nextTrackPieceCode == 0) game->build.nextTrackPieceCode = 66;
     IO_BYTE(scenario.aiFrequency);
     IO_BYTE(scenario.aiThreshold);
     if (mode != save::OP_RESET_SKIP) IO_BYTE(scenario.difficultyCycle);
@@ -328,58 +328,58 @@ void gc_initSaveOrLoad(Game *gc, int32_t mode) {
 #undef IO_INTS
 
     if (mode == save::OP_SAVE_MAIN) {
-        gc_compressSaveBuffer(gc);
-        gc_saveGame(gc);
+        game_compressSaveBuffer(game);
+        game_saveGame(game);
     }
 }
 
-void gc_saveAllMapArrays(Game *gc) {
-    gc->saveCodec.bytesUncompressed = 0;
-    gc->saveCodec.bytesCompressed = 0;
-    gc_initSaveOrLoad(gc, save::OP_SAVE_MAIN);
-    gc_loadGame(gc, 1, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileMap);
-    gc_compressSaveBuffer(gc);
-    gc_saveGame(gc);
-    gc_loadGame(gc, 2, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.trackMap);
-    gc_compressSaveBuffer(gc);
-    gc_saveGame(gc);
-    gc_loadGame(gc, 3, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileElevation);
-    gc_compressSaveBuffer(gc);
-    gc_saveGame(gc);
-    gc_loadGame(gc, 4, save::MODE_WRITE);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.heightMap);
-    gc_compressSaveBuffer(gc);
-    gc_saveGame(gc);
+void game_saveAllMapArrays(Game *game) {
+    game->saveCodec.bytesUncompressed = 0;
+    game->saveCodec.bytesCompressed = 0;
+    game_initSaveOrLoad(game, save::OP_SAVE_MAIN);
+    game_loadGame(game, 1, save::MODE_WRITE);
+    game_saveOrLoadByteMatrixInlined(game, game->world.tileMap);
+    game_compressSaveBuffer(game);
+    game_saveGame(game);
+    game_loadGame(game, 2, save::MODE_WRITE);
+    game_saveOrLoadByteMatrixInlined(game, game->world.trackMap);
+    game_compressSaveBuffer(game);
+    game_saveGame(game);
+    game_loadGame(game, 3, save::MODE_WRITE);
+    game_saveOrLoadByteMatrixInlined(game, game->world.tileElevation);
+    game_compressSaveBuffer(game);
+    game_saveGame(game);
+    game_loadGame(game, 4, save::MODE_WRITE);
+    game_saveOrLoadByteMatrixInlined(game, game->world.heightMap);
+    game_compressSaveBuffer(game);
+    game_saveGame(game);
 }
 
-void gc_restoreAllMapArrays(Game *gc) {
-    gc->saveCodec.bytesUncompressed = 0;
-    gc->saveCodec.bytesCompressed = 0;
-    gc_initSaveOrLoad(gc, save::OP_LOAD_MAIN);
-    gc->world.tileMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
-    gc->world.trackMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
-    gc->world.tileElevation.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
-    gc->world.heightMap.resize(gc->world.mapWidth + 2, gc->world.mapHeight + 2);
-    gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
-    gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
-    gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
-    gc->renderer.viewportHalfWidth = gc->world.mapScreenWidth / 2;
-    gc->renderer.viewportHalfHeight = gc->world.mapScreenHeight / 2;
-    gc_initBuildMenuForScenario(gc, -1);
-    gc_loadGame(gc, 1, save::MODE_READ);
-    gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileMap);
-    gc_loadGame(gc, 2, save::MODE_READ);
-    gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.trackMap);
-    gc_loadGame(gc, 3, save::MODE_READ);
-    gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileElevation);
-    gc_loadGame(gc, 4, save::MODE_READ);
-    gc_decompressSaveBuffer(gc);
-    gc_saveOrLoadByteMatrixInlined(gc, gc->world.heightMap);
-    gc->renderer.lastViewportCenterX = -1;
+void game_restoreAllMapArrays(Game *game) {
+    game->saveCodec.bytesUncompressed = 0;
+    game->saveCodec.bytesCompressed = 0;
+    game_initSaveOrLoad(game, save::OP_LOAD_MAIN);
+    game->world.tileMap.resize(game->world.mapWidth + 1, game->world.mapHeight + 1);
+    game->world.trackMap.resize(game->world.mapWidth + 1, game->world.mapHeight + 1);
+    game->world.tileElevation.resize(game->world.mapWidth + 1, game->world.mapHeight + 1);
+    game->world.heightMap.resize(game->world.mapWidth + 2, game->world.mapHeight + 2);
+    game->world.mapHalfWidth = (game->world.mapWidth - 1) * 8;
+    game->world.mapScreenWidth = (game->world.mapWidth + game->world.mapHeight) * 16;
+    game->world.mapScreenHeight = (game->world.mapWidth + game->world.mapHeight) * 8;
+    game->renderer.viewportHalfWidth = game->world.mapScreenWidth / 2;
+    game->renderer.viewportHalfHeight = game->world.mapScreenHeight / 2;
+    game_initBuildMenuForScenario(game, -1);
+    game_loadGame(game, 1, save::MODE_READ);
+    game_decompressSaveBuffer(game);
+    game_saveOrLoadByteMatrixInlined(game, game->world.tileMap);
+    game_loadGame(game, 2, save::MODE_READ);
+    game_decompressSaveBuffer(game);
+    game_saveOrLoadByteMatrixInlined(game, game->world.trackMap);
+    game_loadGame(game, 3, save::MODE_READ);
+    game_decompressSaveBuffer(game);
+    game_saveOrLoadByteMatrixInlined(game, game->world.tileElevation);
+    game_loadGame(game, 4, save::MODE_READ);
+    game_decompressSaveBuffer(game);
+    game_saveOrLoadByteMatrixInlined(game, game->world.heightMap);
+    game->renderer.lastViewportCenterX = -1;
 }
