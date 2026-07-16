@@ -248,10 +248,6 @@ typedef struct GameCanvas {
     int32_t timerB2;
     int32_t timerC1;
     int32_t timerC2;
-    int32_t woodAgeTimer;
-    int32_t phaseTimer;
-    std::array<std::array<int8_t, 3>, 50> tileQueue{};
-    std::array<bool, 50> tileQueueVisualOnly{};
     std::array<int32_t, 9> dc{};
     int32_t bx;
     int32_t fR;

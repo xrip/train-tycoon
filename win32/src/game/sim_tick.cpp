@@ -203,9 +203,9 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
         }
     }
     for (n3 = 49; n3 >= 0; --n3) {
-        if (gc->tileQueue[n3][0] != 0
-            && gc_byteToUnsignedInt(gc, gc->tileQueue[n3][1]) == n
-            && gc_byteToUnsignedInt(gc, gc->tileQueue[n3][2]) == n2)
+        if (gc->world.tileQueue[n3][0] != 0
+            && gc_byteToUnsignedInt(gc, gc->world.tileQueue[n3][1]) == n
+            && gc_byteToUnsignedInt(gc, gc->world.tileQueue[n3][2]) == n2)
             bl3 = false;
     }
     if (!bl3) return;
@@ -213,15 +213,15 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
         gc->world.tileMap[n][n2] = (int8_t)(gc->world.tileMap[n][n2] + 128);
     n3 = 0;
     for (int i = 49; i >= 0; --i) {
-        if (gc->tileQueue[i][0] == 0) {
+        if (gc->world.tileQueue[i][0] == 0) {
             n3 = i;
             break;
         }
     }
-    gc->tileQueue[n3][0] = 14;
-    gc->tileQueueVisualOnly[n3] = bl2;
-    gc->tileQueue[n3][1] = (int8_t)n;
-    gc->tileQueue[n3][2] = (int8_t)n2;
+    gc->world.tileQueue[n3][0] = 14;
+    gc->world.tileQueueVisualOnly[n3] = bl2;
+    gc->world.tileQueue[n3][1] = (int8_t)n;
+    gc->world.tileQueue[n3][2] = (int8_t)n2;
 }
 
 // void placeCityTileInlined(int,int,int)
@@ -654,7 +654,7 @@ void gc_simulationTick(GameCanvas *gc) {
                 gc->timerC1 = 0;
                 if (++gc->timerC2 == 3) gc->timerC2 = 0;
             }
-            if (++gc->woodAgeTimer == 150) {
+            if (++gc->world.woodAgeTimer == 150) {
                 for (int n27 = 0; n27 < gc->world.mapWidth; ++n27) {
                     for (int n = 0; n < gc->world.mapHeight; ++n) {
                         if (gc->world.tileMap[n27][n] < 59 || gc->world.tileMap[n27][n] > 61
@@ -664,23 +664,23 @@ void gc_simulationTick(GameCanvas *gc) {
                         if (gc->world.tileMap[n27][n] == 62) gc->world.tileMap[n27][n] = 59;
                     }
                 }
-                gc->woodAgeTimer = 0;
+                gc->world.woodAgeTimer = 0;
             }
-            if (++gc->phaseTimer == 10) gc->phaseTimer = 0;
+            if (++gc->world.phaseTimer == 10) gc->world.phaseTimer = 0;
 
             for (int n27 = 0; n27 < 50; ++n27) {
-                if (gc->tileQueue[n27][0] <= 0) continue;
-                --gc->tileQueue[n27][0];
-                int n = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][1]);
-                int n29 = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][2]);
-                if (gc->tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
+                if (gc->world.tileQueue[n27][0] <= 0) continue;
+                --gc->world.tileQueue[n27][0];
+                int n = gc_byteToUnsignedInt(gc, gc->world.tileQueue[n27][1]);
+                int n29 = gc_byteToUnsignedInt(gc, gc->world.tileQueue[n27][2]);
+                if (gc->world.tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
                     && n < gc->world.mapWidth && n29 < gc->world.mapHeight)
                     gc->world.tileMap[n][n29] = (int8_t)(gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128);
-                if (gc->tileQueue[n27][0] != 7 || n < 0 || n29 < 0
+                if (gc->world.tileQueue[n27][0] != 7 || n < 0 || n29 < 0
                     || n >= gc->world.mapWidth || n29 >= gc->world.mapHeight)
                     continue;
                 int n30 = gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128;
-                if (gc->tileQueueVisualOnly[n27]) continue;
+                if (gc->world.tileQueueVisualOnly[n27]) continue;
                 if (n30 >= 29 && n30 <= 33) gc->world.tileMap[n][n29] = -128;
                 if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
                     gc->world.trackMap[n][n29] = 0;

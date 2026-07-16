@@ -29,6 +29,16 @@ struct World {
     std::array<int8_t, 48> cityPopulation{};
     std::array<int8_t, 48> cityIndex{};
 
+    // Tile-map animation state. tileQueue holds up to 50 pending tile changes
+    // (each: countdown, x, y) applied to tileMap during the tick;
+    // tileQueueVisualOnly marks the ones that are display-only. woodAgeTimer
+    // ages forest tiles and phaseTimer cycles the tile animation phase. All
+    // runtime-only (not saved). Values and tick order are unchanged.
+    std::array<std::array<int8_t, 3>, 50> tileQueue{};
+    std::array<bool, 50> tileQueueVisualOnly{};
+    int32_t woodAgeTimer = 0;
+    int32_t phaseTimer = 0;
+
     // True when (x, y) is a valid map cell.
     bool in_bounds(int32_t x, int32_t y) const {
         return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;

@@ -105,7 +105,7 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
             if (!gcs_animationsDisabled) {
                 if (n2 == 54 || n2 == 55)
                     midp_draw_image(g, gc->tile_sprites[gc->tileSpriteIndex[53]].get(), n, n12, 33);
-                if (gc->phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
+                if (gc->world.phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
                     int8_t *row = gc->world.tileMap[n5].data();
                     row[n4] = (int8_t)(row[n4] + 1);
                     if (gc->world.tileMap[n5][n4] == 69) gc->world.tileMap[n5][n4] = 65;
@@ -131,8 +131,8 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
         n12 = gc->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n5][n4] + 15;
         int n14 = -1;
         for (int i = 0; i < 50; ++i) {
-            if (gc_byteToUnsignedInt(gc, gc->tileQueue[i][1]) != n5 || gc_byteToUnsignedInt(gc, gc->tileQueue[i][2]) != n4) continue;
-            n14 = gc->tileQueue[i][0];
+            if (gc_byteToUnsignedInt(gc, gc->world.tileQueue[i][1]) != n5 || gc_byteToUnsignedInt(gc, gc->world.tileQueue[i][2]) != n4) continue;
+            n14 = gc->world.tileQueue[i][0];
         }
         if (n14 <= 0) continue;
         midp_draw_image(g, gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);

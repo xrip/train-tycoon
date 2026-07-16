@@ -275,8 +275,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->timerB2 = 0;
     gc->timerC1 = 0;
     gc->timerC2 = 0;
-    gc->woodAgeTimer = 0;
-    gc->phaseTimer = 0;
+    gc->world.woodAgeTimer = 0;
+    gc->world.phaseTimer = 0;
     gc->dc = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     gc->bx = 0;
     gc->fR = 0;
