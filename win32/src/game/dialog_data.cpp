@@ -38,7 +38,7 @@ static std::vector<int8_t> join_three_codes(std::span<const int8_t> first,
     return result;
 }
 
-std::vector<int8_t> gc_formatCurrency(GameCanvas *gc, int32_t value) {
+std::vector<int8_t> gc_formatCurrency(Game *gc, int32_t value) {
     (void)gc;
     uint32_t magnitude = value < 0 ? 0u - (uint32_t)value : (uint32_t)value;
     char digits[16];
@@ -59,7 +59,7 @@ std::vector<int8_t> gc_formatCurrency(GameCanvas *gc, int32_t value) {
 }
 
 std::optional<std::vector<int8_t>> gc_resolveDialogValue(
-    GameCanvas *gc, int32_t screen, int32_t field) {
+    Game *gc, int32_t screen, int32_t field) {
     switch (screen) {
         case 14:
             if (gc->ui.screenParam >= 0 && gc->ui.screenParam <= 4)

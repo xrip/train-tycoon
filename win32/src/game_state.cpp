@@ -11,8 +11,8 @@ bool gcs_selectionHidden;
 bool gcs_monthlyReportEnabled;
 bool gcs_annualReportEnabled;
 
-void gc_fields_init(GameCanvas *gc) {
-    *gc = GameCanvas{};
+void gc_fields_init(Game *gc) {
+    *gc = Game{};
     // --- static fields (declaration order) ---
     gcs_screenWidth = 1;
     gcs_hs = 1;

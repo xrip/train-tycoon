@@ -2,7 +2,7 @@
 #include "game_methods.h"
 
 // void initBuildMenuRow(int n, int n2)
-void gc_initBuildMenuRow(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_initBuildMenuRow(Game *gc, int32_t n, int32_t n2) {
     const auto row_len = static_cast<std::size_t>(n2);
     gc->ui.buildMenuItems[n].assign(row_len, 0);
     gc->ui.buildMenuResultCodes[n].assign(row_len, 0);
@@ -16,7 +16,7 @@ void gc_initBuildMenuRow(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // void addMenuItemInlined(int n, int n2, int n3, boolean bl, boolean bl2, int n4)
-void gc_addMenuItemInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
+void gc_addMenuItemInlined(Game *gc, int32_t n, int32_t n2, int32_t n3,
                           bool bl, bool bl2, int32_t n4) {
     int mi = gc->ui.buildMenuModeIndex, c = gc->ui.buildMenuItemCursor;
     gc->ui.buildMenuItems[mi][c] = (int8_t)n2;
@@ -30,7 +30,7 @@ void gc_addMenuItemInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
 }
 
 // void initBuildMenuForScenario(int n)
-void gc_initBuildMenuForScenario(GameCanvas *gc, int32_t n) {
+void gc_initBuildMenuForScenario(Game *gc, int32_t n) {
     if (n != -1) gc->scenario.scenarioBits = (int8_t)n;
     gc->ui.buildMenuItems.resize(6, 0);
     gc->ui.buildMenuResultCodes.resize(6, 0);

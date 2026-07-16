@@ -3,7 +3,7 @@
 
 #include <limits.h>
 
-int16_t gc_pathDistanceMin(GameCanvas *gc, int32_t x, int32_t y,
+int16_t gc_pathDistanceMin(Game *gc, int32_t x, int32_t y,
                            int32_t current_min) {
     int16_t result = (int16_t)current_min;
     if (x >= 0 && x < gc->world.mapWidth && y >= 0 && y < gc->world.mapHeight
@@ -13,7 +13,7 @@ int16_t gc_pathDistanceMin(GameCanvas *gc, int32_t x, int32_t y,
     return result;
 }
 
-int32_t gc_relaxPathCell(GameCanvas *gc, int32_t x, int32_t y) {
+int32_t gc_relaxPathCell(Game *gc, int32_t x, int32_t y) {
     bool changed_or_blocked = false;
     int16_t cell = gc->pathfinder.distanceGrid[x][y];
     if (cell > 0 && cell != 3 && cell != 7) {
@@ -54,7 +54,7 @@ int32_t gc_relaxPathCell(GameCanvas *gc, int32_t x, int32_t y) {
     return changed_or_blocked ? 0 : 1;
 }
 
-void gc_floodFillPath(GameCanvas *gc) {
+void gc_floodFillPath(Game *gc) {
     bool keep_searching = true;
     bool destination_found = false;
     for (int pass = 50;
@@ -91,7 +91,7 @@ void gc_floodFillPath(GameCanvas *gc) {
     }
 }
 
-bool gc_findPathStep(GameCanvas *gc, int32_t x, int32_t y,
+bool gc_findPathStep(Game *gc, int32_t x, int32_t y,
                      int32_t current_distance) {
     if (!gc->world.in_bounds(x, y)
         || gc->pathfinder.distanceGrid[x][y] < 20
@@ -102,7 +102,7 @@ bool gc_findPathStep(GameCanvas *gc, int32_t x, int32_t y,
     return true;
 }
 
-bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
+bool gc_isTileMatchForPathInlined(Game *gc, bool connected,
                                   int32_t x, int32_t y,
                                   int32_t tile_a, int32_t tile_b,
                                   int32_t tile_c, int32_t tile_d,
@@ -124,7 +124,7 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
     return false;
 }
 
-void gc_validatePathStep(GameCanvas *gc) {
+void gc_validatePathStep(Game *gc) {
     int x = gc->pathfinder.targetX;
     int y = gc->pathfinder.targetY;
     bool path_complete = true;
@@ -281,7 +281,7 @@ void gc_validatePathStep(GameCanvas *gc) {
     }
 }
 
-void gc_scanTrackTiles(GameCanvas *gc) {
+void gc_scanTrackTiles(Game *gc) {
     gc->build.trackTileCount = 0;
     for (int x = 0; x < gc->world.mapWidth; ++x) {
         for (int y = 0; y < gc->world.mapHeight; ++y) {
@@ -295,7 +295,7 @@ void gc_scanTrackTiles(GameCanvas *gc) {
     }
 }
 
-void gc_clearPathDistanceGrid(GameCanvas *gc) {
+void gc_clearPathDistanceGrid(Game *gc) {
     for (int x = 0; x < gc->world.mapWidth; ++x)
         for (int y = 0; y < gc->world.mapHeight; ++y)
             gc->pathfinder.distanceGrid[x][y] = 0;
@@ -372,7 +372,7 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
     }
 }
 
-bool gc_tryBuildPath(GameCanvas *gc) {
+bool gc_tryBuildPath(Game *gc) {
     gc->pathfinder.distanceGrid.resize(gc->world.mapWidth, gc->world.mapHeight);
     gc->pathfinder.searchLimit = 10;
     gc->build.selectionCost = 0;

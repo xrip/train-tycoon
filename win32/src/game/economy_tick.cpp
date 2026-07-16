@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 // void placeTrainAt(int,int)
-void gc_placeTrainAt(GameCanvas *gc, int32_t duration_units, int32_t row) {
+void gc_placeTrainAt(Game *gc, int32_t duration_units, int32_t row) {
     int delay_days = duration_units * 60 + 20 + gc->rng.next_int() % 20;
     int due_day = gc->ui.placeTrainDay[row] + delay_days;
     int due_month = gc->ui.placeTrainMonth[row];
@@ -22,7 +22,7 @@ void gc_placeTrainAt(GameCanvas *gc, int32_t duration_units, int32_t row) {
     gc->ui.menuRowParamC[row] = (int8_t)due_year;
 }
 
-static void copy_menu_row_to_slot5(GameCanvas *gc, int row) {
+static void copy_menu_row_to_slot5(Game *gc, int row) {
     gc->scenario.offerTypeTransitionCode = gc->ui.menuRowType[row] + 40;
     gc->scenario.offerEffectTransitionCode = gc->ui.menuRowAltType[row] + 60;
     gc->scenario.offerRowIndex = 5;
@@ -48,7 +48,7 @@ static void copy_menu_row_to_slot5(GameCanvas *gc, int row) {
 }
 
 // void applyMenuRowEffect(int)
-void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
+void gc_applyMenuRowEffect(Game *gc, int32_t row) {
     if (gc->ui.menuRowAltType[row] == 1 || gc->ui.menuRowAltType[row] == 2) {
         gc->economy.money += gc->ui.menuRowRevenue[row];
         gc_pushMoneyHistory(gc, gc->ui.menuRowRevenue[row]);
@@ -79,7 +79,7 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
 }
 
 // void duplicateMenuRow(int)
-void gc_duplicateMenuRow(GameCanvas *gc, int32_t row) {
+void gc_duplicateMenuRow(Game *gc, int32_t row) {
     copy_menu_row_to_slot5(gc, row);
     gc->scenario.duplicateRowState = 4;
     gc->ui.transitionCode = 8;
@@ -87,7 +87,7 @@ void gc_duplicateMenuRow(GameCanvas *gc, int32_t row) {
 }
 
 // void everyMonthlyTick()
-void gc_everyMonthlyTick(GameCanvas *gc) {
+void gc_everyMonthlyTick(Game *gc) {
     if (!gc->scenario.monthlyOffersEnabled) return;
     for (int resource = 0; resource < 6; ++resource) {
         if (gc->scenario.routeResourceFlags[resource] > 0) --gc->scenario.routeResourceFlags[resource];

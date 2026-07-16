@@ -3,13 +3,13 @@
 
 #include <string.h>
 
-static void draw_train_image(GameCanvas *gc, Surface *graphics,
+static void draw_train_image(Game *gc, Surface *graphics,
                              int sprite_code, int x, int y) {
     int sprite_index = gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[sprite_code]);
     midp_draw_image(graphics, gc->assets.tile_sprites[sprite_index].get(), x, y, 33);
 }
 
-void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
+void gc_drawSpriteSingle(Game *gc, Surface *graphics,
                          int32_t train) {
     int16_t sprites[8];
     memcpy(sprites, gc->assets.trainSpriteDirectionTable[gc->fleet.trainFlags[train] & 0x0f].data(),

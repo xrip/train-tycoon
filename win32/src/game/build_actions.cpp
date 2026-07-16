@@ -2,18 +2,18 @@
 #include "game_methods.h"
 #include <vector>
 
-void gc_enterOutOfMoneyState(GameCanvas *gc) {
+void gc_enterOutOfMoneyState(Game *gc) {
     gc->ready = false;
     gc->ui.transitionCode = 11;
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
-void gc_incrementRowValueType13(GameCanvas *gc, int32_t amount) {
+void gc_incrementRowValueType13(Game *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row)
         if (gc->ui.menuRowType[row] == 13) gc->ui.menuRowValue[row] += amount;
 }
 
-bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t car, int32_t x, int32_t y) {
+bool gc_isAnyTrainCarAt(Game *gc, int32_t car, int32_t x, int32_t y) {
     if (car == -1) return false;
     if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[car]) == x
         && gc_byteToUnsignedInt(gc, gc->fleet.trainY[car]) == y)
@@ -21,7 +21,7 @@ bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t car, int32_t x, int32_t y) {
     return gc_isAnyTrainCarAt(gc, gc->fleet.nextCar[car], x, y);
 }
 
-int32_t gc_findTrainHeadAt(GameCanvas *gc, int32_t x, int32_t y) {
+int32_t gc_findTrainHeadAt(Game *gc, int32_t x, int32_t y) {
     for (int train = 0; train < 500; ++train) {
         if ((gc->fleet.trainFlags[train] & 0x80) == 128
             && (gc->fleet.trainFlags[train] & 0x40) == 64
@@ -31,7 +31,7 @@ int32_t gc_findTrainHeadAt(GameCanvas *gc, int32_t x, int32_t y) {
     return 5000;
 }
 
-int32_t gc_allocateServiceVehicleSlot(GameCanvas *gc, int32_t type,
+int32_t gc_allocateServiceVehicleSlot(Game *gc, int32_t type,
                                       int32_t x, int32_t y,
                                       bool horizontal, bool extended) {
     int slot = 5000;
@@ -53,7 +53,7 @@ int32_t gc_allocateServiceVehicleSlot(GameCanvas *gc, int32_t type,
     return slot;
 }
 
-void gc_computeTrainCost(GameCanvas *gc) {
+void gc_computeTrainCost(Game *gc) {
     switch (gc->build.wagonType) {
         case 0: gc->build.unitCost = gc->economy.gWagonCost; break;
         case 1: gc->build.unitCost = gc->economy.gWagonCost2; break;
@@ -80,7 +80,7 @@ void gc_computeTrainCost(GameCanvas *gc) {
     }
 }
 
-void gc_rebuildCityList(GameCanvas *gc) {
+void gc_rebuildCityList(Game *gc) {
     for (int city = 0; city < 48; ++city) gc->world.cityIndex[city] = 0;
     const int seen_count = 64 * gc->world.mapWidth * gc->world.mapHeight;
     std::vector<uint8_t> seen_city_tiles(
@@ -112,7 +112,7 @@ void gc_rebuildCityList(GameCanvas *gc) {
     }
 }
 
-void gc_applyBackgroundCost(GameCanvas *gc) {
+void gc_applyBackgroundCost(Game *gc) {
     if (gc->build.demolitionAffordable) {
         gc->economy.subsidyCost += gc->build.backgroundCost;
         gc->economy.money -= gc->build.backgroundCost;
@@ -122,7 +122,7 @@ void gc_applyBackgroundCost(GameCanvas *gc) {
     }
 }
 
-void gc_demolishAtCursor(GameCanvas *gc) {
+void gc_demolishAtCursor(Game *gc) {
     int cursor_x = gc->ui.tileCursorX;
     int cursor_y = gc->ui.tileCursorY;
     if (gc->ui.blockBuildMenu || !gc_isCityOrStationTile(gc, cursor_x, cursor_y))
@@ -196,7 +196,7 @@ void gc_demolishAtCursor(GameCanvas *gc) {
     gc_applyBackgroundCost(gc);
 }
 
-void gc_pickTrainsAtCursor(GameCanvas *gc) {
+void gc_pickTrainsAtCursor(Game *gc) {
     if (gc->ui.blockBuildMenu) return;
     int track = gc->world.trackMap[gc->ui.tileCursorX][gc->ui.tileCursorY];
     if ((track & 0xC0) == 128) {
@@ -252,7 +252,7 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
-void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
+void gc_buildPlaceTrackPiece(Game *gc, int32_t piece) {
     int slot;
     switch (piece) {
         case 0:
@@ -316,7 +316,7 @@ void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
     gc_rebuildCityList(gc);
 }
 
-void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
+void gc_computeTrackBuildInlined(Game *gc, int32_t start_x,
                                  int32_t start_y, int32_t step_x,
                                  int32_t step_y, int32_t target_tile,
                                  int32_t start_tile, int32_t end_tile,
@@ -355,7 +355,7 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     gc->renderer.lastViewportCenterX = -1;
 }
 
-void gc_revertTrackTiles(GameCanvas *gc) {
+void gc_revertTrackTiles(Game *gc) {
     int x = gc->build.trackStartX;
     int y = gc->build.trackStartY;
     for (;;) {
@@ -373,7 +373,7 @@ void gc_revertTrackTiles(GameCanvas *gc) {
     }
 }
 
-void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
+void gc_placeTrackAtCursorInlined(Game *gc, bool first_direction,
                                   int32_t first_tile, int32_t second_tile,
                                   int32_t match_tile_a, int32_t match_tile_b,
                                   int32_t result_tile_a, int32_t result_tile_b,
@@ -418,7 +418,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
     gc_advanceConstructionTimers(gc, x, y, -4);
 }
 
-void gc_normalizeTrackBits(GameCanvas *gc) {
+void gc_normalizeTrackBits(Game *gc) {
     for (int x = 0; x < gc->world.mapWidth; ++x) {
         for (int y = 0; y < gc->world.mapHeight; ++y) {
             if (gc->world.trackMap[x][y] == 64) {
@@ -446,7 +446,7 @@ void gc_normalizeTrackBits(GameCanvas *gc) {
     }
 }
 
-void gc_setTrackOwnerCode(GameCanvas *gc, int32_t owner) {
+void gc_setTrackOwnerCode(Game *gc, int32_t owner) {
     for (int x = 0; x < gc->world.mapWidth; ++x) {
         for (int y = 0; y < gc->world.mapHeight; ++y) {
             if (gc->world.trackMap[x][y] == 64) {
@@ -464,7 +464,7 @@ void gc_setTrackOwnerCode(GameCanvas *gc, int32_t owner) {
     }
 }
 
-void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
+void gc_rebuildMenuTypeIndexes(Game *gc) {
     gc->ui.menuRowEnabledCount = 0;
     for (int row = 0; row < 5; ++row) {
         if (gc->ui.menuRowType[row] == 0) continue;
@@ -472,7 +472,7 @@ void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
     }
 }
 
-void gc_openBuildMenu(GameCanvas *gc) {
+void gc_openBuildMenu(Game *gc) {
     int item = gc->ui.buildMenuItems[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
     bool allowed_while_paused =
         (gc->ui.buildMenuMode == 0 && (item == 11 || item == 1 || item == 9))
@@ -650,7 +650,7 @@ void gc_openBuildMenu(GameCanvas *gc) {
     }
 }
 
-void gc_addSelectedOption(GameCanvas *gc, int32_t option) {
+void gc_addSelectedOption(Game *gc, int32_t option) {
     for (int slot = 0; slot < 5; ++slot) {
         if (gc->build.wagonOptionSlots[slot] != -1) continue;
         gc->build.wagonOptionSlots[slot] = option;
@@ -658,7 +658,7 @@ void gc_addSelectedOption(GameCanvas *gc, int32_t option) {
     }
 }
 
-void gc_popSelectedOption(GameCanvas *gc) {
+void gc_popSelectedOption(Game *gc) {
     for (int slot = 4; slot >= 0; --slot) {
         if (gc->build.wagonOptionSlots[slot] == -1) continue;
         gc->build.wagonOptionSlots[slot] = -1;
@@ -666,7 +666,7 @@ void gc_popSelectedOption(GameCanvas *gc) {
     }
 }
 
-int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t x, int32_t y,
+int32_t gc_allocateTrainSlot(Game *gc, int32_t x, int32_t y,
                              int32_t engine_type, int32_t era,
                              int32_t direction, int32_t energy) {
     int train = 500;
@@ -695,7 +695,7 @@ int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t x, int32_t y,
     return train;
 }
 
-void gc_incrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
+void gc_incrementCargoOptionCount(Game *gc, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
         if (car_type == 6 && gc->ui.menuRowType[row] == 9)
             ++gc->ui.menuRowValue[row];
@@ -708,7 +708,7 @@ void gc_incrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
     }
 }
 
-void gc_decrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
+void gc_decrementCargoOptionCount(Game *gc, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
         if ((car_type == 7 || car_type == 6) && gc->ui.menuRowType[row] == 9)
             --gc->ui.menuRowValue[row];
@@ -721,18 +721,18 @@ void gc_decrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
     }
 }
 
-void gc_decrementTrainCargoOptionCounts(GameCanvas *gc, int32_t car) {
+void gc_decrementTrainCargoOptionCounts(Game *gc, int32_t car) {
     if (car == -1) return;
     gc_decrementCargoOptionCount(gc, gc->fleet.trainFlags[car] & 7);
     gc_decrementTrainCargoOptionCounts(gc, gc->fleet.nextCar[car]);
 }
 
-void gc_incrementRowValueType14(GameCanvas *gc, int32_t amount) {
+void gc_incrementRowValueType14(Game *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row)
         if (gc->ui.menuRowType[row] == 14) gc->ui.menuRowValue[row] += amount;
 }
 
-bool gc_buyTrainAtCursor(GameCanvas *gc) {
+bool gc_buyTrainAtCursor(Game *gc) {
     if (gc->economy.money < gc->build.unitCost) {
         gc_enterOutOfMoneyState(gc);
         return false;
@@ -757,7 +757,7 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
     return true;
 }
 
-bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t train,
+bool gc_applyTrainUpgradeInlined(Game *gc, int32_t train,
                                  int32_t state_code, int32_t *options) {
     int cost = gc->build.unitCost - gc->build.currentTrainCostSnapshot;
     if (gc->economy.money < cost) {

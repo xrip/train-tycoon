@@ -6,7 +6,7 @@
 
 // Economy owns the player's money, loan state, tax/interest parameters, and the
 // game calendar. Values and save byte order are unchanged; fields are inherited
-// as-is from the prior GameCanvas layout. Revenue history, station revenue, and
+// as-is from the prior Game layout. Revenue history, station revenue, and
 // report aggregates move into Economy in a later ECON-01 leaf.
 struct Economy {
     int32_t money = 0;

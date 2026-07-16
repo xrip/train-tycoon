@@ -1,5 +1,5 @@
 // midp_graphics.c - software 2D rasterizer implementing the MIDP Graphics
-// primitives GameCanvas uses, on a 32bpp surface. All primitives respect the
+// primitives Game uses, on a 32bpp surface. All primitives respect the
 // active clip rectangle. The screen surface stores 0x00RRGGBB; Image surfaces
 // store ARGB and drawImage source-over-blends onto them.
 #include "midp.h"
@@ -90,7 +90,7 @@ void midp_draw_line(Surface *g, int x1, int y1, int x2, int y2) {
     }
 }
 
-// Midpoint-ellipse based arc. GameCanvas uses only full circles (arc == 360),
+// Midpoint-ellipse based arc. Game uses only full circles (arc == 360),
 // so we render the whole outline / disc and rely on the clip rectangle. This is
 // faithful for the observed call sites; partial sweeps can be added if needed.
 static void arc_impl(Surface *g, int x, int y, int w, int h,

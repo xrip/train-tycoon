@@ -4,7 +4,7 @@
 #include "midp_input.h"
 
 // public void registerCityEntryInlined(byte by)  -- 1=down/right 2=up/left 3=select
-void gc_registerCityEntryInlined(GameCanvas *gc, int8_t by) {
+void gc_registerCityEntryInlined(Game *gc, int8_t by) {
     switch (by) {
         case 1:
             if (gc->ui.cursorSelectX != -2) { gc->ui.cursorDragY = gc->ui.cursorSelectX; break; }
@@ -25,7 +25,7 @@ void gc_registerCityEntryInlined(GameCanvas *gc, int8_t by) {
 }
 
 // void handleKey(int n)
-void gc_handleKey(GameCanvas *gc, int32_t n) {
+void gc_handleKey(Game *gc, int32_t n) {
     int n2;
     if (n == 65 || n == 97) n = 48;
     if (n == 89 || n == 121) n = 42;

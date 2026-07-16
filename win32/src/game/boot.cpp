@@ -12,13 +12,13 @@ static int read_u16_be(ResourceReader& resource) {
 }
 
 // public void keyPressed(int n)
-void gc_keyPressed(GameCanvas *gc, int32_t n) {
+void gc_keyPressed(Game *gc, int32_t n) {
     if (gc->ui.inputPending) { gc->ui.inputPending = false; return; }
     gc->ui.currentKey = n;
 }
 
 // public void resetOverlayRenderState()
-void gc_resetOverlayRenderState(GameCanvas *gc) {
+void gc_resetOverlayRenderState(Game *gc) {
     gc->ui.cursorScale = 0;
     gc->ui.cursorDragY = -1;
     gc->ui.cursorSelectY = -1;
@@ -29,7 +29,7 @@ void gc_resetOverlayRenderState(GameCanvas *gc) {
     gc->renderer.needsRepaint = false;
 }
 
-void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
+void gc_loadPackedSpriteData(Game *gc, const char *resource_name) {
     ResourceReader in = resources::open(resource_name);
     if (!in) return;
     int n = in.read_byte();
@@ -50,7 +50,7 @@ void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
 }
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
-std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
+std::unique_ptr<Image> gc_decodePngFromSpriteStream(Game *gc) {
     std::vector<int8_t> png_bytes;
     int png_size = 0;
     int image_format = gc->assets.sprite_stream.read_byte();
@@ -118,14 +118,14 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
 }
 
 // byte[] m(int n)
-std::vector<int8_t> gc_readPackedTextCodes(GameCanvas *gc, int32_t offset) {
+std::vector<int8_t> gc_readPackedTextCodes(Game *gc, int32_t offset) {
     const int code_count = gc->assets.spriteData[offset];
     return {gc->assets.spriteData.data() + offset + 1,
             gc->assets.spriteData.data() + offset + 1 + code_count};
 }
 
 // void loadGame(int n, int n2)
-void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode) {
+void gc_loadGame(Game *gc, int32_t slot, int32_t mode) {
     gc->saveCodec.saveSlot = slot;
     gc->saveCodec.savePendingMode = mode;
     gc->saveCodec.saveReadOffset = 0;
@@ -155,7 +155,7 @@ void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode) {
 }
 
 // void writeSaveSnapshot()
-void gc_writeSaveSnapshot(GameCanvas *gc) {
+void gc_writeSaveSnapshot(Game *gc) {
     gcs_animationsDisabled = gc_saveOrLoadBool(gc, gcs_animationsDisabled);
     gcs_selectionHidden = gc_saveOrLoadBool(gc, gcs_selectionHidden);
     gcs_monthlyReportEnabled = gc_saveOrLoadBool(gc, gcs_monthlyReportEnabled);
@@ -169,14 +169,14 @@ void gc_writeSaveSnapshot(GameCanvas *gc) {
 }
 
 // void persistSnapshotMode1()
-void gc_persistSnapshotMode1(GameCanvas *gc) {
+void gc_persistSnapshotMode1(Game *gc) {
     gc_loadGame(gc, 5, save::MODE_READ);
     gc_writeSaveSnapshot(gc);
     gc_setMusicVolume(gc, gc->music_volume_level);
 }
 
 // Add one isometric tile-draw offset pair.
-void gc_appendTileDrawOffset(GameCanvas *gc, ByteBuffer& x_offsets,
+void gc_appendTileDrawOffset(Game *gc, ByteBuffer& x_offsets,
                              ByteBuffer& y_offsets, int32_t x, int32_t y) {
     (void)gc;
     x_offsets.write(x);
@@ -184,7 +184,7 @@ void gc_appendTileDrawOffset(GameCanvas *gc, ByteBuffer& x_offsets,
 }
 
 // public void k(int n, int n2) -- build+sort the iso tile-draw order tables
-void gc_k(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_k(Game *gc, int32_t n, int32_t n2) {
     ByteBuffer x_offsets;
     ByteBuffer y_offsets;
     int n3, n4, n5;
@@ -227,7 +227,7 @@ void gc_k(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // void setCanvasSize(int n, int n2)
-void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_setCanvasSize(Game *gc, int32_t n, int32_t n2) {
     if (gc->lastCanvasWidth != n || gc->lastCanvasHeight != n2) {
         gcs_screenWidth = n;
         gcs_hs = n2;
@@ -248,7 +248,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // public void setState(int n)
-void gc_setState(GameCanvas *gc, int32_t n) {
+void gc_setState(Game *gc, int32_t n) {
     gc->savedGameState = gc->gameState;
     if (!gc->ready) gc->assets.cycle_flag = NULL;
     gc->ui.snapshotLoadedFlag = false;
@@ -327,7 +327,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
 }
 
 // public void start(GameMIDlet gameMIDlet) -- host owns the loop, no thread
-void gc_start(GameCanvas *gc, void *gameMIDlet) {
+void gc_start(Game *gc, void *gameMIDlet) {
     gc->midlet = gameMIDlet;
     gc_persistSnapshotMode1(gc);
     gc_setState(gc, +GameState::BootSplash0);
@@ -336,7 +336,7 @@ void gc_start(GameCanvas *gc, void *gameMIDlet) {
 
 // public void run() -- ONE iteration of the original game-thread loop.
 // The host (main.c) calls this each frame; timing/repaint/sleep are host-owned.
-void gc_run(GameCanvas *gc) {
+void gc_run(Game *gc) {
     if (gc->stopRequested || gc->ui.paused) return;
     gc->frameStartTime = midp_current_time_millis();
     if (gc->ui.keyRepeatDelay == 0) {

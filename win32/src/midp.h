@@ -54,7 +54,7 @@ extern "C" {
 #define MIDP_KEY_SOFT_LEFT  -6
 #define MIDP_KEY_SOFT_RIGHT -7
 
-// --- Graphics primitives (only what GameCanvas uses) --------------------------
+// --- Graphics primitives (only what Game uses) --------------------------
 void midp_gfx_init_screen(Surface *g, uint32_t *fb, int w, int h);
 void midp_set_color(Surface *g, int rgb);
 void midp_set_clip(Surface *g, int x, int y, int w, int h);

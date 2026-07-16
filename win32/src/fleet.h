@@ -8,7 +8,7 @@
 // is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.
 //
-// Field meanings are inherited as-is from the prior GameCanvas layout; several
+// Field meanings are inherited as-is from the prior Game layout; several
 // (e.g. trainEraOrStage, trainAgeOrTimer) carry recorded uncertainty and are
 // recovered in a later FLEET-01 sub-leaf once the tick code is re-read.
 struct Fleet {

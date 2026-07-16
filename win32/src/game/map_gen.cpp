@@ -5,9 +5,9 @@
 #include <stdlib.h> // abs
 #include <vector>
 
-static int nextRngInt(GameCanvas *gc) { return gc->rng.next_int(); }
+static int nextRngInt(Game *gc) { return gc->rng.next_int(); }
 
-// GameCanvas::mapGenStage steps through the incremental generator in
+// Game::mapGenStage steps through the incremental generator in
 // gc_loadState25Setup: init, raise then lower terrain, place patches, six
 // terrain-feature passes, then scatter starting obstacles.
 namespace mapgen {
@@ -25,7 +25,7 @@ inline constexpr int32_t STAGE_SCATTER_OBSTACLES = 10;
 }  // namespace mapgen
 
 // byte randomCityTile()
-int8_t gc_randomCityTile(GameCanvas *gc) {
+int8_t gc_randomCityTile(Game *gc) {
     int n = abs(nextRngInt(gc) % 22);
     if (n < 6) return 34;
     if (n < 11) return 35;
@@ -38,7 +38,7 @@ int8_t gc_randomCityTile(GameCanvas *gc) {
 }
 
 // byte addCityEntry(int n)
-int8_t gc_addCityEntry(GameCanvas *gc, int32_t n) {
+int8_t gc_addCityEntry(Game *gc, int32_t n) {
     gc->world.stationDirectionCode[gc->ui.cityListIndex] = (int8_t)n;
     gc->world.cityPopulation[gc->ui.cityListIndex] = (int8_t)(50 + nextRngInt(gc) % 20);
     gc->world.cityIndex[gc->ui.cityListIndex] = 0;
@@ -47,7 +47,7 @@ int8_t gc_addCityEntry(GameCanvas *gc, int32_t n) {
 }
 
 // byte registerTrain(byte by, int n, int n2)
-int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2) {
+int8_t gc_registerTrain(Game *gc, int8_t by, int32_t n, int32_t n2) {
     gc->world.constructionTimers[gc->ui.numSelectedTrains] = 50;
     gc->world.zonePopulation[gc->ui.numSelectedTrains] = by;
     gc->ui.trainSelectionY[gc->ui.numSelectedTrains] = (int16_t)n;
@@ -68,7 +68,7 @@ int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2) {
 }
 
 // void toggleFlagInlined(boolean bl) -- recompute slope tiles from heightMap
-void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
+void gc_toggleFlagInlined(Game *gc, bool bl) {
     int n, n2, n3, n4;
     if (bl) {
         gc_commitTerrainEdit(gc);
@@ -126,7 +126,7 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
 }
 
 // void smoothTileAtInlined(int n, int n2, boolean bl)
-void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
+void gc_smoothTileAtInlined(Game *gc, int32_t n, int32_t n2, bool bl) {
     if ((bl && gc->world.heightMap[n][n2] < 3) || (!bl && gc->world.heightMap[n][n2] > -1)) {
         gc_setSelectionStart(gc, n, n2);
         if (gc_isAdjacentTileEmpty(gc, n, n2, gc->world.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
@@ -148,7 +148,7 @@ void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
 }
 
 // void raiseTerrainArea(int n, int n2, int n3, int n4, int n5)
-void gc_raiseTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
+void gc_raiseTerrainArea(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > gc->world.mapWidth || j > gc->world.mapHeight) continue;
@@ -164,7 +164,7 @@ void gc_raiseTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int3
 }
 
 // void lowerTerrainArea(int n, int n2, int n3, int n4, int n5)
-void gc_lowerTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
+void gc_lowerTerrainArea(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
     (void)n5;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
@@ -180,7 +180,7 @@ void gc_lowerTerrainArea(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int3
 }
 
 // void trackBuildStepInlined(int n, int n2, int n3, int n4)
-void gc_trackBuildStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
+void gc_trackBuildStepInlined(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
     int8_t by = -2;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
@@ -195,7 +195,7 @@ void gc_trackBuildStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
 }
 
 // void placeTerrainPatch(int n, int n2)
-void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_placeTerrainPatch(Game *gc, int32_t n, int32_t n2) {
     int n3, n4, n5, n6;
     int8_t by, by2, by3, by4;
     int n7 = abs(nextRngInt(gc) % 5) + gc->world.terrainPatchBaseSize;
@@ -312,7 +312,7 @@ void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // void placeTerrainFeature(int n)
-void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
+void gc_placeTerrainFeature(Game *gc, int32_t n) {
     int n2, n3, n4, n5, n6, n7;
     bool bl;
     if (gc->build.trackBuildInProgress) return;
@@ -413,7 +413,7 @@ void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
 }
 
 // void loadState25Setup(int n) -- the incremental map generator
-void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
+void gc_loadState25Setup(Game *gc, int32_t n) {
     if (n == 0) {
         gc->world.tileMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
         gc->world.trackMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
@@ -492,7 +492,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
     }
 }
 
-void gc_pickCitySite(GameCanvas *gc) {
+void gc_pickCitySite(Game *gc) {
     int x = abs(nextRngInt(gc) % gc->world.mapWidth);
     int y = abs(nextRngInt(gc) % gc->world.mapHeight);
     gc->world.industryCategory = -1;
@@ -523,7 +523,7 @@ void gc_pickCitySite(GameCanvas *gc) {
     }
 }
 
-void gc_pickIndustrySite(GameCanvas *gc) {
+void gc_pickIndustrySite(Game *gc) {
     int x = abs(nextRngInt(gc) % gc->world.mapWidth);
     int y = abs(nextRngInt(gc) % gc->world.mapHeight);
     gc->world.industrySiteFound = false;
@@ -558,7 +558,7 @@ void gc_pickIndustrySite(GameCanvas *gc) {
     }
 }
 
-void gc_spawnTrainAt(GameCanvas *gc, int32_t x, int32_t y) {
+void gc_spawnTrainAt(Game *gc, int32_t x, int32_t y) {
     int engine_type = gc->era / 3;
     int wagon_count = gc->build.selectionCost / 8000 + 1;
     if (wagon_count > 5) wagon_count = 5;
@@ -573,12 +573,12 @@ void gc_spawnTrainAt(GameCanvas *gc, int32_t x, int32_t y) {
         train = gc_spawnTrainCar(gc, train, cargo_type);
 }
 
-static bool can_extend_station_over(GameCanvas *gc, int x, int y) {
+static bool can_extend_station_over(Game *gc, int x, int y) {
     int tile = gc->world.tileMap[x][y];
     return tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST);
 }
 
-void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
+void gc_autoExtendTrackStation(Game *gc, int32_t x, int32_t y) {
     bool track_left = x > 0 && gc->world.trackMap[x - 1][y] == track::PRESENT;
     bool track_right = x < gc->world.mapWidth - 1 && gc->world.trackMap[x + 1][y] == track::PRESENT;
     bool track_up = y > 0 && gc->world.trackMap[x][y - 1] == track::PRESENT;
@@ -630,7 +630,7 @@ void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
     }
 }
 
-void gc_placeCitiesAndIndustry(GameCanvas *gc) {
+void gc_placeCitiesAndIndustry(Game *gc) {
     int city_attempts = 0;
     int industry_attempts = 0;
     do {

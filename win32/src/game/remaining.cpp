@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-std::vector<int8_t> gc_formatNumberWithSuffix(GameCanvas *gc, int32_t value,
+std::vector<int8_t> gc_formatNumberWithSuffix(Game *gc, int32_t value,
                                               int32_t suffix) {
     (void)gc;
     char text[24];
@@ -17,7 +17,7 @@ std::vector<int8_t> gc_formatNumberWithSuffix(GameCanvas *gc, int32_t value,
     return result;
 }
 
-std::vector<int8_t> gc_encodeDisplayText(GameCanvas *gc, const char *text) {
+std::vector<int8_t> gc_encodeDisplayText(Game *gc, const char *text) {
     (void)gc;
     int length = (int)strlen(text);
     std::vector<int8_t> result(static_cast<size_t>(length));
@@ -29,7 +29,7 @@ std::vector<int8_t> gc_encodeDisplayText(GameCanvas *gc, const char *text) {
     return result;
 }
 
-void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
+void gc_setYearGraphMode(Game *gc, int32_t mode, bool alternate) {
     gc->ui.yearGraphMode = mode;
     gc->ui.yearGraphAlt = alternate;
     int minimum = 0;
@@ -87,7 +87,7 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
     }
 }
 
-int32_t gc_computeMilestoneScore(GameCanvas *gc) {
+int32_t gc_computeMilestoneScore(Game *gc) {
     int target = gc->scenario.currentMilestoneScore;
     int current = 0;
     if (gc->scenario.scenarioMilestoneIndex >= 6 && gc->scenario.scenarioMilestoneIndex <= 11)
@@ -133,7 +133,7 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
     return score;
 }
 
-int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
+int8_t gc_computeMenuRowDisplayValue(Game *gc, int32_t row) {
     int value;
     if (gc->ui.menuRowType[row] == 1) {
         value = 100 * gc->ui.menuRowValue[row] / gc->ui.menuRowCost[row];
@@ -151,7 +151,7 @@ int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
     return (int8_t)value;
 }
 
-void gc_loadMusic(GameCanvas *gc) {
+void gc_loadMusic(Game *gc) {
     gc->music_available = gc->music_output &&
         gc->music_output->load(resources::path_for("music.mid"));
     if (gc->music_available) {
@@ -160,20 +160,20 @@ void gc_loadMusic(GameCanvas *gc) {
     gc->music_playing = false;
 }
 
-void gc_playMusic(GameCanvas *gc) {
+void gc_playMusic(Game *gc) {
     if (gc->music_available && !gc->music_playing && gc->music_enabled &&
         gc->music_output->play()) {
         gc->music_playing = true;
     }
 }
 
-void gc_setMusicVolume(GameCanvas *gc, int32_t level) {
+void gc_setMusicVolume(Game *gc, int32_t level) {
     if (gc->music_available) {
         gc->music_output->set_volume(level * 20);
     }
 }
 
-void gc_stopMusic(GameCanvas *gc) {
+void gc_stopMusic(Game *gc) {
     if (gc->music_available && gc->music_playing) {
         gc->music_output->stop();
     }
@@ -181,22 +181,22 @@ void gc_stopMusic(GameCanvas *gc) {
 }
 
 // These helpers are used only by the excluded high-score network request.
-char *gc_decodeString(GameCanvas *gc, int8_t *bytes) {
+char *gc_decodeString(Game *gc, int8_t *bytes) {
     (void)gc; (void)bytes;
     return NULL;
 }
 
-char *gc_buildPlayerNameString(GameCanvas *gc) {
+char *gc_buildPlayerNameString(Game *gc) {
     (void)gc;
     return NULL;
 }
 
-bool gc_syncHighScores(GameCanvas *gc, bool upload) {
+bool gc_syncHighScores(Game *gc, bool upload) {
     (void)gc; (void)upload;
     return false;
 }
 
-void gc_hideNotify(GameCanvas *gc) {
+void gc_hideNotify(Game *gc) {
     gc->ui.paused = true;
     if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_stopMusic(gc);
     if (gc->gameState == +GameState::Playing) {
@@ -206,7 +206,7 @@ void gc_hideNotify(GameCanvas *gc) {
     }
 }
 
-void gc_showNotify(GameCanvas *gc) {
+void gc_showNotify(Game *gc) {
     if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_playMusic(gc);
     gc->ui.paused = false;
 }

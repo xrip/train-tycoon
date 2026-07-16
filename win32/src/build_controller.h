@@ -1,6 +1,6 @@
 // Build actions: laying track, editing terrain, removal, and buying trains
 // (see game/build_actions.cpp). Only the action-in-progress state lives here;
-// the build/menu display rows stay on GameCanvas for UI-01.
+// the build/menu display rows stay on Game for UI-01.
 #ifndef BUILD_CONTROLLER_H
 #define BUILD_CONTROLLER_H
 #include "support/grid.h"

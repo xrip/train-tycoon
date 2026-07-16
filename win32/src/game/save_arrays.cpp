@@ -4,7 +4,7 @@
 #include <vector>
 
 // void ensureSaveBufferCapacity(int n)
-void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n) {
+void gc_ensureSaveBufferCapacity(Game *gc, int32_t n) {
     // Grow by n, preserving existing bytes and zeroing the new tail.
     gc->saveCodec.saveBuffer.resize(static_cast<std::size_t>(gc->saveCodec.snapshotSize + n));
     gc->saveCodec.snapshotSize += n;
@@ -12,7 +12,7 @@ void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n) {
 
 // Byte array save/load over an explicit length. The std::array and Grid
 // overloads forward here so the byte order stays identical.
-void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t *byArray, int len) {
+void gc_saveOrLoadByteSpan(Game *gc, int8_t *byArray, int len) {
     if (gc->saveCodec.savePendingMode == save::MODE_SKIP) {
         for (int i = 0; i < len; ++i) byArray[i] = 0;
     } else if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
@@ -26,7 +26,7 @@ void gc_saveOrLoadByteSpan(GameCanvas *gc, int8_t *byArray, int len) {
 }
 
 // Short array save/load over an explicit length.
-void gc_saveOrLoadShortSpan(GameCanvas *gc, int16_t *sArray, int len) {
+void gc_saveOrLoadShortSpan(Game *gc, int16_t *sArray, int len) {
     if (gc->saveCodec.savePendingMode == save::MODE_SKIP) {
         for (int i = 0; i < len; ++i) sArray[i] = 0;
     } else if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
@@ -45,7 +45,7 @@ void gc_saveOrLoadShortSpan(GameCanvas *gc, int16_t *sArray, int len) {
 }
 
 // Int array save/load over an explicit length.
-void gc_saveOrLoadIntSpan(GameCanvas *gc, int32_t *nArray, int len) {
+void gc_saveOrLoadIntSpan(Game *gc, int32_t *nArray, int len) {
     if (gc->saveCodec.savePendingMode == save::MODE_SKIP) {
         for (int i = 0; i < len; ++i) nArray[i] = 0;
     } else if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
@@ -68,7 +68,7 @@ void gc_saveOrLoadIntSpan(GameCanvas *gc, int32_t *nArray, int len) {
 }
 
 // boolean loadSnapshotAndReturn()
-bool gc_loadSnapshotAndReturn(GameCanvas *gc) {
+bool gc_loadSnapshotAndReturn(Game *gc) {
     gc_loadGame(gc, 0, save::MODE_READ);
     return gc->saveCodec.snapshotLoaded;
 }

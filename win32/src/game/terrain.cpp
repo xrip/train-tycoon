@@ -4,7 +4,7 @@
 #include <string.h>
 
 // boolean isPlaceableTerrain(int n, int n2)
-bool gc_isPlaceableTerrain(GameCanvas *gc, int32_t n, int32_t n2) {
+bool gc_isPlaceableTerrain(Game *gc, int32_t n, int32_t n2) {
     return gc->world.tileElevation[n][n2] >= 0
            && (gc->world.tileMap[n][n2] == 0
                || (gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST))
@@ -12,13 +12,13 @@ bool gc_isPlaceableTerrain(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // void placeTrackTile(int n, int n2, int n3, int n4)
-void gc_placeTrackTile(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
+void gc_placeTrackTile(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
     gc->world.tileMap[n][n2] = (int8_t)n3;
     gc->world.trackMap[n][n2] = (int8_t)(0xC0 | n4);
 }
 
 // void clearBuildPathTile(int n, int n2)
-void gc_clearBuildPathTile(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_clearBuildPathTile(Game *gc, int32_t n, int32_t n2) {
     if (n > 0 && n < gc->world.mapWidth && n2 > 0 && n2 < gc->world.mapHeight
         && ((gc->world.tileMap[n][n2] >= 7 && gc->world.tileMap[n][n2] <= 10)
             || (gc->world.tileMap[n][n2] >= 21 && gc->world.tileMap[n][n2] <= 24)
@@ -29,7 +29,7 @@ void gc_clearBuildPathTile(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // boolean isCurveTile(int n, int n2)
-bool gc_isCurveTile(GameCanvas *gc, int32_t n, int32_t n2) {
+bool gc_isCurveTile(Game *gc, int32_t n, int32_t n2) {
     int8_t by = gc->world.tileMap[n][n2];
     if (by < 7 || by > 10) return false;
     bool bl = false;
@@ -41,7 +41,7 @@ bool gc_isCurveTile(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // boolean isCityOrStationTile(int n, int n2)
-bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
+bool gc_isCityOrStationTile(Game *gc, int32_t n, int32_t n2) {
     if ((gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST)
         || (gc->world.tileMap[n][n2] >= 70 && gc->world.tileMap[n][n2] <= 80 && gc->world.trackMap[n][n2] == 65)
         || (gc->world.tileMap[n][n2] == tile::CROSSING && (gc->world.trackMap[n][n2] & 0x47) == 65)
@@ -98,7 +98,7 @@ bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
 }
 
 // boolean isTileBuildable(int,int,int)
-bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
+bool gc_isTileBuildable(Game *gc, int32_t x, int32_t y, int32_t type) {
     if (type == 5)
         return gc_isTileBuildable(gc, x, y, 0)
                && gc_isTileBuildable(gc, x, y - 1, 0)
@@ -118,7 +118,7 @@ bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
 }
 
 // void commitTerrainEdit() -- copy the 10x10 edit buffer back into heightMap
-void gc_commitTerrainEdit(GameCanvas *gc) {
+void gc_commitTerrainEdit(Game *gc) {
     for (int i = 0; i < 10; ++i) {
         memcpy(gc->world.heightMap[gc->build.selectionStartX + i].data() + gc->build.selectionStartY,
                gc->build.terrainEditBuffer[i].data(), 10);
@@ -126,7 +126,7 @@ void gc_commitTerrainEdit(GameCanvas *gc) {
 }
 
 // void setSelectionStart(int n, int n2)
-void gc_setSelectionStart(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_setSelectionStart(Game *gc, int32_t n, int32_t n2) {
     gc->build.selectionStartX = n - 5;
     gc->build.selectionStartY = n2 - 5;
     if (gc->build.selectionStartX < 0) gc->build.selectionStartX = 0;

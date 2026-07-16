@@ -22,15 +22,15 @@ constexpr int kScreenHeight = 320;
 constexpr std::int64_t kFixedRandomSeed = 0x5eed1234;
 std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 
-GameCanvas* make_game() {
-    auto* game = new GameCanvas{};
+Game* make_game() {
+    auto* game = new Game{};
     gc_fields_init(game);
     game->music_output = std::make_unique<SilentMusicOutput>();
     game->rng.set_seed(kFixedRandomSeed);
     return game;
 }
 
-std::uint64_t map_digest(const GameCanvas* game) {
+std::uint64_t map_digest(const Game* game) {
     StableDigest digest;
     digest.add_i32(game->scenario.activeScenario);
     digest.add_i32(game->world.mapWidth);
@@ -49,7 +49,7 @@ std::uint64_t map_digest(const GameCanvas* game) {
     return digest.value();
 }
 
-void generate_scenario(GameCanvas* game, int scenario) {
+void generate_scenario(Game* game, int scenario) {
     game->scenario.activeScenario = scenario;
     gc_setState(game, 25);
     for (int step = 0; game->gameState == 25 && step < 200000; ++step) {
@@ -251,7 +251,7 @@ TEST_CASE("fast: record store keeps record bytes and ids") {
 }
 
 TEST_CASE("fast: small path search") {
-    GameCanvas* game = make_game();
+    Game* game = make_game();
     game->world.mapWidth = 5;
     game->world.mapHeight = 5;
     game->world.tileMap.resize(game->world.mapWidth, game->world.mapHeight);
@@ -270,7 +270,7 @@ TEST_CASE("fast: small path search") {
 }
 
 TEST_CASE("fast: save buffer bytes and round trip") {
-    GameCanvas* game = make_game();
+    Game* game = make_game();
     game->economy.money = 123456;
     game->economy.dayOfMonth = 17;
     game->economy.monthOfYear = 8;
@@ -319,7 +319,7 @@ TEST_CASE("fast: MIDI resource is valid") {
 }
 
 TEST_CASE("fast: game music rules use a silent output") {
-    GameCanvas* game = make_game();
+    Game* game = make_game();
     auto* output = static_cast<SilentMusicOutput*>(game->music_output.get());
 
     gc_loadMusic(game);
@@ -362,7 +362,7 @@ TEST_CASE("full: all scenario maps have fixed digests") {
         46185107338736850ULL,
     };
     for (int scenario = 0; scenario < static_cast<int>(expected.size()); ++scenario) {
-        GameCanvas* game = make_game();
+        Game* game = make_game();
         generate_scenario(game, scenario);
         INFO(scenario);
         CHECK(map_digest(game) == expected[scenario]);
@@ -371,7 +371,7 @@ TEST_CASE("full: all scenario maps have fixed digests") {
 }
 
 TEST_CASE("full: scenario zero input and frames have fixed digests") {
-    GameCanvas* game = make_game();
+    Game* game = make_game();
     gc_start(game, nullptr);
 
     game->loadingStartTime = 0;

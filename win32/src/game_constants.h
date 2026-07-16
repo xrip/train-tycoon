@@ -4,7 +4,7 @@
 #define GAME_CONSTANTS_H
 #include <cstdint>
 
-// Values for GameCanvas::gameState (and its saved previous-state copy `hx`).
+// Values for Game::gameState (and its saved previous-state copy `hx`).
 // The field stays int32_t for save and arithmetic safety; these names replace
 // the raw state literals at read and write sites. Use unary `+` to get the
 // int32_t value, e.g. gc_setState(gc, +GameState::Playing).
@@ -37,7 +37,7 @@ constexpr int32_t operator+(GameState state) noexcept {
     return static_cast<int32_t>(state);
 }
 
-// Track-map byte encoding (GameCanvas::trackMap). A byte packs a "track present"
+// Track-map byte encoding (Game::trackMap). A byte packs a "track present"
 // flag in bit 6 with a 6-bit owner field in the low bits. At the crossing tile
 // (tile::CROSSING) the owner field holds two 3-bit sub-owners, one per crossing
 // direction. Bits 0x80/0xC0 mark other trackMap overlays whose exact meaning is
@@ -51,7 +51,7 @@ inline constexpr int32_t AI_PIECE_FIRST = 66;   // first AI route piece code (ow
 inline constexpr int32_t AI_PIECE_WRAP = 69;    // one past the last AI piece code
 }  // namespace track
 
-// Tile-map sentinels (GameCanvas::tileMap). Most tile ids are track, bridge, and
+// Tile-map sentinels (Game::tileMap). Most tile ids are track, bridge, and
 // road shape codes recorded in DECISIONS; only the strongly-evidenced sentinel
 // is named here.
 namespace tile {
@@ -62,7 +62,7 @@ inline constexpr int32_t BUILT_FIRST = 34;   // first non-terrain (built) tile; 
 inline constexpr int32_t CITY_ZONE_LAST = 40; // last city population zone tile
 }  // namespace tile
 
-// Menu/dialog transition-code bases (GameCanvas::transitionCode and
+// Menu/dialog transition-code bases (Game::transitionCode and
 // pendingTransitionCode). The per-screen menu ids are UI navigation and are
 // named with the UI controller in UI-01; only the arithmetic bases that build a
 // code from model data are named here. See DECISIONS "Recovered in MODEL-01".
@@ -72,7 +72,7 @@ inline constexpr int32_t OFFER_ALT_BASE = 60;       // menuRowAltType[row] + thi
 inline constexpr int32_t SCENARIO_NOTICE_BASE = 80; // scenarioNotice id   + this
 }  // namespace transition
 
-// Save-codec direction (GameCanvas::savePendingMode, also the mode argument of
+// Save-codec direction (Game::savePendingMode, also the mode argument of
 // gc_loadGame). One IO_* field walk serves save and load; the mode decides which
 // way bytes move. See save.cpp / save_arrays.cpp.
 namespace save {

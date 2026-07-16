@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 // int accumulateTrainTurns(int)
-int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
+int32_t gc_accumulateTrainTurns(Game *gc, int32_t car) {
     if (car == -1) return 0;
     int tile = gc->world.tileMap[gc_byteToUnsignedInt(gc, gc->fleet.trainX[car])][gc_byteToUnsignedInt(gc, gc->fleet.trainY[car])];
     int turn = 0;
@@ -15,7 +15,7 @@ int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
 }
 
 // int findServiceVehicleAt(int,int)
-int32_t gc_findServiceVehicleAt(GameCanvas *gc, int32_t x, int32_t y) {
+int32_t gc_findServiceVehicleAt(Game *gc, int32_t x, int32_t y) {
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
         if ((gc->fleet.vehicleFlags[vehicle] & 0x80) != 128) continue;
         int vehicle_x = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleX[vehicle]);
@@ -32,7 +32,7 @@ int32_t gc_findServiceVehicleAt(GameCanvas *gc, int32_t x, int32_t y) {
 }
 
 // int spawnTrainCar(int,int)
-int32_t gc_spawnTrainCar(GameCanvas *gc, int32_t previous_car, int32_t car_type) {
+int32_t gc_spawnTrainCar(Game *gc, int32_t previous_car, int32_t car_type) {
     int new_car = 500;
     for (int car = 0; car < 500; ++car) {
         if ((gc->fleet.trainFlags[car] & 0x80) == 0) {
@@ -57,7 +57,7 @@ int32_t gc_spawnTrainCar(GameCanvas *gc, int32_t previous_car, int32_t car_type)
 }
 
 // void resetTrailingCars(int,int,int)
-void gc_resetTrailingCars(GameCanvas *gc, int32_t head, int32_t car, int32_t phase) {
+void gc_resetTrailingCars(Game *gc, int32_t head, int32_t car, int32_t phase) {
     if (car == -1) return;
     gc_resetTrailingCars(gc, head, gc->fleet.nextCar[car], phase - 8);
     gc->fleet.trainX[car] = gc->fleet.trainX[head];
@@ -67,7 +67,7 @@ void gc_resetTrailingCars(GameCanvas *gc, int32_t head, int32_t car, int32_t pha
 }
 
 // int takeServiceResource(int,int,int)
-int32_t gc_takeServiceResource(GameCanvas *gc, int32_t vehicle,
+int32_t gc_takeServiceResource(Game *gc, int32_t vehicle,
                                int32_t resource, int32_t wanted) {
     int taken = gc->fleet.serviceResourceStock[vehicle][resource] > wanted
                 ? wanted : gc->fleet.serviceResourceStock[vehicle][resource];
@@ -77,7 +77,7 @@ int32_t gc_takeServiceResource(GameCanvas *gc, int32_t vehicle,
 }
 
 // int collectNearbyServiceResource(int,int,int)
-int32_t gc_collectNearbyServiceResource(GameCanvas *gc, int32_t vehicle,
+int32_t gc_collectNearbyServiceResource(Game *gc, int32_t vehicle,
                                         int32_t resource, int32_t wanted) {
     int total = gc_takeServiceResource(gc, vehicle, resource, wanted);
     for (int other = 0; other < 250; ++other) {
@@ -92,7 +92,7 @@ int32_t gc_collectNearbyServiceResource(GameCanvas *gc, int32_t vehicle,
 }
 
 // boolean trainCanLoadAtServiceVehicle(int,int)
-bool gc_trainCanLoadAtServiceVehicle(GameCanvas *gc, int32_t head,
+bool gc_trainCanLoadAtServiceVehicle(Game *gc, int32_t head,
                                      int32_t vehicle) {
     int car = gc->fleet.nextCar[head];
     if (car == -1) return false;
@@ -127,7 +127,7 @@ bool gc_trainCanLoadAtServiceVehicle(GameCanvas *gc, int32_t head,
 }
 
 // void loadTrainAtServiceVehicle(int,int,boolean)
-void gc_loadTrainAtServiceVehicle(GameCanvas *gc, int32_t car,
+void gc_loadTrainAtServiceVehicle(Game *gc, int32_t car,
                                   int32_t vehicle, bool construction_done) {
     if (car == -1) return;
     if ((gc->fleet.trainFlags[car] & 0x40) == 0) {
@@ -185,7 +185,7 @@ void gc_loadTrainAtServiceVehicle(GameCanvas *gc, int32_t car,
 }
 
 // void recordDeliveredResource(int,int)
-void gc_recordDeliveredResource(GameCanvas *gc, int32_t resource, int32_t amount) {
+void gc_recordDeliveredResource(Game *gc, int32_t resource, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
         if (gc->ui.menuRowType[row] == 3 + resource)
             gc->ui.menuRowValue[row] += amount;
@@ -200,7 +200,7 @@ void gc_recordDeliveredResource(GameCanvas *gc, int32_t resource, int32_t amount
 }
 
 // void recordTrainRevenue(int)
-void gc_recordTrainRevenue(GameCanvas *gc, int32_t amount) {
+void gc_recordTrainRevenue(Game *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
         if (gc->ui.menuRowType[row] == 1) gc->ui.menuRowValue[row] += amount;
     }
@@ -209,7 +209,7 @@ void gc_recordTrainRevenue(GameCanvas *gc, int32_t amount) {
 }
 
 // int unloadTrainRevenue(int,int)
-int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
+int32_t gc_unloadTrainRevenue(Game *gc, int32_t car, int32_t vehicle) {
     if (car == -1) return 0;
     int revenue = 0;
     if ((gc->fleet.trainFlags[car] & 0x40) == 0
@@ -277,7 +277,7 @@ static int normalize_track_variant(int variant) {
 }
 
 // void updateTrain(int)
-void gc_updateTrain(GameCanvas *gc, int32_t head) {
+void gc_updateTrain(Game *gc, int32_t head) {
     int stop_chain = 0;
     if ((gc->fleet.trainFlags[head] & 0x40) == 0
         || gc_byteToUnsignedInt(gc, gc->fleet.trainEnergyOrCount[head]) <= 0) {

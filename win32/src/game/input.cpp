@@ -3,17 +3,17 @@
 
 #include <stdlib.h>
 
-void gc_keyReleased(GameCanvas *gc, int32_t n) {
+void gc_keyReleased(Game *gc, int32_t n) {
     (void)n;
     gc->ui.currentKey = -999;
 }
 
-void gc_pointerPressed(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_pointerPressed(Game *gc, int32_t n, int32_t n2) {
     (void)n; (void)n2;
     if (gc->ui.inputPending) return;
 }
 
-void gc_pointerReleased(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_pointerReleased(Game *gc, int32_t n, int32_t n2) {
     (void)n; (void)n2;
     if (gc->ui.inputPending) {
         gc->ui.inputPending = false;
@@ -21,12 +21,12 @@ void gc_pointerReleased(GameCanvas *gc, int32_t n, int32_t n2) {
     }
 }
 
-void gc_pointerDragged(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_pointerDragged(Game *gc, int32_t n, int32_t n2) {
     (void)n; (void)n2;
     if (gc->ui.inputPending) return;
 }
 
-void gc_resetKeyState(GameCanvas *gc, int32_t n) {
+void gc_resetKeyState(Game *gc, int32_t n) {
     (void)n;
     gc->ui.currentKey = 0;
     gc->ui.lastKeyCode = 0;
@@ -37,7 +37,7 @@ void gc_resetKeyState(GameCanvas *gc, int32_t n) {
 }
 
 // void cycleBuildMenuIndex(boolean forward)
-void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
+void gc_cycleBuildMenuIndex(Game *gc, bool forward) {
     gc->ui.buildMenuItemIndex += forward ? 1 : -1;
     int item_count = static_cast<int>(gc->ui.buildMenuItems[gc->ui.buildMenuMode].size());
     if (gc->ui.buildMenuItemIndex < 0) gc->ui.buildMenuItemIndex = item_count - 1;
@@ -49,7 +49,7 @@ void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
 }
 
 // void viewportPanKey()
-void gc_viewportPanKey(GameCanvas *gc) {
+void gc_viewportPanKey(Game *gc) {
     int key = gc->ui.lastKeyCode;
     if (key == 56 || key == 6) gc->renderer.viewportCenterY += 30;
     if (key == 50 || key == 1) gc->renderer.viewportCenterY -= 30;
@@ -85,7 +85,7 @@ void gc_viewportPanKey(GameCanvas *gc) {
 }
 
 // void viewportZoomKey()
-void gc_viewportZoomKey(GameCanvas *gc) {
+void gc_viewportZoomKey(Game *gc) {
     int step = gc_computeKeyRepeatDelay(gc);
     int key = gc->ui.lastKeyCode;
     if (key == 56 || key == 6) gc->renderer.mapScaleY += step * 2;
@@ -164,7 +164,7 @@ void gc_viewportZoomKey(GameCanvas *gc) {
 }
 
 // void computeViewportBounds()
-void gc_computeViewportBounds(GameCanvas *gc) {
+void gc_computeViewportBounds(Game *gc) {
     int tile_center_x = 0;
     int tile_center_y = 0;
     int tile_x = gc->renderer.viewportBaseX - 2 * gc->renderer.viewportBaseY

@@ -47,7 +47,7 @@ static void set_resource_root_from_executable(void) {
 
 static bool run_midi_device_test(int total_millis) {
     if (total_millis < 200) total_millis = 200;
-    GameCanvas *test = new GameCanvas{};
+    Game *test = new Game{};
     gc_fields_init(test);
     test->music_output = std::make_unique<WinMmMusicPlayer>();
     MusicOutput* output = test->music_output.get();
@@ -109,7 +109,7 @@ int main(void) {
     if (!mfb_open("Train Tycoon", MIDP_SCREEN_W, MIDP_SCREEN_H, WIN_SCALE, 32))
         return 1;
 
-    GameCanvas *gc = new GameCanvas{};
+    Game *gc = new Game{};
     gc_fields_init(gc);
     gc->music_output = std::make_unique<WinMmMusicPlayer>();
     gc_start(gc, NULL); // resource load + initial state (no thread spawn)

@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 // void dayResetP()
-void gc_dayResetP(GameCanvas *gc) {
+void gc_dayResetP(Game *gc) {
     if (gc->economy.monthOfYear % 4 == 0) {
         for (int i = 0; i < 64; ++i) {
             if (gc->world.constructionTimers[i] > 0)
@@ -13,7 +13,7 @@ void gc_dayResetP(GameCanvas *gc) {
 }
 
 // void advanceConstructionTimers(int,int,int)
-void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
+void gc_advanceConstructionTimers(Game *gc, int32_t n, int32_t n2, int32_t n3) {
     bool seen[64] = {false};
     for (int i = n - 5; i <= n + 5; ++i) {
         for (int j = n2 - 5; j <= n2 + 5; ++j) {
@@ -39,7 +39,7 @@ void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t
 }
 
 // void maybeAITick()
-void gc_maybeAITick(GameCanvas *gc) {
+void gc_maybeAITick(Game *gc) {
     for (int n = 0; n < 64; ++n) gc->world.zonePopulation[n] = 0;
     for (int n = 0; n < gc->world.mapWidth; ++n) {
         for (int i = 0; i < gc->world.mapHeight; ++i) {
@@ -51,7 +51,7 @@ void gc_maybeAITick(GameCanvas *gc) {
 }
 
 // void dayResetAg()
-void gc_dayResetAg(GameCanvas *gc) {
+void gc_dayResetAg(Game *gc) {
     for (int i = 0; i < 48; ++i) {
         gc->world.cityPopulation[i] += (int8_t)(gc->rng.next_int() % 8);
         if (gc->world.cityPopulation[i] < 10) gc->world.cityPopulation[i] = 10;
@@ -60,12 +60,12 @@ void gc_dayResetAg(GameCanvas *gc) {
 }
 
 // void revenueOrYear()
-void gc_revenueOrYear(GameCanvas *gc) {
+void gc_revenueOrYear(Game *gc) {
     for (int n = 0; n < 500; ++n) ++gc->fleet.trainAgeOrTimer[n];
 }
 
 // void everyTwoTick()
-void gc_everyTwoTick(GameCanvas *gc) {
+void gc_everyTwoTick(Game *gc) {
     if (gc->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
         if ((gc->fleet.trainFlags[i] & 0x80) != 128 || (gc->fleet.trainFlags[i] & 0x40) != 64)
@@ -83,12 +83,12 @@ void gc_everyTwoTick(GameCanvas *gc) {
 }
 
 // int countCarsInTrain(int)
-int32_t gc_countCarsInTrain(GameCanvas *gc, int32_t n) {
+int32_t gc_countCarsInTrain(Game *gc, int32_t n) {
     return n != -1 ? gc_countCarsInTrain(gc, gc->fleet.nextCar[n]) + 1 : 0;
 }
 
 // boolean isTrainHeadCarAt(int,int,int)
-bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
+bool gc_isTrainHeadCarAt(Game *gc, int32_t n, int32_t n2, int32_t n3) {
     if (n == -1) return false;
     if (gc_byteToUnsignedInt(gc, gc->fleet.trainX[n]) == n2 && gc_byteToUnsignedInt(gc, gc->fleet.trainY[n]) == n3)
         return true;
@@ -96,7 +96,7 @@ bool gc_isTrainHeadCarAt(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
 }
 
 // void removeTrainFromMapInlined(int,boolean)
-void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
+void gc_removeTrainFromMapInlined(Game *gc, int32_t n, bool bl) {
     if (n == -1) return;
     gc_removeTrainFromMapInlined(gc, gc->fleet.nextCar[n], bl);
     gc->fleet.trainFlags[n] = (int8_t)(gc->fleet.trainFlags[n] | 0xE0);
@@ -112,7 +112,7 @@ void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
 }
 
 // void mergeTrainAt(int)
-void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
+void gc_mergeTrainAt(Game *gc, int32_t n) {
     for (int i = 0; i < 500; ++i) {
         if (n == i || (gc->fleet.trainFlags[i] & 0x80) != 128
             || (gc->fleet.trainFlags[i] & 0x40) != 64
@@ -125,14 +125,14 @@ void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
 }
 
 // void maybeAiTakeTurn()
-void gc_maybeAiTakeTurn(GameCanvas *gc) {
+void gc_maybeAiTakeTurn(Game *gc) {
     if (gc->ui.buildMenuMode != 2 && gc->ui.buildMenuMode != 4
         && gc->rng.next_int() % gc->scenario.aiFrequency > gc->scenario.aiThreshold)
         gc_setState(gc, +GameState::AiTurn);
 }
 
 // void dayResetAd()
-void gc_dayResetAd(GameCanvas *gc) {
+void gc_dayResetAd(Game *gc) {
     for (int i = 0; i < 500; ++i) {
         if ((gc->fleet.trainFlags[i] & 0x80) != 128 || (gc->fleet.trainFlags[i] & 0x40) != 64)
             continue;
@@ -150,7 +150,7 @@ void gc_dayResetAd(GameCanvas *gc) {
 }
 
 // void postRevenueReset()
-void gc_postRevenueReset(GameCanvas *gc) {
+void gc_postRevenueReset(Game *gc) {
     for (int i = 0; i < 500; ++i) {
         if ((gc->fleet.trainFlags[i] & 0x80) != 128) continue;
         int n2 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[i]);
@@ -162,7 +162,7 @@ void gc_postRevenueReset(GameCanvas *gc) {
 }
 
 // void archiveOrRecall()
-void gc_archiveOrRecall(GameCanvas *gc) {
+void gc_archiveOrRecall(Game *gc) {
     gc->economy.terrainTotal = gc->economy.loanBalance * gc->economy.interestRate / 1200;
     gc->economy.decadeEnterpriseTax = gc->economy.totalRevenue * gc->economy.enterpriseTaxPct / 100;
     gc->economy.netProfit = gc->economy.totalRevenue - gc->economy.terrainTotal - gc->economy.totalSpent
@@ -171,7 +171,7 @@ void gc_archiveOrRecall(GameCanvas *gc) {
 }
 
 // void computeYearEndMetrics()
-void gc_computeYearEndMetrics(GameCanvas *gc) {
+void gc_computeYearEndMetrics(Game *gc) {
     gc_archiveOrRecall(gc);
     gc->economy.yearProfitHistory[0] = gc->economy.netProfit;
     gc->economy.yearRevenueHistory[0] = gc->economy.totalRevenue;
@@ -187,7 +187,7 @@ void gc_computeYearEndMetrics(GameCanvas *gc) {
 }
 
 // void handleCursorClickInlined(int,int,boolean,boolean)
-void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
+void gc_handleCursorClickInlined(Game *gc, int32_t n, int32_t n2,
                                  bool bl, bool bl2) {
     bool bl3 = !bl;
     int n3;
@@ -225,7 +225,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
 }
 
 // void placeCityTileInlined(int,int,int)
-void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
+void gc_placeCityTileInlined(Game *gc, int32_t n, int32_t n2, int32_t n3) {
     if (gc->world.tileMap[n][n2] == 0
         || (gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST)) {
         gc->world.tileMap[n][n2] = gc_randomCityTile(gc);
@@ -234,7 +234,7 @@ void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) 
 }
 
 // boolean pickValidForestTile()
-bool gc_pickValidForestTile(GameCanvas *gc) {
+bool gc_pickValidForestTile(Game *gc) {
     int n2 = std::abs(gc->rng.next_int() % (gc->world.mapWidth - 2)) + 1;
     int n = std::abs(gc->rng.next_int() % (gc->world.mapHeight - 2)) + 1;
     if (gc->world.tileMap[n2][n] != 0
@@ -325,14 +325,14 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
 }
 
 // void persistSnapshotMode0()
-void gc_persistSnapshotMode0(GameCanvas *gc) {
+void gc_persistSnapshotMode0(Game *gc) {
     gc_loadGame(gc, 5, save::MODE_WRITE);
     gc_writeSaveSnapshot(gc);
     gc_saveGame(gc);
 }
 
 // int computeMapTrainMetric(int)
-int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
+int32_t gc_computeMapTrainMetric(Game *gc, int32_t n) {
     int n2 = gc->economy.trainRevenueScore;
     for (int i = 0; i < gc->world.mapWidth; ++i) {
         for (int j = 0; j < gc->world.mapHeight; ++j) {
@@ -357,7 +357,7 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
 }
 
 // void everyTwoTickZ()
-void gc_everyTwoTickZ(GameCanvas *gc) {
+void gc_everyTwoTickZ(Game *gc) {
     bool bl = false;
     if (!gc->scenario.milestonesEnabled) {
         switch (gc->scenario.scenarioMilestoneIndex) {
@@ -410,7 +410,7 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
 }
 
 // int scanMapForMetric()
-int32_t gc_scanMapForMetric(GameCanvas *gc) {
+int32_t gc_scanMapForMetric(Game *gc) {
     int n4 = 0;
     for (int n3 = 0; n3 < gc->world.mapWidth; ++n3) {
         for (int n2 = 0; n2 < gc->world.mapHeight; ++n2) {
@@ -449,7 +449,7 @@ int32_t gc_scanMapForMetric(GameCanvas *gc) {
 }
 
 // void newYearNotify()
-void gc_newYearNotify(GameCanvas *gc) {
+void gc_newYearNotify(Game *gc) {
     for (int n = 0; n < 500; ++n) {
         gc->fleet.prevTrainRevenue[n] = gc->fleet.trainRevenue[n];
         gc->fleet.trainRevenue[n] = 0;
@@ -529,7 +529,7 @@ void gc_newYearNotify(GameCanvas *gc) {
 }
 
 // void tickInputOrAi(boolean)
-void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
+void gc_tickInputOrAi(Game *gc, bool bl) {
     for (int i = 0; i < 250; ++i) {
         if ((gc->fleet.vehicleFlags[i] & 0x80) != 128) continue;
         int n3 = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleX[i]);
@@ -640,7 +640,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
 // void simulationTick() - the per-frame Playing tick. Runs in exact order:
 // frame timers, tile-fade queue, train updates, then (when counterA reaches
 // dH) the day/month/year calendar cadence with its monthly/yearly hooks.
-void gc_simulationTick(GameCanvas *gc) {
+void gc_simulationTick(Game *gc) {
             gc->tickStart = midp_current_time_millis();
             if (++gc->timerA1 == 2) {
                 gc->timerA1 = 0;

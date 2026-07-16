@@ -8,7 +8,7 @@ static int imin(int a, int b) { return a < b ? a : b; }
 static int imax(int a, int b) { return a > b ? a : b; }
 
 // public void renderFontString(Graphics graphics, int n, int n2, byte[] byArray, boolean bl)
-void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
+void gc_renderFontString(Game *gc, Surface *g, int32_t n, int32_t n2,
                         std::span<const int8_t> codes, bool bl) {
     int n3 = n;
     midp_set_color(g, 0);
@@ -71,7 +71,7 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
 // slots = the offered wagon in wagonOptionSlots); contextCode 26 is the
 // slotIndex-th car of the train under the cursor. Returns NULL when the slot has
 // no sprite.
-Image *gc_wagonCarSprite(GameCanvas *gc, int32_t contextCode, int32_t slotIndex) {
+Image *gc_wagonCarSprite(Game *gc, int32_t contextCode, int32_t slotIndex) {
     if (contextCode == 23) {
         if (slotIndex == 0 && gc->build.wagonType >= 0 && gc->build.wagonType < 3)
             return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
@@ -107,7 +107,7 @@ Image *gc_wagonCarSprite(GameCanvas *gc, int32_t contextCode, int32_t slotIndex)
 }
 
 // void drawTextBox(Graphics graphics, int n, int n2, int n3, int n4, byte[] byArray)
-void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
+void gc_drawTextBox(Game *gc, Surface *g, int32_t n, int32_t n2,
                     int32_t n3, int32_t n4,
                     std::span<const int8_t> codes) {
     int n5 = 0;
@@ -132,7 +132,7 @@ void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
 }
 
 // void drawRectFill(Graphics graphics, int n, int n2, byte by)
-void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
+void gc_drawRectFill(Game *gc, Surface *g, int32_t n, int32_t n2, int8_t by) {
     const auto engine_codes = gc_tracked_codes(gc->assets.spriteBitmapTable[
         gc->assets.spriteIndexTable[80 + (gc->ui.trainSelectionIndex[by] >> 8 & 0xFF)]]);
     const auto wagon_codes = gc_tracked_codes(gc->assets.spriteBitmapTable[
@@ -161,7 +161,7 @@ void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t b
 }
 
 // public void renderPackedSprite(Graphics graphics, int n)
-void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
+void gc_renderPackedSprite(Game *gc, Surface *g, int32_t n) {
     int n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13;
     int8_t by;
     if (gc->renderer.lastRenderedSpriteId != n) {

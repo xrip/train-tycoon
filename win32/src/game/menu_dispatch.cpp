@@ -4,7 +4,7 @@
 #include "game_methods.h"
 
 // void handleBuildMenuState(int n, int n2)
-void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
+void gc_handleBuildMenuState(Game *gc, int32_t n, int32_t n2) {
     switch (n) {
         case 1:
             switch (n2) {

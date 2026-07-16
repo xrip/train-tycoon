@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-typedef struct GameCanvas {
+typedef struct Game {
     void* midlet;
     bool stopRequested;
     void* gameThread;
@@ -83,7 +83,7 @@ typedef struct GameCanvas {
     int32_t dayTickThreshold;  // frames per game-day (counterA counts up to this)
     int64_t tickStart;
     int64_t tickEnd;
-} GameCanvas;
+} Game;
 
 extern int32_t gcs_screenWidth;
 extern int32_t gcs_hs;
@@ -94,6 +94,6 @@ extern bool gcs_selectionHidden;
 extern bool gcs_monthlyReportEnabled;
 extern bool gcs_annualReportEnabled;
 
-void gc_fields_init(GameCanvas *gc);
+void gc_fields_init(Game *gc);
 
 #endif
