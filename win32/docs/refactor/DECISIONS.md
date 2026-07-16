@@ -24,6 +24,21 @@ Refactor all first-party code under `win32/`. Keep MiniFB and `stb_image` as
 vendor code. New sound effects, networking, new rules, and portability are out
 of scope.
 
+## D-012: Cost-model constants stay on GameCanvas after BUILD-01
+
+BUILD-01 gave `BuildController` the transient *action* state (track-lay,
+train-buy dialog, terrain-edit selection). The per-scenario economic/physics
+constants (`moneyBaseA/B`, `baseTrainSpeed`, `accel1/2`, `brake1`,
+`baseTrainSpeed2`, `costPower/Struct/Overhead/Maintenance/Crew`,
+`gWagonCost1..6`, `costGroupC1..4`) are **not** build-action state: they are
+loaded together in `GeneratingMap` and inflated together by the yearly random
+event, and they feed train-buy cost, train physics, and the economy alike. They
+form one cross-cutting parameter block, so forcing them into `BuildController`
+would be wrong. They stay on `GameCanvas` for now; their owner (likely
+`Scenario` as scenario-loaded parameters, or a small shared model) is decided
+later. The build/menu *display* rows (`buildMenu*`, `menuRow*`,
+`trainSelection*`) stay for UI-01.
+
 ## D-004: Tests
 
 Use vendored doctest 2.5.3, clear rule checks, and fixed output digests. The
