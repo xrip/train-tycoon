@@ -71,7 +71,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 36:
             gc_setState(gc, +GameState::MapOverview); break;
         case 17:
-            if (n2 == 1) gc->pendingTransitionCode = 80 + gc->scenarioNoticeId;
+            if (n2 == 1) gc->pendingTransitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenarioNoticeId;
             gc_setState(gc, +GameState::Playing); break;
         case 2:
         case 3:
@@ -261,10 +261,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 40:
             switch (n2) {
                 case 1:
-                    gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + 40;
+                    gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + transition::OFFER_TYPE_BASE;
                     gc->duplicateRowState = 2; break;
                 case 2:
-                    gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + 60;
+                    gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + transition::OFFER_ALT_BASE;
                     gc->duplicateRowState = 2; break;
             }
             gc_setState(gc, +GameState::Playing); break;
@@ -278,11 +278,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 60:
             if (n2 % 2 == 1) {
                 gc->offerRowIndex = gc->enabledMenuRowIndexes[n2 / 2];
-                gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + 40;
+                gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + transition::OFFER_TYPE_BASE;
             }
             if (n2 % 2 == 0) {
                 gc->offerRowIndex = gc->enabledMenuRowIndexes[(n2 - 1) / 2];
-                gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + 60;
+                gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + transition::OFFER_ALT_BASE;
             }
             gc->duplicateRowState = 1;
             gc_setState(gc, +GameState::Playing); break;

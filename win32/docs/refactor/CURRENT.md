@@ -2,47 +2,38 @@
 
 ## Item
 
-`MODEL-01` - name game enums and constants.
+`SAVE-01` - one explicit codec for the old save byte order.
 
 ## Base
 
-- Commit: OWN-04 closed green (no raw owning array, no length registry).
+- Commit: MODEL-01 closed green (states, track/tile, and transition-code bases
+  named; UI screen ids deferred to UI-01).
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Give the game's magic numbers and state codes clear names: game states, tile and
-track codes, menu transition codes, resource kinds, and similar fixed constants.
-Keep every numeric value and all game behavior unchanged.
+Give the legacy `.rms` save format one clear codec. The save/load path currently
+lives in `win32/src/game/save.cpp` (the `IO_*` and matrix macros) and
+`save_arrays.cpp` (array helpers already split into size-explicit `*Span` cores
+plus thin wrappers). Make the byte order explicit and readable while keeping the
+exact same bytes.
 
 ## Non-goals
 
-- Do not split the `GameCanvas` struct or move fields between files yet.
-- Do not change save byte order or numeric game values.
-- Do not rename by guesswork; use behavior and cross-references, and record
-  uncertain evidence in `DECISIONS.md` before a rename.
+- Do not change the save byte order, field order, array order, or any numeric
+  value. Golden save digests must not move.
+- Do not split the `GameCanvas` struct yet; that is a later model stage.
 
 ## Last proof
 
-The ownership arc (OWN-01 through OWN-04) is complete. Every game array is
-`std::array`, `std::vector`, or `Grid<T>`, and the raw array-length registry is
-removed. Debug and Release fast/full tests passed on 2026-07-15.
+MODEL-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
+change. Constants live in `game_constants.h`.
 
 ## Next action
 
-Done: the `gc_setState`/`gameState` value group is named. `game_constants.h`
-holds `enum class GameState : int32_t` (values unchanged); all read/write/case
-sites use `+GameState::Name`. The previous-state copy `hx` comparisons were named
-too. `confirmTargetState` and `keySubState` were left as-is (not states; see
-DECISIONS D-006/MODEL-01). Debug and Release full gates passed on 2026-07-16.
-
-Done: the track-map bitfield (`track::PRESENT`, `OWNER_MASK`, crossing
-sub-owners, AI piece-code cycle) and `tile::CROSSING` are named in
-`game_constants.h`; uncertain overlay bits and shape tile-ids are recorded in
-DECISIONS. Debug and Release full gates passed on 2026-07-16.
-
-Next: name the menu transition codes (`transitionCode`/`pendingTransitionCode`)
-and resource kinds. Use behavior and cross-references; record uncertain evidence
-in `DECISIONS.md` before a rename. Keep numbers identical and commit each leaf
-after the strict Debug and full tests pass. Then close MODEL-01.
+Read `save.cpp` and `save_arrays.cpp` in full and map the exact field/array/
+matrix write order. Per the handoff, the `*MatrixInlined` helpers still need the
+same size-explicit `*Span` split that the array helpers got in OWN-02/D-008.
+Start there: give each saved matrix a size-explicit core, keep the byte order,
+run the strict Debug build and full tests, and commit each leaf.

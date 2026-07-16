@@ -140,6 +140,29 @@ Track and tile codes (second MODEL-01 leaf), in `game_constants.h`:
     colour grouping is in `gc_update` state `BuildingMinimap`. These need a
     per-range evidence pass before naming.
 
+Menu transition codes (third MODEL-01 leaf), in `game_constants.h`
+`namespace transition`:
+
+- Named the arithmetic bases only: `OFFER_TYPE_BASE` (40) and `OFFER_ALT_BASE`
+  (60) build an offer screen code from `menuRowType`/`menuRowAltType`;
+  `SCENARIO_NOTICE_BASE` (80) builds a notice code from the scenario notice id.
+  Evidence: the `+40`/`+60`/`80 +` construction sites in `gc_handleBuildMenuState`
+  and the `BuildingMinimap`/notice path in `gc_paint`.
+- Deferred (decision): the ~40 per-screen menu ids (1, 2, 3, 4, 5, 10, 14, 23..28,
+  31..36, and the 41..54 / 61..72 offer screens) are UI navigation. They select
+  the `renderPackedSprite` layout and the `gc_handleBuildMenuState` branch, so
+  their meaning is only clear once the menu builder and dispatcher become a
+  `UiController` in UI-01. Naming them now would be guesswork against the "no
+  guess renames" rule, so per-screen naming is scheduled for UI-01. The literals
+  stay unchanged until then.
+- "Resource kinds" from the original handoff list are already plain-named: the
+  numbered resource files became named resources in RT-02 (see D-006). No numeric
+  resource-kind group remains in the model to name.
+
+MODEL-01 is closed on this basis: the game-model constant groups (game states,
+track/tile codes, and the transition-code bases) are named; UI-screen ids are
+deferred to UI-01 by the decision above.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

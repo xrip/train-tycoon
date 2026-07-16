@@ -58,4 +58,14 @@ namespace tile {
 inline constexpr int32_t CROSSING = 76;  // two tracks cross; trackMap holds two owners
 }  // namespace tile
 
+// Menu/dialog transition-code bases (GameCanvas::transitionCode and
+// pendingTransitionCode). The per-screen menu ids are UI navigation and are
+// named with the UI controller in UI-01; only the arithmetic bases that build a
+// code from model data are named here. See DECISIONS "Recovered in MODEL-01".
+namespace transition {
+inline constexpr int32_t OFFER_TYPE_BASE = 40;      // menuRowType[row]    + this
+inline constexpr int32_t OFFER_ALT_BASE = 60;       // menuRowAltType[row] + this
+inline constexpr int32_t SCENARIO_NOTICE_BASE = 80; // scenarioNotice id   + this
+}  // namespace transition
+
 #endif  // GAME_CONSTANTS_H

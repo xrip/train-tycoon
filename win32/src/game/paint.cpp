@@ -124,7 +124,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             if (gc->transitionDebounce <= 0) break;
             gc->transitionDebounce = (int8_t)(gc->transitionDebounce - 1);
             if (gc->transitionDebounce != 0) break;
-            gc->transitionCode = 80 + gc->scenarioNoticeCode;
+            gc->transitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenarioNoticeCode;
             gc_resetOverlayRenderState(gc);
             gc->ready = false;
             gc_renderPackedSprite(gc, g, gc->transitionCode);
