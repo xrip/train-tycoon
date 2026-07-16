@@ -50,7 +50,7 @@ int32_t gc_relaxPathCell(GameCanvas *gc, int32_t x, int32_t y) {
     } else {
         changed_or_blocked = true;
     }
-    if (gc->pathfinder.distanceGrid[gc->pathTargetX][gc->pathTargetY] >= 20) return 2;
+    if (gc->pathfinder.distanceGrid[gc->pathfinder.targetX][gc->pathfinder.targetY] >= 20) return 2;
     return changed_or_blocked ? 0 : 1;
 }
 
@@ -60,29 +60,29 @@ void gc_floodFillPath(GameCanvas *gc) {
     for (int pass = 50;
          keep_searching && !destination_found && pass > 0; --pass) {
         keep_searching = false;
-        for (int x = gc->pathAnchorX; x >= 0; --x) {
-            for (int y = gc->pathAnchorY; y >= 0; --y) {
+        for (int x = gc->pathfinder.anchorX; x >= 0; --x) {
+            for (int y = gc->pathfinder.anchorY; y >= 0; --y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = gc->pathAnchorX; x < gc->world.mapWidth; ++x) {
-            for (int y = gc->pathAnchorY; y < gc->world.mapHeight; ++y) {
+        for (int x = gc->pathfinder.anchorX; x < gc->world.mapWidth; ++x) {
+            for (int y = gc->pathfinder.anchorY; y < gc->world.mapHeight; ++y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = gc->pathAnchorX; x >= 0; --x) {
-            for (int y = gc->pathAnchorY; y < gc->world.mapHeight; ++y) {
+        for (int x = gc->pathfinder.anchorX; x >= 0; --x) {
+            for (int y = gc->pathfinder.anchorY; y < gc->world.mapHeight; ++y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = gc->pathAnchorX; x < gc->world.mapWidth; ++x) {
-            for (int y = gc->pathAnchorY; y >= 0; --y) {
+        for (int x = gc->pathfinder.anchorX; x < gc->world.mapWidth; ++x) {
+            for (int y = gc->pathfinder.anchorY; y >= 0; --y) {
                 int result = gc_relaxPathCell(gc, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
@@ -125,8 +125,8 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
 }
 
 void gc_validatePathStep(GameCanvas *gc) {
-    int x = gc->pathTargetX;
-    int y = gc->pathTargetY;
+    int x = gc->pathfinder.targetX;
+    int y = gc->pathfinder.targetY;
     bool path_complete = true;
     bool walking = true;
     do {
@@ -142,7 +142,7 @@ void gc_validatePathStep(GameCanvas *gc) {
             gc_clearBuildPathTile(gc, x, y - 1);
             gc_clearBuildPathTile(gc, x, y + 1);
         }
-        if (x == gc->pathAnchorX && y == gc->pathAnchorY) {
+        if (x == gc->pathfinder.anchorX && y == gc->pathfinder.anchorY) {
             walking = false;
         } else {
             int distance = gc->pathfinder.distanceGrid[x][y];
@@ -377,9 +377,9 @@ bool gc_tryBuildPath(GameCanvas *gc) {
     gc->pathfinder.searchLimit = 10;
     gc->build.selectionCost = 0;
     gc_clearPathDistanceGrid(gc);
-    gc->pathfinder.distanceGrid[gc->pathAnchorX][gc->pathAnchorY] = 20;
+    gc->pathfinder.distanceGrid[gc->pathfinder.anchorX][gc->pathfinder.anchorY] = 20;
     gc_floodFillPath(gc);
-    if (gc->pathfinder.distanceGrid[gc->pathTargetX][gc->pathTargetY] < 20) {
+    if (gc->pathfinder.distanceGrid[gc->pathfinder.targetX][gc->pathfinder.targetY] < 20) {
         gc->pathfinder.distanceGrid.clear();
         return false;
     }

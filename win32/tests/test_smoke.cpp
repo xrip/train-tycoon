@@ -257,10 +257,10 @@ TEST_CASE("fast: small path search") {
     game->world.tileMap.resize(game->world.mapWidth, game->world.mapHeight);
     game->world.trackMap.resize(game->world.mapWidth, game->world.mapHeight);
     game->world.tileElevation.resize(game->world.mapWidth, game->world.mapHeight);
-    game->pathAnchorX = 1;
-    game->pathAnchorY = 2;
-    game->pathTargetX = 3;
-    game->pathTargetY = 2;
+    game->pathfinder.anchorX = 1;
+    game->pathfinder.anchorY = 2;
+    game->pathfinder.targetX = 3;
+    game->pathfinder.targetY = 2;
     game->accel1 = 10;
 
     CHECK(gc_tryBuildPath(game));

@@ -642,10 +642,10 @@ void gc_placeCitiesAndIndustry(GameCanvas *gc) {
     } while (++industry_attempts != 50 && !gc->industrySiteFound);
     if (industry_attempts >= 50) return;
 
-    gc->pathAnchorX = gc->cityStationX;
-    gc->pathAnchorY = gc->cityStationY;
-    gc->pathTargetX = gc->industryStationX;
-    gc->pathTargetY = gc->industryTileY;
+    gc->pathfinder.anchorX = gc->cityStationX;
+    gc->pathfinder.anchorY = gc->cityStationY;
+    gc->pathfinder.targetX = gc->industryStationX;
+    gc->pathfinder.targetY = gc->industryTileY;
     if (!gc_tryBuildPath(gc)) return;
     gc_autoExtendTrackStation(gc, gc->cityStationX, gc->cityStationY);
     gc_autoExtendTrackStation(gc, gc->industryStationX, gc->industryTileY);
