@@ -32,9 +32,9 @@ typedef struct GameCanvas {
     int32_t frameCount;
     int32_t frameIndex;
     int64_t frameTime;
-    bool ce;
+    bool paintSuspended;   // when true, gc_paint returns without drawing
     bool displayInitialized;
-    bool ee;
+    bool confirmCloseRequested;  // one-shot: close confirm dialog to the menu overlay
     bool flagsA;
     bool snapshotLoadSucceeded;
     Pathfinder pathfinder;
@@ -78,8 +78,8 @@ typedef struct GameCanvas {
     int32_t timerC1;
     int32_t timerC2;
     std::array<int32_t, 9> graphColors{};  // 3 series x 3 ARGB colors for report graphs
-    int32_t eD;
-    int32_t aJ;
+    int32_t lastCanvasWidth;   // last size passed to gc_setCanvasSize
+    int32_t lastCanvasHeight;
     int32_t savedGameState;  // game state stashed for return after an overlay
     int32_t loadingTimer;
     int32_t dayTickThreshold;  // frames per game-day (counterA counts up to this)

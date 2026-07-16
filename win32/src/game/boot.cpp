@@ -228,7 +228,7 @@ void gc_k(GameCanvas *gc, int32_t n, int32_t n2) {
 
 // void setCanvasSize(int n, int n2)
 void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
-    if (gc->eD != n || gc->aJ != n2) {
+    if (gc->lastCanvasWidth != n || gc->lastCanvasHeight != n2) {
         gcs_screenWidth = n;
         gcs_hs = n2;
         gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
@@ -236,8 +236,8 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gcs_gameplayViewportHeight = gcs_hs - 30;
         gcs_bottomBarY = gcs_hs - 15;
         gc_k(gc, n, n2);
-        gc->eD = n;
-        gc->aJ = n2;
+        gc->lastCanvasWidth = n;
+        gc->lastCanvasHeight = n2;
         gc->ui.menuDirty = true;
         gc->renderer.lastViewportCenterX = -1;
         if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {

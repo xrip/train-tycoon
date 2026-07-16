@@ -35,13 +35,13 @@ void gc_fields_init(GameCanvas *gc) {
     gc->ui.inputPending = false;
     gc->ui.pauseFlag = false;
     gc->ui.paused = false;
-    gc->ce = false;
+    gc->paintSuspended = false;
     gc->ui.keyRepeatDelay = 0;
     gc->ui.heldKey = 0;
     gc->displayInitialized = false;
     gc->ui.inputSubState = 0;
     gc->ui.currentKey = 0;
-    gc->ee = false;
+    gc->confirmCloseRequested = false;
     gc->ui.cursorScale = 0;
     gc->ui.cursorDragY = -1;
     gc->ui.cursorSelectY = -1;
@@ -273,8 +273,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->world.woodAgeTimer = 0;
     gc->world.phaseTimer = 0;
     gc->graphColors = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
-    gc->eD = -1;
-    gc->aJ = -1;
+    gc->lastCanvasWidth = -1;
+    gc->lastCanvasHeight = -1;
     gc->savedGameState = 0;
     gc->loadingTimer = 0;
     gc->dayTickThreshold = 50;

@@ -23,7 +23,7 @@ static int read_u24_le(ResourceReader& resource) {
 void gc_paint(GameCanvas *gc, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
-    if (gc->ce) return;
+    if (gc->paintSuspended) return;
     gc_setCanvasSize(gc, n, n2);
     if (gc->gameState != +GameState::MapOverview && gc->gameState != +GameState::BuildingMinimap && gc->gameState != +GameState::BuildingPath
         && gc->gameState != +GameState::SavingGame && gc->gameState != +GameState::LoadingGame && gc->gameState != +GameState::AiTurn
@@ -160,11 +160,11 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
             gc_drawConfirmBar(gc, g);
             gc_drawConfirmDialog(gc, g);
-            if (gc->ee) {
+            if (gc->confirmCloseRequested) {
                 gc->ready = false;
                 gc->ui.transitionCode = 36;
                 gc_setState(gc, +GameState::MenuOverlay);
-                gc->ee = false;
+                gc->confirmCloseRequested = false;
             }
             if (gc->ui.pendingTransitionCode <= -1) break;
             gc->ui.transitionCode = gc->ui.pendingTransitionCode;
