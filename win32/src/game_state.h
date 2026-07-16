@@ -3,6 +3,7 @@
 #define GAME_STATE_H
 #include "game_constants.h"
 #include "world.h"
+#include "pathfinder.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -187,15 +188,11 @@ typedef struct GameCanvas {
     bool cH;
     bool aiEnabled;
     int32_t screenParam;
-    Grid<int16_t> pathDistanceGrid;
+    Pathfinder pathfinder;
     int32_t placementX;
     int32_t placementY;
     int32_t demolishX;
     int32_t demolishY;
-    int32_t pathSearchLimit;
-    int32_t nextPathX;
-    int32_t nextPathY;
-    int32_t pathTieBreakCounter;
     int8_t previewTrackOwnerCode;
     int8_t existingTrackOwnerCode;
     int32_t selectionCost;

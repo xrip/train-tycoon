@@ -31,12 +31,18 @@ exact search result and RNG/tie-break order.
 WORLD-02 closed: Debug and Release full gates passed on 2026-07-16, no golden
 change.
 
+## Progress
+
+- Done (D-014): extracted `struct Pathfinder` (`pathfinder.h`) owning the search
+  scratch (`distanceGrid`, `searchLimit`, `nextX`, `nextY`, `tieBreakCounter`),
+  renamed off `GameCanvas`. The path functions were already well named. Debug and
+  Release full gates passed on 2026-07-16, no golden change.
+
 ## Next action
 
-Read `pathfinding.cpp` end to end. Identify the search scratch state
-(`pathDistanceGrid`, `nextPathX/Y`, `pathTieBreakCounter`, cost accumulators) and
-the step functions. Follow the standard loop: give the scratch state a
-`Pathfinder`-style owner (data first) via a mechanical member-path move like
-`World`, then name the step helpers. Keep the search order identical and lean on
-the goldens after each leaf; commit each leaf after the strict Debug and full
-tests pass.
+Name the shared path endpoints `placementX/Y` (goal) and `demolishX/Y` (source of
+the back-walk; the "demolish" name is misleading here) by behavior, being careful
+they are shared with build/demolish. Consider whether the cost accumulator and
+owner-code fields belong with `Pathfinder` or a later build class. Keep the search
+order identical and lean on the goldens after each leaf; then close PATH-01 and
+open FLEET-01.

@@ -23,8 +23,8 @@ void gc_clearBuildPathTile(GameCanvas *gc, int32_t n, int32_t n2) {
         && ((gc->world.tileMap[n][n2] >= 7 && gc->world.tileMap[n][n2] <= 10)
             || (gc->world.tileMap[n][n2] >= 21 && gc->world.tileMap[n][n2] <= 24)
             || gc->world.tileMap[n][n2] == 70 || gc->world.tileMap[n][n2] == 71)
-        && gc->pathDistanceGrid[n][n2] > 0) {
-        gc->pathDistanceGrid[n][n2] = 0;
+        && gc->pathfinder.distanceGrid[n][n2] > 0) {
+        gc->pathfinder.distanceGrid[n][n2] = 0;
     }
 }
 

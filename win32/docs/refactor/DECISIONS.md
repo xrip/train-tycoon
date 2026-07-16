@@ -236,6 +236,20 @@ Evidence gathered for the map tile ids, recorded before any rename (per the
   sprite orientations and need the tile sprite art to name without guessing, so
   they stay literal for now.
 
+## D-014: Pathfinder owns the search scratch (PATH-01)
+
+`pathfinder.h` defines `struct Pathfinder` owning the path-search scratch that
+was loose on `GameCanvas`: the BFS `distanceGrid` (was `pathDistanceGrid`),
+`searchLimit`, the back-walk cursor `nextX`/`nextY`, and the `tieBreakCounter`.
+`GameCanvas` now has one `Pathfinder pathfinder;` member and the fields were
+renamed onto it (`gc->pathDistanceGrid` -> `gc->pathfinder.distanceGrid`, etc.).
+These five fields are used only by `pathfinding.cpp` (plus `terrain.cpp` reading
+the grid), so the move is clean. `placementX/Y` and `demolishX/Y` stay on
+`GameCanvas` because build and demolish share them; the pathfinding functions
+were already clearly named, so PATH-01's remaining work is naming those shared
+endpoints and deciding whether more of the search moves onto `Pathfinder`. Search
+result and tie-break order are unchanged; goldens did not move.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

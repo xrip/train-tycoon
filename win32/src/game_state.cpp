@@ -100,7 +100,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->snapshotLoadedFlag = false;
     gc->cH = false;
     gc->aiEnabled = false;
-    gc->pathTieBreakCounter = 0;
+    gc->pathfinder.tieBreakCounter = 0;
     gc->previewTrackOwnerCode = 0;
     gc->existingTrackOwnerCode = 1;
     gc->selectionCost = 0;
