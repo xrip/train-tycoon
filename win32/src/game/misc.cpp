@@ -16,7 +16,7 @@ void gc_openSpriteStream(GameCanvas *gc, const char *resource_name) {
 bool gc_spendMoney(GameCanvas *gc, int32_t n) {
     if (n <= gc->economy.money) {
         gc->economy.money -= n;
-        gc->lastViewportCenterX = -1;
+        gc->renderer.lastViewportCenterX = -1;
         gc->economy.totalSpent += n;
         gc_pushMoneyHistory(gc, -n);
         return true;

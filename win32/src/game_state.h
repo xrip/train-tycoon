@@ -9,6 +9,7 @@
 #include "scenario.h"
 #include "build_controller.h"
 #include "assets.h"
+#include "renderer.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -97,9 +98,6 @@ typedef struct GameCanvas {
     int32_t clipY;
     int32_t clipWidth;
     int32_t clipHeight;
-    int32_t currentSpriteId;
-    int32_t lastRenderedSpriteId;
-    int32_t spriteJustChanged;
     bool initialIndustryPlaced;
     int32_t mapGenStage;
     int32_t tilesGeneratedInStage;
@@ -214,14 +212,13 @@ typedef struct GameCanvas {
     Scenario scenario;
     BuildController build;
     Assets assets;
+    Renderer renderer;
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;
     int32_t cachedHeaderYear;
     int32_t counterA;
     JavaRandom rng;
-    std::unique_ptr<Image> backbuffer;
-    Surface* backbuffer_surface;
     int64_t loadingStartTime;
     bool loadingTimeout;
     int32_t transitionCode;
@@ -245,14 +242,6 @@ typedef struct GameCanvas {
     int64_t tickStart;
     int64_t tickEnd;
     int64_t gw;
-    int32_t lastViewportCenterX;
-    int32_t viewportCenterYCached;
-    std::array<int16_t, 500> visibleTrains{};
-    int32_t visibleTrainCount;
-    int32_t viewportX1;
-    int32_t viewportY1;
-    int32_t viewportX0;
-    int32_t viewportY0;
 } GameCanvas;
 
 extern int32_t gcs_screenWidth;

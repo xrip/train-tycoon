@@ -55,8 +55,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->useDefaultOverlaySelection = true;
     gc->pauseMenuOpen = false;
     gc->needsRepaint = false;
-    gc->lastRenderedSpriteId = -1;
-    gc->spriteJustChanged = 0;
+    gc->renderer.lastRenderedSpriteId = -1;
+    gc->renderer.spriteJustChanged = 0;
     gc->build.terrainSmoothCost = 0;
     gc->initialIndustryPlaced = true;
     gc->build.trackBuildInProgress = false;
@@ -263,8 +263,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->scenario.scenarioStep = 0;
     gc->scenario.scenarioNoticeId = 0;
     gc->rng.set_seed(midp_current_time_millis());
-    gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
-    gc->backbuffer_surface = gc->backbuffer->drawing_surface();
+    gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+    gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
     gc->scenario.scenarioResourceCount = 0;
     gc->transitionCode = 0;
     gc->ready = true;
@@ -287,7 +287,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->dH = 50;
     gc->gw = 0;
     gc->assets.tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
-    gc->lastViewportCenterX = -1;
-    gc->viewportCenterYCached = -1;
-    gc->visibleTrainCount = 0;
+    gc->renderer.lastViewportCenterX = -1;
+    gc->renderer.viewportCenterYCached = -1;
+    gc->renderer.visibleTrainCount = 0;
 }

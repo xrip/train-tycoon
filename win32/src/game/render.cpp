@@ -159,11 +159,11 @@ void gc_drawRectFill(GameCanvas *gc, Surface *g, int32_t n, int32_t n2, int8_t b
 void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     int n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13;
     int8_t by;
-    if (gc->lastRenderedSpriteId != n) {
-        gc->spriteJustChanged = 1;
-        gc->lastRenderedSpriteId = n;
+    if (gc->renderer.lastRenderedSpriteId != n) {
+        gc->renderer.spriteJustChanged = 1;
+        gc->renderer.lastRenderedSpriteId = n;
     }
-    if (gc->spriteJustChanged != 0) gc->needsRepaint = false;
+    if (gc->renderer.spriteJustChanged != 0) gc->needsRepaint = false;
     if (gc->mapRedrawPending) {
         gc->menuDirty = true;
         gc_renderMap(gc, g);
@@ -179,7 +179,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     if (gc->dialogContentHeight < n19) gc->dialogContentHeight = n19;
     else n19 = gc->dialogContentHeight;
     if (gc->cursorOverUI || gc->cursorAllowZoomOut) n18 += 6;
-    gc->currentSpriteId = gc->assets.spriteData[s + 15];
+    gc->renderer.currentSpriteId = gc->assets.spriteData[s + 15];
     int n20 = (gcs_screenWidth - n18) / 2;
     int n21 = (gcs_hs - n19) / 2;
     int n22 = 6, n23 = 6, n24 = 6;
@@ -257,7 +257,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
             n2 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : 0;
             int8_t by2 = (by & 0x10) == 16 ? gc->assets.spriteData[n25++] : (int8_t)0;
             std::optional<std::vector<int8_t>> text_codes = n8 != 0
-                ? gc_resolveDialogValue(gc, gc->currentSpriteId, n6)
+                ? gc_resolveDialogValue(gc, gc->renderer.currentSpriteId, n6)
                 : std::optional<std::vector<int8_t>>(
                     gc_readPackedTextCodes(gc, n25));
             int n29 = 0;
@@ -275,7 +275,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
             }
             if (gc->needsRepaint && n12 + n10 + 6 + by2 >= gc->clipY + gc->clipHeight)
                 gc->cursorAllowZoomOut = true;
-            if (n9 != 0 && (n9 == 0 || !gc_isResourceTile(gc, gc->currentSpriteId, n7))) continue;
+            if (n9 != 0 && (n9 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n7))) continue;
             if (n12 + n10 - n3 - 3 <= gc->clipY + gc->clipHeight && n12 + n10 + 8 + by2 >= gc->clipY) {
                 if ((by & 0x10) == 16) {
                     if (gc->cursorDragY == -3) gc->cursorDragY = n13;
@@ -308,11 +308,11 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         n9 = (by & 0x20) == 32 ? 0 : gc->assets.spriteData[n25++];
         n8 = (by & 0x10) == 16 ? 0 : gc->assets.spriteData[n25++];
         n7 = n11 != 0 ? gc->assets.spriteData[n25++] : 0;
-        Image *image = gc_u(gc, gc->currentSpriteId, n10);
+        Image *image = gc_u(gc, gc->renderer.currentSpriteId, n10);
         if (image == NULL) continue;
         n5 = image->width();
         n4 = image->height();
-        if (n11 != 0 && (n11 == 0 || !gc_isResourceTile(gc, gc->currentSpriteId, n7))) continue;
+        if (n11 != 0 && (n11 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n7))) continue;
         if (gc->needsRepaint && n12 + n8 <= gc->clipY + gc->clipHeight && n12 + n8 + n4 >= gc->clipY)
             midp_draw_image(g, image, n26 + n9, n12 + n8, 20);
         if (gc->needsRepaint && n12 + n8 + n4 >= gc->clipY + gc->clipHeight)
@@ -329,15 +329,15 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         n8 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
         n7 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
         n6 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
-        n9 = (int16_t)((by & 8) == 8 ? gc_neighboursMask(gc, gc->currentSpriteId, n9) : n9);
-        n8 = (int16_t)((by & 0x10) == 16 ? gc_neighboursMask(gc, gc->currentSpriteId, n8) : n8);
-        n7 = (int16_t)((by & 0x20) == 32 ? gc_neighboursMask(gc, gc->currentSpriteId, n7) : n7);
-        n6 = (int16_t)((by & 0x40) == 64 ? gc_neighboursMask(gc, gc->currentSpriteId, n6) : n6);
+        n9 = (int16_t)((by & 8) == 8 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n9) : n9);
+        n8 = (int16_t)((by & 0x10) == 16 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n8) : n8);
+        n7 = (int16_t)((by & 0x20) == 32 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n7) : n7);
+        n6 = (int16_t)((by & 0x40) == 64 ? gc_neighboursMask(gc, gc->renderer.currentSpriteId, n6) : n6);
         n5 = (by & 0x80) == 128 ? 1 : 0;
         n4 = n5 != 0 ? gc->assets.spriteData[n25++] : 0;
         n3 = n12 + n8;
         n2 = n3 + n6;
-        if (!gc->needsRepaint || (n5 != 0 && (n5 == 0 || !gc_isResourceTile(gc, gc->currentSpriteId, n4)))) continue;
+        if (!gc->needsRepaint || (n5 != 0 && (n5 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n4)))) continue;
         switch (n11) {
             case 0:
                 midp_set_color(g, n10);
@@ -370,5 +370,5 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         if (gc->cursorScale > 0) gc->cursorOverUI = true;
     }
     gc->needsRepaint = true;
-    if (gc->spriteJustChanged > 0) --gc->spriteJustChanged;
+    if (gc->renderer.spriteJustChanged > 0) --gc->renderer.spriteJustChanged;
 }

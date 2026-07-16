@@ -352,7 +352,7 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
         gc_advanceConstructionTimers(gc, start_x, start_y, -4);
         gc->world.trackMap[start_x][start_y] = 65;
     }
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
 }
 
 void gc_revertTrackTiles(GameCanvas *gc) {
@@ -412,7 +412,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
     }
     gc->economy.money -= cost;
     gc->economy.totalSpent += cost;
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
     gc_pushMoneyHistory(gc, -cost);
     gc_incrementRowValueType13(gc, cost);
     gc_advanceConstructionTimers(gc, x, y, -4);
@@ -592,7 +592,7 @@ void gc_openBuildMenu(GameCanvas *gc) {
             gc->buildMenuMode = 1;
             gc->buildMenuItemIndex = gc->build.buildCancelled ? 0 : 2;
             gc->menuDirty = true;
-            gc->lastViewportCenterX = -1;
+            gc->renderer.lastViewportCenterX = -1;
             break;
         case 3:
             if (item != 9) {
@@ -691,7 +691,7 @@ int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t x, int32_t y,
         gc->fleet.trainStateCode[train] = 7;
         gc->fleet.trainAiOverride[train] = 0;
     }
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
     return train;
 }
 

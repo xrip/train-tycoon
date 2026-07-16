@@ -96,10 +96,10 @@ void gc_drawConfirmBar(GameCanvas *gc, Surface *graphics) {
 // void paintMain(Graphics)
 void gc_paintMain(GameCanvas *gc, Surface *graphics) {
     (void)graphics;
-    gc_drawHeaderBar(gc, gc->backbuffer_surface);
+    gc_drawHeaderBar(gc, gc->renderer.backbuffer_surface);
     if (!gc->menuDirty) return;
-    midp_set_color(gc->backbuffer_surface, 0x606060);
-    midp_fill_rect(gc->backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
+    midp_set_color(gc->renderer.backbuffer_surface, 0x606060);
+    midp_fill_rect(gc->renderer.backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
     int selected_x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode]
                                                [gc->buildMenuItemIndex]);
     int scroll = selected_x + 15 - gcs_screenWidth;
@@ -108,11 +108,11 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
     for (int item = 0; item < item_count; ++item) {
         int x = gc_byteToUnsignedInt(gc, gc->menuItemCode[gc->buildMenuMode][item]) - scroll;
         int sprite = gc_byteToUnsignedInt(gc, gc->menuTextIndex[gc->buildMenuMode][item]);
-        gc_drawSpriteQuad(gc, gc->backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
+        gc_drawSpriteQuad(gc, gc->renderer.backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
         if (item != gc->buildMenuItemIndex) continue;
-        midp_set_color(gc->backbuffer_surface, 0xFFFFFF);
-        midp_draw_rect(gc->backbuffer_surface, x, gcs_bottomBarY, 14, 14);
-        midp_draw_rect(gc->backbuffer_surface, x + 1, gcs_bottomBarY + 1, 12, 12);
+        midp_set_color(gc->renderer.backbuffer_surface, 0xFFFFFF);
+        midp_draw_rect(gc->renderer.backbuffer_surface, x, gcs_bottomBarY, 14, 14);
+        midp_draw_rect(gc->renderer.backbuffer_surface, x + 1, gcs_bottomBarY + 1, 12, 12);
     }
     if (gc->buildMenuMode == 2) {
         char cost_text[24];
@@ -128,7 +128,7 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
         for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
         std::copy(currency_codes.begin(), currency_codes.end(),
                   bytes.begin() + text_len + 1);
-        gc_renderFontString(gc, gc->backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
+        gc_renderFontString(gc, gc->renderer.backbuffer_surface, 35, gcs_bottomBarY + 5, bytes, false);
     }
     gc->menuDirty = false;
 }

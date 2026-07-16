@@ -52,7 +52,7 @@ int32_t gc_spawnTrainCar(GameCanvas *gc, int32_t previous_car, int32_t car_type)
         gc->fleet.wagonEnergyRemaining[new_car] = 0;
         gc->fleet.lastServiceVehicle[new_car] = -1;
     }
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
     return new_car;
 }
 
@@ -321,7 +321,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
                     previous_car = gc_spawnTrainCar(gc, previous_car, car_type);
                 }
                 gc->fleet.trainStateCode[head] = 7;
-                gc->lastViewportCenterX = -1;
+                gc->renderer.lastViewportCenterX = -1;
             }
 
             gc_loadTrainAtServiceVehicle(gc, head, service_vehicle, false);

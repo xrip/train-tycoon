@@ -150,7 +150,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             if (n14 > 0) n14 = 0;
             int n19 = n17 < gcs_screenWidth ? (gcs_screenWidth - n17) / 2 : 0;
             int n20 = n17 < gcs_gameplayViewportHeight ? (gcs_gameplayViewportHeight - n17) / 2 : 0;
-            midp_draw_image(g, gc->backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
+            midp_draw_image(g, gc->renderer.backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
             int n21 = gc->viewportCenterX - 2 * gc->viewportCenterY + 16 + 2 * gc->world.mapHalfWidth;
             int n22 = gc->viewportCenterX + 2 * gc->viewportCenterY - 16 - 2 * gc->world.mapHalfWidth;
             int n23 = gc->world.mapWidth - (n21 /= 32) + (n22 /= 32);
@@ -341,10 +341,10 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             int size = gc->world.mapHeight + gc->world.mapWidth;
-            gc->backbuffer = Image::create_blank(size, size);
-            gc->backbuffer_surface = gc->backbuffer->drawing_surface();
-            midp_set_color(gc->backbuffer_surface, 0);
-            midp_fill_rect(gc->backbuffer_surface, 0, 0, size, size);
+            gc->renderer.backbuffer = Image::create_blank(size, size);
+            gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
+            midp_set_color(gc->renderer.backbuffer_surface, 0);
+            midp_fill_rect(gc->renderer.backbuffer_surface, 0, 0, size, size);
             int previous_kind = -1;
             int kind = 0;
             for (int x = 0; x < gc->world.mapWidth; ++x) {
@@ -373,30 +373,30 @@ void gc_update(GameCanvas *gc) {
                     if (kind != previous_kind) {
                         switch (kind) {
                             case 1:
-                                if (gc->world.tileElevation[x][y] == -1) midp_set_color(gc->backbuffer_surface, 3167360);
-                                if (gc->world.tileElevation[x][y] == 0) midp_set_color(gc->backbuffer_surface, 5274640);
-                                if (gc->world.tileElevation[x][y] == 1) midp_set_color(gc->backbuffer_surface, 6327328);
-                                if (gc->world.tileElevation[x][y] == 2) midp_set_color(gc->backbuffer_surface, 7380016);
-                                if (gc->world.tileElevation[x][y] == 3) midp_set_color(gc->backbuffer_surface, 8432704);
+                                if (gc->world.tileElevation[x][y] == -1) midp_set_color(gc->renderer.backbuffer_surface, 3167360);
+                                if (gc->world.tileElevation[x][y] == 0) midp_set_color(gc->renderer.backbuffer_surface, 5274640);
+                                if (gc->world.tileElevation[x][y] == 1) midp_set_color(gc->renderer.backbuffer_surface, 6327328);
+                                if (gc->world.tileElevation[x][y] == 2) midp_set_color(gc->renderer.backbuffer_surface, 7380016);
+                                if (gc->world.tileElevation[x][y] == 3) midp_set_color(gc->renderer.backbuffer_surface, 8432704);
                                 break;
-                            case 2: midp_set_color(gc->backbuffer_surface, 6327312); break;
-                            case 3: midp_set_color(gc->backbuffer_surface, 0x909040); break;
-                            case 4: midp_set_color(gc->backbuffer_surface, 0x606060); break;
-                            case 5: midp_set_color(gc->backbuffer_surface, 0x404040); break;
-                            case 6: midp_set_color(gc->backbuffer_surface, 0xFC0000); break;
-                            case 7: midp_set_color(gc->backbuffer_surface, 0x101010); break;
-                            case 8: midp_set_color(gc->backbuffer_surface, 0xFC9C00); break;
-                            case 9: midp_set_color(gc->backbuffer_surface, 0x78DC1E); break;
-                            case 10: midp_set_color(gc->backbuffer_surface, 0xFCFC00); break;
-                            case 11: midp_set_color(gc->backbuffer_surface, 0x80C4FC); break;
-                            case 12: midp_set_color(gc->backbuffer_surface, 0); break;
-                            case 13: midp_set_color(gc->backbuffer_surface, 14287063); break;
-                            case 14: midp_set_color(gc->backbuffer_surface, 16738557); break;
-                            case 15: midp_set_color(gc->backbuffer_surface, 16040947); break;
+                            case 2: midp_set_color(gc->renderer.backbuffer_surface, 6327312); break;
+                            case 3: midp_set_color(gc->renderer.backbuffer_surface, 0x909040); break;
+                            case 4: midp_set_color(gc->renderer.backbuffer_surface, 0x606060); break;
+                            case 5: midp_set_color(gc->renderer.backbuffer_surface, 0x404040); break;
+                            case 6: midp_set_color(gc->renderer.backbuffer_surface, 0xFC0000); break;
+                            case 7: midp_set_color(gc->renderer.backbuffer_surface, 0x101010); break;
+                            case 8: midp_set_color(gc->renderer.backbuffer_surface, 0xFC9C00); break;
+                            case 9: midp_set_color(gc->renderer.backbuffer_surface, 0x78DC1E); break;
+                            case 10: midp_set_color(gc->renderer.backbuffer_surface, 0xFCFC00); break;
+                            case 11: midp_set_color(gc->renderer.backbuffer_surface, 0x80C4FC); break;
+                            case 12: midp_set_color(gc->renderer.backbuffer_surface, 0); break;
+                            case 13: midp_set_color(gc->renderer.backbuffer_surface, 14287063); break;
+                            case 14: midp_set_color(gc->renderer.backbuffer_surface, 16738557); break;
+                            case 15: midp_set_color(gc->renderer.backbuffer_surface, 16040947); break;
                         }
                     }
                     previous_kind = kind;
-                    midp_draw_line(gc->backbuffer_surface, draw_x, draw_y,
+                    midp_draw_line(gc->renderer.backbuffer_surface, draw_x, draw_y,
                                    draw_x + 1, draw_y);
                 }
                 previous_kind = -1;

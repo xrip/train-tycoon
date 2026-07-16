@@ -176,12 +176,12 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(viewportBaseY);
     IO_INT(mapScaleX);
     IO_INT(mapScaleY);
-    IO_SHORTS(visibleTrains);
-    IO_INT(visibleTrainCount);
-    IO_INT(viewportX0);
-    IO_INT(viewportY0);
-    IO_INT(viewportX1);
-    IO_INT(viewportY1);
+    IO_SHORTS(renderer.visibleTrains);
+    IO_INT(renderer.visibleTrainCount);
+    IO_INT(renderer.viewportX0);
+    IO_INT(renderer.viewportY0);
+    IO_INT(renderer.viewportX1);
+    IO_INT(renderer.viewportY1);
     IO_INT(economy.loanBalance);
     IO_INT(economy.loanCeiling);
     IO_BYTE(economy.interestRate);
@@ -384,5 +384,5 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc_loadGame(gc, 4, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
     gc_saveOrLoadByteMatrixInlined(gc, gc->world.heightMap);
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
 }

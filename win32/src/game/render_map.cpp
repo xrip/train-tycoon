@@ -6,21 +6,21 @@
 
 // public void renderMap(Graphics graphics)
 void gc_renderMap(GameCanvas *gc, Surface *g) {
-    Surface *bb = gc->backbuffer_surface;
+    Surface *bb = gc->renderer.backbuffer_surface;
     int n, n2, n3, n4, n5, n6, n7;
     int n9 = gc->viewportCenterX - 2 * gc->viewportCenterY + 16 + 2 * gc->world.mapHalfWidth;
     int n10 = gc->viewportCenterX + 2 * gc->viewportCenterY - 16 - 2 * gc->world.mapHalfWidth;
     n9 /= 32;
     n10 /= 32;
-    if (gc->viewportCenterX != gc->lastViewportCenterX || gc->viewportCenterY != gc->viewportCenterYCached) {
+    if (gc->viewportCenterX != gc->renderer.lastViewportCenterX || gc->viewportCenterY != gc->renderer.viewportCenterYCached) {
         midp_set_clip(bb, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
         midp_set_color(bb, 0);
         midp_fill_rect(bb, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
-        gc->visibleTrainCount = 0;
-        gc->viewportX0 = 2 * gc->world.mapWidth;
-        gc->viewportY0 = 2 * gc->world.mapHeight;
-        gc->viewportX1 = -gc->world.mapWidth;
-        gc->viewportY1 = -gc->world.mapWidth;
+        gc->renderer.visibleTrainCount = 0;
+        gc->renderer.viewportX0 = 2 * gc->world.mapWidth;
+        gc->renderer.viewportY0 = 2 * gc->world.mapHeight;
+        gc->renderer.viewportX1 = -gc->world.mapWidth;
+        gc->renderer.viewportY1 = -gc->world.mapWidth;
         for (int n8 = 0; n8 < gc->assets.numActiveTileAnimations; ++n8) {
             n7 = n9 + gc->assets.tileOffsetX[n8];
             int n11 = n10 + gc->assets.tileOffsetY[n8];
@@ -57,39 +57,39 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
                     midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + n3, 33);
                 }
             }
-            if (n7 > gc->viewportX1) gc->viewportX1 = n7;
-            if (n11 > gc->viewportY1) gc->viewportY1 = n11;
-            if (n7 < gc->viewportX0) gc->viewportX0 = n7;
-            if (n11 >= gc->viewportY0) continue;
-            gc->viewportY0 = n11;
+            if (n7 > gc->renderer.viewportX1) gc->renderer.viewportX1 = n7;
+            if (n11 > gc->renderer.viewportY1) gc->renderer.viewportY1 = n11;
+            if (n7 < gc->renderer.viewportX0) gc->renderer.viewportX0 = n7;
+            if (n11 >= gc->renderer.viewportY0) continue;
+            gc->renderer.viewportY0 = n11;
         }
-        if (gc->viewportX0 < 0) gc->viewportX0 = 0;
-        if (gc->viewportY0 < 0) gc->viewportY0 = 0;
-        if (gc->viewportX1 >= gc->world.mapWidth) gc->viewportX1 = gc->world.mapWidth - 1;
-        if (gc->viewportY1 >= gc->world.mapHeight) gc->viewportY1 = gc->world.mapHeight - 1;
-        gc->lastViewportCenterX = gc->viewportCenterX;
-        gc->viewportCenterYCached = gc->viewportCenterY;
+        if (gc->renderer.viewportX0 < 0) gc->renderer.viewportX0 = 0;
+        if (gc->renderer.viewportY0 < 0) gc->renderer.viewportY0 = 0;
+        if (gc->renderer.viewportX1 >= gc->world.mapWidth) gc->renderer.viewportX1 = gc->world.mapWidth - 1;
+        if (gc->renderer.viewportY1 >= gc->world.mapHeight) gc->renderer.viewportY1 = gc->world.mapHeight - 1;
+        gc->renderer.lastViewportCenterX = gc->viewportCenterX;
+        gc->renderer.viewportCenterYCached = gc->viewportCenterY;
         midp_set_clip(bb, 0, 0, gcs_screenWidth, gcs_hs);
     }
     gc_paintMain(gc, g);
-    midp_draw_image(g, gc->backbuffer.get(), 0, 0, 20);
+    midp_draw_image(g, gc->renderer.backbuffer.get(), 0, 0, 20);
     midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
     gc_drawBuildMenuCursor(gc, g);
-    int visible_width = gc->viewportX1 - gc->viewportX0 + 1;
-    int visible_height = gc->viewportY1 - gc->viewportY0 + 1;
+    int visible_width = gc->renderer.viewportX1 - gc->renderer.viewportX0 + 1;
+    int visible_height = gc->renderer.viewportY1 - gc->renderer.viewportY0 + 1;
     if (visible_width < 1) visible_width = 1;
     if (visible_height < 1) visible_height = 1;
     std::vector<uint8_t> visible_train_tiles(
         static_cast<std::size_t>(visible_width * visible_height));
-    gc->visibleTrainCount = 0;
+    gc->renderer.visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
         if ((gc->fleet.trainFlags[n6] & 0x80) != 128) continue;
         n5 = gc_byteToUnsignedInt(gc, gc->fleet.trainX[n6]);
         n4 = gc_byteToUnsignedInt(gc, gc->fleet.trainY[n6]);
-        if (n5 < gc->viewportX0 || n4 < gc->viewportY0 || n5 > gc->viewportX1 || n4 > gc->viewportY1) continue;
-        gc->visibleTrains[gc->visibleTrainCount++] = (int16_t)n6;
-        visible_train_tiles[(n5 - gc->viewportX0) * visible_height +
-                            n4 - gc->viewportY0] = 1;
+        if (n5 < gc->renderer.viewportX0 || n4 < gc->renderer.viewportY0 || n5 > gc->renderer.viewportX1 || n4 > gc->renderer.viewportY1) continue;
+        gc->renderer.visibleTrains[gc->renderer.visibleTrainCount++] = (int16_t)n6;
+        visible_train_tiles[(n5 - gc->renderer.viewportX0) * visible_height +
+                            n4 - gc->renderer.viewportY0] = 1;
     }
     for (n6 = 0; n6 < gc->assets.numActiveTileAnimations; ++n6) {
         int n12;
@@ -118,10 +118,10 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
                 midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[41]].get(), n, n12, 33);
             }
         }
-        if (visible_train_tiles[(n5 - gc->viewportX0) * visible_height +
-                                n4 - gc->viewportY0]) {
-            for (n = 0; n < gc->visibleTrainCount; ++n) {
-                n12 = gc->visibleTrains[n];
+        if (visible_train_tiles[(n5 - gc->renderer.viewportX0) * visible_height +
+                                n4 - gc->renderer.viewportY0]) {
+            for (n = 0; n < gc->renderer.visibleTrainCount; ++n) {
+                n12 = gc->renderer.visibleTrains[n];
                 if ((gc->fleet.trainFlags[n12] & 0x80) != 128 || n5 != gc_byteToUnsignedInt(gc, gc->fleet.trainX[n12]) || n4 != gc_byteToUnsignedInt(gc, gc->fleet.trainY[n12])) continue;
                 gc_drawSpriteSingle(gc, g, n12);
             }

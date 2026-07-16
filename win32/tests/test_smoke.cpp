@@ -276,7 +276,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->economy.monthOfYear = 8;
     game->economy.year = 1973;
     game->economy.loanBalance = -7654321;
-    game->visibleTrains[0] = -1234;
+    game->renderer.visibleTrains[0] = -1234;
     gc_initSaveOrLoad(game, 4);
 
     const int plain_size = game->snapshotSize;
@@ -299,14 +299,14 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->economy.monthOfYear = 0;
     game->economy.year = 0;
     game->economy.loanBalance = 0;
-    game->visibleTrains[0] = 0;
+    game->renderer.visibleTrains[0] = 0;
     gc_initSaveOrLoad(game, 5);
     CHECK(game->economy.money == 123456);
     CHECK(game->economy.dayOfMonth == 17);
     CHECK(game->economy.monthOfYear == 8);
     CHECK(game->economy.year == 1973);
     CHECK(game->economy.loanBalance == -7654321);
-    CHECK(game->visibleTrains[0] == -1234);
+    CHECK(game->renderer.visibleTrains[0] == -1234);
 
     std::free(plain);
     delete game;
@@ -402,7 +402,7 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     gc_run(game);
     gc_paint(game, &screen);
     CHECK(game->gameState == 30);
-    CHECK(game->backbuffer != nullptr);
+    CHECK(game->renderer.backbuffer != nullptr);
     CHECK(game->viewportCenterX != old_viewport_x);
     StableDigest moved_frame;
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));

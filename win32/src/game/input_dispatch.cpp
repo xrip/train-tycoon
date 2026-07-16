@@ -19,7 +19,7 @@ void gc_registerCityEntryInlined(GameCanvas *gc, int8_t by) {
             gc->cursorScale = 0;
             break;
         case 3:
-            gc_handleBuildMenuState(gc, gc->currentSpriteId, gc->cursorDragX);
+            gc_handleBuildMenuState(gc, gc->renderer.currentSpriteId, gc->cursorDragX);
             break;
     }
 }

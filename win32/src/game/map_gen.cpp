@@ -144,7 +144,7 @@ void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
             }
         }
     }
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
 }
 
 // void raiseTerrainArea(int n, int n2, int n3, int n4, int n5)

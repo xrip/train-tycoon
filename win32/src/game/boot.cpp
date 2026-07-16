@@ -231,15 +231,15 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
     if (gc->eD != n || gc->aJ != n2) {
         gcs_screenWidth = n;
         gcs_hs = n2;
-        gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
-        gc->backbuffer_surface = gc->backbuffer->drawing_surface();
+        gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+        gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
         gcs_gameplayViewportHeight = gcs_hs - 30;
         gcs_bottomBarY = gcs_hs - 15;
         gc_k(gc, n, n2);
         gc->eD = n;
         gc->aJ = n2;
         gc->menuDirty = true;
-        gc->lastViewportCenterX = -1;
+        gc->renderer.lastViewportCenterX = -1;
         if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {
             if (gc->hx == +GameState::Playing) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::Playing; }
             if (gc->hx == +GameState::MapOverview) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::MapOverview; }
@@ -310,10 +310,10 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             gc->loadStep = 0;
             break;
         case +GameState::Playing:
-            gc->backbuffer = NULL;
-            gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
-            gc->backbuffer_surface = gc->backbuffer->drawing_surface();
-            gc->lastViewportCenterX = -1;
+            gc->renderer.backbuffer = NULL;
+            gc->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+            gc->renderer.backbuffer_surface = gc->renderer.backbuffer->drawing_surface();
+            gc->renderer.lastViewportCenterX = -1;
             gc->menuDirty = true;
             break;
         case +GameState::BuildingMinimap: gc->loadStep = 4; gc->confirmToggle = 0; break;

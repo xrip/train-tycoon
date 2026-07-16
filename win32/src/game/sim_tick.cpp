@@ -105,7 +105,7 @@ void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
     if (bl)
         gc_handleCursorClickInlined(gc, gc_byteToUnsignedInt(gc, gc->fleet.trainX[n]),
                                     gc_byteToUnsignedInt(gc, gc->fleet.trainY[n]), false, true);
-    gc->lastViewportCenterX = -1;
+    gc->renderer.lastViewportCenterX = -1;
     gc->ready = false;
     gc->transitionCode = 16;
     gc_setState(gc, +GameState::MenuOverlay);
@@ -685,22 +685,22 @@ void gc_simulationTick(GameCanvas *gc) {
                 if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
                     gc->world.trackMap[n][n29] = 0;
                     gc->world.tileMap[n][n29] = -128;
-                    gc->lastViewportCenterX = -1;
+                    gc->renderer.lastViewportCenterX = -1;
                 }
                 if (n30 >= 77 && n30 <= 80) {
                     gc->world.tileMap[n][n29] = (int8_t)(128 + n30 - 56);
                     gc->world.trackMap[n][n29] = 0;
-                    gc->lastViewportCenterX = -1;
+                    gc->renderer.lastViewportCenterX = -1;
                 }
                 if (n30 == 81 || n30 == 82) {
                     gc->world.tileMap[n][n29] = -128;
                     gc->world.trackMap[n][n29] = 0;
-                    gc->lastViewportCenterX = -1;
+                    gc->renderer.lastViewportCenterX = -1;
                 }
                 if (n30 >= 83 && n30 <= 86) {
                     gc->world.tileMap[n][n29] = (int8_t)(128 + n30 - 76);
                     gc->world.trackMap[n][n29] = 0;
-                    gc->lastViewportCenterX = -1;
+                    gc->renderer.lastViewportCenterX = -1;
                 }
                 if (n30 == 76) {
                     int n31 = gc->world.trackMap[n][n29] & 7;
@@ -715,7 +715,7 @@ void gc_simulationTick(GameCanvas *gc) {
                         gc->world.tileMap[n][n29] = -58;
                         gc->world.trackMap[n][n29] = (int8_t)(0x40 | n31);
                     }
-                    gc->lastViewportCenterX = -1;
+                    gc->renderer.lastViewportCenterX = -1;
                 }
             }
 
