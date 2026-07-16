@@ -5,35 +5,35 @@
 
 void gc_keyReleased(GameCanvas *gc, int32_t n) {
     (void)n;
-    gc->currentKey = -999;
+    gc->ui.currentKey = -999;
 }
 
 void gc_pointerPressed(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)n; (void)n2;
-    if (gc->inputPending) return;
+    if (gc->ui.inputPending) return;
 }
 
 void gc_pointerReleased(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)n; (void)n2;
-    if (gc->inputPending) {
-        gc->inputPending = false;
+    if (gc->ui.inputPending) {
+        gc->ui.inputPending = false;
         return;
     }
 }
 
 void gc_pointerDragged(GameCanvas *gc, int32_t n, int32_t n2) {
     (void)n; (void)n2;
-    if (gc->inputPending) return;
+    if (gc->ui.inputPending) return;
 }
 
 void gc_resetKeyState(GameCanvas *gc, int32_t n) {
     (void)n;
-    gc->currentKey = 0;
-    gc->lastKeyCode = 0;
-    gc->keySubState = 0;
-    gc->keyRepeatDelay = 0;
-    gc->heldKey = 0;
-    gc->inputSubState = 0;
+    gc->ui.currentKey = 0;
+    gc->ui.lastKeyCode = 0;
+    gc->ui.keySubState = 0;
+    gc->ui.keyRepeatDelay = 0;
+    gc->ui.heldKey = 0;
+    gc->ui.inputSubState = 0;
 }
 
 // void cycleBuildMenuIndex(boolean forward)
@@ -50,7 +50,7 @@ void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
 
 // void viewportPanKey()
 void gc_viewportPanKey(GameCanvas *gc) {
-    int key = gc->lastKeyCode;
+    int key = gc->ui.lastKeyCode;
     if (key == 56 || key == 6) gc->viewportCenterY += 30;
     if (key == 50 || key == 1) gc->viewportCenterY -= 30;
     if (key == 54 || key == 5) gc->viewportCenterX += 60;
@@ -87,7 +87,7 @@ void gc_viewportPanKey(GameCanvas *gc) {
 // void viewportZoomKey()
 void gc_viewportZoomKey(GameCanvas *gc) {
     int step = gc_computeKeyRepeatDelay(gc);
-    int key = gc->lastKeyCode;
+    int key = gc->ui.lastKeyCode;
     if (key == 56 || key == 6) gc->mapScaleY += step * 2;
     if (key == 50 || key == 1) gc->mapScaleY -= step * 2;
     if (key == 54 || key == 5) gc->mapScaleX += step * 2;
@@ -157,7 +157,7 @@ void gc_viewportZoomKey(GameCanvas *gc) {
             gc->world.mapScreenHeight - gcs_gameplayViewportHeight;
         moved_view = false;
     }
-    if (moved_view) gc->keySubState = 80;
+    if (moved_view) gc->ui.keySubState = 80;
     gc_computeViewportBounds(gc);
     gc->mapScaleX = gc->viewportBaseX * 2;
     gc->mapScaleY = gc->viewportBaseY * 2;
@@ -208,8 +208,8 @@ void gc_computeViewportBounds(GameCanvas *gc) {
 
     gc->build.swapMapX = tile_x;
     gc->build.swapMapY = tile_y;
-    gc->tileCursorX = tile_x;
-    gc->tileCursorY = tile_y;
+    gc->ui.tileCursorX = tile_x;
+    gc->ui.tileCursorY = tile_y;
     int corner_distance[4];
     for (int corner = 0; corner < 4; ++corner) {
         int dx = gc->viewportBaseX - gc->build.selectionTileX[corner];
@@ -236,8 +236,8 @@ void gc_computeViewportBounds(GameCanvas *gc) {
     }
     tile_center_y -= gc->viewportCenterY
                      + 4 * gc->world.heightMap[gc->build.swapMapX][gc->build.swapMapY];
-    gc->cursorScreenX = tile_center_x - gc->viewportCenterX;
-    gc->cursorScreenY = tile_center_y;
+    gc->ui.cursorScreenX = tile_center_x - gc->viewportCenterX;
+    gc->ui.cursorScreenY = tile_center_y;
     for (int corner = 0; corner < 4; ++corner) {
         gc->build.selectionTileX[corner] -= gc->viewportCenterX;
         gc->build.selectionTileY[corner] -= gc->viewportCenterY;

@@ -7,19 +7,19 @@
 void gc_registerCityEntryInlined(GameCanvas *gc, int8_t by) {
     switch (by) {
         case 1:
-            if (gc->cursorSelectX != -2) { gc->cursorDragY = gc->cursorSelectX; break; }
-            if (!gc->cursorAllowZoomOut) break;
-            gc->cursorScale += 10;
+            if (gc->ui.cursorSelectX != -2) { gc->ui.cursorDragY = gc->ui.cursorSelectX; break; }
+            if (!gc->ui.cursorAllowZoomOut) break;
+            gc->ui.cursorScale += 10;
             break;
         case 2:
-            if (gc->cursorSelectY > -1) gc->cursorDragY = gc->cursorSelectY;
-            else if (gc->cursorOverUI) gc->cursorScale -= 10;
-            else gc->cursorDragY = -1;
-            if (gc->cursorScale >= 0) break;
-            gc->cursorScale = 0;
+            if (gc->ui.cursorSelectY > -1) gc->ui.cursorDragY = gc->ui.cursorSelectY;
+            else if (gc->ui.cursorOverUI) gc->ui.cursorScale -= 10;
+            else gc->ui.cursorDragY = -1;
+            if (gc->ui.cursorScale >= 0) break;
+            gc->ui.cursorScale = 0;
             break;
         case 3:
-            gc_handleBuildMenuState(gc, gc->renderer.currentSpriteId, gc->cursorDragX);
+            gc_handleBuildMenuState(gc, gc->renderer.currentSpriteId, gc->ui.cursorDragX);
             break;
     }
 }
@@ -44,9 +44,9 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
     if (n2 == 1) n = 50;
     if (n2 == 6) n = 56;
     if (n2 == 8) n = 53;
-    gc->currentKey = 0;
-    gc->keyRepeatDelay = 0;
-    gc->heldKey = 0;
+    gc->ui.currentKey = 0;
+    gc->ui.keyRepeatDelay = 0;
+    gc->ui.heldKey = 0;
     switch (gc->gameState) {
         case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3:
             gc->loadingTimeout = true;
@@ -54,32 +54,32 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
         case +GameState::MenuOverlay:
             if (n == 56 || n == 54) {
                 gc_registerCityEntryInlined(gc, 1);
-                gc->keyRepeatDelay = 4;
-                gc->heldKey = n;
+                gc->ui.keyRepeatDelay = 4;
+                gc->ui.heldKey = n;
             }
             if (n == 50 || n == 52) {
                 gc_registerCityEntryInlined(gc, 2);
-                gc->keyRepeatDelay = 4;
-                gc->heldKey = n;
+                gc->ui.keyRepeatDelay = 4;
+                gc->ui.heldKey = n;
             }
             if (n == 53) gc_registerCityEntryInlined(gc, 3);
             if (!gc->ui.pauseMenuOpen || n != 42) break;
-            gc->cursorDragY = -3;
-            gc->cursorDragX = -1;
+            gc->ui.cursorDragY = -3;
+            gc->ui.cursorDragX = -1;
             gc_registerCityEntryInlined(gc, 3);
             break;
         case +GameState::Playing:
-            gc->lastKeyCode = n;
-            gc->keySubState = 0;
-            if (gc->inputSubState == 0) {
-                if (n == 42) { gc_cycleBuildMenuIndex(gc, false); gc->inputSubState = 7; gc->currentKey = n; }
-                if (n == 35) { gc_cycleBuildMenuIndex(gc, true); gc->inputSubState = 7; gc->currentKey = n; }
+            gc->ui.lastKeyCode = n;
+            gc->ui.keySubState = 0;
+            if (gc->ui.inputSubState == 0) {
+                if (n == 42) { gc_cycleBuildMenuIndex(gc, false); gc->ui.inputSubState = 7; gc->ui.currentKey = n; }
+                if (n == 35) { gc_cycleBuildMenuIndex(gc, true); gc->ui.inputSubState = 7; gc->ui.currentKey = n; }
                 if (n == 53) gc_openBuildMenu(gc);
                 if (n != 48 || gc->gameState != +GameState::Playing) break;
                 gc_setState(gc, +GameState::BuildingMinimap);
                 break;
             }
-            if (gc->inputSubState == 1) {
+            if (gc->ui.inputSubState == 1) {
                 if (n == 42 && gc->ui.buildMenuMode != 4 && gc->ui.buildMenuMode != 2) {
                     gc->ui.buildMenuMode = 0;
                     gc->ui.buildMenuItemIndex = 0;
@@ -93,11 +93,11 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
                 break;
             }
             if (n != 42 && n != 35) break;
-            gc->currentKey = n;
+            gc->ui.currentKey = n;
             break;
         case +GameState::MapOverview:
-            gc->lastKeyCode = n;
-            gc->keySubState = 40;
+            gc->ui.lastKeyCode = n;
+            gc->ui.keySubState = 40;
             if (n == 53) {
                 if (gc->ui.confirmToggle == 0) {
                     gc_setState(gc, +GameState::Playing);

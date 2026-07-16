@@ -197,7 +197,7 @@ bool gc_syncHighScores(GameCanvas *gc, bool upload) {
 }
 
 void gc_hideNotify(GameCanvas *gc) {
-    gc->paused = true;
+    gc->ui.paused = true;
     if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_stopMusic(gc);
     if (gc->gameState == +GameState::Playing) {
         gc->ready = false;
@@ -208,5 +208,5 @@ void gc_hideNotify(GameCanvas *gc) {
 
 void gc_showNotify(GameCanvas *gc) {
     if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_playMusic(gc);
-    gc->paused = false;
+    gc->ui.paused = false;
 }

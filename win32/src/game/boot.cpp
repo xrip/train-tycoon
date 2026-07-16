@@ -13,18 +13,18 @@ static int read_u16_be(ResourceReader& resource) {
 
 // public void keyPressed(int n)
 void gc_keyPressed(GameCanvas *gc, int32_t n) {
-    if (gc->inputPending) { gc->inputPending = false; return; }
-    gc->currentKey = n;
+    if (gc->ui.inputPending) { gc->ui.inputPending = false; return; }
+    gc->ui.currentKey = n;
 }
 
 // public void resetOverlayRenderState()
 void gc_resetOverlayRenderState(GameCanvas *gc) {
-    gc->cursorScale = 0;
-    gc->cursorDragY = -1;
-    gc->cursorSelectY = -1;
-    gc->cursorSelectX = -1;
-    gc->cursorOverUI = false;
-    gc->cursorAllowZoomOut = false;
+    gc->ui.cursorScale = 0;
+    gc->ui.cursorDragY = -1;
+    gc->ui.cursorSelectY = -1;
+    gc->ui.cursorSelectX = -1;
+    gc->ui.cursorOverUI = false;
+    gc->ui.cursorAllowZoomOut = false;
     gc->renderer.dialogContentHeight = 0;
     gc->renderer.needsRepaint = false;
 }
@@ -303,7 +303,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
         }
         case +GameState::MenuOverlay:
             gc_resetOverlayRenderState(gc);
-            if (!gc->ui.useDefaultOverlaySelection) gc->cursorDragY = 2;
+            if (!gc->ui.useDefaultOverlaySelection) gc->ui.cursorDragY = 2;
             gc->ui.useDefaultOverlaySelection = true;
             break;
         case +GameState::GeneratingMap:
@@ -337,23 +337,23 @@ void gc_start(GameCanvas *gc, void *gameMIDlet) {
 // public void run() -- ONE iteration of the original game-thread loop.
 // The host (main.c) calls this each frame; timing/repaint/sleep are host-owned.
 void gc_run(GameCanvas *gc) {
-    if (gc->stopRequested || gc->paused) return;
+    if (gc->stopRequested || gc->ui.paused) return;
     gc->frameStartTime = midp_current_time_millis();
-    if (gc->keyRepeatDelay == 0) {
-        if (gc->heldKey != 0) gc->currentKey = gc->heldKey;
+    if (gc->ui.keyRepeatDelay == 0) {
+        if (gc->ui.heldKey != 0) gc->ui.currentKey = gc->ui.heldKey;
     } else {
-        --gc->keyRepeatDelay;
+        --gc->ui.keyRepeatDelay;
     }
-    if (gc->currentKey != 0 && gc->currentKey != -999) gc_handleKey(gc, gc->currentKey);
-    if (gc->currentKey == -999) gc_resetKeyState(gc, gc->currentKey);
-    if (gc->inputSubState > 0) --gc->inputSubState;
+    if (gc->ui.currentKey != 0 && gc->ui.currentKey != -999) gc_handleKey(gc, gc->ui.currentKey);
+    if (gc->ui.currentKey == -999) gc_resetKeyState(gc, gc->ui.currentKey);
+    if (gc->ui.inputSubState > 0) --gc->ui.inputSubState;
     ++gc->frameCount;
-    if (gc->inputPending) {
+    if (gc->ui.inputPending) {
         gc->frameIndex = 1;
         while (gc->frameIndex > 0) {
             gc_update(gc);
             if (gc->gameState != +GameState::MenuOverlay && gc->gameState != +GameState::MapOverview) continue;
-            gc->inputPending = false;
+            gc->ui.inputPending = false;
             break;
         }
         gc->frameIndex = 0;
@@ -363,7 +363,7 @@ void gc_run(GameCanvas *gc) {
     }
     if (gc->gameState == +GameState::Playing) {
         for (int n = 0; n < gc->simSpeed; ++n) {
-            if (!gc->pauseFlag) gc_update(gc);
+            if (!gc->ui.pauseFlag) gc_update(gc);
             if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) continue;
             gc_viewportZoomKey(gc);
         }

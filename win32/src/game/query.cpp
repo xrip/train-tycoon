@@ -4,9 +4,9 @@
 
 // int computeKeyRepeatDelay()
 int32_t gc_computeKeyRepeatDelay(GameCanvas *gc) {
-    if (gc->keySubState < 30) gc->keySubState += gc->keyRepeatStep;
-    gc->keySubState = (int8_t)gc->keySubState;
-    return gc->keySubState / 3;
+    if (gc->ui.keySubState < 30) gc->ui.keySubState += gc->ui.keyRepeatStep;
+    gc->ui.keySubState = (int8_t)gc->ui.keySubState;
+    return gc->ui.keySubState / 3;
 }
 
 // void pushMoneyHistory(int n)

@@ -183,7 +183,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     int n19 = gc_byteToUnsignedInt(gc, gc->assets.spriteData[s + 14]);
     if (gc->renderer.dialogContentHeight < n19) gc->renderer.dialogContentHeight = n19;
     else n19 = gc->renderer.dialogContentHeight;
-    if (gc->cursorOverUI || gc->cursorAllowZoomOut) n18 += 6;
+    if (gc->ui.cursorOverUI || gc->ui.cursorAllowZoomOut) n18 += 6;
     gc->renderer.currentSpriteId = gc->assets.spriteData[s + 15];
     int n20 = (gcs_screenWidth - n18) / 2;
     int n21 = (gcs_hs - n19) / 2;
@@ -196,7 +196,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     }
     gc->ui.pauseMenuOpen = false;
     if ((gc->assets.spriteData[s] & 1) == 1) {
-        if (gc->renderer.needsRepaint && gc->cursorDragY == -1) {
+        if (gc->renderer.needsRepaint && gc->ui.cursorDragY == -1) {
             midp_set_color(g, n17);
             midp_fill_rect(g, n20 + n18 - 10, n21 + 3, 7, 7);
         }
@@ -208,8 +208,8 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         }
         gc->ui.pauseMenuOpen = true;
         n24 = 19;
-    } else if (gc->cursorDragY == -1) {
-        gc->cursorDragY = -3;
+    } else if (gc->ui.cursorDragY == -1) {
+        gc->ui.cursorDragY = -3;
     }
     int n25 = s + 16;
     if ((gc->assets.spriteData[s] & 2) == 2) {
@@ -228,26 +228,26 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
     gc->renderer.clipWidth = n18 - 2;
     gc->renderer.clipHeight = n19 - n22 + 3;
     midp_set_clip(g, gc->renderer.clipX, gc->renderer.clipY, gc->renderer.clipWidth, gc->renderer.clipHeight);
-    if (gc->renderer.needsRepaint && gc->cursorOverUI) {
+    if (gc->renderer.needsRepaint && gc->ui.cursorOverUI) {
         midp_set_color(g, n16);
         midp_draw_rect(g, n20 + n18 - 6, n21 + n24 - 1, 4, 0);
         midp_draw_rect(g, n20 + n18 - 5, n21 + n24 - 2, 2, 0);
         midp_draw_rect(g, n20 + n18 - 4, n21 + n24 - 3, 0, 0);
     }
-    if (gc->renderer.needsRepaint && gc->cursorAllowZoomOut) {
+    if (gc->renderer.needsRepaint && gc->ui.cursorAllowZoomOut) {
         midp_set_color(g, n16);
         midp_draw_rect(g, n20 + n18 - 6, n21 + n19 - 5, 4, 0);
         midp_draw_rect(g, n20 + n18 - 5, n21 + n19 - 4, 2, 0);
         midp_draw_rect(g, n20 + n18 - 4, n21 + n19 - 3, 0, 0);
     }
-    gc->cursorSelectY = -2;
-    gc->cursorSelectX = -2;
-    gc->cursorOverUI = false;
-    gc->cursorAllowZoomOut = false;
-    gc->cursorDragX = -1;
+    gc->ui.cursorSelectY = -2;
+    gc->ui.cursorSelectX = -2;
+    gc->ui.cursorOverUI = false;
+    gc->ui.cursorAllowZoomOut = false;
+    gc->ui.cursorDragX = -1;
     int n27 = gc->assets.spriteData[n25++];
     for (n13 = 0; n13 < n27; ++n13) {
-        n12 = n21 + n22 - gc->cursorScale;
+        n12 = n21 + n22 - gc->ui.cursorScale;
         if (((by = gc->assets.spriteData[n25++]) & 0x80) == 0) {
             int n28;
             n11 = (by & 4) == 4 ? 0 : gc->assets.spriteData[n25++];
@@ -279,19 +279,19 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
                 if (gc->renderer.dialogContentHeight > gcs_hs - 20) gc->renderer.dialogContentHeight = gcs_hs - 20;
             }
             if (gc->renderer.needsRepaint && n12 + n10 + 6 + by2 >= gc->renderer.clipY + gc->renderer.clipHeight)
-                gc->cursorAllowZoomOut = true;
+                gc->ui.cursorAllowZoomOut = true;
             if (n9 != 0 && (n9 == 0 || !gc_isResourceTile(gc, gc->renderer.currentSpriteId, n7))) continue;
             if (n12 + n10 - n3 - 3 <= gc->renderer.clipY + gc->renderer.clipHeight && n12 + n10 + 8 + by2 >= gc->renderer.clipY) {
                 if ((by & 0x10) == 16) {
-                    if (gc->cursorDragY == -3) gc->cursorDragY = n13;
+                    if (gc->ui.cursorDragY == -3) gc->ui.cursorDragY = n13;
                     if (n12 + n10 + 8 + by2 <= gc->renderer.clipY + gc->renderer.clipHeight && n12 + n10 - 3 - n3 >= gc->renderer.clipY) {
-                        if (n13 < gc->cursorDragY) gc->cursorSelectY = n13;
-                        if (gc->cursorSelectX == -2 && n13 > gc->cursorDragY) gc->cursorSelectX = n13;
+                        if (n13 < gc->ui.cursorDragY) gc->ui.cursorSelectY = n13;
+                        if (gc->ui.cursorSelectX == -2 && n13 > gc->ui.cursorDragY) gc->ui.cursorSelectX = n13;
                     }
-                    if (gc->renderer.needsRepaint && gc->cursorDragY == n13) {
+                    if (gc->renderer.needsRepaint && gc->ui.cursorDragY == n13) {
                         midp_set_color(g, n17);
                         midp_fill_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
-                        gc->cursorDragX = n5;
+                        gc->ui.cursorDragX = n5;
                     }
                     if (gc->renderer.needsRepaint && (by & 8) == 8) {
                         midp_set_color(g, n16);
@@ -321,12 +321,12 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         if (gc->renderer.needsRepaint && n12 + n8 <= gc->renderer.clipY + gc->renderer.clipHeight && n12 + n8 + n4 >= gc->renderer.clipY)
             midp_draw_image(g, image, n26 + n9, n12 + n8, 20);
         if (gc->renderer.needsRepaint && n12 + n8 + n4 >= gc->renderer.clipY + gc->renderer.clipHeight)
-            gc->cursorAllowZoomOut = true;
+            gc->ui.cursorAllowZoomOut = true;
         n22 += n4 + n8;
     }
     n27 = gc->assets.spriteData[n25++];
     for (n13 = 0; n13 < n27; ++n13) {
-        n12 = n21 + n23 - gc->cursorScale;
+        n12 = n21 + n23 - gc->ui.cursorScale;
         by = gc->assets.spriteData[n25++];
         n11 = by & 7;
         n10 = 65536 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + 256 * gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]) + gc_byteToUnsignedInt(gc, gc->assets.spriteData[n25++]);
@@ -368,11 +368,11 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
                 break;
         }
         if (!gc->renderer.needsRepaint || n2 < gc->renderer.clipY + gc->renderer.clipHeight) continue;
-        gc->cursorAllowZoomOut = true;
+        gc->ui.cursorAllowZoomOut = true;
     }
     if (gc->renderer.needsRepaint) {
-        if (gc->cursorScale == 0 && gc->cursorSelectY == -2) gc->cursorSelectY = -1;
-        if (gc->cursorScale > 0) gc->cursorOverUI = true;
+        if (gc->ui.cursorScale == 0 && gc->ui.cursorSelectY == -2) gc->ui.cursorSelectY = -1;
+        if (gc->ui.cursorScale > 0) gc->ui.cursorOverUI = true;
     }
     gc->renderer.needsRepaint = true;
     if (gc->renderer.spriteJustChanged > 0) --gc->renderer.spriteJustChanged;

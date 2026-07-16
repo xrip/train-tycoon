@@ -86,6 +86,35 @@ struct UiController {
     int8_t cityListIndex = 0;
     bool vehicleMenuSelectIndex = false;
     bool trainMenuSelectIndex = false;
+
+    // Cursor state: zoom scale, drag origin, current selection cell, whether the
+    // cursor is over the UI or may zoom out, the screen pixel position, and the
+    // map tile under the cursor. All runtime-only.
+    int32_t cursorScale = 0;
+    int32_t cursorDragX = 0;
+    int32_t cursorDragY = 0;
+    int32_t cursorSelectX = 0;
+    int32_t cursorSelectY = 0;
+    bool cursorOverUI = false;
+    bool cursorAllowZoomOut = false;
+    int32_t cursorScreenX = 0;
+    int32_t cursorScreenY = 0;
+    int32_t tileCursorX = 0;
+    int32_t tileCursorY = 0;
+
+    // Key input state: the pending/pause flags, the key-repeat timing, the held
+    // and current keys, and the input/key sub-state used by the dispatcher. All
+    // runtime-only.
+    bool inputPending = false;
+    bool pauseFlag = false;
+    bool paused = false;
+    int32_t keyRepeatDelay = 0;
+    int32_t heldKey = 0;
+    int32_t inputSubState = 0;
+    int32_t currentKey = 0;
+    int32_t keySubState = 0;
+    int32_t lastKeyCode = 0;
+    int32_t keyRepeatStep = 0;
 };
 
 #endif  // UI_CONTROLLER_H

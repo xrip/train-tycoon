@@ -223,7 +223,7 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
     int action = gc->ui.menuTransitionCode[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
     if (action == 0) return;
     if (action >= 1 && action <= 7) {
-        bool buildable = gc_isTileBuildable(gc, gc->tileCursorX, gc->tileCursorY,
+        bool buildable = gc_isTileBuildable(gc, gc->ui.tileCursorX, gc->ui.tileCursorY,
                                             action - 1);
         midp_set_color(graphics, buildable ? 0x00FF00 : 0xFF0000);
     }
@@ -231,24 +231,24 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
         int32_t quad_x[4];
         int32_t quad_y[4];
         if (action == 6) {
-            if (gc->tileCursorY > 0) {
-                gc_computeIsoCornersInlined(gc, gc->tileCursorX, gc->tileCursorY - 1,
+            if (gc->ui.tileCursorY > 0) {
+                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX, gc->ui.tileCursorY - 1,
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
             }
-            if (gc->tileCursorY < gc->world.mapWidth - 1) {
-                gc_computeIsoCornersInlined(gc, gc->tileCursorX, gc->tileCursorY + 1,
+            if (gc->ui.tileCursorY < gc->world.mapWidth - 1) {
+                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX, gc->ui.tileCursorY + 1,
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
             }
         } else {
-            if (gc->tileCursorX > 0) {
-                gc_computeIsoCornersInlined(gc, gc->tileCursorX - 1, gc->tileCursorY,
+            if (gc->ui.tileCursorX > 0) {
+                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX - 1, gc->ui.tileCursorY,
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
             }
-            if (gc->tileCursorX < gc->world.mapWidth - 1) {
-                gc_computeIsoCornersInlined(gc, gc->tileCursorX + 1, gc->tileCursorY,
+            if (gc->ui.tileCursorX < gc->world.mapWidth - 1) {
+                gc_computeIsoCornersInlined(gc, gc->ui.tileCursorX + 1, gc->ui.tileCursorY,
                                             quad_x, quad_y, true);
                 gc_drawSelectionQuad(gc, graphics, quad_x, quad_y);
             }
@@ -256,17 +256,17 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
     }
     if (action == 8)
         midp_set_color(graphics,
-                       gc_isPlaceableTerrain(gc, gc->tileCursorX, gc->tileCursorY)
+                       gc_isPlaceableTerrain(gc, gc->ui.tileCursorX, gc->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action == 9)
         midp_set_color(graphics,
-                       gc_isCityOrStationTile(gc, gc->tileCursorX, gc->tileCursorY)
+                       gc_isCityOrStationTile(gc, gc->ui.tileCursorX, gc->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action == 10) midp_set_color(graphics, 0xFFFFFF);
     if (action == 11) {
-        if (gc_isCurveTile(gc, gc->tileCursorX, gc->tileCursorY)) {
-            int x = gc->tileCursorX;
-            int y = gc->tileCursorY;
+        if (gc_isCurveTile(gc, gc->ui.tileCursorX, gc->ui.tileCursorY)) {
+            int x = gc->ui.tileCursorX;
+            int y = gc->ui.tileCursorY;
             int dx = 0;
             int dy = 0;
             if (gc->world.tileMap[x][y] == 7) dy = -1;
@@ -305,8 +305,8 @@ void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
     }
     if (gc->ui.buildMenuMode == 1
         && (gc->ui.buildMenuItemIndex == 5 || gc->ui.buildMenuItemIndex == 6))
-        gc_drawSpriteQuad(gc, graphics, 249, gc->cursorScreenX - 2,
-                          gc->cursorScreenY + 13, 20);
+        gc_drawSpriteQuad(gc, graphics, 249, gc->ui.cursorScreenX - 2,
+                          gc->ui.cursorScreenY + 13, 20);
     gc_drawSpriteQuad(gc, graphics, 200, menu_x, menu_y + 15, 20);
     if (gc->ui.buildMenuMode != 0 || gc->ui.buildMenuItemIndex != 0) {
         int sprite = gc_byteToUnsignedInt(gc, gc->ui.menuTextIndex[gc->ui.buildMenuMode]
@@ -317,10 +317,10 @@ void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
     gc_drawSpriteQuad(gc, graphics, gc->ui.buildMenuItemIndex + 230,
                       menu_x + 5, menu_y + 19, 20);
 
-    int min_x = gc->tileCursorX - 3;
-    int min_y = gc->tileCursorY - 3;
-    int max_x = gc->tileCursorX + 3;
-    int max_y = gc->tileCursorY + 3;
+    int min_x = gc->ui.tileCursorX - 3;
+    int min_y = gc->ui.tileCursorY - 3;
+    int max_x = gc->ui.tileCursorX + 3;
+    int max_y = gc->ui.tileCursorY + 3;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
     if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;

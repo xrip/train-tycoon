@@ -37,8 +37,8 @@ Only one row may be `in_progress`.
 | ASSET-01 | done | Debug and Release full tests passed, 2026-07-16 | Assets owns the packed sprite data tables, the loaded font/tile/cycle images, and the sprite stream reader; backbuffer and per-frame sprite-id render state stay for RENDER-01 |
 | RENDER-01 | done | Debug and Release full tests passed, 2026-07-16 | Renderer owns the backbuffer/surface, current-sprite tracking, the culled visibleTrains list and drawn tile bounds (saved), the cached camera centre, and the clip/repaint/dialog-height frame state. The "drawing cannot change simulation state" property is verified at the Stage-4 exit (manual play). |
 | RENDER-02 | done | Debug and Release full tests passed, 2026-07-16 | Draw functions read by intent; recovered the last weak name gc_u -> gc_wagonCarSprite |
-| UI-01 | in_progress | RENDER-02 green | Menus, dialogs, and text values (data extraction into UiController; the item exit's manual play check is a human step) |
-| UI-02 | queued | - | Input, cursor, pause, screen changes |
+| UI-01 | done (data) | Debug and Release full tests passed, 2026-07-16 | UiController owns the build/offer menu rows, build-menu grids/cursors, confirm-dialog and screen-transition state, report-graph display, and train/city selection. The item exit's manual play check remains a human step. |
+| UI-02 | in_progress | UI-01 green | Input, cursor, pause, screen changes |
 | APP-01 | queued | - | Application loop |
 | CLEAN-01..CLEAN-02 | queued | - | Remove old shape |
 | DOC-01 | queued | - | Final guides |

@@ -101,7 +101,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             gc->tickStart = midp_current_time_millis();
             gc_renderMap(gc, g);
             gc->tickEnd = midp_current_time_millis();
-            if (gc->inputPending) {
+            if (gc->ui.inputPending) {
                 int n13;
                 midp_set_color(g, 0);
                 midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_bottomBarY - 15);
@@ -113,7 +113,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
                 gc_drawSpriteQuad(gc, g, 234, 0, 15, 20);
             }
             gc_drawMoneyTicker(gc, g);
-            if (gc->pauseFlag) gc_drawSpriteQuad(gc, g, 236, 0, 15, 0);
+            if (gc->ui.pauseFlag) gc_drawSpriteQuad(gc, g, 236, 0, 15, 0);
             if (gc->ui.pendingTransitionCode > -1) {
                 gc->ui.transitionCode = gc->ui.pendingTransitionCode;
                 gc_resetOverlayRenderState(gc);
@@ -238,7 +238,7 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep == 2) {
                 gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
                 gc->economy.dayOfMonth = 1; gc->economy.monthOfYear = 1; gc->economy.year = 1950;
-                gc->scenario.milestonesEnabled = false; gc->pauseFlag = false; gc->scenario.aiEnabled = false;
+                gc->scenario.milestonesEnabled = false; gc->ui.pauseFlag = false; gc->scenario.aiEnabled = false;
                 gc->moneyBaseA = 974; gc->moneyBaseB = 974;
                 gc->baseTrainSpeed = 173; gc->accel1 = 342; gc->brake1 = 311;
                 gc->baseTrainSpeed2 = 173; gc->accel2 = 234;
@@ -438,7 +438,7 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             gc_restoreAllMapArrays(gc);
-            gc->pauseFlag = false;
+            gc->ui.pauseFlag = false;
             gc->ui.buildMenuItemIndex = 0;
             gc->ui.menuDirty = true;
             gc_setState(gc, +GameState::Playing);
