@@ -17,15 +17,15 @@ int32_t gc_accumulateTrainTurns(GameCanvas *gc, int32_t car) {
 // int findServiceVehicleAt(int,int)
 int32_t gc_findServiceVehicleAt(GameCanvas *gc, int32_t x, int32_t y) {
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
-        if ((gc->vehicleFlags[vehicle] & 0x80) != 128) continue;
-        int vehicle_x = gc_byteToUnsignedInt(gc, gc->serviceVehicleX[vehicle]);
-        int vehicle_y = gc_byteToUnsignedInt(gc, gc->serviceVehicleY[vehicle]);
+        if ((gc->fleet.vehicleFlags[vehicle] & 0x80) != 128) continue;
+        int vehicle_x = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleX[vehicle]);
+        int vehicle_y = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleY[vehicle]);
         if (vehicle_x == x && vehicle_y == y) return vehicle;
         if ((vehicle_x == x - 1 || vehicle_x == x + 1) && vehicle_y == y
-            && (gc->vehicleFlags[vehicle] & 0xE0) == 224)
+            && (gc->fleet.vehicleFlags[vehicle] & 0xE0) == 224)
             return vehicle;
         if ((vehicle_y == y - 1 || vehicle_y == y + 1) && vehicle_x == x
-            && (gc->vehicleFlags[vehicle] & 0xE0) == 160)
+            && (gc->fleet.vehicleFlags[vehicle] & 0xE0) == 160)
             return vehicle;
     }
     return 5000;
@@ -69,10 +69,10 @@ void gc_resetTrailingCars(GameCanvas *gc, int32_t head, int32_t car, int32_t pha
 // int takeServiceResource(int,int,int)
 int32_t gc_takeServiceResource(GameCanvas *gc, int32_t vehicle,
                                int32_t resource, int32_t wanted) {
-    int taken = gc->serviceResourceStock[vehicle][resource] > wanted
-                ? wanted : gc->serviceResourceStock[vehicle][resource];
-    gc->serviceResourceStock[vehicle][resource] =
-        (int16_t)(gc->serviceResourceStock[vehicle][resource] - taken);
+    int taken = gc->fleet.serviceResourceStock[vehicle][resource] > wanted
+                ? wanted : gc->fleet.serviceResourceStock[vehicle][resource];
+    gc->fleet.serviceResourceStock[vehicle][resource] =
+        (int16_t)(gc->fleet.serviceResourceStock[vehicle][resource] - taken);
     return taken;
 }
 
@@ -81,10 +81,10 @@ int32_t gc_collectNearbyServiceResource(GameCanvas *gc, int32_t vehicle,
                                         int32_t resource, int32_t wanted) {
     int total = gc_takeServiceResource(gc, vehicle, resource, wanted);
     for (int other = 0; other < 250; ++other) {
-        if (vehicle == other || (gc->vehicleFlags[other] & 0x80) != 128
-            || (gc->vehicleFlags[other] & 7) != (gc->vehicleFlags[vehicle] & 7)
-            || std::abs(gc->serviceVehicleX[vehicle] - gc->serviceVehicleX[other]) >= 3
-            || std::abs(gc->serviceVehicleY[vehicle] - gc->serviceVehicleY[other]) >= 3)
+        if (vehicle == other || (gc->fleet.vehicleFlags[other] & 0x80) != 128
+            || (gc->fleet.vehicleFlags[other] & 7) != (gc->fleet.vehicleFlags[vehicle] & 7)
+            || std::abs(gc->fleet.serviceVehicleX[vehicle] - gc->fleet.serviceVehicleX[other]) >= 3
+            || std::abs(gc->fleet.serviceVehicleY[vehicle] - gc->fleet.serviceVehicleY[other]) >= 3)
             continue;
         total += gc_takeServiceResource(gc, other, resource, wanted - total);
     }
@@ -99,25 +99,25 @@ bool gc_trainCanLoadAtServiceVehicle(GameCanvas *gc, int32_t head,
     if ((gc->fleet.trainFlags[car] & 0x40) == 0) {
         switch (gc->fleet.trainFlags[car] & 0xF) {
             case 2:
-                if ((gc->serviceLoadFlags[vehicle] & 1) == 1
+                if ((gc->fleet.serviceLoadFlags[vehicle] & 1) == 1
                     && gc->fleet.trainEnergyOrCount[car] < 25)
                     return true;
-                if ((gc->serviceLoadFlags[vehicle] & 0x10) == 0x10
+                if ((gc->fleet.serviceLoadFlags[vehicle] & 0x10) == 0x10
                     && gc->fleet.wagonEnergyRemaining[car] < 15)
                     return true;
                 break;
             case 3:
-                if ((gc->serviceLoadFlags[vehicle] & 4) == 4
+                if ((gc->fleet.serviceLoadFlags[vehicle] & 4) == 4
                     && gc->fleet.trainEnergyOrCount[car] < 25)
                     return true;
                 break;
             case 4: case 5:
-                if ((gc->serviceLoadFlags[vehicle] & 8) == 8
+                if ((gc->fleet.serviceLoadFlags[vehicle] & 8) == 8
                     && gc->fleet.trainEnergyOrCount[car] < 30)
                     return true;
                 break;
             case 6: case 7:
-                if ((gc->serviceLoadFlags[vehicle] & 2) == 2
+                if ((gc->fleet.serviceLoadFlags[vehicle] & 2) == 2
                     && gc->fleet.trainEnergyOrCount[car] < 30)
                     return true;
                 break;
@@ -218,14 +218,14 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
         int age_scale = gc_byteToUnsignedInt(gc, gc->fleet.cargoAge[car]) / 15 + 1;
         switch (gc->fleet.trainFlags[car] & 0xF) {
             case 2:
-                if ((gc->serviceUnloadFlags[vehicle] & 1) == 1) {
+                if ((gc->fleet.serviceUnloadFlags[vehicle] & 1) == 1) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 3 * age_scale;
                     if (gc->routeResourceFlags[4] > 0) value *= 2;
                     revenue += value;
                     gc_recordDeliveredResource(gc, 4, gc->fleet.trainEnergyOrCount[car]);
                     gc->fleet.trainEnergyOrCount[car] = 0;
                 }
-                if ((gc->serviceUnloadFlags[vehicle] & 0x10) == 0x10) {
+                if ((gc->fleet.serviceUnloadFlags[vehicle] & 0x10) == 0x10) {
                     int value = gc->fleet.wagonEnergyRemaining[car] * 8 * age_scale;
                     if (gc->routeResourceFlags[5] > 0) value *= 2;
                     revenue += value;
@@ -234,7 +234,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
                 }
                 break;
             case 3:
-                if ((gc->serviceUnloadFlags[vehicle] & 2) == 2) {
+                if ((gc->fleet.serviceUnloadFlags[vehicle] & 2) == 2) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 10 * age_scale;
                     if (gc->routeResourceFlags[3] > 0) value *= 2;
                     revenue += value;
@@ -243,7 +243,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
                 }
                 break;
             case 4: case 5:
-                if ((gc->serviceUnloadFlags[vehicle] & 4) == 4) {
+                if ((gc->fleet.serviceUnloadFlags[vehicle] & 4) == 4) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 12 * age_scale;
                     if (gc->routeResourceFlags[2] > 0) value *= 2;
                     revenue += value;
@@ -252,7 +252,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
                 }
                 break;
             case 6: case 7:
-                if ((gc->serviceUnloadFlags[vehicle] & 8) == 8) {
+                if ((gc->fleet.serviceUnloadFlags[vehicle] & 8) == 8) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 13 * age_scale;
                     if (gc->routeResourceFlags[1] > 0) value *= 2;
                     revenue += value;

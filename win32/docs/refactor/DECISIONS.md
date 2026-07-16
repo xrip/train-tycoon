@@ -285,16 +285,21 @@ did not move.
 
 A pure ownership move: the field names are inherited as-is. Some carry recorded
 uncertainty (`trainEraOrStage`, `trainAgeOrTimer`, `trainEnergyOrCount`) and are
-recovered in a later FLEET-01 sub-leaf once the tick code is re-read. The
-service-site records (250-slot: `vehicleFlags`, `serviceVehicleX/Y`,
-`serviceResourceStock`, `serviceUnload/LoadFlags`) and the city/station records
-(48-slot: `stationDirectionCode`, `cityPopulation`, `cityIndex`,
-`stationRevenue`, `prevStationRevenue`) are later FLEET-01 leaves; their final
-owner (`Fleet` vs. a city/station type vs. `World`/`Economy`) is decided when
-those leaves land, since city revenue overlaps `Economy`. Related per-train
-scalars not tied to a slot (`trainAtCursor`, `trainRevenueScore`,
+recovered in a later FLEET-01 sub-leaf once the tick code is re-read. Related
+per-train scalars not tied to a slot (`trainAtCursor`, `trainRevenueScore`,
 `lifetimeTrainRevenue`, `visibleTrains`, `trainSelection*`,
 `trainSpriteDirectionTable`) stay on `GameCanvas` for now as UI/economy/state.
+
+Leaf 2 added the service-vehicle records to `Fleet` (250-slot: `vehicleFlags`,
+`serviceVehicleX/Y`, `serviceResourceStock[site][5]`, `serviceUnloadFlags`,
+`serviceLoadFlags`). These are the depots/stations where trains load and unload;
+`serviceLoadFlags` is runtime-only (recomputed on load, not saved). Same
+mechanical rename and `IO_*`/matrix save-site fix; goldens did not move.
+
+Remaining FLEET-01 leaf: the city/station records (48-slot: `stationDirectionCode`,
+`cityPopulation`, `cityIndex`, `stationRevenue`, `prevStationRevenue`). Their
+final owner is decided when this leaf lands, since `stationRevenue` overlaps
+`Economy`.
 
 ## D-007: Music output boundary
 

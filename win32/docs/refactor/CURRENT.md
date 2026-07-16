@@ -38,24 +38,18 @@ change (fast 0.02 s / full 0.37 s Debug; fast 0.01 s / full 0.05 s Release).
 
 ## Progress
 
-- Done (D-015, leaf 1): extracted `struct Fleet` (`fleet.h`) owning the sixteen
-  per-train-slot record arrays (position/dir/phase/flags, state, the `nextCar`
-  linked-list pointer, revenue history). `GameCanvas` holds one `Fleet fleet;`
-  member; ~280 `gc->field` sites became `gc->fleet.field`, and the `IO_*` save
-  sites became `fleet.<field>` (same byte order). Pure ownership move; Debug and
-  Release full gates passed on 2026-07-16, no golden change.
+- Done (D-015, leaf 1): `struct Fleet` owns the 16 per-train-slot record arrays.
+- Done (D-015, leaf 2): `Fleet` also owns the 250-slot service-vehicle records
+  (`vehicleFlags`, `serviceVehicleX/Y`, `serviceResourceStock`,
+  `serviceUnloadFlags`, `serviceLoadFlags`). Both leaves: Debug + Release full
+  gates green on 2026-07-16, no golden change.
 
 ## Next action
 
-Pick the next FLEET-01 leaf. Candidates, smallest first:
-1. City/station records (48-slot: `stationDirectionCode`, `cityPopulation`,
-   `cityIndex`, `stationRevenue`, `prevStationRevenue`) — but `stationRevenue`
-   overlaps Economy; likely split: records into Fleet/a city type, revenue waits
-   for ECON-01.
-2. Service-site records (250-slot: `vehicleFlags`, `serviceVehicleX/Y`,
-   `serviceResourceStock`, `serviceUnloadFlags`, `serviceLoadFlags`).
-3. Train-field name recovery (re-read `train_tick.cpp` to settle
-   `trainEraOrStage`, `trainAgeOrTimer`, `trainEnergyOrCount`).
-
-Decide the service/city owner when those leaves land; reuse the proven owned-type
--> member -> mechanical rename -> fix `IO_*` -> gates loop for each.
+FLEET-01 final leaf: the city/station records (48-slot: `stationDirectionCode`,
+`cityPopulation`, `cityIndex`, `stationRevenue`, `prevStationRevenue`). Decide
+the owner: records (geography) fit `Fleet` or a city type, but
+`stationRevenue`/`prevStationRevenue` overlap `Economy` (ECON-01). Plan: move the
+three record arrays into `Fleet` and leave the two revenue arrays on
+`GameCanvas` for ECON-01, then close FLEET-01 and open FLEET-02. Train-field name
+recovery stays a separate small leaf.

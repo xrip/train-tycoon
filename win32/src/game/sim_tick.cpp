@@ -531,9 +531,9 @@ void gc_newYearNotify(GameCanvas *gc) {
 // void tickInputOrAi(boolean)
 void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
     for (int i = 0; i < 250; ++i) {
-        if ((gc->vehicleFlags[i] & 0x80) != 128) continue;
-        int n3 = gc_byteToUnsignedInt(gc, gc->serviceVehicleX[i]);
-        int n4 = gc_byteToUnsignedInt(gc, gc->serviceVehicleY[i]);
+        if ((gc->fleet.vehicleFlags[i] & 0x80) != 128) continue;
+        int n3 = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleX[i]);
+        int n4 = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleY[i]);
         int n5 = n3 - 3;
         int n6 = n4 - 3;
         int n7 = n3 + 3;
@@ -555,21 +555,21 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     if ((gc->world.trackMap[n2][n] & 0xC0) == 128 && !bl
                         && !seenZones[n11]) {
                         seenZones[n11] = true;
-                        if ((gc->serviceUnloadFlags[i] & 1) == 1) {
+                        if ((gc->fleet.serviceUnloadFlags[i] & 1) == 1) {
                             int add = gc->zonePopulation[n11]
                                       * (gc->constructionTimers[n11] + 10
                                          + gc->zonePopulation[n11] / 10
                                          + gc->rng.next_int() % 40) / 170;
-                            gc->serviceResourceStock[i][0] =
-                                (int16_t)(gc->serviceResourceStock[i][0] + add);
+                            gc->fleet.serviceResourceStock[i][0] =
+                                (int16_t)(gc->fleet.serviceResourceStock[i][0] + add);
                         }
-                        if ((gc->serviceUnloadFlags[i] & 0x10) == 0x10) {
+                        if ((gc->fleet.serviceUnloadFlags[i] & 0x10) == 0x10) {
                             int add = gc->zonePopulation[n11] / 2
                                       * (gc->constructionTimers[n11] + 10
                                          + gc->zonePopulation[n11] / 10
                                          + std::abs(gc->rng.next_int() % 40)) / 170;
-                            gc->serviceResourceStock[i][4] =
-                                (int16_t)(gc->serviceResourceStock[i][4] + add);
+                            gc->fleet.serviceResourceStock[i][4] =
+                                (int16_t)(gc->fleet.serviceResourceStock[i][4] + add);
                         }
                         gc->zonePopulation[n11] =
                             (int16_t)(gc->zonePopulation[n11]
@@ -583,10 +583,10 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     seenIndustry1[n11] = true;
                     int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
                     if (n10 == 0) n10 = 1;
-                    gc->serviceResourceStock[i][1] =
-                        (int16_t)(gc->serviceResourceStock[i][1] + n10);
+                    gc->fleet.serviceResourceStock[i][1] =
+                        (int16_t)(gc->fleet.serviceResourceStock[i][1] + n10);
                     gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
-                    gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 4);
+                    gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 4);
                 }
                 if (tile >= 53 && tile <= 55 && !bl
                     && (gc->world.trackMap[n2][n] & 0xC0) == 192
@@ -594,10 +594,10 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     seenIndustry2[n11] = true;
                     int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
                     if (n10 == 0) n10 = 1;
-                    gc->serviceResourceStock[i][2] =
-                        (int16_t)(gc->serviceResourceStock[i][2] + n10);
+                    gc->fleet.serviceResourceStock[i][2] =
+                        (int16_t)(gc->fleet.serviceResourceStock[i][2] + n10);
                     gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
-                    gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 8);
+                    gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 8);
                 }
                 if (tile >= 59 && tile <= 61 && !bl
                     && (gc->world.trackMap[n2][n] & 0xC0) == 192
@@ -605,34 +605,34 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     seenIndustry3[n11] = true;
                     int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
                     if (n10 == 0) n10 = 1;
-                    gc->serviceResourceStock[i][3] =
-                        (int16_t)(gc->serviceResourceStock[i][3] + n10);
+                    gc->fleet.serviceResourceStock[i][3] =
+                        (int16_t)(gc->fleet.serviceResourceStock[i][3] + n10);
                     gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
-                    gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 2);
+                    gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 2);
                 }
                 if (tile >= 50 && tile <= 52)
-                    gc->serviceUnloadFlags[i] = (int8_t)(gc->serviceUnloadFlags[i] | 4);
+                    gc->fleet.serviceUnloadFlags[i] = (int8_t)(gc->fleet.serviceUnloadFlags[i] | 4);
                 if (tile >= 56 && tile <= 58)
-                    gc->serviceUnloadFlags[i] = (int8_t)(gc->serviceUnloadFlags[i] | 8);
+                    gc->fleet.serviceUnloadFlags[i] = (int8_t)(gc->fleet.serviceUnloadFlags[i] | 8);
                 if (tile >= 62 && tile <= 64)
-                    gc->serviceUnloadFlags[i] = (int8_t)(gc->serviceUnloadFlags[i] | 2);
+                    gc->fleet.serviceUnloadFlags[i] = (int8_t)(gc->fleet.serviceUnloadFlags[i] | 2);
             }
         }
         if (n9 / 3 > 0) {
-            gc->serviceUnloadFlags[i] = (int8_t)(gc->serviceUnloadFlags[i] | 1);
-            gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 1);
+            gc->fleet.serviceUnloadFlags[i] = (int8_t)(gc->fleet.serviceUnloadFlags[i] | 1);
+            gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 1);
         }
         if (n9 / 7 > 0) {
-            gc->serviceUnloadFlags[i] = (int8_t)(gc->serviceUnloadFlags[i] | 0x10);
-            gc->serviceLoadFlags[i] = (int8_t)(gc->serviceLoadFlags[i] | 0x10);
+            gc->fleet.serviceUnloadFlags[i] = (int8_t)(gc->fleet.serviceUnloadFlags[i] | 0x10);
+            gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 0x10);
         }
-        bool large = (gc->vehicleFlags[i] & 0x20) == 0x20;
+        bool large = (gc->fleet.vehicleFlags[i] & 0x20) == 0x20;
         for (int n = 0; n < 5; ++n) {
             int limit;
             if (large) limit = n == 0 ? 250 : (n == 4 ? 325 : 450);
             else limit = n == 0 ? 100 : (n == 4 ? 150 : 200);
-            if (gc->serviceResourceStock[i][n] > limit)
-                gc->serviceResourceStock[i][n] = (int16_t)limit;
+            if (gc->fleet.serviceResourceStock[i][n] > limit)
+                gc->fleet.serviceResourceStock[i][n] = (int16_t)limit;
         }
     }
 }

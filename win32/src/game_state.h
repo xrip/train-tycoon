@@ -212,12 +212,6 @@ typedef struct GameCanvas {
     int32_t unitCost;
     int32_t currentTrainCostSnapshot;
     int32_t difficultyPct;
-    std::array<int8_t, 250> vehicleFlags{};
-    std::array<int8_t, 250> serviceVehicleX{};
-    std::array<int8_t, 250> serviceVehicleY{};
-    std::array<std::array<int16_t, 5>, 250> serviceResourceStock{};
-    std::array<int8_t, 250> serviceUnloadFlags{};
-    std::array<int8_t, 250> serviceLoadFlags{};
     Fleet fleet;
     int32_t trainAtCursor;
     int32_t era;

@@ -131,7 +131,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 22:
             return gc_formatNumberWithSuffix(
-                gc, gc->serviceResourceStock[gc->serviceVehicleAtCursor][field], 0);
+                gc, gc->fleet.serviceResourceStock[gc->serviceVehicleAtCursor][field], 0);
 
         case 26: {
             if (field == 0)

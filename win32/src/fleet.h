@@ -28,6 +28,17 @@ struct Fleet {
     std::array<int8_t, 500> trainAiOverride{};
     std::array<int32_t, 500> trainRevenue{};
     std::array<int32_t, 500> prevTrainRevenue{};
+
+    // Service-vehicle records (250-slot): the depots/stations where trains load
+    // and unload. serviceResourceStock[site][5] is the per-resource stock;
+    // serviceLoad/UnloadFlags are bitmasks of which resources to load/unload
+    // (serviceLoadFlags is runtime-only, recomputed on load, so not saved).
+    std::array<int8_t, 250> vehicleFlags{};
+    std::array<int8_t, 250> serviceVehicleX{};
+    std::array<int8_t, 250> serviceVehicleY{};
+    std::array<std::array<int16_t, 5>, 250> serviceResourceStock{};
+    std::array<int8_t, 250> serviceUnloadFlags{};
+    std::array<int8_t, 250> serviceLoadFlags{};
 };
 
 #endif  // FLEET_H

@@ -234,11 +234,11 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BYTES(stationDirectionCode);
     IO_BYTES(cityPopulation);
     IO_BYTES(cityIndex);
-    IO_BYTES(vehicleFlags);
-    IO_BYTES(serviceVehicleX);
-    IO_BYTES(serviceVehicleY);
-    IO_BYTES(serviceUnloadFlags);
-    gc_saveOrLoadShortMatrixInlined(gc, gc->serviceResourceStock);
+    IO_BYTES(fleet.vehicleFlags);
+    IO_BYTES(fleet.serviceVehicleX);
+    IO_BYTES(fleet.serviceVehicleY);
+    IO_BYTES(fleet.serviceUnloadFlags);
+    gc_saveOrLoadShortMatrixInlined(gc, gc->fleet.serviceResourceStock);
     IO_BYTE(numSelectedTrains);
     IO_BOOL(flagsA);
     IO_BYTES(constructionTimers);

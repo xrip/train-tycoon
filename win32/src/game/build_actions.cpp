@@ -36,20 +36,20 @@ int32_t gc_allocateServiceVehicleSlot(GameCanvas *gc, int32_t type,
                                       bool horizontal, bool extended) {
     int slot = 5000;
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
-        if ((gc->vehicleFlags[vehicle] & 0x80) == 0) {
+        if ((gc->fleet.vehicleFlags[vehicle] & 0x80) == 0) {
             slot = vehicle;
             break;
         }
     }
     if (slot == 5000) return slot;
 
-    gc->vehicleFlags[slot] = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
+    gc->fleet.vehicleFlags[slot] = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
                                       | (extended ? 0x20 : 0) | type);
-    gc->serviceVehicleX[slot] = (int8_t)x;
-    gc->serviceVehicleY[slot] = (int8_t)y;
-    gc->serviceUnloadFlags[slot] = 0;
+    gc->fleet.serviceVehicleX[slot] = (int8_t)x;
+    gc->fleet.serviceVehicleY[slot] = (int8_t)y;
+    gc->fleet.serviceUnloadFlags[slot] = 0;
     for (int resource = 0; resource < 5; ++resource)
-        gc->serviceResourceStock[slot][resource] = 0;
+        gc->fleet.serviceResourceStock[slot][resource] = 0;
     return slot;
 }
 
@@ -169,10 +169,10 @@ void gc_demolishAtCursor(GameCanvas *gc) {
     } else if (tile >= 87 && tile <= 90) {
         int vehicle = gc_findServiceVehicleAt(gc, cursor_x, cursor_y);
         if (vehicle != 5000) {
-            int x = gc_byteToUnsignedInt(gc, gc->serviceVehicleX[vehicle]);
-            int y = gc_byteToUnsignedInt(gc, gc->serviceVehicleY[vehicle]);
-            if ((gc->vehicleFlags[vehicle] & 0x20) == 32) {
-                if ((gc->vehicleFlags[vehicle] & 0x40) == 0) {
+            int x = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleX[vehicle]);
+            int y = gc_byteToUnsignedInt(gc, gc->fleet.serviceVehicleY[vehicle]);
+            if ((gc->fleet.vehicleFlags[vehicle] & 0x20) == 32) {
+                if ((gc->fleet.vehicleFlags[vehicle] & 0x40) == 0) {
                     gc->world.trackMap[x][y - 1] = 0;
                     gc->world.trackMap[x][y + 1] = 0;
                     gc_handleCursorClickInlined(gc, x, y - 1, true, false);
@@ -187,7 +187,7 @@ void gc_demolishAtCursor(GameCanvas *gc) {
             gc_handleCursorClickInlined(gc, x, y, true, false);
             gc_advanceConstructionTimers(gc, x, y, -6);
             gc->world.trackMap[x][y] = 0;
-            gc->vehicleFlags[vehicle] = 0;
+            gc->fleet.vehicleFlags[vehicle] = 0;
         }
     } else {
         gc_handleCursorClickInlined(gc, cursor_x, cursor_y, true, false);
@@ -738,7 +738,7 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
         return false;
     }
     int direction =
-        (gc->vehicleFlags[gc->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
+        (gc->fleet.vehicleFlags[gc->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
     int train = gc_allocateTrainSlot(
         gc, gc->tileCursorX, gc->tileCursorY,
         gc->wagonType < 3 ? 0 : 1, gc->wagonType,
