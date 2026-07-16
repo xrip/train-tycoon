@@ -93,7 +93,7 @@ void gc_floodFillPath(GameCanvas *gc) {
 
 bool gc_findPathStep(GameCanvas *gc, int32_t x, int32_t y,
                      int32_t current_distance) {
-    if (x < 0 || x >= gc->world.mapWidth || y < 0 || y >= gc->world.mapHeight
+    if (!gc->world.in_bounds(x, y)
         || gc->pathDistanceGrid[x][y] < 20
         || gc->pathDistanceGrid[x][y] >= current_distance)
         return false;
@@ -109,8 +109,7 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
                                   int32_t tile_e, int32_t tile_f,
                                   int32_t tile_g, int32_t tile_h,
                                   bool high_owner) {
-    if (connected || x < 0 || x >= gc->world.mapWidth
-        || y < 0 || y >= gc->world.mapHeight)
+    if (connected || !gc->world.in_bounds(x, y))
         return connected;
     int tile = gc->world.tileMap[x][y];
     int owner = gc->world.trackMap[x][y] & track::OWNER_MASK;

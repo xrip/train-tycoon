@@ -24,8 +24,8 @@ Only one row may be `in_progress`.
 | OWN-04 | done | Debug and Release full tests passed, 2026-07-15 | Remove raw registry |
 | MODEL-01 | done | Debug and Release full tests passed, 2026-07-16 | Enums and constants (states, track/tile, transition bases; UI screen ids deferred to UI-01) |
 | SAVE-01 | done | Debug and Release full tests passed, 2026-07-16 | Explicit save codec (direction, op selector, primitive names); SaveCodec class deferred to model stages |
-| WORLD-01 | in_progress | SAVE-01 green | World data, map queries, geometry |
-| WORLD-02 | queued | - | Terrain and generation |
+| WORLD-01 | done | Debug and Release full tests passed, 2026-07-16 | World owns map grids, dimensions, in_bounds; entangled queries deferred |
+| WORLD-02 | in_progress | WORLD-01 green | Terrain and generation |
 | PATH-01 | queued | - | Path search |
 | FLEET-01..FLEET-02 | queued | - | Trains and service sites |
 | ECON-01 | queued | - | Economy and calendar |

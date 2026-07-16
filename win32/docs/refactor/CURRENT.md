@@ -2,52 +2,39 @@
 
 ## Item
 
-`WORLD-01` - world data, map queries, and geometry.
+`WORLD-02` - terrain work and map generation.
 
 ## Base
 
-- Commit: SAVE-01 closed green (explicit save codec; SaveCodec class deferred to
-  the model stages).
+- Commit: WORLD-01 closed green (`World` owns the map grids, dimensions, and
+  `in_bounds`).
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Give the map its own owned data. Introduce a `World` type that owns the four map
-grids (`tileMap`, `trackMap`, `tileElevation`, `heightMap`) and the core map
-dimensions/geometry, then move map queries and coordinate math onto it. Keep
-every read identical and the save byte order unchanged.
+Make map generation and terrain editing clear. The generation code lives in
+`win32/src/game/map_gen.cpp` and terrain work in `win32/src/game/terrain.cpp`.
+Give the generation stages and terrain scratch state readable names and shape,
+and let generation write through `World`. Keep the exact random call order and
+generated output; the 13 scenario map goldens must not move.
 
 ## Non-goals
 
-- Do not change tile/track values, map generation output, or save bytes. Golden
-  map and save digests must not move.
-- Do not remove `GameCanvas` yet; `World` becomes a member it owns, migrated one
-  caller group at a time behind the existing field access.
+- Do not change the RNG call order, generated tile/track output, or save bytes.
+  The scenario map digests are the guard.
+- Do not remove `GameCanvas`; generation still reads scenario/config fields on it.
 
 ## Last proof
 
-SAVE-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
+WORLD-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
 change.
-
-## Progress
-
-- Done (D-012): `struct World` in `world.h` owns the four map grids; `GameCanvas`
-  holds one `World world;` and all `gc->tileMap` style access moved to
-  `gc->world.tileMap`. Debug and Release full gates passed on 2026-07-16, no
-  golden change.
-
-## Progress
-
-- Done (D-012, leaf 1): `World` owns the four map grids.
-- Done (D-012, leaf 2): `World` owns `mapWidth`, `mapHeight`, `mapHalfWidth`,
-  `mapScreenWidth`, `mapScreenHeight`; save macros repointed to `world.*`. Debug
-  and Release full gates passed on 2026-07-16, no golden change.
 
 ## Next action
 
-Operations next: move the pure map-query helpers (`gc_isCityOrStationTile`, the
-connected-track scans, in-bounds checks, and coordinate/geometry math) to read a
-`World&` rather than reaching through `GameCanvas`. Keep values and byte order
-identical; commit each leaf after the strict Debug and full tests pass, then close
-WORLD-01 and open WORLD-02 (terrain and generation).
+Read `map_gen.cpp` end to end and map the generation stages (obstacle, terrain
+raise/lower, feature, city/industry placement) and their RNG use. Name the stage
+helpers and the terrain scratch fields (`terrainEditBuffer`, patch buffers) by
+behavior. Because map-gen output is RNG-sensitive, make only name/shape changes
+that leave the random sequence identical, and lean on the scenario map goldens
+after every leaf. Commit each leaf after the strict Debug and full tests pass.

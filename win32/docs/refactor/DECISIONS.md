@@ -199,6 +199,14 @@ keeps byte order: `IO_INT(mapWidth)`/`IO_INT(mapHeight)` became
 expansion, same bytes). The `viewport*` camera fields stay in `GameCanvas`; they
 are view state, not map data.
 
+A third leaf seeded `World`'s query API with `World::in_bounds(x, y)` and adopted
+it at the full out-of-bounds checks (pathfinding, input, build, terrain, sim).
+WORLD-01 closes here: `World` owns the map data (grids + dimensions) and its first
+query. The remaining map-query operations (`gc_isCityOrStationTile`, track scans,
+station checks) read train/economy state that is not yet extracted, so moving
+them onto `World` waits for FLEET/ECON; forcing it now would couple `World` to
+unextracted state against the "one caller group at a time" rule.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

@@ -107,7 +107,7 @@ bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
         return gc_isTileBuildable(gc, x, y, 0)
                && gc_isTileBuildable(gc, x - 1, y, 0)
                && gc_isTileBuildable(gc, x + 1, y, 0);
-    if (x < 0 || y < 0 || x >= gc->world.mapWidth || y >= gc->world.mapHeight) return false;
+    if (!gc->world.in_bounds(x, y)) return false;
     int tile = gc->world.tileMap[x][y];
     bool buildable = gc->world.tileElevation[x][y] >= 0
                      && (tile == 0 || (tile >= 29 && tile <= 33))

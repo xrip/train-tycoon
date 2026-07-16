@@ -17,7 +17,7 @@ void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t
     bool seen[64] = {false};
     for (int i = n - 5; i <= n + 5; ++i) {
         for (int j = n2 - 5; j <= n2 + 5; ++j) {
-            if (i < 0 || j < 0 || i >= gc->world.mapWidth || j >= gc->world.mapHeight
+            if (!gc->world.in_bounds(i, j)
                 || (gc->world.trackMap[i][j] & 0xC0) != 128)
                 continue;
             int n4 = gc->world.trackMap[i][j] & 0x3F;

@@ -19,6 +19,11 @@ struct World {
     int32_t mapHalfWidth = 0;    // (mapWidth - 1) * 8
     int32_t mapScreenWidth = 0;  // (mapWidth + mapHeight) * 16
     int32_t mapScreenHeight = 0; // (mapWidth + mapHeight) * 8
+
+    // True when (x, y) is a valid map cell.
+    bool in_bounds(int32_t x, int32_t y) const {
+        return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;
+    }
 };
 
 #endif  // WORLD_H

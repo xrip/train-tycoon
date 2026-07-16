@@ -369,7 +369,7 @@ void gc_revertTrackTiles(GameCanvas *gc) {
         gc->world.trackMap[x][y] = 0;
         x += gc->trackStepX;
         y += gc->trackStepY;
-        if (x < 0 || y < 0 || x >= gc->world.mapWidth || y >= gc->world.mapHeight) break;
+        if (!gc->world.in_bounds(x, y)) break;
     }
 }
 

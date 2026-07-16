@@ -177,7 +177,7 @@ void gc_computeViewportBounds(GameCanvas *gc) {
 
     for (int x = tile_x - 1; x <= tile_x + 1 && gc->blockBuildMenu; ++x) {
         for (int y = tile_y - 1; y <= tile_y + 1; ++y) {
-            if (x < 0 || x >= gc->world.mapWidth || y < 0 || y >= gc->world.mapHeight)
+            if (!gc->world.in_bounds(x, y))
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
             tile_center_y = gc->world.mapHalfWidth - x * 8 + y * 8 + 8;
