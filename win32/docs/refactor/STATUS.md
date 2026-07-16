@@ -40,8 +40,9 @@ Only one row may be `in_progress`.
 | UI-01 | done (data) | Debug and Release full tests passed, 2026-07-16 | UiController owns the build/offer menu rows, build-menu grids/cursors, confirm-dialog and screen-transition state, report-graph display, and train/city selection. The item exit's manual play check remains a human step. |
 | UI-02 | done (data) | Debug and Release full tests passed, 2026-07-16 | UiController owns cursor and key input state (pending/pause, key-repeat, held/current keys, sub-states). Manual play check remains a human step. |
 | SaveCodec | done | Debug and Release full tests passed, 2026-07-16 | SaveCodec owns the serialization buffer/cursor and snapshot bookkeeping (SAVE-01 tail). |
-| APP-01 | queued | - | Application loop (frame/timing state still on the aggregate; exit needs manual play) |
-| CLEAN-01 | in_progress | Debug and Release full tests passed, 2026-07-16 | Leaf 1 done: `GameCanvas`->`Game` across all 36 files. Remaining (leaf 2): the cosmetic `gc_*` free-function prefix and `gc` receiver rename, and removing `game_methods.h` -- large mechanical churn, best in a fresh context. |
-| CLEAN-02 | in_progress | - | Name audit: removed 10 dead fields; recovered dc/dH/hx/cH/ce/ee/eD/aJ and flagsA/flagsB. Only savedLegacyMetricBq (save-only) remains. |
+| APP-01 | done (code) | Debug and Release full tests passed, 2026-07-16 | main.cpp is a small entry point + frame loop that polls input, runs one game_run update, then game_paint render; Game holds no Win32/window state. The exit's manual play check remains a human step. |
+| DOC-01 | done | n/a (docs) | Added docs/DESIGN.md: the Game aggregate, its ten parts, the locked invariants, and build/test commands. |
+| CLEAN-01 | done | Debug, Release, and ASan full tests passed, 2026-07-16 | GameCanvas->Game; gc_*->game_* and gc->game; game_methods.h->game.h; 108 Java-signature comments removed; 10 dead fields removed; no compatibility adapters existed. |
+| CLEAN-02 | done | Debug and Release full tests passed, 2026-07-16 | Name audit complete: recovered dc/dH/hx/cH/ce/ee/eD/aJ and flagsA/flagsB (->Scenario); only the save-only savedLegacyMetricBq keeps its as-is name. |
 | DOC-01 | queued | - | Final guides |
-| RELEASE-01 | queued | - | Final proof |
+| RELEASE-01 | blocked (human) | - | Needs a human: manual play-through proof across all scenarios + a real MIDI device check (TRAIN_TYCOON_MIDI_TEST_MS). Debug/Release/ASan automated gates are green. |

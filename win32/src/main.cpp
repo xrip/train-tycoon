@@ -1,4 +1,6 @@
-// main.c - Win32 entry point and game frame loop.
+// main.cpp - Win32 entry point and game frame loop. The loop owns the timing and
+// drives the Game each frame: poll input, game_run (one update step), then
+// game_paint (render). The Game and its parts hold no Win32 or window state.
 #include "midp_input.h"
 
 // MiniFB.h uses the C23 `nullptr` keyword, absent from MSVC's C compiler.
