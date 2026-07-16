@@ -46,6 +46,34 @@ struct World {
     std::array<int8_t, 64> constructionTimers{};
     std::array<int16_t, 64> zonePopulation{};
 
+    // Map-generation parameters (loaded per scenario), the generation progress
+    // counters, and the industry/city placement bookkeeping used while building
+    // the map. industryCategory and industrySiteFound are saved; the rest are
+    // runtime-only. Values and save byte order are unchanged.
+    int32_t initialObstacleCount = 0;
+    int32_t terrainRaiseStepCount = 0;
+    int32_t terrainLowerStepCount = 0;
+    int32_t mapGenColumns = 0;
+    int32_t mapGenRows = 0;
+    int32_t terrainPatchBaseSize = 0;
+    int32_t terrainFeatureStage7Count = 0;
+    int32_t terrainFeatureStage6Count = 0;
+    int32_t weightAccel = 0;
+    int32_t weightAccel2 = 0;
+    int32_t weightAccel3 = 0;
+    int32_t weightAccel4 = 0;
+    int32_t mapGenStage = 0;
+    int32_t tilesGeneratedInStage = 0;
+    int32_t totalTilesToGenerate = 0;
+    int32_t mapGenTilesDone = 0;
+    int32_t industryCategory = 0;
+    bool industrySiteFound = false;
+    int32_t cityStationX = 0;
+    int32_t cityStationY = 0;
+    int32_t industryStationX = 0;
+    int32_t industryTileY = 0;
+    bool initialIndustryPlaced = false;
+
     // True when (x, y) is a valid map cell.
     bool in_bounds(int32_t x, int32_t y) const {
         return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;

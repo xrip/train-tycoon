@@ -58,12 +58,12 @@ void gc_fields_init(GameCanvas *gc) {
     gc->renderer.lastRenderedSpriteId = -1;
     gc->renderer.spriteJustChanged = 0;
     gc->build.terrainSmoothCost = 0;
-    gc->initialIndustryPlaced = true;
+    gc->world.initialIndustryPlaced = true;
     gc->build.trackBuildInProgress = false;
-    gc->mapGenStage = 0;
-    gc->tilesGeneratedInStage = 0;
-    gc->totalTilesToGenerate = 0;
-    gc->mapGenTilesDone = 0;
+    gc->world.mapGenStage = 0;
+    gc->world.tilesGeneratedInStage = 0;
+    gc->world.totalTilesToGenerate = 0;
+    gc->world.mapGenTilesDone = 0;
     gc->viewportBaseX = gc->viewportHalfWidth;
     gc->viewportBaseY = gc->viewportHalfHeight;
     gc->mapScaleX = gc->viewportHalfWidth * 2;

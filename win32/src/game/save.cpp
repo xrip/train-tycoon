@@ -261,8 +261,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BYTES(fleet.trainAgeOrTimer);
     IO_INTS(fleet.trainStateCode);
     IO_BYTES(fleet.trainAiOverride);
-    IO_INT(industryCategory);
-    IO_BOOL(industrySiteFound);
+    IO_INT(world.industryCategory);
+    IO_BOOL(world.industrySiteFound);
     IO_INT(build.nextTrackPieceCode);
     if (gc->build.nextTrackPieceCode == 0) gc->build.nextTrackPieceCode = 66;
     IO_BYTE(scenario.aiFrequency);

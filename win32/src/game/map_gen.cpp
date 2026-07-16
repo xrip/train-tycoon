@@ -130,7 +130,7 @@ void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
     if ((bl && gc->world.heightMap[n][n2] < 3) || (!bl && gc->world.heightMap[n][n2] > -1)) {
         gc_setSelectionStart(gc, n, n2);
         if (gc_isAdjacentTileEmpty(gc, n, n2, gc->world.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
-            if (gc->initialIndustryPlaced) {
+            if (gc->world.initialIndustryPlaced) {
                 if (gc->build.terrainSmoothCost <= gc->economy.money) {
                     gc->economy.money -= gc->build.terrainSmoothCost;
                     gc_pushMoneyHistory(gc, -gc->build.terrainSmoothCost);
@@ -198,8 +198,8 @@ void gc_trackBuildStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
 void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
     int n3, n4, n5, n6;
     int8_t by, by2, by3, by4;
-    int n7 = abs(nextRngInt(gc) % 5) + gc->terrainPatchBaseSize;
-    int8_t by5 = (int8_t)(abs(nextRngInt(gc) % 5) + gc->terrainPatchBaseSize);
+    int n7 = abs(nextRngInt(gc) % 5) + gc->world.terrainPatchBaseSize;
+    int8_t by5 = (int8_t)(abs(nextRngInt(gc) % 5) + gc->world.terrainPatchBaseSize);
     std::vector<std::vector<int8_t>> patch_tiles(
         static_cast<size_t>(n7),
         std::vector<int8_t>(static_cast<size_t>(by5)));
@@ -419,27 +419,27 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
         gc->world.trackMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
         gc->world.tileElevation.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
         gc->world.heightMap.resize(gc->world.mapWidth + 2, gc->world.mapHeight + 2);
-        gc->initialIndustryPlaced = false;
-        gc->mapGenStage = mapgen::STAGE_INIT;
-        gc->tilesGeneratedInStage = 0;
-        gc->totalTilesToGenerate = gc->terrainRaiseStepCount + gc->terrainLowerStepCount + gc->mapGenColumns * (gc->mapGenColumns - 1)
-            + gc->mapGenRows + gc->weightAccel2 + gc->weightAccel + gc->terrainFeatureStage6Count
-            + gc->terrainFeatureStage7Count + gc->weightAccel4 + gc->weightAccel3 + 1;
-        gc->mapGenTilesDone = 0;
+        gc->world.initialIndustryPlaced = false;
+        gc->world.mapGenStage = mapgen::STAGE_INIT;
+        gc->world.tilesGeneratedInStage = 0;
+        gc->world.totalTilesToGenerate = gc->world.terrainRaiseStepCount + gc->world.terrainLowerStepCount + gc->world.mapGenColumns * (gc->world.mapGenColumns - 1)
+            + gc->world.mapGenRows + gc->world.weightAccel2 + gc->world.weightAccel + gc->world.terrainFeatureStage6Count
+            + gc->world.terrainFeatureStage7Count + gc->world.weightAccel4 + gc->world.weightAccel3 + 1;
+        gc->world.mapGenTilesDone = 0;
     }
     if (n == 1) {
         int n2 = 0, n3, n4;
-        if (gc->mapGenStage == mapgen::STAGE_INIT) { gc->mapGenStage = mapgen::STAGE_RAISE_TERRAIN; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_RAISE_TERRAIN && gc->tilesGeneratedInStage == gc->terrainRaiseStepCount) { gc->mapGenStage = mapgen::STAGE_LOWER_TERRAIN; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
-        if (gc->mapGenStage == mapgen::STAGE_LOWER_TERRAIN && gc->tilesGeneratedInStage == gc->terrainLowerStepCount) { gc->mapGenStage = mapgen::STAGE_PLACE_PATCHES; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
-        if (gc->mapGenStage == mapgen::STAGE_PLACE_PATCHES && gc->tilesGeneratedInStage == gc->mapGenColumns * (gc->mapGenColumns - 1) + gc->mapGenRows) { gc->mapGenStage = mapgen::STAGE_FEATURE_0; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_0 && gc->tilesGeneratedInStage == gc->weightAccel2) { gc->mapGenStage = mapgen::STAGE_FEATURE_1; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_1 && gc->tilesGeneratedInStage == gc->weightAccel) { gc->mapGenStage = mapgen::STAGE_FEATURE_2; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_2 && gc->tilesGeneratedInStage == gc->terrainFeatureStage6Count) { gc->mapGenStage = mapgen::STAGE_FEATURE_3; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_3 && gc->tilesGeneratedInStage == gc->terrainFeatureStage7Count) { gc->mapGenStage = mapgen::STAGE_FEATURE_4; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_4 && gc->tilesGeneratedInStage == gc->weightAccel4) { gc->mapGenStage = mapgen::STAGE_FEATURE_5; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_5 && gc->tilesGeneratedInStage == gc->weightAccel3) { gc->mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == mapgen::STAGE_RAISE_TERRAIN) {
+        if (gc->world.mapGenStage == mapgen::STAGE_INIT) { gc->world.mapGenStage = mapgen::STAGE_RAISE_TERRAIN; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN && gc->world.tilesGeneratedInStage == gc->world.terrainRaiseStepCount) { gc->world.mapGenStage = mapgen::STAGE_LOWER_TERRAIN; gc->world.tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
+        if (gc->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN && gc->world.tilesGeneratedInStage == gc->world.terrainLowerStepCount) { gc->world.mapGenStage = mapgen::STAGE_PLACE_PATCHES; gc->world.tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
+        if (gc->world.mapGenStage == mapgen::STAGE_PLACE_PATCHES && gc->world.tilesGeneratedInStage == gc->world.mapGenColumns * (gc->world.mapGenColumns - 1) + gc->world.mapGenRows) { gc->world.mapGenStage = mapgen::STAGE_FEATURE_0; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_0 && gc->world.tilesGeneratedInStage == gc->world.weightAccel2) { gc->world.mapGenStage = mapgen::STAGE_FEATURE_1; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_1 && gc->world.tilesGeneratedInStage == gc->world.weightAccel) { gc->world.mapGenStage = mapgen::STAGE_FEATURE_2; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_2 && gc->world.tilesGeneratedInStage == gc->world.terrainFeatureStage6Count) { gc->world.mapGenStage = mapgen::STAGE_FEATURE_3; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_3 && gc->world.tilesGeneratedInStage == gc->world.terrainFeatureStage7Count) { gc->world.mapGenStage = mapgen::STAGE_FEATURE_4; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_4 && gc->world.tilesGeneratedInStage == gc->world.weightAccel4) { gc->world.mapGenStage = mapgen::STAGE_FEATURE_5; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_5 && gc->world.tilesGeneratedInStage == gc->world.weightAccel3) { gc->world.mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; gc->world.tilesGeneratedInStage = 0; }
+        if (gc->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN) {
             int center_x = abs(nextRngInt(gc) % gc->world.mapWidth);
             int center_y = abs(nextRngInt(gc) % gc->world.mapHeight);
             int width = abs(nextRngInt(gc) % 20) + 1;
@@ -448,7 +448,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
             gc_raiseTerrainArea(gc, center_x, center_y, width, height,
                                 elevation_step);
         }
-        if (gc->mapGenStage == mapgen::STAGE_LOWER_TERRAIN) {
+        if (gc->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN) {
             int center_x = abs(nextRngInt(gc) % gc->world.mapWidth);
             int center_y = abs(nextRngInt(gc) % gc->world.mapHeight);
             int width = abs(nextRngInt(gc) % 20) + 1;
@@ -456,13 +456,13 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
             gc_lowerTerrainArea(gc, center_x, center_y, width, height, -1);
         }
         gc->build.trackBuildInProgress = false;
-        if (gc->mapGenStage == mapgen::STAGE_PLACE_PATCHES) {
-            for (n4 = 0; n4 < gc->mapGenColumns; ++n4) {
+        if (gc->world.mapGenStage == mapgen::STAGE_PLACE_PATCHES) {
+            for (n4 = 0; n4 < gc->world.mapGenColumns; ++n4) {
                 bool done = false;
-                for (n3 = 0; n3 < gc->mapGenRows && !done; ++n3) {
-                    if (gc->tilesGeneratedInStage != gc->mapGenColumns * n4 + n3) continue;
-                    n2 = gc->world.mapWidth / gc->mapGenColumns;
-                    int n5 = gc->world.mapHeight / gc->mapGenRows;
+                for (n3 = 0; n3 < gc->world.mapGenRows && !done; ++n3) {
+                    if (gc->world.tilesGeneratedInStage != gc->world.mapGenColumns * n4 + n3) continue;
+                    n2 = gc->world.mapWidth / gc->world.mapGenColumns;
+                    int n5 = gc->world.mapHeight / gc->world.mapGenRows;
                     int n6 = n4 * n2 + abs(nextRngInt(gc) % (n2 / 2));
                     int n7 = n3 * n5 + abs(nextRngInt(gc) % (n5 / 2));
                     gc_placeTerrainPatch(gc, n6, n7);
@@ -471,31 +471,31 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
                 if (done) break;
             }
         }
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_0) gc_placeTerrainFeature(gc, 0);
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_1) gc_placeTerrainFeature(gc, 1);
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_2) gc_placeTerrainFeature(gc, 2);
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_3) gc_placeTerrainFeature(gc, 3);
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_4) gc_placeTerrainFeature(gc, 4);
-        if (gc->mapGenStage == mapgen::STAGE_FEATURE_5) gc_placeTerrainFeature(gc, 5);
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_0) gc_placeTerrainFeature(gc, 0);
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_1) gc_placeTerrainFeature(gc, 1);
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_2) gc_placeTerrainFeature(gc, 2);
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_3) gc_placeTerrainFeature(gc, 3);
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_4) gc_placeTerrainFeature(gc, 4);
+        if (gc->world.mapGenStage == mapgen::STAGE_FEATURE_5) gc_placeTerrainFeature(gc, 5);
         if (gc->build.trackBuildInProgress) gc->loadStep = 0;
-        if (gc->mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
-            for (n4 = 0; n4 < gc->initialObstacleCount; ++n4) {
+        if (gc->world.mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
+            for (n4 = 0; n4 < gc->world.initialObstacleCount; ++n4) {
                 n3 = abs(nextRngInt(gc) % gc->world.mapWidth);
                 n2 = abs(nextRngInt(gc) % gc->world.mapHeight);
                 if (gc->world.tileMap[n3][n2] != 0 || gc->world.tileElevation[n3][n2] < 0) continue;
                 gc->world.tileMap[n3][n2] = (int8_t)(tile::SCENERY_FIRST + abs(nextRngInt(gc) % 5));
             }
-            gc->initialIndustryPlaced = true;
+            gc->world.initialIndustryPlaced = true;
         }
-        ++gc->tilesGeneratedInStage;
-        ++gc->mapGenTilesDone;
+        ++gc->world.tilesGeneratedInStage;
+        ++gc->world.mapGenTilesDone;
     }
 }
 
 void gc_pickCitySite(GameCanvas *gc) {
     int x = abs(nextRngInt(gc) % gc->world.mapWidth);
     int y = abs(nextRngInt(gc) % gc->world.mapHeight);
-    gc->industryCategory = -1;
+    gc->world.industryCategory = -1;
     int tile = gc->world.tileMap[x][y];
     if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
     int min_x = x - 2;
@@ -507,26 +507,26 @@ void gc_pickCitySite(GameCanvas *gc) {
     if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
     if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
     for (int near_x = min_x;
-         near_x <= max_x && gc->industryCategory <= 0; ++near_x) {
+         near_x <= max_x && gc->world.industryCategory <= 0; ++near_x) {
         for (int near_y = min_y;
-             near_y <= max_y && gc->industryCategory <= 0; ++near_y) {
+             near_y <= max_y && gc->world.industryCategory <= 0; ++near_y) {
             tile = gc->world.tileMap[near_x][near_y];
-            if (tile >= 34 && tile <= 40) gc->industryCategory = 0;
-            if (tile >= 65 && tile <= 68) gc->industryCategory = 1;
-            if (tile >= 53 && tile <= 55) gc->industryCategory = 2;
-            if (tile >= 59 && tile <= 61) gc->industryCategory = 3;
+            if (tile >= 34 && tile <= 40) gc->world.industryCategory = 0;
+            if (tile >= 65 && tile <= 68) gc->world.industryCategory = 1;
+            if (tile >= 53 && tile <= 55) gc->world.industryCategory = 2;
+            if (tile >= 59 && tile <= 61) gc->world.industryCategory = 3;
         }
     }
-    if (gc->industryCategory >= 0) {
-        gc->cityStationX = x;
-        gc->cityStationY = y;
+    if (gc->world.industryCategory >= 0) {
+        gc->world.cityStationX = x;
+        gc->world.cityStationY = y;
     }
 }
 
 void gc_pickIndustrySite(GameCanvas *gc) {
     int x = abs(nextRngInt(gc) % gc->world.mapWidth);
     int y = abs(nextRngInt(gc) % gc->world.mapHeight);
-    gc->industrySiteFound = false;
+    gc->world.industrySiteFound = false;
     int tile = gc->world.tileMap[x][y];
     if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
     int min_x = x - 2;
@@ -538,23 +538,23 @@ void gc_pickIndustrySite(GameCanvas *gc) {
     if (max_x >= gc->world.mapWidth) max_x = gc->world.mapWidth - 1;
     if (max_y >= gc->world.mapHeight) max_y = gc->world.mapHeight - 1;
     for (int near_x = min_x;
-         near_x <= max_x && !gc->industrySiteFound; ++near_x) {
+         near_x <= max_x && !gc->world.industrySiteFound; ++near_x) {
         for (int near_y = min_y;
-             near_y <= max_y && !gc->industrySiteFound; ++near_y) {
+             near_y <= max_y && !gc->world.industrySiteFound; ++near_y) {
             tile = gc->world.tileMap[near_x][near_y];
-            if (tile >= 34 && tile <= 40 && gc->industryCategory == 0)
-                gc->industrySiteFound = true;
-            if (tile >= 62 && tile <= 64 && gc->industryCategory == 1)
-                gc->industrySiteFound = true;
-            if (tile >= 50 && tile <= 52 && gc->industryCategory == 2)
-                gc->industrySiteFound = true;
-            if (tile >= 56 && tile <= 58 && gc->industryCategory == 3)
-                gc->industrySiteFound = true;
+            if (tile >= 34 && tile <= 40 && gc->world.industryCategory == 0)
+                gc->world.industrySiteFound = true;
+            if (tile >= 62 && tile <= 64 && gc->world.industryCategory == 1)
+                gc->world.industrySiteFound = true;
+            if (tile >= 50 && tile <= 52 && gc->world.industryCategory == 2)
+                gc->world.industrySiteFound = true;
+            if (tile >= 56 && tile <= 58 && gc->world.industryCategory == 3)
+                gc->world.industrySiteFound = true;
         }
     }
-    if (gc->industrySiteFound) {
-        gc->industryStationX = x;
-        gc->industryTileY = y;
+    if (gc->world.industrySiteFound) {
+        gc->world.industryStationX = x;
+        gc->world.industryTileY = y;
     }
 }
 
@@ -563,9 +563,9 @@ void gc_spawnTrainAt(GameCanvas *gc, int32_t x, int32_t y) {
     int wagon_count = gc->build.selectionCost / 8000 + 1;
     if (wagon_count > 5) wagon_count = 5;
     int cargo_type = 2;
-    if (gc->industryCategory == 1) cargo_type = 3;
-    if (gc->industryCategory == 2) cargo_type = 4;
-    if (gc->industryCategory == 3) cargo_type = 6;
+    if (gc->world.industryCategory == 1) cargo_type = 3;
+    if (gc->world.industryCategory == 2) cargo_type = 4;
+    if (gc->world.industryCategory == 3) cargo_type = 6;
     int train = gc_allocateTrainSlot(
         gc, x, y, engine_type, gc->era,
         gc->world.tileMap[x][y] == 87 ? 0 : 2, 8 - gc->era);
@@ -635,21 +635,21 @@ void gc_placeCitiesAndIndustry(GameCanvas *gc) {
     int industry_attempts = 0;
     do {
         gc_pickCitySite(gc);
-    } while (++city_attempts != 50 && gc->industryCategory == -1);
+    } while (++city_attempts != 50 && gc->world.industryCategory == -1);
     if (city_attempts >= 50) return;
     do {
         gc_pickIndustrySite(gc);
-    } while (++industry_attempts != 50 && !gc->industrySiteFound);
+    } while (++industry_attempts != 50 && !gc->world.industrySiteFound);
     if (industry_attempts >= 50) return;
 
-    gc->pathfinder.anchorX = gc->cityStationX;
-    gc->pathfinder.anchorY = gc->cityStationY;
-    gc->pathfinder.targetX = gc->industryStationX;
-    gc->pathfinder.targetY = gc->industryTileY;
+    gc->pathfinder.anchorX = gc->world.cityStationX;
+    gc->pathfinder.anchorY = gc->world.cityStationY;
+    gc->pathfinder.targetX = gc->world.industryStationX;
+    gc->pathfinder.targetY = gc->world.industryTileY;
     if (!gc_tryBuildPath(gc)) return;
-    gc_autoExtendTrackStation(gc, gc->cityStationX, gc->cityStationY);
-    gc_autoExtendTrackStation(gc, gc->industryStationX, gc->industryTileY);
-    gc_spawnTrainAt(gc, gc->cityStationX, gc->cityStationY);
+    gc_autoExtendTrackStation(gc, gc->world.cityStationX, gc->world.cityStationY);
+    gc_autoExtendTrackStation(gc, gc->world.industryStationX, gc->world.industryTileY);
+    gc_spawnTrainAt(gc, gc->world.cityStationX, gc->world.cityStationY);
     gc_setTrackOwnerCode(gc, gc->build.nextTrackPieceCode - track::PRESENT);
     ++gc->build.nextTrackPieceCode;
     if (gc->build.nextTrackPieceCode == track::AI_PIECE_WRAP) gc->build.nextTrackPieceCode = track::AI_PIECE_FIRST;

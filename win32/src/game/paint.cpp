@@ -89,8 +89,8 @@ void gc_paint(GameCanvas *gc, Surface *g) {
                            gc_tracked_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
-            int n11 = gc->totalTilesToGenerate < 2 ? 2 : gc->totalTilesToGenerate;
-            int n12 = gc->mapGenTilesDone * (gcs_screenWidth - 20) / (n11 - 1);
+            int n11 = gc->world.totalTilesToGenerate < 2 ? 2 : gc->world.totalTilesToGenerate;
+            int n12 = gc->world.mapGenTilesDone * (gcs_screenWidth - 20) / (n11 - 1);
             midp_set_color(g, RGB3(60, 105, 144));
             midp_fill_rect(g, 10, gcs_hs - 23, n12, 9);
             midp_set_color(g, 0xFFFFFF);
@@ -291,10 +291,10 @@ void gc_update(GameCanvas *gc) {
                         gc->viewportBaseY = gc->viewportCenterY;
                         gc->mapScaleX = gc->viewportBaseX * 2;
                         gc->mapScaleY = gc->viewportBaseY * 2;
-                        gc->initialObstacleCount = obstacle_count; gc->terrainRaiseStepCount = terrain_raise_steps; gc->terrainLowerStepCount = terrain_lower_steps; gc->terrainPatchBaseSize = terrain_patch_size;
-                        gc->mapGenColumns = map_gen_columns; gc->mapGenRows = map_gen_rows;
-                        gc->terrainFeatureStage7Count = stage7_feature_count; gc->terrainFeatureStage6Count = stage6_feature_count;
-                        gc->weightAccel = weight_accel_1; gc->weightAccel2 = weight_accel_2; gc->weightAccel3 = weight_accel_3; gc->weightAccel4 = weight_accel_4;
+                        gc->world.initialObstacleCount = obstacle_count; gc->world.terrainRaiseStepCount = terrain_raise_steps; gc->world.terrainLowerStepCount = terrain_lower_steps; gc->world.terrainPatchBaseSize = terrain_patch_size;
+                        gc->world.mapGenColumns = map_gen_columns; gc->world.mapGenRows = map_gen_rows;
+                        gc->world.terrainFeatureStage7Count = stage7_feature_count; gc->world.terrainFeatureStage6Count = stage6_feature_count;
+                        gc->world.weightAccel = weight_accel_1; gc->world.weightAccel2 = weight_accel_2; gc->world.weightAccel3 = weight_accel_3; gc->world.weightAccel4 = weight_accel_4;
                         gc->economy.money = starting_money; gc->economy.loanCeiling = loan_ceiling; gc->economy.loanBalance = starting_loan;
                         gc->economy.interestRate = (int8_t)interest_rate; gc->era = era_number - 1;
                         gc->scenario.scenarioMilestoneIndex = (int8_t)milestone_index;
@@ -314,10 +314,10 @@ void gc_update(GameCanvas *gc) {
                     if (gc->scenario.difficultySlot == 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 22; }
                     if (gc->scenario.difficultyA == 0) { gc->economy.interestRate = 4; gc->economy.enterpriseTaxPct = 2; }
                     if (gc->scenario.difficultyA == 1) { gc->economy.interestRate = 8; gc->economy.enterpriseTaxPct = 5; }
-                    if (gc->scenario.difficultyB == 0) { gc->mapGenColumns /= 2; gc->mapGenRows /= 2; }
+                    if (gc->scenario.difficultyB == 0) { gc->world.mapGenColumns /= 2; gc->world.mapGenRows /= 2; }
                     if (gc->scenario.difficultyC == 0) {
-                        gc->terrainFeatureStage7Count /= 2; gc->terrainFeatureStage6Count /= 2;
-                        gc->weightAccel /= 2; gc->weightAccel2 /= 2; gc->weightAccel3 /= 2; gc->weightAccel4 /= 2;
+                        gc->world.terrainFeatureStage7Count /= 2; gc->world.terrainFeatureStage6Count /= 2;
+                        gc->world.weightAccel /= 2; gc->world.weightAccel2 /= 2; gc->world.weightAccel3 /= 2; gc->world.weightAccel4 /= 2;
                     }
                 }
             }
@@ -328,8 +328,8 @@ void gc_update(GameCanvas *gc) {
             }
             if (gc->loadStep <= 3) break;
             gc_loadState25Setup(gc, 1);
-            if (gc->mapGenTilesDone != gc->totalTilesToGenerate) break;
-            gc->mapGenTilesDone = 0;
+            if (gc->world.mapGenTilesDone != gc->world.totalTilesToGenerate) break;
+            gc->world.mapGenTilesDone = 0;
             gc_setState(gc, +GameState::Playing);
             break;
         }
