@@ -51,125 +51,125 @@ void gc_cycleBuildMenuIndex(GameCanvas *gc, bool forward) {
 // void viewportPanKey()
 void gc_viewportPanKey(GameCanvas *gc) {
     int key = gc->ui.lastKeyCode;
-    if (key == 56 || key == 6) gc->viewportCenterY += 30;
-    if (key == 50 || key == 1) gc->viewportCenterY -= 30;
-    if (key == 54 || key == 5) gc->viewportCenterX += 60;
-    if (key == 52 || key == 2) gc->viewportCenterX -= 60;
+    if (key == 56 || key == 6) gc->renderer.viewportCenterY += 30;
+    if (key == 50 || key == 1) gc->renderer.viewportCenterY -= 30;
+    if (key == 54 || key == 5) gc->renderer.viewportCenterX += 60;
+    if (key == 52 || key == 2) gc->renderer.viewportCenterX -= 60;
     if (key == 49) {
-        gc->viewportCenterY -= 30;
-        gc->viewportCenterX -= 60;
+        gc->renderer.viewportCenterY -= 30;
+        gc->renderer.viewportCenterX -= 60;
     }
     if (key == 51) {
-        gc->viewportCenterY -= 30;
-        gc->viewportCenterX += 60;
+        gc->renderer.viewportCenterY -= 30;
+        gc->renderer.viewportCenterX += 60;
     }
     if (key == 55) {
-        gc->viewportCenterY += 30;
-        gc->viewportCenterX -= 60;
+        gc->renderer.viewportCenterY += 30;
+        gc->renderer.viewportCenterX -= 60;
     }
     if (key == 57) {
-        gc->viewportCenterY += 30;
-        gc->viewportCenterX += 60;
+        gc->renderer.viewportCenterY += 30;
+        gc->renderer.viewportCenterX += 60;
     }
-    if (gc->viewportCenterX < 0) gc->viewportCenterX = 0;
-    if (gc->viewportCenterY < 0) gc->viewportCenterY = 0;
-    if (gc->viewportCenterX > gc->world.mapScreenWidth - gcs_screenWidth)
-        gc->viewportCenterX = gc->world.mapScreenWidth - gcs_screenWidth;
-    if (gc->viewportCenterY > gc->world.mapScreenHeight - gcs_gameplayViewportHeight)
-        gc->viewportCenterY = gc->world.mapScreenHeight - gcs_gameplayViewportHeight;
-    gc->viewportBaseX = gc->viewportCenterX + gcs_screenWidth / 2;
-    gc->viewportBaseY =
-        gc->viewportCenterY + gcs_gameplayViewportHeight / 2;
-    gc->mapScaleX = gc->viewportBaseX * 2;
-    gc->mapScaleY = gc->viewportBaseY * 2;
+    if (gc->renderer.viewportCenterX < 0) gc->renderer.viewportCenterX = 0;
+    if (gc->renderer.viewportCenterY < 0) gc->renderer.viewportCenterY = 0;
+    if (gc->renderer.viewportCenterX > gc->world.mapScreenWidth - gcs_screenWidth)
+        gc->renderer.viewportCenterX = gc->world.mapScreenWidth - gcs_screenWidth;
+    if (gc->renderer.viewportCenterY > gc->world.mapScreenHeight - gcs_gameplayViewportHeight)
+        gc->renderer.viewportCenterY = gc->world.mapScreenHeight - gcs_gameplayViewportHeight;
+    gc->renderer.viewportBaseX = gc->renderer.viewportCenterX + gcs_screenWidth / 2;
+    gc->renderer.viewportBaseY =
+        gc->renderer.viewportCenterY + gcs_gameplayViewportHeight / 2;
+    gc->renderer.mapScaleX = gc->renderer.viewportBaseX * 2;
+    gc->renderer.mapScaleY = gc->renderer.viewportBaseY * 2;
 }
 
 // void viewportZoomKey()
 void gc_viewportZoomKey(GameCanvas *gc) {
     int step = gc_computeKeyRepeatDelay(gc);
     int key = gc->ui.lastKeyCode;
-    if (key == 56 || key == 6) gc->mapScaleY += step * 2;
-    if (key == 50 || key == 1) gc->mapScaleY -= step * 2;
-    if (key == 54 || key == 5) gc->mapScaleX += step * 2;
-    if (key == 52 || key == 2) gc->mapScaleX -= step * 2;
+    if (key == 56 || key == 6) gc->renderer.mapScaleY += step * 2;
+    if (key == 50 || key == 1) gc->renderer.mapScaleY -= step * 2;
+    if (key == 54 || key == 5) gc->renderer.mapScaleX += step * 2;
+    if (key == 52 || key == 2) gc->renderer.mapScaleX -= step * 2;
     if (key == 49) {
-        gc->mapScaleY -= step;
-        gc->mapScaleX -= step * 2;
+        gc->renderer.mapScaleY -= step;
+        gc->renderer.mapScaleX -= step * 2;
     }
     if (key == 51) {
-        gc->mapScaleY -= step;
-        gc->mapScaleX += step * 2;
+        gc->renderer.mapScaleY -= step;
+        gc->renderer.mapScaleX += step * 2;
     }
     if (key == 55) {
-        gc->mapScaleY += step;
-        gc->mapScaleX -= step * 2;
+        gc->renderer.mapScaleY += step;
+        gc->renderer.mapScaleX -= step * 2;
     }
     if (key == 57) {
-        gc->mapScaleY += step;
-        gc->mapScaleX += step * 2;
+        gc->renderer.mapScaleY += step;
+        gc->renderer.mapScaleX += step * 2;
     }
 
-    gc->viewportBaseX = gc->mapScaleX / 2;
-    gc->viewportBaseY = gc->mapScaleY / 2;
-    if (gc->viewportBaseX > gc->world.mapScreenWidth - 8)
-        gc->viewportBaseX = gc->world.mapScreenWidth - 8;
-    if (gc->viewportBaseY > gc->world.mapScreenHeight - 4)
-        gc->viewportBaseY = gc->world.mapScreenHeight - 4;
+    gc->renderer.viewportBaseX = gc->renderer.mapScaleX / 2;
+    gc->renderer.viewportBaseY = gc->renderer.mapScaleY / 2;
+    if (gc->renderer.viewportBaseX > gc->world.mapScreenWidth - 8)
+        gc->renderer.viewportBaseX = gc->world.mapScreenWidth - 8;
+    if (gc->renderer.viewportBaseY > gc->world.mapScreenHeight - 4)
+        gc->renderer.viewportBaseY = gc->world.mapScreenHeight - 4;
 
     bool moved_view = false;
-    if (gc->viewportCenterX > 0
-        && gc->viewportBaseX - gc->viewportCenterX <= 10) {
+    if (gc->renderer.viewportCenterX > 0
+        && gc->renderer.viewportBaseX - gc->renderer.viewportCenterX <= 10) {
         moved_view = true;
-        gc->viewportCenterX = gc->viewportBaseX - 11;
+        gc->renderer.viewportCenterX = gc->renderer.viewportBaseX - 11;
     }
-    if (gc->viewportCenterY > 0
-        && gc->viewportBaseY - gc->viewportCenterY <= 10) {
+    if (gc->renderer.viewportCenterY > 0
+        && gc->renderer.viewportBaseY - gc->renderer.viewportCenterY <= 10) {
         moved_view = true;
-        gc->viewportCenterY = gc->viewportBaseY - 11;
+        gc->renderer.viewportCenterY = gc->renderer.viewportBaseY - 11;
     }
-    if (gc->viewportBaseX - gc->viewportCenterX >= gcs_screenWidth - 20) {
+    if (gc->renderer.viewportBaseX - gc->renderer.viewportCenterX >= gcs_screenWidth - 20) {
         moved_view = true;
-        gc->viewportCenterX = gc->viewportBaseX - gcs_screenWidth + 21;
+        gc->renderer.viewportCenterX = gc->renderer.viewportBaseX - gcs_screenWidth + 21;
     }
-    if (gc->viewportBaseY - gc->viewportCenterY
+    if (gc->renderer.viewportBaseY - gc->renderer.viewportCenterY
         >= gcs_gameplayViewportHeight - 20) {
         moved_view = true;
-        gc->viewportCenterY =
-            gc->viewportBaseY - gcs_gameplayViewportHeight + 21;
+        gc->renderer.viewportCenterY =
+            gc->renderer.viewportBaseY - gcs_gameplayViewportHeight + 21;
     }
-    if (gc->viewportBaseX < 0) gc->viewportBaseX = 0;
-    if (gc->viewportBaseY < 0) gc->viewportBaseY = 0;
-    if (gc->viewportCenterX < 0) {
-        gc->viewportCenterX = 0;
+    if (gc->renderer.viewportBaseX < 0) gc->renderer.viewportBaseX = 0;
+    if (gc->renderer.viewportBaseY < 0) gc->renderer.viewportBaseY = 0;
+    if (gc->renderer.viewportCenterX < 0) {
+        gc->renderer.viewportCenterX = 0;
         moved_view = false;
     }
-    if (gc->viewportCenterY < 0) {
-        gc->viewportCenterY = 0;
+    if (gc->renderer.viewportCenterY < 0) {
+        gc->renderer.viewportCenterY = 0;
         moved_view = false;
     }
-    if (gc->viewportCenterX > gc->world.mapScreenWidth - gcs_screenWidth) {
-        gc->viewportCenterX = gc->world.mapScreenWidth - gcs_screenWidth;
+    if (gc->renderer.viewportCenterX > gc->world.mapScreenWidth - gcs_screenWidth) {
+        gc->renderer.viewportCenterX = gc->world.mapScreenWidth - gcs_screenWidth;
         moved_view = false;
     }
-    if (gc->viewportCenterY
+    if (gc->renderer.viewportCenterY
         > gc->world.mapScreenHeight - gcs_gameplayViewportHeight) {
-        gc->viewportCenterY =
+        gc->renderer.viewportCenterY =
             gc->world.mapScreenHeight - gcs_gameplayViewportHeight;
         moved_view = false;
     }
     if (moved_view) gc->ui.keySubState = 80;
     gc_computeViewportBounds(gc);
-    gc->mapScaleX = gc->viewportBaseX * 2;
-    gc->mapScaleY = gc->viewportBaseY * 2;
+    gc->renderer.mapScaleX = gc->renderer.viewportBaseX * 2;
+    gc->renderer.mapScaleY = gc->renderer.viewportBaseY * 2;
 }
 
 // void computeViewportBounds()
 void gc_computeViewportBounds(GameCanvas *gc) {
     int tile_center_x = 0;
     int tile_center_y = 0;
-    int tile_x = gc->viewportBaseX - 2 * gc->viewportBaseY
+    int tile_x = gc->renderer.viewportBaseX - 2 * gc->renderer.viewportBaseY
                  + 16 + 2 * gc->world.mapHalfWidth;
-    int tile_y = gc->viewportBaseX + 2 * gc->viewportBaseY
+    int tile_y = gc->renderer.viewportBaseX + 2 * gc->renderer.viewportBaseY
                  - 16 - 2 * gc->world.mapHalfWidth;
     tile_x /= 32;
     tile_y /= 32;
@@ -184,17 +184,17 @@ void gc_computeViewportBounds(GameCanvas *gc) {
             gc_computeIsoCornersInlined(gc, x, y, gc->build.selectionTileX.data(),
                                         gc->build.selectionTileY.data(), false);
             int opposite_edges =
-                gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
+                gc_crossProduct2D(gc, gc->renderer.viewportBaseX, gc->renderer.viewportBaseY,
                                   gc->build.selectionTileX[0], gc->build.selectionTileY[0],
                                   gc->build.selectionTileX[1], gc->build.selectionTileY[1])
-                * gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
+                * gc_crossProduct2D(gc, gc->renderer.viewportBaseX, gc->renderer.viewportBaseY,
                                     gc->build.selectionTileX[2], gc->build.selectionTileY[2],
                                     gc->build.selectionTileX[3], gc->build.selectionTileY[3]);
             int other_edges =
-                gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
+                gc_crossProduct2D(gc, gc->renderer.viewportBaseX, gc->renderer.viewportBaseY,
                                   gc->build.selectionTileX[0], gc->build.selectionTileY[0],
                                   gc->build.selectionTileX[2], gc->build.selectionTileY[2])
-                * gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
+                * gc_crossProduct2D(gc, gc->renderer.viewportBaseX, gc->renderer.viewportBaseY,
                                     gc->build.selectionTileX[1], gc->build.selectionTileY[1],
                                     gc->build.selectionTileX[3], gc->build.selectionTileY[3]);
             if (opposite_edges > 0 || other_edges > 0) continue;
@@ -212,8 +212,8 @@ void gc_computeViewportBounds(GameCanvas *gc) {
     gc->ui.tileCursorY = tile_y;
     int corner_distance[4];
     for (int corner = 0; corner < 4; ++corner) {
-        int dx = gc->viewportBaseX - gc->build.selectionTileX[corner];
-        int dy = gc->viewportBaseY - gc->build.selectionTileY[corner];
+        int dx = gc->renderer.viewportBaseX - gc->build.selectionTileX[corner];
+        int dy = gc->renderer.viewportBaseY - gc->build.selectionTileY[corner];
         corner_distance[corner] = abs(dx * dx + dy * dy);
     }
     int nearest = corner_distance[0];
@@ -234,12 +234,12 @@ void gc_computeViewportBounds(GameCanvas *gc) {
         ++gc->build.swapMapX;
         ++gc->build.swapMapY;
     }
-    tile_center_y -= gc->viewportCenterY
+    tile_center_y -= gc->renderer.viewportCenterY
                      + 4 * gc->world.heightMap[gc->build.swapMapX][gc->build.swapMapY];
-    gc->ui.cursorScreenX = tile_center_x - gc->viewportCenterX;
+    gc->ui.cursorScreenX = tile_center_x - gc->renderer.viewportCenterX;
     gc->ui.cursorScreenY = tile_center_y;
     for (int corner = 0; corner < 4; ++corner) {
-        gc->build.selectionTileX[corner] -= gc->viewportCenterX;
-        gc->build.selectionTileY[corner] -= gc->viewportCenterY;
+        gc->build.selectionTileX[corner] -= gc->renderer.viewportCenterX;
+        gc->build.selectionTileY[corner] -= gc->renderer.viewportCenterY;
     }
 }

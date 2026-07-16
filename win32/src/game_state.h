@@ -28,8 +28,6 @@ typedef struct GameCanvas {
     int32_t cB;
     int32_t ar;
     int32_t D;
-    int32_t viewportHalfWidth;
-    int32_t viewportHalfHeight;
     int32_t moneyBaseA;
     int32_t moneyBaseB;
     int32_t baseTrainSpeed;
@@ -65,10 +63,6 @@ typedef struct GameCanvas {
     bool displayInitialized;
     bool ee;
     int32_t dp;
-    int32_t viewportBaseX;
-    int32_t viewportBaseY;
-    int32_t mapScaleX;
-    int32_t mapScaleY;
     bool flagsA;
     bool cH;
     Pathfinder pathfinder;
@@ -89,8 +83,6 @@ typedef struct GameCanvas {
     std::unique_ptr<MusicOutput> music_output;
     int32_t gameState;
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
-    int32_t viewportCenterX;
-    int32_t viewportCenterY;
     Economy economy;
     Scenario scenario;
     BuildController build;

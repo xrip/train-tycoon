@@ -165,17 +165,17 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
-    IO_INT(viewportCenterX);
-    IO_INT(viewportCenterY);
+    IO_INT(renderer.viewportCenterX);
+    IO_INT(renderer.viewportCenterY);
     IO_INT(economy.money);
     IO_INT(economy.dayOfMonth);
     IO_INT(economy.monthOfYear);
     IO_INT(economy.year);
     IO_INT(counterA);
-    IO_INT(viewportBaseX);
-    IO_INT(viewportBaseY);
-    IO_INT(mapScaleX);
-    IO_INT(mapScaleY);
+    IO_INT(renderer.viewportBaseX);
+    IO_INT(renderer.viewportBaseY);
+    IO_INT(renderer.mapScaleX);
+    IO_INT(renderer.mapScaleY);
     IO_SHORTS(renderer.visibleTrains);
     IO_INT(renderer.visibleTrainCount);
     IO_INT(renderer.viewportX0);
@@ -369,8 +369,8 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
     gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
     gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
-    gc->viewportHalfWidth = gc->world.mapScreenWidth / 2;
-    gc->viewportHalfHeight = gc->world.mapScreenHeight / 2;
+    gc->renderer.viewportHalfWidth = gc->world.mapScreenWidth / 2;
+    gc->renderer.viewportHalfHeight = gc->world.mapScreenHeight / 2;
     gc_initBuildMenuForScenario(gc, -1);
     gc_loadGame(gc, 1, save::MODE_READ);
     gc_decompressSaveBuffer(gc);

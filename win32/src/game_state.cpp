@@ -29,8 +29,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
     gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
     gc->world.mapScreenHeight = (gc->world.mapWidth + gc->world.mapHeight) * 8;
-    gc->viewportHalfWidth = gc->world.mapScreenWidth / 2;
-    gc->viewportHalfHeight = gc->world.mapScreenHeight / 2;
+    gc->renderer.viewportHalfWidth = gc->world.mapScreenWidth / 2;
+    gc->renderer.viewportHalfHeight = gc->world.mapScreenHeight / 2;
     gc->simSpeed = 1;
     gc->frameCount = 0;
     gc->frameIndex = 0;
@@ -64,10 +64,10 @@ void gc_fields_init(GameCanvas *gc) {
     gc->world.tilesGeneratedInStage = 0;
     gc->world.totalTilesToGenerate = 0;
     gc->world.mapGenTilesDone = 0;
-    gc->viewportBaseX = gc->viewportHalfWidth;
-    gc->viewportBaseY = gc->viewportHalfHeight;
-    gc->mapScaleX = gc->viewportHalfWidth * 2;
-    gc->mapScaleY = gc->viewportHalfHeight * 2;
+    gc->renderer.viewportBaseX = gc->renderer.viewportHalfWidth;
+    gc->renderer.viewportBaseY = gc->renderer.viewportHalfHeight;
+    gc->renderer.mapScaleX = gc->renderer.viewportHalfWidth * 2;
+    gc->renderer.mapScaleY = gc->renderer.viewportHalfHeight * 2;
     gc->ui.keySubState = 0;
     gc->ui.lastKeyCode = 0;
     gc->ui.keyRepeatStep = 3;
@@ -244,8 +244,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->economy.trainRevenueScore = 0;
     gc->scenario.bestScenarioScore = 0;
     gc->assets.numActiveTileAnimations = 0;
-    gc->viewportCenterX = 0;
-    gc->viewportCenterY = 0;
+    gc->renderer.viewportCenterX = 0;
+    gc->renderer.viewportCenterY = 0;
     gc->economy.money = 200000;
     gc->cachedHeaderMoney = 0;
     gc->economy.loanBalance = 0;

@@ -36,9 +36,9 @@ void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,
     }
 
     int tile = gc_byteToUnsignedInt(gc, gc->world.tileMap[tile_x][tile_y]);
-    int x = tile_y * 16 + tile_x * 16 + 16 - gc->viewportCenterX;
+    int x = tile_y * 16 + tile_x * 16 + 16 - gc->renderer.viewportCenterX;
     int y = gc->world.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
-            gc->viewportCenterY - 4 * gc->world.tileElevation[tile_x][tile_y] + 15;
+            gc->renderer.viewportCenterY - 4 * gc->world.tileElevation[tile_x][tile_y] + 15;
     int phase = gc->fleet.trainPhase[train];
     if (phase < 0) return;
 

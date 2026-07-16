@@ -189,8 +189,8 @@ void gc_computeIsoCornersInlined(GameCanvas *gc, int32_t x, int32_t y,
     screen_y[3] = center_y - 4 * gc->world.heightMap[x + 1][y + 1];
     if (viewport_relative) {
         for (int corner = 0; corner < 4; ++corner) {
-            screen_x[corner] -= gc->viewportCenterX;
-            screen_y[corner] -= gc->viewportCenterY;
+            screen_x[corner] -= gc->renderer.viewportCenterX;
+            screen_y[corner] -= gc->renderer.viewportCenterY;
         }
     }
 }
@@ -293,8 +293,8 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
 // void drawBuildMenuRow(Graphics)
 void gc_drawBuildMenuRow(GameCanvas *gc, Surface *graphics) {
     if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) return;
-    int menu_x = gc->viewportBaseX - gc->viewportCenterX;
-    int menu_y = gc->viewportBaseY - gc->viewportCenterY;
+    int menu_x = gc->renderer.viewportBaseX - gc->renderer.viewportCenterX;
+    int menu_y = gc->renderer.viewportBaseY - gc->renderer.viewportCenterY;
     if (gc->ui.blockBuildMenu) {
         gc_drawSpriteQuad(gc, graphics, 200, menu_x, menu_y + 15, 20);
         midp_set_color(graphics, 0xFF0000);

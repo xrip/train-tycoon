@@ -40,6 +40,20 @@ struct Renderer {
     bool needsRepaint = false;
     bool mapRedrawPending = false;
     int32_t dialogContentHeight = 0;
+
+    // Camera / view transform. viewportCenter is the live camera centre (panned
+    // by input, read by drawing); viewportBase and mapScale set the isometric
+    // projection; the half sizes are derived from the map screen size.
+    // viewportCenter, viewportBase, and mapScale are saved and keep their exact
+    // byte order; the half sizes are recomputed on load.
+    int32_t viewportCenterX = 0;
+    int32_t viewportCenterY = 0;
+    int32_t viewportBaseX = 0;
+    int32_t viewportBaseY = 0;
+    int32_t mapScaleX = 0;
+    int32_t mapScaleY = 0;
+    int32_t viewportHalfWidth = 0;
+    int32_t viewportHalfHeight = 0;
 };
 
 #endif  // RENDERER_H

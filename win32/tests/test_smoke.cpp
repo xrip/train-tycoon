@@ -397,13 +397,13 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(first_frame.value() == 13699798000239068498ULL);
 
-    const int old_viewport_x = game->viewportCenterX;
+    const int old_viewport_x = game->renderer.viewportCenterX;
     gc_keyPressed(game, 54);
     gc_run(game);
     gc_paint(game, &screen);
     CHECK(game->gameState == 30);
     CHECK(game->renderer.backbuffer != nullptr);
-    CHECK(game->viewportCenterX != old_viewport_x);
+    CHECK(game->renderer.viewportCenterX != old_viewport_x);
     StableDigest moved_frame;
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(moved_frame.value() == 2749731419861486662ULL);
