@@ -1,10 +1,10 @@
 // Small general game functions.
-#include "game.h"
+#include "game_internal.h"
 
 void game_drawSpriteQuad(Game *game, Surface *graphics, int32_t n,
                        int32_t n2, int32_t n3, int32_t n4) {
     midp_draw_image(graphics,
-                    game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[n])].get(), n2, n3, n4);
+                    game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[n])].get(), n2, n3, n4);
 }
 
 void game_openSpriteStream(Game *game, const char *resource_name) {

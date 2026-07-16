@@ -1,5 +1,5 @@
 // Game start, resources, sprites, state changes, and save start.
-#include "game.h"
+#include "game_internal.h"
 #include "support/record_store.h"
 #include <stdlib.h>
 #include <string.h>
@@ -170,9 +170,8 @@ void game_persistSnapshotMode1(Game *game) {
 }
 
 // Add one isometric tile-draw offset pair.
-void game_appendTileDrawOffset(Game *game, ByteBuffer& x_offsets,
+void game_appendTileDrawOffset(ByteBuffer& x_offsets,
                              ByteBuffer& y_offsets, int32_t x, int32_t y) {
-    (void)game;
     x_offsets.write(x);
     y_offsets.write(y);
 }
@@ -189,7 +188,7 @@ void game_k(Game *game, int32_t n, int32_t n2) {
         for (n4 = -1; n4 < n7; ++n4) {
             n3 = n4 - n5 / 2;
             int n8 = n5 % 2 == 0 ? 0 + n4 + n5 / 2 : -1 + n4 + n5 / 2;
-            game_appendTileDrawOffset(game, x_offsets, y_offsets, n3, n8);
+            game_appendTileDrawOffset(x_offsets, y_offsets, n3, n8);
         }
     }
     const auto x_offset_bytes = x_offsets.bytes();
@@ -233,9 +232,9 @@ void game_setCanvasSize(Game *game, int32_t n, int32_t n2) {
         game->lastCanvasHeight = n2;
         game->ui.menuDirty = true;
         game->renderer.lastViewportCenterX = -1;
-        if (game->gameState == +GameState::MenuOverlay && !game->ready) {
-            if (game->savedGameState == +GameState::Playing) { game->ui.pendingTransitionCode = game->ui.transitionCode; game->gameState = +GameState::Playing; }
-            if (game->savedGameState == +GameState::MapOverview) { game->ui.pendingTransitionCode = game->ui.transitionCode; game->gameState = +GameState::MapOverview; }
+        if (game->gameState == GameState::MenuOverlay && !game->ready) {
+            if (game->savedGameState == GameState::Playing) { game->ui.pendingTransitionCode = game->ui.transitionCode; game->gameState = GameState::Playing; }
+            if (game->savedGameState == GameState::MapOverview) { game->ui.pendingTransitionCode = game->ui.transitionCode; game->gameState = GameState::MapOverview; }
         }
     }
 }
@@ -246,19 +245,19 @@ void game_setState(Game *game, int32_t n) {
     game->ui.snapshotLoadedFlag = false;
     game->ui.menuDirty = true;
     switch (n) {
-        case +GameState::BootSplash0:
+        case GameState::BootSplash0:
             game_openSpriteStream(game, "sprite_images.bin");
             game_loadPackedSpriteData(game, "packed_sprites.bin");
             game->loadingTimer = 0;
             /* fall through */
-        case +GameState::BootSplash1:
-        case +GameState::BootSplash2:
+        case GameState::BootSplash1:
+        case GameState::BootSplash2:
             game->assets.cycle_flag = game_decodePngFromSpriteStream(game);
             game->loadingStartTime = midp_current_time_millis();
             game->loadingTimeout = false;
             game->loadingTimer = 0;
             break;
-        case +GameState::IntroReady: {
+        case GameState::IntroReady: {
             ResourceReader in = resources::open("sprite_image_map.bin");
             if (in) {
                 int n2 = in.read_byte();
@@ -276,7 +275,7 @@ void game_setState(Game *game, int32_t n) {
             }
             break;
         }
-        case +GameState::LoadingResources: {
+        case GameState::LoadingResources: {
             game->assets.spriteLoadCounter = 0;
             ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
@@ -293,44 +292,42 @@ void game_setState(Game *game, int32_t n) {
             game->assets.tileSpriteIndex[68] = game->assets.tileSpriteIndex[66];
             break;
         }
-        case +GameState::MenuOverlay:
+        case GameState::MenuOverlay:
             game_resetOverlayRenderState(game);
             if (!game->ui.useDefaultOverlaySelection) game->ui.cursorDragY = 2;
             game->ui.useDefaultOverlaySelection = true;
             break;
-        case +GameState::GeneratingMap:
+        case GameState::GeneratingMap:
             game->loadStep = 0;
             break;
-        case +GameState::Playing:
+        case GameState::Playing:
             game->renderer.backbuffer = NULL;
             game->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
             game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
             game->renderer.lastViewportCenterX = -1;
             game->ui.menuDirty = true;
             break;
-        case +GameState::BuildingMinimap: game->loadStep = 4; game->ui.confirmToggle = 0; break;
-        case +GameState::BuildingPath: game->loadStep = 4; break;
-        case +GameState::SavingGame: game->loadStep = 4; break;
-        case +GameState::LoadingGame: game->loadStep = 4; break;
-        case +GameState::AiTurn: game->loadStep = 4; break;
-        case +GameState::HighScoreSync: game->loadStep = 4; break;
+        case GameState::BuildingMinimap: game->loadStep = 4; game->ui.confirmToggle = 0; break;
+        case GameState::BuildingPath: game->loadStep = 4; break;
+        case GameState::SavingGame: game->loadStep = 4; break;
+        case GameState::LoadingGame: game->loadStep = 4; break;
+        case GameState::AiTurn: game->loadStep = 4; break;
+        case GameState::HighScoreSync: game->loadStep = 4; break;
     }
     game->gameState = n;
 }
 
-// public void start(GameMIDlet gameMIDlet) -- host owns the loop, no thread
-void game_start(Game *game, void *gameMIDlet) {
-    game->midlet = gameMIDlet;
+// The host owns the loop; start only loads saved settings and enters boot.
+void game_start(Game *game) {
     game_persistSnapshotMode1(game);
-    game_setState(game, +GameState::BootSplash0);
+    game_setState(game, GameState::BootSplash0);
     // Display.setCurrent + Thread(this).start() are replaced by the host loop.
 }
 
 // public void run() -- ONE iteration of the original game-thread loop.
 // The host (main.c) calls this each frame; timing/repaint/sleep are host-owned.
 void game_run(Game *game) {
-    if (game->stopRequested || game->ui.paused) return;
-    game->frameStartTime = midp_current_time_millis();
+    if (game->stopRequested) return;
     if (game->ui.keyRepeatDelay == 0) {
         if (game->ui.heldKey != 0) game->ui.currentKey = game->ui.heldKey;
     } else {
@@ -339,21 +336,20 @@ void game_run(Game *game) {
     if (game->ui.currentKey != 0 && game->ui.currentKey != -999) game_handleKey(game, game->ui.currentKey);
     if (game->ui.currentKey == -999) game_resetKeyState(game, game->ui.currentKey);
     if (game->ui.inputSubState > 0) --game->ui.inputSubState;
-    ++game->frameCount;
     if (game->ui.inputPending) {
         game->frameIndex = 1;
         while (game->frameIndex > 0) {
             game_update(game);
-            if (game->gameState != +GameState::MenuOverlay && game->gameState != +GameState::MapOverview) continue;
+            if (game->gameState != GameState::MenuOverlay && game->gameState != GameState::MapOverview) continue;
             game->ui.inputPending = false;
             break;
         }
         game->frameIndex = 0;
     }
-    if (game->gameState == +GameState::LoadingResources) {
+    if (game->gameState == GameState::LoadingResources) {
         for (int n = 0; n < 5; ++n) game_update(game);
     }
-    if (game->gameState == +GameState::Playing) {
+    if (game->gameState == GameState::Playing) {
         for (int n = 0; n < game->simSpeed; ++n) {
             if (!game->ui.pauseFlag) game_update(game);
             if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) continue;
@@ -362,5 +358,4 @@ void game_run(Game *game) {
     } else {
         game_update(game);
     }
-    game->frameTime = midp_current_time_millis() - game->frameStartTime;
 }

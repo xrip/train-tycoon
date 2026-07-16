@@ -114,7 +114,7 @@ int main(void) {
     Game *game = new Game{};
     game_fields_init(game);
     game->music_output = std::make_unique<WinMmMusicPlayer>();
-    game_start(game, NULL); // resource load + initial state (no thread spawn)
+    game_start(game); // resource load + initial state (no thread spawn)
 
     Surface screen;
     midp_gfx_init_screen(&screen, g_framebuffer, MIDP_SCREEN_W, MIDP_SCREEN_H);

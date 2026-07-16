@@ -4,15 +4,13 @@
 #define GAME_CONSTANTS_H
 #include <cstdint>
 
-// Values for Game::gameState (and its saved previous-state copy `hx`).
-// The field stays int32_t for save and arithmetic safety; these names replace
-// the raw state literals at read and write sites. Use unary `+` to get the
-// int32_t value, e.g. game_setState(game, +GameState::Playing).
+// Values for Game::gameState and its saved previous-state copy. The field stays
+// int32_t because it is part of the save stream.
 //
 // Flow: BootSplash0 -> BootSplash1 (loads fonts) -> IntroReady -> MenuOverlay.
 // Splash states 2 and 3 are defined by the switches but unreached in the
 // current boot path (BootSplash1 jumps straight to IntroReady).
-enum class GameState : int32_t {
+enum GameState : int32_t {
     BootSplash0      = 0,    // first splash: opens the sprite stream; black frame
     BootSplash1      = 1,    // second splash: decodes fonts, then -> IntroReady
     BootSplash2      = 2,    // defined by the switches; unreached in current flow
@@ -30,12 +28,6 @@ enum class GameState : int32_t {
     AiTurn           = 105,  // AI turn: place cities/industry or advance
     HighScoreSync    = 120,  // upload/sync high scores (network)
 };
-
-// Unary plus yields the underlying int32_t so the value fits the int32_t
-// gameState field, switch subjects, and case labels without a verbose cast.
-constexpr int32_t operator+(GameState state) noexcept {
-    return static_cast<int32_t>(state);
-}
 
 // Track-map byte encoding (Game::trackMap). A byte packs a "track present"
 // flag in bit 6 with a 6-bit owner field in the low bits. At the crossing tile

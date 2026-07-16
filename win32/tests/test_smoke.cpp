@@ -1,6 +1,6 @@
 #include "doctest/doctest.h"
 
-#include "game.h"
+#include "game_internal.h"
 #include "click_map.h"
 #include "midp_input.h"
 #include "stable_digest.h"
@@ -78,19 +78,19 @@ void generate_scenario(Game* game, int scenario) {
 }
 
 void load_game_resources(Game* game) {
-    game_start(game, nullptr);
+    game_start(game);
     game->loadingStartTime = 0;
     game_update(game);
     game->loadingStartTime = 0;
     game_update(game);
     game_update(game);
-    REQUIRE(game->gameState == +GameState::MenuOverlay);
+    REQUIRE(game->gameState == GameState::MenuOverlay);
 
-    game_setState(game, +GameState::LoadingResources);
-    for (int step = 0; game->gameState == +GameState::LoadingResources && step < 1000; ++step) {
+    game_setState(game, GameState::LoadingResources);
+    for (int step = 0; game->gameState == GameState::LoadingResources && step < 1000; ++step) {
         game_update(game);
     }
-    REQUIRE(game->gameState == +GameState::MenuOverlay);
+    REQUIRE(game->gameState == GameState::MenuOverlay);
 }
 
 } // namespace
@@ -502,13 +502,13 @@ TEST_CASE("full: report and graph dialogs have fixed frame digests") {
 
     game->ready = false;
     game->ui.transitionCode = 32;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
     game_paint(game, &screen);
     CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
 
     game_setYearGraphMode(game, 0, false);
     game->ui.transitionCode = 33;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
     game_paint(game, &screen);
     CHECK(paint_digest(game, &screen) == 1138514185145564824ULL);
     delete game;

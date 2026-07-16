@@ -1,5 +1,5 @@
 // Game-map header, bottom bar, and overlays.
-#include "game.h"
+#include "game_internal.h"
 
 #include <algorithm>
 #include <stdio.h>
@@ -96,14 +96,14 @@ void game_paintMain(Game *game, Surface *graphics) {
     if (!game->ui.menuDirty) return;
     midp_set_color(game->renderer.backbuffer_surface, 0x606060);
     midp_fill_rect(game->renderer.backbuffer_surface, 0, gcs_bottomBarY, gcs_screenWidth, 15);
-    int selected_x = game_byteToUnsignedInt(game, game->ui.menuItemCode[game->ui.buildMenuMode]
+    int selected_x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode]
                                                [game->ui.buildMenuItemIndex]);
     int scroll = selected_x + 15 - gcs_screenWidth;
     if (scroll < 0) scroll = 0;
     int item_count = static_cast<int>(game->ui.buildMenuItems[game->ui.buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
-        int x = game_byteToUnsignedInt(game, game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
-        int sprite = game_byteToUnsignedInt(game, game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
+        int x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
+        int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
         game_drawSpriteQuad(game, game->renderer.backbuffer_surface, sprite, x, gcs_bottomBarY, 20);
         if (item != game->ui.buildMenuItemIndex) continue;
         midp_set_color(game->renderer.backbuffer_surface, 0xFFFFFF);
@@ -116,7 +116,7 @@ void game_paintMain(Game *game, Surface *graphics) {
                             ? -(int64_t)game->build.selectionCost : game->build.selectionCost;
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
         int text_len = (int)strlen(cost_text);
-        const auto currency_codes = game_tracked_codes(
+        const auto currency_codes = std::span<const int8_t>(
             game->assets.spriteBitmapTable[game->assets.spriteIndexTable[10]]);
         std::vector<int8_t> bytes(
             static_cast<size_t>(text_len + 1) + currency_codes.size());
@@ -160,7 +160,7 @@ void game_drawConfirmDialog(Game *game, Surface *graphics) {
     if (game->ui.confirmCounter <= 0) return;
     if (game->ui.confirmTargetState >= 0) {
         game_drawTextBox(game, graphics, 10, 10, 0, 37,
-                       game_tracked_codes(game->assets.spriteBitmapTable[
+                       std::span<const int8_t>(game->assets.spriteBitmapTable[
                            game->assets.spriteIndexTable[120 + game->ui.confirmTargetState]]));
     }
     --game->ui.confirmCounter;
@@ -310,7 +310,7 @@ void game_drawBuildMenuRow(Game *game, Surface *graphics) {
                           game->ui.cursorScreenY + 13, 20);
     game_drawSpriteQuad(game, graphics, 200, menu_x, menu_y + 15, 20);
     if (game->ui.buildMenuMode != 0 || game->ui.buildMenuItemIndex != 0) {
-        int sprite = game_byteToUnsignedInt(game, game->ui.menuTextIndex[game->ui.buildMenuMode]
+        int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode]
                                                [game->ui.buildMenuItemIndex]);
         game_drawSpriteQuad(game, graphics, sprite, menu_x + 5, menu_y + 19, 20);
     }

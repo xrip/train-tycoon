@@ -1,5 +1,5 @@
 // Simulation tick functions.
-#include "game.h"
+#include "game_internal.h"
 #include <cstdlib>
 
 void game_dayResetP(Game *game) {
@@ -64,8 +64,8 @@ void game_everyTwoTick(Game *game) {
     for (int i = 0; i < 500; ++i) {
         if ((game->fleet.trainFlags[i] & 0x80) != 128 || (game->fleet.trainFlags[i] & 0x40) != 64)
             continue;
-        int n2 = game_byteToUnsignedInt(game, game->fleet.trainX[i]);
-        int n = game_byteToUnsignedInt(game, game->fleet.trainY[i]);
+        int n2 = unsignedByte(game->fleet.trainX[i]);
+        int n = unsignedByte(game->fleet.trainY[i]);
         if (game->world.trackMap[n2][n] != 65) continue;
         int n3 = game_countCarsInTrain(game, i) * 2;
         if ((game->fleet.trainFlags[i] & 0xF) == 0) n3 += 3;
@@ -82,7 +82,7 @@ int32_t game_countCarsInTrain(Game *game, int32_t n) {
 
 bool game_isTrainHeadCarAt(Game *game, int32_t n, int32_t n2, int32_t n3) {
     if (n == -1) return false;
-    if (game_byteToUnsignedInt(game, game->fleet.trainX[n]) == n2 && game_byteToUnsignedInt(game, game->fleet.trainY[n]) == n3)
+    if (unsignedByte(game->fleet.trainX[n]) == n2 && unsignedByte(game->fleet.trainY[n]) == n3)
         return true;
     return game_isTrainHeadCarAt(game, game->fleet.nextCar[n], n2, n3);
 }
@@ -94,20 +94,20 @@ void game_removeTrainFromMapInlined(Game *game, int32_t n, bool bl) {
     game->fleet.nextCar[n] = -1;
     game->fleet.trainEnergyOrCount[n] = 7;
     if (bl)
-        game_handleCursorClickInlined(game, game_byteToUnsignedInt(game, game->fleet.trainX[n]),
-                                    game_byteToUnsignedInt(game, game->fleet.trainY[n]), false, true);
+        game_handleCursorClickInlined(game, unsignedByte(game->fleet.trainX[n]),
+                                    unsignedByte(game->fleet.trainY[n]), false, true);
     game->renderer.lastViewportCenterX = -1;
     game->ready = false;
     game->ui.transitionCode = 16;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
 }
 
 void game_mergeTrainAt(Game *game, int32_t n) {
     for (int i = 0; i < 500; ++i) {
         if (n == i || (game->fleet.trainFlags[i] & 0x80) != 128
             || (game->fleet.trainFlags[i] & 0x40) != 64
-            || !game_isTrainHeadCarAt(game, i, game_byteToUnsignedInt(game, game->fleet.trainX[n]),
-                                    game_byteToUnsignedInt(game, game->fleet.trainY[n])))
+            || !game_isTrainHeadCarAt(game, i, unsignedByte(game->fleet.trainX[n]),
+                                    unsignedByte(game->fleet.trainY[n])))
             continue;
         game_removeTrainFromMapInlined(game, i, true);
         game_removeTrainFromMapInlined(game, n, true);
@@ -117,15 +117,15 @@ void game_mergeTrainAt(Game *game, int32_t n) {
 void game_maybeAiTakeTurn(Game *game) {
     if (game->ui.buildMenuMode != 2 && game->ui.buildMenuMode != 4
         && game->rng.next_int() % game->scenario.aiFrequency > game->scenario.aiThreshold)
-        game_setState(game, +GameState::AiTurn);
+        game_setState(game, GameState::AiTurn);
 }
 
 void game_dayResetAd(Game *game) {
     for (int i = 0; i < 500; ++i) {
         if ((game->fleet.trainFlags[i] & 0x80) != 128 || (game->fleet.trainFlags[i] & 0x40) != 64)
             continue;
-        int n2 = game_byteToUnsignedInt(game, game->fleet.trainX[i]);
-        int n = game_byteToUnsignedInt(game, game->fleet.trainY[i]);
+        int n2 = unsignedByte(game->fleet.trainX[i]);
+        int n = unsignedByte(game->fleet.trainY[i]);
         if ((game->world.trackMap[n2][n] != 66 && game->world.trackMap[n2][n] != 67
              && game->world.trackMap[n2][n] != 68)
             || game->fleet.trainEraOrStage[i] >= game->era)
@@ -140,8 +140,8 @@ void game_dayResetAd(Game *game) {
 void game_postRevenueReset(Game *game) {
     for (int i = 0; i < 500; ++i) {
         if ((game->fleet.trainFlags[i] & 0x80) != 128) continue;
-        int n2 = game_byteToUnsignedInt(game, game->fleet.trainX[i]);
-        int n = game_byteToUnsignedInt(game, game->fleet.trainY[i]);
+        int n2 = unsignedByte(game->fleet.trainX[i]);
+        int n = unsignedByte(game->fleet.trainY[i]);
         if (game->world.trackMap[n2][n] == 66 || game->world.trackMap[n2][n] == 67
             || game->world.trackMap[n2][n] == 68)
             game->fleet.trainAgeOrTimer[i] = 0;
@@ -188,12 +188,12 @@ void game_handleCursorClickInlined(Game *game, int32_t n, int32_t n2,
     }
     for (n3 = 49; n3 >= 0; --n3) {
         if (game->world.tileQueue[n3][0] != 0
-            && game_byteToUnsignedInt(game, game->world.tileQueue[n3][1]) == n
-            && game_byteToUnsignedInt(game, game->world.tileQueue[n3][2]) == n2)
+            && unsignedByte(game->world.tileQueue[n3][1]) == n
+            && unsignedByte(game->world.tileQueue[n3][2]) == n2)
             bl3 = false;
     }
     if (!bl3) return;
-    if (game_byteToUnsignedInt(game, game->world.tileMap[n][n2]) < 128)
+    if (unsignedByte(game->world.tileMap[n][n2]) < 128)
         game->world.tileMap[n][n2] = (int8_t)(game->world.tileMap[n][n2] + 128);
     n3 = 0;
     for (int i = 49; i >= 0; --i) {
@@ -320,7 +320,7 @@ int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
                 if ((game->fleet.trainFlags[k] & 0x80) != 128
-                    || game_byteToUnsignedInt(game, game->fleet.trainX[k]) != i || game_byteToUnsignedInt(game, game->fleet.trainY[k]) != j)
+                    || unsignedByte(game->fleet.trainX[k]) != i || unsignedByte(game->fleet.trainY[k]) != j)
                     continue;
                 n2 += (game->fleet.trainFlags[k] & 0x40) == 64 ? 400 : 55;
             }
@@ -385,7 +385,7 @@ void game_everyTwoTickZ(Game *game) {
         game_persistSnapshotMode0(game);
         game->scenario.currentScenarioScore = game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
     }
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
 }
 
 int32_t game_scanMapForMetric(Game *game) {
@@ -406,8 +406,8 @@ int32_t game_scanMapForMetric(Game *game) {
     }
     for (int n3 = 0; n3 < 500; ++n3) {
         if ((game->fleet.trainFlags[n3] & 0x80) != 128) continue;
-        int n2 = game_byteToUnsignedInt(game, game->fleet.trainX[n3]);
-        int n = game_byteToUnsignedInt(game, game->fleet.trainY[n3]);
+        int n2 = unsignedByte(game->fleet.trainX[n3]);
+        int n = unsignedByte(game->fleet.trainY[n3]);
         if (game->world.trackMap[n2][n] != 65) continue;
         if ((game->fleet.trainFlags[n3] & 0x40) == 64) {
             switch (game->fleet.trainEraOrStage[n3]) {
@@ -496,20 +496,20 @@ void game_newYearNotify(Game *game) {
         if (gcs_annualReportEnabled) {
             game->ready = false;
             game->ui.transitionCode = 35;
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
         }
     } else if (gcs_monthlyReportEnabled) {
         game->ready = false;
         game->ui.transitionCode = 32;
-        game_setState(game, +GameState::MenuOverlay);
+        game_setState(game, GameState::MenuOverlay);
     }
 }
 
 void game_tickInputOrAi(Game *game, bool bl) {
     for (int i = 0; i < 250; ++i) {
         if ((game->fleet.vehicleFlags[i] & 0x80) != 128) continue;
-        int n3 = game_byteToUnsignedInt(game, game->fleet.serviceVehicleX[i]);
-        int n4 = game_byteToUnsignedInt(game, game->fleet.serviceVehicleY[i]);
+        int n3 = unsignedByte(game->fleet.serviceVehicleX[i]);
+        int n4 = unsignedByte(game->fleet.serviceVehicleY[i]);
         int n5 = n3 - 3;
         int n6 = n4 - 3;
         int n7 = n3 + 3;
@@ -616,7 +616,6 @@ void game_tickInputOrAi(Game *game, bool bl) {
 // frame timers, tile-fade queue, train updates, then (when counterA reaches
 // dH) the day/month/year calendar cadence with its monthly/yearly hooks.
 void game_simulationTick(Game *game) {
-            game->tickStart = midp_current_time_millis();
             if (++game->timerA1 == 2) {
                 game->timerA1 = 0;
                 if (++game->timerA2 == 3) game->timerA2 = 0;
@@ -646,15 +645,15 @@ void game_simulationTick(Game *game) {
             for (int n27 = 0; n27 < 50; ++n27) {
                 if (game->world.tileQueue[n27][0] <= 0) continue;
                 --game->world.tileQueue[n27][0];
-                int n = game_byteToUnsignedInt(game, game->world.tileQueue[n27][1]);
-                int n29 = game_byteToUnsignedInt(game, game->world.tileQueue[n27][2]);
+                int n = unsignedByte(game->world.tileQueue[n27][1]);
+                int n29 = unsignedByte(game->world.tileQueue[n27][2]);
                 if (game->world.tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
                     && n < game->world.mapWidth && n29 < game->world.mapHeight)
-                    game->world.tileMap[n][n29] = (int8_t)(game_byteToUnsignedInt(game, game->world.tileMap[n][n29]) - 128);
+                    game->world.tileMap[n][n29] = (int8_t)(unsignedByte(game->world.tileMap[n][n29]) - 128);
                 if (game->world.tileQueue[n27][0] != 7 || n < 0 || n29 < 0
                     || n >= game->world.mapWidth || n29 >= game->world.mapHeight)
                     continue;
-                int n30 = game_byteToUnsignedInt(game, game->world.tileMap[n][n29]) - 128;
+                int n30 = unsignedByte(game->world.tileMap[n][n29]) - 128;
                 if (game->world.tileQueueVisualOnly[n27]) continue;
                 if (n30 >= 29 && n30 <= 33) game->world.tileMap[n][n29] = -128;
                 if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
@@ -778,7 +777,7 @@ void game_simulationTick(Game *game) {
                     if (game->economy.money < 0) {
                         game->ready = false;
                         game->ui.transitionCode = 7;
-                        game_setState(game, +GameState::MenuOverlay);
+                        game_setState(game, GameState::MenuOverlay);
                     }
                 }
                 int oldEra = game->era;
@@ -793,10 +792,9 @@ void game_simulationTick(Game *game) {
                 if (oldEra != game->era) {
                     game->ready = false;
                     game->ui.transitionCode = 13;
-                    game_setState(game, +GameState::MenuOverlay);
+                    game_setState(game, GameState::MenuOverlay);
                 }
             } else {
                 ++game->counterA;
             }
-            game->tickEnd = midp_current_time_millis();
 }

@@ -1,5 +1,5 @@
 // Build-menu tables for a scenario.
-#include "game.h"
+#include "game_internal.h"
 
 void game_initBuildMenuRow(Game *game, int32_t n, int32_t n2) {
     const auto row_len = static_cast<std::size_t>(n2);

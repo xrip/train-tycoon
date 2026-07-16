@@ -30,12 +30,9 @@ void game_fields_init(Game *game) {
     game->renderer.viewportHalfWidth = game->world.mapScreenWidth / 2;
     game->renderer.viewportHalfHeight = game->world.mapScreenHeight / 2;
     game->simSpeed = 1;
-    game->frameCount = 0;
     game->frameIndex = 0;
     game->ui.inputPending = false;
     game->ui.pauseFlag = false;
-    game->ui.paused = false;
-    game->paintSuspended = false;
     game->ui.keyRepeatDelay = 0;
     game->ui.heldKey = 0;
     game->displayInitialized = false;

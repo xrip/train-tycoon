@@ -1,11 +1,11 @@
 // Direct game-map build and selection actions.
-#include "game.h"
+#include "game_internal.h"
 #include <vector>
 
 void game_enterOutOfMoneyState(Game *game) {
     game->ready = false;
     game->ui.transitionCode = 11;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
 }
 
 void game_incrementRowValueType13(Game *game, int32_t amount) {
@@ -15,8 +15,8 @@ void game_incrementRowValueType13(Game *game, int32_t amount) {
 
 bool game_isAnyTrainCarAt(Game *game, int32_t car, int32_t x, int32_t y) {
     if (car == -1) return false;
-    if (game_byteToUnsignedInt(game, game->fleet.trainX[car]) == x
-        && game_byteToUnsignedInt(game, game->fleet.trainY[car]) == y)
+    if (unsignedByte(game->fleet.trainX[car]) == x
+        && unsignedByte(game->fleet.trainY[car]) == y)
         return true;
     return game_isAnyTrainCarAt(game, game->fleet.nextCar[car], x, y);
 }
@@ -169,8 +169,8 @@ void game_demolishAtCursor(Game *game) {
     } else if (tile >= 87 && tile <= 90) {
         int vehicle = game_findServiceVehicleAt(game, cursor_x, cursor_y);
         if (vehicle != 5000) {
-            int x = game_byteToUnsignedInt(game, game->fleet.serviceVehicleX[vehicle]);
-            int y = game_byteToUnsignedInt(game, game->fleet.serviceVehicleY[vehicle]);
+            int x = unsignedByte(game->fleet.serviceVehicleX[vehicle]);
+            int y = unsignedByte(game->fleet.serviceVehicleY[vehicle]);
             if ((game->fleet.vehicleFlags[vehicle] & 0x20) == 32) {
                 if ((game->fleet.vehicleFlags[vehicle] & 0x40) == 0) {
                     game->world.trackMap[x][y - 1] = 0;
@@ -203,13 +203,13 @@ void game_pickTrainsAtCursor(Game *game) {
         game->build.junctionDirCursor = (int8_t)(track & 0x3F);
         game->ready = false;
         game->ui.transitionCode = 20;
-        game_setState(game, +GameState::MenuOverlay);
+        game_setState(game, GameState::MenuOverlay);
     }
     if ((track & 0xC0) == 192) {
         game->build.stationDirCursor = (int8_t)(track & 0x3F);
         game->ready = false;
         game->ui.transitionCode = 21;
-        game_setState(game, +GameState::MenuOverlay);
+        game_setState(game, GameState::MenuOverlay);
     }
     if (track != 65) return;
 
@@ -221,7 +221,7 @@ void game_pickTrainsAtCursor(Game *game) {
         if (game->serviceVehicleAtCursor != 5000) {
             game->ready = false;
             game->ui.transitionCode = 22;
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
         }
         return;
     }
@@ -249,7 +249,7 @@ void game_pickTrainsAtCursor(Game *game) {
     game->build.currentTrainCostSnapshot = game->build.unitCost;
     game->ready = false;
     game->ui.transitionCode = 26;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
 }
 
 void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
@@ -492,23 +492,23 @@ void game_openBuildMenu(Game *game) {
                     break;
                 case 2:
                     game->ready = false; game->ui.transitionCode = 30;
-                    game_setState(game, +GameState::MenuOverlay); break;
+                    game_setState(game, GameState::MenuOverlay); break;
                 case 3:
                     game->ready = false; game->ui.transitionCode = 31;
-                    game_setState(game, +GameState::MenuOverlay); break;
+                    game_setState(game, GameState::MenuOverlay); break;
                 case 4:
                     game_rebuildMenuTypeIndexes(game);
                     game->ready = false; game->ui.transitionCode = 60;
-                    game_setState(game, +GameState::MenuOverlay); break;
+                    game_setState(game, GameState::MenuOverlay); break;
                 case 5:
                     game->ready = false; game->ui.transitionCode = 17;
-                    game_setState(game, +GameState::MenuOverlay); break;
+                    game_setState(game, GameState::MenuOverlay); break;
                 case 8: game->ui.inputPending = true; break;
                 case 9:
                     game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
                     game->ui.useDefaultOverlaySelection = false;
                     game->ready = false; game->ui.transitionCode = 1;
-                    game_setState(game, +GameState::MenuOverlay); break;
+                    game_setState(game, GameState::MenuOverlay); break;
                 case 11: game->ui.pauseFlag = !game->ui.pauseFlag; break;
             }
             break;
@@ -612,7 +612,7 @@ void game_openBuildMenu(Game *game) {
                 game->pathfinder.targetX = game->ui.tileCursorX;
                 game->pathfinder.targetY = game->ui.tileCursorY;
                 game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
-                game_setState(game, +GameState::BuildingPath);
+                game_setState(game, GameState::BuildingPath);
             } else if (item == 9) {
                 game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
                 game->ui.buildMenuMode = 1;

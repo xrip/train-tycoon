@@ -1,5 +1,5 @@
 // Save-buffer reading, writing, and compression.
-#include "game.h"
+#include "game_internal.h"
 #include "support/record_store.h"
 
 #include <stdlib.h>
@@ -64,9 +64,7 @@ void game_saveGame(Game *game) {
     store->add_record(record);
 }
 
-void game_writeRleRun(Game *game, ByteBuffer& output,
-                    int32_t value, int32_t count) {
-    (void)game;
+void game_writeRleRun(ByteBuffer& output, int32_t value, int32_t count) {
     if (count == 1) {
         if (value == -1) {
             output.write(255);
@@ -80,44 +78,33 @@ void game_writeRleRun(Game *game, ByteBuffer& output,
     }
 }
 
-void game_checkSaveByteSum(Game *game, const char *label) {
-    (void)label;
-    uint64_t sum = 0;
-    for (int i = 0; i < game->saveCodec.snapshotSize; ++i)
-        sum += (uint64_t)game_byteToUnsignedInt(game, game->saveCodec.saveBuffer[i]);
-    (void)sum;
-}
-
 void game_compressSaveBuffer(Game *game) {
-    game_checkSaveByteSum(game, "Compress pre");
     ByteBuffer output;
     int value = game->saveCodec.saveBuffer[0];
     int count = 1;
     for (int i = 1; i < game->saveCodec.snapshotSize; ++i) {
         if (value != game->saveCodec.saveBuffer[i] || count == 254) {
-            game_writeRleRun(game, output, value, count);
+            game_writeRleRun(output, value, count);
             value = game->saveCodec.saveBuffer[i];
             count = 1;
         } else {
             ++count;
         }
     }
-    game_writeRleRun(game, output, value, count);
+    game_writeRleRun(output, value, count);
     game->saveCodec.bytesUncompressed += game->saveCodec.snapshotSize;
     const auto compressed = output.bytes();
     game->saveCodec.snapshotSize = static_cast<int>(compressed.size());
     game->saveCodec.saveBuffer.assign(static_cast<std::size_t>(game->saveCodec.snapshotSize), 0);
     memcpy(game->saveCodec.saveBuffer.data(), compressed.data(), (size_t)game->saveCodec.snapshotSize);
     game->saveCodec.bytesCompressed += game->saveCodec.snapshotSize;
-    game_checkSaveByteSum(game, "Compress post");
 }
 
 void game_decompressSaveBuffer(Game *game) {
-    game_checkSaveByteSum(game, "Decompress pre");
     ByteBuffer output;
     for (int i = 0; i < game->saveCodec.snapshotSize; ++i) {
         if (game->saveCodec.saveBuffer[i] == -1) {
-            int count = game_byteToUnsignedInt(game, game->saveCodec.saveBuffer[i + 1]);
+            int count = unsignedByte(game->saveCodec.saveBuffer[i + 1]);
             for (int j = 0; j < count; ++j)
                 output.write(game->saveCodec.saveBuffer[i + 2]);
             i += 2;
@@ -131,7 +118,6 @@ void game_decompressSaveBuffer(Game *game) {
     game->saveCodec.saveBuffer.assign(static_cast<std::size_t>(game->saveCodec.snapshotSize), 0);
     memcpy(game->saveCodec.saveBuffer.data(), decompressed.data(), (size_t)game->saveCodec.snapshotSize);
     game->saveCodec.bytesUncompressed += game->saveCodec.snapshotSize;
-    game_checkSaveByteSum(game, "Decompress post");
 }
 
 void game_initSaveOrLoad(Game *game, int32_t mode) {

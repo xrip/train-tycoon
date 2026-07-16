@@ -1,7 +1,7 @@
 // Packed-sprite UI and text drawing.
 // renderPackedSprite draws the menu/dialog layouts (state 20). renderFontString
 // draws text from the `ca[]` font atlas. u() resolves per-slot sub-sprites.
-#include "game.h"
+#include "game_internal.h"
 
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 static int imin(int a, int b) { return a < b ? a : b; }
@@ -72,16 +72,16 @@ void game_renderFontString(Game *game, Surface *g, int32_t n, int32_t n2,
 Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
     if (contextCode == 23) {
         if (slotIndex == 0 && game->build.wagonType >= 0 && game->build.wagonType < 3)
-            return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[136])].get();
+            return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[136])].get();
         if (slotIndex == 0 && game->build.wagonType >= 3 && game->build.wagonType < 6)
-            return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[146])].get();
+            return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[146])].get();
         if (slotIndex > 0) {
             switch (game->build.wagonOptionSlots[slotIndex - 1]) {
                 case -1: return NULL;
-                case 0: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[162])].get();
-                case 1: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[167])].get();
-                case 2: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[172])].get();
-                case 3: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[182])].get();
+                case 0: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[162])].get();
+                case 1: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[167])].get();
+                case 2: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[172])].get();
+                case 3: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[182])].get();
             }
         }
     }
@@ -91,14 +91,14 @@ Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
         int carType = game->fleet.trainFlags[carSlot] & 0xF;
         switch (carType) {
             case -1: return NULL;
-            case 0: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[136])].get();
-            case 1: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[146])].get();
-            case 2: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[162])].get();
-            case 3: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[167])].get();
-            case 4: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[172])].get();
-            case 5: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[177])].get();
-            case 6: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[182])].get();
-            case 7: return game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[187])].get();
+            case 0: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[136])].get();
+            case 1: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[146])].get();
+            case 2: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[162])].get();
+            case 3: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[167])].get();
+            case 4: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[172])].get();
+            case 5: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[177])].get();
+            case 6: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[182])].get();
+            case 7: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[187])].get();
         }
     }
     return NULL;
@@ -129,9 +129,9 @@ void game_drawTextBox(Game *game, Surface *g, int32_t n, int32_t n2,
 }
 
 void game_drawRectFill(Game *game, Surface *g, int32_t n, int32_t n2, int8_t by) {
-    const auto engine_codes = game_tracked_codes(game->assets.spriteBitmapTable[
+    const auto engine_codes = std::span<const int8_t>(game->assets.spriteBitmapTable[
         game->assets.spriteIndexTable[80 + (game->ui.trainSelectionIndex[by] >> 8 & 0xFF)]]);
-    const auto wagon_codes = game_tracked_codes(game->assets.spriteBitmapTable[
+    const auto wagon_codes = std::span<const int8_t>(game->assets.spriteBitmapTable[
         game->assets.spriteIndexTable[86 + (game->ui.trainSelectionIndex[by] & 0xFF)]]);
     std::vector<int8_t> train_codes;
     train_codes.reserve(wagon_codes.size() + engine_codes.size());
@@ -170,12 +170,12 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
         game->renderer.mapRedrawPending = false;
     }
     int16_t s = game->assets.spriteOffsetTable[n];
-    int n14 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 1]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 2]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 3]);
-    int n15 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 4]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 5]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 6]);
-    int n16 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 7]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 8]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 9]);
-    int n17 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 10]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[s + 11]) + game_byteToUnsignedInt(game, game->assets.spriteData[s + 12]);
-    int n18 = game_byteToUnsignedInt(game, game->assets.spriteData[s + 13]);
-    int n19 = game_byteToUnsignedInt(game, game->assets.spriteData[s + 14]);
+    int n14 = 65536 * unsignedByte(game->assets.spriteData[s + 1]) + 256 * unsignedByte(game->assets.spriteData[s + 2]) + unsignedByte(game->assets.spriteData[s + 3]);
+    int n15 = 65536 * unsignedByte(game->assets.spriteData[s + 4]) + 256 * unsignedByte(game->assets.spriteData[s + 5]) + unsignedByte(game->assets.spriteData[s + 6]);
+    int n16 = 65536 * unsignedByte(game->assets.spriteData[s + 7]) + 256 * unsignedByte(game->assets.spriteData[s + 8]) + unsignedByte(game->assets.spriteData[s + 9]);
+    int n17 = 65536 * unsignedByte(game->assets.spriteData[s + 10]) + 256 * unsignedByte(game->assets.spriteData[s + 11]) + unsignedByte(game->assets.spriteData[s + 12]);
+    int n18 = unsignedByte(game->assets.spriteData[s + 13]);
+    int n19 = unsignedByte(game->assets.spriteData[s + 14]);
     if (game->renderer.dialogContentHeight < n19) game->renderer.dialogContentHeight = n19;
     else n19 = game->renderer.dialogContentHeight;
     if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) n18 += 6;
@@ -334,11 +334,11 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
         n12 = n21 + n23 - game->ui.cursorScale;
         by = game->assets.spriteData[n25++];
         n11 = by & 7;
-        n10 = 65536 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
-        n9 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
-        n8 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
-        n7 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
-        n6 = game_byteToUnsignedInt(game, game->assets.spriteData[n25++]) + 256 * game_byteToUnsignedInt(game, game->assets.spriteData[n25++]);
+        n10 = 65536 * unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]) + unsignedByte(game->assets.spriteData[n25++]);
+        n9 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
+        n8 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
+        n7 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
+        n6 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
         n9 = (int16_t)((by & 8) == 8 ? game_neighboursMask(game, game->renderer.currentSpriteId, n9) : n9);
         n8 = (int16_t)((by & 0x10) == 16 ? game_neighboursMask(game, game->renderer.currentSpriteId, n8) : n8);
         n7 = (int16_t)((by & 0x20) == 32 ? game_neighboursMask(game, game->renderer.currentSpriteId, n7) : n7);

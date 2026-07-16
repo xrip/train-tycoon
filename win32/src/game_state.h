@@ -23,17 +23,9 @@
 #include <vector>
 
 typedef struct Game {
-    void* midlet;
     bool stopRequested;
-    void* gameThread;
     int32_t simSpeed;
-    int64_t frameStartTime;
-    int64_t sleepStart;
-    int32_t sleepMillis;
-    int32_t frameCount;
     int32_t frameIndex;
-    int64_t frameTime;
-    bool paintSuspended;   // when true, game_paint returns without drawing
     bool displayInitialized;
     bool confirmCloseRequested;  // one-shot: close confirm dialog to the menu overlay
     bool snapshotLoadSucceeded;
@@ -83,8 +75,6 @@ typedef struct Game {
     int32_t savedGameState;  // game state stashed for return after an overlay
     int32_t loadingTimer;
     int32_t dayTickThreshold;  // frames per game-day (counterA counts up to this)
-    int64_t tickStart;
-    int64_t tickEnd;
 } Game;
 
 extern int32_t gcs_screenWidth;

@@ -1,7 +1,7 @@
 // Isometric world drawing.
 // Draws terrain into the offscreen backbuffer (only when the viewport moved),
 // blits it, then overlays dynamic tiles, trains, selections and the build menu.
-#include "game.h"
+#include "game_internal.h"
 #include <vector>
 
 void game_renderMap(Game *game, Surface *g) {
@@ -24,7 +24,7 @@ void game_renderMap(Game *game, Surface *g) {
             n7 = n9 + game->assets.tileOffsetX[n8];
             int n11 = n10 + game->assets.tileOffsetY[n8];
             if (n7 >= 0 && n7 < game->world.mapWidth && n11 >= 0 && n11 < game->world.mapHeight) {
-                n6 = game_byteToUnsignedInt(game, game->world.tileMap[n7][n11]);
+                n6 = unsignedByte(game->world.tileMap[n7][n11]);
                 if (n6 >= 128) n6 -= 128;
                 if (!((n6 != 0 && n6 <= 28) || (n6 >= 77 && n6 <= 86))) {
                     n5 = n11 * 16 + n7 * 16 + 16 - game->renderer.viewportCenterX;
@@ -83,8 +83,8 @@ void game_renderMap(Game *game, Surface *g) {
     game->renderer.visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
         if ((game->fleet.trainFlags[n6] & 0x80) != 128) continue;
-        n5 = game_byteToUnsignedInt(game, game->fleet.trainX[n6]);
-        n4 = game_byteToUnsignedInt(game, game->fleet.trainY[n6]);
+        n5 = unsignedByte(game->fleet.trainX[n6]);
+        n4 = unsignedByte(game->fleet.trainY[n6]);
         if (n5 < game->renderer.viewportX0 || n4 < game->renderer.viewportY0 || n5 > game->renderer.viewportX1 || n4 > game->renderer.viewportY1) continue;
         game->renderer.visibleTrains[game->renderer.visibleTrainCount++] = (int16_t)n6;
         visible_train_tiles[(n5 - game->renderer.viewportX0) * visible_height +
@@ -95,7 +95,7 @@ void game_renderMap(Game *game, Surface *g) {
         n5 = n9 + game->assets.tileOffsetX[n6];
         n4 = n10 + game->assets.tileOffsetY[n6];
         if (n5 < 0 || n5 >= game->world.mapWidth || n4 < 0 || n4 >= game->world.mapHeight) continue;
-        n3 = game_byteToUnsignedInt(game, game->world.tileMap[n5][n4]);
+        n3 = unsignedByte(game->world.tileMap[n5][n4]);
         n2 = n3;
         if (n2 >= 128) n2 -= 128;
         if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
@@ -121,7 +121,7 @@ void game_renderMap(Game *game, Surface *g) {
                                 n4 - game->renderer.viewportY0]) {
             for (n = 0; n < game->renderer.visibleTrainCount; ++n) {
                 n12 = game->renderer.visibleTrains[n];
-                if ((game->fleet.trainFlags[n12] & 0x80) != 128 || n5 != game_byteToUnsignedInt(game, game->fleet.trainX[n12]) || n4 != game_byteToUnsignedInt(game, game->fleet.trainY[n12])) continue;
+                if ((game->fleet.trainFlags[n12] & 0x80) != 128 || n5 != unsignedByte(game->fleet.trainX[n12]) || n4 != unsignedByte(game->fleet.trainY[n12])) continue;
                 game_drawSpriteSingle(game, g, n12);
             }
         }
@@ -130,11 +130,11 @@ void game_renderMap(Game *game, Surface *g) {
         n12 = game->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n5][n4] + 15;
         int n14 = -1;
         for (int i = 0; i < 50; ++i) {
-            if (game_byteToUnsignedInt(game, game->world.tileQueue[i][1]) != n5 || game_byteToUnsignedInt(game, game->world.tileQueue[i][2]) != n4) continue;
+            if (unsignedByte(game->world.tileQueue[i][1]) != n5 || unsignedByte(game->world.tileQueue[i][2]) != n4) continue;
             n14 = game->world.tileQueue[i][0];
         }
         if (n14 <= 0) continue;
-        midp_draw_image(g, game->assets.tile_sprites[game_byteToUnsignedInt(game, game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
+        midp_draw_image(g, game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
     }
     if (!gcs_selectionHidden) {
         for (n6 = 0; n6 < game->assets.numActiveTileAnimations; ++n6) {

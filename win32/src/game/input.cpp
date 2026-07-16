@@ -1,5 +1,5 @@
 // Game input state and actions.
-#include "game.h"
+#include "game_internal.h"
 
 #include <stdlib.h>
 
@@ -162,17 +162,17 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
             game_computeIsoCornersInlined(game, x, y, game->build.selectionTileX.data(),
                                         game->build.selectionTileY.data(), false);
             int opposite_edges =
-                game_crossProduct2D(game, anchorX, anchorY,
+                game_crossProduct2D(anchorX, anchorY,
                                   game->build.selectionTileX[0], game->build.selectionTileY[0],
                                   game->build.selectionTileX[1], game->build.selectionTileY[1])
-                * game_crossProduct2D(game, anchorX, anchorY,
+                * game_crossProduct2D(anchorX, anchorY,
                                     game->build.selectionTileX[2], game->build.selectionTileY[2],
                                     game->build.selectionTileX[3], game->build.selectionTileY[3]);
             int other_edges =
-                game_crossProduct2D(game, anchorX, anchorY,
+                game_crossProduct2D(anchorX, anchorY,
                                   game->build.selectionTileX[0], game->build.selectionTileY[0],
                                   game->build.selectionTileX[2], game->build.selectionTileY[2])
-                * game_crossProduct2D(game, anchorX, anchorY,
+                * game_crossProduct2D(anchorX, anchorY,
                                     game->build.selectionTileX[1], game->build.selectionTileY[1],
                                     game->build.selectionTileX[3], game->build.selectionTileY[3]);
             if (opposite_edges > 0 || other_edges > 0) continue;

@@ -1,5 +1,5 @@
 // Monthly economy and offer processing.
-#include "game.h"
+#include "game_internal.h"
 #include <cstdlib>
 
 void game_placeTrainAt(Game *game, int32_t duration_units, int32_t row) {
@@ -73,14 +73,14 @@ void game_applyMenuRowEffect(Game *game, int32_t row) {
     copy_menu_row_to_slot5(game, row);
     game->scenario.duplicateRowState = 3;
     game->ui.transitionCode = 9;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
 }
 
 void game_duplicateMenuRow(Game *game, int32_t row) {
     copy_menu_row_to_slot5(game, row);
     game->scenario.duplicateRowState = 4;
     game->ui.transitionCode = 8;
-    game_setState(game, +GameState::MenuOverlay);
+    game_setState(game, GameState::MenuOverlay);
 }
 
 void game_everyMonthlyTick(Game *game) {
@@ -127,8 +127,8 @@ void game_everyMonthlyTick(Game *game) {
         int type267_count = 0;
         for (int train = 0; train < 500; ++train) {
             if ((game->fleet.trainFlags[train] & 0x80) != 128
-                || game->world.trackMap[game_byteToUnsignedInt(game, game->fleet.trainX[train])]
-                               [game_byteToUnsignedInt(game, game->fleet.trainY[train])] != 65)
+                || game->world.trackMap[unsignedByte(game->fleet.trainX[train])]
+                               [unsignedByte(game->fleet.trainY[train])] != 65)
                 continue;
             ++active_train_count;
             if ((game->fleet.trainFlags[train] & 0x40) == 64) {
@@ -201,7 +201,7 @@ void game_everyMonthlyTick(Game *game) {
             int effect_index = effect_code - 1;
             game->scenario.offerEffectNextCount[effect_index] =
                 (int16_t)(game->scenario.offerEffectNextCount[effect_index]
-                          + game_byteToUnsignedInt(game, game->scenario.offerEffectSchedule[effect_index][1]));
+                          + unsignedByte(game->scenario.offerEffectSchedule[effect_index][1]));
             if (effect_code == 1) {
                 game->ui.menuRowEra[free_row] =
                     (int8_t)(30 + std::abs(game->rng.next_int() % 50));
@@ -226,7 +226,7 @@ void game_everyMonthlyTick(Game *game) {
             game->ready = false;
             game->ui.transitionCode = 40;
             game->scenario.offerRowIndex = (int8_t)free_row;
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             ++game->scenario.offerGenerationCount;
         }
     }

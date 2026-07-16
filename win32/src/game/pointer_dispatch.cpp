@@ -11,7 +11,7 @@
 //   - menu element:    MenuOverlay selectable rows (geometry captured in render)
 //   - game field:      the Playing map / MapOverview minimap (deferred: needs the
 //                      isometric screen->tile inverse; tracked as the next step)
-#include "game.h"
+#include "game_internal.h"
 #include "game_constants.h"
 
 namespace {
@@ -57,7 +57,7 @@ void pointer_click_bottom_bar(Game *game, int x) {
 // valid in-map tile; main clears it when the mouse leaves the window.
 void game_pointerMoved(Game *game, int32_t x, int32_t y) {
     game->ui.mouseOverField = false;
-    if (game->gameState != +GameState::Playing) return;
+    if (game->gameState != GameState::Playing) return;
     if (y < 15 || y >= gcs_bottomBarY) return;  // top status strip / bottom bar = UI chrome
     int32_t anchor_x = x + game->renderer.viewportCenterX;
     int32_t anchor_y = y + game->renderer.viewportCenterY;
@@ -77,7 +77,7 @@ void game_pointerMoved(Game *game, int32_t x, int32_t y) {
 // build-menu row is enabled (game_viewportZoomKey is skipped otherwise, so the
 // advance would never be clamped/processed). margin/step are tuning knobs.
 void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y) {
-    if (game->gameState != +GameState::Playing) return;
+    if (game->gameState != GameState::Playing) return;
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
     if (y < 15 || y >= gcs_bottomBarY) return;  // only inside the gameplay viewport
 
@@ -103,13 +103,13 @@ void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y) {
 void game_pointerPressed(Game *game, int32_t x, int32_t y) {
     if (game->ui.inputPending) { game->ui.inputPending = false; return; }
     switch (game->gameState) {
-        case +GameState::BootSplash0: case +GameState::BootSplash1:
-        case +GameState::BootSplash2: case +GameState::BootSplash3:
-        case +GameState::LoadingResources:
-        case +GameState::GeneratingMap:
+        case GameState::BootSplash0: case GameState::BootSplash1:
+        case GameState::BootSplash2: case GameState::BootSplash3:
+        case GameState::LoadingResources:
+        case GameState::GeneratingMap:
             pointer_advance_loader(game);
             return;
-        case +GameState::MenuOverlay: {
+        case GameState::MenuOverlay: {
             const int hx = static_cast<int>(x);
             const int hy = static_cast<int>(y);
             // Control element: the top-right X closes the overlay. Same as the
@@ -129,7 +129,7 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
             }
             return;
         }
-        case +GameState::Playing:
+        case GameState::Playing:
             // Control element: the bottom build-menu bar.
             if (y >= gcs_bottomBarY) {
                 pointer_click_bottom_bar(game, static_cast<int>(x));
@@ -146,7 +146,7 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
                 if (!game->ui.blockBuildMenu) game_openBuildMenu(game);
             }
             return;
-        case +GameState::MapOverview:
+        case GameState::MapOverview:
             // Control element: the confirm bar's two 14px buttons -- x=0 accepts
             // (return to play), x=18 exits (back to menu). Same as the 5/fire path.
             if (y >= gcs_bottomBarY) {
@@ -154,13 +154,13 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
                 else if (x >= 18 && x < 32) game->ui.confirmToggle = 1;
                 else return;
                 if (game->ui.confirmToggle == 0) {
-                    game_setState(game, +GameState::Playing);
+                    game_setState(game, GameState::Playing);
                     game->ui.buildMenuItemIndex = 0;
                     game->ui.menuDirty = true;
                 } else {
                     game->ready = false;
                     game->ui.transitionCode = 36;
-                    game_setState(game, +GameState::MenuOverlay);
+                    game_setState(game, GameState::MenuOverlay);
                 }
             }
             // Minimap pan-on-click is deferred with the screen->map inverse.
@@ -168,14 +168,4 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
         default:
             return;  // Building*/Saving/Loading/Ai/Sync: transient, ignore.
     }
-}
-
-void game_pointerReleased(Game *game, int32_t x, int32_t y) {
-    (void)x; (void)y;
-    if (game->ui.inputPending) game->ui.inputPending = false;
-}
-
-void game_pointerDragged(Game *game, int32_t x, int32_t y) {
-    (void)x; (void)y;
-    if (game->ui.inputPending) return;
 }

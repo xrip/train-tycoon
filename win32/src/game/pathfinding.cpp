@@ -1,5 +1,5 @@
 // Build-path search, validation, and preview tiles.
-#include "game.h"
+#include "game_internal.h"
 
 #include <limits.h>
 

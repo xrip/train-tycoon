@@ -1,6 +1,6 @@
 // Per-state key dispatch and
 // registerCityEntryInlined (menu cursor move / select).
-#include "game.h"
+#include "game_internal.h"
 #include "midp_input.h"
 
 // public void registerCityEntryInlined(byte by)  -- 1=down/right 2=up/left 3=select
@@ -47,10 +47,10 @@ void game_handleKey(Game *game, int32_t n) {
     game->ui.keyRepeatDelay = 0;
     game->ui.heldKey = 0;
     switch (game->gameState) {
-        case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3:
+        case GameState::BootSplash0: case GameState::BootSplash1: case GameState::BootSplash2: case GameState::BootSplash3:
             game->loadingTimeout = true;
             break;
-        case +GameState::MenuOverlay:
+        case GameState::MenuOverlay:
             if (n == 56 || n == 54) {
                 game_registerCityEntryInlined(game, 1);
                 game->ui.keyRepeatDelay = 4;
@@ -67,15 +67,15 @@ void game_handleKey(Game *game, int32_t n) {
             game->ui.cursorDragX = -1;
             game_registerCityEntryInlined(game, 3);
             break;
-        case +GameState::Playing:
+        case GameState::Playing:
             game->ui.lastKeyCode = n;
             game->ui.keySubState = 0;
             if (game->ui.inputSubState == 0) {
                 if (n == 42) { game_cycleBuildMenuIndex(game, false); game->ui.inputSubState = 7; game->ui.currentKey = n; }
                 if (n == 35) { game_cycleBuildMenuIndex(game, true); game->ui.inputSubState = 7; game->ui.currentKey = n; }
                 if (n == 53) game_openBuildMenu(game);
-                if (n != 48 || game->gameState != +GameState::Playing) break;
-                game_setState(game, +GameState::BuildingMinimap);
+                if (n != 48 || game->gameState != GameState::Playing) break;
+                game_setState(game, GameState::BuildingMinimap);
                 break;
             }
             if (game->ui.inputSubState == 1) {
@@ -94,18 +94,18 @@ void game_handleKey(Game *game, int32_t n) {
             if (n != 42 && n != 35) break;
             game->ui.currentKey = n;
             break;
-        case +GameState::MapOverview:
+        case GameState::MapOverview:
             game->ui.lastKeyCode = n;
             game->ui.keySubState = 40;
             if (n == 53) {
                 if (game->ui.confirmToggle == 0) {
-                    game_setState(game, +GameState::Playing);
+                    game_setState(game, GameState::Playing);
                     game->ui.buildMenuItemIndex = 0;
                     game->ui.menuDirty = true;
                 } else {
                     game->ready = false;
                     game->ui.transitionCode = 36;
-                    game_setState(game, +GameState::MenuOverlay);
+                    game_setState(game, GameState::MenuOverlay);
                 }
             }
             if (n != 42 && n != 35) break;

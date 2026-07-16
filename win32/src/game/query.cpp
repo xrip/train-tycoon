@@ -1,5 +1,5 @@
 // Map and game-state queries.
-#include "game.h"
+#include "game_internal.h"
 #include <stdlib.h> // abs
 
 int32_t game_computeKeyRepeatDelay(Game *game) {

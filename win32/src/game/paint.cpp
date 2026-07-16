@@ -1,5 +1,5 @@
 // Game paint and update state machines.
-#include "game.h"
+#include "game_internal.h"
 #include <cstdlib>
 
 static int read_u16_le(ResourceReader& resource) {
@@ -22,20 +22,19 @@ static int read_u24_le(ResourceReader& resource) {
 void game_paint(Game *game, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
-    if (game->paintSuspended) return;
     game->clickMap.clear();  // rebuild overlay hit-rects fresh each frame
     game_setCanvasSize(game, n, n2);
-    if (game->gameState != +GameState::MapOverview && game->gameState != +GameState::BuildingMinimap && game->gameState != +GameState::BuildingPath
-        && game->gameState != +GameState::SavingGame && game->gameState != +GameState::LoadingGame && game->gameState != +GameState::AiTurn
-        && game->gameState != +GameState::HighScoreSync && (game->gameState != +GameState::MenuOverlay || game->ready)) {
+    if (game->gameState != GameState::MapOverview && game->gameState != GameState::BuildingMinimap && game->gameState != GameState::BuildingPath
+        && game->gameState != GameState::SavingGame && game->gameState != GameState::LoadingGame && game->gameState != GameState::AiTurn
+        && game->gameState != GameState::HighScoreSync && (game->gameState != GameState::MenuOverlay || game->ready)) {
         midp_set_color(g, 0);
         midp_fill_rect(g, 0, 0, n, n2);
     }
     midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
     switch (game->gameState) {
-        case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3: {
+        case GameState::BootSplash0: case GameState::BootSplash1: case GameState::BootSplash2: case GameState::BootSplash3: {
             midp_set_color(g, 0xFFFFFF);
-            if (game->gameState == +GameState::BootSplash0) midp_set_color(g, 0);
+            if (game->gameState == GameState::BootSplash0) midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             int n3 = gcs_screenWidth / 2;
             int n4 = gcs_hs / 2;
@@ -54,7 +53,7 @@ void game_paint(Game *game, Surface *g) {
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
             break;
         }
-        case +GameState::LoadingResources: {
+        case GameState::LoadingResources: {
             midp_set_color(g, 0xFFFFFF);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             midp_draw_image(g, game->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
@@ -67,7 +66,7 @@ void game_paint(Game *game, Surface *g) {
             midp_draw_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
             break;
         }
-        case +GameState::MenuOverlay: {
+        case GameState::MenuOverlay: {
             if (game->ready) {
                 midp_set_color(g, 0xFFFFFF);
                 midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
@@ -75,18 +74,18 @@ void game_paint(Game *game, Surface *g) {
                     midp_draw_image(g, game->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             }
             if (game->ui.transitionCode == 36) {
-                game->gameState = +GameState::MapOverview;
+                game->gameState = GameState::MapOverview;
                 game_paint(game, g);
-                game->gameState = +GameState::MenuOverlay;
+                game->gameState = GameState::MenuOverlay;
             }
             game_renderPackedSprite(game, g, game->ui.transitionCode);
             break;
         }
-        case +GameState::GeneratingMap: {
+        case GameState::GeneratingMap: {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[0]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
             int n11 = game->world.totalTilesToGenerate < 2 ? 2 : game->world.totalTilesToGenerate;
@@ -97,10 +96,8 @@ void game_paint(Game *game, Surface *g) {
             midp_draw_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
             break;
         }
-        case +GameState::Playing: {
-            game->tickStart = midp_current_time_millis();
+        case GameState::Playing: {
             game_renderMap(game, g);
-            game->tickEnd = midp_current_time_millis();
             if (game->ui.inputPending) {
                 int n13;
                 midp_set_color(g, 0);
@@ -119,7 +116,7 @@ void game_paint(Game *game, Surface *g) {
                 game_resetOverlayRenderState(game);
                 game->ui.pendingTransitionCode = -1;
                 game_renderPackedSprite(game, g, game->ui.transitionCode);
-                game_setState(game, +GameState::MenuOverlay);
+                game_setState(game, GameState::MenuOverlay);
             }
             if (game->ui.transitionDebounce <= 0) break;
             game->ui.transitionDebounce = (int8_t)(game->ui.transitionDebounce - 1);
@@ -128,14 +125,14 @@ void game_paint(Game *game, Surface *g) {
             game_resetOverlayRenderState(game);
             game->ready = false;
             game_renderPackedSprite(game, g, game->ui.transitionCode);
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             break;
         }
-        case +GameState::BuildingMinimap:
+        case GameState::BuildingMinimap:
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
             break;
-        case +GameState::MapOverview: {
+        case GameState::MapOverview: {
             int n14;
             midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
             midp_set_color(g, 0);
@@ -163,7 +160,7 @@ void game_paint(Game *game, Surface *g) {
             if (game->confirmCloseRequested) {
                 game->ready = false;
                 game->ui.transitionCode = 36;
-                game_setState(game, +GameState::MenuOverlay);
+                game_setState(game, GameState::MenuOverlay);
                 game->confirmCloseRequested = false;
             }
             if (game->ui.pendingTransitionCode <= -1) break;
@@ -171,55 +168,55 @@ void game_paint(Game *game, Surface *g) {
             game_resetOverlayRenderState(game);
             game->ui.pendingTransitionCode = -1;
             game_renderPackedSprite(game, g, game->ui.transitionCode);
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             break;
         }
-        case +GameState::BuildingPath:
+        case GameState::BuildingPath:
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
             break;
-        case +GameState::SavingGame:
+        case GameState::SavingGame:
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[52]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[52]]));
             break;
-        case +GameState::LoadingGame:
+        case GameState::LoadingGame:
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[53]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[53]]));
             break;
-        case +GameState::AiTurn:
+        case GameState::AiTurn:
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[49]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[49]]));
             break;
-        case +GameState::HighScoreSync:
+        case GameState::HighScoreSync:
             game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
-                           game_tracked_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[66]]));
+                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[66]]));
             break;
     }
 }
 
 void game_update(Game *game) {
     switch (game->gameState) {
-        case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: {
+        case GameState::BootSplash0: case GameState::BootSplash1: case GameState::BootSplash2: {
             if (midp_current_time_millis() - game->loadingStartTime > 5000L)
                 game->loadingTimeout = true;
             ++game->loadingTimer;
             if (!game->loadingTimeout) break;
-            if (game->gameState == +GameState::BootSplash1) {
+            if (game->gameState == GameState::BootSplash1) {
                 for (int i = 0; i < 6; ++i) game->assets.font_images[i] = game_decodePngFromSpriteStream(game);
-                game_setState(game, +GameState::IntroReady);
+                game_setState(game, GameState::IntroReady);
                 break;
             }
             game_setState(game, game->gameState + 1);
             break;
         }
-        case +GameState::IntroReady:
+        case GameState::IntroReady:
             game->ready = true;
             game->ui.screenParam = 3;
             game->ui.transitionCode = 14;
             game_resetOverlayRenderState(game);
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             break;
-        case +GameState::LoadingResources:
+        case GameState::LoadingResources:
             game->assets.tile_sprites[game->assets.spriteLoadCounter] = game_decodePngFromSpriteStream(game);
             ++game->assets.spriteLoadCounter;
             if (game->assets.spriteLoadCounter == game->scenario.scenarioResourceCount / 2) {
@@ -230,9 +227,9 @@ void game_update(Game *game) {
             if (game->assets.spriteLoadCounter != game->scenario.scenarioResourceCount) break;
             game->ready = true;
             game->ui.transitionCode = 1;
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             break;
-        case +GameState::GeneratingMap: {
+        case GameState::GeneratingMap: {
             ++game->loadStep;
             if (game->loadStep == 2) {
                 game_initSaveOrLoad(game, save::OP_RESET_SKIP);
@@ -329,14 +326,14 @@ void game_update(Game *game) {
             game_loadState25Setup(game, 1);
             if (game->world.mapGenTilesDone != game->world.totalTilesToGenerate) break;
             game->world.mapGenTilesDone = 0;
-            game_setState(game, +GameState::Playing);
+            game_setState(game, GameState::Playing);
             break;
         }
-        case +GameState::Playing: {
+        case GameState::Playing: {
             game_simulationTick(game);
             break;
         }
-        case +GameState::BuildingMinimap: {
+        case GameState::BuildingMinimap: {
             if (game->loadStep > 0) --game->loadStep;
             if (game->loadStep != 2) break;
             int size = game->world.mapHeight + game->world.mapWidth;
@@ -400,17 +397,17 @@ void game_update(Game *game) {
                 }
                 previous_kind = -1;
             }
-            game_setState(game, +GameState::MapOverview);
+            game_setState(game, GameState::MapOverview);
             break;
         }
-        case +GameState::MapOverview:
+        case GameState::MapOverview:
             game_viewportPanKey(game);
             break;
-        case +GameState::BuildingPath:
+        case GameState::BuildingPath:
             if (game->loadStep > 0) --game->loadStep;
             if (game->loadStep != 2) break;
             if (game_tryBuildPath(game)) {
-                game_setState(game, +GameState::Playing);
+                game_setState(game, GameState::Playing);
                 game->ui.buildMenuItemIndex = 0;
                 game->build.buildCancelled = true;
                 game->ui.buildMenuMode = 2;
@@ -423,43 +420,43 @@ void game_update(Game *game) {
             game->ui.menuDirty = true;
             game->ready = false;
             game->ui.transitionCode = 12;
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             break;
-        case +GameState::SavingGame:
+        case GameState::SavingGame:
             if (game->loadStep > 0) --game->loadStep;
             if (game->loadStep != 2) break;
             game_saveAllMapArrays(game);
             game->ui.buildMenuItemIndex = 0;
             game->ui.menuDirty = true;
-            game_setState(game, +GameState::Playing);
+            game_setState(game, GameState::Playing);
             break;
-        case +GameState::LoadingGame:
+        case GameState::LoadingGame:
             if (game->loadStep > 0) --game->loadStep;
             if (game->loadStep != 2) break;
             game_restoreAllMapArrays(game);
             game->ui.pauseFlag = false;
             game->ui.buildMenuItemIndex = 0;
             game->ui.menuDirty = true;
-            game_setState(game, +GameState::Playing);
+            game_setState(game, GameState::Playing);
             break;
-        case +GameState::AiTurn:
+        case GameState::AiTurn:
             if (game->loadStep > 0) --game->loadStep;
             if (game->loadStep != 2) break;
             if (game->build.nextTrackPieceCode - track::AI_PIECE_FIRST < game->scenario.difficultyCycle) {
                 game_placeCitiesAndIndustry(game);
-                game_setState(game, +GameState::Playing);
+                game_setState(game, GameState::Playing);
                 break;
             }
             ++game->build.nextTrackPieceCode;
             if (game->build.nextTrackPieceCode == track::AI_PIECE_WRAP) game->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
-            game_setState(game, +GameState::Playing);
+            game_setState(game, GameState::Playing);
             break;
-        case +GameState::HighScoreSync:
+        case GameState::HighScoreSync:
             if (game->loadStep > 0) --game->loadStep;
             if (game->loadStep != 2) break;
             game->ui.transitionCode = game_syncHighScores(game, game->scenario.highScoreUploadRequested)
                                  ? 19 : 18;
-            game_setState(game, +GameState::MenuOverlay);
+            game_setState(game, GameState::MenuOverlay);
             break;
     }
 }

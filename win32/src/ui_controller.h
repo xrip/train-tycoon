@@ -111,7 +111,6 @@ struct UiController {
     // runtime-only.
     bool inputPending = false;
     bool pauseFlag = false;
-    bool paused = false;
     int32_t keyRepeatDelay = 0;
     int32_t heldKey = 0;
     int32_t inputSubState = 0;

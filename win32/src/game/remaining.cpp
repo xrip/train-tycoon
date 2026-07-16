@@ -1,12 +1,10 @@
 // Score, graph, text, and life-cycle functions.
-#include "game.h"
+#include "game_internal.h"
 
 #include <stdio.h>
 #include <string.h>
 
-std::vector<int8_t> game_formatNumberWithSuffix(Game *game, int32_t value,
-                                              int32_t suffix) {
-    (void)game;
+std::vector<int8_t> game_formatNumberWithSuffix(int32_t value, int32_t suffix) {
     char text[24];
     snprintf(text, sizeof(text), "%d", value);
     int length = (int)strlen(text);
@@ -17,8 +15,7 @@ std::vector<int8_t> game_formatNumberWithSuffix(Game *game, int32_t value,
     return result;
 }
 
-std::vector<int8_t> game_encodeDisplayText(Game *game, const char *text) {
-    (void)game;
+std::vector<int8_t> game_encodeDisplayText(const char *text) {
     int length = (int)strlen(text);
     std::vector<int8_t> result(static_cast<size_t>(length));
     for (int i = 0; i < length; ++i) {
@@ -180,33 +177,7 @@ void game_stopMusic(Game *game) {
     game->music_playing = false;
 }
 
-// These helpers are used only by the excluded high-score network request.
-char *game_decodeString(Game *game, int8_t *bytes) {
-    (void)game; (void)bytes;
-    return NULL;
-}
-
-char *game_buildPlayerNameString(Game *game) {
-    (void)game;
-    return NULL;
-}
-
 bool game_syncHighScores(Game *game, bool upload) {
     (void)game; (void)upload;
     return false;
-}
-
-void game_hideNotify(Game *game) {
-    game->ui.paused = true;
-    if (game->gameState > +GameState::LoadingResources && game->gameState != +GameState::HighScoreSync) game_stopMusic(game);
-    if (game->gameState == +GameState::Playing) {
-        game->ready = false;
-        game->ui.transitionCode = 1;
-        game_setState(game, +GameState::MenuOverlay);
-    }
-}
-
-void game_showNotify(Game *game) {
-    if (game->gameState > +GameState::LoadingResources && game->gameState != +GameState::HighScoreSync) game_playMusic(game);
-    game->ui.paused = false;
 }

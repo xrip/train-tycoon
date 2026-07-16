@@ -1,7 +1,7 @@
 // Terrain and map generation.
 // Driven by loadState25Setup across mapGenStage 0..10 (raise/lower terrain,
 // place patches and features, scatter industry). The random process is exact.
-#include "game.h"
+#include "game_internal.h"
 #include <stdlib.h> // abs
 #include <vector>
 
