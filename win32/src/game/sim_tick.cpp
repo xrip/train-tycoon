@@ -348,9 +348,9 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
     }
     n2 += gc->economy.dayOfMonth + 30 * gc->economy.monthOfYear + 365 * (gc->economy.year - 1950);
     if (n < 0) {
-        if (n2 > gc->bestScenarioScore) gc->bestScenarioScore = n2;
+        if (n2 > gc->scenario.bestScenarioScore) gc->scenario.bestScenarioScore = n2;
     } else {
-        gc->scenarioScores[n] = n2;
+        gc->scenario.scenarioScores[n] = n2;
     }
     gc_persistSnapshotMode0(gc);
     return n2;
@@ -359,52 +359,52 @@ int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
 // void everyTwoTickZ()
 void gc_everyTwoTickZ(GameCanvas *gc) {
     bool bl = false;
-    if (!gc->milestonesEnabled) {
-        switch (gc->scenarioMilestoneIndex) {
-            case 1: bl = gc->currentMilestoneScore <= gc->milestoneThreshold1; break;
-            case 2: bl = gc->currentMilestoneScore <= gc->milestoneThreshold2; break;
-            case 3: bl = gc->currentMilestoneScore <= gc->milestoneThreshold3; break;
-            case 4: bl = gc->currentMilestoneScore <= gc->milestoneThreshold4; break;
-            case 5: bl = gc->currentMilestoneScore <= gc->milestoneThreshold5; break;
+    if (!gc->scenario.milestonesEnabled) {
+        switch (gc->scenario.scenarioMilestoneIndex) {
+            case 1: bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold1; break;
+            case 2: bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold2; break;
+            case 3: bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold3; break;
+            case 4: bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold4; break;
+            case 5: bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold5; break;
             case 6:
-                bl = gc->currentMilestoneScore <= gc->milestoneThreshold1
-                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold2;
+                bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold1
+                     && gc->scenario.milestoneCoThreshold2 <= gc->scenario.milestoneThreshold2;
                 break;
             case 7:
-                bl = gc->currentMilestoneScore <= gc->milestoneThreshold1
-                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold3;
+                bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold1
+                     && gc->scenario.milestoneCoThreshold2 <= gc->scenario.milestoneThreshold3;
                 break;
             case 8:
-                bl = gc->currentMilestoneScore <= gc->milestoneThreshold1
-                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold4;
+                bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold1
+                     && gc->scenario.milestoneCoThreshold2 <= gc->scenario.milestoneThreshold4;
                 break;
             case 9:
-                bl = gc->currentMilestoneScore <= gc->milestoneThreshold2
-                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold3;
+                bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold2
+                     && gc->scenario.milestoneCoThreshold2 <= gc->scenario.milestoneThreshold3;
                 break;
             case 10:
-                bl = gc->currentMilestoneScore <= gc->milestoneThreshold2
-                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold4;
+                bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold2
+                     && gc->scenario.milestoneCoThreshold2 <= gc->scenario.milestoneThreshold4;
                 break;
             case 11:
-                bl = gc->currentMilestoneScore <= gc->milestoneThreshold4
-                     && gc->milestoneCoThreshold2 <= gc->milestoneThreshold5;
+                bl = gc->scenario.currentMilestoneScore <= gc->scenario.milestoneThreshold4
+                     && gc->scenario.milestoneCoThreshold2 <= gc->scenario.milestoneThreshold5;
                 break;
-            case 12: bl = gc->currentMilestoneScore <= gc->economy.lifetimeTrainRevenue; break;
+            case 12: bl = gc->scenario.currentMilestoneScore <= gc->economy.lifetimeTrainRevenue; break;
             case 13: bl = gc->economy.loanBalance == 0; break;
-            case 14: bl = gc->economy.year == gc->currentMilestoneScore; break;
-            case 15: bl = gc->currentMilestoneScore <= gc->aiWagonsBought; break;
+            case 14: bl = gc->economy.year == gc->scenario.currentMilestoneScore; break;
+            case 15: bl = gc->scenario.currentMilestoneScore <= gc->aiWagonsBought; break;
         }
     }
     if (!bl) return;
     gc->ready = false;
     gc->transitionCode = 6;
-    gc->milestonesEnabled = true;
+    gc->scenario.milestonesEnabled = true;
     if (gc->scenarioStep >= 2) {
         if (gc->scenarioStepCompare < gc->scenarioStep)
             gc->scenarioStepCompare = gc->scenarioStep;
         gc_persistSnapshotMode0(gc);
-        gc->currentScenarioScore = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
+        gc->scenario.currentScenarioScore = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
     }
     gc_setState(gc, +GameState::MenuOverlay);
 }

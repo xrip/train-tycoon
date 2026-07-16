@@ -88,33 +88,33 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
 }
 
 int32_t gc_computeMilestoneScore(GameCanvas *gc) {
-    int target = gc->currentMilestoneScore;
+    int target = gc->scenario.currentMilestoneScore;
     int current = 0;
-    if (gc->scenarioMilestoneIndex >= 6 && gc->scenarioMilestoneIndex <= 11)
-        target += gc->milestoneCoThreshold2;
-    switch (gc->scenarioMilestoneIndex) {
-        case 1: current = gc->milestoneThreshold1; break;
-        case 2: current = gc->milestoneThreshold2; break;
-        case 3: current = gc->milestoneThreshold3; break;
-        case 4: current = gc->milestoneThreshold4; break;
-        case 5: current = gc->milestoneThreshold5; break;
+    if (gc->scenario.scenarioMilestoneIndex >= 6 && gc->scenario.scenarioMilestoneIndex <= 11)
+        target += gc->scenario.milestoneCoThreshold2;
+    switch (gc->scenario.scenarioMilestoneIndex) {
+        case 1: current = gc->scenario.milestoneThreshold1; break;
+        case 2: current = gc->scenario.milestoneThreshold2; break;
+        case 3: current = gc->scenario.milestoneThreshold3; break;
+        case 4: current = gc->scenario.milestoneThreshold4; break;
+        case 5: current = gc->scenario.milestoneThreshold5; break;
         case 6:
-            current = gc->milestoneThreshold1 + gc->milestoneThreshold2;
+            current = gc->scenario.milestoneThreshold1 + gc->scenario.milestoneThreshold2;
             break;
         case 7:
-            current = gc->milestoneThreshold1 + gc->milestoneThreshold3;
+            current = gc->scenario.milestoneThreshold1 + gc->scenario.milestoneThreshold3;
             break;
         case 8:
-            current = gc->milestoneThreshold1 + gc->milestoneThreshold4;
+            current = gc->scenario.milestoneThreshold1 + gc->scenario.milestoneThreshold4;
             break;
         case 9:
-            current = gc->milestoneThreshold2 + gc->milestoneThreshold3;
+            current = gc->scenario.milestoneThreshold2 + gc->scenario.milestoneThreshold3;
             break;
         case 10:
-            current = gc->milestoneThreshold2 + gc->milestoneThreshold4;
+            current = gc->scenario.milestoneThreshold2 + gc->scenario.milestoneThreshold4;
             break;
         case 11:
-            current = gc->milestoneThreshold4 + gc->milestoneThreshold5;
+            current = gc->scenario.milestoneThreshold4 + gc->scenario.milestoneThreshold5;
             break;
         case 12: current = gc->economy.lifetimeTrainRevenue; break;
         case 13:
@@ -123,7 +123,7 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
             break;
         case 14:
             current = gc->economy.year - 1950;
-            target = gc->currentMilestoneScore - 1950;
+            target = gc->scenario.currentMilestoneScore - 1950;
             break;
         case 15: current = gc->aiWagonsBought; break;
     }

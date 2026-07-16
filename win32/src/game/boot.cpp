@@ -161,10 +161,10 @@ void gc_writeSaveSnapshot(GameCanvas *gc) {
     gcs_monthlyReportEnabled = gc_saveOrLoadBool(gc, gcs_monthlyReportEnabled);
     gcs_annualReportEnabled = gc_saveOrLoadBool(gc, gcs_annualReportEnabled);
     gc->scenarioStepCompare = gc_saveIntToBuffer(gc, gc->scenarioStepCompare);
-    gc->bestScenarioScore = gc_saveIntToBuffer(gc, gc->bestScenarioScore);
+    gc->scenario.bestScenarioScore = gc_saveIntToBuffer(gc, gc->scenario.bestScenarioScore);
     gc->music_volume_level = gc_saveIntToBuffer(gc, gc->music_volume_level);
-    gc_saveOrLoadIntArrayInlined(gc, gc->scenarioScores);
-    gc_saveOrLoadIntArrayInlined(gc, gc->leaderboardScores);
+    gc_saveOrLoadIntArrayInlined(gc, gc->scenario.scenarioScores);
+    gc_saveOrLoadIntArrayInlined(gc, gc->scenario.leaderboardScores);
     gc_saveOrLoadByteArrayInlined(gc, gc->playerNameCodes);
 }
 

@@ -191,11 +191,11 @@ void gc_recordDeliveredResource(GameCanvas *gc, int32_t resource, int32_t amount
             gc->menuRowValue[row] += amount;
     }
     switch (resource) {
-        case 1: gc->milestoneThreshold1 += amount; break;
-        case 2: gc->milestoneThreshold2 += amount; break;
-        case 3: gc->milestoneThreshold3 += amount; break;
-        case 4: gc->milestoneThreshold4 += amount; break;
-        case 5: gc->milestoneThreshold5 += amount; break;
+        case 1: gc->scenario.milestoneThreshold1 += amount; break;
+        case 2: gc->scenario.milestoneThreshold2 += amount; break;
+        case 3: gc->scenario.milestoneThreshold3 += amount; break;
+        case 4: gc->scenario.milestoneThreshold4 += amount; break;
+        case 5: gc->scenario.milestoneThreshold5 += amount; break;
     }
 }
 

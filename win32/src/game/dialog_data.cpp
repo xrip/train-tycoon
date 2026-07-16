@@ -69,7 +69,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 4:
             switch (field) {
-                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[25 + gc->scenarioMilestone]]);
+                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[25 + gc->scenario.scenarioMilestone]]);
                 case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[30 + gc->difficultyA]]);
                 case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[35 + gc->difficultySlot]]);
                 case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyB]]);
@@ -276,15 +276,15 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             break;
 
         case 28:
-            if (field == 0) return gc_formatNumberWithSuffix(gc, gc->bestScenarioScore, 0);
+            if (field == 0) return gc_formatNumberWithSuffix(gc, gc->scenario.bestScenarioScore, 0);
             if (field >= 1 && field <= 13)
-                return gc_formatNumberWithSuffix(gc, gc->scenarioScores[field - 1], 0);
+                return gc_formatNumberWithSuffix(gc, gc->scenario.scenarioScores[field - 1], 0);
             if (field >= 20 && field <= 33)
-                return gc_formatNumberWithSuffix(gc, gc->leaderboardScores[field - 20], 0);
+                return gc_formatNumberWithSuffix(gc, gc->scenario.leaderboardScores[field - 20], 0);
             break;
 
         case 6:
-            return gc_formatNumberWithSuffix(gc, gc->currentScenarioScore, 0);
+            return gc_formatNumberWithSuffix(gc, gc->scenario.currentScenarioScore, 0);
     }
     return std::nullopt;
 }

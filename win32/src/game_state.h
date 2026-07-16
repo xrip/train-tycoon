@@ -6,6 +6,7 @@
 #include "pathfinder.h"
 #include "fleet.h"
 #include "economy.h"
+#include "scenario.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -166,7 +167,6 @@ typedef struct GameCanvas {
     int32_t pendingTransitionCode;
     bool discountApplied;
     int32_t baseTrainCostSnapshot;
-    int8_t scenarioMilestone;
     int8_t difficultyA;
     int8_t difficultySlot;
     int8_t difficultyB;
@@ -176,7 +176,6 @@ typedef struct GameCanvas {
     int32_t activeScenario;
     int32_t offerTypeTransitionCode;
     int32_t offerEffectTransitionCode;
-    int32_t currentScenarioScore;
     bool highScoreUploadRequested;
     std::array<int8_t, 10> playerNameCodes{};
     std::array<int8_t, 10> playerNameCursorMarker{};
@@ -261,25 +260,13 @@ typedef struct GameCanvas {
     int32_t lastOfferDateCode;
     int32_t menuRowEnabledCount;
     std::array<int8_t, 5> enabledMenuRowIndexes{};
-    int8_t scenarioMilestoneIndex;
-    int32_t currentMilestoneScore;
-    int32_t milestoneCoThreshold2;
-    int32_t milestoneThreshold1;
-    int32_t milestoneThreshold2;
-    int32_t milestoneThreshold3;
-    int32_t milestoneThreshold4;
-    int32_t milestoneThreshold5;
     int32_t aiWagonsBought;
-    bool milestonesEnabled;
     bool music_playing;
     bool music_available;
     bool music_auto_start;
     bool music_enabled;
     int32_t music_volume_level;
     std::unique_ptr<MusicOutput> music_output;
-    int32_t bestScenarioScore;
-    std::array<int32_t, 13> scenarioScores{};
-    std::array<int32_t, 14> leaderboardScores{};
     std::vector<int8_t> tileOffsetX;
     std::vector<int8_t> tileOffsetY;
     int32_t numActiveTileAnimations;
@@ -288,6 +275,7 @@ typedef struct GameCanvas {
     int32_t viewportCenterX;
     int32_t viewportCenterY;
     Economy economy;
+    Scenario scenario;
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;

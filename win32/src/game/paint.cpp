@@ -238,7 +238,7 @@ void gc_update(GameCanvas *gc) {
             if (gc->loadStep == 2) {
                 gc_initSaveOrLoad(gc, save::OP_RESET_SKIP);
                 gc->economy.dayOfMonth = 1; gc->economy.monthOfYear = 1; gc->economy.year = 1950;
-                gc->milestonesEnabled = false; gc->pauseFlag = false; gc->aiEnabled = false;
+                gc->scenario.milestonesEnabled = false; gc->pauseFlag = false; gc->aiEnabled = false;
                 gc->moneyBaseA = 974; gc->moneyBaseB = 974;
                 gc->baseTrainSpeed = 173; gc->accel1 = 342; gc->brake1 = 311;
                 gc->baseTrainSpeed2 = 173; gc->accel2 = 234;
@@ -297,8 +297,8 @@ void gc_update(GameCanvas *gc) {
                         gc->weightAccel = weight_accel_1; gc->weightAccel2 = weight_accel_2; gc->weightAccel3 = weight_accel_3; gc->weightAccel4 = weight_accel_4;
                         gc->economy.money = starting_money; gc->economy.loanCeiling = loan_ceiling; gc->economy.loanBalance = starting_loan;
                         gc->economy.interestRate = (int8_t)interest_rate; gc->era = era_number - 1;
-                        gc->scenarioMilestoneIndex = (int8_t)milestone_index;
-                        gc->currentMilestoneScore = milestone_score; gc->milestoneCoThreshold2 = milestone_threshold;
+                        gc->scenario.scenarioMilestoneIndex = (int8_t)milestone_index;
+                        gc->scenario.currentMilestoneScore = milestone_score; gc->scenario.milestoneCoThreshold2 = milestone_threshold;
                         gc_initBuildMenuForScenario(gc, build_menu_scenario);
                         gc->flagsA = (scenario_flags & 2) == 2;
                         gc->flagsB = (scenario_flags & 4) == 4;

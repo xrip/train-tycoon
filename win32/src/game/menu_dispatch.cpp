@@ -89,8 +89,8 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 4:
             switch (n2) {
                 case 1:
-                    if (gc->scenarioMilestone == 0) { gc->scenarioMilestone = 1; goto hbms_end; }
-                    gc->scenarioMilestone = 0; goto hbms_end;
+                    if (gc->scenario.scenarioMilestone == 0) { gc->scenario.scenarioMilestone = 1; goto hbms_end; }
+                    gc->scenario.scenarioMilestone = 0; goto hbms_end;
                 case 2:
                     if (gc->difficultyA == 0) { gc->difficultyA = 1; goto hbms_end; }
                     gc->difficultyA = 0; goto hbms_end;
@@ -108,7 +108,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     if (gc->difficultyCycle != 4) goto hbms_end;
                     gc->difficultyCycle = 1; goto hbms_end;
                 case 10:
-                    gc->activeScenario = gc->scenarioMilestone; gc_setState(gc, +GameState::GeneratingMap); goto hbms_end;
+                    gc->activeScenario = gc->scenario.scenarioMilestone; gc_setState(gc, +GameState::GeneratingMap); goto hbms_end;
             }
             if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;

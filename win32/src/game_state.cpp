@@ -87,7 +87,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->pendingTransitionCode = -1;
     gc->discountApplied = false;
     gc->baseTrainCostSnapshot = 0;
-    gc->scenarioMilestone = 0;
+    gc->scenario.scenarioMilestone = 0;
     gc->difficultyA = 0;
     gc->difficultySlot = 0;
     gc->difficultyB = 0;
@@ -230,11 +230,11 @@ void gc_fields_init(GameCanvas *gc) {
     gc->lastOfferDateCode = 0;
     gc->menuRowEnabledCount = 0;
     gc->economy.lifetimeTrainRevenue = 0;
-    gc->milestoneThreshold1 = 0;
-    gc->milestoneThreshold2 = 0;
-    gc->milestoneThreshold3 = 0;
-    gc->milestoneThreshold4 = 0;
-    gc->milestoneThreshold5 = 0;
+    gc->scenario.milestoneThreshold1 = 0;
+    gc->scenario.milestoneThreshold2 = 0;
+    gc->scenario.milestoneThreshold3 = 0;
+    gc->scenario.milestoneThreshold4 = 0;
+    gc->scenario.milestoneThreshold5 = 0;
     gc->aiWagonsBought = 0;
     gc->music_playing = false;
     gc->music_available = false;
@@ -242,7 +242,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->music_enabled = false;
     gc->music_volume_level = 2;
     gc->economy.trainRevenueScore = 0;
-    gc->bestScenarioScore = 0;
+    gc->scenario.bestScenarioScore = 0;
     gc->numActiveTileAnimations = 0;
     gc->viewportCenterX = 0;
     gc->viewportCenterY = 0;
