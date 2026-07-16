@@ -114,7 +114,7 @@ void gc_rebuildCityList(GameCanvas *gc) {
 
 void gc_applyBackgroundCost(GameCanvas *gc) {
     if (gc->demolitionAffordable) {
-        gc->subsidyCost += gc->backgroundCost;
+        gc->economy.subsidyCost += gc->backgroundCost;
         gc->economy.money -= gc->backgroundCost;
         gc_pushMoneyHistory(gc, -gc->backgroundCost);
     } else {

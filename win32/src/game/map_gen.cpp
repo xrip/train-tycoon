@@ -134,7 +134,7 @@ void gc_smoothTileAtInlined(GameCanvas *gc, int32_t n, int32_t n2, bool bl) {
                 if (gc->terrainSmoothCost <= gc->economy.money) {
                     gc->economy.money -= gc->terrainSmoothCost;
                     gc_pushMoneyHistory(gc, -gc->terrainSmoothCost);
-                    gc->subsidyCost += gc->terrainSmoothCost;
+                    gc->economy.subsidyCost += gc->terrainSmoothCost;
                     gc_toggleFlagInlined(gc, true);
                 } else {
                     gc_enterOutOfMoneyState(gc);

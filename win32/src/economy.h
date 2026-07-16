@@ -44,6 +44,42 @@ struct Economy {
     std::array<int32_t, 12> decadeProfitHistory{};
     std::array<int32_t, 12> altDecadeRevenueTotal{};
     std::array<int32_t, 3> moneyHistory{};
+
+    // Period/decade financial report aggregates. The "WithCurrent" running
+    // accumulators (and legacyDecadeMetric) are runtime-only and are not saved;
+    // all other fields here are saved. Values and save byte order are unchanged.
+    int32_t fuelCostAccrued = 0;
+    int32_t subsidyCost = 0;
+    int32_t terrainTotal = 0;
+    int32_t decadeEnterpriseTax = 0;
+    int32_t netProfit = 0;
+    int32_t decadeSpentWithCurrent = 0;
+    int32_t decadeAiSpentWithCurrent = 0;
+    int32_t decadeFuelWithCurrent = 0;
+    int32_t decadeSubsidyWithCurrent = 0;
+    int32_t legacyDecadeMetric = 0;
+    int32_t decadeEnterpriseWithCurrent = 0;
+    int32_t decadeProfitWithCurrent = 0;
+    int32_t prevTotalSpent = 0;
+    int32_t prevFuelCost = 0;
+    int32_t prevSubsidyCost = 0;
+    int32_t prevTerrainTotal = 0;
+    int32_t prevEnterpriseTotal = 0;
+    int32_t prevDecadeSpent = 0;
+    int32_t prevDecadeAiSpent = 0;
+    int32_t prevDecadeFuel = 0;
+    int32_t prevDecadeSubsidy = 0;
+    int32_t previousLegacyDecadeMetric = 0;
+    int32_t previousDecadeEnterpriseTax = 0;
+    int32_t previousDecadeProfit = 0;
+    int32_t decadeCostTotal = 0;
+    int32_t decadeSpentTotal = 0;
+    int32_t decadeFuelCost = 0;
+    int32_t decadeSubsidyTotal = 0;
+    int32_t savedLegacyMetricEb = 0;
+    int32_t decadeEnterpriseTotal = 0;
+    int32_t decadeProfitTotal = 0;
+    std::array<int32_t, 12> altDecadeTotalCost{};
 };
 
 #endif  // ECONOMY_H

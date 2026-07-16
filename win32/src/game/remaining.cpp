@@ -50,7 +50,7 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
             gc->altYearArray[index] = (int8_t)(gc->economy.year - index - 1940);
             value = mode == 0 ? gc->economy.decadeProfitHistory[index]
                     : mode == 1 ? gc->economy.altDecadeRevenueTotal[index]
-                    : gc->altDecadeTotalCost[index];
+                    : gc->economy.altDecadeTotalCost[index];
         }
         if (value > maximum) maximum = value;
         if (value < minimum) minimum = value;
@@ -82,7 +82,7 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
             // The original tests the other-total array before scaling cost.
             gc->yearGraphValues[index] =
                 gc->economy.decadeProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->altDecadeTotalCost[index] / scale);
+                : (int8_t)(30 * gc->economy.altDecadeTotalCost[index] / scale);
         }
     }
 }

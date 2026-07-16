@@ -170,14 +170,14 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 32: {
             int values[8] = {
-                gc->compareToPrevious ? gc->prevTotalSpent : gc->economy.totalSpent,
+                gc->compareToPrevious ? gc->economy.prevTotalSpent : gc->economy.totalSpent,
                 gc->compareToPrevious ? gc->economy.prevAiMoneySpent : gc->economy.aiMoneySpent,
-                gc->compareToPrevious ? gc->prevFuelCost : gc->fuelCostAccrued,
-                gc->compareToPrevious ? gc->prevSubsidyCost : gc->subsidyCost,
-                gc->compareToPrevious ? gc->prevTerrainTotal : gc->terrainTotal,
-                gc->compareToPrevious ? gc->prevEnterpriseTotal : gc->decadeEnterpriseTax,
+                gc->compareToPrevious ? gc->economy.prevFuelCost : gc->economy.fuelCostAccrued,
+                gc->compareToPrevious ? gc->economy.prevSubsidyCost : gc->economy.subsidyCost,
+                gc->compareToPrevious ? gc->economy.prevTerrainTotal : gc->economy.terrainTotal,
+                gc->compareToPrevious ? gc->economy.prevEnterpriseTotal : gc->economy.decadeEnterpriseTax,
                 gc->compareToPrevious ? gc->economy.prevTotalRevenue : gc->economy.totalRevenue,
-                gc->compareToPrevious ? gc->economy.previousYearProfit : gc->netProfit
+                gc->compareToPrevious ? gc->economy.previousYearProfit : gc->economy.netProfit
             };
             if (field >= 0 && field < 8) return gc_formatCurrency(gc, values[field]);
             break;
@@ -185,14 +185,14 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 35: {
             int values[8] = {
-                gc->compareToPrevious ? gc->prevDecadeSpent : gc->decadeSpentWithCurrent,
-                gc->compareToPrevious ? gc->prevDecadeAiSpent : gc->decadeAiSpentWithCurrent,
-                gc->compareToPrevious ? gc->prevDecadeFuel : gc->decadeFuelWithCurrent,
-                gc->compareToPrevious ? gc->prevDecadeSubsidy : gc->decadeSubsidyWithCurrent,
-                gc->compareToPrevious ? gc->previousLegacyDecadeMetric : gc->legacyDecadeMetric,
-                gc->compareToPrevious ? gc->previousDecadeEnterpriseTax : gc->decadeEnterpriseWithCurrent,
+                gc->compareToPrevious ? gc->economy.prevDecadeSpent : gc->economy.decadeSpentWithCurrent,
+                gc->compareToPrevious ? gc->economy.prevDecadeAiSpent : gc->economy.decadeAiSpentWithCurrent,
+                gc->compareToPrevious ? gc->economy.prevDecadeFuel : gc->economy.decadeFuelWithCurrent,
+                gc->compareToPrevious ? gc->economy.prevDecadeSubsidy : gc->economy.decadeSubsidyWithCurrent,
+                gc->compareToPrevious ? gc->economy.previousLegacyDecadeMetric : gc->economy.legacyDecadeMetric,
+                gc->compareToPrevious ? gc->economy.previousDecadeEnterpriseTax : gc->economy.decadeEnterpriseWithCurrent,
                 gc->compareToPrevious ? gc->economy.prevDecadeRevenue : gc->economy.decadeRevenueWithCurrent,
-                gc->compareToPrevious ? gc->previousDecadeProfit : gc->decadeProfitWithCurrent
+                gc->compareToPrevious ? gc->economy.previousDecadeProfit : gc->economy.decadeProfitWithCurrent
             };
             if (field >= 0 && field < 8) return gc_formatCurrency(gc, values[field]);
             break;
@@ -210,7 +210,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
                 } else {
                     if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.decadeProfitHistory[index]);
                     if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.altDecadeRevenueTotal[index]);
-                    if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->altDecadeTotalCost[index]);
+                    if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->economy.altDecadeTotalCost[index]);
                 }
             } else {
                 if (field >= 20) {
