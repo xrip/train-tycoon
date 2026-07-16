@@ -27,6 +27,6 @@ bool gc_spendMoney(GameCanvas *gc, int32_t n) {
 
 // void everyTenTick()
 void gc_everyTenTick(GameCanvas *gc) {
-    gc->yearCompanyValueHistory[0] = gc_scanMapForMetric(gc);
-    gc->altDecadeTotalCost[0] = gc->yearCompanyValueHistory[0];
+    gc->economy.yearCompanyValueHistory[0] = gc_scanMapForMetric(gc);
+    gc->altDecadeTotalCost[0] = gc->economy.yearCompanyValueHistory[0];
 }

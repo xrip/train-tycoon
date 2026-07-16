@@ -43,13 +43,13 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
                 gc->altYearArray[index] = (int8_t)(12 + gc->altYearArray[index]);
                 --gc->yearGraphOffsets[index];
             }
-            value = mode == 0 ? gc->yearProfitHistory[index]
-                    : mode == 1 ? gc->yearRevenueHistory[index]
-                    : gc->yearCompanyValueHistory[index];
+            value = mode == 0 ? gc->economy.yearProfitHistory[index]
+                    : mode == 1 ? gc->economy.yearRevenueHistory[index]
+                    : gc->economy.yearCompanyValueHistory[index];
         } else {
             gc->altYearArray[index] = (int8_t)(gc->economy.year - index - 1940);
-            value = mode == 0 ? gc->decadeProfitHistory[index]
-                    : mode == 1 ? gc->altDecadeRevenueTotal[index]
+            value = mode == 0 ? gc->economy.decadeProfitHistory[index]
+                    : mode == 1 ? gc->economy.altDecadeRevenueTotal[index]
                     : gc->altDecadeTotalCost[index];
         }
         if (value > maximum) maximum = value;
@@ -59,29 +59,29 @@ void gc_setYearGraphMode(GameCanvas *gc, int32_t mode, bool alternate) {
     for (int index = 0; index < 12; ++index) {
         if (!alternate && mode == 0) {
             gc->yearGraphValues[index] =
-                gc->yearProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->yearProfitHistory[index] / scale);
+                gc->economy.yearProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * gc->economy.yearProfitHistory[index] / scale);
         } else if (!alternate && mode == 1) {
             gc->yearGraphValues[index] =
-                gc->yearRevenueHistory[index] == 0 ? 0
-                : (int8_t)(60 * gc->yearRevenueHistory[index] / scale);
+                gc->economy.yearRevenueHistory[index] == 0 ? 0
+                : (int8_t)(60 * gc->economy.yearRevenueHistory[index] / scale);
         } else if (!alternate && mode == 2) {
             // The original tests profit for zero before scaling company value.
             gc->yearGraphValues[index] =
-                gc->yearProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->yearCompanyValueHistory[index] / scale);
+                gc->economy.yearProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * gc->economy.yearCompanyValueHistory[index] / scale);
         } else if (alternate && mode == 0) {
             gc->yearGraphValues[index] =
-                gc->decadeProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * gc->decadeProfitHistory[index] / scale);
+                gc->economy.decadeProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * gc->economy.decadeProfitHistory[index] / scale);
         } else if (alternate && mode == 1) {
             gc->yearGraphValues[index] =
-                gc->altDecadeRevenueTotal[index] == 0 ? 0
-                : (int8_t)(60 * gc->altDecadeRevenueTotal[index] / scale);
+                gc->economy.altDecadeRevenueTotal[index] == 0 ? 0
+                : (int8_t)(60 * gc->economy.altDecadeRevenueTotal[index] / scale);
         } else if (alternate && mode == 2) {
             // The original tests the other-total array before scaling cost.
             gc->yearGraphValues[index] =
-                gc->decadeProfitHistory[index] == 0 ? 0
+                gc->economy.decadeProfitHistory[index] == 0 ? 0
                 : (int8_t)(30 * gc->altDecadeTotalCost[index] / scale);
         }
     }

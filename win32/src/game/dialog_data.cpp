@@ -97,7 +97,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             switch (field) {
                 case 0: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[100 + gc->world.stationDirectionCode[gc->stationDirCursor]]]);
                 case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[106 + gc->world.stationDirectionCode[gc->stationDirCursor] / 2]]);
-                case 2: return gc_formatNumberWithSuffix(gc, gc->prevStationRevenue[gc->stationDirCursor], 0);
+                case 2: return gc_formatNumberWithSuffix(gc, gc->economy.prevStationRevenue[gc->stationDirCursor], 0);
             }
             break;
 
@@ -177,7 +177,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
                 gc->compareToPrevious ? gc->prevTerrainTotal : gc->terrainTotal,
                 gc->compareToPrevious ? gc->prevEnterpriseTotal : gc->decadeEnterpriseTax,
                 gc->compareToPrevious ? gc->economy.prevTotalRevenue : gc->economy.totalRevenue,
-                gc->compareToPrevious ? gc->previousYearProfit : gc->netProfit
+                gc->compareToPrevious ? gc->economy.previousYearProfit : gc->netProfit
             };
             if (field >= 0 && field < 8) return gc_formatCurrency(gc, values[field]);
             break;
@@ -191,7 +191,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
                 gc->compareToPrevious ? gc->prevDecadeSubsidy : gc->decadeSubsidyWithCurrent,
                 gc->compareToPrevious ? gc->previousLegacyDecadeMetric : gc->legacyDecadeMetric,
                 gc->compareToPrevious ? gc->previousDecadeEnterpriseTax : gc->decadeEnterpriseWithCurrent,
-                gc->compareToPrevious ? gc->prevDecadeRevenue : gc->decadeRevenueWithCurrent,
+                gc->compareToPrevious ? gc->economy.prevDecadeRevenue : gc->economy.decadeRevenueWithCurrent,
                 gc->compareToPrevious ? gc->previousDecadeProfit : gc->decadeProfitWithCurrent
             };
             if (field >= 0 && field < 8) return gc_formatCurrency(gc, values[field]);
@@ -204,12 +204,12 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             if (field >= 40) {
                 int index = field - 40;
                 if (!gc->yearGraphAlt) {
-                    if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->yearProfitHistory[index]);
-                    if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->yearRevenueHistory[index]);
-                    if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->yearCompanyValueHistory[index]);
+                    if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.yearProfitHistory[index]);
+                    if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.yearRevenueHistory[index]);
+                    if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->economy.yearCompanyValueHistory[index]);
                 } else {
-                    if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->decadeProfitHistory[index]);
-                    if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->altDecadeRevenueTotal[index]);
+                    if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.decadeProfitHistory[index]);
+                    if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.altDecadeRevenueTotal[index]);
                     if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->altDecadeTotalCost[index]);
                 }
             } else {

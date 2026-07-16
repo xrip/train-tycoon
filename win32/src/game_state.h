@@ -150,7 +150,6 @@ typedef struct GameCanvas {
     int32_t buildMenuItemCode;
     int8_t scenarioBits;
     int32_t confirmToggle;
-    std::array<int32_t, 3> moneyHistory{};
     std::array<int8_t, 3> moneyTickerFrames{};
     int32_t confirmCounter;
     int32_t confirmTargetState;
@@ -223,8 +222,6 @@ typedef struct GameCanvas {
     bool snapshotLoaded;
     int32_t bytesUncompressed;
     int32_t bytesCompressed;
-    std::array<int16_t, 48> stationRevenue{};
-    std::array<int16_t, 48> prevStationRevenue{};
     bool compareToPrevious;
     int32_t yearGraphMode;
     bool yearGraphAlt;
@@ -238,7 +235,6 @@ typedef struct GameCanvas {
     int32_t decadeAiSpentWithCurrent;
     int32_t decadeFuelWithCurrent;
     int32_t decadeSubsidyWithCurrent;
-    int32_t decadeRevenueWithCurrent;
     int32_t legacyDecadeMetric;
     int32_t decadeEnterpriseWithCurrent;
     int32_t decadeProfitWithCurrent;
@@ -247,12 +243,10 @@ typedef struct GameCanvas {
     int32_t prevSubsidyCost;
     int32_t prevTerrainTotal;
     int32_t prevEnterpriseTotal;
-    int32_t previousYearProfit;
     int32_t prevDecadeSpent;
     int32_t prevDecadeAiSpent;
     int32_t prevDecadeFuel;
     int32_t prevDecadeSubsidy;
-    int32_t prevDecadeRevenue;
     int32_t previousLegacyDecadeMetric;
     int32_t previousDecadeEnterpriseTax;
     int32_t previousDecadeProfit;
@@ -260,16 +254,9 @@ typedef struct GameCanvas {
     int32_t decadeSpentTotal;
     int32_t decadeFuelCost;
     int32_t decadeSubsidyTotal;
-    int32_t decadeRevenueTotal;
     int32_t savedLegacyMetricEb;
     int32_t decadeEnterpriseTotal;
     int32_t decadeProfitTotal;
-    int32_t decadeProfitGraphTotal;
-    std::array<int32_t, 12> yearProfitHistory{};
-    std::array<int32_t, 12> yearRevenueHistory{};
-    std::array<int32_t, 12> yearCompanyValueHistory{};
-    std::array<int32_t, 12> decadeProfitHistory{};
-    std::array<int32_t, 12> altDecadeRevenueTotal{};
     std::array<int32_t, 12> altDecadeTotalCost{};
     std::array<int8_t, 12> yearGraphOffsets{};
     std::array<int8_t, 12> altYearArray{};

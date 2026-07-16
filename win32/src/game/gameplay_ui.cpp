@@ -150,15 +150,15 @@ void gc_drawMoneyTicker(GameCanvas *gc, Surface *graphics) {
     int y = 0;
     if (gc->moneyTickerFrames[2] > 0) {
         --gc->moneyTickerFrames[2];
-        y = gc_drawNumber(gc, graphics, gc->moneyHistory[2], y);
+        y = gc_drawNumber(gc, graphics, gc->economy.moneyHistory[2], y);
     }
     if (gc->moneyTickerFrames[1] > 0) {
         --gc->moneyTickerFrames[1];
-        y = gc_drawNumber(gc, graphics, gc->moneyHistory[1], y);
+        y = gc_drawNumber(gc, graphics, gc->economy.moneyHistory[1], y);
     }
     if (gc->moneyTickerFrames[0] > 0) {
         --gc->moneyTickerFrames[0];
-        gc_drawNumber(gc, graphics, gc->moneyHistory[0], y);
+        gc_drawNumber(gc, graphics, gc->economy.moneyHistory[0], y);
     }
 }
 

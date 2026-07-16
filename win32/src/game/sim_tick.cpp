@@ -173,15 +173,15 @@ void gc_archiveOrRecall(GameCanvas *gc) {
 // void computeYearEndMetrics()
 void gc_computeYearEndMetrics(GameCanvas *gc) {
     gc_archiveOrRecall(gc);
-    gc->yearProfitHistory[0] = gc->netProfit;
-    gc->yearRevenueHistory[0] = gc->economy.totalRevenue;
-    gc->decadeProfitHistory[0] = gc->decadeProfitGraphTotal + gc->netProfit;
-    gc->altDecadeRevenueTotal[0] = gc->economy.revenueTotal + gc->economy.totalRevenue;
+    gc->economy.yearProfitHistory[0] = gc->netProfit;
+    gc->economy.yearRevenueHistory[0] = gc->economy.totalRevenue;
+    gc->economy.decadeProfitHistory[0] = gc->economy.decadeProfitGraphTotal + gc->netProfit;
+    gc->economy.altDecadeRevenueTotal[0] = gc->economy.revenueTotal + gc->economy.totalRevenue;
     gc->decadeSpentWithCurrent = gc->decadeCostTotal + gc->economy.totalSpent;
     gc->decadeAiSpentWithCurrent = gc->decadeSpentTotal + gc->economy.aiMoneySpent;
     gc->decadeFuelWithCurrent = gc->decadeFuelCost + gc->fuelCostAccrued;
     gc->decadeSubsidyWithCurrent = gc->decadeSubsidyTotal + gc->subsidyCost;
-    gc->decadeRevenueWithCurrent = gc->decadeRevenueTotal + gc->economy.totalRevenue;
+    gc->economy.decadeRevenueWithCurrent = gc->economy.decadeRevenueTotal + gc->economy.totalRevenue;
     gc->decadeProfitWithCurrent = gc->decadeProfitTotal + gc->netProfit;
     gc->decadeEnterpriseWithCurrent = gc->decadeEnterpriseTotal + gc->decadeEnterpriseTax;
 }
@@ -455,8 +455,8 @@ void gc_newYearNotify(GameCanvas *gc) {
         gc->fleet.trainRevenue[n] = 0;
     }
     for (int n = 0; n < 48; ++n) {
-        gc->prevStationRevenue[n] = gc->stationRevenue[n];
-        gc->stationRevenue[n] = 0;
+        gc->economy.prevStationRevenue[n] = gc->economy.stationRevenue[n];
+        gc->economy.stationRevenue[n] = 0;
     }
     gc_archiveOrRecall(gc);
     gc->prevTotalSpent = gc->economy.totalSpent;
@@ -466,41 +466,41 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->economy.prevTotalRevenue = gc->economy.totalRevenue;
     gc->prevTerrainTotal = gc->terrainTotal;
     gc->prevEnterpriseTotal = gc->decadeEnterpriseTax;
-    gc->previousYearProfit = gc->netProfit;
+    gc->economy.previousYearProfit = gc->netProfit;
     for (int n = 10; n >= 0; --n) {
-        gc->yearProfitHistory[n + 1] = gc->yearProfitHistory[n];
-        gc->yearRevenueHistory[n + 1] = gc->yearRevenueHistory[n];
-        gc->yearCompanyValueHistory[n + 1] = gc->yearCompanyValueHistory[n];
+        gc->economy.yearProfitHistory[n + 1] = gc->economy.yearProfitHistory[n];
+        gc->economy.yearRevenueHistory[n + 1] = gc->economy.yearRevenueHistory[n];
+        gc->economy.yearCompanyValueHistory[n + 1] = gc->economy.yearCompanyValueHistory[n];
     }
-    gc->yearProfitHistory[0] = gc->yearRevenueHistory[0] = gc->yearCompanyValueHistory[0] = 0;
+    gc->economy.yearProfitHistory[0] = gc->economy.yearRevenueHistory[0] = gc->economy.yearCompanyValueHistory[0] = 0;
     gc->decadeCostTotal += gc->economy.totalSpent;
     gc->decadeSpentTotal += gc->economy.aiMoneySpent;
     gc->decadeFuelCost += gc->fuelCostAccrued;
     gc->decadeSubsidyTotal += gc->subsidyCost;
-    gc->decadeRevenueTotal += gc->economy.totalRevenue;
+    gc->economy.decadeRevenueTotal += gc->economy.totalRevenue;
     gc->decadeProfitTotal += gc->netProfit;
     gc->decadeEnterpriseTotal += gc->decadeEnterpriseTax;
-    gc->decadeProfitGraphTotal += gc->netProfit;
+    gc->economy.decadeProfitGraphTotal += gc->netProfit;
     gc->economy.revenueTotal += gc->economy.totalRevenue;
     if (gc->economy.monthOfYear == 13) {
         gc->prevDecadeSpent = gc->decadeSpentWithCurrent;
         gc->prevDecadeAiSpent = gc->decadeAiSpentWithCurrent;
         gc->prevDecadeFuel = gc->decadeFuelWithCurrent;
         gc->prevDecadeSubsidy = gc->decadeSubsidyWithCurrent;
-        gc->prevDecadeRevenue = gc->decadeRevenueWithCurrent;
+        gc->economy.prevDecadeRevenue = gc->economy.decadeRevenueWithCurrent;
         gc->previousLegacyDecadeMetric = gc->legacyDecadeMetric;
         gc->previousDecadeEnterpriseTax = gc->decadeEnterpriseWithCurrent;
         gc->previousDecadeProfit = gc->decadeProfitWithCurrent;
         gc->decadeCostTotal = gc->decadeSpentTotal = gc->decadeFuelCost = 0;
-        gc->decadeSubsidyTotal = gc->decadeRevenueTotal = gc->decadeProfitTotal = 0;
+        gc->decadeSubsidyTotal = gc->economy.decadeRevenueTotal = gc->decadeProfitTotal = 0;
         gc->decadeEnterpriseTotal = 0;
         for (int n = 10; n >= 0; --n) {
-            gc->decadeProfitHistory[n + 1] = gc->decadeProfitHistory[n];
-            gc->altDecadeRevenueTotal[n + 1] = gc->altDecadeRevenueTotal[n];
+            gc->economy.decadeProfitHistory[n + 1] = gc->economy.decadeProfitHistory[n];
+            gc->economy.altDecadeRevenueTotal[n + 1] = gc->economy.altDecadeRevenueTotal[n];
             gc->altDecadeTotalCost[n + 1] = gc->altDecadeTotalCost[n];
         }
-        gc->decadeProfitGraphTotal = gc->economy.revenueTotal = 0;
-        gc->decadeProfitHistory[0] = gc->altDecadeRevenueTotal[0] = 0;
+        gc->economy.decadeProfitGraphTotal = gc->economy.revenueTotal = 0;
+        gc->economy.decadeProfitHistory[0] = gc->economy.altDecadeRevenueTotal[0] = 0;
         gc->altDecadeTotalCost[0] = 0;
     }
     gc->altDecadeTotalCost[0] = gc_scanMapForMetric(gc);
@@ -585,7 +585,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     if (n10 == 0) n10 = 1;
                     gc->fleet.serviceResourceStock[i][1] =
                         (int16_t)(gc->fleet.serviceResourceStock[i][1] + n10);
-                    gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
+                    gc->economy.stationRevenue[n11] = (int16_t)(gc->economy.stationRevenue[n11] + n10);
                     gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 4);
                 }
                 if (tile >= 53 && tile <= 55 && !bl
@@ -596,7 +596,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     if (n10 == 0) n10 = 1;
                     gc->fleet.serviceResourceStock[i][2] =
                         (int16_t)(gc->fleet.serviceResourceStock[i][2] + n10);
-                    gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
+                    gc->economy.stationRevenue[n11] = (int16_t)(gc->economy.stationRevenue[n11] + n10);
                     gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 8);
                 }
                 if (tile >= 59 && tile <= 61 && !bl
@@ -607,7 +607,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     if (n10 == 0) n10 = 1;
                     gc->fleet.serviceResourceStock[i][3] =
                         (int16_t)(gc->fleet.serviceResourceStock[i][3] + n10);
-                    gc->stationRevenue[n11] = (int16_t)(gc->stationRevenue[n11] + n10);
+                    gc->economy.stationRevenue[n11] = (int16_t)(gc->economy.stationRevenue[n11] + n10);
                     gc->fleet.serviceLoadFlags[i] = (int8_t)(gc->fleet.serviceLoadFlags[i] | 2);
                 }
                 if (tile >= 50 && tile <= 52)

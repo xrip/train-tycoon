@@ -11,9 +11,9 @@ int32_t gc_computeKeyRepeatDelay(GameCanvas *gc) {
 
 // void pushMoneyHistory(int n)
 void gc_pushMoneyHistory(GameCanvas *gc, int32_t n) {
-    gc->moneyHistory[2] = gc->moneyHistory[1];
-    gc->moneyHistory[1] = gc->moneyHistory[0];
-    gc->moneyHistory[0] = n;
+    gc->economy.moneyHistory[2] = gc->economy.moneyHistory[1];
+    gc->economy.moneyHistory[1] = gc->economy.moneyHistory[0];
+    gc->economy.moneyHistory[0] = n;
     gc->moneyTickerFrames[2] = gc->moneyTickerFrames[1];
     gc->moneyTickerFrames[1] = gc->moneyTickerFrames[0];
     gc->moneyTickerFrames[0] = 80;
