@@ -31,6 +31,22 @@ Game* make_game() {
     return game;
 }
 
+std::uint64_t save_state_digest(Game* game) {
+    game_initSaveOrLoad(game, 4);
+    StableDigest digest;
+    digest.add_bytes(game->saveCodec.saveBuffer.data(),
+                     static_cast<std::size_t>(game->saveCodec.snapshotSize));
+    return digest.value();
+}
+
+std::uint64_t paint_digest(Game* game, Surface* screen) {
+    std::memset(framebuffer, 0, sizeof(framebuffer));
+    game_paint(game, screen);
+    StableDigest digest;
+    digest.add_pixels(framebuffer, std::size(framebuffer));
+    return digest.value();
+}
+
 std::uint64_t map_digest(const Game* game) {
     StableDigest digest;
     digest.add_i32(game->scenario.activeScenario);
@@ -61,7 +77,60 @@ void generate_scenario(Game* game, int scenario) {
     REQUIRE(!game->world.trackMap.empty());
 }
 
+void load_game_resources(Game* game) {
+    game_start(game, nullptr);
+    game->loadingStartTime = 0;
+    game_update(game);
+    game->loadingStartTime = 0;
+    game_update(game);
+    game_update(game);
+    REQUIRE(game->gameState == +GameState::MenuOverlay);
+
+    game_setState(game, +GameState::LoadingResources);
+    for (int step = 0; game->gameState == +GameState::LoadingResources && step < 1000; ++step) {
+        game_update(game);
+    }
+    REQUIRE(game->gameState == +GameState::MenuOverlay);
+}
+
 } // namespace
+
+TEST_CASE("fast: game initialization restores all non-zero defaults") {
+    Game* game = make_game();
+
+    CHECK(game->simSpeed == 1);
+    CHECK(game->economy.money == 200000);
+    CHECK(game->economy.loanCeiling == 600000);
+    CHECK(game->economy.dayOfMonth == 1);
+    CHECK(game->economy.monthOfYear == 1);
+    CHECK(game->economy.year == 1950);
+    CHECK(game->scenario.difficultyPct == 100);
+    CHECK(game->scenario.difficultyCycle == 1);
+    CHECK(game->scenario.aiFrequency == 15);
+    CHECK(game->scenario.aiThreshold == 12);
+    CHECK(game->build.nextTrackPieceCode == 66);
+    CHECK(game->dayTickThreshold == 50);
+    CHECK(game->lastCanvasWidth == -1);
+    CHECK(game->lastCanvasHeight == -1);
+    CHECK(game->fleet.forwardTrackSteps[0][1] == 1);
+    CHECK(game->fleet.reverseTrackSteps[5][11] == 1);
+    CHECK(game->assets.trainSpriteDirectionTable[7][7] == 188);
+    CHECK(game->scenario.offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
+    CHECK(game->scenario.offerEffectSchedule[3][1] == -56);
+    CHECK(game->graphColors[8] == 51200);
+    CHECK(game->assets.tileSpriteYOffsetByCode[24] == -4);
+
+    game->economy.money = 1;
+    game->fleet.forwardTrackSteps[0][1] = 99;
+    game->scenario.offerTypesByEffect[0].clear();
+    game_fields_init(game);
+
+    CHECK(game->economy.money == 200000);
+    CHECK(game->fleet.forwardTrackSteps[0][1] == 1);
+    CHECK(game->scenario.offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
+    CHECK(game->renderer.backbuffer != nullptr);
+    delete game;
+}
 
 TEST_CASE("fast: Java random values") {
     JavaRandom random{};
@@ -373,20 +442,7 @@ TEST_CASE("full: all scenario maps have fixed digests") {
 
 TEST_CASE("full: scenario zero input and frames have fixed digests") {
     Game* game = make_game();
-    game_start(game, nullptr);
-
-    game->loadingStartTime = 0;
-    game_update(game);
-    game->loadingStartTime = 0;
-    game_update(game);
-    game_update(game);
-    REQUIRE(game->gameState == 20);
-
-    game_setState(game, 10);
-    for (int step = 0; game->gameState == 10 && step < 1000; ++step) {
-        game_update(game);
-    }
-    REQUIRE(game->gameState == 20);
+    load_game_resources(game);
 
     generate_scenario(game, 0);
 
@@ -409,6 +465,52 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(moved_frame.value() == 2749731419861486662ULL);
 
+    delete game;
+}
+
+TEST_CASE("full: year rollover has a fixed saved-state digest") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    game->rng.set_seed(kFixedRandomSeed);
+    gcs_monthlyReportEnabled = false;
+    gcs_annualReportEnabled = false;
+    game->economy.dayOfMonth = 31;
+    game->economy.monthOfYear = 12;
+    game->economy.year = 1950;
+    game->counterA = game->dayTickThreshold;
+
+    game_simulationTick(game);
+
+    CHECK(game->economy.dayOfMonth == 1);
+    CHECK(game->economy.monthOfYear == 1);
+    CHECK(game->economy.year == 1951);
+    CHECK(game->counterA == 0);
+    CHECK(save_state_digest(game) == 8296142532964329289ULL);
+    delete game;
+}
+
+TEST_CASE("full: report and graph dialogs have fixed frame digests") {
+    Game* game = make_game();
+    load_game_resources(game);
+    generate_scenario(game, 0);
+    Surface screen;
+    midp_gfx_init_screen(&screen, framebuffer, kScreenWidth, kScreenHeight);
+
+    // Set the canvas size while the game is still in Playing. An overlay entered
+    // before the first paint is sent back to Playing by the resize path.
+    paint_digest(game, &screen);
+
+    game->ready = false;
+    game->ui.transitionCode = 32;
+    game_setState(game, +GameState::MenuOverlay);
+    game_paint(game, &screen);
+    CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
+
+    game_setYearGraphMode(game, 0, false);
+    game->ui.transitionCode = 33;
+    game_setState(game, +GameState::MenuOverlay);
+    game_paint(game, &screen);
+    CHECK(paint_digest(game, &screen) == 1138514185145564824ULL);
     delete game;
 }
 
