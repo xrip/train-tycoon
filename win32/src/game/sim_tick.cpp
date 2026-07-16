@@ -613,188 +613,226 @@ void game_tickInputOrAi(Game *game, bool bl) {
     }
 }
 
-// frame timers, tile-fade queue, train updates, then (when dayFrameCounter reaches
-// dH) the day/month/year calendar cadence with its monthly/yearly hooks.
+namespace {
+
+void advanceTileAnimationFrames(Game *game) {
+    if (++game->tile50AnimationPhase == 2) {
+        game->tile50AnimationPhase = 0;
+        if (++game->tile50AnimationFrame == 3) game->tile50AnimationFrame = 0;
+    }
+    if (++game->tile64AnimationPhase == 2) {
+        game->tile64AnimationPhase = 0;
+        if (++game->tile64AnimationFrame == 3) game->tile64AnimationFrame = 0;
+    }
+    if (++game->tile55AnimationPhase == 3) {
+        game->tile55AnimationPhase = 0;
+        if (++game->tile55AnimationFrame == 3) game->tile55AnimationFrame = 0;
+    }
+    if (++game->world.woodAgeTimer == 150) {
+        for (int mapX = 0; mapX < game->world.mapWidth; ++mapX) {
+            for (int mapY = 0; mapY < game->world.mapHeight; ++mapY) {
+                if (game->world.tileMap[mapX][mapY] < 59 || game->world.tileMap[mapX][mapY] > 61
+                    || game->rng.next_int() % 3 != 0)
+                    continue;
+                ++game->world.tileMap[mapX][mapY];
+                if (game->world.tileMap[mapX][mapY] == 62) game->world.tileMap[mapX][mapY] = 59;
+            }
+        }
+        game->world.woodAgeTimer = 0;
+    }
+    if (++game->world.phaseTimer == 10) game->world.phaseTimer = 0;
+}
+
+void applyQueuedTileChanges(Game *game) {
+    for (int queueIndex = 0; queueIndex < kTileQueueCount; ++queueIndex) {
+        if (game->world.tileQueue[queueIndex][0] <= 0) continue;
+        --game->world.tileQueue[queueIndex][0];
+        int tileX = unsignedByte(game->world.tileQueue[queueIndex][1]);
+        int tileY = unsignedByte(game->world.tileQueue[queueIndex][2]);
+        if (game->world.tileQueue[queueIndex][0] == 0 && tileX >= 0 && tileY >= 0
+            && tileX < game->world.mapWidth && tileY < game->world.mapHeight)
+            game->world.tileMap[tileX][tileY] = (int8_t)(unsignedByte(game->world.tileMap[tileX][tileY]) - 128);
+        if (game->world.tileQueue[queueIndex][0] != 7 || tileX < 0 || tileY < 0
+            || tileX >= game->world.mapWidth || tileY >= game->world.mapHeight)
+            continue;
+        int tileCode = unsignedByte(game->world.tileMap[tileX][tileY]) - 128;
+        if (game->world.tileQueueVisualOnly[queueIndex]) continue;
+        if (tileCode >= 29 && tileCode <= 33) game->world.tileMap[tileX][tileY] = -128;
+        if ((tileCode >= 70 && tileCode <= 75) || (tileCode >= 87 && tileCode <= 90)) {
+            game->world.trackMap[tileX][tileY] = 0;
+            game->world.tileMap[tileX][tileY] = -128;
+            game->renderer.lastViewportCenterX = -1;
+        }
+        if (tileCode >= 77 && tileCode <= 80) {
+            game->world.tileMap[tileX][tileY] = (int8_t)(128 + tileCode - 56);
+            game->world.trackMap[tileX][tileY] = 0;
+            game->renderer.lastViewportCenterX = -1;
+        }
+        if (tileCode == 81 || tileCode == 82) {
+            game->world.tileMap[tileX][tileY] = -128;
+            game->world.trackMap[tileX][tileY] = 0;
+            game->renderer.lastViewportCenterX = -1;
+        }
+        if (tileCode >= 83 && tileCode <= 86) {
+            game->world.tileMap[tileX][tileY] = (int8_t)(128 + tileCode - 76);
+            game->world.trackMap[tileX][tileY] = 0;
+            game->renderer.lastViewportCenterX = -1;
+        }
+        if (tileCode == 76) {
+            int firstTrackOwner = game->world.trackMap[tileX][tileY] & 7;
+            int secondTrackOwner = (game->world.trackMap[tileX][tileY] & 0x3F) >> 3;
+            if (firstTrackOwner == 1 && secondTrackOwner == 1) {
+                game->world.tileMap[tileX][tileY] = -128;
+                game->world.trackMap[tileX][tileY] = 0;
+            } else if (firstTrackOwner == 1) {
+                game->world.tileMap[tileX][tileY] = -57;
+                game->world.trackMap[tileX][tileY] = (int8_t)(0x40 | secondTrackOwner);
+            } else if (secondTrackOwner == 1) {
+                game->world.tileMap[tileX][tileY] = -58;
+                game->world.trackMap[tileX][tileY] = (int8_t)(0x40 | firstTrackOwner);
+            }
+            game->renderer.lastViewportCenterX = -1;
+        }
+    }
+}
+
+void updateActiveTrains(Game *game) {
+    for (int trainIndex = 0; trainIndex < kTrainSlotCount; ++trainIndex) {
+        if ((game->fleet.trainFlags[trainIndex] & 0x80) != 128
+            || (game->fleet.trainFlags[trainIndex] & 0x40) != 64)
+            continue;
+        if ((game->fleet.trainFlags[trainIndex] & 0x20) == 32) {
+            if (game->fleet.energyCargoOrRemovalTicks[trainIndex] > 0) {
+                --game->fleet.energyCargoOrRemovalTicks[trainIndex];
+                continue;
+            }
+            game->fleet.trainPhase[trainIndex] = 0;
+            game->fleet.trainFlags[trainIndex] = 0;
+            continue;
+        }
+        game_updateTrain(game, trainIndex);
+        game_updateTrain(game, trainIndex);
+        if (game->fleet.trainPhase[trainIndex] == 0) game_mergeTrainAt(game, trainIndex);
+    }
+}
+
+void advanceMonthIfDayEnded(Game *game) {
+    switch (game->economy.monthOfYear) {
+        case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+            if (game->economy.dayOfMonth == 32) ++game->economy.monthOfYear;
+            break;
+        case 2:
+            if ((game->economy.year % 4 != 0 && game->economy.dayOfMonth == 29)
+                || (game->economy.year % 4 == 0 && game->economy.dayOfMonth == 30))
+                ++game->economy.monthOfYear;
+            break;
+        case 4: case 6: case 9: case 11:
+            if (game->economy.dayOfMonth == 31) ++game->economy.monthOfYear;
+            break;
+    }
+}
+
+void applyNewMonthChanges(Game *game) {
+    game->economy.dayOfMonth = 1;
+    game_newYearNotify(game);
+    game_decayConstructionTimersQuarterly(game);
+    game_updateCityPopulation(game);
+    game_upgradeOneAiTrainForEra(game);
+    switch (std::abs(game->rng.next_int() % 7)) {
+        case 0: game->economy.moneyBaseA += 9; game->economy.moneyBaseB += 9; break;
+        case 1: ++game->economy.baseTrainSpeed; game->economy.accel1 += 3; game->economy.brake1 += 3; break;
+        case 2: ++game->economy.baseTrainSpeed2; game->economy.accel2 += 2; break;
+        case 3: game->economy.costPower += 47; game->economy.costStruct += 98; break;
+        case 4:
+            game->economy.costOverhead += 3;
+            game->economy.costMaintenance += 59;
+            game->economy.costCrew += 4;
+            break;
+        case 5:
+            game->economy.gWagonCost += 378;
+            game->economy.gWagonCost2 += 432;
+            game->economy.gWagonCost3 += 518;
+            game->economy.gWagonCost4 += 601;
+            game->economy.gWagonCost5 += 714;
+            game->economy.gWagonCost6 += 826;
+            break;
+        case 6:
+            game->economy.costGroupC1 += 45;
+            game->economy.costGroupC2 += 51;
+            game->economy.costGroupC3 += 43;
+            game->economy.costGroupC4 += 50;
+            break;
+    }
+}
+
+void advanceYearIfNeeded(Game *game) {
+    if (game->economy.monthOfYear == 13) {
+        game_ageTrainsOneYear(game);
+        game_resetAiDepotTrainAges(game);
+        game->economy.monthOfYear = 1;
+        ++game->economy.year;
+        if (game->economy.money < 0) {
+            game->ready = false;
+            game->ui.transitionCode = 7;
+            game_setState(game, GameState::MenuOverlay);
+        }
+    }
+}
+
+void advanceEraIfNeeded(Game *game) {
+    int previousEra = game->era;
+    if (game->economy.dayOfMonth == 5 && game->economy.monthOfYear == 3 && game->economy.year == 1951 && game->era < 2)
+        game->era = 2;
+    if (game->economy.dayOfMonth == 17 && game->economy.monthOfYear == 7 && game->economy.year == 1953 && game->era < 3)
+        game->era = 3;
+    if (game->economy.dayOfMonth == 4 && game->economy.monthOfYear == 12 && game->economy.year == 1957 && game->era < 4)
+        game->era = 4;
+    if (game->economy.dayOfMonth == 26 && game->economy.monthOfYear == 2 && game->economy.year == 1962 && game->era < 5)
+        game->era = 5;
+    if (previousEra != game->era) {
+        game->ready = false;
+        game->ui.transitionCode = 13;
+        game_setState(game, GameState::MenuOverlay);
+    }
+}
+
+void advanceGameDay(Game *game) {
+    game_computeYearEndMetrics(game);
+    if (game->frameIndex > 0) --game->frameIndex;
+    game->dayFrameCounter = 0;
+    ++game->economy.dayOfMonth;
+    game_everyMonthlyTick(game);
+    if (game->economy.dayOfMonth % 4 == 0) game_maybeAiTakeTurn(game);
+    if (game->economy.dayOfMonth % 2 == 0) {
+        if (game->economy.dayOfMonth % 10 == 0) game_everyTenTick(game);
+        game_chargeTrainRunningCosts(game);
+        game_checkScenarioMilestone(game);
+        if (game->scenario.aiExpansionEnabled) {
+            int forestFound = 0;
+            for (int attempt = 0; attempt < 30; ++attempt)
+                forestFound = forestFound || game_pickValidForestTile(game);
+            if (forestFound) game_recountZonePopulation(game);
+        }
+        game_tickInputOrAi(game, false);
+    }
+
+    int previousMonth = game->economy.monthOfYear;
+    advanceMonthIfDayEnded(game);
+    if (previousMonth != game->economy.monthOfYear) applyNewMonthChanges(game);
+    advanceYearIfNeeded(game);
+    advanceEraIfNeeded(game);
+}
+
+} // namespace
+
+// Advance frame animation, queued map work, trains, and the calendar in that order.
 void game_simulationTick(Game *game) {
-            if (++game->tile50AnimationPhase == 2) {
-                game->tile50AnimationPhase = 0;
-                if (++game->tile50AnimationFrame == 3) game->tile50AnimationFrame = 0;
-            }
-            if (++game->tile64AnimationPhase == 2) {
-                game->tile64AnimationPhase = 0;
-                if (++game->tile64AnimationFrame == 3) game->tile64AnimationFrame = 0;
-            }
-            if (++game->tile55AnimationPhase == 3) {
-                game->tile55AnimationPhase = 0;
-                if (++game->tile55AnimationFrame == 3) game->tile55AnimationFrame = 0;
-            }
-            if (++game->world.woodAgeTimer == 150) {
-                for (int n27 = 0; n27 < game->world.mapWidth; ++n27) {
-                    for (int n = 0; n < game->world.mapHeight; ++n) {
-                        if (game->world.tileMap[n27][n] < 59 || game->world.tileMap[n27][n] > 61
-                            || game->rng.next_int() % 3 != 0)
-                            continue;
-                        ++game->world.tileMap[n27][n];
-                        if (game->world.tileMap[n27][n] == 62) game->world.tileMap[n27][n] = 59;
-                    }
-                }
-                game->world.woodAgeTimer = 0;
-            }
-            if (++game->world.phaseTimer == 10) game->world.phaseTimer = 0;
-
-            for (int n27 = 0; n27 < 50; ++n27) {
-                if (game->world.tileQueue[n27][0] <= 0) continue;
-                --game->world.tileQueue[n27][0];
-                int n = unsignedByte(game->world.tileQueue[n27][1]);
-                int n29 = unsignedByte(game->world.tileQueue[n27][2]);
-                if (game->world.tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
-                    && n < game->world.mapWidth && n29 < game->world.mapHeight)
-                    game->world.tileMap[n][n29] = (int8_t)(unsignedByte(game->world.tileMap[n][n29]) - 128);
-                if (game->world.tileQueue[n27][0] != 7 || n < 0 || n29 < 0
-                    || n >= game->world.mapWidth || n29 >= game->world.mapHeight)
-                    continue;
-                int n30 = unsignedByte(game->world.tileMap[n][n29]) - 128;
-                if (game->world.tileQueueVisualOnly[n27]) continue;
-                if (n30 >= 29 && n30 <= 33) game->world.tileMap[n][n29] = -128;
-                if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
-                    game->world.trackMap[n][n29] = 0;
-                    game->world.tileMap[n][n29] = -128;
-                    game->renderer.lastViewportCenterX = -1;
-                }
-                if (n30 >= 77 && n30 <= 80) {
-                    game->world.tileMap[n][n29] = (int8_t)(128 + n30 - 56);
-                    game->world.trackMap[n][n29] = 0;
-                    game->renderer.lastViewportCenterX = -1;
-                }
-                if (n30 == 81 || n30 == 82) {
-                    game->world.tileMap[n][n29] = -128;
-                    game->world.trackMap[n][n29] = 0;
-                    game->renderer.lastViewportCenterX = -1;
-                }
-                if (n30 >= 83 && n30 <= 86) {
-                    game->world.tileMap[n][n29] = (int8_t)(128 + n30 - 76);
-                    game->world.trackMap[n][n29] = 0;
-                    game->renderer.lastViewportCenterX = -1;
-                }
-                if (n30 == 76) {
-                    int n31 = game->world.trackMap[n][n29] & 7;
-                    int n32 = (game->world.trackMap[n][n29] & 0x3F) >> 3;
-                    if (n31 == 1 && n32 == 1) {
-                        game->world.tileMap[n][n29] = -128;
-                        game->world.trackMap[n][n29] = 0;
-                    } else if (n31 == 1) {
-                        game->world.tileMap[n][n29] = -57;
-                        game->world.trackMap[n][n29] = (int8_t)(0x40 | n32);
-                    } else if (n32 == 1) {
-                        game->world.tileMap[n][n29] = -58;
-                        game->world.trackMap[n][n29] = (int8_t)(0x40 | n31);
-                    }
-                    game->renderer.lastViewportCenterX = -1;
-                }
-            }
-
-            for (int n27 = 0; n27 < 500; ++n27) {
-                if ((game->fleet.trainFlags[n27] & 0x80) != 128
-                    || (game->fleet.trainFlags[n27] & 0x40) != 64)
-                    continue;
-                if ((game->fleet.trainFlags[n27] & 0x20) == 32) {
-                    if (game->fleet.energyCargoOrRemovalTicks[n27] > 0) {
-                        --game->fleet.energyCargoOrRemovalTicks[n27];
-                        continue;
-                    }
-                    game->fleet.trainPhase[n27] = 0;
-                    game->fleet.trainFlags[n27] = 0;
-                    continue;
-                }
-                game_updateTrain(game, n27);
-                game_updateTrain(game, n27);
-                if (game->fleet.trainPhase[n27] == 0) game_mergeTrainAt(game, n27);
-            }
-
-            if (game->dayFrameCounter >= game->dayTickThreshold) {
-                game_computeYearEndMetrics(game);
-                if (game->frameIndex > 0) --game->frameIndex;
-                game->dayFrameCounter = 0;
-                ++game->economy.dayOfMonth;
-                game_everyMonthlyTick(game);
-                if (game->economy.dayOfMonth % 4 == 0) game_maybeAiTakeTurn(game);
-                if (game->economy.dayOfMonth % 2 == 0) {
-                    if (game->economy.dayOfMonth % 10 == 0) game_everyTenTick(game);
-                    game_chargeTrainRunningCosts(game);
-                    game_checkScenarioMilestone(game);
-                    if (game->scenario.aiExpansionEnabled) {
-                        int found = 0;
-                        for (int n = 0; n < 30; ++n)
-                            found = found || game_pickValidForestTile(game);
-                        if (found) game_recountZonePopulation(game);
-                    }
-                    game_tickInputOrAi(game, false);
-                }
-                int oldMonth = game->economy.monthOfYear;
-                switch (game->economy.monthOfYear) {
-                    case 1: case 3: case 5: case 7: case 8: case 10: case 12:
-                        if (game->economy.dayOfMonth == 32) ++game->economy.monthOfYear;
-                        break;
-                    case 2:
-                        if ((game->economy.year % 4 != 0 && game->economy.dayOfMonth == 29)
-                            || (game->economy.year % 4 == 0 && game->economy.dayOfMonth == 30))
-                            ++game->economy.monthOfYear;
-                        break;
-                    case 4: case 6: case 9: case 11:
-                        if (game->economy.dayOfMonth == 31) ++game->economy.monthOfYear;
-                        break;
-                }
-                if (oldMonth != game->economy.monthOfYear) {
-                    game->economy.dayOfMonth = 1;
-                    game_newYearNotify(game);
-                    game_decayConstructionTimersQuarterly(game);
-                    game_updateCityPopulation(game);
-                    game_upgradeOneAiTrainForEra(game);
-                    switch (std::abs(game->rng.next_int() % 7)) {
-                        case 0: game->economy.moneyBaseA += 9; game->economy.moneyBaseB += 9; break;
-                        case 1: ++game->economy.baseTrainSpeed; game->economy.accel1 += 3; game->economy.brake1 += 3; break;
-                        case 2: ++game->economy.baseTrainSpeed2; game->economy.accel2 += 2; break;
-                        case 3: game->economy.costPower += 47; game->economy.costStruct += 98; break;
-                        case 4:
-                            game->economy.costOverhead += 3; game->economy.costMaintenance += 59; game->economy.costCrew += 4;
-                            break;
-                        case 5:
-                            game->economy.gWagonCost += 378; game->economy.gWagonCost2 += 432;
-                            game->economy.gWagonCost3 += 518; game->economy.gWagonCost4 += 601;
-                            game->economy.gWagonCost5 += 714; game->economy.gWagonCost6 += 826;
-                            break;
-                        case 6:
-                            game->economy.costGroupC1 += 45; game->economy.costGroupC2 += 51;
-                            game->economy.costGroupC3 += 43; game->economy.costGroupC4 += 50;
-                            break;
-                    }
-                }
-                if (game->economy.monthOfYear == 13) {
-                    game_ageTrainsOneYear(game);
-                    game_resetAiDepotTrainAges(game);
-                    game->economy.monthOfYear = 1;
-                    ++game->economy.year;
-                    if (game->economy.money < 0) {
-                        game->ready = false;
-                        game->ui.transitionCode = 7;
-                        game_setState(game, GameState::MenuOverlay);
-                    }
-                }
-                int oldEra = game->era;
-                if (game->economy.dayOfMonth == 5 && game->economy.monthOfYear == 3 && game->economy.year == 1951 && game->era < 2)
-                    game->era = 2;
-                if (game->economy.dayOfMonth == 17 && game->economy.monthOfYear == 7 && game->economy.year == 1953 && game->era < 3)
-                    game->era = 3;
-                if (game->economy.dayOfMonth == 4 && game->economy.monthOfYear == 12 && game->economy.year == 1957 && game->era < 4)
-                    game->era = 4;
-                if (game->economy.dayOfMonth == 26 && game->economy.monthOfYear == 2 && game->economy.year == 1962 && game->era < 5)
-                    game->era = 5;
-                if (oldEra != game->era) {
-                    game->ready = false;
-                    game->ui.transitionCode = 13;
-                    game_setState(game, GameState::MenuOverlay);
-                }
-            } else {
-                ++game->dayFrameCounter;
-            }
+    advanceTileAnimationFrames(game);
+    applyQueuedTileChanges(game);
+    updateActiveTrains(game);
+    if (game->dayFrameCounter >= game->dayTickThreshold) {
+        advanceGameDay(game);
+    } else {
+        ++game->dayFrameCounter;
+    }
 }
