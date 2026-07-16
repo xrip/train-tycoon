@@ -66,14 +66,19 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
 }
 
 // Image u(int n, int n2)
-Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
-    if (n == 23) {
-        if (n2 == 0 && gc->build.wagonType >= 0 && gc->build.wagonType < 3)
+// Returns the tile sprite image for a wagon/car slot. contextCode 23 is the
+// build-menu wagon preview (slotIndex 0 = the engine chosen by wagonType, higher
+// slots = the offered wagon in wagonOptionSlots); contextCode 26 is the
+// slotIndex-th car of the train under the cursor. Returns NULL when the slot has
+// no sprite.
+Image *gc_wagonCarSprite(GameCanvas *gc, int32_t contextCode, int32_t slotIndex) {
+    if (contextCode == 23) {
+        if (slotIndex == 0 && gc->build.wagonType >= 0 && gc->build.wagonType < 3)
             return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
-        if (n2 == 0 && gc->build.wagonType >= 3 && gc->build.wagonType < 6)
+        if (slotIndex == 0 && gc->build.wagonType >= 3 && gc->build.wagonType < 6)
             return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
-        if (n2 > 0) {
-            switch (gc->build.wagonOptionSlots[n2 - 1]) {
+        if (slotIndex > 0) {
+            switch (gc->build.wagonOptionSlots[slotIndex - 1]) {
                 case -1: return NULL;
                 case 0: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
                 case 1: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
@@ -82,11 +87,11 @@ Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
             }
         }
     }
-    if (n == 26 && gc_countCarsInTrain(gc, gc->trainAtCursor) > n2) {
-        int n4 = gc->trainAtCursor;
-        for (int i = 0; i < n2; ++i) n4 = gc->fleet.nextCar[n4];
-        int n3 = gc->fleet.trainFlags[n4] & 0xF;
-        switch (n3) {
+    if (contextCode == 26 && gc_countCarsInTrain(gc, gc->trainAtCursor) > slotIndex) {
+        int carSlot = gc->trainAtCursor;
+        for (int i = 0; i < slotIndex; ++i) carSlot = gc->fleet.nextCar[carSlot];
+        int carType = gc->fleet.trainFlags[carSlot] & 0xF;
+        switch (carType) {
             case -1: return NULL;
             case 0: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
             case 1: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
@@ -308,7 +313,7 @@ void gc_renderPackedSprite(GameCanvas *gc, Surface *g, int32_t n) {
         n9 = (by & 0x20) == 32 ? 0 : gc->assets.spriteData[n25++];
         n8 = (by & 0x10) == 16 ? 0 : gc->assets.spriteData[n25++];
         n7 = n11 != 0 ? gc->assets.spriteData[n25++] : 0;
-        Image *image = gc_u(gc, gc->renderer.currentSpriteId, n10);
+        Image *image = gc_wagonCarSprite(gc, gc->renderer.currentSpriteId, n10);
         if (image == NULL) continue;
         n5 = image->width();
         n4 = image->height();

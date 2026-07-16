@@ -89,7 +89,7 @@ void gc_rebuildCityList(GameCanvas *gc);
 std::vector<int8_t> gc_formatCurrency(GameCanvas *gc, int32_t n);
 std::vector<int8_t> gc_formatNumberWithSuffix(GameCanvas *gc, int32_t n, int32_t n2);
 std::vector<int8_t> gc_encodeDisplayText(GameCanvas *gc, const char* string);
-Image* gc_u(GameCanvas *gc, int32_t n, int32_t n2);
+Image* gc_wagonCarSprite(GameCanvas *gc, int32_t n, int32_t n2);
 bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2);
 int32_t gc_neighboursMask(GameCanvas *gc, int32_t n, int32_t n2);
 std::optional<std::vector<int8_t>> gc_resolveDialogValue(GameCanvas *gc, int32_t n, int32_t n2);
