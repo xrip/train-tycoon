@@ -19,6 +19,50 @@ static int read_u24_le(ResourceReader& resource) {
 #define WIDTH  MIDP_SCREEN_W   // this.getWidth()
 #define HEIGHT MIDP_SCREEN_H   // this.getHeight()
 
+namespace {
+
+void paintMapOverview(Game *game, Surface *g) {
+    midp_set_clip(g, 0, 15, canvasWidth, gameplayViewportHeight);
+    midp_set_color(g, 0);
+    midp_fill_rect(g, 0, 15, canvasWidth, gameplayViewportHeight);
+    int viewportMapX = game->renderer.viewportCenterX / 16;
+    int viewportMapY = game->renderer.viewportCenterY / 8;
+    int overviewSize = game->world.mapWidth + game->world.mapHeight;
+    int drawX = canvasWidth / 2 - viewportMapX - canvasWidth / 32;
+    if (canvasWidth - drawX > overviewSize) drawX = canvasWidth - overviewSize;
+    if (drawX > 0) drawX = 0;
+    int drawY = gameplayViewportHeight / 2 - viewportMapY - gameplayViewportHeight / 16;
+    if (gameplayViewportHeight - drawY > overviewSize) drawY = gameplayViewportHeight - overviewSize;
+    if (drawY > 0) drawY = 0;
+    int centerX = overviewSize < canvasWidth ? (canvasWidth - overviewSize) / 2 : 0;
+    int centerY = overviewSize < gameplayViewportHeight ? (gameplayViewportHeight - overviewSize) / 2 : 0;
+    midp_draw_image(g, game->renderer.backbuffer.get(), drawX + centerX, 15 + drawY + centerY, 20);
+    int mapX = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.mapHalfWidth;
+    int mapY = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.mapHalfWidth;
+    int boxY = game->world.mapWidth - (mapX /= 32) + (mapY /= 32);
+    int boxX = mapX + mapY;
+    midp_set_color(g, 0xFFFFFF);
+    midp_draw_rect(g, boxX + drawX + centerX, 15 + boxY + drawY + centerY,
+                   canvasWidth / 16, gameplayViewportHeight / 8);
+    midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
+    game_drawConfirmBar(game, g);
+    game_drawConfirmDialog(game, g);
+    if (game->confirmCloseRequested) {
+        game->ready = false;
+        game->ui.transitionCode = 36;
+        game_setState(game, GameState::MenuOverlay);
+        game->confirmCloseRequested = false;
+    }
+    if (game->ui.pendingTransitionCode <= -1) return;
+    game->ui.transitionCode = game->ui.pendingTransitionCode;
+    game_resetOverlayRenderState(game);
+    game->ui.pendingTransitionCode = -1;
+    game_renderPackedSprite(game, g, game->ui.transitionCode);
+    game_setState(game, GameState::MenuOverlay);
+}
+
+} // namespace
+
 void game_paint(Game *game, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
@@ -132,45 +176,9 @@ void game_paint(Game *game, Surface *g) {
             game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
             break;
-        case GameState::MapOverview: {
-            int n14;
-            midp_set_clip(g, 0, 15, canvasWidth, gameplayViewportHeight);
-            midp_set_color(g, 0);
-            midp_fill_rect(g, 0, 15, canvasWidth, gameplayViewportHeight);
-            int n15 = game->renderer.viewportCenterX / 16;
-            int n16 = game->renderer.viewportCenterY / 8;
-            int n17 = game->world.mapWidth + game->world.mapHeight;
-            int n18 = canvasWidth / 2 - n15 - canvasWidth / 32;
-            if (canvasWidth - n18 > n17) n18 = canvasWidth - n17;
-            if (n18 > 0) n18 = 0;
-            if (gameplayViewportHeight - (n14 = gameplayViewportHeight / 2 - n16 - gameplayViewportHeight / 16) > n17) n14 = gameplayViewportHeight - n17;
-            if (n14 > 0) n14 = 0;
-            int n19 = n17 < canvasWidth ? (canvasWidth - n17) / 2 : 0;
-            int n20 = n17 < gameplayViewportHeight ? (gameplayViewportHeight - n17) / 2 : 0;
-            midp_draw_image(g, game->renderer.backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
-            int n21 = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.mapHalfWidth;
-            int n22 = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.mapHalfWidth;
-            int n23 = game->world.mapWidth - (n21 /= 32) + (n22 /= 32);
-            int n24 = n21 + n22;
-            midp_set_color(g, 0xFFFFFF);
-            midp_draw_rect(g, n24 + n18 + n19, 15 + n23 + n14 + n20, canvasWidth / 16, gameplayViewportHeight / 8);
-            midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
-            game_drawConfirmBar(game, g);
-            game_drawConfirmDialog(game, g);
-            if (game->confirmCloseRequested) {
-                game->ready = false;
-                game->ui.transitionCode = 36;
-                game_setState(game, GameState::MenuOverlay);
-                game->confirmCloseRequested = false;
-            }
-            if (game->ui.pendingTransitionCode <= -1) break;
-            game->ui.transitionCode = game->ui.pendingTransitionCode;
-            game_resetOverlayRenderState(game);
-            game->ui.pendingTransitionCode = -1;
-            game_renderPackedSprite(game, g, game->ui.transitionCode);
-            game_setState(game, GameState::MenuOverlay);
+        case GameState::MapOverview:
+            paintMapOverview(game, g);
             break;
-        }
         case GameState::BuildingPath:
             game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
@@ -193,6 +201,77 @@ void game_paint(Game *game, Surface *g) {
             break;
     }
 }
+
+namespace {
+
+void setMinimapColor(Game *game, int kind, int x, int y) {
+    Surface *surface = game->renderer.backbuffer_surface;
+    switch (kind) {
+        case 1:
+            if (game->world.tileElevation[x][y] == -1) midp_set_color(surface, 3167360);
+            if (game->world.tileElevation[x][y] == 0) midp_set_color(surface, 5274640);
+            if (game->world.tileElevation[x][y] == 1) midp_set_color(surface, 6327328);
+            if (game->world.tileElevation[x][y] == 2) midp_set_color(surface, 7380016);
+            if (game->world.tileElevation[x][y] == 3) midp_set_color(surface, 8432704);
+            break;
+        case 2: midp_set_color(surface, 6327312); break;
+        case 3: midp_set_color(surface, 0x909040); break;
+        case 4: midp_set_color(surface, 0x606060); break;
+        case 5: midp_set_color(surface, 0x404040); break;
+        case 6: midp_set_color(surface, 0xFC0000); break;
+        case 7: midp_set_color(surface, 0x101010); break;
+        case 8: midp_set_color(surface, 0xFC9C00); break;
+        case 9: midp_set_color(surface, 0x78DC1E); break;
+        case 10: midp_set_color(surface, 0xFCFC00); break;
+        case 11: midp_set_color(surface, 0x80C4FC); break;
+        case 12: midp_set_color(surface, 0); break;
+        case 13: midp_set_color(surface, 14287063); break;
+        case 14: midp_set_color(surface, 16738557); break;
+        case 15: midp_set_color(surface, 16040947); break;
+    }
+}
+
+void buildMinimapOverview(Game *game) {
+    int size = game->world.mapHeight + game->world.mapWidth;
+    game->renderer.backbuffer = Image::create_blank(size, size);
+    game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
+    midp_set_color(game->renderer.backbuffer_surface, 0);
+    midp_fill_rect(game->renderer.backbuffer_surface, 0, 0, size, size);
+    int previousKind = -1;
+    int kind = 0;
+    for (int x = 0; x < game->world.mapWidth; ++x) {
+        for (int y = 0; y < game->world.mapHeight; ++y) {
+            int drawY = game->world.mapWidth - x + y;
+            int drawX = x + y;
+            int tileCode = game->world.tileMap[x][y];
+            int trackCode = game->world.trackMap[x][y];
+            if (tileCode == 0) kind = 1;
+            if (tileCode >= 3 && tileCode <= 28) kind = 2;
+            if (tileCode >= tile::SCENERY_FIRST && tileCode <= tile::SCENERY_LAST) kind = 3;
+            if (tileCode >= 34 && tileCode <= 41) kind = 4;
+            if (tileCode >= 42 && tileCode <= 48) kind = 5;
+            if (tileCode >= 50 && tileCode <= 52) kind = 6;
+            if (tileCode >= 53 && tileCode <= 55) kind = 7;
+            if (tileCode >= 56 && tileCode <= 58) kind = 8;
+            if (tileCode >= 59 && tileCode <= 61) kind = 9;
+            if (tileCode >= 62 && tileCode <= 64) kind = 10;
+            if (tileCode >= 65 && tileCode <= 68) kind = 11;
+            if (tileCode >= 70 && tileCode <= 90) {
+                if (trackCode == 64 || trackCode == 65) kind = 12;
+                if (trackCode == 66) kind = 13;
+                if (trackCode == 67) kind = 14;
+                if (trackCode == 68) kind = 15;
+            }
+            if (kind != previousKind) setMinimapColor(game, kind, x, y);
+            previousKind = kind;
+            midp_draw_line(game->renderer.backbuffer_surface, drawX, drawY, drawX + 1, drawY);
+        }
+        previousKind = -1;
+    }
+    game_setState(game, GameState::MapOverview);
+}
+
+} // namespace
 
 void game_update(Game *game) {
     switch (game->gameState) {
@@ -336,68 +415,7 @@ void game_update(Game *game) {
         case GameState::BuildingMinimap: {
             if (game->stateWorkStep > 0) --game->stateWorkStep;
             if (game->stateWorkStep != 2) break;
-            int size = game->world.mapHeight + game->world.mapWidth;
-            game->renderer.backbuffer = Image::create_blank(size, size);
-            game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
-            midp_set_color(game->renderer.backbuffer_surface, 0);
-            midp_fill_rect(game->renderer.backbuffer_surface, 0, 0, size, size);
-            int previous_kind = -1;
-            int kind = 0;
-            for (int x = 0; x < game->world.mapWidth; ++x) {
-                for (int y = 0; y < game->world.mapHeight; ++y) {
-                    int draw_y = game->world.mapWidth - x + y;
-                    int draw_x = x + y;
-                    int tile = game->world.tileMap[x][y];
-                    int track = game->world.trackMap[x][y];
-                    if (tile == 0) kind = 1;
-                    if (tile >= 3 && tile <= 28) kind = 2;
-                    if (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST) kind = 3;
-                    if (tile >= 34 && tile <= 41) kind = 4;
-                    if (tile >= 42 && tile <= 48) kind = 5;
-                    if (tile >= 50 && tile <= 52) kind = 6;
-                    if (tile >= 53 && tile <= 55) kind = 7;
-                    if (tile >= 56 && tile <= 58) kind = 8;
-                    if (tile >= 59 && tile <= 61) kind = 9;
-                    if (tile >= 62 && tile <= 64) kind = 10;
-                    if (tile >= 65 && tile <= 68) kind = 11;
-                    if (tile >= 70 && tile <= 90) {
-                        if (track == 64 || track == 65) kind = 12;
-                        if (track == 66) kind = 13;
-                        if (track == 67) kind = 14;
-                        if (track == 68) kind = 15;
-                    }
-                    if (kind != previous_kind) {
-                        switch (kind) {
-                            case 1:
-                                if (game->world.tileElevation[x][y] == -1) midp_set_color(game->renderer.backbuffer_surface, 3167360);
-                                if (game->world.tileElevation[x][y] == 0) midp_set_color(game->renderer.backbuffer_surface, 5274640);
-                                if (game->world.tileElevation[x][y] == 1) midp_set_color(game->renderer.backbuffer_surface, 6327328);
-                                if (game->world.tileElevation[x][y] == 2) midp_set_color(game->renderer.backbuffer_surface, 7380016);
-                                if (game->world.tileElevation[x][y] == 3) midp_set_color(game->renderer.backbuffer_surface, 8432704);
-                                break;
-                            case 2: midp_set_color(game->renderer.backbuffer_surface, 6327312); break;
-                            case 3: midp_set_color(game->renderer.backbuffer_surface, 0x909040); break;
-                            case 4: midp_set_color(game->renderer.backbuffer_surface, 0x606060); break;
-                            case 5: midp_set_color(game->renderer.backbuffer_surface, 0x404040); break;
-                            case 6: midp_set_color(game->renderer.backbuffer_surface, 0xFC0000); break;
-                            case 7: midp_set_color(game->renderer.backbuffer_surface, 0x101010); break;
-                            case 8: midp_set_color(game->renderer.backbuffer_surface, 0xFC9C00); break;
-                            case 9: midp_set_color(game->renderer.backbuffer_surface, 0x78DC1E); break;
-                            case 10: midp_set_color(game->renderer.backbuffer_surface, 0xFCFC00); break;
-                            case 11: midp_set_color(game->renderer.backbuffer_surface, 0x80C4FC); break;
-                            case 12: midp_set_color(game->renderer.backbuffer_surface, 0); break;
-                            case 13: midp_set_color(game->renderer.backbuffer_surface, 14287063); break;
-                            case 14: midp_set_color(game->renderer.backbuffer_surface, 16738557); break;
-                            case 15: midp_set_color(game->renderer.backbuffer_surface, 16040947); break;
-                        }
-                    }
-                    previous_kind = kind;
-                    midp_draw_line(game->renderer.backbuffer_surface, draw_x, draw_y,
-                                   draw_x + 1, draw_y);
-                }
-                previous_kind = -1;
-            }
-            game_setState(game, GameState::MapOverview);
+            buildMinimapOverview(game);
             break;
         }
         case GameState::MapOverview:
