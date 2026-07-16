@@ -149,8 +149,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
     gc->compareToPrevious = false;
-    gc->yearGraphMode = 0;
-    gc->yearGraphAlt = false;
+    gc->ui.yearGraphMode = 0;
+    gc->ui.yearGraphAlt = false;
     gc->monthRolloverFlag = false;
     gc->economy.totalSpent = 0;
     gc->economy.aiMoneySpent = 0;

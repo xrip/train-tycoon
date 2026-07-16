@@ -108,7 +108,6 @@ typedef struct GameCanvas {
     int32_t tileCursorY;
     bool vehicleMenuSelectIndex;
     bool trainMenuSelectIndex;
-    std::array<int8_t, 3> moneyTickerFrames{};
     bool flagsA;
     int8_t junctionDirCursor;
     int8_t numSelectedTrains;
@@ -142,12 +141,7 @@ typedef struct GameCanvas {
     int32_t bytesUncompressed;
     int32_t bytesCompressed;
     bool compareToPrevious;
-    int32_t yearGraphMode;
-    bool yearGraphAlt;
     bool monthRolloverFlag;
-    std::array<int8_t, 12> yearGraphOffsets{};
-    std::array<int8_t, 12> altYearArray{};
-    std::array<int8_t, 12> yearGraphValues{};
     int32_t industryCategory;
     bool industrySiteFound;
     int32_t cityStationX;

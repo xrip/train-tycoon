@@ -62,6 +62,17 @@ struct UiController {
     bool pauseMenuOpen = false;
     bool useDefaultOverlaySelection = false;
     bool snapshotLoadedFlag = false;
+
+    // Report-graph display state and the money ticker. yearGraphMode/Alt pick the
+    // graph series; yearGraphOffsets/altYearArray/yearGraphValues are the plotted
+    // bar geometry; moneyTickerFrames animates the header money change. All
+    // runtime-only (not saved).
+    int32_t yearGraphMode = 0;
+    bool yearGraphAlt = false;
+    std::array<int8_t, 12> yearGraphOffsets{};
+    std::array<int8_t, 12> altYearArray{};
+    std::array<int8_t, 12> yearGraphValues{};
+    std::array<int8_t, 3> moneyTickerFrames{};
 };
 
 #endif  // UI_CONTROLLER_H

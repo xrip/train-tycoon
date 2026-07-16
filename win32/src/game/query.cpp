@@ -14,9 +14,9 @@ void gc_pushMoneyHistory(GameCanvas *gc, int32_t n) {
     gc->economy.moneyHistory[2] = gc->economy.moneyHistory[1];
     gc->economy.moneyHistory[1] = gc->economy.moneyHistory[0];
     gc->economy.moneyHistory[0] = n;
-    gc->moneyTickerFrames[2] = gc->moneyTickerFrames[1];
-    gc->moneyTickerFrames[1] = gc->moneyTickerFrames[0];
-    gc->moneyTickerFrames[0] = 80;
+    gc->ui.moneyTickerFrames[2] = gc->ui.moneyTickerFrames[1];
+    gc->ui.moneyTickerFrames[1] = gc->ui.moneyTickerFrames[0];
+    gc->ui.moneyTickerFrames[0] = 80;
 }
 
 // boolean isTrackStepInlined(int n, int n2, int n3, int n4, int n5)
@@ -34,14 +34,14 @@ bool gc_isTrackStepInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3,
 // int neighboursMask(int n, int n2)
 int32_t gc_neighboursMask(GameCanvas *gc, int32_t n, int32_t n2) {
     if (n == 34) {
-        if (gc->yearGraphMode == 0 || gc->yearGraphMode == 2) {
+        if (gc->ui.yearGraphMode == 0 || gc->ui.yearGraphMode == 2) {
             if (n2 == 65) return 65;
-            if (n2 >= 20) return 64 + gc->yearGraphValues[n2 - 20];
-            return 65 + gc->yearGraphValues[n2];
+            if (n2 >= 20) return 64 + gc->ui.yearGraphValues[n2 - 20];
+            return 65 + gc->ui.yearGraphValues[n2];
         }
         if (n2 == 65) return 35;
-        if (n2 >= 20) return 34 + gc->yearGraphValues[n2 - 20];
-        return 35 + gc->yearGraphValues[n2];
+        if (n2 >= 20) return 34 + gc->ui.yearGraphValues[n2 - 20];
+        return 35 + gc->ui.yearGraphValues[n2];
     }
     return 0;
 }

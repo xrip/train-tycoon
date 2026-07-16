@@ -200,40 +200,40 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 33:
             if (field == 65)
-                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[57 + gc->yearGraphMode]]);
+                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[57 + gc->ui.yearGraphMode]]);
             if (field >= 40) {
                 int index = field - 40;
-                if (!gc->yearGraphAlt) {
-                    if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.yearProfitHistory[index]);
-                    if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.yearRevenueHistory[index]);
-                    if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->economy.yearCompanyValueHistory[index]);
+                if (!gc->ui.yearGraphAlt) {
+                    if (gc->ui.yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.yearProfitHistory[index]);
+                    if (gc->ui.yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.yearRevenueHistory[index]);
+                    if (gc->ui.yearGraphMode == 2) return gc_formatCurrency(gc, gc->economy.yearCompanyValueHistory[index]);
                 } else {
-                    if (gc->yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.decadeProfitHistory[index]);
-                    if (gc->yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.altDecadeRevenueTotal[index]);
-                    if (gc->yearGraphMode == 2) return gc_formatCurrency(gc, gc->economy.altDecadeTotalCost[index]);
+                    if (gc->ui.yearGraphMode == 0) return gc_formatCurrency(gc, gc->economy.decadeProfitHistory[index]);
+                    if (gc->ui.yearGraphMode == 1) return gc_formatCurrency(gc, gc->economy.altDecadeRevenueTotal[index]);
+                    if (gc->ui.yearGraphMode == 2) return gc_formatCurrency(gc, gc->economy.altDecadeTotalCost[index]);
                 }
             } else {
                 if (field >= 20) {
-                    if (!gc->yearGraphAlt)
-                        return gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0);
+                    if (!gc->ui.yearGraphAlt)
+                        return gc_formatNumberWithSuffix(gc, gc->ui.altYearArray[field - 20], 0);
                     return std::nullopt;
                 }
-                return !gc->yearGraphAlt
-                    ? gc_formatNumberWithSuffix(gc, gc->yearGraphOffsets[field] + 1940, 20)
-                    : gc_formatNumberWithSuffix(gc, gc->altYearArray[field] + 1940, 0);
+                return !gc->ui.yearGraphAlt
+                    ? gc_formatNumberWithSuffix(gc, gc->ui.yearGraphOffsets[field] + 1940, 20)
+                    : gc_formatNumberWithSuffix(gc, gc->ui.altYearArray[field] + 1940, 0);
             }
             // The original falls through when the graph mode is invalid.
         case 34:
             if (field == 65)
-                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[54 + gc->yearGraphMode]]);
+                return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[54 + gc->ui.yearGraphMode]]);
             if (field >= 20) {
-                if (!gc->yearGraphAlt)
-                    return gc_formatNumberWithSuffix(gc, gc->altYearArray[field - 20], 0);
+                if (!gc->ui.yearGraphAlt)
+                    return gc_formatNumberWithSuffix(gc, gc->ui.altYearArray[field - 20], 0);
                 return std::nullopt;
             }
-            return !gc->yearGraphAlt
-                ? gc_formatNumberWithSuffix(gc, gc->yearGraphOffsets[field] + 40, 20)
-                : gc_formatNumberWithSuffix(gc, gc->altYearArray[field] + 1940, 0);
+            return !gc->ui.yearGraphAlt
+                ? gc_formatNumberWithSuffix(gc, gc->ui.yearGraphOffsets[field] + 40, 20)
+                : gc_formatNumberWithSuffix(gc, gc->ui.altYearArray[field] + 1940, 0);
 
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
