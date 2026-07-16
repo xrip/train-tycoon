@@ -400,11 +400,11 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
     gc->ready = false;
     gc->transitionCode = 6;
     gc->scenario.milestonesEnabled = true;
-    if (gc->scenarioStep >= 2) {
-        if (gc->scenarioStepCompare < gc->scenarioStep)
-            gc->scenarioStepCompare = gc->scenarioStep;
+    if (gc->scenario.scenarioStep >= 2) {
+        if (gc->scenario.scenarioStepCompare < gc->scenario.scenarioStep)
+            gc->scenario.scenarioStepCompare = gc->scenario.scenarioStep;
         gc_persistSnapshotMode0(gc);
-        gc->scenario.currentScenarioScore = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
+        gc->scenario.currentScenarioScore = gc_computeMapTrainMetric(gc, gc->scenario.scenarioStep - 2);
     }
     gc_setState(gc, +GameState::MenuOverlay);
 }

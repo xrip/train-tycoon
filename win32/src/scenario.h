@@ -51,6 +51,29 @@ struct Scenario {
     int32_t offerGenerationCount = 0;
     std::array<int16_t, 12> offerEffectNextCount{};
     int32_t lastOfferDateCode = 0;
+
+    // Scenario identity, difficulty setup, run progression, and high-score name
+    // entry. scenarioBits, difficultyCycle, scenarioStep, and scenarioNoticeId
+    // are saved through the main codec; scenarioStepCompare, playerNameCodes,
+    // and scenarioResourceCount are read/written by game/boot.cpp. The rest are
+    // runtime-only. activeScenario feeds the map digest. Save byte order is
+    // unchanged.
+    int8_t scenarioBits = 0;
+    int32_t activeScenario = 0;
+    int8_t difficultyA = 0;
+    int8_t difficultySlot = 0;
+    int8_t difficultyB = 0;
+    int8_t difficultyC = 0;
+    int32_t difficultyPct = 0;
+    int8_t difficultyCycle = 0;
+    int32_t scenarioStepCompare = 0;
+    int32_t scenarioStep = 0;
+    int32_t scenarioNoticeId = 0;
+    int32_t scenarioResourceCount = 0;
+    int8_t scenarioNoticeCode = 0;
+    bool highScoreUploadRequested = false;
+    std::array<int8_t, 10> playerNameCodes{};
+    std::array<int8_t, 10> playerNameCursorMarker{};
 };
 
 #endif  // SCENARIO_H

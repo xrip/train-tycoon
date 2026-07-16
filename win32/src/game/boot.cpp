@@ -160,12 +160,12 @@ void gc_writeSaveSnapshot(GameCanvas *gc) {
     gcs_selectionHidden = gc_saveOrLoadBool(gc, gcs_selectionHidden);
     gcs_monthlyReportEnabled = gc_saveOrLoadBool(gc, gcs_monthlyReportEnabled);
     gcs_annualReportEnabled = gc_saveOrLoadBool(gc, gcs_annualReportEnabled);
-    gc->scenarioStepCompare = gc_saveIntToBuffer(gc, gc->scenarioStepCompare);
+    gc->scenario.scenarioStepCompare = gc_saveIntToBuffer(gc, gc->scenario.scenarioStepCompare);
     gc->scenario.bestScenarioScore = gc_saveIntToBuffer(gc, gc->scenario.bestScenarioScore);
     gc->music_volume_level = gc_saveIntToBuffer(gc, gc->music_volume_level);
     gc_saveOrLoadIntArrayInlined(gc, gc->scenario.scenarioScores);
     gc_saveOrLoadIntArrayInlined(gc, gc->scenario.leaderboardScores);
-    gc_saveOrLoadByteArrayInlined(gc, gc->playerNameCodes);
+    gc_saveOrLoadByteArrayInlined(gc, gc->scenario.playerNameCodes);
 }
 
 // void persistSnapshotMode1()
@@ -288,16 +288,16 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             gc->spriteLoadCounter = 0;
             ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
-                gc->scenarioResourceCount = in.read_byte();
-                for (int i = 0; i < gc->scenarioResourceCount; ++i) {
+                gc->scenario.scenarioResourceCount = in.read_byte();
+                for (int i = 0; i < gc->scenario.scenarioResourceCount; ++i) {
                     int n6 = in.read_byte();
                     gc->tileSpriteIndex[n6] = (int8_t)(i - 8);
                 }
             }
-            gc->scenarioResourceCount -= 8;
+            gc->scenario.scenarioResourceCount -= 8;
             gc->tile_sprites.clear();
             gc->tile_sprites.resize(
-                static_cast<std::size_t>(gc->scenarioResourceCount));
+                static_cast<std::size_t>(gc->scenario.scenarioResourceCount));
             gc->tileSpriteIndex[68] = gc->tileSpriteIndex[66];
             break;
         }

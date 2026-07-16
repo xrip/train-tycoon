@@ -149,7 +149,6 @@ typedef struct GameCanvas {
     int32_t buildMenuItemCursor;
     int32_t buildMenuModeIndex;
     int32_t buildMenuItemCode;
-    int8_t scenarioBits;
     int32_t confirmToggle;
     std::array<int8_t, 3> moneyTickerFrames{};
     int32_t confirmCounter;
@@ -167,14 +166,6 @@ typedef struct GameCanvas {
     int32_t pendingTransitionCode;
     bool discountApplied;
     int32_t baseTrainCostSnapshot;
-    int8_t difficultyA;
-    int8_t difficultySlot;
-    int8_t difficultyB;
-    int8_t difficultyC;
-    int32_t activeScenario;
-    bool highScoreUploadRequested;
-    std::array<int8_t, 10> playerNameCodes{};
-    std::array<int8_t, 10> playerNameCursorMarker{};
     int8_t spriteCycleCursor;
     bool snapshotLoadedFlag;
     bool cH;
@@ -201,7 +192,6 @@ typedef struct GameCanvas {
     std::array<int32_t, 5> wagonCountMatch{};
     int32_t unitCost;
     int32_t currentTrainCostSnapshot;
-    int32_t difficultyPct;
     Fleet fleet;
     int32_t trainAtCursor;
     int32_t era;
@@ -228,7 +218,6 @@ typedef struct GameCanvas {
     int32_t cityStationY;
     int32_t industryStationX;
     int32_t industryTileY;
-    int8_t difficultyCycle;
     int32_t nextTrackPieceCode;
     std::array<int8_t, 6> menuRowType{};
     std::array<int8_t, 6> placeTrainDay{};
@@ -266,9 +255,6 @@ typedef struct GameCanvas {
     int32_t cachedHeaderMonth;
     int32_t cachedHeaderYear;
     int32_t counterA;
-    int32_t scenarioStepCompare;
-    int32_t scenarioStep;
-    int32_t scenarioNoticeId;
     JavaRandom rng;
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface;
@@ -278,7 +264,6 @@ typedef struct GameCanvas {
     int64_t loadingStartTime;
     bool loadingTimeout;
     int32_t spriteLoadCounter;
-    int32_t scenarioResourceCount;
     int32_t transitionCode;
     bool ready;
     int32_t loadStep;
@@ -298,7 +283,6 @@ typedef struct GameCanvas {
     int32_t bx;
     int32_t fR;
     int8_t transitionDebounce;
-    int8_t scenarioNoticeCode;
     int32_t eD;
     int32_t aJ;
     int32_t hx;

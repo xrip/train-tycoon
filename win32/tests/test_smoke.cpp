@@ -32,7 +32,7 @@ GameCanvas* make_game() {
 
 std::uint64_t map_digest(const GameCanvas* game) {
     StableDigest digest;
-    digest.add_i32(game->activeScenario);
+    digest.add_i32(game->scenario.activeScenario);
     digest.add_i32(game->world.mapWidth);
     digest.add_i32(game->world.mapHeight);
     digest.add_i32(game->economy.money);
@@ -50,7 +50,7 @@ std::uint64_t map_digest(const GameCanvas* game) {
 }
 
 void generate_scenario(GameCanvas* game, int scenario) {
-    game->activeScenario = scenario;
+    game->scenario.activeScenario = scenario;
     gc_setState(game, 25);
     for (int step = 0; game->gameState == 25 && step < 200000; ++step) {
         gc_update(game);

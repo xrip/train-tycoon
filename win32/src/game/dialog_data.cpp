@@ -70,11 +70,11 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
         case 4:
             switch (field) {
                 case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[25 + gc->scenario.scenarioMilestone]]);
-                case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[30 + gc->difficultyA]]);
-                case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[35 + gc->difficultySlot]]);
-                case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyB]]);
-                case 5: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->difficultyC]]);
-                case 6: return gc_formatNumberWithSuffix(gc, gc->difficultyCycle, 0);
+                case 2: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[30 + gc->scenario.difficultyA]]);
+                case 3: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[35 + gc->scenario.difficultySlot]]);
+                case 4: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->scenario.difficultyB]]);
+                case 5: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[40 + gc->scenario.difficultyC]]);
+                case 6: return gc_formatNumberWithSuffix(gc, gc->scenario.difficultyCycle, 0);
             }
             break;
 
@@ -267,11 +267,11 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             break;
 
         case 27:
-            if (field == 1) return copy_codes(gc->playerNameCodes);
+            if (field == 1) return copy_codes(gc->scenario.playerNameCodes);
             if (field == 0) {
-                gc->playerNameCursorMarker.fill(0);
-                gc->playerNameCursorMarker[gc->scenario.routeSlotIndex] = 28;
-                return copy_codes(gc->playerNameCursorMarker);
+                gc->scenario.playerNameCursorMarker.fill(0);
+                gc->scenario.playerNameCursorMarker[gc->scenario.routeSlotIndex] = 28;
+                return copy_codes(gc->scenario.playerNameCursorMarker);
             }
             break;
 

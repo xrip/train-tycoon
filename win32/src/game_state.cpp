@@ -88,13 +88,13 @@ void gc_fields_init(GameCanvas *gc) {
     gc->discountApplied = false;
     gc->baseTrainCostSnapshot = 0;
     gc->scenario.scenarioMilestone = 0;
-    gc->difficultyA = 0;
-    gc->difficultySlot = 0;
-    gc->difficultyB = 0;
-    gc->difficultyC = 0;
+    gc->scenario.difficultyA = 0;
+    gc->scenario.difficultySlot = 0;
+    gc->scenario.difficultyB = 0;
+    gc->scenario.difficultyC = 0;
     gc->scenario.offerRowIndex = 0;
     gc->scenario.duplicateRowState = 0;
-    gc->highScoreUploadRequested = false;
+    gc->scenario.highScoreUploadRequested = false;
     gc->scenario.routeSlotIndex = 0;
     gc->spriteCycleCursor = 0;
     gc->snapshotLoadedFlag = false;
@@ -111,7 +111,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->wagonDiscountType = 0;
     gc->unitCost = 0;
     gc->currentTrainCostSnapshot = 0;
-    gc->difficultyPct = 100;
+    gc->scenario.difficultyPct = 100;
     gc->era = 1;
     gc->fleet.forwardTrackSteps = {{
         {{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
@@ -194,7 +194,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->economy.decadeProfitTotal = 0;
     gc->economy.revenueTotal = 0;
     gc->economy.decadeProfitGraphTotal = 0;
-    gc->difficultyCycle = 1;
+    gc->scenario.difficultyCycle = 1;
     gc->nextTrackPieceCode = 66;
     gc->scenario.aiFrequency = 15;
     gc->scenario.aiThreshold = 12;
@@ -259,13 +259,13 @@ void gc_fields_init(GameCanvas *gc) {
     gc->cachedHeaderYear = 0;
     gc->counterA = 0;
     gc->economy.enterpriseTaxPct = 2;
-    gc->scenarioStepCompare = 1;
-    gc->scenarioStep = 0;
-    gc->scenarioNoticeId = 0;
+    gc->scenario.scenarioStepCompare = 1;
+    gc->scenario.scenarioStep = 0;
+    gc->scenario.scenarioNoticeId = 0;
     gc->rng.set_seed(midp_current_time_millis());
     gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
     gc->backbuffer_surface = gc->backbuffer->drawing_surface();
-    gc->scenarioResourceCount = 0;
+    gc->scenario.scenarioResourceCount = 0;
     gc->transitionCode = 0;
     gc->ready = true;
     gc->loadStep = 0;

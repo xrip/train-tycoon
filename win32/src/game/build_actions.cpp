@@ -63,7 +63,7 @@ void gc_computeTrainCost(GameCanvas *gc) {
         case 5: gc->unitCost = gc->gWagonCost6; break;
     }
     if (gc->wagonType == gc->wagonDiscountType)
-        gc->unitCost = gc->unitCost * gc->difficultyPct / 100;
+        gc->unitCost = gc->unitCost * gc->scenario.difficultyPct / 100;
 
     for (int option = 0; option < 5; ++option) {
         int option_cost;
@@ -75,7 +75,7 @@ void gc_computeTrainCost(GameCanvas *gc) {
             default: continue;
         }
         if (gc->wagonOptionSlots[option] == gc->wagonCountMatch[option])
-            option_cost = option_cost * gc->difficultyPct / 100;
+            option_cost = option_cost * gc->scenario.difficultyPct / 100;
         gc->unitCost += option_cost;
     }
 }
@@ -241,10 +241,10 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
     for (int option = 0; option < 5; ++option)
         gc->wagonCountMatch[option] = gc->wagonOptionSlots[option];
     gc->wagonDiscountType = gc->wagonType;
-    gc->difficultyPct = 100;
+    gc->scenario.difficultyPct = 100;
     gc_computeTrainCost(gc);
     gc->baseTrainCostSnapshot = gc->unitCost;
-    gc->difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
+    gc->scenario.difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
     gc_computeTrainCost(gc);
     gc->currentTrainCostSnapshot = gc->unitCost;
     gc->ready = false;
@@ -505,7 +505,7 @@ void gc_openBuildMenu(GameCanvas *gc) {
                     gc_setState(gc, +GameState::MenuOverlay); break;
                 case 8: gc->inputPending = true; break;
                 case 9:
-                    gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
+                    gc_computeMapTrainMetric(gc, gc->scenario.scenarioStep - 2);
                     gc->useDefaultOverlaySelection = false;
                     gc->ready = false; gc->transitionCode = 1;
                     gc_setState(gc, +GameState::MenuOverlay); break;

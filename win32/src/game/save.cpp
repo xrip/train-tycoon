@@ -267,7 +267,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     if (gc->nextTrackPieceCode == 0) gc->nextTrackPieceCode = 66;
     IO_BYTE(scenario.aiFrequency);
     IO_BYTE(scenario.aiThreshold);
-    if (mode != save::OP_RESET_SKIP) IO_BYTE(difficultyCycle);
+    if (mode != save::OP_RESET_SKIP) IO_BYTE(scenario.difficultyCycle);
     IO_BYTES(menuRowType);
     IO_BYTES(placeTrainDay);
     IO_BYTES(menuRowParamA);
@@ -285,7 +285,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(savedLegacyMetricBq);
     IO_INT(scenario.lastOfferDateCode);
     IO_BOOL(flagsB);
-    IO_BYTE(scenarioBits);
+    IO_BYTE(scenario.scenarioBits);
     IO_BYTE(scenario.scenarioMilestoneIndex);
     IO_BOOL(scenario.milestonesEnabled);
     IO_INT(scenario.currentMilestoneScore);
@@ -298,8 +298,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(scenario.milestoneThreshold5);
     IO_INT(scenario.aiWagonsBought);
     IO_INT(economy.trainRevenueScore);
-    IO_INT(scenarioStep);
-    IO_INT(scenarioNoticeId);
+    IO_INT(scenario.scenarioStep);
+    IO_INT(scenario.scenarioNoticeId);
     IO_INT(moneyBaseA);
     IO_INT(moneyBaseB);
     IO_INT(baseTrainSpeed);

@@ -60,7 +60,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
-            int n10 = gc->spriteLoadCounter * (gcs_screenWidth - 20) / (gc->scenarioResourceCount - 1);
+            int n10 = gc->spriteLoadCounter * (gcs_screenWidth - 20) / (gc->scenario.scenarioResourceCount - 1);
             midp_set_color(g, RGB3(60, 105, 144));
             midp_fill_rect(g, 10, gcs_hs - 13, n10, 9);
             midp_set_color(g, RGB3(49, 64, 90));
@@ -124,7 +124,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             if (gc->transitionDebounce <= 0) break;
             gc->transitionDebounce = (int8_t)(gc->transitionDebounce - 1);
             if (gc->transitionDebounce != 0) break;
-            gc->transitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenarioNoticeCode;
+            gc->transitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeCode;
             gc_resetOverlayRenderState(gc);
             gc->ready = false;
             gc_renderPackedSprite(gc, g, gc->transitionCode);
@@ -223,12 +223,12 @@ void gc_update(GameCanvas *gc) {
         case +GameState::LoadingResources:
             gc->tile_sprites[gc->spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
             ++gc->spriteLoadCounter;
-            if (gc->spriteLoadCounter == gc->scenarioResourceCount / 2) {
+            if (gc->spriteLoadCounter == gc->scenario.scenarioResourceCount / 2) {
                 gc_loadMusic(gc);
                 if (gc->music_auto_start) { gc_playMusic(gc); gc->music_enabled = true; }
                 else gc->music_enabled = false;
             }
-            if (gc->spriteLoadCounter != gc->scenarioResourceCount) break;
+            if (gc->spriteLoadCounter != gc->scenario.scenarioResourceCount) break;
             gc->ready = true;
             gc->transitionCode = 1;
             gc_setState(gc, +GameState::MenuOverlay);
@@ -277,8 +277,8 @@ void gc_update(GameCanvas *gc) {
                         const int milestone_threshold = read_u24_le(in);
                         const int build_menu_scenario = in.read_byte();
                         const int scenario_flags = in.read_byte();
-                        if (scenario_index != gc->activeScenario) continue;
-                        gc->scenarioStep = scenario_index;
+                        if (scenario_index != gc->scenario.activeScenario) continue;
+                        gc->scenario.scenarioStep = scenario_index;
                         gc->world.mapWidth = gc->world.mapHeight = map_size;
                         gc->world.mapHalfWidth = (gc->world.mapWidth - 1) * 8;
                         gc->world.mapScreenWidth = (gc->world.mapWidth + gc->world.mapHeight) * 16;
@@ -304,18 +304,18 @@ void gc_update(GameCanvas *gc) {
                         gc->flagsB = (scenario_flags & 4) == 4;
                         if ((scenario_flags & 1) != 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 100; }
                         else { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
-                        gc->scenarioNoticeId = notice_id;
-                        if (notice_id != 0) { gc->transitionDebounce = 5; gc->scenarioNoticeCode = (int8_t)notice_id; continue; }
+                        gc->scenario.scenarioNoticeId = notice_id;
+                        if (notice_id != 0) { gc->transitionDebounce = 5; gc->scenario.scenarioNoticeCode = (int8_t)notice_id; continue; }
                         gc->transitionDebounce = 0;
                     }
                 }
-                if (gc->activeScenario <= 1) {
-                    if (gc->difficultySlot == 0) { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
-                    if (gc->difficultySlot == 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 22; }
-                    if (gc->difficultyA == 0) { gc->economy.interestRate = 4; gc->economy.enterpriseTaxPct = 2; }
-                    if (gc->difficultyA == 1) { gc->economy.interestRate = 8; gc->economy.enterpriseTaxPct = 5; }
-                    if (gc->difficultyB == 0) { gc->mapGenColumns /= 2; gc->mapGenRows /= 2; }
-                    if (gc->difficultyC == 0) {
+                if (gc->scenario.activeScenario <= 1) {
+                    if (gc->scenario.difficultySlot == 0) { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
+                    if (gc->scenario.difficultySlot == 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 22; }
+                    if (gc->scenario.difficultyA == 0) { gc->economy.interestRate = 4; gc->economy.enterpriseTaxPct = 2; }
+                    if (gc->scenario.difficultyA == 1) { gc->economy.interestRate = 8; gc->economy.enterpriseTaxPct = 5; }
+                    if (gc->scenario.difficultyB == 0) { gc->mapGenColumns /= 2; gc->mapGenRows /= 2; }
+                    if (gc->scenario.difficultyC == 0) {
                         gc->terrainFeatureStage7Count /= 2; gc->terrainFeatureStage6Count /= 2;
                         gc->weightAccel /= 2; gc->weightAccel2 /= 2; gc->weightAccel3 /= 2; gc->weightAccel4 /= 2;
                     }
@@ -628,7 +628,7 @@ void gc_update(GameCanvas *gc) {
         case +GameState::AiTurn:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            if (gc->nextTrackPieceCode - track::AI_PIECE_FIRST < gc->difficultyCycle) {
+            if (gc->nextTrackPieceCode - track::AI_PIECE_FIRST < gc->scenario.difficultyCycle) {
                 gc_placeCitiesAndIndustry(gc);
                 gc_setState(gc, +GameState::Playing);
                 break;
@@ -640,7 +640,7 @@ void gc_update(GameCanvas *gc) {
         case +GameState::HighScoreSync:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            gc->transitionCode = gc_syncHighScores(gc, gc->highScoreUploadRequested)
+            gc->transitionCode = gc_syncHighScores(gc, gc->scenario.highScoreUploadRequested)
                                  ? 19 : 18;
             gc_setState(gc, +GameState::MenuOverlay);
             break;

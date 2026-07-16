@@ -71,7 +71,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 36:
             gc_setState(gc, +GameState::MapOverview); break;
         case 17:
-            if (n2 == 1) gc->pendingTransitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenarioNoticeId;
+            if (n2 == 1) gc->pendingTransitionCode = transition::SCENARIO_NOTICE_BASE + gc->scenario.scenarioNoticeId;
             gc_setState(gc, +GameState::Playing); break;
         case 2:
         case 3:
@@ -83,7 +83,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc->ready = false; gc->scenario.aiEnabled = true; gc->transitionCode = 1;
             gc_resetOverlayRenderState(gc); gc_setState(gc, +GameState::MenuOverlay); break;
         case 5:
-            if (n2 >= 2) { gc->activeScenario = n2; gc_setState(gc, +GameState::GeneratingMap); break; }
+            if (n2 >= 2) { gc->scenario.activeScenario = n2; gc_setState(gc, +GameState::GeneratingMap); break; }
             if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 4:
@@ -92,23 +92,23 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     if (gc->scenario.scenarioMilestone == 0) { gc->scenario.scenarioMilestone = 1; goto hbms_end; }
                     gc->scenario.scenarioMilestone = 0; goto hbms_end;
                 case 2:
-                    if (gc->difficultyA == 0) { gc->difficultyA = 1; goto hbms_end; }
-                    gc->difficultyA = 0; goto hbms_end;
+                    if (gc->scenario.difficultyA == 0) { gc->scenario.difficultyA = 1; goto hbms_end; }
+                    gc->scenario.difficultyA = 0; goto hbms_end;
                 case 3:
-                    if (gc->difficultySlot == 0) { gc->difficultySlot = 1; goto hbms_end; }
-                    gc->difficultySlot = 0; goto hbms_end;
+                    if (gc->scenario.difficultySlot == 0) { gc->scenario.difficultySlot = 1; goto hbms_end; }
+                    gc->scenario.difficultySlot = 0; goto hbms_end;
                 case 4:
-                    if (gc->difficultyB == 0) { gc->difficultyB = 1; goto hbms_end; }
-                    gc->difficultyB = 0; goto hbms_end;
+                    if (gc->scenario.difficultyB == 0) { gc->scenario.difficultyB = 1; goto hbms_end; }
+                    gc->scenario.difficultyB = 0; goto hbms_end;
                 case 5:
-                    if (gc->difficultyC == 0) { gc->difficultyC = 1; goto hbms_end; }
-                    gc->difficultyC = 0; goto hbms_end;
+                    if (gc->scenario.difficultyC == 0) { gc->scenario.difficultyC = 1; goto hbms_end; }
+                    gc->scenario.difficultyC = 0; goto hbms_end;
                 case 6:
-                    gc->difficultyCycle = (int8_t)(gc->difficultyCycle + 1);
-                    if (gc->difficultyCycle != 4) goto hbms_end;
-                    gc->difficultyCycle = 1; goto hbms_end;
+                    gc->scenario.difficultyCycle = (int8_t)(gc->scenario.difficultyCycle + 1);
+                    if (gc->scenario.difficultyCycle != 4) goto hbms_end;
+                    gc->scenario.difficultyCycle = 1; goto hbms_end;
                 case 10:
-                    gc->activeScenario = gc->scenario.scenarioMilestone; gc_setState(gc, +GameState::GeneratingMap); goto hbms_end;
+                    gc->scenario.activeScenario = gc->scenario.scenarioMilestone; gc_setState(gc, +GameState::GeneratingMap); goto hbms_end;
             }
             if (gc->ready) { gc->transitionCode = 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
@@ -123,7 +123,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 gc->wagonDiscountType = gc->wagonType;
                 for (int n3 = 0; n3 < 5; ++n3) gc->wagonOptionSlots[n3] = -1;
                 for (int n3 = 0; n3 < 5; ++n3) gc->wagonCountMatch[n3] = -1;
-                gc->difficultyPct = 100;
+                gc->scenario.difficultyPct = 100;
                 gc->discountApplied = false;
                 gc_computeTrainCost(gc);
                 gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); goto hbms_end;
@@ -164,7 +164,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc->economy.money -= n4;
                     gc_pushMoneyHistory(gc, -n4);
                     gc->economy.aiMoneySpent += n4;
-                    gc->difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
+                    gc->scenario.difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
                     gc_computeTrainCost(gc);
                     gc->currentTrainCostSnapshot = gc->unitCost;
                     gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing);
@@ -294,29 +294,29 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             if (gc->scenario.duplicateRowState == 4) gc->pendingTransitionCode = 8;
             gc_setState(gc, +GameState::Playing); break;
         case 28:
-            if (n2 == 41) { gc->highScoreUploadRequested = false; gc_setState(gc, +GameState::HighScoreSync); break; }
+            if (n2 == 41) { gc->scenario.highScoreUploadRequested = false; gc_setState(gc, +GameState::HighScoreSync); break; }
             if (gc->ready) { gc->transitionCode = n2 == 40 ? 27 : 1; gc_resetOverlayRenderState(gc); break; }
             gc->pendingTransitionCode = n2 == 40 ? 27 : 1; gc_setState(gc, +GameState::Playing); break;
         case 27:
-            if (n2 == 40) { gc->highScoreUploadRequested = true; gc_setState(gc, +GameState::HighScoreSync); break; }
+            if (n2 == 40) { gc->scenario.highScoreUploadRequested = true; gc_setState(gc, +GameState::HighScoreSync); break; }
             if (n2 == 0) gc->scenario.routeSlotIndex = (int8_t)(gc->scenario.routeSlotIndex - 1);
             if (n2 == 1) gc->scenario.routeSlotIndex = (int8_t)(gc->scenario.routeSlotIndex + 1);
             if (gc->scenario.routeSlotIndex < 0) gc->scenario.routeSlotIndex = 9;
             if (gc->scenario.routeSlotIndex == 10) gc->scenario.routeSlotIndex = 0;
-            gc->spriteCycleCursor = gc->playerNameCodes[gc->scenario.routeSlotIndex];
+            gc->spriteCycleCursor = gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex];
             if (n2 == 2) {
                 gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor - 1);
                 if (gc->spriteCycleCursor < 0) gc->spriteCycleCursor = 95;
                 if (gc->spriteCycleCursor == 69) gc->spriteCycleCursor = 65;
                 if (gc->spriteCycleCursor == 39) gc->spriteCycleCursor = 17;
-                gc->playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
+                gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
             }
             if (n2 == 3) {
                 gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor + 1);
                 if (gc->spriteCycleCursor == 18) gc->spriteCycleCursor = 40;
                 if (gc->spriteCycleCursor == 66) gc->spriteCycleCursor = 70;
                 if (gc->spriteCycleCursor == 96) gc->spriteCycleCursor = 0;
-                gc->playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
+                gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
             }
             if (n2 >= 0) break;
             gc_persistSnapshotMode0(gc);
