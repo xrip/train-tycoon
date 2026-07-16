@@ -282,14 +282,16 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
             if (n12 + n10 - n3 - 3 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 + 8 + by2 >= game->renderer.clipY) {
                 if ((by & 0x10) == 16) {
                     if (game->ui.cursorDragY == -3) game->ui.cursorDragY = n13;
+                    // Capture every visible text row as a full-width hit band, including
+                    // the topmost row whose band starts above the clip and so fails the
+                    // fully-in-clip test below. Without this the default-selected first
+                    // menu item is drawn and keyboard-selectable but not mouse-clickable.
+                    game->clickMap.add_menu_row(game->renderer.clipX, n12 + n10 - n3 - 3,
+                                                game->renderer.clipWidth, 10 + n3 + by2,
+                                                n13, n5);
                     if (n12 + n10 + 8 + by2 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 - 3 - n3 >= game->renderer.clipY) {
                         if (n13 < game->ui.cursorDragY) game->ui.cursorSelectY = n13;
                         if (game->ui.cursorSelectX == -2 && n13 > game->ui.cursorDragY) game->ui.cursorSelectX = n13;
-                        // Full row band (clip width), so a click anywhere on the
-                        // row's line selects it -- not just on the text glyph box.
-                        game->clickMap.add_menu_row(game->renderer.clipX, n12 + n10 - n3 - 3,
-                                                    game->renderer.clipWidth, 10 + n3 + by2,
-                                                    n13, n5);
                     }
                     if (game->renderer.needsRepaint && game->ui.cursorDragY == n13) {
                         midp_set_color(g, n17);

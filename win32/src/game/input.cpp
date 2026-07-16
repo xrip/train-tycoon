@@ -137,17 +137,17 @@ void game_viewportZoomKey(Game *game) {
         moved_view = false;
     }
     if (moved_view) game->ui.keySubState = 80;
-    game_computeViewportBounds(game);
+    game_computeViewportBounds(game, game->renderer.viewportBaseX, game->renderer.viewportBaseY);
     game->renderer.mapScaleX = game->renderer.viewportBaseX * 2;
     game->renderer.mapScaleY = game->renderer.viewportBaseY * 2;
 }
 
-void game_computeViewportBounds(Game *game) {
+void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
     int tile_center_x = 0;
     int tile_center_y = 0;
-    int tile_x = game->renderer.viewportBaseX - 2 * game->renderer.viewportBaseY
+    int tile_x = anchorX - 2 * anchorY
                  + 16 + 2 * game->world.mapHalfWidth;
-    int tile_y = game->renderer.viewportBaseX + 2 * game->renderer.viewportBaseY
+    int tile_y = anchorX + 2 * anchorY
                  - 16 - 2 * game->world.mapHalfWidth;
     tile_x /= 32;
     tile_y /= 32;
@@ -162,17 +162,17 @@ void game_computeViewportBounds(Game *game) {
             game_computeIsoCornersInlined(game, x, y, game->build.selectionTileX.data(),
                                         game->build.selectionTileY.data(), false);
             int opposite_edges =
-                game_crossProduct2D(game, game->renderer.viewportBaseX, game->renderer.viewportBaseY,
+                game_crossProduct2D(game, anchorX, anchorY,
                                   game->build.selectionTileX[0], game->build.selectionTileY[0],
                                   game->build.selectionTileX[1], game->build.selectionTileY[1])
-                * game_crossProduct2D(game, game->renderer.viewportBaseX, game->renderer.viewportBaseY,
+                * game_crossProduct2D(game, anchorX, anchorY,
                                     game->build.selectionTileX[2], game->build.selectionTileY[2],
                                     game->build.selectionTileX[3], game->build.selectionTileY[3]);
             int other_edges =
-                game_crossProduct2D(game, game->renderer.viewportBaseX, game->renderer.viewportBaseY,
+                game_crossProduct2D(game, anchorX, anchorY,
                                   game->build.selectionTileX[0], game->build.selectionTileY[0],
                                   game->build.selectionTileX[2], game->build.selectionTileY[2])
-                * game_crossProduct2D(game, game->renderer.viewportBaseX, game->renderer.viewportBaseY,
+                * game_crossProduct2D(game, anchorX, anchorY,
                                     game->build.selectionTileX[1], game->build.selectionTileY[1],
                                     game->build.selectionTileX[3], game->build.selectionTileY[3]);
             if (opposite_edges > 0 || other_edges > 0) continue;
@@ -190,8 +190,8 @@ void game_computeViewportBounds(Game *game) {
     game->ui.tileCursorY = tile_y;
     int corner_distance[4];
     for (int corner = 0; corner < 4; ++corner) {
-        int dx = game->renderer.viewportBaseX - game->build.selectionTileX[corner];
-        int dy = game->renderer.viewportBaseY - game->build.selectionTileY[corner];
+        int dx = anchorX - game->build.selectionTileX[corner];
+        int dy = anchorY - game->build.selectionTileY[corner];
         corner_distance[corner] = abs(dx * dx + dy * dy);
     }
     int nearest = corner_distance[0];

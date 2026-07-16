@@ -101,6 +101,10 @@ struct UiController {
     int32_t cursorScreenY = 0;
     int32_t tileCursorX = 0;
     int32_t tileCursorY = 0;
+    // Pointer (mouse) state: true while the mouse hover sits over a valid tile on
+    // the gameplay field this frame. Gates the mouse cursor arrow draw and tells
+    // pointerPressed that a click lands on the map rather than a control element.
+    bool mouseOverField = false;
 
     // Key input state: the pending/pause flags, the key-repeat timing, the held
     // and current keys, and the input/key sub-state used by the dispatcher. All

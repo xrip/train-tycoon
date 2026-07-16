@@ -284,6 +284,18 @@ void game_drawBuildMenuRow(Game *game, Surface *graphics) {
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
     int menu_x = game->renderer.viewportBaseX - game->renderer.viewportCenterX;
     int menu_y = game->renderer.viewportBaseY - game->renderer.viewportCenterY;
+    // The keyboard cursor is anchored at the screen centre (viewportBase); the
+    // run loop re-anchors it there every tick. When the mouse drives the cursor,
+    // game_pointerMoved has already resolved the hovered tile and written its
+    // screen position to cursorScreenX/Y, so re-anchor the whole cursor widget
+    // (sprite 200 + tool icon) there too. Otherwise the arrow stays pinned at
+    // the centre while the selection diamond (drawn from selectionTileX/Y)
+    // tracks the mouse. Keyboard frames have mouseOverField == false, so they
+    // keep the centre anchor and stay byte-identical.
+    if (game->ui.mouseOverField) {
+        menu_x = game->ui.cursorScreenX;
+        menu_y = game->ui.cursorScreenY;
+    }
     if (game->ui.blockBuildMenu) {
         game_drawSpriteQuad(game, graphics, 200, menu_x, menu_y + 15, 20);
         midp_set_color(graphics, 0xFF0000);

@@ -18,6 +18,7 @@ void game_start(Game *game, void* gameMIDlet);
 void game_run(Game *game);
 void game_pointerPressed(Game *game, int32_t n, int32_t n2);
 void game_pointerReleased(Game *game, int32_t n, int32_t n2);
+void game_pointerMoved(Game *game, int32_t x, int32_t y);
 void game_pointerDragged(Game *game, int32_t n, int32_t n2);
 void game_keyPressed(Game *game, int32_t n);
 void game_keyReleased(Game *game, int32_t n);
@@ -51,7 +52,12 @@ void game_viewportPanKey(Game *game);
 void game_viewportZoomKey(Game *game);
 int32_t game_crossProduct2D(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6);
 void game_computeIsoCornersInlined(Game *game, int32_t n, int32_t n2, int32_t* nArray, int32_t* nArray2, bool bl);
-void game_computeViewportBounds(Game *game);
+// Resolve the tile under a map-screen-space point (anchorX/Y) and refresh the
+// tile cursor, its screen position, and the selection diamond. anchorX/Y are in
+// the same space as viewportBaseX/Y (absolute map-pixel coords, not view-relative).
+// The keyboard zoom path passes viewportBase (screen centre); the pointer path
+// passes the mouse position translated into map space.
+void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY);
 void game_drawSelectionQuad(Game *game, Surface* graphics, int32_t* nArray, int32_t* nArray2);
 void game_drawBuildMenuCursor(Game *game, Surface* graphics);
 void game_drawBuildMenuRow(Game *game, Surface* graphics);

@@ -127,15 +127,33 @@ int main(void) {
             else         game_keyReleased(game, keycode);
         }
 
+        // Mouse position (framebuffer pixels); valid while the pointer is inside
+        // the window. Polled up front so both the click handler and the post-run
+        // hover (below) use the same sample.
+        int mouse_x, mouse_y;
+        const bool mouse_inside = mfb_mousepos(&mouse_x, &mouse_y);
+
         // Mouse: a left-click is forwarded as a pointer press. The game's pointer
-        // dispatch classifies it against the current screen (bottom-bar items,
-        // overlay menu rows, confirm buttons) using the hit-rects captured during
-        // the previous frame's paint.
+        // dispatch classifies it against the current screen (game-field tile,
+        // bottom-bar items, overlay menu rows, confirm buttons).
         int click_x, click_y;
         if (mfb_poll_lclick(&click_x, &click_y))
             game_pointerPressed(game, click_x, click_y);
 
         game_run(game);           // one iteration of the original run() loop
+
+        // Apply the mouse hover AFTER game_run. The Playing run loop re-anchors the
+        // tile cursor to the screen centre every tick (game_viewportZoomKey ->
+        // game_computeViewportBounds(viewportBase)), so applying it before run()
+        // gets clobbered and the visible cursor never leaves centre. Re-applying it
+        // here, right before paint, is what locks the game cursor to the mouse.
+        // (Clicks still resolve correctly either way -- pointerPressed resolves and
+        // consumes the tile inline, before run() can reset it.)
+        if (mouse_inside)
+            game_pointerMoved(game, mouse_x, mouse_y);
+        else
+            game->ui.mouseOverField = false;
+
         game_paint(game, &screen);
 
         if (!mfb_update(g_framebuffer, TARGET_FPS))

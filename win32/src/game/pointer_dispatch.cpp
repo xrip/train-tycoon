@@ -49,6 +49,22 @@ void pointer_click_bottom_bar(Game *game, int x) {
 
 }  // namespace
 
+// Mouse hover over the gameplay field. Translates the view-space mouse position
+// into the map-screen space game_computeViewportBounds expects (absolute map
+// pixels = mouse + viewport scroll offset) and resolves the tile under it, so the
+// tile cursor, the selection diamond, and the cursor arrow all track the mouse.
+// mouseOverField is cleared up front and only set again when the hover lands on a
+// valid in-map tile; main clears it when the mouse leaves the window.
+void game_pointerMoved(Game *game, int32_t x, int32_t y) {
+    game->ui.mouseOverField = false;
+    if (game->gameState != +GameState::Playing) return;
+    if (y < 15 || y >= gcs_bottomBarY) return;  // top status strip / bottom bar = UI chrome
+    int32_t anchor_x = x + game->renderer.viewportCenterX;
+    int32_t anchor_y = y + game->renderer.viewportCenterY;
+    game_computeViewportBounds(game, anchor_x, anchor_y);
+    game->ui.mouseOverField = !game->ui.blockBuildMenu;
+}
+
 void game_pointerPressed(Game *game, int32_t x, int32_t y) {
     if (game->ui.inputPending) { game->ui.inputPending = false; return; }
     switch (game->gameState) {
@@ -84,8 +100,16 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
                 pointer_click_bottom_bar(game, static_cast<int>(x));
                 return;
             }
-            // Game field (the isometric map) is deferred: moving the tile cursor
-            // needs the screen->tile inverse. Keyboard arrows still move it.
+            // Game field: resolve the tile under the click and fire the active
+            // build tool -- the same action as pressing 5/fire on that tile.
+            // (game_pointerMoved usually already resolved the hover tile; recompute
+            // so a click without a prior hover still lands on the right tile.)
+            if (y >= 15) {
+                int32_t anchor_x = x + game->renderer.viewportCenterX;
+                int32_t anchor_y = y + game->renderer.viewportCenterY;
+                game_computeViewportBounds(game, anchor_x, anchor_y);
+                if (!game->ui.blockBuildMenu) game_openBuildMenu(game);
+            }
             return;
         case +GameState::MapOverview:
             // Control element: the confirm bar's two 14px buttons -- x=0 accepts

@@ -468,3 +468,46 @@ TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
     CHECK(game->ui.buildMenuItemIndex == 0);
     delete game;
 }
+
+TEST_CASE("full: pointer hover resolves the tile under the mouse") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    REQUIRE(game->gameState == 30);
+
+    gcs_screenWidth = kScreenWidth;
+    gcs_hs = kScreenHeight;
+    gcs_bottomBarY = gcs_hs - 15;
+
+    // Hover the middle of the gameplay viewport. The viewport always shows the
+    // map after generation, so its centre sits on a valid tile.
+    const int hover_x = kScreenWidth / 2;
+    const int hover_y = (15 + gcs_bottomBarY) / 2;
+
+    game_pointerMoved(game, hover_x, hover_y);
+    REQUIRE(game->ui.mouseOverField);
+
+    const int tx = game->ui.tileCursorX;
+    const int ty = game->ui.tileCursorY;
+    CHECK(tx >= 0);
+    CHECK(tx < game->world.mapWidth);
+    CHECK(ty >= 0);
+    CHECK(ty < game->world.mapHeight);
+
+    // Round-trip: the resolved tile's screen centre (the flat iso forward
+    // transform the resolver mirrors) must sit within one tile of the hover.
+    const int tile_screen_x =
+        ty * 16 + tx * 16 + 16 - game->renderer.viewportCenterX;
+    const int tile_screen_y =
+        game->world.mapHalfWidth - tx * 8 + ty * 8 + 8 - game->renderer.viewportCenterY;
+    const int dx = tile_screen_x - hover_x;
+    const int dy = tile_screen_y - hover_y;
+    CHECK(dx >= -16);
+    CHECK(dx <= 16);
+    CHECK(dy >= -8);
+    CHECK(dy <= 8);
+
+    // Hovering UI chrome (the bottom bar) must not claim a field tile.
+    game_pointerMoved(game, hover_x, gcs_bottomBarY);
+    CHECK_FALSE(game->ui.mouseOverField);
+    delete game;
+}
