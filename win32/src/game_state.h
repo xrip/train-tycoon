@@ -24,10 +24,6 @@
 typedef struct GameCanvas {
     void* midlet;
     bool stopRequested;
-    int32_t at;
-    int32_t cB;
-    int32_t ar;
-    int32_t D;
     void* gameThread;
     int32_t simSpeed;
     int64_t frameStartTime;
@@ -37,10 +33,8 @@ typedef struct GameCanvas {
     int32_t frameIndex;
     int64_t frameTime;
     bool ce;
-    int64_t bT;
     bool displayInitialized;
     bool ee;
-    int32_t dp;
     bool flagsA;
     bool cH;
     Pathfinder pathfinder;
@@ -48,7 +42,6 @@ typedef struct GameCanvas {
     Fleet fleet;
     int32_t trainAtCursor;
     int32_t era;
-    int32_t dI;
     bool compareToPrevious;
     bool monthRolloverFlag;
     bool flagsB;
@@ -85,8 +78,6 @@ typedef struct GameCanvas {
     int32_t timerC1;
     int32_t timerC2;
     std::array<int32_t, 9> dc{};
-    int32_t bx;
-    int32_t fR;
     int32_t eD;
     int32_t aJ;
     int32_t hx;
@@ -94,7 +85,6 @@ typedef struct GameCanvas {
     int32_t dH;
     int64_t tickStart;
     int64_t tickEnd;
-    int64_t gw;
 } GameCanvas;
 
 extern int32_t gcs_screenWidth;

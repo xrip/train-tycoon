@@ -13,8 +13,6 @@ bool gcs_annualReportEnabled;
 
 void gc_fields_init(GameCanvas *gc) {
     *gc = GameCanvas{};
-    // --- constructor finals (GameCanvas()) ---
-    gc->at = 3; gc->cB = 33; gc->ar = 20; gc->D = 240;
     // --- static fields (declaration order) ---
     gcs_screenWidth = 1;
     gcs_hs = 1;
@@ -38,14 +36,12 @@ void gc_fields_init(GameCanvas *gc) {
     gc->ui.pauseFlag = false;
     gc->ui.paused = false;
     gc->ce = false;
-    gc->bT = midp_current_time_millis();
     gc->ui.keyRepeatDelay = 0;
     gc->ui.heldKey = 0;
     gc->displayInitialized = false;
     gc->ui.inputSubState = 0;
     gc->ui.currentKey = 0;
     gc->ee = false;
-    gc->dp = 255;
     gc->ui.cursorScale = 0;
     gc->ui.cursorDragY = -1;
     gc->ui.cursorSelectY = -1;
@@ -129,7 +125,6 @@ void gc_fields_init(GameCanvas *gc) {
         {{9, 8, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}},
         {{11, 10, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
     }};
-    gc->dI = 5;
     gc->assets.trainSpriteDirectionTable = {{
         {{130, 131, 132, 133, 134, 135, 136, 137}},
         {{140, 141, 142, 143, 144, 145, 146, 147}},
@@ -278,14 +273,11 @@ void gc_fields_init(GameCanvas *gc) {
     gc->world.woodAgeTimer = 0;
     gc->world.phaseTimer = 0;
     gc->dc = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
-    gc->bx = 0;
-    gc->fR = 0;
     gc->eD = -1;
     gc->aJ = -1;
     gc->hx = 0;
     gc->loadingTimer = 0;
     gc->dH = 50;
-    gc->gw = 0;
     gc->assets.tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
     gc->renderer.lastViewportCenterX = -1;
     gc->renderer.viewportCenterYCached = -1;
