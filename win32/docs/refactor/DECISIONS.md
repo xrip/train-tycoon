@@ -207,6 +207,27 @@ station checks) read train/economy state that is not yet extracted, so moving
 them onto `World` waits for FLEET/ECON; forcing it now would couple `World` to
 unextracted state against the "one caller group at a time" rule.
 
+## D-013: Tile-shape taxonomy needs one holistic pass (WORLD-02 groundwork)
+
+Evidence gathered for the map tile ids, recorded before any rename (per the
+"record uncertain evidence first" rule):
+
+- Tiles `0` = empty/flat ground; `3..28` = isometric slope and cliff shapes
+  computed from height-corner comparisons in `gc_toggleFlagInlined` (16+ distinct
+  configurations); `29..33` = passable scenery/obstacle tiles scattered in
+  generation stage `STAGE_SCATTER_OBSTACLES` (`29 + rng%5`); `34..40` = city
+  zone tiles (`gc_randomCityTile`); `41..68` = structures, resources, and
+  water/coast; `70..90` = track, bridge, and station shapes; `76` = `tile::CROSSING`.
+- The catch: the same numeric bound means different things in different
+  predicates. `>= 29 && <= 33` tests "is scenery", but `> 33` in
+  `gc_placeTerrainPatch` tests "is a structure tile (>= 34)", i.e. 33 is the top
+  of the terrain range there, not the top of scenery. A blanket
+  `SCENERY_LAST = 33` rename would mislabel the boundary check.
+- Decision: name the tile shapes in one focused taxonomy pass (its own leaf),
+  reading each predicate's intent, rather than piecemeal per-number renames. Until
+  then the shape-id literals stay. `tile::CROSSING` (76) remains the only named
+  tile sentinel.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM
