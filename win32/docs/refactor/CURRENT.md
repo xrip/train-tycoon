@@ -30,10 +30,18 @@ exact same bytes.
 MODEL-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
 change. Constants live in `game_constants.h`.
 
+## Progress
+
+- Verified the codec: the `*MatrixInlined` helpers already forward to the
+  size-explicit `*Span` cores (done in OWN-04), so no matrix split is left.
+- Done (D-011): named the codec direction with `save::MODE_WRITE/READ/SKIP` and
+  renamed `gc_loadGame(n, n2)` -> `(slot, mode)`. Debug and Release full gates
+  passed on 2026-07-16, no golden change.
+
 ## Next action
 
-Read `save.cpp` and `save_arrays.cpp` in full and map the exact field/array/
-matrix write order. Per the handoff, the `*MatrixInlined` helpers still need the
-same size-explicit `*Span` split that the array helpers got in OWN-02/D-008.
-Start there: give each saved matrix a size-explicit core, keep the byte order,
-run the strict Debug build and full tests, and commit each leaf.
+Continue making the codec explicit: name the `gc_initSaveOrLoad(mode)` selector
+values (0/1/2/4/5) and rename the misleading `gc_readShortFromBuffer` (it reads
+one unsigned byte). Consider grouping the codec into a `SaveCodec` boundary once
+the field walk reads clearly. Keep byte order identical; commit each leaf after
+the strict Debug and full tests pass.

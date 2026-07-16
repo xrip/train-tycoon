@@ -139,7 +139,7 @@ int32_t gc_collectNearbyServiceResource(GameCanvas *gc, int32_t n, int32_t n2, i
 void gc_loadTrainAtServiceVehicle(GameCanvas *gc, int32_t n, int32_t n2, bool bl);
 void gc_decrementTrainCargoOptionCounts(GameCanvas *gc, int32_t n);
 bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t* nArray);
-void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2);
+void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode);
 void gc_ensureSaveBufferCapacity(GameCanvas *gc, int32_t n);
 int32_t gc_readShortFromBuffer(GameCanvas *gc);
 void gc_saveGame(GameCanvas *gc);

@@ -125,13 +125,13 @@ std::vector<int8_t> gc_readPackedTextCodes(GameCanvas *gc, int32_t offset) {
 }
 
 // void loadGame(int n, int n2)
-void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2) {
-    gc->saveSlot = n;
-    gc->savePendingMode = n2;
+void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode) {
+    gc->saveSlot = slot;
+    gc->savePendingMode = mode;
     gc->saveReadOffset = 0;
     gc->snapshotSize = 0;
     gc->snapshotLoaded = false;
-    if (gc->savePendingMode == 1) {
+    if (gc->savePendingMode == save::MODE_READ) {
         std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
         if (store) {
             int nr = store->record_count();
@@ -140,7 +140,7 @@ void gc_loadGame(GameCanvas *gc, int32_t n, int32_t n2) {
                 const auto record = store->record(id);
                 if (!record) continue;
                 const int len = static_cast<int>(record->size());
-                if (len > 0 && (int8_t)(*record)[0] == n) {
+                if (len > 0 && (int8_t)(*record)[0] == slot) {
                     gc->saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
                     memcpy(gc->saveBuffer.data(), record->data() + 1,
                            (size_t)(len - 1));
@@ -170,7 +170,7 @@ void gc_writeSaveSnapshot(GameCanvas *gc) {
 
 // void persistSnapshotMode1()
 void gc_persistSnapshotMode1(GameCanvas *gc) {
-    gc_loadGame(gc, 5, 1);
+    gc_loadGame(gc, 5, save::MODE_READ);
     gc_writeSaveSnapshot(gc);
     gc_setMusicVolume(gc, gc->music_volume_level);
 }

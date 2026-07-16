@@ -143,7 +143,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->saveBuffer.clear();
     gc->saveReadOffset = 0;
     gc->saveSlot = 0;
-    gc->savePendingMode = 0;
+    gc->savePendingMode = save::MODE_WRITE;
     gc->snapshotSize = 0;
     gc->snapshotLoaded = false;
     gc->bytesUncompressed = 0;

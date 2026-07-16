@@ -326,7 +326,7 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
 
 // void persistSnapshotMode0()
 void gc_persistSnapshotMode0(GameCanvas *gc) {
-    gc_loadGame(gc, 5, 0);
+    gc_loadGame(gc, 5, save::MODE_WRITE);
     gc_writeSaveSnapshot(gc);
     gc_saveGame(gc);
 }

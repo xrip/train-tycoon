@@ -163,6 +163,19 @@ MODEL-01 is closed on this basis: the game-model constant groups (game states,
 track/tile codes, and the transition-code bases) are named; UI-screen ids are
 deferred to UI-01 by the decision above.
 
+## D-011: Save codec direction is explicit (SAVE-01)
+
+The one `IO_*` field walk in `gc_initSaveOrLoad` serves both save and load; the
+direction lives in `GameCanvas::savePendingMode` and in the `mode` argument of
+`gc_loadGame`. These were opaque `0`/`1`/`2` literals. `game_constants.h`
+`namespace save` now names them: `MODE_WRITE` (0) serializes, `MODE_READ` (1)
+deserializes, `MODE_SKIP` (2) touches nothing (returns 0, zeros arrays). Applied
+at every `savePendingMode` compare/assign and every `gc_loadGame` call, and the
+`gc_loadGame` parameters were renamed `n`/`n2` -> `slot`/`mode`. Values and byte
+order are unchanged. The higher-level `gc_initSaveOrLoad(mode)` selector (0/1/2/
+4/5) and the misleading primitive name `gc_readShortFromBuffer` (it reads one
+unsigned byte) are left for later SAVE-01 leaves.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

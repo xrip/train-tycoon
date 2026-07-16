@@ -19,9 +19,9 @@ bool gc_saveOrLoadBool(GameCanvas *gc, bool bl) {
 
 // byte saveOrLoadByte(byte by)
 int8_t gc_saveOrLoadByte(GameCanvas *gc, int8_t by) {
-    if (gc->savePendingMode == 2) return 0;
+    if (gc->savePendingMode == save::MODE_SKIP) return 0;
     int8_t by2 = by;
-    if (gc->savePendingMode == 0) {
+    if (gc->savePendingMode == save::MODE_WRITE) {
         gc_ensureSaveBufferCapacity(gc, 1);
         gc->saveBuffer[gc->saveReadOffset++] = by;
     } else if (gc->snapshotLoaded) {
@@ -32,9 +32,9 @@ int8_t gc_saveOrLoadByte(GameCanvas *gc, int8_t by) {
 
 // int saveIntToBuffer(int n)
 int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n) {
-    if (gc->savePendingMode == 2) return 0;
+    if (gc->savePendingMode == save::MODE_SKIP) return 0;
     int32_t n2 = n;
-    if (gc->savePendingMode == 0) {
+    if (gc->savePendingMode == save::MODE_WRITE) {
         gc_ensureSaveBufferCapacity(gc, 4);
         gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n & 0xFF);
         gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 8 & 0xFF);
@@ -138,17 +138,17 @@ void gc_decompressSaveBuffer(GameCanvas *gc) {
 }
 
 void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
-    if (mode == 0) gc_loadGame(gc, 0, 0);
-    if (mode == 1) gc_loadGame(gc, 0, 1);
-    if (mode == 2) gc->savePendingMode = 2;
+    if (mode == 0) gc_loadGame(gc, 0, save::MODE_WRITE);
+    if (mode == 1) gc_loadGame(gc, 0, save::MODE_READ);
+    if (mode == 2) gc->savePendingMode = save::MODE_SKIP;
     if (mode == 4) {
         gc->snapshotSize = 0;
         gc->saveBuffer.clear();
-        gc->savePendingMode = 0;
+        gc->savePendingMode = save::MODE_WRITE;
     }
     if (mode == 5) {
         gc->saveReadOffset = 0;
-        gc->savePendingMode = 1;
+        gc->savePendingMode = save::MODE_READ;
         gc->snapshotLoaded = true;
     }
     if (mode == 1) gc_decompressSaveBuffer(gc);
@@ -340,19 +340,19 @@ void gc_saveAllMapArrays(GameCanvas *gc) {
     gc->bytesUncompressed = 0;
     gc->bytesCompressed = 0;
     gc_initSaveOrLoad(gc, 0);
-    gc_loadGame(gc, 1, 0);
+    gc_loadGame(gc, 1, save::MODE_WRITE);
     gc_saveOrLoadByteMatrixInlined(gc, gc->tileMap);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
-    gc_loadGame(gc, 2, 0);
+    gc_loadGame(gc, 2, save::MODE_WRITE);
     gc_saveOrLoadByteMatrixInlined(gc, gc->trackMap);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
-    gc_loadGame(gc, 3, 0);
+    gc_loadGame(gc, 3, save::MODE_WRITE);
     gc_saveOrLoadByteMatrixInlined(gc, gc->tileElevation);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
-    gc_loadGame(gc, 4, 0);
+    gc_loadGame(gc, 4, save::MODE_WRITE);
     gc_saveOrLoadByteMatrixInlined(gc, gc->heightMap);
     gc_compressSaveBuffer(gc);
     gc_saveGame(gc);
@@ -372,16 +372,16 @@ void gc_restoreAllMapArrays(GameCanvas *gc) {
     gc->viewportHalfWidth = gc->mapScreenWidth / 2;
     gc->viewportHalfHeight = gc->mapScreenHeight / 2;
     gc_initBuildMenuForScenario(gc, -1);
-    gc_loadGame(gc, 1, 1);
+    gc_loadGame(gc, 1, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
     gc_saveOrLoadByteMatrixInlined(gc, gc->tileMap);
-    gc_loadGame(gc, 2, 1);
+    gc_loadGame(gc, 2, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
     gc_saveOrLoadByteMatrixInlined(gc, gc->trackMap);
-    gc_loadGame(gc, 3, 1);
+    gc_loadGame(gc, 3, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
     gc_saveOrLoadByteMatrixInlined(gc, gc->tileElevation);
-    gc_loadGame(gc, 4, 1);
+    gc_loadGame(gc, 4, save::MODE_READ);
     gc_decompressSaveBuffer(gc);
     gc_saveOrLoadByteMatrixInlined(gc, gc->heightMap);
     gc->lastViewportCenterX = -1;

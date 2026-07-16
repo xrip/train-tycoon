@@ -68,4 +68,13 @@ inline constexpr int32_t OFFER_ALT_BASE = 60;       // menuRowAltType[row] + thi
 inline constexpr int32_t SCENARIO_NOTICE_BASE = 80; // scenarioNotice id   + this
 }  // namespace transition
 
+// Save-codec direction (GameCanvas::savePendingMode, also the mode argument of
+// gc_loadGame). One IO_* field walk serves save and load; the mode decides which
+// way bytes move. See save.cpp / save_arrays.cpp.
+namespace save {
+inline constexpr int32_t MODE_WRITE = 0;  // serialize fields into the buffer
+inline constexpr int32_t MODE_READ = 1;   // deserialize fields from the buffer
+inline constexpr int32_t MODE_SKIP = 2;   // touch nothing: return 0 and zero arrays
+}  // namespace save
+
 #endif  // GAME_CONSTANTS_H
