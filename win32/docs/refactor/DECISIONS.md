@@ -39,6 +39,23 @@ would be wrong. They stay on `GameCanvas` for now; their owner (likely
 later. The build/menu *display* rows (`buildMenu*`, `menuRow*`,
 `trainSelection*`) stay for UI-01.
 
+## D-013: Stage-3 exit signature refactor is gated on shared-state homing
+
+The stage-3 exit ("core rules no longer use `GameCanvas`") cannot be a pure
+signature refactor yet: the rule functions in `sim_tick.cpp` / `economy_tick.cpp`
+read shared state that has no owner (`rng` in ~30 call sites, `era`, the frame
+timers, and the D-012 cost constants). A function cannot take `World&`/`Economy&`
+instead of `GameCanvas*` while it still reads `gc->rng` or `gc->gWagonCost`.
+
+Plan: keep homing the owned shared state first (tile-animation and zone-growth
+state moved onto `World`; the UI/render/asset fields move onto `UiController`,
+`Renderer`, and `Assets` in Stage 4). `rng` will be threaded as a `JavaRandom&`
+parameter to the rules that need it, and `era` and the cost constants get a home
+during that pass. The `GameCanvas*` -> owner-ref conversion of the core rules is
+done last, once its inputs are all homed, so each converted group stays a clean
+mechanical change with the full gates green. All golden digests stay fixed
+throughout.
+
 ## D-004: Tests
 
 Use vendored doctest 2.5.3, clear rule checks, and fixed output digests. The

@@ -33,7 +33,8 @@ Only one row may be `in_progress`.
 | SCENARIO-01 | done | Debug and Release full tests passed, 2026-07-16 | Scenario owns scores/leaderboard, milestones, AI opponent state, offer generation, scenario identity/difficulty/progression, and high-score entry; shared menu-row display arrays stay for UI-01 |
 | SIM-01 | done | Debug and Release full tests passed, 2026-07-16 | Playing tick extracted into one named gc_simulationTick coordinator stating the exact tick order; gc_update dispatcher still lives in paint.cpp (smell, left for a later cleanup) |
 | BUILD-01 | done | Debug and Release full tests passed, 2026-07-16 | BuildController owns track-lay, train-buy, and terrain-edit/selection action state (picks up PATH-01's selectionCost/track owner codes); cost-model constants and build-menu display stay per D-012 |
-| ASSET-01 | queued | - | Game assets |
+| STAGE-3-EXIT | partial | ASan full tests passed, 2026-07-16 | All Stage-3 data owners exist (World/Pathfinder/Fleet/Economy/Scenario/BuildController) and ASan is clean. Tile-animation and zone-growth state homed onto World. The core-rule `GameCanvas*` -> owner-ref signature refactor is gated on shared-state homing (rng/era/cost constants) per D-013; done last, after Stage 4 homes the UI/render/asset fields. |
+| ASSET-01 | in_progress | STAGE-3-EXIT partial | Game assets |
 | RENDER-01..RENDER-02 | queued | - | Drawing |
 | UI-01..UI-02 | queued | - | UI and input |
 | APP-01 | queued | - | Application loop |
