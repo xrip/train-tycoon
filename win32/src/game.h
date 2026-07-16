@@ -19,6 +19,7 @@ void game_run(Game *game);
 void game_pointerPressed(Game *game, int32_t n, int32_t n2);
 void game_pointerReleased(Game *game, int32_t n, int32_t n2);
 void game_pointerMoved(Game *game, int32_t x, int32_t y);
+void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y);
 void game_pointerDragged(Game *game, int32_t n, int32_t n2);
 void game_keyPressed(Game *game, int32_t n);
 void game_keyReleased(Game *game, int32_t n);

@@ -511,3 +511,46 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     CHECK_FALSE(game->ui.mouseOverField);
     delete game;
 }
+
+TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    REQUIRE(game->gameState == 30);
+
+    // generate_scenario never paints, so set the screen-size globals that the
+    // first game_paint would normally establish (the live loop always has these).
+    gcs_screenWidth = kScreenWidth;
+    gcs_hs = kScreenHeight;
+    gcs_bottomBarY = gcs_hs - 15;
+
+    const int mid_x = kScreenWidth / 2;
+    const int mid_y = (15 + gcs_bottomBarY) / 2;
+    const int cx0 = game->renderer.viewportCenterX;
+    const int cy0 = game->renderer.viewportCenterY;
+    const int msx0 = game->renderer.mapScaleX;
+    const int msy0 = game->renderer.mapScaleY;
+
+    // Middle of the viewport never arms a pan.
+    game_pointerEdgeScroll(game, mid_x, mid_y);
+    CHECK(game->renderer.viewportCenterX == cx0);
+    CHECK(game->renderer.viewportCenterY == cy0);
+
+    // Right edge pans right; mapScale (= 2*viewportBase) moves 2x the camera
+    // delta so the run loop's camera-follow sees an unchanged cursor offset and
+    // doesn't fight the pan. A cardinal edge only moves one axis.
+    game_pointerEdgeScroll(game, kScreenWidth - 1, mid_y);
+    const int right_dx = game->renderer.viewportCenterX - cx0;
+    CHECK(right_dx > 0);
+    CHECK(game->renderer.mapScaleX - msx0 == 2 * right_dx);
+    CHECK(game->renderer.viewportCenterY == cy0);
+
+    // Top-right corner pans along both axes (right + up).
+    game_pointerEdgeScroll(game, kScreenWidth - 1, 15);
+    const int dx = game->renderer.viewportCenterX - (cx0 + right_dx);
+    const int dy = game->renderer.viewportCenterY - cy0;
+    CHECK(dx > 0);
+    CHECK(dy < 0);
+    CHECK(game->renderer.mapScaleY - msy0 == 2 * dy);
+
+    delete game;
+}

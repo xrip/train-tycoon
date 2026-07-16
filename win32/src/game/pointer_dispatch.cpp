@@ -65,6 +65,41 @@ void game_pointerMoved(Game *game, int32_t x, int32_t y) {
     game->ui.mouseOverField = !game->ui.blockBuildMenu;
 }
 
+// Edge-scroll: with the mouse held near a gameplay-viewport edge, pan the map
+// the same way holding an arrow key does. We advance the camera (viewportCenter)
+// and the cursor anchor (mapScale; viewportBase = mapScale/2) together so they
+// stay in lockstep. game_viewportZoomKey -- run next, inside game_run --
+// re-derives viewportBase from mapScale and clamps to the map; with
+// viewportBase - viewportCenter unchanged its camera-follow does not fight us,
+// and the logical cursor doesn't drift off to a map edge. The visible cursor
+// stays on the mouse (game_pointerMoved runs after run), so the world scrolls
+// under it. Gated to match the arrow path: Playing only, and only while a
+// build-menu row is enabled (game_viewportZoomKey is skipped otherwise, so the
+// advance would never be clamped/processed). margin/step are tuning knobs.
+void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y) {
+    if (game->gameState != +GameState::Playing) return;
+    if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
+    if (y < 15 || y >= gcs_bottomBarY) return;  // only inside the gameplay viewport
+
+    constexpr int32_t margin = 12;  // px from the edge that arms a pan
+    constexpr int32_t step = 8;     // px/frame the camera moves (screen units)
+
+    int32_t dx = 0;
+    if (x <= margin) dx = -step;
+    else if (x >= gcs_screenWidth - 1 - margin) dx = step;
+    int32_t dy = 0;
+    const int32_t top = 15 + margin;
+    const int32_t bottom = gcs_bottomBarY - 1 - margin;
+    if (y <= top) dy = -step;
+    else if (y >= bottom) dy = step;
+    if (dx == 0 && dy == 0) return;
+
+    game->renderer.viewportCenterX += dx;
+    game->renderer.viewportCenterY += dy;
+    game->renderer.mapScaleX += dx * 2;  // keep viewportBase (= mapScale/2) locked to the camera
+    game->renderer.mapScaleY += dy * 2;
+}
+
 void game_pointerPressed(Game *game, int32_t x, int32_t y) {
     if (game->ui.inputPending) { game->ui.inputPending = false; return; }
     switch (game->gameState) {

@@ -140,6 +140,13 @@ int main(void) {
         if (mfb_poll_lclick(&click_x, &click_y))
             game_pointerPressed(game, click_x, click_y);
 
+        // Edge-scroll: pan the map when the mouse sits near a viewport edge.
+        // Applied before game_run so game_viewportZoomKey (inside run) clamps
+        // the advance to the map and keeps viewportBase in lockstep with the
+        // camera (see game_pointerEdgeScroll).
+        if (mouse_inside)
+            game_pointerEdgeScroll(game, mouse_x, mouse_y);
+
         game_run(game);           // one iteration of the original run() loop
 
         // Apply the mouse hover AFTER game_run. The Playing run loop re-anchors the
