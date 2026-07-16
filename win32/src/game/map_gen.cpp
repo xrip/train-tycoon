@@ -403,9 +403,9 @@ void game_placeTerrainFeature(Game *game, int32_t n) {
     }
 }
 
-// void loadState25Setup(int n) -- the incremental map generator
-void game_loadState25Setup(Game *game, int32_t n) {
-    if (n == 0) {
+namespace {
+
+void beginMapGeneration(Game *game) {
         game->world.tileMap.resize(game->world.mapWidth + 1, game->world.mapHeight + 1);
         game->world.trackMap.resize(game->world.mapWidth + 1, game->world.mapHeight + 1);
         game->world.tileElevation.resize(game->world.mapWidth + 1, game->world.mapHeight + 1);
@@ -417,9 +417,9 @@ void game_loadState25Setup(Game *game, int32_t n) {
             + game->world.mapGenRows + game->world.weightAccel2 + game->world.weightAccel + game->world.terrainFeatureStage6Count
             + game->world.terrainFeatureStage7Count + game->world.weightAccel4 + game->world.weightAccel3 + 1;
         game->world.mapGenTilesDone = 0;
-    }
-    if (n == 1) {
-        int n2 = 0, n3, n4;
+}
+
+void advanceMapGenerationStage(Game *game) {
         if (game->world.mapGenStage == mapgen::STAGE_INIT) { game->world.mapGenStage = mapgen::STAGE_RAISE_TERRAIN; game->world.tilesGeneratedInStage = 0; }
         if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainRaiseStepCount) { game->world.mapGenStage = mapgen::STAGE_LOWER_TERRAIN; game->world.tilesGeneratedInStage = 0; game_rebuildTerrainTiles(game, false); }
         if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainLowerStepCount) { game->world.mapGenStage = mapgen::STAGE_PLACE_PATCHES; game->world.tilesGeneratedInStage = 0; game_rebuildTerrainTiles(game, false); }
@@ -430,6 +430,9 @@ void game_loadState25Setup(Game *game, int32_t n) {
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_3 && game->world.tilesGeneratedInStage == game->world.terrainFeatureStage7Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_4; game->world.tilesGeneratedInStage = 0; }
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4 && game->world.tilesGeneratedInStage == game->world.weightAccel4) { game->world.mapGenStage = mapgen::STAGE_FEATURE_5; game->world.tilesGeneratedInStage = 0; }
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5 && game->world.tilesGeneratedInStage == game->world.weightAccel3) { game->world.mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; game->world.tilesGeneratedInStage = 0; }
+}
+
+void generateTerrainHeightStep(Game *game) {
         if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN) {
             int center_x = abs(nextRngInt(game) % game->world.mapWidth);
             int center_y = abs(nextRngInt(game) % game->world.mapHeight);
@@ -446,22 +449,28 @@ void game_loadState25Setup(Game *game, int32_t n) {
             int height = abs(nextRngInt(game) % 20) + 1;
             game_lowerTerrainArea(game, center_x, center_y, width, height, -1);
         }
+}
+
+void generateTerrainPatchStep(Game *game) {
         game->build.trackBuildInProgress = false;
         if (game->world.mapGenStage == mapgen::STAGE_PLACE_PATCHES) {
-            for (n4 = 0; n4 < game->world.mapGenColumns; ++n4) {
+            for (int column = 0; column < game->world.mapGenColumns; ++column) {
                 bool done = false;
-                for (n3 = 0; n3 < game->world.mapGenRows && !done; ++n3) {
-                    if (game->world.tilesGeneratedInStage != game->world.mapGenColumns * n4 + n3) continue;
-                    n2 = game->world.mapWidth / game->world.mapGenColumns;
-                    int n5 = game->world.mapHeight / game->world.mapGenRows;
-                    int n6 = n4 * n2 + abs(nextRngInt(game) % (n2 / 2));
-                    int n7 = n3 * n5 + abs(nextRngInt(game) % (n5 / 2));
-                    game_placeTerrainPatch(game, n6, n7);
+                for (int row = 0; row < game->world.mapGenRows && !done; ++row) {
+                    if (game->world.tilesGeneratedInStage != game->world.mapGenColumns * column + row) continue;
+                    int cellWidth = game->world.mapWidth / game->world.mapGenColumns;
+                    int cellHeight = game->world.mapHeight / game->world.mapGenRows;
+                    int patchX = column * cellWidth + abs(nextRngInt(game) % (cellWidth / 2));
+                    int patchY = row * cellHeight + abs(nextRngInt(game) % (cellHeight / 2));
+                    game_placeTerrainPatch(game, patchX, patchY);
                     done = true;
                 }
                 if (done) break;
             }
         }
+}
+
+void generateTerrainFeatureStep(Game *game) {
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0) game_placeTerrainFeature(game, 0);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1) game_placeTerrainFeature(game, 1);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_2) game_placeTerrainFeature(game, 2);
@@ -469,18 +478,36 @@ void game_loadState25Setup(Game *game, int32_t n) {
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4) game_placeTerrainFeature(game, 4);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5) game_placeTerrainFeature(game, 5);
         if (game->build.trackBuildInProgress) game->stateWorkStep = 0;
+}
+
+void scatterInitialObstacles(Game *game) {
         if (game->world.mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
-            for (n4 = 0; n4 < game->world.initialObstacleCount; ++n4) {
-                n3 = abs(nextRngInt(game) % game->world.mapWidth);
-                n2 = abs(nextRngInt(game) % game->world.mapHeight);
-                if (game->world.tileMap[n3][n2] != 0 || game->world.tileElevation[n3][n2] < 0) continue;
-                game->world.tileMap[n3][n2] = (int8_t)(tile::SCENERY_FIRST + abs(nextRngInt(game) % 5));
+            for (int obstacle = 0; obstacle < game->world.initialObstacleCount; ++obstacle) {
+                int mapX = abs(nextRngInt(game) % game->world.mapWidth);
+                int mapY = abs(nextRngInt(game) % game->world.mapHeight);
+                if (game->world.tileMap[mapX][mapY] != 0 || game->world.tileElevation[mapX][mapY] < 0) continue;
+                game->world.tileMap[mapX][mapY] = (int8_t)(tile::SCENERY_FIRST + abs(nextRngInt(game) % 5));
             }
             game->world.initialIndustryPlaced = true;
         }
+}
+
+void generateOneMapStep(Game *game) {
+        advanceMapGenerationStage(game);
+        generateTerrainHeightStep(game);
+        generateTerrainPatchStep(game);
+        generateTerrainFeatureStep(game);
+        scatterInitialObstacles(game);
         ++game->world.tilesGeneratedInStage;
         ++game->world.mapGenTilesDone;
-    }
+}
+
+} // namespace
+
+// Set up the map generator (mode 0), or run one ordered generation step (mode 1).
+void game_loadState25Setup(Game *game, int32_t mode) {
+    if (mode == 0) beginMapGeneration(game);
+    if (mode == 1) generateOneMapStep(game);
 }
 
 void game_pickCitySite(Game *game) {
