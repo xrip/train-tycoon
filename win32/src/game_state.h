@@ -107,8 +107,6 @@ typedef struct GameCanvas {
     int32_t tileCursorX;
     int32_t tileCursorY;
     bool flagsA;
-    int8_t junctionDirCursor;
-    int8_t stationDirCursor;
     bool cH;
     Pathfinder pathfinder;
     // Endpoints of the path being built. pathAnchor is the reference endpoint

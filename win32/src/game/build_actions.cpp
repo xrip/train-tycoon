@@ -200,13 +200,13 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
     if (gc->ui.blockBuildMenu) return;
     int track = gc->world.trackMap[gc->tileCursorX][gc->tileCursorY];
     if ((track & 0xC0) == 128) {
-        gc->junctionDirCursor = (int8_t)(track & 0x3F);
+        gc->build.junctionDirCursor = (int8_t)(track & 0x3F);
         gc->ready = false;
         gc->ui.transitionCode = 20;
         gc_setState(gc, +GameState::MenuOverlay);
     }
     if ((track & 0xC0) == 192) {
-        gc->stationDirCursor = (int8_t)(track & 0x3F);
+        gc->build.stationDirCursor = (int8_t)(track & 0x3F);
         gc->ready = false;
         gc->ui.transitionCode = 21;
         gc_setState(gc, +GameState::MenuOverlay);

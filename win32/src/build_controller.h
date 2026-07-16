@@ -53,6 +53,11 @@ struct BuildController {
     std::array<int32_t, 4> selectionTileY{};
     int32_t swapMapX = 0;
     int32_t swapMapY = 0;
+
+    // Placement direction cursors: which way a junction or station being placed
+    // faces. Both runtime-only. Save byte order is unchanged.
+    int8_t junctionDirCursor = 0;
+    int8_t stationDirCursor = 0;
 };
 
 #endif  // BUILD_CONTROLLER_H

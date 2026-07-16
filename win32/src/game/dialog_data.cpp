@@ -81,23 +81,23 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
         case 20:
             switch (field) {
                 case 0: {
-                    int selection = gc->ui.trainSelectionIndex[gc->junctionDirCursor];
+                    int selection = gc->ui.trainSelectionIndex[gc->build.junctionDirCursor];
                     const std::vector<int8_t> &engine = gc->assets.spriteBitmapTable[
                         gc->assets.spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
                     const std::vector<int8_t> &wagon = gc->assets.spriteBitmapTable[
                         gc->assets.spriteIndexTable[86 + (selection & 0xff)]];
                     return join_codes(tracked_codes(wagon), tracked_codes(engine));
                 }
-                case 1: return gc_formatNumberWithSuffix(gc, gc->world.zonePopulation[gc->junctionDirCursor] * 13, 0);
-                case 2: return gc_formatNumberWithSuffix(gc, gc->world.constructionTimers[gc->junctionDirCursor], 29);
+                case 1: return gc_formatNumberWithSuffix(gc, gc->world.zonePopulation[gc->build.junctionDirCursor] * 13, 0);
+                case 2: return gc_formatNumberWithSuffix(gc, gc->world.constructionTimers[gc->build.junctionDirCursor], 29);
             }
             break;
 
         case 21:
             switch (field) {
-                case 0: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[100 + gc->world.stationDirectionCode[gc->stationDirCursor]]]);
-                case 1: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[106 + gc->world.stationDirectionCode[gc->stationDirCursor] / 2]]);
-                case 2: return gc_formatNumberWithSuffix(gc, gc->economy.prevStationRevenue[gc->stationDirCursor], 0);
+                case 0: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[100 + gc->world.stationDirectionCode[gc->build.stationDirCursor]]]);
+                case 1: return copy_codes(gc->assets.spriteBitmapTable[gc->assets.spriteIndexTable[106 + gc->world.stationDirectionCode[gc->build.stationDirCursor] / 2]]);
+                case 2: return gc_formatNumberWithSuffix(gc, gc->economy.prevStationRevenue[gc->build.stationDirCursor], 0);
             }
             break;
 

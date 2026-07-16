@@ -80,9 +80,9 @@ void gc_fields_init(GameCanvas *gc) {
     gc->ui.confirmCounter = 0;
     gc->ui.confirmTargetState = -1;
     gc->flagsA = true;
-    gc->junctionDirCursor = 0;
+    gc->build.junctionDirCursor = 0;
     gc->ui.numSelectedTrains = 0;
-    gc->stationDirCursor = 0;
+    gc->build.stationDirCursor = 0;
     gc->ui.cityListIndex = 0;
     gc->ui.pendingTransitionCode = -1;
     gc->build.discountApplied = false;
