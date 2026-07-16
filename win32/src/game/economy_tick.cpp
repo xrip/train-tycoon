@@ -5,9 +5,9 @@
 // void placeTrainAt(int,int)
 void gc_placeTrainAt(GameCanvas *gc, int32_t duration_units, int32_t row) {
     int delay_days = duration_units * 60 + 20 + gc->rng.next_int() % 20;
-    int due_day = gc->placeTrainDay[row] + delay_days;
-    int due_month = gc->placeTrainMonth[row];
-    int due_year = gc->placeTrainYear[row];
+    int due_day = gc->ui.placeTrainDay[row] + delay_days;
+    int due_month = gc->ui.placeTrainMonth[row];
+    int due_year = gc->ui.placeTrainYear[row];
     while (due_day > 28) {
         due_day -= 28;
         ++due_month;
@@ -17,51 +17,51 @@ void gc_placeTrainAt(GameCanvas *gc, int32_t duration_units, int32_t row) {
         ++due_year;
     }
     if (due_day == 1) ++due_day;
-    gc->menuRowParamA[row] = (int8_t)due_day;
-    gc->menuRowParamB[row] = (int8_t)due_month;
-    gc->menuRowParamC[row] = (int8_t)due_year;
+    gc->ui.menuRowParamA[row] = (int8_t)due_day;
+    gc->ui.menuRowParamB[row] = (int8_t)due_month;
+    gc->ui.menuRowParamC[row] = (int8_t)due_year;
 }
 
 static void copy_menu_row_to_slot5(GameCanvas *gc, int row) {
-    gc->scenario.offerTypeTransitionCode = gc->menuRowType[row] + 40;
-    gc->scenario.offerEffectTransitionCode = gc->menuRowAltType[row] + 60;
+    gc->scenario.offerTypeTransitionCode = gc->ui.menuRowType[row] + 40;
+    gc->scenario.offerEffectTransitionCode = gc->ui.menuRowAltType[row] + 60;
     gc->scenario.offerRowIndex = 5;
-    gc->menuRowType[5] = gc->menuRowType[row];
-    gc->menuRowCost[5] = gc->menuRowCost[row];
-    gc->menuRowValue[5] = gc->menuRowValue[row];
-    gc->menuRowAltType[5] = gc->menuRowAltType[row];
-    gc->menuRowEra[5] = gc->menuRowEra[row];
-    gc->menuRowRevenue[5] = gc->menuRowRevenue[row];
-    gc->placeTrainDay[5] = gc->placeTrainDay[row];
-    gc->placeTrainMonth[5] = gc->placeTrainMonth[row];
-    gc->placeTrainYear[5] = gc->placeTrainYear[row];
-    gc->menuRowParamA[5] = gc->menuRowParamA[row];
-    gc->menuRowParamB[5] = gc->menuRowParamB[row];
-    gc->menuRowParamC[5] = gc->menuRowParamC[row];
-    gc->menuRowType[row] = 0;
-    gc->menuRowCost[row] = 0;
-    gc->menuRowValue[row] = 0;
-    gc->menuRowAltType[row] = 0;
-    gc->menuRowEra[row] = 0;
-    gc->menuRowRevenue[row] = 0;
+    gc->ui.menuRowType[5] = gc->ui.menuRowType[row];
+    gc->ui.menuRowCost[5] = gc->ui.menuRowCost[row];
+    gc->ui.menuRowValue[5] = gc->ui.menuRowValue[row];
+    gc->ui.menuRowAltType[5] = gc->ui.menuRowAltType[row];
+    gc->ui.menuRowEra[5] = gc->ui.menuRowEra[row];
+    gc->ui.menuRowRevenue[5] = gc->ui.menuRowRevenue[row];
+    gc->ui.placeTrainDay[5] = gc->ui.placeTrainDay[row];
+    gc->ui.placeTrainMonth[5] = gc->ui.placeTrainMonth[row];
+    gc->ui.placeTrainYear[5] = gc->ui.placeTrainYear[row];
+    gc->ui.menuRowParamA[5] = gc->ui.menuRowParamA[row];
+    gc->ui.menuRowParamB[5] = gc->ui.menuRowParamB[row];
+    gc->ui.menuRowParamC[5] = gc->ui.menuRowParamC[row];
+    gc->ui.menuRowType[row] = 0;
+    gc->ui.menuRowCost[row] = 0;
+    gc->ui.menuRowValue[row] = 0;
+    gc->ui.menuRowAltType[row] = 0;
+    gc->ui.menuRowEra[row] = 0;
+    gc->ui.menuRowRevenue[row] = 0;
     gc->ready = false;
 }
 
 // void applyMenuRowEffect(int)
 void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
-    if (gc->menuRowAltType[row] == 1 || gc->menuRowAltType[row] == 2) {
-        gc->economy.money += gc->menuRowRevenue[row];
-        gc_pushMoneyHistory(gc, gc->menuRowRevenue[row]);
+    if (gc->ui.menuRowAltType[row] == 1 || gc->ui.menuRowAltType[row] == 2) {
+        gc->economy.money += gc->ui.menuRowRevenue[row];
+        gc_pushMoneyHistory(gc, gc->ui.menuRowRevenue[row]);
     }
-    if (gc->menuRowAltType[row] == 3) gc->economy.loanCeiling += gc->menuRowRevenue[row];
-    if (gc->menuRowAltType[row] == 4 && gc->era < 5) ++gc->era;
-    if (gc->menuRowAltType[row] >= 5 && gc->menuRowAltType[row] <= 10) {
-        int resource = gc->menuRowAltType[row] - 5;
+    if (gc->ui.menuRowAltType[row] == 3) gc->economy.loanCeiling += gc->ui.menuRowRevenue[row];
+    if (gc->ui.menuRowAltType[row] == 4 && gc->era < 5) ++gc->era;
+    if (gc->ui.menuRowAltType[row] >= 5 && gc->ui.menuRowAltType[row] <= 10) {
+        int resource = gc->ui.menuRowAltType[row] - 5;
         gc->scenario.routeResourceFlags[resource] =
-            (int8_t)(gc->scenario.routeResourceFlags[resource] + gc->menuRowEra[row]);
+            (int8_t)(gc->scenario.routeResourceFlags[resource] + gc->ui.menuRowEra[row]);
     }
-    if (gc->menuRowAltType[row] == 11) {
-        gc->economy.loanBalance -= gc->economy.loanBalance * gc->menuRowEra[row] / 100;
+    if (gc->ui.menuRowAltType[row] == 11) {
+        gc->economy.loanBalance -= gc->economy.loanBalance * gc->ui.menuRowEra[row] / 100;
         if (gc->economy.loanBalance < 0) gc->economy.loanBalance = 0;
         if (gc->economy.loanBalance % 20000 != 0) {
             if (gc->economy.loanBalance % 20000 < 10000)
@@ -70,7 +70,7 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
                 gc->economy.loanBalance += 20000 - gc->economy.loanBalance % 20000;
         }
     }
-    if (gc->menuRowAltType[row] == 12 && gc->economy.interestRate > 1)
+    if (gc->ui.menuRowAltType[row] == 12 && gc->economy.interestRate > 1)
         --gc->economy.interestRate;
     copy_menu_row_to_slot5(gc, row);
     gc->scenario.duplicateRowState = 3;
@@ -93,17 +93,17 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         if (gc->scenario.routeResourceFlags[resource] > 0) --gc->scenario.routeResourceFlags[resource];
     }
     for (int row = 0; row < 5; ++row) {
-        if ((gc->menuRowType[row] == 1
-             || (gc->menuRowType[row] >= 4 && gc->menuRowType[row] <= 14))
-            && gc->menuRowCost[row] <= gc->menuRowValue[row])
+        if ((gc->ui.menuRowType[row] == 1
+             || (gc->ui.menuRowType[row] >= 4 && gc->ui.menuRowType[row] <= 14))
+            && gc->ui.menuRowCost[row] <= gc->ui.menuRowValue[row])
             gc_applyMenuRowEffect(gc, row);
-        if (gc->menuRowParamA[row] != gc->economy.dayOfMonth
-            || gc->menuRowParamB[row] != gc->economy.monthOfYear
-            || gc->menuRowParamC[row] != gc->economy.year - 1950)
+        if (gc->ui.menuRowParamA[row] != gc->economy.dayOfMonth
+            || gc->ui.menuRowParamB[row] != gc->economy.monthOfYear
+            || gc->ui.menuRowParamC[row] != gc->economy.year - 1950)
             continue;
-        if (gc->menuRowType[row] == 2 && gc->menuRowCost[row] <= gc->economy.money)
+        if (gc->ui.menuRowType[row] == 2 && gc->ui.menuRowCost[row] <= gc->economy.money)
             gc_applyMenuRowEffect(gc, row);
-        if (gc->menuRowType[row] != 0) gc_duplicateMenuRow(gc, row);
+        if (gc->ui.menuRowType[row] != 0) gc_duplicateMenuRow(gc, row);
     }
 
     int date = gc->economy.dayOfMonth + 32 * gc->economy.monthOfYear + 370 * (gc->economy.year - 1950);
@@ -111,15 +111,15 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         return;
     int free_row = -1;
     for (int row = 0; row < 5; ++row) {
-        if (gc->menuRowType[row] == 0) {
+        if (gc->ui.menuRowType[row] == 0) {
             free_row = row;
             break;
         }
     }
     if (free_row > -1) {
-        gc->placeTrainDay[free_row] = (int8_t)gc->economy.dayOfMonth;
-        gc->placeTrainMonth[free_row] = (int8_t)gc->economy.monthOfYear;
-        gc->placeTrainYear[free_row] = (int8_t)(gc->economy.year - 1950);
+        gc->ui.placeTrainDay[free_row] = (int8_t)gc->economy.dayOfMonth;
+        gc->ui.placeTrainMonth[free_row] = (int8_t)gc->economy.monthOfYear;
+        gc->ui.placeTrainYear[free_row] = (int8_t)(gc->economy.year - 1950);
         int offer_scale = 4 + std::abs(gc->rng.next_int() % 12);
         gc_placeTrainAt(gc, offer_scale, free_row);
         int offer_type = std::abs(gc->rng.next_int() % 16);
@@ -147,41 +147,41 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
             }
         }
         (void)active_train_count;
-        gc->menuRowType[free_row] =
+        gc->ui.menuRowType[free_row] =
             offer_type > 0 && offer_type < 15 ? (int8_t)offer_type : 0;
         if (offer_type == 1)
-            gc->menuRowCost[free_row] = offer_scale * (engine_count + 2)
+            gc->ui.menuRowCost[free_row] = offer_scale * (engine_count + 2)
                                          * (3000 + gc->rng.next_int() % 1500);
         if (offer_type == 2)
-            gc->menuRowCost[free_row] = gc->economy.money + offer_scale * (engine_count + 2)
+            gc->ui.menuRowCost[free_row] = gc->economy.money + offer_scale * (engine_count + 2)
                                          * (2000 + gc->rng.next_int() % 1000);
-        if (offer_type == 3) gc->menuRowType[free_row] = 0;
+        if (offer_type == 3) gc->ui.menuRowType[free_row] = 0;
         if (offer_type == 4)
-            gc->menuRowCost[free_row] = offer_scale * (type4_count * 2 + 5)
+            gc->ui.menuRowCost[free_row] = offer_scale * (type4_count * 2 + 5)
                                          * (25 + gc->rng.next_int() % 3);
         if (offer_type == 5)
-            gc->menuRowCost[free_row] = offer_scale * (type45_count * 2 + 5)
+            gc->ui.menuRowCost[free_row] = offer_scale * (type45_count * 2 + 5)
                                          * (25 + gc->rng.next_int() % 3);
         if (offer_type == 6)
-            gc->menuRowCost[free_row] = offer_scale * (type3_count * 2 + 5)
+            gc->ui.menuRowCost[free_row] = offer_scale * (type3_count * 2 + 5)
                                          * (25 + gc->rng.next_int() % 3);
         if (offer_type == 7)
-            gc->menuRowCost[free_row] = offer_scale * (type267_count * 2 + 5)
+            gc->ui.menuRowCost[free_row] = offer_scale * (type267_count * 2 + 5)
                                          * (18 + gc->rng.next_int() % 3);
         if (offer_type == 8)
-            gc->menuRowCost[free_row] = offer_scale * (type267_count * 2 + 5)
+            gc->ui.menuRowCost[free_row] = offer_scale * (type267_count * 2 + 5)
                                          * (10 + gc->rng.next_int() % 3);
         if (offer_type >= 9 && offer_type <= 12)
-            gc->menuRowCost[free_row] = 3 + std::abs(gc->rng.next_int() % 8);
+            gc->ui.menuRowCost[free_row] = 3 + std::abs(gc->rng.next_int() % 8);
         if (offer_type == 13)
-            gc->menuRowCost[free_row] =
+            gc->ui.menuRowCost[free_row] =
                 (13324 + std::abs(gc->rng.next_int() % 5000)) * offer_scale;
         if (offer_type == 14) {
             if (gc->economy.loanBalance > 40000)
-                gc->menuRowCost[free_row] = gc->economy.loanBalance
+                gc->ui.menuRowCost[free_row] = gc->economy.loanBalance
                     * (75 + std::abs(gc->rng.next_int() % 15)) / 100;
             else
-                gc->menuRowType[free_row] = 0;
+                gc->ui.menuRowType[free_row] = 0;
         }
         if (offer_type != 0) {
             int effect_code = 0;
@@ -207,26 +207,26 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
                 (int16_t)(gc->scenario.offerEffectNextCount[effect_index]
                           + gc_byteToUnsignedInt(gc, gc->scenario.offerEffectSchedule[effect_index][1]));
             if (effect_code == 1) {
-                gc->menuRowEra[free_row] =
+                gc->ui.menuRowEra[free_row] =
                     (int8_t)(30 + std::abs(gc->rng.next_int() % 50));
-                gc->menuRowRevenue[free_row] =
-                    gc->menuRowCost[free_row] * gc->menuRowEra[free_row] / 100;
+                gc->ui.menuRowRevenue[free_row] =
+                    gc->ui.menuRowCost[free_row] * gc->ui.menuRowEra[free_row] / 100;
             }
             if (effect_code == 2)
-                gc->menuRowRevenue[free_row] =
+                gc->ui.menuRowRevenue[free_row] =
                     5000 * (6 + std::abs(gc->rng.next_int() % 17));
             if (effect_code == 3)
-                gc->menuRowRevenue[free_row] =
+                gc->ui.menuRowRevenue[free_row] =
                     20000 * (3 + std::abs(gc->rng.next_int() % 3));
             if (effect_code >= 5 && effect_code <= 10)
-                gc->menuRowEra[free_row] =
+                gc->ui.menuRowEra[free_row] =
                     (int8_t)(25 + std::abs(gc->rng.next_int() % 45));
             if (effect_code == 11)
-                gc->menuRowEra[free_row] =
+                gc->ui.menuRowEra[free_row] =
                     (int8_t)(15 + std::abs(gc->rng.next_int() % 30));
-            gc->menuRowAltType[free_row] = (int8_t)effect_code;
+            gc->ui.menuRowAltType[free_row] = (int8_t)effect_code;
         }
-        if (gc->menuRowType[free_row] != 0) {
+        if (gc->ui.menuRowType[free_row] != 0) {
             gc->ready = false;
             gc->transitionCode = 40;
             gc->scenario.offerRowIndex = (int8_t)free_row;

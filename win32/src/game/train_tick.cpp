@@ -187,8 +187,8 @@ void gc_loadTrainAtServiceVehicle(GameCanvas *gc, int32_t car,
 // void recordDeliveredResource(int,int)
 void gc_recordDeliveredResource(GameCanvas *gc, int32_t resource, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
-        if (gc->menuRowType[row] == 3 + resource)
-            gc->menuRowValue[row] += amount;
+        if (gc->ui.menuRowType[row] == 3 + resource)
+            gc->ui.menuRowValue[row] += amount;
     }
     switch (resource) {
         case 1: gc->scenario.milestoneThreshold1 += amount; break;
@@ -202,7 +202,7 @@ void gc_recordDeliveredResource(GameCanvas *gc, int32_t resource, int32_t amount
 // void recordTrainRevenue(int)
 void gc_recordTrainRevenue(GameCanvas *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
-        if (gc->menuRowType[row] == 1) gc->menuRowValue[row] += amount;
+        if (gc->ui.menuRowType[row] == 1) gc->ui.menuRowValue[row] += amount;
     }
     gc->economy.lifetimeTrainRevenue += amount;
     gc->economy.trainRevenueScore += amount / 73;

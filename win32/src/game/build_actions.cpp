@@ -10,7 +10,7 @@ void gc_enterOutOfMoneyState(GameCanvas *gc) {
 
 void gc_incrementRowValueType13(GameCanvas *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (gc->menuRowType[row] == 13) gc->menuRowValue[row] += amount;
+        if (gc->ui.menuRowType[row] == 13) gc->ui.menuRowValue[row] += amount;
 }
 
 bool gc_isAnyTrainCarAt(GameCanvas *gc, int32_t car, int32_t x, int32_t y) {
@@ -467,7 +467,7 @@ void gc_setTrackOwnerCode(GameCanvas *gc, int32_t owner) {
 void gc_rebuildMenuTypeIndexes(GameCanvas *gc) {
     gc->menuRowEnabledCount = 0;
     for (int row = 0; row < 5; ++row) {
-        if (gc->menuRowType[row] == 0) continue;
+        if (gc->ui.menuRowType[row] == 0) continue;
         gc->enabledMenuRowIndexes[gc->menuRowEnabledCount++] = (int8_t)row;
     }
 }
@@ -697,27 +697,27 @@ int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t x, int32_t y,
 
 void gc_incrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
-        if (car_type == 6 && gc->menuRowType[row] == 9)
-            ++gc->menuRowValue[row];
-        if (car_type == 4 && gc->menuRowType[row] == 10)
-            ++gc->menuRowValue[row];
-        if (car_type == 3 && gc->menuRowType[row] == 11)
-            ++gc->menuRowValue[row];
-        if (car_type == 2 && gc->menuRowType[row] == 12)
-            ++gc->menuRowValue[row];
+        if (car_type == 6 && gc->ui.menuRowType[row] == 9)
+            ++gc->ui.menuRowValue[row];
+        if (car_type == 4 && gc->ui.menuRowType[row] == 10)
+            ++gc->ui.menuRowValue[row];
+        if (car_type == 3 && gc->ui.menuRowType[row] == 11)
+            ++gc->ui.menuRowValue[row];
+        if (car_type == 2 && gc->ui.menuRowType[row] == 12)
+            ++gc->ui.menuRowValue[row];
     }
 }
 
 void gc_decrementCargoOptionCount(GameCanvas *gc, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
-        if ((car_type == 7 || car_type == 6) && gc->menuRowType[row] == 9)
-            --gc->menuRowValue[row];
-        if ((car_type == 5 || car_type == 4) && gc->menuRowType[row] == 10)
-            --gc->menuRowValue[row];
-        if (car_type == 3 && gc->menuRowType[row] == 11)
-            --gc->menuRowValue[row];
-        if (car_type == 2 && gc->menuRowType[row] == 12)
-            --gc->menuRowValue[row];
+        if ((car_type == 7 || car_type == 6) && gc->ui.menuRowType[row] == 9)
+            --gc->ui.menuRowValue[row];
+        if ((car_type == 5 || car_type == 4) && gc->ui.menuRowType[row] == 10)
+            --gc->ui.menuRowValue[row];
+        if (car_type == 3 && gc->ui.menuRowType[row] == 11)
+            --gc->ui.menuRowValue[row];
+        if (car_type == 2 && gc->ui.menuRowType[row] == 12)
+            --gc->ui.menuRowValue[row];
     }
 }
 
@@ -729,7 +729,7 @@ void gc_decrementTrainCargoOptionCounts(GameCanvas *gc, int32_t car) {
 
 void gc_incrementRowValueType14(GameCanvas *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (gc->menuRowType[row] == 14) gc->menuRowValue[row] += amount;
+        if (gc->ui.menuRowType[row] == 14) gc->ui.menuRowValue[row] += amount;
 }
 
 bool gc_buyTrainAtCursor(GameCanvas *gc) {

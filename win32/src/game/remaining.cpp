@@ -135,14 +135,14 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
 
 int8_t gc_computeMenuRowDisplayValue(GameCanvas *gc, int32_t row) {
     int value;
-    if (gc->menuRowType[row] == 1) {
-        value = 100 * gc->menuRowValue[row] / gc->menuRowCost[row];
-    } else if (gc->menuRowType[row] == 2) {
+    if (gc->ui.menuRowType[row] == 1) {
+        value = 100 * gc->ui.menuRowValue[row] / gc->ui.menuRowCost[row];
+    } else if (gc->ui.menuRowType[row] == 2) {
         value = gc->economy.money > 0
-                ? 100 * gc->economy.money / gc->menuRowCost[row]
-                : 100 * gc->menuRowCost[row] / gc->economy.money;
-    } else if (gc->menuRowType[row] >= 4 && gc->menuRowType[row] <= 14) {
-        value = 100 * gc->menuRowValue[row] / gc->menuRowCost[row];
+                ? 100 * gc->economy.money / gc->ui.menuRowCost[row]
+                : 100 * gc->ui.menuRowCost[row] / gc->economy.money;
+    } else if (gc->ui.menuRowType[row] >= 4 && gc->ui.menuRowType[row] <= 14) {
+        value = 100 * gc->ui.menuRowValue[row] / gc->ui.menuRowCost[row];
     } else {
         return 0;
     }

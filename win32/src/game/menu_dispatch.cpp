@@ -261,10 +261,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 40:
             switch (n2) {
                 case 1:
-                    gc->pendingTransitionCode = gc->menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                    gc->pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
                     gc->scenario.duplicateRowState = 2; break;
                 case 2:
-                    gc->pendingTransitionCode = gc->menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                    gc->pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
                     gc->scenario.duplicateRowState = 2; break;
             }
             gc_setState(gc, +GameState::Playing); break;
@@ -278,11 +278,11 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 60:
             if (n2 % 2 == 1) {
                 gc->scenario.offerRowIndex = gc->enabledMenuRowIndexes[n2 / 2];
-                gc->pendingTransitionCode = gc->menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                gc->pendingTransitionCode = gc->ui.menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
             }
             if (n2 % 2 == 0) {
                 gc->scenario.offerRowIndex = gc->enabledMenuRowIndexes[(n2 - 1) / 2];
-                gc->pendingTransitionCode = gc->menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                gc->pendingTransitionCode = gc->ui.menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
             }
             gc->scenario.duplicateRowState = 1;
             gc_setState(gc, +GameState::Playing); break;

@@ -10,6 +10,7 @@
 #include "build_controller.h"
 #include "assets.h"
 #include "renderer.h"
+#include "ui_controller.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -175,18 +176,6 @@ typedef struct GameCanvas {
     int32_t cityStationY;
     int32_t industryStationX;
     int32_t industryTileY;
-    std::array<int8_t, 6> menuRowType{};
-    std::array<int8_t, 6> placeTrainDay{};
-    std::array<int8_t, 6> menuRowParamA{};
-    std::array<int8_t, 6> placeTrainMonth{};
-    std::array<int8_t, 6> menuRowParamB{};
-    std::array<int8_t, 6> placeTrainYear{};
-    std::array<int8_t, 6> menuRowParamC{};
-    std::array<int32_t, 6> menuRowCost{};
-    std::array<int32_t, 6> menuRowValue{};
-    std::array<int8_t, 6> menuRowAltType{};
-    std::array<int8_t, 6> menuRowEra{};
-    std::array<int32_t, 6> menuRowRevenue{};
     bool flagsB;
     int32_t savedLegacyMetricBq;
     int32_t menuRowEnabledCount;
@@ -206,6 +195,7 @@ typedef struct GameCanvas {
     BuildController build;
     Assets assets;
     Renderer renderer;
+    UiController ui;
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;
