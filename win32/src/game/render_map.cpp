@@ -4,72 +4,91 @@
 #include "game_internal.h"
 #include <vector>
 
-void game_renderMap(Game *game, Surface *g) {
-    Surface *bb = game->renderer.backbuffer_surface;
-    int n, n2, n3, n4, n5, n6, n7;
-    int n9 = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.mapHalfWidth;
-    int n10 = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.mapHalfWidth;
-    n9 /= 32;
-    n10 /= 32;
-    if (game->renderer.viewportCenterX != game->renderer.lastViewportCenterX || game->renderer.viewportCenterY != game->renderer.viewportCenterYCached) {
-        midp_set_clip(bb, 0, 15, canvasWidth, gameplayViewportHeight);
-        midp_set_color(bb, 0);
-        midp_fill_rect(bb, 0, 15, canvasWidth, gameplayViewportHeight);
-        game->renderer.visibleTrainCount = 0;
-        game->renderer.viewportX0 = 2 * game->world.mapWidth;
-        game->renderer.viewportY0 = 2 * game->world.mapHeight;
-        game->renderer.viewportX1 = -game->world.mapWidth;
-        game->renderer.viewportY1 = -game->world.mapWidth;
-        for (int n8 = 0; n8 < game->assets.numActiveTileAnimations; ++n8) {
-            n7 = n9 + game->assets.tileOffsetX[n8];
-            int n11 = n10 + game->assets.tileOffsetY[n8];
-            if (n7 >= 0 && n7 < game->world.mapWidth && n11 >= 0 && n11 < game->world.mapHeight) {
-                n6 = unsignedByte(game->world.tileMap[n7][n11]);
-                if (n6 >= 128) n6 -= 128;
-                if (!((n6 != 0 && n6 <= 28) || (n6 >= 77 && n6 <= 86))) {
-                    n5 = n11 * 16 + n7 * 16 + 16 - game->renderer.viewportCenterX;
-                    n4 = game->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n7][n11] + 15;
-                    if (game->world.tileElevation[n7][n11] > -1) {
-                        if ((n6 >= 42 && n6 <= 48) || (n6 >= 70 && n6 <= 76))
-                            midp_draw_image(bb, game->assets.tile_sprites[game->assets.tileSpriteIndex[n6]].get(), n5, n4, 33);
-                        else
-                            midp_draw_image(bb, game->assets.tile_sprites[game->assets.tileSpriteIndex[1]].get(), n5, n4, 33);
-                    } else {
-                        midp_draw_image(bb, game->assets.tile_sprites[game->assets.tileSpriteIndex[2]].get(), n5, n4, 33);
-                    }
-                }
-                if (n6 >= 3 && n6 <= 28) {
-                    n5 = n11 * 16 + n7 * 16 + 16 - game->renderer.viewportCenterX;
-                    n4 = game->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n7][n11] + 15;
-                    midp_draw_image(bb, game->assets.tile_sprites[game->assets.tileSpriteIndex[n6]].get(), n5, n4 + game->assets.tileSpriteYOffsetByCode[n6 - 3], 33);
-                }
-                if (n6 >= 77 && n6 <= 80) {
-                    n5 = n11 * 16 + n7 * 16 + 16 - game->renderer.viewportCenterX;
-                    n4 = game->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n7][n11] + 15;
-                    midp_draw_image(bb, game->assets.tile_sprites[game->assets.tileSpriteIndex[n6]].get(), n5, n4 + game->assets.tileSpriteYOffsetByCode[n6 - 56 - 3], 33);
-                }
-                if (n6 >= 80 && n6 <= 86) {
-                    n5 = n11 * 16 + n7 * 16 + 16 - game->renderer.viewportCenterX;
-                    n4 = game->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n7][n11] + 15;
-                    n3 = 0;
-                    switch (n6) { case 84: n3 = 4; break; case 86: n3 = 4; break; }
-                    midp_draw_image(bb, game->assets.tile_sprites[game->assets.tileSpriteIndex[n6]].get(), n5, n4 + n3, 33);
+namespace {
+
+struct MapOrigin {
+    int x;
+    int y;
+};
+
+MapOrigin getMapOrigin(const Game *game) {
+    int x = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY
+        + 16 + 2 * game->world.mapHalfWidth;
+    int y = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY
+        - 16 - 2 * game->world.mapHalfWidth;
+    return {x / 32, y / 32};
+}
+
+void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
+    if (game->renderer.viewportCenterX == game->renderer.lastViewportCenterX
+        && game->renderer.viewportCenterY == game->renderer.viewportCenterYCached)
+        return;
+
+    Surface *backbuffer = game->renderer.backbuffer_surface;
+    midp_set_clip(backbuffer, 0, 15, canvasWidth, gameplayViewportHeight);
+    midp_set_color(backbuffer, 0);
+    midp_fill_rect(backbuffer, 0, 15, canvasWidth, gameplayViewportHeight);
+    game->renderer.visibleTrainCount = 0;
+    game->renderer.viewportX0 = 2 * game->world.mapWidth;
+    game->renderer.viewportY0 = 2 * game->world.mapHeight;
+    game->renderer.viewportX1 = -game->world.mapWidth;
+    game->renderer.viewportY1 = -game->world.mapWidth;
+    for (int drawIndex = 0; drawIndex < game->assets.numActiveTileAnimations; ++drawIndex) {
+        int mapX = origin.x + game->assets.tileOffsetX[drawIndex];
+        int mapY = origin.y + game->assets.tileOffsetY[drawIndex];
+        if (mapX >= 0 && mapX < game->world.mapWidth && mapY >= 0 && mapY < game->world.mapHeight) {
+            int tileCode = unsignedByte(game->world.tileMap[mapX][mapY]);
+            if (tileCode >= 128) tileCode -= 128;
+            int drawX = mapY * 16 + mapX * 16 + 16 - game->renderer.viewportCenterX;
+            int drawY = game->world.mapHalfWidth - mapX * 8 + mapY * 8 + 16
+                - game->renderer.viewportCenterY - 4 * game->world.tileElevation[mapX][mapY] + 15;
+            if (!((tileCode != 0 && tileCode <= 28) || (tileCode >= 77 && tileCode <= 86))) {
+                if (game->world.tileElevation[mapX][mapY] > -1) {
+                    if ((tileCode >= 42 && tileCode <= 48) || (tileCode >= 70 && tileCode <= 76))
+                        midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(), drawX, drawY, 33);
+                    else
+                        midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[1]].get(), drawX, drawY, 33);
+                } else {
+                    midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[2]].get(), drawX, drawY, 33);
                 }
             }
-            if (n7 > game->renderer.viewportX1) game->renderer.viewportX1 = n7;
-            if (n11 > game->renderer.viewportY1) game->renderer.viewportY1 = n11;
-            if (n7 < game->renderer.viewportX0) game->renderer.viewportX0 = n7;
-            if (n11 >= game->renderer.viewportY0) continue;
-            game->renderer.viewportY0 = n11;
+            if (tileCode >= 3 && tileCode <= 28) {
+                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(),
+                                drawX, drawY + game->assets.tileSpriteYOffsetByCode[tileCode - 3], 33);
+            }
+            if (tileCode >= 77 && tileCode <= 80) {
+                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(),
+                                drawX, drawY + game->assets.tileSpriteYOffsetByCode[tileCode - 56 - 3], 33);
+            }
+            if (tileCode >= 80 && tileCode <= 86) {
+                int yOffset = 0;
+                switch (tileCode) { case 84: yOffset = 4; break; case 86: yOffset = 4; break; }
+                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(),
+                                drawX, drawY + yOffset, 33);
+            }
         }
-        if (game->renderer.viewportX0 < 0) game->renderer.viewportX0 = 0;
-        if (game->renderer.viewportY0 < 0) game->renderer.viewportY0 = 0;
-        if (game->renderer.viewportX1 >= game->world.mapWidth) game->renderer.viewportX1 = game->world.mapWidth - 1;
-        if (game->renderer.viewportY1 >= game->world.mapHeight) game->renderer.viewportY1 = game->world.mapHeight - 1;
-        game->renderer.lastViewportCenterX = game->renderer.viewportCenterX;
-        game->renderer.viewportCenterYCached = game->renderer.viewportCenterY;
-        midp_set_clip(bb, 0, 0, canvasWidth, canvasHeight);
+        if (mapX > game->renderer.viewportX1) game->renderer.viewportX1 = mapX;
+        if (mapY > game->renderer.viewportY1) game->renderer.viewportY1 = mapY;
+        if (mapX < game->renderer.viewportX0) game->renderer.viewportX0 = mapX;
+        if (mapY < game->renderer.viewportY0) game->renderer.viewportY0 = mapY;
     }
+    if (game->renderer.viewportX0 < 0) game->renderer.viewportX0 = 0;
+    if (game->renderer.viewportY0 < 0) game->renderer.viewportY0 = 0;
+    if (game->renderer.viewportX1 >= game->world.mapWidth) game->renderer.viewportX1 = game->world.mapWidth - 1;
+    if (game->renderer.viewportY1 >= game->world.mapHeight) game->renderer.viewportY1 = game->world.mapHeight - 1;
+    game->renderer.lastViewportCenterX = game->renderer.viewportCenterX;
+    game->renderer.viewportCenterYCached = game->renderer.viewportCenterY;
+    midp_set_clip(backbuffer, 0, 0, canvasWidth, canvasHeight);
+}
+
+} // namespace
+
+void game_renderMap(Game *game, Surface *g) {
+    int n, n2, n3, n4, n5, n6;
+    MapOrigin origin = getMapOrigin(game);
+    int n9 = origin.x;
+    int n10 = origin.y;
+    redrawStaticMapIfNeeded(game, origin);
     game_paintMain(game, g);
     midp_draw_image(g, game->renderer.backbuffer.get(), 0, 0, 20);
     midp_set_clip(g, 0, 15, canvasWidth, gameplayViewportHeight);
