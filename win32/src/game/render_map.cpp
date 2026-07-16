@@ -32,29 +32,29 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
                     n4 = gc->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n7][n11] + 15;
                     if (gc->world.tileElevation[n7][n11] > -1) {
                         if ((n6 >= 42 && n6 <= 48) || (n6 >= 70 && n6 <= 76))
-                            midp_draw_image(bb, gc->tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4, 33);
+                            midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4, 33);
                         else
-                            midp_draw_image(bb, gc->tile_sprites[gc->assets.tileSpriteIndex[1]].get(), n5, n4, 33);
+                            midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[1]].get(), n5, n4, 33);
                     } else {
-                        midp_draw_image(bb, gc->tile_sprites[gc->assets.tileSpriteIndex[2]].get(), n5, n4, 33);
+                        midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[2]].get(), n5, n4, 33);
                     }
                 }
                 if (n6 >= 3 && n6 <= 28) {
                     n5 = n11 * 16 + n7 * 16 + 16 - gc->viewportCenterX;
                     n4 = gc->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n7][n11] + 15;
-                    midp_draw_image(bb, gc->tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + gc->assets.tileSpriteYOffsetByCode[n6 - 3], 33);
+                    midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + gc->assets.tileSpriteYOffsetByCode[n6 - 3], 33);
                 }
                 if (n6 >= 77 && n6 <= 80) {
                     n5 = n11 * 16 + n7 * 16 + 16 - gc->viewportCenterX;
                     n4 = gc->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n7][n11] + 15;
-                    midp_draw_image(bb, gc->tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + gc->assets.tileSpriteYOffsetByCode[n6 - 56 - 3], 33);
+                    midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + gc->assets.tileSpriteYOffsetByCode[n6 - 56 - 3], 33);
                 }
                 if (n6 >= 80 && n6 <= 86) {
                     n5 = n11 * 16 + n7 * 16 + 16 - gc->viewportCenterX;
                     n4 = gc->world.mapHalfWidth - n7 * 8 + n11 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n7][n11] + 15;
                     n3 = 0;
                     switch (n6) { case 84: n3 = 4; break; case 86: n3 = 4; break; }
-                    midp_draw_image(bb, gc->tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + n3, 33);
+                    midp_draw_image(bb, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[n6]].get(), n5, n4 + n3, 33);
                 }
             }
             if (n7 > gc->viewportX1) gc->viewportX1 = n7;
@@ -104,18 +104,18 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
             n12 = gc->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - gc->viewportCenterY - 4 * gc->world.tileElevation[n5][n4] + 15;
             if (!gcs_animationsDisabled) {
                 if (n2 == 54 || n2 == 55)
-                    midp_draw_image(g, gc->tile_sprites[gc->assets.tileSpriteIndex[53]].get(), n, n12, 33);
+                    midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[53]].get(), n, n12, 33);
                 if (gc->world.phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
                     int8_t *row = gc->world.tileMap[n5].data();
                     row[n4] = (int8_t)(row[n4] + 1);
                     if (gc->world.tileMap[n5][n4] == 69) gc->world.tileMap[n5][n4] = 65;
                 }
-                if (n2 != 55) midp_draw_image(g, gc->tile_sprites[gc->assets.tileSpriteIndex[n2]].get(), n, n12, 33);
-                else midp_draw_image(g, gc->tile_sprites[gc->assets.tileSpriteIndex[243 + gc->timerC2]].get(), n, n12, 33);
-                if (n2 == 50) midp_draw_image(g, gc->tile_sprites[gc->assets.tileSpriteIndex[240 + gc->timerA2]].get(), n + 12, n12 - 28, 33);
-                if (n2 == 64) midp_draw_image(g, gc->tile_sprites[gc->assets.tileSpriteIndex[246 + gc->timerB2]].get(), n + 3, n12 - 39, 33);
+                if (n2 != 55) midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[n2]].get(), n, n12, 33);
+                else midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[243 + gc->timerC2]].get(), n, n12, 33);
+                if (n2 == 50) midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[240 + gc->timerA2]].get(), n + 12, n12 - 28, 33);
+                if (n2 == 64) midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[246 + gc->timerB2]].get(), n + 3, n12 - 39, 33);
             } else {
-                midp_draw_image(g, gc->tile_sprites[gc->assets.tileSpriteIndex[41]].get(), n, n12, 33);
+                midp_draw_image(g, gc->assets.tile_sprites[gc->assets.tileSpriteIndex[41]].get(), n, n12, 33);
             }
         }
         if (visible_train_tiles[(n5 - gc->viewportX0) * visible_height +
@@ -135,7 +135,7 @@ void gc_renderMap(GameCanvas *gc, Surface *g) {
             n14 = gc->world.tileQueue[i][0];
         }
         if (n14 <= 0) continue;
-        midp_draw_image(g, gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
+        midp_draw_image(g, gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
     }
     if (!gcs_selectionHidden) {
         for (n6 = 0; n6 < gc->assets.numActiveTileAnimations; ++n6) {

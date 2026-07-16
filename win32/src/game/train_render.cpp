@@ -6,7 +6,7 @@
 static void draw_train_image(GameCanvas *gc, Surface *graphics,
                              int sprite_code, int x, int y) {
     int sprite_index = gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[sprite_code]);
-    midp_draw_image(graphics, gc->tile_sprites[sprite_index].get(), x, y, 33);
+    midp_draw_image(graphics, gc->assets.tile_sprites[sprite_index].get(), x, y, 33);
 }
 
 void gc_drawSpriteSingle(GameCanvas *gc, Surface *graphics,

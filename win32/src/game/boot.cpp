@@ -53,34 +53,34 @@ void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {
 std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
     std::vector<int8_t> png_bytes;
     int png_size = 0;
-    int image_format = gc->sprite_stream.read_byte();
+    int image_format = gc->assets.sprite_stream.read_byte();
     if (image_format == 2) {
-        png_size = read_u16_be(gc->sprite_stream);
+        png_size = read_u16_be(gc->assets.sprite_stream);
         png_bytes.resize(static_cast<std::size_t>(png_size));
         png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
         for (int index = 4; index < png_size; ++index)
-            png_bytes[index] = (int8_t)gc->sprite_stream.read_byte();
+            png_bytes[index] = (int8_t)gc->assets.sprite_stream.read_byte();
     }
     if (image_format == 1) {
-        int image_data_size = read_u16_be(gc->sprite_stream);
-        int palette_byte_count = gc->sprite_stream.read_byte() * 3;
-        int transparency_count = gc->sprite_stream.read_byte();
+        int image_data_size = read_u16_be(gc->assets.sprite_stream);
+        int palette_byte_count = gc->assets.sprite_stream.read_byte() * 3;
+        int transparency_count = gc->assets.sprite_stream.read_byte();
         png_size = image_data_size + palette_byte_count + 69 +
                    transparency_count * 13;
         png_bytes.resize(static_cast<std::size_t>(png_size));
         png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
         png_bytes[4] = 13; png_bytes[5] = 10; png_bytes[6] = 26; png_bytes[7] = 10;
         png_bytes[11] = 13; png_bytes[12] = 73; png_bytes[13] = 72; png_bytes[14] = 68; png_bytes[15] = 82;
-        png_bytes[18] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[19] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[22] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[23] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[24] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[18] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[19] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[22] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[23] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[24] = (int8_t)gc->assets.sprite_stream.read_byte();
         png_bytes[25] = 3;
-        png_bytes[29] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[30] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[31] = (int8_t)gc->sprite_stream.read_byte();
-        png_bytes[32] = (int8_t)gc->sprite_stream.read_byte();
+        png_bytes[29] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[30] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[31] = (int8_t)gc->assets.sprite_stream.read_byte();
+        png_bytes[32] = (int8_t)gc->assets.sprite_stream.read_byte();
         png_bytes[35] = (int8_t)(palette_byte_count >> 8 & 0xFF);
         png_bytes[36] = (int8_t)(palette_byte_count & 0xFF);
         png_bytes[37] = 80; png_bytes[38] = 76; png_bytes[39] = 84; png_bytes[40] = 69;
@@ -88,7 +88,7 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
         for (output_index = 0; output_index < palette_byte_count + 4;
              ++output_index) {
             png_bytes[41 + output_index] =
-                (int8_t)gc->sprite_stream.read_byte();
+                (int8_t)gc->assets.sprite_stream.read_byte();
         }
         output_index = 41 + palette_byte_count + 4;
         if (transparency_count == 1) {
@@ -107,7 +107,7 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(GameCanvas *gc) {
         png_bytes[output_index++] = (int8_t)(image_data_size & 0xFF);
         png_bytes[output_index++] = 73; png_bytes[output_index++] = 68; png_bytes[output_index++] = 65; png_bytes[output_index++] = 84;
         for (int index = 0; index < image_data_size + 4; ++index)
-            png_bytes[output_index++] = (int8_t)gc->sprite_stream.read_byte();
+            png_bytes[output_index++] = (int8_t)gc->assets.sprite_stream.read_byte();
         output_index += 4;
         png_bytes[output_index++] = 73; png_bytes[output_index++] = 69; png_bytes[output_index++] = 78; png_bytes[output_index++] = 68;
         png_bytes[output_index++] = -82; png_bytes[output_index++] = 66; png_bytes[output_index++] = 96; png_bytes[output_index++] = -126;
@@ -250,7 +250,7 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
 // public void setState(int n)
 void gc_setState(GameCanvas *gc, int32_t n) {
     gc->hx = gc->gameState;
-    if (!gc->ready) gc->cycle_flag = NULL;
+    if (!gc->ready) gc->assets.cycle_flag = NULL;
     gc->snapshotLoadedFlag = false;
     gc->menuDirty = true;
     switch (n) {
@@ -261,7 +261,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             /* fall through */
         case +GameState::BootSplash1:
         case +GameState::BootSplash2:
-            gc->cycle_flag = gc_decodePngFromSpriteStream(gc);
+            gc->assets.cycle_flag = gc_decodePngFromSpriteStream(gc);
             gc->loadingStartTime = midp_current_time_millis();
             gc->loadingTimeout = false;
             gc->loadingTimer = 0;
@@ -285,7 +285,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             break;
         }
         case +GameState::LoadingResources: {
-            gc->spriteLoadCounter = 0;
+            gc->assets.spriteLoadCounter = 0;
             ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
                 gc->scenario.scenarioResourceCount = in.read_byte();
@@ -295,8 +295,8 @@ void gc_setState(GameCanvas *gc, int32_t n) {
                 }
             }
             gc->scenario.scenarioResourceCount -= 8;
-            gc->tile_sprites.clear();
-            gc->tile_sprites.resize(
+            gc->assets.tile_sprites.clear();
+            gc->assets.tile_sprites.resize(
                 static_cast<std::size_t>(gc->scenario.scenarioResourceCount));
             gc->assets.tileSpriteIndex[68] = gc->assets.tileSpriteIndex[66];
             break;

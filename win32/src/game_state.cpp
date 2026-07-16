@@ -96,7 +96,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->scenario.duplicateRowState = 0;
     gc->scenario.highScoreUploadRequested = false;
     gc->scenario.routeSlotIndex = 0;
-    gc->spriteCycleCursor = 0;
+    gc->assets.spriteCycleCursor = 0;
     gc->snapshotLoadedFlag = false;
     gc->cH = false;
     gc->scenario.aiEnabled = false;

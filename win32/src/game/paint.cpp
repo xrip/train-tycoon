@@ -39,8 +39,8 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             int n3 = gcs_screenWidth / 2;
             int n4 = gcs_hs / 2;
-            int n5 = gc->cycle_flag->width() / 2;
-            int n6 = gc->cycle_flag->height();
+            int n5 = gc->assets.cycle_flag->width() / 2;
+            int n6 = gc->assets.cycle_flag->height();
             int n7 = n6 / 10 + 1;
             for (int i = 0; i < 10; ++i) {
                 int n8 = (n3 + n5 + 30) * (gc->loadingTimer - 5 * (i / 2)) / 10;
@@ -49,7 +49,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
                 int n9 = n3 - (n3 + n5 + 30 - n8);
                 if (i % 2 == 1) n9 = n3 + (n3 + n5 + 30 - n8);
                 midp_set_clip(g, n9 - n5, n4 - n6 / 2 + i * n7, n5 * 2, n7);
-                midp_draw_image(g, gc->cycle_flag.get(), n9, n4, 3);
+                midp_draw_image(g, gc->assets.cycle_flag.get(), n9, n4, 3);
             }
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
             break;
@@ -57,10 +57,10 @@ void gc_paint(GameCanvas *gc, Surface *g) {
         case +GameState::LoadingResources: {
             midp_set_color(g, 0xFFFFFF);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
+            midp_draw_image(g, gc->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
-            int n10 = gc->spriteLoadCounter * (gcs_screenWidth - 20) / (gc->scenario.scenarioResourceCount - 1);
+            int n10 = gc->assets.spriteLoadCounter * (gcs_screenWidth - 20) / (gc->scenario.scenarioResourceCount - 1);
             midp_set_color(g, RGB3(60, 105, 144));
             midp_fill_rect(g, 10, gcs_hs - 13, n10, 9);
             midp_set_color(g, RGB3(49, 64, 90));
@@ -71,8 +71,8 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             if (gc->ready) {
                 midp_set_color(g, 0xFFFFFF);
                 midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-                if (gc->cycle_flag != NULL)
-                    midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
+                if (gc->assets.cycle_flag != NULL)
+                    midp_draw_image(g, gc->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             }
             if (gc->transitionCode == 36) {
                 gc->gameState = +GameState::MapOverview;
@@ -206,7 +206,7 @@ void gc_update(GameCanvas *gc) {
             ++gc->loadingTimer;
             if (!gc->loadingTimeout) break;
             if (gc->gameState == +GameState::BootSplash1) {
-                for (int i = 0; i < 6; ++i) gc->font_images[i] = gc_decodePngFromSpriteStream(gc);
+                for (int i = 0; i < 6; ++i) gc->assets.font_images[i] = gc_decodePngFromSpriteStream(gc);
                 gc_setState(gc, +GameState::IntroReady);
                 break;
             }
@@ -221,14 +221,14 @@ void gc_update(GameCanvas *gc) {
             gc_setState(gc, +GameState::MenuOverlay);
             break;
         case +GameState::LoadingResources:
-            gc->tile_sprites[gc->spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
-            ++gc->spriteLoadCounter;
-            if (gc->spriteLoadCounter == gc->scenario.scenarioResourceCount / 2) {
+            gc->assets.tile_sprites[gc->assets.spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
+            ++gc->assets.spriteLoadCounter;
+            if (gc->assets.spriteLoadCounter == gc->scenario.scenarioResourceCount / 2) {
                 gc_loadMusic(gc);
                 if (gc->music_auto_start) { gc_playMusic(gc); gc->music_enabled = true; }
                 else gc->music_enabled = false;
             }
-            if (gc->spriteLoadCounter != gc->scenario.scenarioResourceCount) break;
+            if (gc->assets.spriteLoadCounter != gc->scenario.scenarioResourceCount) break;
             gc->ready = true;
             gc->transitionCode = 1;
             gc_setState(gc, +GameState::MenuOverlay);

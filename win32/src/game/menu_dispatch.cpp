@@ -303,20 +303,20 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             if (n2 == 1) gc->scenario.routeSlotIndex = (int8_t)(gc->scenario.routeSlotIndex + 1);
             if (gc->scenario.routeSlotIndex < 0) gc->scenario.routeSlotIndex = 9;
             if (gc->scenario.routeSlotIndex == 10) gc->scenario.routeSlotIndex = 0;
-            gc->spriteCycleCursor = gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex];
+            gc->assets.spriteCycleCursor = gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex];
             if (n2 == 2) {
-                gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor - 1);
-                if (gc->spriteCycleCursor < 0) gc->spriteCycleCursor = 95;
-                if (gc->spriteCycleCursor == 69) gc->spriteCycleCursor = 65;
-                if (gc->spriteCycleCursor == 39) gc->spriteCycleCursor = 17;
-                gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
+                gc->assets.spriteCycleCursor = (int8_t)(gc->assets.spriteCycleCursor - 1);
+                if (gc->assets.spriteCycleCursor < 0) gc->assets.spriteCycleCursor = 95;
+                if (gc->assets.spriteCycleCursor == 69) gc->assets.spriteCycleCursor = 65;
+                if (gc->assets.spriteCycleCursor == 39) gc->assets.spriteCycleCursor = 17;
+                gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex] = gc->assets.spriteCycleCursor;
             }
             if (n2 == 3) {
-                gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor + 1);
-                if (gc->spriteCycleCursor == 18) gc->spriteCycleCursor = 40;
-                if (gc->spriteCycleCursor == 66) gc->spriteCycleCursor = 70;
-                if (gc->spriteCycleCursor == 96) gc->spriteCycleCursor = 0;
-                gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
+                gc->assets.spriteCycleCursor = (int8_t)(gc->assets.spriteCycleCursor + 1);
+                if (gc->assets.spriteCycleCursor == 18) gc->assets.spriteCycleCursor = 40;
+                if (gc->assets.spriteCycleCursor == 66) gc->assets.spriteCycleCursor = 70;
+                if (gc->assets.spriteCycleCursor == 96) gc->assets.spriteCycleCursor = 0;
+                gc->scenario.playerNameCodes[gc->scenario.routeSlotIndex] = gc->assets.spriteCycleCursor;
             }
             if (n2 >= 0) break;
             gc_persistSnapshotMode0(gc);

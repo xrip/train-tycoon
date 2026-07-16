@@ -81,8 +81,6 @@ typedef struct GameCanvas {
     int32_t currentKey;
     bool ee;
     int32_t dp;
-    ResourceReader sprite_stream;
-    std::array<std::unique_ptr<Image>, 6> font_images;
     int32_t cursorScale;
     int32_t cursorDragY;
     int32_t cursorSelectY;
@@ -147,7 +145,6 @@ typedef struct GameCanvas {
     int8_t stationDirCursor;
     int8_t cityListIndex;
     int32_t pendingTransitionCode;
-    int8_t spriteCycleCursor;
     bool snapshotLoadedFlag;
     bool cH;
     int32_t screenParam;
@@ -225,11 +222,8 @@ typedef struct GameCanvas {
     JavaRandom rng;
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface;
-    std::vector<std::unique_ptr<Image>> tile_sprites;
-    std::unique_ptr<Image> cycle_flag;
     int64_t loadingStartTime;
     bool loadingTimeout;
-    int32_t spriteLoadCounter;
     int32_t transitionCode;
     bool ready;
     int32_t loadStep;

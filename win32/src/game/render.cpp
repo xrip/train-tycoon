@@ -23,7 +23,7 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
         }
         if (by == 0) { n3 += 6; continue; }
         if (by < 32) {
-            midp_draw_image(g, gc->font_images[(by - 1) / 16].get(), n3 - 5 * ((by - 1) % 16), n2, 20);
+            midp_draw_image(g, gc->assets.font_images[(by - 1) / 16].get(), n3 - 5 * ((by - 1) % 16), n2, 20);
             n3 += 6;
             continue;
         }
@@ -50,12 +50,12 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
             continue;
         }
         if (by < 70) {
-            midp_draw_image(g, gc->font_images[2 + (by - 40) / 16].get(), n3 - 5 * ((by - 40) % 16), n2, 20);
+            midp_draw_image(g, gc->assets.font_images[2 + (by - 40) / 16].get(), n3 - 5 * ((by - 40) % 16), n2, 20);
             n3 += 6;
             continue;
         }
         if (by >= 100) continue;
-        midp_draw_image(g, gc->font_images[4 + (by - 70) / 16].get(), n3 - 5 * ((by - 70) % 16), n2, 20);
+        midp_draw_image(g, gc->assets.font_images[4 + (by - 70) / 16].get(), n3 - 5 * ((by - 70) % 16), n2, 20);
         n3 += 6;
     }
     if (bl) {
@@ -69,16 +69,16 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
 Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
     if (n == 23) {
         if (n2 == 0 && gc->build.wagonType >= 0 && gc->build.wagonType < 3)
-            return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
+            return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
         if (n2 == 0 && gc->build.wagonType >= 3 && gc->build.wagonType < 6)
-            return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
+            return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
         if (n2 > 0) {
             switch (gc->build.wagonOptionSlots[n2 - 1]) {
                 case -1: return NULL;
-                case 0: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
-                case 1: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
-                case 2: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[172])].get();
-                case 3: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[182])].get();
+                case 0: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
+                case 1: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
+                case 2: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[172])].get();
+                case 3: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[182])].get();
             }
         }
     }
@@ -88,14 +88,14 @@ Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
         int n3 = gc->fleet.trainFlags[n4] & 0xF;
         switch (n3) {
             case -1: return NULL;
-            case 0: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
-            case 1: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
-            case 2: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
-            case 3: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
-            case 4: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[172])].get();
-            case 5: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[177])].get();
-            case 6: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[182])].get();
-            case 7: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[187])].get();
+            case 0: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[136])].get();
+            case 1: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[146])].get();
+            case 2: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[162])].get();
+            case 3: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[167])].get();
+            case 4: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[172])].get();
+            case 5: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[177])].get();
+            case 6: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[182])].get();
+            case 7: return gc->assets.tile_sprites[gc_byteToUnsignedInt(gc, gc->assets.tileSpriteIndex[187])].get();
         }
     }
     return NULL;
