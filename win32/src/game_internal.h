@@ -36,7 +36,7 @@ void game_rebuildTerrainTiles(Game *game, bool bl);
 void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl);
 void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
 void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
-void game_loadState25Setup(Game *game, int32_t n);
+void game_runMapGenerationStep(Game *game, int32_t mode);
 int8_t game_randomCityTile(Game *game);
 void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2);
 void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4);
@@ -202,7 +202,7 @@ void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2);
 void game_drawTextBox(Game *game, Surface* graphics, int32_t n, int32_t n2,
                     int32_t n3, int32_t n4, std::span<const int8_t> codes);
 void game_enterOutOfMoneyState(Game *game);
-void game_drawRectFill(Game *game, Surface* graphics, int32_t n, int32_t n2, int8_t by);
+void game_drawSelectedTrainLabel(Game *game, Surface* graphics, int32_t x, int32_t y, int8_t selectionIndex);
 void game_setCanvasSize(Game *game, int32_t n, int32_t n2);
 void game_paint(Game *game, Surface* graphics);
 void game_setState(Game *game, int32_t n);

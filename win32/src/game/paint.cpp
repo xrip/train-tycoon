@@ -399,10 +399,10 @@ void game_update(Game *game) {
             if (game->stateWorkStep == 3) {
                 game->ui.buildMenuItemIndex = 0;
                 game->ui.buildMenuMode = 0;
-                game_loadState25Setup(game, 0);
+                game_runMapGenerationStep(game, 0);
             }
             if (game->stateWorkStep <= 3) break;
-            game_loadState25Setup(game, 1);
+            game_runMapGenerationStep(game, 1);
             if (game->world.mapGenTilesDone != game->world.totalTilesToGenerate) break;
             game->world.mapGenTilesDone = 0;
             game_setState(game, GameState::Playing);

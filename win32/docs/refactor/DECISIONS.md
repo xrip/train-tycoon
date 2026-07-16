@@ -71,12 +71,9 @@ not enough. Record uncertain evidence here before a rename.
 
 ### Open name set
 
-- Methods: `gc_k`, `gc_u`.
-- Weak method groups: `dayResetP`, `dayResetAg`, `dayResetAd`,
-  `everyTwoTickZ`, and all `*Inlined` names.
-- Short state fields: `aJ`, `ar`, `at`, `bT`, `bx`, `ca`, `cB`, `ce`, `cH`,
-  `D`, `dc`, `dH`, `dI`, `dp`, `eD`, `ee`, `fR`, `gw`, and `hx`.
-  (`dk` and `j` were removed in OWN-02 as dead state.)
+The high-value method and state set is closed. No `*Inlined`, `gc_*`, unary
+`GameState`, or short top-level state name remains. Small local names in code
+that has not been changed are renamed only with their next focused work item.
 
 ### Recovered in RT-01
 
@@ -122,11 +119,9 @@ not enough. Record uncertain evidence here before a rename.
 
 ### Recovered in MODEL-01
 
-- `GameCanvas::gameState` values now have names in `game_constants.h` as
-  `enum class GameState : int32_t`. The field stays `int32_t` for save and
-  arithmetic safety; a unary `constexpr operator+(GameState)` yields the value
-  so read/write/case sites stay short (`+GameState::Playing`). Numbers are
-  unchanged. Names come from each state's behavior:
+- `Game::gameState` values have names in `game_constants.h` as the plain exact
+  value `enum GameState : int32_t`. No unary conversion operator is needed.
+  Numbers are unchanged. Names come from each state's behavior:
   - `BootSplash0..3` (0..3): startup splash steps; `BootSplash1` decodes fonts.
     States 2 and 3 are defined by the switches but unreached in the current
     boot path.
@@ -366,17 +361,14 @@ Game music rules use one small `MusicOutput` interface. The app owns WinMM
 through `WinMmMusicPlayer`; tests use `SilentMusicOutput` and need no device or
 `winmm` link. This is the only class split needed for music.
 
-## D-008: Save helpers over owned fixed arrays
+## D-008: Concrete save helpers over fixed arrays
 
-OWN-02 moved every fixed-size state array to `std::array`, which has no entry in
-the old array-length registry that `midp_arr_len` reads. To keep the save byte
-order exactly, each array save/load helper was split into a size-explicit
-`gc_saveOrLoad*Span(gc, data, len)` core plus a thin registry wrapper for
-still-raw arrays. Templated `std::array` overloads of the `*Inlined` names let
-the save codec `IO_*` macros resolve to the size-explicit path automatically, so
-no macro site changed. Constant tables use direct brace initializers instead of
-`midp_alloc_arr` plus `memcpy`. Uniform matrices use nested `std::array`; the one
-mixed-row table (`offerTypesByEffect`) uses `std::array<std::vector<int8_t>, N>`.
+Fixed-size game records are plain arrays with named count constants. The save
+codec has four supported walkers: bytes, shorts, ints, and byte grids. The
+`IO_*` macros pass the field pointer and its compile-time element count, so save
+order stays visible and exact without templates or an array-length registry.
+The mixed-row `offerTypesByEffect` table remains a fixed outer array of dynamic
+vectors because each row has a different run-time length.
 
 ## D-009: Row-owning Grid<T> for maps and matrices
 
@@ -392,10 +384,30 @@ gets a `Grid<int8_t>` matrix overload that walks rows, preserving byte order.
 
 OWN-04 removed the `midp_alloc_arr` / `midp_arr_len` / `GC_NEW` array-length
 registry. It existed only because raw C pointers do not carry a length like Java
-arrays. Now every game array is a `std::array`, `std::vector`, or `Grid<T>` that
-knows its own size, so lengths come from `.size()` and the registry is gone. The
-save codec keeps byte order through the size-explicit `*Span` cores and the
-`std::array` / `Grid` overloads.
+arrays. Now every fixed game array has a named compile-time count, and dynamic
+data uses `std::vector` or `Grid<T>`, so the registry is gone. The save codec
+keeps byte order through concrete pointer-and-count walkers and the byte-grid
+walker.
+
+## D-019: KISS cleanup after the C++ move
+
+The ownership move used standard-library form more widely than the game needs.
+`KISS-01` keeps the parts that state real rules and removes form that only adds
+syntax:
+
+- plain fixed arrays for fixed game records;
+- `std::vector` only for dynamic owned data;
+- `std::unique_ptr` only for one owned image or music output;
+- `Grid<T>` for map data that must keep `grid[x][y]` access;
+- `std::span` only at borrowed text and byte interfaces;
+- `std::optional` only for a dialog value that can be absent;
+- concrete save walkers instead of template overload sets;
+- a small public `game.h` and one private `game_internal.h`;
+- ordered file-local helpers for the simulation tick, map generation, overview
+  paint, static map redraw, and packed dialog byte reader.
+
+The locked save and pixel digests were added before these changes. No golden
+value changed.
 
 ## D-006: Plain native resources
 

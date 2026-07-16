@@ -127,32 +127,36 @@ void game_drawTextBox(Game *game, Surface *surface, int32_t x, int32_t y,
     game_renderFontString(game, surface, x + 4, y + 5, codes, false);
 }
 
-void game_drawRectFill(Game *game, Surface *g, int32_t n, int32_t n2, int8_t by) {
+void game_drawSelectedTrainLabel(Game *game, Surface *surface, int32_t x, int32_t y,
+                                 int8_t selectionIndex) {
     const auto engine_codes = std::span<const int8_t>(game->assets.spriteBitmapTable[
-        game->assets.spriteIndexTable[80 + (game->ui.trainSelectionIndex[by] >> 8 & 0xFF)]]);
+        game->assets.spriteIndexTable[80 + (game->ui.trainSelectionIndex[selectionIndex] >> 8 & 0xFF)]]);
     const auto wagon_codes = std::span<const int8_t>(game->assets.spriteBitmapTable[
-        game->assets.spriteIndexTable[86 + (game->ui.trainSelectionIndex[by] & 0xFF)]]);
+        game->assets.spriteIndexTable[86 + (game->ui.trainSelectionIndex[selectionIndex] & 0xFF)]]);
     std::vector<int8_t> train_codes;
     train_codes.reserve(wagon_codes.size() + engine_codes.size());
     train_codes.insert(train_codes.end(), wagon_codes.begin(), wagon_codes.end());
     train_codes.insert(train_codes.end(), engine_codes.begin(), engine_codes.end());
-    int n3 = 0;
+    int textWidth = 0;
     for (const int8_t code : train_codes) {
         if (code >= 32 && code <= 39) continue;
-        ++n3;
+        ++textWidth;
     }
-    midp_set_color(g, RGB3(255, 176, 98));
-    midp_fill_rect(g, n -= (n3 *= 6) / 2 + 3, n2 -= 5, n3 + 5, 11);
-    midp_set_color(g, RGB3(255, 210, 170));
-    midp_draw_rect(g, n, n2, n3 + 5, 11);
-    midp_set_color(g, RGB3(255, 130, 0));
-    midp_draw_rect(g, n, n2 + 11, n3 + 5, 0);
-    midp_draw_rect(g, n + n3 + 5, n2, 0, 11);
+    textWidth *= 6;
+    x -= textWidth / 2 + 3;
+    y -= 5;
+    midp_set_color(surface, RGB3(255, 176, 98));
+    midp_fill_rect(surface, x, y, textWidth + 5, 11);
+    midp_set_color(surface, RGB3(255, 210, 170));
+    midp_draw_rect(surface, x, y, textWidth + 5, 11);
+    midp_set_color(surface, RGB3(255, 130, 0));
+    midp_draw_rect(surface, x, y + 11, textWidth + 5, 0);
+    midp_draw_rect(surface, x + textWidth + 5, y, 0, 11);
     game->renderer.clipX = 0;
     game->renderer.clipY = 15;
     game->renderer.clipWidth = canvasWidth;
     game->renderer.clipHeight = gameplayViewportHeight;
-    game_renderFontString(game, g, n + 4, n2 + 3, train_codes, true);
+    game_renderFontString(game, surface, x + 4, y + 3, train_codes, true);
 }
 
 void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {

@@ -11,7 +11,7 @@ This project uses C++ as C with Classes:
 - classes own state and keep simple rules true;
 - structs hold plain data;
 - free functions hold small, pure operations;
-- normal `std::array`, `std::vector`, `std::span`, `std::string`,
+- plain fixed arrays, plus `std::vector`, `std::span`, `std::string`,
   `std::filesystem::path`, and `std::unique_ptr` are welcome when they make
   ownership or size clear;
 - a long standard namespace may have a clear alias in a `.cpp` file, such as
@@ -88,7 +88,7 @@ Exit: every Stage 0 check and digest is unchanged.
 4. `RT-04` - RAII record store with a selected save root.
 5. `RT-05` - `WinMmMusicPlayer` and a silent test music output.
 6. `OWN-01` - local arrays and text to standard containers.
-7. `OWN-02` - fixed state arrays and tables to `std::array`.
+7. `OWN-02` - fixed state arrays and tables with named compile-time counts.
 8. `OWN-03` - maps and other matrices to `Grid<T>` or nested containers.
 9. `OWN-04` - remove raw ownership and the array-length registry.
 

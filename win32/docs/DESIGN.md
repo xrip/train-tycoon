@@ -35,9 +35,9 @@ small helper such as `World::in_bounds`. Game rules are free functions in
 - **Save bytes**: `game/save.cpp` writes fields in the exact legacy order via the
   `IO_*` macros. Moving a field into a part changes the macro argument
   (`field` -> `owner.field`) but never the order.
-- **Tick order**: the per-frame simulation runs in `gc_simulationTick`
-  (`game/sim_tick.cpp`): frame timers, tile-fade queue, train updates, then the
-  day/month/year calendar cadence with its monthly and yearly hooks.
+- **Tick order**: the per-frame simulation runs in `game_simulationTick`
+  (`game/sim_tick.cpp`): animation timers, queued tile work, train updates, then
+  the day/month/year calendar cadence with its monthly and yearly hooks.
 - **Random order**: the 48-bit LCG (`JavaRandom`) is called in the same order as
   the original; map generation depends on it.
 - **Signed bytes / stable slot ids / draw order**: unchanged.
@@ -58,8 +58,8 @@ AddressSanitizer is run at stage exits with `/fsanitize=address` (add it to
 
 ## What is intentionally still on `Game`
 
-The top-level coordinator state (rng, era, gameState, frame/tick timers,
-dayFrameCounter, loading flags, cachedHeader*, music, and the one save-only carried
+The top-level coordinator state (rng, era, gameState, dayFrameCounter, loading
+flags, cachedHeader*, music, and the one save-only carried
 `savedLegacyMetricBq`). These are the aggregate's own frame/coordinator concerns,
 not a sub-part. See `docs/refactor/DECISIONS.md` and `STATUS.md` for the item
-history and the remaining cosmetic `gc_*` cleanup (CLEAN-01 leaf 2).
+history.

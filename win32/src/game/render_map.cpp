@@ -163,7 +163,7 @@ void game_renderMap(Game *game, Surface *g) {
                 if (game->ui.trainSelectionY[n3] != n5 || game->ui.trainSelectionX[n3] != n4) continue;
                 n2 = n4 * 16 + n5 * 16 + 16 - game->renderer.viewportCenterX;
                 n = game->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n5][n4] + 15;
-                game_drawRectFill(game, g, n2, n - 16, (int8_t)n3);
+                game_drawSelectedTrainLabel(game, g, n2, n - 16, (int8_t)n3);
             }
         }
     }

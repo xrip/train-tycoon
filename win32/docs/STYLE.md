@@ -12,10 +12,16 @@ This is C++20 in a C-with-Classes style.
 - Do not add template metaprogramming, CRTP, policy systems, deep class trees,
   event systems, or generic frameworks.
 
-Standard-library types are normal code. Use `std::array` for fixed storage,
-`std::vector` for dynamic owned storage, `std::span` for a view, `std::string`
-for text, `std::filesystem::path` for paths, and `std::unique_ptr` for one
-heap owner. Use `std::shared_ptr` only when ownership is truly shared.
+Standard-library types are tools, not a goal. Use a plain named C array for
+fixed game records, `std::vector` for dynamic owned storage, `std::span` for a
+real pointer-and-count view, `std::string` for text, `std::filesystem::path` for
+paths, and `std::unique_ptr` for one heap owner. Use `std::optional` only when
+absence is a real result. Use `std::shared_ptr` only when ownership is truly
+shared.
+
+Do not wrap fixed storage in a template only to gain `.size()`. Use a named
+count constant. Do not make a generic save helper when four concrete walkers
+state the supported byte forms more clearly.
 
 ## Names
 

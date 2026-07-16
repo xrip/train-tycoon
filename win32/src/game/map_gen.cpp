@@ -8,7 +8,7 @@
 static int nextRngInt(Game *game) { return game->rng.next_int(); }
 
 // Game::mapGenStage steps through the incremental generator in
-// game_loadState25Setup: init, raise then lower terrain, place patches, six
+// game_runMapGenerationStep: init, raise then lower terrain, place patches, six
 // terrain-feature passes, then scatter starting obstacles.
 namespace mapgen {
 inline constexpr int32_t STAGE_INIT = 0;
@@ -505,7 +505,7 @@ void generateOneMapStep(Game *game) {
 } // namespace
 
 // Set up the map generator (mode 0), or run one ordered generation step (mode 1).
-void game_loadState25Setup(Game *game, int32_t mode) {
+void game_runMapGenerationStep(Game *game, int32_t mode) {
     if (mode == 0) beginMapGeneration(game);
     if (mode == 1) generateOneMapStep(game);
 }

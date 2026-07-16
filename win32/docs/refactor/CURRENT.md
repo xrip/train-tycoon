@@ -2,60 +2,61 @@
 
 ## Item
 
-`CLEAN-01` - rename `GameCanvas` -> `Game`, remove the old shape. (Also lands the
-stage-3-exit "core rules no longer use `GameCanvas`" change, since rules then
-take the `Game` aggregate of parts.)
+`KISS-01` - remove needless C++ library form, dead state, weak names, and large
+mixed-purpose coordinators without changing game behavior.
 
-## Base
+## Base and checkpoints
 
-- Commit: scenario flags named/homed (`697da02`); STATUS updated (`90c2838`).
-- Branch: `master`
-- User-owned file: root `AGENTS.md` (tracked by the user; do not change it).
+- Base: `ce9e091` (`Add pointer edge scrolling`).
+- Behavior lock: `780f9f4`.
+- Public API and dead-state cleanup: `e3dda1e`.
+- Plain fixed game storage and concrete save walkers: `68507b8`.
+- Core name recovery: `34ba7a9`.
+- Ordered simulation, map generation, paint, map redraw, and packed-dialog
+  work: `f022c9f`, `d056f1d`, `ea5a3a3`, `c6c932c`, `c739969`.
+- Branch: `master`.
+- User-owned `.idea/` data is not part of this work.
 
-## State of the refactor (this is the big milestone)
+## Result
 
-All ten owned parts exist and every commit is behavior-identical with both full
-gates green and ASan clean:
+- `game.h` is the small application boundary. Shared core declarations are in
+  `game_internal.h`.
+- Dead host, timing, input, and helper state is gone.
+- Fixed game records use plain named arrays. `std::vector`, `std::unique_ptr`,
+  `Grid`, `std::span`, and `std::optional` stay only where size, ownership, a
+  borrowed text range, or a missing dialog value needs them.
+- Save work uses concrete byte, short, int, and grid walkers. Save field order
+  and bytes are fixed by tests.
+- `GameState` is a plain exact-value enum; no unary conversion helper remains.
+- The simulation tick and incremental map generator are ordered coordinators.
+  Static map redraw and overview paint are separate jobs. Packed dialog bytes
+  have names for their header, content items, selection bands, images, and draw
+  commands.
+- `savedLegacyMetricBq` stays because it is part of the old save form.
+- `game_syncHighScores` stays because live state-machine code calls it, even
+  though the native implementation is now a no-op.
 
-- `World`, `Pathfinder`, `Fleet`, `Economy`, `Scenario`, `BuildController`,
-  `Assets`, `Renderer`, `UiController`, `SaveCodec`.
+## Locked proof
 
-`GameCanvas` is now a thin aggregate: the ten parts plus the top-level
-coordinator state (rng, era, gameState, frame/tick timers, dayFrameCounter, loading
-flags, cachedHeader*, music, savedGameState, dayTickThreshold, graphColors).
-All obfuscated field names are recovered except `savedLegacyMetricBq`
-(save-only, carried metric). Ten dead write-only fields were removed.
+The full Debug test set locks:
 
-## Why CLEAN-01 is not done yet
+- reset defaults and resource setup;
+- all scenario map digests;
+- exact save size, bytes, and round trip;
+- year-boundary saved-state digest;
+- packed report and graph pixel digests;
+- input and main frame digests.
 
-The full CLEAN-01 is a large mechanical restructure across 36+ files:
-1. Type rename `GameCanvas` -> `Game` (the identifier `Game` is verified free -
-   no collisions with `GameState`/`game_*`/the `game` test variable).
-2. Rename the ~200 `gc_*` free functions and the `gc` receiver to the `Game`
-   aggregate style, and drop the `GameCanvas*` first parameter's old shape.
-3. Remove `game_methods.h`, the compatibility calls, and Java-signature comments.
+No golden value may move during `KISS-01`.
 
-It is best done in a fresh context so each mechanical pass is verified with the
-full gates, not stacked on an already long session.
+## Remaining proof
 
-## Verified recipe for the type rename (step 1)
+- Run Debug and Release full presets.
+- Run the throwaway AddressSanitizer build.
+- Start the Release game for a short launch check. Full visual play and audible
+  MIDI remain human checks.
 
-- `grep -rlE "\bGameCanvas\b" src tests --include=*.cpp --include=*.h` -> 36 files.
-- Word-boundary replace `GameCanvas` -> `Game` in those files (keeps `gc_*`,
-  `gcs_*`, `gc->` untouched since they do not contain "GameCanvas").
-- `typedef struct GameCanvas { ... } GameCanvas;` becomes
-  `typedef struct Game { ... } Game;`.
-- Build + both full gates (`test-debug-full`, `test-release-full`); no golden may
-  move.
+## Separate issue
 
-## Blockers (human-gated - cannot be done autonomously)
-
-- The UI-01 / UI-02 / APP-01 manual play check.
-- RELEASE-01's manual proof + real MIDI device check.
-
-## Remaining items after CLEAN-01
-
-- `APP-01` - organise the frame loop (state already on the aggregate).
-- `CLEAN-02` - only `savedLegacyMetricBq` left to consider; otherwise done.
-- `DOC-01` - final design/save/resource/sim/build guides.
-- `RELEASE-01` - full proof (human).
+`game_computeMenuRowDisplayValue` can divide by zero for a bad row value. This
+is a game bug, not a behavior-safe cleanup, so it needs its own test and change.

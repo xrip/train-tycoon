@@ -123,12 +123,10 @@ real MIDI device test is an opt-in `device` label.
 
 ## OWN-02 proof
 
-- Every fixed-size raw state array and constant table is now `std::array`,
-  including per-train 500-slot arrays, service and city arrays, financial
-  history, menu row tables, offer tables, and the track-step and
-  sprite-direction constant tables.
-- Save helpers split into size-explicit `*Span` cores plus registry wrappers,
-  with templated `std::array` overloads of the `*Inlined` names; save byte
+- Every fixed-size game state array and constant table is a plain array with a
+  named compile-time count, including per-train 500-slot arrays, service and
+  city arrays, financial history, menu rows, and rule tables.
+- Save helpers are concrete byte, short, int, and byte-grid walkers; save byte
   order is unchanged.
 - Dead `dk` and `j` offset tables were removed.
 - Debug and Release fast/full tests passed on 2026-07-15.
@@ -142,8 +140,8 @@ real MIDI device test is an opt-in `device` label.
   `pathDistanceGrid`, `terrainEditBuffer`), the build-menu tables, the sprite
   bitmap table, and the fixed `tileQueue` and `serviceResourceStock` matrices no
   longer use raw pointers.
-- Matrix save helpers gained `std::array` and `Grid<int8_t>` overloads, so the
-  map and stock save byte order is unchanged.
+- Matrix save work uses the `Grid<int8_t>` walker, while fixed service stock is
+  passed as one flat pointer and count, so map and stock save order is unchanged.
 - No raw `**` matrix field remains in `GameCanvas`.
 - Debug and Release fast/full tests passed on 2026-07-15.
 - All 13 scenario map digests, save/load, and frame goldens are unchanged.
