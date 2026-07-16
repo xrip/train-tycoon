@@ -68,12 +68,12 @@ void gc_renderFontString(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
 // Image u(int n, int n2)
 Image *gc_u(GameCanvas *gc, int32_t n, int32_t n2) {
     if (n == 23) {
-        if (n2 == 0 && gc->wagonType >= 0 && gc->wagonType < 3)
+        if (n2 == 0 && gc->build.wagonType >= 0 && gc->build.wagonType < 3)
             return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[136])].get();
-        if (n2 == 0 && gc->wagonType >= 3 && gc->wagonType < 6)
+        if (n2 == 0 && gc->build.wagonType >= 3 && gc->build.wagonType < 6)
             return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[146])].get();
         if (n2 > 0) {
-            switch (gc->wagonOptionSlots[n2 - 1]) {
+            switch (gc->build.wagonOptionSlots[n2 - 1]) {
                 case -1: return NULL;
                 case 0: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[162])].get();
                 case 1: return gc->tile_sprites[gc_byteToUnsignedInt(gc, gc->tileSpriteIndex[167])].get();

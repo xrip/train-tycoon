@@ -127,7 +127,7 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             break;
 
         case 23:
-            return gc_formatCurrency(gc, gc->unitCost - gc->currentTrainCostSnapshot);
+            return gc_formatCurrency(gc, gc->build.unitCost - gc->build.currentTrainCostSnapshot);
 
         case 22:
             return gc_formatNumberWithSuffix(
@@ -139,8 +139,8 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
             if (field == 6) return gc_formatCurrency(gc, gc->fleet.trainRevenue[gc->trainAtCursor]);
             if (field == 7) return gc_formatCurrency(gc, gc->fleet.prevTrainRevenue[gc->trainAtCursor]);
             if (field == 8) return gc_formatNumberWithSuffix(gc, gc->fleet.trainAgeOrTimer[gc->trainAtCursor], 0);
-            if (field == 9) return gc_formatCurrency(gc, gc->currentTrainCostSnapshot * 70 / 100);
-            if (field == 10) return gc_formatCurrency(gc, gc->baseTrainCostSnapshot - gc->currentTrainCostSnapshot);
+            if (field == 9) return gc_formatCurrency(gc, gc->build.currentTrainCostSnapshot * 70 / 100);
+            if (field == 10) return gc_formatCurrency(gc, gc->build.baseTrainCostSnapshot - gc->build.currentTrainCostSnapshot);
             if (field == 20)
                 return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[
                     gc->fleet.trainAiOverride[gc->trainAtCursor] == 0 ? 21 : 20]]);

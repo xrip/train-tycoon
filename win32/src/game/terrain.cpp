@@ -139,5 +139,5 @@ void gc_setSelectionStart(GameCanvas *gc, int32_t n, int32_t n2) {
         memcpy(gc->terrainEditBuffer[i].data(),
                gc->world.heightMap[gc->selectionStartX + i].data() + gc->selectionStartY, 10);
     }
-    gc->terrainSmoothCost = 0;
+    gc->build.terrainSmoothCost = 0;
 }

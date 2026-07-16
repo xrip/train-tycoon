@@ -73,7 +73,7 @@ bool gc_isAdjacentTileEmpty(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, b
                           : gc->terrainEditBuffer[n4][n5 + 1] > n3 + 1)
             && !gc_isAdjacentTileEmpty(gc, n, n2 + 1, n3 - step, bl)) bl2 = false;
     }
-    gc->terrainSmoothCost += gc->costOverhead
+    gc->build.terrainSmoothCost += gc->costOverhead
         + (n3 == -1 ? gc->costMaintenance : abs(n3) * gc->costCrew);
     return bl2;
 }

@@ -54,29 +54,29 @@ int32_t gc_allocateServiceVehicleSlot(GameCanvas *gc, int32_t type,
 }
 
 void gc_computeTrainCost(GameCanvas *gc) {
-    switch (gc->wagonType) {
-        case 0: gc->unitCost = gc->gWagonCost; break;
-        case 1: gc->unitCost = gc->gWagonCost2; break;
-        case 2: gc->unitCost = gc->gWagonCost3; break;
-        case 3: gc->unitCost = gc->gWagonCost4; break;
-        case 4: gc->unitCost = gc->gWagonCost5; break;
-        case 5: gc->unitCost = gc->gWagonCost6; break;
+    switch (gc->build.wagonType) {
+        case 0: gc->build.unitCost = gc->gWagonCost; break;
+        case 1: gc->build.unitCost = gc->gWagonCost2; break;
+        case 2: gc->build.unitCost = gc->gWagonCost3; break;
+        case 3: gc->build.unitCost = gc->gWagonCost4; break;
+        case 4: gc->build.unitCost = gc->gWagonCost5; break;
+        case 5: gc->build.unitCost = gc->gWagonCost6; break;
     }
-    if (gc->wagonType == gc->wagonDiscountType)
-        gc->unitCost = gc->unitCost * gc->scenario.difficultyPct / 100;
+    if (gc->build.wagonType == gc->build.wagonDiscountType)
+        gc->build.unitCost = gc->build.unitCost * gc->scenario.difficultyPct / 100;
 
     for (int option = 0; option < 5; ++option) {
         int option_cost;
-        switch (gc->wagonOptionSlots[option]) {
+        switch (gc->build.wagonOptionSlots[option]) {
             case 0: option_cost = gc->costGroupC1; break;
             case 1: option_cost = gc->costGroupC2; break;
             case 2: option_cost = gc->costGroupC3; break;
             case 3: option_cost = gc->costGroupC4; break;
             default: continue;
         }
-        if (gc->wagonOptionSlots[option] == gc->wagonCountMatch[option])
+        if (gc->build.wagonOptionSlots[option] == gc->build.wagonCountMatch[option])
             option_cost = option_cost * gc->scenario.difficultyPct / 100;
-        gc->unitCost += option_cost;
+        gc->build.unitCost += option_cost;
     }
 }
 
@@ -113,10 +113,10 @@ void gc_rebuildCityList(GameCanvas *gc) {
 }
 
 void gc_applyBackgroundCost(GameCanvas *gc) {
-    if (gc->demolitionAffordable) {
-        gc->economy.subsidyCost += gc->backgroundCost;
-        gc->economy.money -= gc->backgroundCost;
-        gc_pushMoneyHistory(gc, -gc->backgroundCost);
+    if (gc->build.demolitionAffordable) {
+        gc->economy.subsidyCost += gc->build.backgroundCost;
+        gc->economy.money -= gc->build.backgroundCost;
+        gc_pushMoneyHistory(gc, -gc->build.backgroundCost);
     } else {
         gc_enterOutOfMoneyState(gc);
     }
@@ -128,7 +128,7 @@ void gc_demolishAtCursor(GameCanvas *gc) {
     if (gc->blockBuildMenu || !gc_isCityOrStationTile(gc, cursor_x, cursor_y))
         return;
 
-    gc->backgroundCost = 0;
+    gc->build.backgroundCost = 0;
     int tile = gc->world.tileMap[cursor_x][cursor_y];
     if (tile >= 81 && tile <= 86) {
         gc_advanceConstructionTimers(gc, cursor_x, cursor_y, -3);
@@ -226,27 +226,27 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
         return;
     }
 
-    gc->wagonType = gc->fleet.trainEraOrStage[gc->trainAtCursor];
-    for (int option = 0; option < 5; ++option) gc->wagonOptionSlots[option] = -1;
+    gc->build.wagonType = gc->fleet.trainEraOrStage[gc->trainAtCursor];
+    for (int option = 0; option < 5; ++option) gc->build.wagonOptionSlots[option] = -1;
     int car = gc->fleet.nextCar[gc->trainAtCursor];
     for (int option = 0; option < 5 && car != -1; ++option) {
         switch (gc->fleet.trainFlags[car] & 0xF) {
-            case 2: gc->wagonOptionSlots[option] = 0; break;
-            case 3: gc->wagonOptionSlots[option] = 1; break;
-            case 4: case 5: gc->wagonOptionSlots[option] = 2; break;
-            case 6: case 7: gc->wagonOptionSlots[option] = 3; break;
+            case 2: gc->build.wagonOptionSlots[option] = 0; break;
+            case 3: gc->build.wagonOptionSlots[option] = 1; break;
+            case 4: case 5: gc->build.wagonOptionSlots[option] = 2; break;
+            case 6: case 7: gc->build.wagonOptionSlots[option] = 3; break;
         }
         car = gc->fleet.nextCar[car];
     }
     for (int option = 0; option < 5; ++option)
-        gc->wagonCountMatch[option] = gc->wagonOptionSlots[option];
-    gc->wagonDiscountType = gc->wagonType;
+        gc->build.wagonCountMatch[option] = gc->build.wagonOptionSlots[option];
+    gc->build.wagonDiscountType = gc->build.wagonType;
     gc->scenario.difficultyPct = 100;
     gc_computeTrainCost(gc);
-    gc->baseTrainCostSnapshot = gc->unitCost;
+    gc->build.baseTrainCostSnapshot = gc->build.unitCost;
     gc->scenario.difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
     gc_computeTrainCost(gc);
-    gc->currentTrainCostSnapshot = gc->unitCost;
+    gc->build.currentTrainCostSnapshot = gc->build.unitCost;
     gc->ready = false;
     gc->transitionCode = 26;
     gc_setState(gc, +GameState::MenuOverlay);
@@ -652,16 +652,16 @@ void gc_openBuildMenu(GameCanvas *gc) {
 
 void gc_addSelectedOption(GameCanvas *gc, int32_t option) {
     for (int slot = 0; slot < 5; ++slot) {
-        if (gc->wagonOptionSlots[slot] != -1) continue;
-        gc->wagonOptionSlots[slot] = option;
+        if (gc->build.wagonOptionSlots[slot] != -1) continue;
+        gc->build.wagonOptionSlots[slot] = option;
         break;
     }
 }
 
 void gc_popSelectedOption(GameCanvas *gc) {
     for (int slot = 4; slot >= 0; --slot) {
-        if (gc->wagonOptionSlots[slot] == -1) continue;
-        gc->wagonOptionSlots[slot] = -1;
+        if (gc->build.wagonOptionSlots[slot] == -1) continue;
+        gc->build.wagonOptionSlots[slot] = -1;
         break;
     }
 }
@@ -733,7 +733,7 @@ void gc_incrementRowValueType14(GameCanvas *gc, int32_t amount) {
 }
 
 bool gc_buyTrainAtCursor(GameCanvas *gc) {
-    if (gc->economy.money < gc->unitCost) {
+    if (gc->economy.money < gc->build.unitCost) {
         gc_enterOutOfMoneyState(gc);
         return false;
     }
@@ -741,25 +741,25 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
         (gc->fleet.vehicleFlags[gc->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
     int train = gc_allocateTrainSlot(
         gc, gc->tileCursorX, gc->tileCursorY,
-        gc->wagonType < 3 ? 0 : 1, gc->wagonType,
-        direction, 8 - gc->wagonType);
+        gc->build.wagonType < 3 ? 0 : 1, gc->build.wagonType,
+        direction, 8 - gc->build.wagonType);
     for (int option = 0; option < 5; ++option) {
-        if (gc->wagonOptionSlots[option] < 0) continue;
-        int car_type = 2 + gc->wagonOptionSlots[option];
+        if (gc->build.wagonOptionSlots[option] < 0) continue;
+        int car_type = 2 + gc->build.wagonOptionSlots[option];
         if (car_type == 5) ++car_type;
         train = gc_spawnTrainCar(gc, train, car_type);
         gc_incrementCargoOptionCount(gc, car_type);
     }
-    gc->economy.money -= gc->unitCost;
-    gc->economy.aiMoneySpent += gc->unitCost;
-    gc_pushMoneyHistory(gc, -gc->unitCost);
+    gc->economy.money -= gc->build.unitCost;
+    gc->economy.aiMoneySpent += gc->build.unitCost;
+    gc_pushMoneyHistory(gc, -gc->build.unitCost);
     ++gc->scenario.aiWagonsBought;
     return true;
 }
 
 bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t train,
                                  int32_t state_code, int32_t *options) {
-    int cost = gc->unitCost - gc->currentTrainCostSnapshot;
+    int cost = gc->build.unitCost - gc->build.currentTrainCostSnapshot;
     if (gc->economy.money < cost) {
         gc_enterOutOfMoneyState(gc);
         return false;

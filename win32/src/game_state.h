@@ -103,7 +103,6 @@ typedef struct GameCanvas {
     int32_t currentSpriteId;
     int32_t lastRenderedSpriteId;
     int32_t spriteJustChanged;
-    int32_t terrainSmoothCost;
     bool initialIndustryPlaced;
     Grid<int8_t> terrainEditBuffer;
     int32_t selectionStartX;
@@ -131,8 +130,6 @@ typedef struct GameCanvas {
     bool vehicleMenuSelectIndex;
     bool trainMenuSelectIndex;
     bool blockBuildMenu;
-    int32_t backgroundCost;
-    bool demolitionAffordable;
     bool menuDirty;
     int32_t buildMenuMode;
     int32_t selectedMenuRowX;
@@ -160,8 +157,6 @@ typedef struct GameCanvas {
     int8_t stationDirCursor;
     int8_t cityListIndex;
     int32_t pendingTransitionCode;
-    bool discountApplied;
-    int32_t baseTrainCostSnapshot;
     int8_t spriteCycleCursor;
     bool snapshotLoadedFlag;
     bool cH;
@@ -177,12 +172,6 @@ typedef struct GameCanvas {
     int32_t pathTargetX;
     int32_t pathTargetY;
     int32_t serviceVehicleAtCursor;
-    int32_t wagonType;
-    int32_t wagonDiscountType;
-    std::array<int32_t, 5> wagonOptionSlots{};
-    std::array<int32_t, 5> wagonCountMatch{};
-    int32_t unitCost;
-    int32_t currentTrainCostSnapshot;
     Fleet fleet;
     int32_t trainAtCursor;
     int32_t era;

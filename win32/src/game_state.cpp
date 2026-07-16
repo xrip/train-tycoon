@@ -57,7 +57,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->needsRepaint = false;
     gc->lastRenderedSpriteId = -1;
     gc->spriteJustChanged = 0;
-    gc->terrainSmoothCost = 0;
+    gc->build.terrainSmoothCost = 0;
     gc->initialIndustryPlaced = true;
     gc->build.trackBuildInProgress = false;
     gc->mapGenStage = 0;
@@ -85,8 +85,8 @@ void gc_fields_init(GameCanvas *gc) {
     gc->stationDirCursor = 0;
     gc->cityListIndex = 0;
     gc->pendingTransitionCode = -1;
-    gc->discountApplied = false;
-    gc->baseTrainCostSnapshot = 0;
+    gc->build.discountApplied = false;
+    gc->build.baseTrainCostSnapshot = 0;
     gc->scenario.scenarioMilestone = 0;
     gc->scenario.difficultyA = 0;
     gc->scenario.difficultySlot = 0;
@@ -107,10 +107,10 @@ void gc_fields_init(GameCanvas *gc) {
     gc->build.buildCancelled = true;
     gc->build.trackTileCount = 0;
     gc->serviceVehicleAtCursor = 0;
-    gc->wagonType = 0;
-    gc->wagonDiscountType = 0;
-    gc->unitCost = 0;
-    gc->currentTrainCostSnapshot = 0;
+    gc->build.wagonType = 0;
+    gc->build.wagonDiscountType = 0;
+    gc->build.unitCost = 0;
+    gc->build.currentTrainCostSnapshot = 0;
     gc->scenario.difficultyPct = 100;
     gc->era = 1;
     gc->fleet.forwardTrackSteps = {{

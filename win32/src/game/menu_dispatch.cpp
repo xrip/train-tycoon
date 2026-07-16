@@ -55,10 +55,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 2: gc->stopRequested = true; break;
                 case 3: gc->music_auto_start = true; gc->music_enabled = true; gc_setState(gc, +GameState::LoadingResources); break;
                 case 4: {
-                    gc->economy.money += gc->currentTrainCostSnapshot * 70 / 100;
-                    gc->economy.aiMoneySpent -= gc->currentTrainCostSnapshot * 70 / 100;
-                    if (gc->currentTrainCostSnapshot != 0)
-                        gc_pushMoneyHistory(gc, gc->currentTrainCostSnapshot * 70 / 100);
+                    gc->economy.money += gc->build.currentTrainCostSnapshot * 70 / 100;
+                    gc->economy.aiMoneySpent -= gc->build.currentTrainCostSnapshot * 70 / 100;
+                    if (gc->build.currentTrainCostSnapshot != 0)
+                        gc_pushMoneyHistory(gc, gc->build.currentTrainCostSnapshot * 70 / 100);
                     int16_t s = gc->fleet.nextCar[gc->trainAtCursor];
                     gc_decrementTrainCargoOptionCounts(gc, s);
                     gc->fleet.trainFlags[gc->trainAtCursor] = 0;
@@ -118,13 +118,13 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc_setState(gc, +GameState::Playing); break;
         case 22:
             if (n2 == 1) {
-                gc->wagonType = 0;
-                gc->currentTrainCostSnapshot = 0;
-                gc->wagonDiscountType = gc->wagonType;
-                for (int n3 = 0; n3 < 5; ++n3) gc->wagonOptionSlots[n3] = -1;
-                for (int n3 = 0; n3 < 5; ++n3) gc->wagonCountMatch[n3] = -1;
+                gc->build.wagonType = 0;
+                gc->build.currentTrainCostSnapshot = 0;
+                gc->build.wagonDiscountType = gc->build.wagonType;
+                for (int n3 = 0; n3 < 5; ++n3) gc->build.wagonOptionSlots[n3] = -1;
+                for (int n3 = 0; n3 < 5; ++n3) gc->build.wagonCountMatch[n3] = -1;
                 gc->scenario.difficultyPct = 100;
-                gc->discountApplied = false;
+                gc->build.discountApplied = false;
                 gc_computeTrainCost(gc);
                 gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); goto hbms_end;
             }
@@ -133,17 +133,17 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             if (n2 == 0) { gc->pendingTransitionCode = 24; gc_setState(gc, +GameState::Playing); break; }
             if (n2 == 1) { gc->pendingTransitionCode = 25; gc_setState(gc, +GameState::Playing); break; }
             if (n2 == 2) {
-                if (!gc->discountApplied) {
+                if (!gc->build.discountApplied) {
                     if (!gc_buyTrainAtCursor(gc)) break;
                     gc_setState(gc, +GameState::Playing); break;
                 }
-                if (!gc_applyTrainUpgradeInlined(gc, gc->trainAtCursor, gc->wagonType, gc->wagonOptionSlots.data())) break;
+                if (!gc_applyTrainUpgradeInlined(gc, gc->trainAtCursor, gc->build.wagonType, gc->build.wagonOptionSlots.data())) break;
                 gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing); break;
             }
-            gc->pendingTransitionCode = !gc->discountApplied ? 22 : 26;
+            gc->pendingTransitionCode = !gc->build.discountApplied ? 22 : 26;
             gc_setState(gc, +GameState::Playing); break;
         case 24:
-            if (n2 >= 0 && n2 < 6) { gc->wagonType = n2; gc_computeTrainCost(gc); }
+            if (n2 >= 0 && n2 < 6) { gc->build.wagonType = n2; gc_computeTrainCost(gc); }
             gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); break;
         case 25:
             if (n2 == 3) gc_addSelectedOption(gc, 0);
@@ -155,10 +155,10 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing); break;
         case 26:
             if (n2 == 1) {
-                gc->discountApplied = true;
+                gc->build.discountApplied = true;
                 gc->pendingTransitionCode = 23; gc_setState(gc, +GameState::Playing);
             } else if (n2 == 2) {
-                int n4 = gc->baseTrainCostSnapshot - gc->currentTrainCostSnapshot;
+                int n4 = gc->build.baseTrainCostSnapshot - gc->build.currentTrainCostSnapshot;
                 if (n4 <= gc->economy.money) {
                     gc->fleet.trainAgeOrTimer[gc->trainAtCursor] = 0;
                     gc->economy.money -= n4;
@@ -166,7 +166,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc->economy.aiMoneySpent += n4;
                     gc->scenario.difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
                     gc_computeTrainCost(gc);
-                    gc->currentTrainCostSnapshot = gc->unitCost;
+                    gc->build.currentTrainCostSnapshot = gc->build.unitCost;
                     gc->pendingTransitionCode = 26; gc_setState(gc, +GameState::Playing);
                 } else {
                     gc_enterOutOfMoneyState(gc);

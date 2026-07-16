@@ -195,11 +195,11 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
         n3 = gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST
              ? gc->baseTrainSpeed2 : -gc->accel2;
         if (gc->economy.money >= n3 || gc->economy.money < 0) {
-            gc->backgroundCost += n3;
+            gc->build.backgroundCost += n3;
             bl3 = true;
-            gc->demolitionAffordable = true;
+            gc->build.demolitionAffordable = true;
         } else {
-            gc->demolitionAffordable = false;
+            gc->build.demolitionAffordable = false;
         }
     }
     for (n3 = 49; n3 >= 0; --n3) {
