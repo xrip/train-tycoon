@@ -49,12 +49,14 @@ The full Debug test set locks:
 
 No golden value may move during `KISS-01`.
 
-## Remaining proof
+## Proof result
 
-- Run Debug and Release full presets.
-- Run the throwaway AddressSanitizer build.
-- Start the Release game for a short launch check. Full visual play and audible
-  MIDI remain human checks.
+- Debug full: pass.
+- Release full: pass.
+- Fresh AddressSanitizer Debug full: pass after adding the MSVC ASan run-time
+  directory to `PATH`.
+- Bounded Release MIDI/launch path: exit 0.
+- Full visual play remains a human check.
 
 ## Separate issue
 
