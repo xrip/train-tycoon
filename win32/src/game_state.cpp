@@ -140,14 +140,14 @@ void gc_fields_init(GameCanvas *gc) {
         {{180, 181, 182, 183, 180, 181, 182, 183}},
         {{185, 186, 187, 188, 185, 186, 187, 188}},
     }};
-    gc->saveBuffer.clear();
-    gc->saveReadOffset = 0;
-    gc->saveSlot = 0;
-    gc->savePendingMode = save::MODE_WRITE;
-    gc->snapshotSize = 0;
-    gc->snapshotLoaded = false;
-    gc->bytesUncompressed = 0;
-    gc->bytesCompressed = 0;
+    gc->saveCodec.saveBuffer.clear();
+    gc->saveCodec.saveReadOffset = 0;
+    gc->saveCodec.saveSlot = 0;
+    gc->saveCodec.savePendingMode = save::MODE_WRITE;
+    gc->saveCodec.snapshotSize = 0;
+    gc->saveCodec.snapshotLoaded = false;
+    gc->saveCodec.bytesUncompressed = 0;
+    gc->saveCodec.bytesCompressed = 0;
     gc->compareToPrevious = false;
     gc->ui.yearGraphMode = 0;
     gc->ui.yearGraphAlt = false;

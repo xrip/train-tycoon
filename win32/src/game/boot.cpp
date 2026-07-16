@@ -126,12 +126,12 @@ std::vector<int8_t> gc_readPackedTextCodes(GameCanvas *gc, int32_t offset) {
 
 // void loadGame(int n, int n2)
 void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode) {
-    gc->saveSlot = slot;
-    gc->savePendingMode = mode;
-    gc->saveReadOffset = 0;
-    gc->snapshotSize = 0;
-    gc->snapshotLoaded = false;
-    if (gc->savePendingMode == save::MODE_READ) {
+    gc->saveCodec.saveSlot = slot;
+    gc->saveCodec.savePendingMode = mode;
+    gc->saveCodec.saveReadOffset = 0;
+    gc->saveCodec.snapshotSize = 0;
+    gc->saveCodec.snapshotLoaded = false;
+    if (gc->saveCodec.savePendingMode == save::MODE_READ) {
         std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
         if (store) {
             int nr = store->record_count();
@@ -141,16 +141,16 @@ void gc_loadGame(GameCanvas *gc, int32_t slot, int32_t mode) {
                 if (!record) continue;
                 const int len = static_cast<int>(record->size());
                 if (len > 0 && (int8_t)(*record)[0] == slot) {
-                    gc->saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
-                    memcpy(gc->saveBuffer.data(), record->data() + 1,
+                    gc->saveCodec.saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
+                    memcpy(gc->saveCodec.saveBuffer.data(), record->data() + 1,
                            (size_t)(len - 1));
-                    gc->snapshotSize = len - 1;
-                    gc->snapshotLoaded = true;
+                    gc->saveCodec.snapshotSize = len - 1;
+                    gc->saveCodec.snapshotLoaded = true;
                 }
             }
         }
     } else {
-        gc->snapshotLoaded = true;
+        gc->saveCodec.snapshotLoaded = true;
     }
 }
 

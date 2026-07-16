@@ -7,9 +7,9 @@
 
 // Read one byte from the save buffer as an unsigned value (0..255).
 int32_t gc_readSaveByteUnsigned(GameCanvas *gc) {
-    return gc->saveBuffer[gc->saveReadOffset] >= 0
-               ? gc->saveBuffer[gc->saveReadOffset++]
-               : 256 + gc->saveBuffer[gc->saveReadOffset++];
+    return gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset] >= 0
+               ? gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++]
+               : 256 + gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++];
 }
 
 // boolean saveOrLoadBool(boolean bl)
@@ -19,28 +19,28 @@ bool gc_saveOrLoadBool(GameCanvas *gc, bool bl) {
 
 // byte saveOrLoadByte(byte by)
 int8_t gc_saveOrLoadByte(GameCanvas *gc, int8_t by) {
-    if (gc->savePendingMode == save::MODE_SKIP) return 0;
+    if (gc->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
     int8_t by2 = by;
-    if (gc->savePendingMode == save::MODE_WRITE) {
+    if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
         gc_ensureSaveBufferCapacity(gc, 1);
-        gc->saveBuffer[gc->saveReadOffset++] = by;
-    } else if (gc->snapshotLoaded) {
-        by2 = gc->saveBuffer[gc->saveReadOffset++];
+        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = by;
+    } else if (gc->saveCodec.snapshotLoaded) {
+        by2 = gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++];
     }
     return by2;
 }
 
 // int saveIntToBuffer(int n)
 int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n) {
-    if (gc->savePendingMode == save::MODE_SKIP) return 0;
+    if (gc->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
     int32_t n2 = n;
-    if (gc->savePendingMode == save::MODE_WRITE) {
+    if (gc->saveCodec.savePendingMode == save::MODE_WRITE) {
         gc_ensureSaveBufferCapacity(gc, 4);
-        gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n & 0xFF);
-        gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 8 & 0xFF);
-        gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
-        gc->saveBuffer[gc->saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
-    } else if (gc->snapshotLoaded) {
+        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n & 0xFF);
+        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n >> 8 & 0xFF);
+        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
+        gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
+    } else if (gc->saveCodec.snapshotLoaded) {
         uint32_t bits = (uint32_t)gc_readSaveByteUnsigned(gc);
         bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 8;
         bits |= (uint32_t)gc_readSaveByteUnsigned(gc) << 16;
@@ -51,19 +51,19 @@ int32_t gc_saveIntToBuffer(GameCanvas *gc, int32_t n) {
 }
 
 void gc_saveGame(GameCanvas *gc) {
-    if (gc->savePendingMode != 0) return;
+    if (gc->saveCodec.savePendingMode != 0) return;
     std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
     if (!store) return;
     for (int index = store->record_count() - 1; index >= 0; --index) {
         int id = store->record_id_at(index);
         const auto record = store->record(id);
         if (!record) continue;
-        bool same_slot = !record->empty() && (int8_t)(*record)[0] == gc->saveSlot;
+        bool same_slot = !record->empty() && (int8_t)(*record)[0] == gc->saveCodec.saveSlot;
         if (same_slot) store->delete_record(id);
     }
-    std::vector<uint8_t> record(static_cast<std::size_t>(gc->snapshotSize) + 1);
-    record[0] = (uint8_t)gc->saveSlot;
-    memcpy(record.data() + 1, gc->saveBuffer.data(), (size_t)gc->snapshotSize);
+    std::vector<uint8_t> record(static_cast<std::size_t>(gc->saveCodec.snapshotSize) + 1);
+    record[0] = (uint8_t)gc->saveCodec.saveSlot;
+    memcpy(record.data() + 1, gc->saveCodec.saveBuffer.data(), (size_t)gc->saveCodec.snapshotSize);
     store->add_record(record);
 }
 
@@ -86,70 +86,70 @@ void gc_writeRleRun(GameCanvas *gc, ByteBuffer& output,
 void gc_checkSaveByteSum(GameCanvas *gc, const char *label) {
     (void)label;
     uint64_t sum = 0;
-    for (int i = 0; i < gc->snapshotSize; ++i)
-        sum += (uint64_t)gc_byteToUnsignedInt(gc, gc->saveBuffer[i]);
+    for (int i = 0; i < gc->saveCodec.snapshotSize; ++i)
+        sum += (uint64_t)gc_byteToUnsignedInt(gc, gc->saveCodec.saveBuffer[i]);
     (void)sum;
 }
 
 void gc_compressSaveBuffer(GameCanvas *gc) {
     gc_checkSaveByteSum(gc, "Compress pre");
     ByteBuffer output;
-    int value = gc->saveBuffer[0];
+    int value = gc->saveCodec.saveBuffer[0];
     int count = 1;
-    for (int i = 1; i < gc->snapshotSize; ++i) {
-        if (value != gc->saveBuffer[i] || count == 254) {
+    for (int i = 1; i < gc->saveCodec.snapshotSize; ++i) {
+        if (value != gc->saveCodec.saveBuffer[i] || count == 254) {
             gc_writeRleRun(gc, output, value, count);
-            value = gc->saveBuffer[i];
+            value = gc->saveCodec.saveBuffer[i];
             count = 1;
         } else {
             ++count;
         }
     }
     gc_writeRleRun(gc, output, value, count);
-    gc->bytesUncompressed += gc->snapshotSize;
+    gc->saveCodec.bytesUncompressed += gc->saveCodec.snapshotSize;
     const auto compressed = output.bytes();
-    gc->snapshotSize = static_cast<int>(compressed.size());
-    gc->saveBuffer.assign(static_cast<std::size_t>(gc->snapshotSize), 0);
-    memcpy(gc->saveBuffer.data(), compressed.data(), (size_t)gc->snapshotSize);
-    gc->bytesCompressed += gc->snapshotSize;
+    gc->saveCodec.snapshotSize = static_cast<int>(compressed.size());
+    gc->saveCodec.saveBuffer.assign(static_cast<std::size_t>(gc->saveCodec.snapshotSize), 0);
+    memcpy(gc->saveCodec.saveBuffer.data(), compressed.data(), (size_t)gc->saveCodec.snapshotSize);
+    gc->saveCodec.bytesCompressed += gc->saveCodec.snapshotSize;
     gc_checkSaveByteSum(gc, "Compress post");
 }
 
 void gc_decompressSaveBuffer(GameCanvas *gc) {
     gc_checkSaveByteSum(gc, "Decompress pre");
     ByteBuffer output;
-    for (int i = 0; i < gc->snapshotSize; ++i) {
-        if (gc->saveBuffer[i] == -1) {
-            int count = gc_byteToUnsignedInt(gc, gc->saveBuffer[i + 1]);
+    for (int i = 0; i < gc->saveCodec.snapshotSize; ++i) {
+        if (gc->saveCodec.saveBuffer[i] == -1) {
+            int count = gc_byteToUnsignedInt(gc, gc->saveCodec.saveBuffer[i + 1]);
             for (int j = 0; j < count; ++j)
-                output.write(gc->saveBuffer[i + 2]);
+                output.write(gc->saveCodec.saveBuffer[i + 2]);
             i += 2;
         } else {
-            output.write(gc->saveBuffer[i]);
+            output.write(gc->saveCodec.saveBuffer[i]);
         }
     }
-    gc->bytesCompressed += gc->snapshotSize;
+    gc->saveCodec.bytesCompressed += gc->saveCodec.snapshotSize;
     const auto decompressed = output.bytes();
-    gc->snapshotSize = static_cast<int>(decompressed.size());
-    gc->saveBuffer.assign(static_cast<std::size_t>(gc->snapshotSize), 0);
-    memcpy(gc->saveBuffer.data(), decompressed.data(), (size_t)gc->snapshotSize);
-    gc->bytesUncompressed += gc->snapshotSize;
+    gc->saveCodec.snapshotSize = static_cast<int>(decompressed.size());
+    gc->saveCodec.saveBuffer.assign(static_cast<std::size_t>(gc->saveCodec.snapshotSize), 0);
+    memcpy(gc->saveCodec.saveBuffer.data(), decompressed.data(), (size_t)gc->saveCodec.snapshotSize);
+    gc->saveCodec.bytesUncompressed += gc->saveCodec.snapshotSize;
     gc_checkSaveByteSum(gc, "Decompress post");
 }
 
 void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     if (mode == save::OP_SAVE_MAIN) gc_loadGame(gc, 0, save::MODE_WRITE);
     if (mode == save::OP_LOAD_MAIN) gc_loadGame(gc, 0, save::MODE_READ);
-    if (mode == save::OP_RESET_SKIP) gc->savePendingMode = save::MODE_SKIP;
+    if (mode == save::OP_RESET_SKIP) gc->saveCodec.savePendingMode = save::MODE_SKIP;
     if (mode == 4) {
-        gc->snapshotSize = 0;
-        gc->saveBuffer.clear();
-        gc->savePendingMode = save::MODE_WRITE;
+        gc->saveCodec.snapshotSize = 0;
+        gc->saveCodec.saveBuffer.clear();
+        gc->saveCodec.savePendingMode = save::MODE_WRITE;
     }
     if (mode == 5) {
-        gc->saveReadOffset = 0;
-        gc->savePendingMode = save::MODE_READ;
-        gc->snapshotLoaded = true;
+        gc->saveCodec.saveReadOffset = 0;
+        gc->saveCodec.savePendingMode = save::MODE_READ;
+        gc->saveCodec.snapshotLoaded = true;
     }
     if (mode == save::OP_LOAD_MAIN) gc_decompressSaveBuffer(gc);
 
@@ -337,8 +337,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
 }
 
 void gc_saveAllMapArrays(GameCanvas *gc) {
-    gc->bytesUncompressed = 0;
-    gc->bytesCompressed = 0;
+    gc->saveCodec.bytesUncompressed = 0;
+    gc->saveCodec.bytesCompressed = 0;
     gc_initSaveOrLoad(gc, save::OP_SAVE_MAIN);
     gc_loadGame(gc, 1, save::MODE_WRITE);
     gc_saveOrLoadByteMatrixInlined(gc, gc->world.tileMap);
@@ -359,8 +359,8 @@ void gc_saveAllMapArrays(GameCanvas *gc) {
 }
 
 void gc_restoreAllMapArrays(GameCanvas *gc) {
-    gc->bytesUncompressed = 0;
-    gc->bytesCompressed = 0;
+    gc->saveCodec.bytesUncompressed = 0;
+    gc->saveCodec.bytesCompressed = 0;
     gc_initSaveOrLoad(gc, save::OP_LOAD_MAIN);
     gc->world.tileMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
     gc->world.trackMap.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);

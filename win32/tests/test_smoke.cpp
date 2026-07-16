@@ -279,20 +279,20 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->renderer.visibleTrains[0] = -1234;
     gc_initSaveOrLoad(game, 4);
 
-    const int plain_size = game->snapshotSize;
+    const int plain_size = game->saveCodec.snapshotSize;
     REQUIRE(plain_size > 0);
     StableDigest save_digest;
-    save_digest.add_bytes(game->saveBuffer.data(), static_cast<std::size_t>(plain_size));
+    save_digest.add_bytes(game->saveCodec.saveBuffer.data(), static_cast<std::size_t>(plain_size));
     CHECK(plain_size == 19242);
     CHECK(save_digest.value() == 16273675477449773753ULL);
     auto* plain = static_cast<int8_t*>(std::malloc(static_cast<std::size_t>(plain_size)));
     REQUIRE(plain != nullptr);
-    std::memcpy(plain, game->saveBuffer.data(), static_cast<std::size_t>(plain_size));
+    std::memcpy(plain, game->saveCodec.saveBuffer.data(), static_cast<std::size_t>(plain_size));
 
     gc_compressSaveBuffer(game);
     gc_decompressSaveBuffer(game);
-    CHECK(game->snapshotSize == plain_size);
-    CHECK(std::memcmp(game->saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
+    CHECK(game->saveCodec.snapshotSize == plain_size);
+    CHECK(std::memcmp(game->saveCodec.saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
 
     game->economy.money = 0;
     game->economy.dayOfMonth = 0;

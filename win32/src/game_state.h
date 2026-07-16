@@ -11,6 +11,7 @@
 #include "assets.h"
 #include "renderer.h"
 #include "ui_controller.h"
+#include "save_codec.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -93,14 +94,6 @@ typedef struct GameCanvas {
     int32_t trainAtCursor;
     int32_t era;
     int32_t dI;
-    std::vector<int8_t> saveBuffer;
-    int32_t saveReadOffset;
-    int32_t saveSlot;
-    int32_t savePendingMode;
-    int32_t snapshotSize;
-    bool snapshotLoaded;
-    int32_t bytesUncompressed;
-    int32_t bytesCompressed;
     bool compareToPrevious;
     bool monthRolloverFlag;
     int32_t industryCategory;
@@ -127,6 +120,7 @@ typedef struct GameCanvas {
     Assets assets;
     Renderer renderer;
     UiController ui;
+    SaveCodec saveCodec;
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;
