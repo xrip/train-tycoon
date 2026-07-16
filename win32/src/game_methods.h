@@ -121,6 +121,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl);
 int32_t gc_spawnTrainCar(GameCanvas *gc, int32_t n, int32_t n2);
 int32_t gc_allocateTrainSlot(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6);
 void gc_revenueOrYear(GameCanvas *gc);
+void gc_simulationTick(GameCanvas *gc);
 void gc_everyTwoTick(GameCanvas *gc);
 bool gc_trainCanLoadAtServiceVehicle(GameCanvas *gc, int32_t n, int32_t n2);
 void gc_updateTrain(GameCanvas *gc, int32_t n);

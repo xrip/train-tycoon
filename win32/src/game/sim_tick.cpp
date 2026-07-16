@@ -636,3 +636,192 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
         }
     }
 }
+
+// void simulationTick() - the per-frame Playing tick. Runs in exact order:
+// frame timers, tile-fade queue, train updates, then (when counterA reaches
+// dH) the day/month/year calendar cadence with its monthly/yearly hooks.
+void gc_simulationTick(GameCanvas *gc) {
+            gc->tickStart = midp_current_time_millis();
+            if (++gc->timerA1 == 2) {
+                gc->timerA1 = 0;
+                if (++gc->timerA2 == 3) gc->timerA2 = 0;
+            }
+            if (++gc->timerB1 == 2) {
+                gc->timerB1 = 0;
+                if (++gc->timerB2 == 3) gc->timerB2 = 0;
+            }
+            if (++gc->timerC1 == 3) {
+                gc->timerC1 = 0;
+                if (++gc->timerC2 == 3) gc->timerC2 = 0;
+            }
+            if (++gc->woodAgeTimer == 150) {
+                for (int n27 = 0; n27 < gc->world.mapWidth; ++n27) {
+                    for (int n = 0; n < gc->world.mapHeight; ++n) {
+                        if (gc->world.tileMap[n27][n] < 59 || gc->world.tileMap[n27][n] > 61
+                            || gc->rng.next_int() % 3 != 0)
+                            continue;
+                        ++gc->world.tileMap[n27][n];
+                        if (gc->world.tileMap[n27][n] == 62) gc->world.tileMap[n27][n] = 59;
+                    }
+                }
+                gc->woodAgeTimer = 0;
+            }
+            if (++gc->phaseTimer == 10) gc->phaseTimer = 0;
+
+            for (int n27 = 0; n27 < 50; ++n27) {
+                if (gc->tileQueue[n27][0] <= 0) continue;
+                --gc->tileQueue[n27][0];
+                int n = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][1]);
+                int n29 = gc_byteToUnsignedInt(gc, gc->tileQueue[n27][2]);
+                if (gc->tileQueue[n27][0] == 0 && n >= 0 && n29 >= 0
+                    && n < gc->world.mapWidth && n29 < gc->world.mapHeight)
+                    gc->world.tileMap[n][n29] = (int8_t)(gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128);
+                if (gc->tileQueue[n27][0] != 7 || n < 0 || n29 < 0
+                    || n >= gc->world.mapWidth || n29 >= gc->world.mapHeight)
+                    continue;
+                int n30 = gc_byteToUnsignedInt(gc, gc->world.tileMap[n][n29]) - 128;
+                if (gc->tileQueueVisualOnly[n27]) continue;
+                if (n30 >= 29 && n30 <= 33) gc->world.tileMap[n][n29] = -128;
+                if ((n30 >= 70 && n30 <= 75) || (n30 >= 87 && n30 <= 90)) {
+                    gc->world.trackMap[n][n29] = 0;
+                    gc->world.tileMap[n][n29] = -128;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 >= 77 && n30 <= 80) {
+                    gc->world.tileMap[n][n29] = (int8_t)(128 + n30 - 56);
+                    gc->world.trackMap[n][n29] = 0;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 == 81 || n30 == 82) {
+                    gc->world.tileMap[n][n29] = -128;
+                    gc->world.trackMap[n][n29] = 0;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 >= 83 && n30 <= 86) {
+                    gc->world.tileMap[n][n29] = (int8_t)(128 + n30 - 76);
+                    gc->world.trackMap[n][n29] = 0;
+                    gc->lastViewportCenterX = -1;
+                }
+                if (n30 == 76) {
+                    int n31 = gc->world.trackMap[n][n29] & 7;
+                    int n32 = (gc->world.trackMap[n][n29] & 0x3F) >> 3;
+                    if (n31 == 1 && n32 == 1) {
+                        gc->world.tileMap[n][n29] = -128;
+                        gc->world.trackMap[n][n29] = 0;
+                    } else if (n31 == 1) {
+                        gc->world.tileMap[n][n29] = -57;
+                        gc->world.trackMap[n][n29] = (int8_t)(0x40 | n32);
+                    } else if (n32 == 1) {
+                        gc->world.tileMap[n][n29] = -58;
+                        gc->world.trackMap[n][n29] = (int8_t)(0x40 | n31);
+                    }
+                    gc->lastViewportCenterX = -1;
+                }
+            }
+
+            for (int n27 = 0; n27 < 500; ++n27) {
+                if ((gc->fleet.trainFlags[n27] & 0x80) != 128
+                    || (gc->fleet.trainFlags[n27] & 0x40) != 64)
+                    continue;
+                if ((gc->fleet.trainFlags[n27] & 0x20) == 32) {
+                    if (gc->fleet.trainEnergyOrCount[n27] > 0) {
+                        --gc->fleet.trainEnergyOrCount[n27];
+                        continue;
+                    }
+                    gc->fleet.trainPhase[n27] = 0;
+                    gc->fleet.trainFlags[n27] = 0;
+                    continue;
+                }
+                gc_updateTrain(gc, n27);
+                gc_updateTrain(gc, n27);
+                if (gc->fleet.trainPhase[n27] == 0) gc_mergeTrainAt(gc, n27);
+            }
+
+            if (gc->counterA >= gc->dH) {
+                gc_computeYearEndMetrics(gc);
+                if (gc->frameIndex > 0) --gc->frameIndex;
+                gc->counterA = 0;
+                ++gc->economy.dayOfMonth;
+                gc_everyMonthlyTick(gc);
+                if (gc->economy.dayOfMonth % 4 == 0) gc_maybeAiTakeTurn(gc);
+                if (gc->economy.dayOfMonth % 2 == 0) {
+                    if (gc->economy.dayOfMonth % 10 == 0) gc_everyTenTick(gc);
+                    gc_everyTwoTick(gc);
+                    gc_everyTwoTickZ(gc);
+                    if (gc->flagsA) {
+                        int found = 0;
+                        for (int n = 0; n < 30; ++n)
+                            found = found || gc_pickValidForestTile(gc);
+                        if (found) gc_maybeAITick(gc);
+                    }
+                    gc_tickInputOrAi(gc, false);
+                }
+                int oldMonth = gc->economy.monthOfYear;
+                switch (gc->economy.monthOfYear) {
+                    case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+                        if (gc->economy.dayOfMonth == 32) ++gc->economy.monthOfYear;
+                        break;
+                    case 2:
+                        if ((gc->economy.year % 4 != 0 && gc->economy.dayOfMonth == 29)
+                            || (gc->economy.year % 4 == 0 && gc->economy.dayOfMonth == 30))
+                            ++gc->economy.monthOfYear;
+                        break;
+                    case 4: case 6: case 9: case 11:
+                        if (gc->economy.dayOfMonth == 31) ++gc->economy.monthOfYear;
+                        break;
+                }
+                if (oldMonth != gc->economy.monthOfYear) {
+                    gc->economy.dayOfMonth = 1;
+                    gc_newYearNotify(gc);
+                    gc_dayResetP(gc);
+                    gc_dayResetAg(gc);
+                    gc_dayResetAd(gc);
+                    switch (std::abs(gc->rng.next_int() % 7)) {
+                        case 0: gc->moneyBaseA += 9; gc->moneyBaseB += 9; break;
+                        case 1: ++gc->baseTrainSpeed; gc->accel1 += 3; gc->brake1 += 3; break;
+                        case 2: ++gc->baseTrainSpeed2; gc->accel2 += 2; break;
+                        case 3: gc->costPower += 47; gc->costStruct += 98; break;
+                        case 4:
+                            gc->costOverhead += 3; gc->costMaintenance += 59; gc->costCrew += 4;
+                            break;
+                        case 5:
+                            gc->gWagonCost += 378; gc->gWagonCost2 += 432;
+                            gc->gWagonCost3 += 518; gc->gWagonCost4 += 601;
+                            gc->gWagonCost5 += 714; gc->gWagonCost6 += 826;
+                            break;
+                        case 6:
+                            gc->costGroupC1 += 45; gc->costGroupC2 += 51;
+                            gc->costGroupC3 += 43; gc->costGroupC4 += 50;
+                            break;
+                    }
+                }
+                if (gc->economy.monthOfYear == 13) {
+                    gc_revenueOrYear(gc);
+                    gc_postRevenueReset(gc);
+                    gc->economy.monthOfYear = 1;
+                    ++gc->economy.year;
+                    if (gc->economy.money < 0) {
+                        gc->ready = false;
+                        gc->transitionCode = 7;
+                        gc_setState(gc, +GameState::MenuOverlay);
+                    }
+                }
+                int oldEra = gc->era;
+                if (gc->economy.dayOfMonth == 5 && gc->economy.monthOfYear == 3 && gc->economy.year == 1951 && gc->era < 2)
+                    gc->era = 2;
+                if (gc->economy.dayOfMonth == 17 && gc->economy.monthOfYear == 7 && gc->economy.year == 1953 && gc->era < 3)
+                    gc->era = 3;
+                if (gc->economy.dayOfMonth == 4 && gc->economy.monthOfYear == 12 && gc->economy.year == 1957 && gc->era < 4)
+                    gc->era = 4;
+                if (gc->economy.dayOfMonth == 26 && gc->economy.monthOfYear == 2 && gc->economy.year == 1962 && gc->era < 5)
+                    gc->era = 5;
+                if (oldEra != gc->era) {
+                    gc->ready = false;
+                    gc->transitionCode = 13;
+                    gc_setState(gc, +GameState::MenuOverlay);
+                }
+            } else {
+                ++gc->counterA;
+            }
+            gc->tickEnd = midp_current_time_millis();
+}
