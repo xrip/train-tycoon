@@ -6,8 +6,8 @@
 void gc_dayResetP(GameCanvas *gc) {
     if (gc->economy.monthOfYear % 4 == 0) {
         for (int i = 0; i < 64; ++i) {
-            if (gc->constructionTimers[i] > 0)
-                --gc->constructionTimers[i];
+            if (gc->world.constructionTimers[i] > 0)
+                --gc->world.constructionTimers[i];
         }
     }
 }
@@ -25,27 +25,27 @@ void gc_advanceConstructionTimers(GameCanvas *gc, int32_t n, int32_t n2, int32_t
             seen[n4] = true;
             int n5;
             if (n3 < 0) {
-                n5 = gc->constructionTimers[n4] * n3 * 3 / 200 - 1;
+                n5 = gc->world.constructionTimers[n4] * n3 * 3 / 200 - 1;
                 if (n5 < n3) n3 = n5;
             } else {
-                n5 = (100 - gc->constructionTimers[n4]) / 30 * n3 / 3 + 1;
+                n5 = (100 - gc->world.constructionTimers[n4]) / 30 * n3 / 3 + 1;
                 if (n5 > n3) n5 = n3;
             }
-            gc->constructionTimers[n4] = (int8_t)(gc->constructionTimers[n4] + n5);
-            if (gc->constructionTimers[n4] < 0) gc->constructionTimers[n4] = 0;
-            if (gc->constructionTimers[n4] > 100) gc->constructionTimers[n4] = 100;
+            gc->world.constructionTimers[n4] = (int8_t)(gc->world.constructionTimers[n4] + n5);
+            if (gc->world.constructionTimers[n4] < 0) gc->world.constructionTimers[n4] = 0;
+            if (gc->world.constructionTimers[n4] > 100) gc->world.constructionTimers[n4] = 100;
         }
     }
 }
 
 // void maybeAITick()
 void gc_maybeAITick(GameCanvas *gc) {
-    for (int n = 0; n < 64; ++n) gc->zonePopulation[n] = 0;
+    for (int n = 0; n < 64; ++n) gc->world.zonePopulation[n] = 0;
     for (int n = 0; n < gc->world.mapWidth; ++n) {
         for (int i = 0; i < gc->world.mapHeight; ++i) {
             if (gc->world.tileMap[n][i] < tile::BUILT_FIRST || gc->world.tileMap[n][i] > tile::CITY_ZONE_LAST) continue;
             int n2 = gc->world.trackMap[n][i] & 0x3F;
-            ++gc->zonePopulation[n2];
+            ++gc->world.zonePopulation[n2];
         }
     }
 }
@@ -556,23 +556,23 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                         && !seenZones[n11]) {
                         seenZones[n11] = true;
                         if ((gc->fleet.serviceUnloadFlags[i] & 1) == 1) {
-                            int add = gc->zonePopulation[n11]
-                                      * (gc->constructionTimers[n11] + 10
-                                         + gc->zonePopulation[n11] / 10
+                            int add = gc->world.zonePopulation[n11]
+                                      * (gc->world.constructionTimers[n11] + 10
+                                         + gc->world.zonePopulation[n11] / 10
                                          + gc->rng.next_int() % 40) / 170;
                             gc->fleet.serviceResourceStock[i][0] =
                                 (int16_t)(gc->fleet.serviceResourceStock[i][0] + add);
                         }
                         if ((gc->fleet.serviceUnloadFlags[i] & 0x10) == 0x10) {
-                            int add = gc->zonePopulation[n11] / 2
-                                      * (gc->constructionTimers[n11] + 10
-                                         + gc->zonePopulation[n11] / 10
+                            int add = gc->world.zonePopulation[n11] / 2
+                                      * (gc->world.constructionTimers[n11] + 10
+                                         + gc->world.zonePopulation[n11] / 10
                                          + std::abs(gc->rng.next_int() % 40)) / 170;
                             gc->fleet.serviceResourceStock[i][4] =
                                 (int16_t)(gc->fleet.serviceResourceStock[i][4] + add);
                         }
-                        gc->zonePopulation[n11] =
-                            (int16_t)(gc->zonePopulation[n11]
+                        gc->world.zonePopulation[n11] =
+                            (int16_t)(gc->world.zonePopulation[n11]
                                       + gc->rng.next_int() % 2);
                     }
                     ++n9;

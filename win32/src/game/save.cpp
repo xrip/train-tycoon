@@ -241,8 +241,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     gc_saveOrLoadShortMatrixInlined(gc, gc->fleet.serviceResourceStock);
     IO_BYTE(numSelectedTrains);
     IO_BOOL(flagsA);
-    IO_BYTES(constructionTimers);
-    IO_SHORTS(zonePopulation);
+    IO_BYTES(world.constructionTimers);
+    IO_SHORTS(world.zonePopulation);
     IO_SHORTS(trainSelectionIndex);
     IO_SHORTS(trainSelectionY);
     IO_SHORTS(trainSelectionX);

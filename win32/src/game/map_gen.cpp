@@ -48,8 +48,8 @@ int8_t gc_addCityEntry(GameCanvas *gc, int32_t n) {
 
 // byte registerTrain(byte by, int n, int n2)
 int8_t gc_registerTrain(GameCanvas *gc, int8_t by, int32_t n, int32_t n2) {
-    gc->constructionTimers[gc->numSelectedTrains] = 50;
-    gc->zonePopulation[gc->numSelectedTrains] = by;
+    gc->world.constructionTimers[gc->numSelectedTrains] = 50;
+    gc->world.zonePopulation[gc->numSelectedTrains] = by;
     gc->trainSelectionY[gc->numSelectedTrains] = (int16_t)n;
     gc->trainSelectionX[gc->numSelectedTrains] = (int16_t)n2;
     int16_t s = 0;

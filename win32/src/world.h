@@ -39,6 +39,13 @@ struct World {
     int32_t woodAgeTimer = 0;
     int32_t phaseTimer = 0;
 
+    // Per-zone growth state (64-slot zone grid derived from the map). zonePopulation
+    // is recomputed each growth pass by counting populated tiles; constructionTimers
+    // is the per-zone construction level. Both are saved. Values and save byte order
+    // are unchanged.
+    std::array<int8_t, 64> constructionTimers{};
+    std::array<int16_t, 64> zonePopulation{};
+
     // True when (x, y) is a valid map cell.
     bool in_bounds(int32_t x, int32_t y) const {
         return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;

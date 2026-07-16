@@ -88,8 +88,8 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
                         gc->spriteIndexTable[86 + (selection & 0xff)]];
                     return join_codes(tracked_codes(wagon), tracked_codes(engine));
                 }
-                case 1: return gc_formatNumberWithSuffix(gc, gc->zonePopulation[gc->junctionDirCursor] * 13, 0);
-                case 2: return gc_formatNumberWithSuffix(gc, gc->constructionTimers[gc->junctionDirCursor], 29);
+                case 1: return gc_formatNumberWithSuffix(gc, gc->world.zonePopulation[gc->junctionDirCursor] * 13, 0);
+                case 2: return gc_formatNumberWithSuffix(gc, gc->world.constructionTimers[gc->junctionDirCursor], 29);
             }
             break;
 
