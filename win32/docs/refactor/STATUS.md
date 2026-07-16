@@ -33,13 +33,15 @@ Only one row may be `in_progress`.
 | SCENARIO-01 | done | Debug and Release full tests passed, 2026-07-16 | Scenario owns scores/leaderboard, milestones, AI opponent state, offer generation, scenario identity/difficulty/progression, and high-score entry; shared menu-row display arrays stay for UI-01 |
 | SIM-01 | done | Debug and Release full tests passed, 2026-07-16 | Playing tick extracted into one named gc_simulationTick coordinator stating the exact tick order; gc_update dispatcher still lives in paint.cpp (smell, left for a later cleanup) |
 | BUILD-01 | done | Debug and Release full tests passed, 2026-07-16 | BuildController owns track-lay, train-buy, and terrain-edit/selection action state (picks up PATH-01's selectionCost/track owner codes); cost-model constants and build-menu display stay per D-012 |
-| STAGE-3-EXIT | partial | ASan full tests passed, 2026-07-16 | All Stage-3 data owners exist (World/Pathfinder/Fleet/Economy/Scenario/BuildController) and ASan is clean. Tile-animation and zone-growth state homed onto World. The core-rule `GameCanvas*` -> owner-ref signature refactor is gated on shared-state homing (rng/era/cost constants) per D-013; done last, after Stage 4 homes the UI/render/asset fields. |
+| STAGE-3-EXIT | partial | ASan full tests passed, 2026-07-16 | All ten owned parts exist and ASan is clean. Tile-animation, zone-growth, and map-gen params homed onto World; camera onto Renderer; cost/performance model onto Economy (D-012 resolved); scenario flags onto Scenario. `GameCanvas` is now a thin aggregate (parts + rng/era/frame loop). The core-rule -> owner-ref/`Game&` signature refactor is the remaining piece (D-013); it lands with CLEAN-01's `GameCanvas`->`Game` rename. |
 | ASSET-01 | done | Debug and Release full tests passed, 2026-07-16 | Assets owns the packed sprite data tables, the loaded font/tile/cycle images, and the sprite stream reader; backbuffer and per-frame sprite-id render state stay for RENDER-01 |
 | RENDER-01 | done | Debug and Release full tests passed, 2026-07-16 | Renderer owns the backbuffer/surface, current-sprite tracking, the culled visibleTrains list and drawn tile bounds (saved), the cached camera centre, and the clip/repaint/dialog-height frame state. The "drawing cannot change simulation state" property is verified at the Stage-4 exit (manual play). |
 | RENDER-02 | done | Debug and Release full tests passed, 2026-07-16 | Draw functions read by intent; recovered the last weak name gc_u -> gc_wagonCarSprite |
 | UI-01 | done (data) | Debug and Release full tests passed, 2026-07-16 | UiController owns the build/offer menu rows, build-menu grids/cursors, confirm-dialog and screen-transition state, report-graph display, and train/city selection. The item exit's manual play check remains a human step. |
-| UI-02 | in_progress | UI-01 green | Input, cursor, pause, screen changes |
-| APP-01 | queued | - | Application loop |
-| CLEAN-01..CLEAN-02 | queued | - | Remove old shape |
+| UI-02 | done (data) | Debug and Release full tests passed, 2026-07-16 | UiController owns cursor and key input state (pending/pause, key-repeat, held/current keys, sub-states). Manual play check remains a human step. |
+| SaveCodec | done | Debug and Release full tests passed, 2026-07-16 | SaveCodec owns the serialization buffer/cursor and snapshot bookkeeping (SAVE-01 tail). |
+| APP-01 | queued | - | Application loop (frame/timing state still on the aggregate; exit needs manual play) |
+| CLEAN-01 | queued | - | Rename `GameCanvas`->`Game`, remove old shape (also lands the core-rule signature change) |
+| CLEAN-02 | in_progress | - | Name audit: removed 10 dead fields; recovered dc/dH/hx/cH/ce/ee/eD/aJ and flagsA/flagsB. Only savedLegacyMetricBq (save-only) remains. |
 | DOC-01 | queued | - | Final guides |
 | RELEASE-01 | queued | - | Final proof |
