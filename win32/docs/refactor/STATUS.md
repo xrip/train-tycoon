@@ -35,8 +35,8 @@ Only one row may be `in_progress`.
 | BUILD-01 | done | Debug and Release full tests passed, 2026-07-16 | BuildController owns track-lay, train-buy, and terrain-edit/selection action state (picks up PATH-01's selectionCost/track owner codes); cost-model constants and build-menu display stay per D-012 |
 | STAGE-3-EXIT | partial | ASan full tests passed, 2026-07-16 | All Stage-3 data owners exist (World/Pathfinder/Fleet/Economy/Scenario/BuildController) and ASan is clean. Tile-animation and zone-growth state homed onto World. The core-rule `GameCanvas*` -> owner-ref signature refactor is gated on shared-state homing (rng/era/cost constants) per D-013; done last, after Stage 4 homes the UI/render/asset fields. |
 | ASSET-01 | done | Debug and Release full tests passed, 2026-07-16 | Assets owns the packed sprite data tables, the loaded font/tile/cycle images, and the sprite stream reader; backbuffer and per-frame sprite-id render state stay for RENDER-01 |
-| RENDER-01 | in_progress | ASSET-01 green | Read-only world and train drawing |
-| RENDER-02 | queued | - | Screen and widget drawing |
+| RENDER-01 | done | Debug and Release full tests passed, 2026-07-16 | Renderer owns the backbuffer/surface, current-sprite tracking, the culled visibleTrains list and drawn tile bounds (saved), the cached camera centre, and the clip/repaint/dialog-height frame state. The "drawing cannot change simulation state" property is verified at the Stage-4 exit (manual play). |
+| RENDER-02 | in_progress | RENDER-01 green | Screen and widget drawing |
 | UI-01..UI-02 | queued | - | UI and input |
 | APP-01 | queued | - | Application loop |
 | CLEAN-01..CLEAN-02 | queued | - | Remove old shape |
