@@ -241,15 +241,15 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gc->ui.menuDirty = true;
         gc->renderer.lastViewportCenterX = -1;
         if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {
-            if (gc->hx == +GameState::Playing) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::Playing; }
-            if (gc->hx == +GameState::MapOverview) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::MapOverview; }
+            if (gc->savedGameState == +GameState::Playing) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::Playing; }
+            if (gc->savedGameState == +GameState::MapOverview) { gc->ui.pendingTransitionCode = gc->ui.transitionCode; gc->gameState = +GameState::MapOverview; }
         }
     }
 }
 
 // public void setState(int n)
 void gc_setState(GameCanvas *gc, int32_t n) {
-    gc->hx = gc->gameState;
+    gc->savedGameState = gc->gameState;
     if (!gc->ready) gc->assets.cycle_flag = NULL;
     gc->ui.snapshotLoadedFlag = false;
     gc->ui.menuDirty = true;

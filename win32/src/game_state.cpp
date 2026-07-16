@@ -94,7 +94,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->scenario.routeSlotIndex = 0;
     gc->assets.spriteCycleCursor = 0;
     gc->ui.snapshotLoadedFlag = false;
-    gc->cH = false;
+    gc->snapshotLoadSucceeded = false;
     gc->scenario.aiEnabled = false;
     gc->pathfinder.tieBreakCounter = 0;
     gc->build.previewTrackOwnerCode = 0;
@@ -272,12 +272,12 @@ void gc_fields_init(GameCanvas *gc) {
     gc->timerC2 = 0;
     gc->world.woodAgeTimer = 0;
     gc->world.phaseTimer = 0;
-    gc->dc = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
+    gc->graphColors = {16756834, 16765610, 0xC08000, 0xFF9696, 0xFFC8C8, 0xC80000, 0xA0FFA0, 0xC8FFC8, 51200};
     gc->eD = -1;
     gc->aJ = -1;
-    gc->hx = 0;
+    gc->savedGameState = 0;
     gc->loadingTimer = 0;
-    gc->dH = 50;
+    gc->dayTickThreshold = 50;
     gc->assets.tileSpriteYOffsetByCode = {0, 0, -4, 0, 0, 4, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, -4, 4, 4, 0, 0, 4, 0, -4, 0};
     gc->renderer.lastViewportCenterX = -1;
     gc->renderer.viewportCenterYCached = -1;

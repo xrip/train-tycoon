@@ -36,7 +36,7 @@ typedef struct GameCanvas {
     bool displayInitialized;
     bool ee;
     bool flagsA;
-    bool cH;
+    bool snapshotLoadSucceeded;
     Pathfinder pathfinder;
     int32_t serviceVehicleAtCursor;
     Fleet fleet;
@@ -77,12 +77,12 @@ typedef struct GameCanvas {
     int32_t timerB2;
     int32_t timerC1;
     int32_t timerC2;
-    std::array<int32_t, 9> dc{};
+    std::array<int32_t, 9> graphColors{};  // 3 series x 3 ARGB colors for report graphs
     int32_t eD;
     int32_t aJ;
-    int32_t hx;
+    int32_t savedGameState;  // game state stashed for return after an overlay
     int32_t loadingTimer;
-    int32_t dH;
+    int32_t dayTickThreshold;  // frames per game-day (counterA counts up to this)
     int64_t tickStart;
     int64_t tickEnd;
 } GameCanvas;

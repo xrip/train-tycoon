@@ -83,12 +83,12 @@ bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
     if (n != 1) gc->ui.snapshotLoadedFlag = false;
     if (n == 1) {
         if (!gc->ui.snapshotLoadedFlag) {
-            gc->cH = gc_loadSnapshotAndReturn(gc);
+            gc->snapshotLoadSucceeded = gc_loadSnapshotAndReturn(gc);
             gc->ui.snapshotLoadedFlag = true;
         }
         if (n2 == 0 && gc->scenario.aiEnabled) return false;
         if (n2 == 0 && !gc->ready) return true;
-        if (n2 == 1 && gc->cH) return true;
+        if (n2 == 1 && gc->snapshotLoadSucceeded) return true;
     }
     if (n == 5 && gc->scenario.scenarioStepCompare > n2) return true;
     if (n == 21) {

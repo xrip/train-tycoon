@@ -121,11 +121,11 @@ void gc_drawTextBox(GameCanvas *gc, Surface *g, int32_t n, int32_t n2,
     if ((n4 & 2) == 2) n2 -= 5;
     if ((n4 & 4) == 4) n -= n5 + 6;
     if (n4 == 37) { n = 0; n2 = 15 + gcs_gameplayViewportHeight - 15; }
-    midp_set_color(g, gc->dc[3 * n3]);
+    midp_set_color(g, gc->graphColors[3 * n3]);
     midp_fill_rect(g, n, n2, n5 + 5, 13);
-    midp_set_color(g, gc->dc[3 * n3 + 1]);
+    midp_set_color(g, gc->graphColors[3 * n3 + 1]);
     midp_draw_rect(g, n, n2, n5 + 5, 13);
-    midp_set_color(g, gc->dc[3 * n3 + 2]);
+    midp_set_color(g, gc->graphColors[3 * n3 + 2]);
     midp_draw_rect(g, n, n2 + 13, n5 + 5, 0);
     midp_draw_rect(g, n + n5 + 5, n2, 0, 13);
     gc_renderFontString(gc, g, n + 4, n2 + 5, codes, false);

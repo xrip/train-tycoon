@@ -737,7 +737,7 @@ void gc_simulationTick(GameCanvas *gc) {
                 if (gc->fleet.trainPhase[n27] == 0) gc_mergeTrainAt(gc, n27);
             }
 
-            if (gc->counterA >= gc->dH) {
+            if (gc->counterA >= gc->dayTickThreshold) {
                 gc_computeYearEndMetrics(gc);
                 if (gc->frameIndex > 0) --gc->frameIndex;
                 gc->counterA = 0;
