@@ -264,8 +264,8 @@ TEST_CASE("fast: small path search") {
     game->accel1 = 10;
 
     CHECK(gc_tryBuildPath(game));
-    CHECK(game->trackTileCount > 0);
-    CHECK(game->selectionCost > 0);
+    CHECK(game->build.trackTileCount > 0);
+    CHECK(game->build.selectionCost > 0);
     delete game;
 }
 

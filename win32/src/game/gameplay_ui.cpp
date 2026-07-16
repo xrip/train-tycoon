@@ -116,8 +116,8 @@ void gc_paintMain(GameCanvas *gc, Surface *graphics) {
     }
     if (gc->buildMenuMode == 2) {
         char cost_text[24];
-        int64_t magnitude = gc->selectionCost < 0
-                            ? -(int64_t)gc->selectionCost : gc->selectionCost;
+        int64_t magnitude = gc->build.selectionCost < 0
+                            ? -(int64_t)gc->build.selectionCost : gc->build.selectionCost;
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
         int text_len = (int)strlen(cost_text);
         const auto currency_codes = gc_tracked_codes(

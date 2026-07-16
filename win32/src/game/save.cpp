@@ -263,8 +263,8 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BYTES(fleet.trainAiOverride);
     IO_INT(industryCategory);
     IO_BOOL(industrySiteFound);
-    IO_INT(nextTrackPieceCode);
-    if (gc->nextTrackPieceCode == 0) gc->nextTrackPieceCode = 66;
+    IO_INT(build.nextTrackPieceCode);
+    if (gc->build.nextTrackPieceCode == 0) gc->build.nextTrackPieceCode = 66;
     IO_BYTE(scenario.aiFrequency);
     IO_BYTE(scenario.aiThreshold);
     if (mode != save::OP_RESET_SKIP) IO_BYTE(scenario.difficultyCycle);

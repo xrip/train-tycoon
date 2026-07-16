@@ -325,10 +325,10 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     int end_y = start_y;
     bool found_target = false;
     int cost = gc->moneyBaseA;
-    gc->trackStartX = start_x;
-    gc->trackStartY = start_y;
-    gc->trackStepX = step_x;
-    gc->trackStepY = step_y;
+    gc->build.trackStartX = start_x;
+    gc->build.trackStartY = start_y;
+    gc->build.trackStepX = step_x;
+    gc->build.trackStepY = step_y;
     while ((end_x += step_x) >= 0 && (end_y += step_y) >= 0
            && end_x < gc->world.mapWidth && end_y < gc->world.mapHeight) {
         cost += gc->moneyBaseB;
@@ -338,11 +338,11 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
     }
     if (!found_target) return;
 
-    gc->selectionCost = cost;
+    gc->build.selectionCost = cost;
     gc->buildMenuMode = 2;
     gc->menuDirty = true;
     gc->buildMenuItemIndex = 0;
-    gc->buildCancelled = false;
+    gc->build.buildCancelled = false;
     gc->world.tileMap[end_x][end_y] = (int8_t)end_tile;
     gc->world.trackMap[end_x][end_y] = 65;
     gc->world.tileMap[start_x][start_y] = (int8_t)start_tile;
@@ -356,8 +356,8 @@ void gc_computeTrackBuildInlined(GameCanvas *gc, int32_t start_x,
 }
 
 void gc_revertTrackTiles(GameCanvas *gc) {
-    int x = gc->trackStartX;
-    int y = gc->trackStartY;
+    int x = gc->build.trackStartX;
+    int y = gc->build.trackStartY;
     for (;;) {
         int tile = gc->world.tileMap[x][y];
         if (tile < 81 || tile > 86) break;
@@ -367,8 +367,8 @@ void gc_revertTrackTiles(GameCanvas *gc) {
         if (tile == 85) gc->world.tileMap[x][y] = 9;
         if (tile == 81 || tile == 82) gc->world.tileMap[x][y] = 0;
         gc->world.trackMap[x][y] = 0;
-        x += gc->trackStepX;
-        y += gc->trackStepY;
+        x += gc->build.trackStepX;
+        y += gc->build.trackStepY;
         if (!gc->world.in_bounds(x, y)) break;
     }
 }
@@ -575,22 +575,22 @@ void gc_openBuildMenu(GameCanvas *gc) {
             break;
         case 2:
             if (item == 0) {
-                if (gc->selectionCost <= gc->economy.money) {
+                if (gc->build.selectionCost <= gc->economy.money) {
                     gc_setTrackOwnerCode(gc, 1);
-                    gc->economy.money -= gc->selectionCost;
-                    gc->economy.totalSpent += gc->selectionCost;
-                    gc_pushMoneyHistory(gc, -gc->selectionCost);
-                    gc_incrementRowValueType13(gc, gc->selectionCost);
+                    gc->economy.money -= gc->build.selectionCost;
+                    gc->economy.totalSpent += gc->build.selectionCost;
+                    gc_pushMoneyHistory(gc, -gc->build.selectionCost);
+                    gc_incrementRowValueType13(gc, gc->build.selectionCost);
                 } else {
                     gc_normalizeTrackBits(gc);
                     gc_enterOutOfMoneyState(gc);
                 }
             } else if (item == 9) {
-                if (gc->buildCancelled) gc_normalizeTrackBits(gc);
+                if (gc->build.buildCancelled) gc_normalizeTrackBits(gc);
                 else gc_revertTrackTiles(gc);
             }
             gc->buildMenuMode = 1;
-            gc->buildMenuItemIndex = gc->buildCancelled ? 0 : 2;
+            gc->buildMenuItemIndex = gc->build.buildCancelled ? 0 : 2;
             gc->menuDirty = true;
             gc->lastViewportCenterX = -1;
             break;

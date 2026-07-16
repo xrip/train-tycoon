@@ -59,7 +59,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->spriteJustChanged = 0;
     gc->terrainSmoothCost = 0;
     gc->initialIndustryPlaced = true;
-    gc->trackBuildInProgress = false;
+    gc->build.trackBuildInProgress = false;
     gc->mapGenStage = 0;
     gc->tilesGeneratedInStage = 0;
     gc->totalTilesToGenerate = 0;
@@ -101,11 +101,11 @@ void gc_fields_init(GameCanvas *gc) {
     gc->cH = false;
     gc->scenario.aiEnabled = false;
     gc->pathfinder.tieBreakCounter = 0;
-    gc->previewTrackOwnerCode = 0;
-    gc->existingTrackOwnerCode = 1;
-    gc->selectionCost = 0;
-    gc->buildCancelled = true;
-    gc->trackTileCount = 0;
+    gc->build.previewTrackOwnerCode = 0;
+    gc->build.existingTrackOwnerCode = 1;
+    gc->build.selectionCost = 0;
+    gc->build.buildCancelled = true;
+    gc->build.trackTileCount = 0;
     gc->serviceVehicleAtCursor = 0;
     gc->wagonType = 0;
     gc->wagonDiscountType = 0;
@@ -195,7 +195,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->economy.revenueTotal = 0;
     gc->economy.decadeProfitGraphTotal = 0;
     gc->scenario.difficultyCycle = 1;
-    gc->nextTrackPieceCode = 66;
+    gc->build.nextTrackPieceCode = 66;
     gc->scenario.aiFrequency = 15;
     gc->scenario.aiThreshold = 12;
     gc->scenario.offerTypesByEffect = {{

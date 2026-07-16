@@ -275,25 +275,25 @@ void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
             while (n5 != gc->world.heightMap[n + by4][n2 + by3]) {
                 gc_smoothTileAtInlined(gc, n + by4, n2 + by3, n5 > gc->world.heightMap[n + by4][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; return;
+                gc->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != gc->world.heightMap[n + by4 + 1][n2 + by3]) {
                 gc_smoothTileAtInlined(gc, n + by4 + 1, n2 + by3, n5 > gc->world.heightMap[n + by4 + 1][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; return;
+                gc->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != gc->world.heightMap[n + by4][n2 + by3 + 1]) {
                 gc_smoothTileAtInlined(gc, n + by4, n2 + by3 + 1, n5 > gc->world.heightMap[n + by4][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; return;
+                gc->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != gc->world.heightMap[n + by4 + 1][n2 + by3 + 1]) {
                 gc_smoothTileAtInlined(gc, n + by4 + 1, n2 + by3 + 1, n5 > gc->world.heightMap[n + by4 + 1][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
-                gc->trackBuildInProgress = true; return;
+                gc->build.trackBuildInProgress = true; return;
             }
         }
     }
@@ -315,7 +315,7 @@ void gc_placeTerrainPatch(GameCanvas *gc, int32_t n, int32_t n2) {
 void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
     int n2, n3, n4, n5, n6, n7;
     bool bl;
-    if (gc->trackBuildInProgress) return;
+    if (gc->build.trackBuildInProgress) return;
     int64_t l = midp_current_time_millis();
     do {
         bl = true;
@@ -332,10 +332,10 @@ void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
             }
         }
         if (midp_current_time_millis() - l <= 1500) continue;
-        gc->trackBuildInProgress = true;
+        gc->build.trackBuildInProgress = true;
         break;
     } while (!bl);
-    if (gc->trackBuildInProgress) return;
+    if (gc->build.trackBuildInProgress) return;
     gc_trackBuildStepInlined(gc, n7, n6, n5, n4);
     n3 = gc_addCityEntry(gc, n);
     switch (n) {
@@ -455,7 +455,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
             int height = abs(nextRngInt(gc) % 20) + 1;
             gc_lowerTerrainArea(gc, center_x, center_y, width, height, -1);
         }
-        gc->trackBuildInProgress = false;
+        gc->build.trackBuildInProgress = false;
         if (gc->mapGenStage == mapgen::STAGE_PLACE_PATCHES) {
             for (n4 = 0; n4 < gc->mapGenColumns; ++n4) {
                 bool done = false;
@@ -477,7 +477,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
         if (gc->mapGenStage == mapgen::STAGE_FEATURE_3) gc_placeTerrainFeature(gc, 3);
         if (gc->mapGenStage == mapgen::STAGE_FEATURE_4) gc_placeTerrainFeature(gc, 4);
         if (gc->mapGenStage == mapgen::STAGE_FEATURE_5) gc_placeTerrainFeature(gc, 5);
-        if (gc->trackBuildInProgress) gc->loadStep = 0;
+        if (gc->build.trackBuildInProgress) gc->loadStep = 0;
         if (gc->mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
             for (n4 = 0; n4 < gc->initialObstacleCount; ++n4) {
                 n3 = abs(nextRngInt(gc) % gc->world.mapWidth);
@@ -560,7 +560,7 @@ void gc_pickIndustrySite(GameCanvas *gc) {
 
 void gc_spawnTrainAt(GameCanvas *gc, int32_t x, int32_t y) {
     int engine_type = gc->era / 3;
-    int wagon_count = gc->selectionCost / 8000 + 1;
+    int wagon_count = gc->build.selectionCost / 8000 + 1;
     if (wagon_count > 5) wagon_count = 5;
     int cargo_type = 2;
     if (gc->industryCategory == 1) cargo_type = 3;
@@ -585,15 +585,15 @@ void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
     bool track_down = y < gc->world.mapHeight - 1 && gc->world.trackMap[x][y + 1] == track::PRESENT;
     if (track_left || track_right) {
         gc->world.tileMap[x][y] = 88;
-        gc->world.trackMap[x][y] = (int8_t)gc->nextTrackPieceCode;
+        gc->world.trackMap[x][y] = (int8_t)gc->build.nextTrackPieceCode;
         if (track_right && x > 1
             && can_extend_station_over(gc, x - 1, y)
             && can_extend_station_over(gc, x - 2, y)) {
             gc->world.tileMap[x][y] = 90;
             gc->world.tileMap[x - 1][y] = 88;
             gc->world.tileMap[x - 2][y] = 90;
-            gc->world.trackMap[x - 1][y] = (int8_t)gc->nextTrackPieceCode;
-            gc->world.trackMap[x - 2][y] = (int8_t)gc->nextTrackPieceCode;
+            gc->world.trackMap[x - 1][y] = (int8_t)gc->build.nextTrackPieceCode;
+            gc->world.trackMap[x - 2][y] = (int8_t)gc->build.nextTrackPieceCode;
         }
         if (track_left && x < gc->world.mapWidth - 2
             && can_extend_station_over(gc, x + 1, y)
@@ -601,21 +601,21 @@ void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
             gc->world.tileMap[x][y] = 90;
             gc->world.tileMap[x + 1][y] = 88;
             gc->world.tileMap[x + 2][y] = 90;
-            gc->world.trackMap[x + 1][y] = (int8_t)gc->nextTrackPieceCode;
-            gc->world.trackMap[x + 2][y] = (int8_t)gc->nextTrackPieceCode;
+            gc->world.trackMap[x + 1][y] = (int8_t)gc->build.nextTrackPieceCode;
+            gc->world.trackMap[x + 2][y] = (int8_t)gc->build.nextTrackPieceCode;
         }
     }
     if (track_up || track_down) {
         gc->world.tileMap[x][y] = 87;
-        gc->world.trackMap[x][y] = (int8_t)gc->nextTrackPieceCode;
+        gc->world.trackMap[x][y] = (int8_t)gc->build.nextTrackPieceCode;
         if (track_up && y > 1
             && can_extend_station_over(gc, x, y - 1)
             && can_extend_station_over(gc, x, y - 2)) {
             gc->world.tileMap[x][y] = 89;
             gc->world.tileMap[x][y - 1] = 87;
             gc->world.tileMap[x][y - 2] = 89;
-            gc->world.trackMap[x][y - 1] = (int8_t)gc->nextTrackPieceCode;
-            gc->world.trackMap[x][y - 2] = (int8_t)gc->nextTrackPieceCode;
+            gc->world.trackMap[x][y - 1] = (int8_t)gc->build.nextTrackPieceCode;
+            gc->world.trackMap[x][y - 2] = (int8_t)gc->build.nextTrackPieceCode;
         }
         // The original bytecode tests track_up here too (not track_down).
         if (track_up && y < gc->world.mapHeight - 2
@@ -624,8 +624,8 @@ void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {
             gc->world.tileMap[x][y] = 89;
             gc->world.tileMap[x][y + 1] = 87;
             gc->world.tileMap[x][y + 2] = 89;
-            gc->world.trackMap[x][y + 1] = (int8_t)gc->nextTrackPieceCode;
-            gc->world.trackMap[x][y + 2] = (int8_t)gc->nextTrackPieceCode;
+            gc->world.trackMap[x][y + 1] = (int8_t)gc->build.nextTrackPieceCode;
+            gc->world.trackMap[x][y + 2] = (int8_t)gc->build.nextTrackPieceCode;
         }
     }
 }
@@ -650,7 +650,7 @@ void gc_placeCitiesAndIndustry(GameCanvas *gc) {
     gc_autoExtendTrackStation(gc, gc->cityStationX, gc->cityStationY);
     gc_autoExtendTrackStation(gc, gc->industryStationX, gc->industryTileY);
     gc_spawnTrainAt(gc, gc->cityStationX, gc->cityStationY);
-    gc_setTrackOwnerCode(gc, gc->nextTrackPieceCode - track::PRESENT);
-    ++gc->nextTrackPieceCode;
-    if (gc->nextTrackPieceCode == track::AI_PIECE_WRAP) gc->nextTrackPieceCode = track::AI_PIECE_FIRST;
+    gc_setTrackOwnerCode(gc, gc->build.nextTrackPieceCode - track::PRESENT);
+    ++gc->build.nextTrackPieceCode;
+    if (gc->build.nextTrackPieceCode == track::AI_PIECE_WRAP) gc->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
 }

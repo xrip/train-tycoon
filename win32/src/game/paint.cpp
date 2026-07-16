@@ -413,13 +413,13 @@ void gc_update(GameCanvas *gc) {
             if (gc_tryBuildPath(gc)) {
                 gc_setState(gc, +GameState::Playing);
                 gc->buildMenuItemIndex = 0;
-                gc->buildCancelled = true;
+                gc->build.buildCancelled = true;
                 gc->buildMenuMode = 2;
                 gc->menuDirty = true;
                 break;
             }
             gc->buildMenuItemIndex = 0;
-            gc->buildCancelled = true;
+            gc->build.buildCancelled = true;
             gc->buildMenuMode = 1;
             gc->menuDirty = true;
             gc->ready = false;
@@ -446,13 +446,13 @@ void gc_update(GameCanvas *gc) {
         case +GameState::AiTurn:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
-            if (gc->nextTrackPieceCode - track::AI_PIECE_FIRST < gc->scenario.difficultyCycle) {
+            if (gc->build.nextTrackPieceCode - track::AI_PIECE_FIRST < gc->scenario.difficultyCycle) {
                 gc_placeCitiesAndIndustry(gc);
                 gc_setState(gc, +GameState::Playing);
                 break;
             }
-            ++gc->nextTrackPieceCode;
-            if (gc->nextTrackPieceCode == track::AI_PIECE_WRAP) gc->nextTrackPieceCode = track::AI_PIECE_FIRST;
+            ++gc->build.nextTrackPieceCode;
+            if (gc->build.nextTrackPieceCode == track::AI_PIECE_WRAP) gc->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
             gc_setState(gc, +GameState::Playing);
             break;
         case +GameState::HighScoreSync:

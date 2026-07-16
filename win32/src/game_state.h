@@ -7,6 +7,7 @@
 #include "fleet.h"
 #include "economy.h"
 #include "scenario.h"
+#include "build_controller.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -107,7 +108,6 @@ typedef struct GameCanvas {
     Grid<int8_t> terrainEditBuffer;
     int32_t selectionStartX;
     int32_t selectionStartY;
-    bool trackBuildInProgress;
     int32_t mapGenStage;
     int32_t tilesGeneratedInStage;
     int32_t totalTilesToGenerate;
@@ -119,10 +119,6 @@ typedef struct GameCanvas {
     int32_t keySubState;
     int32_t lastKeyCode;
     int32_t keyRepeatStep;
-    int32_t trackStartX;
-    int32_t trackStartY;
-    int32_t trackStepX;
-    int32_t trackStepY;
     int32_t buildMenuItemIndex;
     std::array<int32_t, 4> selectionTileX{};
     std::array<int32_t, 4> selectionTileY{};
@@ -180,11 +176,6 @@ typedef struct GameCanvas {
     int32_t pathAnchorY;
     int32_t pathTargetX;
     int32_t pathTargetY;
-    int8_t previewTrackOwnerCode;
-    int8_t existingTrackOwnerCode;
-    int32_t selectionCost;
-    bool buildCancelled;
-    int32_t trackTileCount;
     int32_t serviceVehicleAtCursor;
     int32_t wagonType;
     int32_t wagonDiscountType;
@@ -218,7 +209,6 @@ typedef struct GameCanvas {
     int32_t cityStationY;
     int32_t industryStationX;
     int32_t industryTileY;
-    int32_t nextTrackPieceCode;
     std::array<int8_t, 6> menuRowType{};
     std::array<int8_t, 6> placeTrainDay{};
     std::array<int8_t, 6> menuRowParamA{};
@@ -250,6 +240,7 @@ typedef struct GameCanvas {
     int32_t viewportCenterY;
     Economy economy;
     Scenario scenario;
+    BuildController build;
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;

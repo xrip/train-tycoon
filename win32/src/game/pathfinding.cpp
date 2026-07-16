@@ -116,7 +116,7 @@ bool gc_isTileMatchForPathInlined(GameCanvas *gc, bool connected,
     owner = tile == tile::CROSSING && high_owner
                 ? owner >> track::DIR_OWNER_SHIFT
                 : owner & track::DIR_OWNER_MASK;
-    if (owner == gc->existingTrackOwnerCode
+    if (owner == gc->build.existingTrackOwnerCode
         && (tile == tile_a || tile == tile_b || tile == tile_c
             || tile == tile_d || tile == tile_e || tile == tile_f
             || tile == tile_g || tile == tile_h || tile == 76))
@@ -219,26 +219,26 @@ void gc_validatePathStep(GameCanvas *gc) {
             int old_tile = gc->world.tileMap[map_x][map_y];
             bool joined_track = false;
             if (old_tile != 0 && old_tile > 28)
-                gc->selectionCost += gc->baseTrainSpeed;
-            int cost_before_shape = gc->selectionCost;
+                gc->build.selectionCost += gc->baseTrainSpeed;
+            int cost_before_shape = gc->build.selectionCost;
             if (left && right) {
                 if (old_tile == 22) gc->world.tileMap[map_x][map_y] = 78;
                 else if (old_tile == 24) gc->world.tileMap[map_x][map_y] = 80;
                 else if (old_tile == 9) {
                     gc->world.tileMap[map_x][map_y] = 85;
-                    gc->selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 8) {
                     gc->world.tileMap[map_x][map_y] = 84;
-                    gc->selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 70) {
                     gc->world.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
                     gc->world.trackMap[map_x][map_y] = (int8_t)(
                         track::PRESENT | (gc->world.trackMap[map_x][map_y] & track::OWNER_MASK)
-                        | gc->previewTrackOwnerCode << track::DIR_OWNER_SHIFT);
+                        | gc->build.previewTrackOwnerCode << track::DIR_OWNER_SHIFT);
                 } else if (gc->world.tileElevation[map_x][map_y] == -1) {
                     gc->world.tileMap[map_x][map_y] = 81;
-                    gc->selectionCost += gc->moneyBaseB;
+                    gc->build.selectionCost += gc->moneyBaseB;
                 } else {
                     gc->world.tileMap[map_x][map_y] = 71;
                 }
@@ -247,19 +247,19 @@ void gc_validatePathStep(GameCanvas *gc) {
                 else if (old_tile == 23) gc->world.tileMap[map_x][map_y] = 79;
                 else if (old_tile == 7) {
                     gc->world.tileMap[map_x][map_y] = 83;
-                    gc->selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 10) {
                     gc->world.tileMap[map_x][map_y] = 86;
-                    gc->selectionCost += gc->moneyBaseA;
+                    gc->build.selectionCost += gc->moneyBaseA;
                 } else if (old_tile == 71) {
                     gc->world.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
                     gc->world.trackMap[map_x][map_y] = (int8_t)(
                         track::PRESENT | (gc->world.trackMap[map_x][map_y] & track::OWNER_MASK) << track::DIR_OWNER_SHIFT
-                        | gc->previewTrackOwnerCode);
+                        | gc->build.previewTrackOwnerCode);
                 } else if (gc->world.tileElevation[map_x][map_y] == -1) {
                     gc->world.tileMap[map_x][map_y] = 82;
-                    gc->selectionCost += gc->moneyBaseB;
+                    gc->build.selectionCost += gc->moneyBaseB;
                 } else {
                     gc->world.tileMap[map_x][map_y] = 70;
                 }
@@ -270,27 +270,27 @@ void gc_validatePathStep(GameCanvas *gc) {
 
             if (!joined_track && old_tile != gc->world.tileMap[map_x][map_y]) {
                 gc->world.trackMap[map_x][map_y] =
-                    (int8_t)(track::PRESENT | gc->previewTrackOwnerCode);
-                if (cost_before_shape == gc->selectionCost)
-                    gc->selectionCost += gc->accel1;
+                    (int8_t)(track::PRESENT | gc->build.previewTrackOwnerCode);
+                if (cost_before_shape == gc->build.selectionCost)
+                    gc->build.selectionCost += gc->accel1;
             }
             if (joined_track)
-                gc->selectionCost +=
+                gc->build.selectionCost +=
                     gc->brake1 + gc->accel1 + gc->baseTrainSpeed;
         }
     }
 }
 
 void gc_scanTrackTiles(GameCanvas *gc) {
-    gc->trackTileCount = 0;
+    gc->build.trackTileCount = 0;
     for (int x = 0; x < gc->world.mapWidth; ++x) {
         for (int y = 0; y < gc->world.mapHeight; ++y) {
-            if (gc->world.trackMap[x][y] == track::PRESENT) ++gc->trackTileCount;
+            if (gc->world.trackMap[x][y] == track::PRESENT) ++gc->build.trackTileCount;
             if (gc->world.tileMap[x][y] != tile::CROSSING) continue;
             int low_owner = gc->world.trackMap[x][y] & track::DIR_OWNER_MASK;
             int high_owner = (gc->world.trackMap[x][y] & track::OWNER_MASK) >> track::DIR_OWNER_SHIFT;
-            if (low_owner == 0) ++gc->trackTileCount;
-            if (high_owner == 0) ++gc->trackTileCount;
+            if (low_owner == 0) ++gc->build.trackTileCount;
+            if (high_owner == 0) ++gc->build.trackTileCount;
         }
     }
 }
@@ -375,7 +375,7 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
 bool gc_tryBuildPath(GameCanvas *gc) {
     gc->pathfinder.distanceGrid.resize(gc->world.mapWidth, gc->world.mapHeight);
     gc->pathfinder.searchLimit = 10;
-    gc->selectionCost = 0;
+    gc->build.selectionCost = 0;
     gc_clearPathDistanceGrid(gc);
     gc->pathfinder.distanceGrid[gc->pathAnchorX][gc->pathAnchorY] = 20;
     gc_floodFillPath(gc);
@@ -386,6 +386,6 @@ bool gc_tryBuildPath(GameCanvas *gc) {
     gc_validatePathStep(gc);
     gc->pathfinder.distanceGrid.clear();
     gc_scanTrackTiles(gc);
-    if (gc->trackTileCount == 0) return false;
-    return gc->selectionCost != 0;
+    if (gc->build.trackTileCount == 0) return false;
+    return gc->build.selectionCost != 0;
 }
