@@ -244,11 +244,28 @@ was loose on `GameCanvas`: the BFS `distanceGrid` (was `pathDistanceGrid`),
 `GameCanvas` now has one `Pathfinder pathfinder;` member and the fields were
 renamed onto it (`gc->pathDistanceGrid` -> `gc->pathfinder.distanceGrid`, etc.).
 These five fields are used only by `pathfinding.cpp` (plus `terrain.cpp` reading
-the grid), so the move is clean. `placementX/Y` and `demolishX/Y` stay on
-`GameCanvas` because build and demolish share them; the pathfinding functions
-were already clearly named, so PATH-01's remaining work is naming those shared
-endpoints and deciding whether more of the search moves onto `Pathfinder`. Search
-result and tie-break order are unchanged; goldens did not move.
+the grid), so the move is clean. Search result and tie-break order are
+unchanged; goldens did not move.
+
+A second leaf named the two shared path endpoints by behavior. They are written
+by map-gen (the city/industry stations) and by the build menu (the player's two
+picks), and read only by the search, so they stay on `GameCanvas`:
+- `placementX/Y` -> `pathAnchorX/Y`: the reference endpoint (the city station in
+  AI gen, the first tile the player picks). It is the reverse-BFS seed
+  (`distanceGrid == 20`) and the back-walk terminus (`gc_validatePathStep` stops
+  when it reaches the anchor).
+- `demolishX/Y` -> `pathTargetX/Y`: the endpoint the track reaches toward (the
+  industry station / second pick). The flood-fill must reach it and the
+  back-walk starts there. The old `demolish` name was wrong: the real demolish
+  action (`gc_demolishAtCursor`) never touches these coordinates.
+
+Deferred to BUILD-01: the path cost accumulator `selectionCost` and the
+track-owner codes `previewTrackOwnerCode` / `existingTrackOwnerCode`. They are
+written by the build menu (`gc_setTrackOwnerCode`, the confirm/revert flow) and
+read by the search as a side effect, so they are build/preview state, not
+path-search scratch. Moving them onto `Pathfinder` now would couple the search
+to unextracted build state against the "one caller group at a time" rule; they
+land with the `BuildController`. PATH-01 closes here.
 
 ## D-007: Music output boundary
 

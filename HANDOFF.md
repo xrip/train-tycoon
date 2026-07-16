@@ -35,8 +35,9 @@ Progress in stage 3 (game model):
 | SAVE-01 | done | Explicit save codec |
 | WORLD-01 | done | `World` owns map grids/dimensions |
 | WORLD-02 | done | Generation stages + tile-range taxonomy |
-| PATH-01 | **in progress** | `Pathfinder` scratch extracted; endpoints remain |
-| FLEET-01…RELEASE-01 | queued | Not started |
+| PATH-01 | done | Endpoints named `pathAnchor/Target`; cost/owner deferred to BUILD-01 |
+| FLEET-01 | **next** | Train/service/city records (not yet started) |
+| FLEET-02…RELEASE-01 | queued | Not started |
 
 Authoritative status is `win32/docs/refactor/STATUS.md`. The active leaf and next
 action are in `win32/docs/refactor/CURRENT.md`. Design decisions and every
@@ -106,8 +107,15 @@ golden moved). Range `bf87d96..HEAD`:
 **PATH-01 — path-search scratch (`win32/src/pathfinder.h`):**
 - `1e5306f` — `struct Pathfinder` owning `distanceGrid` (was `pathDistanceGrid`),
   `searchLimit`, `nextX`, `nextY`, `tieBreakCounter`, renamed off `GameCanvas`.
-  These five are pathfinding-only (terrain just reads the grid). The path
-  functions were already well named. **PATH-01 is not closed.**
+  These five are pathfinding-only (terrain just reads the grid).
+- (this session) — named the shared endpoints by behavior: `placementX/Y` →
+  `pathAnchorX/Y` (reverse-BFS seed and back-walk terminus; city station / first
+  player pick) and `demolishX/Y` → `pathTargetX/Y` (flood-fill target and
+  back-walk start; industry station / second pick). The old `demolish` name was
+  wrong — the real demolish action never uses these. The cost accumulator
+  `selectionCost` and owner codes `previewTrackOwnerCode`/`existingTrackOwnerCode`
+  are deferred to BUILD-01 (build/preview state, not search scratch). **PATH-01
+  closed**; Debug and Release full gates green, no golden moved.
 
 ## Current architecture and key design decisions
 
@@ -146,13 +154,15 @@ Decisions worth knowing (full list in `DECISIONS.md`):
 
 ## What is incomplete or deferred
 
-- **PATH-01 is mid-flight** (data extracted, not closed). Remaining: name the
-  shared endpoints `placementX/Y` (path goal) and `demolishX/Y` (back-walk source;
-  the "demolish" name is misleading in the path context), decide whether cost
-  accumulators / owner-code fields join `Pathfinder`, then close it.
-- Deferred, recorded work: per-screen menu transition ids (→ UI-01); the
-  isometric slope/cliff tile ids 3..28 (need sprite art); entangled map-query
-  operations (move with Fleet/Economy); the `SaveCodec` class boundary.
+- **FLEET-01 is the active item** (not yet started). Extract train, service-site,
+  and city-record state into a `Fleet` owned type with stable slot IDs, reusing
+  the proven extraction pattern. This also unblocks the entangled map queries
+  deferred from WORLD-01.
+- Deferred, recorded work: path cost/owner fields (`selectionCost`,
+  `previewTrackOwnerCode`, `existingTrackOwnerCode`) → BUILD-01; per-screen menu
+  transition ids (→ UI-01); the isometric slope/cliff tile ids 3..28 (need sprite
+  art); entangled map-query operations (move with Fleet/Economy); the `SaveCodec`
+  class boundary.
 - Stage 3 items FLEET-01/02, ECON-01, SCENARIO-01, SIM-01, BUILD-01 not started;
   all of stage 4 (ASSET/RENDER/UI/APP) and stage 5 (CLEAN/DOC/RELEASE) not started.
 
@@ -188,27 +198,25 @@ the executable). Short real-MIDI device check:
 $env:TRAIN_TYCOON_MIDI_TEST_MS='3000'; .\build\Debug\train_tycoon.exe; Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 ```
 
-### Verification at this handoff (2026-07-16)
+### Verification at this handoff (2026-07-16, after PATH-01 close)
 
 - Debug build clean under strict first-party `/W4 /permissive- /WX`.
-- Debug tests: 2/2 passed (fast 0.01 s, full 0.37 s).
+- Debug tests: 2/2 passed (fast 0.02 s, full 0.37 s).
 - Release build clean.
-- Release tests: 2/2 passed (fast 0.01 s, full 0.06 s).
+- Release tests: 2/2 passed (fast 0.01 s, full 0.05 s).
 - No test failed; no golden value changed.
 
 ## Current objective and next tasks (priority order)
 
-1. **Finish PATH-01.** Name `placementX/Y` and `demolishX/Y` by behavior (careful:
-   shared with build/demolish), settle the cost/owner-code fields, run both full
-   gates, and close PATH-01 in `STATUS.md`/`CURRENT.md`.
-2. **FLEET-01** — trains, service, and city records with stable slot ids. Reuse
+1. **FLEET-01** — trains, service, and city records with stable slot ids. Reuse
    the proven extraction pattern (owned type → member → mechanical rename →
    gates). This also unblocks the deferred entangled map queries in `World`.
-3. **FLEET-02, ECON-01, SCENARIO-01, SIM-01, BUILD-01** — remaining stage-3
-   model classes, in that order.
-4. Stage 4 (ASSET/RENDER/UI/APP) and stage 5 (CLEAN/DOC/RELEASE). Note the
+2. **FLEET-02, ECON-01, SCENARIO-01, SIM-01, BUILD-01** — remaining stage-3
+   model classes, in that order. (BUILD-01 also picks up the deferred path
+   cost/owner fields.)
+3. Stage 4 (ASSET/RENDER/UI/APP) and stage 5 (CLEAN/DOC/RELEASE). Note the
    human-gated manual-play and MIDI-device checks at UI-01 and RELEASE-01.
-5. Opportunistic, evidence-first cleanups when the co-dependencies land: slope
+4. Opportunistic, evidence-first cleanups when the co-dependencies land: slope
    tile ids (3..28), per-screen menu ids, the `SaveCodec` class boundary, and the
    dead `gc_initSaveOrLoad` 4/5 branches.
 

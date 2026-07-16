@@ -189,10 +189,15 @@ typedef struct GameCanvas {
     bool aiEnabled;
     int32_t screenParam;
     Pathfinder pathfinder;
-    int32_t placementX;
-    int32_t placementY;
-    int32_t demolishX;
-    int32_t demolishY;
+    // Endpoints of the path being built. pathAnchor is the reference endpoint
+    // (the city station in AI gen, the first tile the player picks): it is the
+    // reverse-BFS seed (distance 20) and the back-walk terminus. pathTarget is
+    // the endpoint the track reaches toward (the industry station / second
+    // pick): the flood-fill must reach it and the back-walk starts there.
+    int32_t pathAnchorX;
+    int32_t pathAnchorY;
+    int32_t pathTargetX;
+    int32_t pathTargetY;
     int8_t previewTrackOwnerCode;
     int8_t existingTrackOwnerCode;
     int32_t selectionCost;

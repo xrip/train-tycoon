@@ -519,9 +519,9 @@ void gc_openBuildMenu(GameCanvas *gc) {
                         || !gc_isPlaceableTerrain(gc, gc->tileCursorX,
                                                   gc->tileCursorY))
                         break;
-                    gc->placementX = gc->tileCursorX;
-                    gc->placementY = gc->tileCursorY;
-                    gc->world.tileMap[gc->placementX][gc->placementY] = 127;
+                    gc->pathAnchorX = gc->tileCursorX;
+                    gc->pathAnchorY = gc->tileCursorY;
+                    gc->world.tileMap[gc->pathAnchorX][gc->pathAnchorY] = 127;
                     gc->buildMenuMode = 4;
                     gc->menuDirty = true;
                     gc->buildMenuItemIndex = 0;
@@ -609,12 +609,12 @@ void gc_openBuildMenu(GameCanvas *gc) {
                     || !gc_isPlaceableTerrain(gc, gc->tileCursorX,
                                               gc->tileCursorY))
                     break;
-                gc->demolishX = gc->tileCursorX;
-                gc->demolishY = gc->tileCursorY;
-                gc->world.tileMap[gc->placementX][gc->placementY] = 0;
+                gc->pathTargetX = gc->tileCursorX;
+                gc->pathTargetY = gc->tileCursorY;
+                gc->world.tileMap[gc->pathAnchorX][gc->pathAnchorY] = 0;
                 gc_setState(gc, +GameState::BuildingPath);
             } else if (item == 9) {
-                gc->world.tileMap[gc->placementX][gc->placementY] = 0;
+                gc->world.tileMap[gc->pathAnchorX][gc->pathAnchorY] = 0;
                 gc->buildMenuMode = 1;
                 gc->menuDirty = true;
                 gc->buildMenuItemIndex = 0;
