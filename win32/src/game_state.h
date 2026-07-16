@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "ui_controller.h"
 #include "save_codec.h"
+#include "click_map.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -59,6 +60,7 @@ typedef struct Game {
     Renderer renderer;
     UiController ui;
     SaveCodec saveCodec;
+    ClickMap clickMap;  // captured overlay menu-row hit-rects, filled in game_paint
     int32_t cachedHeaderMoney;
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;

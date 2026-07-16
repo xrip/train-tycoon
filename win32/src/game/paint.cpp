@@ -23,6 +23,7 @@ void game_paint(Game *game, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
     if (game->paintSuspended) return;
+    game->clickMap.clear();  // rebuild overlay hit-rects fresh each frame
     game_setCanvasSize(game, n, n2);
     if (game->gameState != +GameState::MapOverview && game->gameState != +GameState::BuildingMinimap && game->gameState != +GameState::BuildingPath
         && game->gameState != +GameState::SavingGame && game->gameState != +GameState::LoadingGame && game->gameState != +GameState::AiTurn

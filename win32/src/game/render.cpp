@@ -203,6 +203,9 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
         }
         game->ui.pauseMenuOpen = true;
         n24 = 19;
+        // Capture the top-right close (X) button so the pointer layer can close
+        // the overlay by clicking it -- same geometry as the drawn X box above.
+        game->clickMap.add_close(n20 + n18 - 10, n21 + 3, 7, 7);
     } else if (game->ui.cursorDragY == -1) {
         game->ui.cursorDragY = -3;
     }
@@ -282,6 +285,11 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
                     if (n12 + n10 + 8 + by2 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 - 3 - n3 >= game->renderer.clipY) {
                         if (n13 < game->ui.cursorDragY) game->ui.cursorSelectY = n13;
                         if (game->ui.cursorSelectX == -2 && n13 > game->ui.cursorDragY) game->ui.cursorSelectX = n13;
+                        // Full row band (clip width), so a click anywhere on the
+                        // row's line selects it -- not just on the text glyph box.
+                        game->clickMap.add_menu_row(game->renderer.clipX, n12 + n10 - n3 - 3,
+                                                    game->renderer.clipWidth, 10 + n3 + by2,
+                                                    n13, n5);
                     }
                     if (game->renderer.needsRepaint && game->ui.cursorDragY == n13) {
                         midp_set_color(g, n17);

@@ -127,6 +127,14 @@ int main(void) {
             else         game_keyReleased(game, keycode);
         }
 
+        // Mouse: a left-click is forwarded as a pointer press. The game's pointer
+        // dispatch classifies it against the current screen (bottom-bar items,
+        // overlay menu rows, confirm buttons) using the hit-rects captured during
+        // the previous frame's paint.
+        int click_x, click_y;
+        if (mfb_poll_lclick(&click_x, &click_y))
+            game_pointerPressed(game, click_x, click_y);
+
         game_run(game);           // one iteration of the original run() loop
         game_paint(game, &screen);
 

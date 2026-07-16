@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 
 #include "game.h"
+#include "click_map.h"
 #include "midp_input.h"
 #include "stable_digest.h"
 #include "support/input_queue.h"
@@ -408,5 +409,62 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(moved_frame.value() == 2749731419861486662ULL);
 
+    delete game;
+}
+
+TEST_CASE("fast: click map records and hit-tests overlay elements") {
+    ClickMap map;
+    CHECK(map.count == 0);
+    CHECK_FALSE(map.hit_menu_row(50, 10, nullptr, nullptr));
+    CHECK_FALSE(map.hit_close(50, 10));
+
+    map.add_menu_row(0, 0, 200, 20, 0, 11);
+    map.add_menu_row(0, 20, 200, 20, 1, 22);
+    map.add_close(190, 2, 7, 7);   // top-right X, overlapping row 0's band
+    CHECK(map.count == 3);
+
+    int row = -1, code = -1;
+    // A click on row 0's text area misses the X and hits the row.
+    CHECK(map.hit_menu_row(10, 10, &row, &code));
+    CHECK(row == 0);
+    CHECK(code == 11);
+    CHECK_FALSE(map.hit_close(10, 10));
+
+    // The X wins on its own pixels even though row 0's band covers them.
+    CHECK(map.hit_close(193, 5));
+    CHECK(map.hit_menu_row(193, 5, &row, &code));   // row also spans it; caller checks X first
+    CHECK(row == 0);
+
+    CHECK(map.hit_menu_row(10, 30, &row, &code));
+    CHECK(row == 1);
+    CHECK(code == 22);
+
+    map.clear();
+    CHECK(map.count == 0);
+    CHECK_FALSE(map.hit_close(193, 5));
+}
+
+TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    REQUIRE(game->gameState == 30);
+    REQUIRE(game->ui.buildMenuMode == 0);
+
+    // generate_scenario never paints, so set the screen-size globals that the
+    // first game_paint would normally establish (the live loop always has these).
+    gcs_screenWidth = kScreenWidth;
+    gcs_hs = kScreenHeight;
+    gcs_bottomBarY = gcs_hs - 15;
+
+    // Mode-0 index 1 is always the "build" entry (item id 1); activating it
+    // switches buildMenuMode to 1 and resets the item index to 0 (openBuildMenu
+    // mode-0 case 1). Click that icon's x on the bottom bar.
+    const int item1_x = static_cast<int>(static_cast<std::uint8_t>(game->ui.menuItemCode[0][1]));
+    REQUIRE(item1_x > 0);
+
+    game_pointerPressed(game, item1_x, gcs_bottomBarY);
+
+    CHECK(game->ui.buildMenuMode == 1);
+    CHECK(game->ui.buildMenuItemIndex == 0);
     delete game;
 }

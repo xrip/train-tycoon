@@ -8,24 +8,6 @@ void game_keyReleased(Game *game, int32_t n) {
     game->ui.currentKey = -999;
 }
 
-void game_pointerPressed(Game *game, int32_t n, int32_t n2) {
-    (void)n; (void)n2;
-    if (game->ui.inputPending) return;
-}
-
-void game_pointerReleased(Game *game, int32_t n, int32_t n2) {
-    (void)n; (void)n2;
-    if (game->ui.inputPending) {
-        game->ui.inputPending = false;
-        return;
-    }
-}
-
-void game_pointerDragged(Game *game, int32_t n, int32_t n2) {
-    (void)n; (void)n2;
-    if (game->ui.inputPending) return;
-}
-
 void game_resetKeyState(Game *game, int32_t n) {
     (void)n;
     game->ui.currentKey = 0;
