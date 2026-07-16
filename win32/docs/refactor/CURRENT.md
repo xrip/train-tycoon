@@ -2,63 +2,60 @@
 
 ## Item
 
-`UI-02` - input, cursor, pause, and screen changes (data extraction).
+`CLEAN-01` - rename `GameCanvas` -> `Game`, remove the old shape. (Also lands the
+stage-3-exit "core rules no longer use `GameCanvas`" change, since rules then
+take the `Game` aggregate of parts.)
 
 ## Base
 
-- Commit: path endpoints homed into Pathfinder (`f9a8fe0`). All nine owned parts
-  now exist; `GameCanvas` is down from ~440 fields to ~85.
+- Commit: scenario flags named/homed (`697da02`); STATUS updated (`90c2838`).
 - Branch: `master`
 - User-owned file: root `AGENTS.md` (tracked by the user; do not change it).
 
-## State of the refactor
+## State of the refactor (this is the big milestone)
 
-The single `GameCanvas` state bag has been split into owned parts, each behind a
-mechanical `gc->owner.field` move with both full gates green and no golden
-change on any commit:
+All ten owned parts exist and every commit is behavior-identical with both full
+gates green and ASan clean:
 
-- `World` - map grids, dimensions, city records, tile-animation queue, zone
-  growth (constructionTimers/zonePopulation).
-- `Pathfinder` - BFS scratch and the path endpoints.
-- `Fleet` - train/service records and movement-rule tables.
-- `Economy` - money, loans, calendar, revenue/spend aggregates, station revenue,
-  decade/period report totals.
-- `Scenario` - scores/leaderboard, milestones, AI, offers, identity/difficulty.
-- `BuildController` - track-lay, train-buy, terrain-edit, placement cursors.
-- `Assets` - packed sprite tables, images, sprite stream.
-- `Renderer` - backbuffer, view/clip/repaint state, visible-train list.
-- `UiController` - menu rows and grids, dialogs, transitions, graph display,
-  selection, cursor, and key input.
+- `World`, `Pathfinder`, `Fleet`, `Economy`, `Scenario`, `BuildController`,
+  `Assets`, `Renderer`, `UiController`, `SaveCodec`.
 
-`UI-02` leaf 1 (cursor + key input) is done. ASan full tests are clean.
+`GameCanvas` is now a thin aggregate: the ten parts plus the top-level
+coordinator state (rng, era, gameState, frame/tick timers, counterA, loading
+flags, cachedHeader*, music, savedGameState, dayTickThreshold, graphColors).
+All obfuscated field names are recovered except `savedLegacyMetricBq`
+(save-only, carried metric). Ten dead write-only fields were removed.
 
-## What remains on GameCanvas (for the next items)
+## Why CLEAN-01 is not done yet
 
-- Frame loop / timing (APP-01): simSpeed, frame/tick timers, counterA, dH,
-  loading*, ready, gameThread, stopRequested.
-- Map generation params (still a WORLD group): mapGen*, terrain*, weightAccel*,
-  industry*, cityStation*, viewportBase/half, mapScale.
-- Camera/viewport: viewportCenterX/Y (UI-02/camera).
-- Cost-model constants (D-012): moneyBaseA/B, baseTrainSpeed, accel*, brake1,
-  costPower/Struct/Overhead/Maintenance/Crew, gWagonCost*, costGroupC*.
-- Save-codec state (SaveCodec, deferred by SAVE-01): saveBuffer, saveReadOffset,
-  saveSlot, savePendingMode, snapshot*, bytes*, compareToPrevious.
-- Simulation-shared: rng, era, flagsA/B, monthRolloverFlag, gameState,
-  cachedHeader*, savedLegacyMetricBq.
-- Music: music_* and music_output.
-- Still-obfuscated names (CLEAN-02 name audit): at, cB, ar, D, ce, ee, dp, cH,
-  dI, bx, fR, eD, aJ, hx, gw, bT.
+The full CLEAN-01 is a large mechanical restructure across 36+ files:
+1. Type rename `GameCanvas` -> `Game` (the identifier `Game` is verified free -
+   no collisions with `GameState`/`game_*`/the `game` test variable).
+2. Rename the ~200 `gc_*` free functions and the `gc` receiver to the `Game`
+   aggregate style, and drop the `GameCanvas*` first parameter's old shape.
+3. Remove `game_methods.h`, the compatibility calls, and Java-signature comments.
 
-## Non-goals / blockers
+It is best done in a fresh context so each mechanical pass is verified with the
+full gates, not stacked on an already long session.
 
-- Do not change save bytes, tick order, or any golden.
-- The stage-3 exit "core rules no longer use GameCanvas" (signature refactor) is
-  gated on homing rng/era/cost constants first, per D-013.
-- Human-gated: the UI-01/UI-02/APP-01 manual play check and RELEASE-01's manual
-  proof + real MIDI device check cannot be done autonomously.
+## Verified recipe for the type rename (step 1)
 
-## Next action
+- `grep -rlE "\bGameCanvas\b" src tests --include=*.cpp --include=*.h` -> 36 files.
+- Word-boundary replace `GameCanvas` -> `Game` in those files (keeps `gc_*`,
+  `gcs_*`, `gc->` untouched since they do not contain "GameCanvas").
+- `typedef struct GameCanvas { ... } GameCanvas;` becomes
+  `typedef struct Game { ... } Game;`.
+- Build + both full gates (`test-debug-full`, `test-release-full`); no golden may
+  move.
 
-Finish UI-02 by homing the remaining input/screen-change flags, then start
-APP-01 (frame-loop/timing state) or the SaveCodec extraction. Recover the
-remaining obfuscated field names as part of CLEAN-02.
+## Blockers (human-gated - cannot be done autonomously)
+
+- The UI-01 / UI-02 / APP-01 manual play check.
+- RELEASE-01's manual proof + real MIDI device check.
+
+## Remaining items after CLEAN-01
+
+- `APP-01` - organise the frame loop (state already on the aggregate).
+- `CLEAN-02` - only `savedLegacyMetricBq` left to consider; otherwise done.
+- `DOC-01` - final design/save/resource/sim/build guides.
+- `RELEASE-01` - full proof (human).
