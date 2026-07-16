@@ -55,22 +55,22 @@ bool gc_isAdjacentTileEmpty(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, b
     }
     if (n2 > 0 && gc->world.tileMap[n][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
     if (gc->world.tileMap[n][n2] >= tile::BUILT_FIRST) bl2 = false;
-    int32_t n4 = n - gc->selectionStartX;
-    int32_t n5 = n2 - gc->selectionStartY;
+    int32_t n4 = n - gc->build.selectionStartX;
+    int32_t n5 = n2 - gc->build.selectionStartY;
     if (bl2) {
-        gc->terrainEditBuffer[n4][n5] = (int8_t)n3;
+        gc->build.terrainEditBuffer[n4][n5] = (int8_t)n3;
         int step = bl ? 1 : -1;
-        if (n4 > 0 && (bl ? gc->terrainEditBuffer[n4 - 1][n5] < n3 - 1
-                          : gc->terrainEditBuffer[n4 - 1][n5] > n3 + 1)
+        if (n4 > 0 && (bl ? gc->build.terrainEditBuffer[n4 - 1][n5] < n3 - 1
+                          : gc->build.terrainEditBuffer[n4 - 1][n5] > n3 + 1)
             && !gc_isAdjacentTileEmpty(gc, n - 1, n2, n3 - step, bl)) bl2 = false;
-        if (n5 > 0 && (bl ? gc->terrainEditBuffer[n4][n5 - 1] < n3 - 1
-                          : gc->terrainEditBuffer[n4][n5 - 1] > n3 + 1)
+        if (n5 > 0 && (bl ? gc->build.terrainEditBuffer[n4][n5 - 1] < n3 - 1
+                          : gc->build.terrainEditBuffer[n4][n5 - 1] > n3 + 1)
             && !gc_isAdjacentTileEmpty(gc, n, n2 - 1, n3 - step, bl)) bl2 = false;
-        if (n4 < 9 && (bl ? gc->terrainEditBuffer[n4 + 1][n5] < n3 - 1
-                          : gc->terrainEditBuffer[n4 + 1][n5] > n3 + 1)
+        if (n4 < 9 && (bl ? gc->build.terrainEditBuffer[n4 + 1][n5] < n3 - 1
+                          : gc->build.terrainEditBuffer[n4 + 1][n5] > n3 + 1)
             && !gc_isAdjacentTileEmpty(gc, n + 1, n2, n3 - step, bl)) bl2 = false;
-        if (n5 < 9 && (bl ? gc->terrainEditBuffer[n4][n5 + 1] < n3 - 1
-                          : gc->terrainEditBuffer[n4][n5 + 1] > n3 + 1)
+        if (n5 < 9 && (bl ? gc->build.terrainEditBuffer[n4][n5 + 1] < n3 - 1
+                          : gc->build.terrainEditBuffer[n4][n5 + 1] > n3 + 1)
             && !gc_isAdjacentTileEmpty(gc, n, n2 + 1, n3 - step, bl)) bl2 = false;
     }
     gc->build.terrainSmoothCost += gc->costOverhead

@@ -181,22 +181,22 @@ void gc_computeViewportBounds(GameCanvas *gc) {
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
             tile_center_y = gc->world.mapHalfWidth - x * 8 + y * 8 + 8;
-            gc_computeIsoCornersInlined(gc, x, y, gc->selectionTileX.data(),
-                                        gc->selectionTileY.data(), false);
+            gc_computeIsoCornersInlined(gc, x, y, gc->build.selectionTileX.data(),
+                                        gc->build.selectionTileY.data(), false);
             int opposite_edges =
                 gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
-                                  gc->selectionTileX[0], gc->selectionTileY[0],
-                                  gc->selectionTileX[1], gc->selectionTileY[1])
+                                  gc->build.selectionTileX[0], gc->build.selectionTileY[0],
+                                  gc->build.selectionTileX[1], gc->build.selectionTileY[1])
                 * gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
-                                    gc->selectionTileX[2], gc->selectionTileY[2],
-                                    gc->selectionTileX[3], gc->selectionTileY[3]);
+                                    gc->build.selectionTileX[2], gc->build.selectionTileY[2],
+                                    gc->build.selectionTileX[3], gc->build.selectionTileY[3]);
             int other_edges =
                 gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
-                                  gc->selectionTileX[0], gc->selectionTileY[0],
-                                  gc->selectionTileX[2], gc->selectionTileY[2])
+                                  gc->build.selectionTileX[0], gc->build.selectionTileY[0],
+                                  gc->build.selectionTileX[2], gc->build.selectionTileY[2])
                 * gc_crossProduct2D(gc, gc->viewportBaseX, gc->viewportBaseY,
-                                    gc->selectionTileX[1], gc->selectionTileY[1],
-                                    gc->selectionTileX[3], gc->selectionTileY[3]);
+                                    gc->build.selectionTileX[1], gc->build.selectionTileY[1],
+                                    gc->build.selectionTileX[3], gc->build.selectionTileY[3]);
             if (opposite_edges > 0 || other_edges > 0) continue;
             tile_x = x;
             tile_y = y;
@@ -206,14 +206,14 @@ void gc_computeViewportBounds(GameCanvas *gc) {
     }
     if (gc->blockBuildMenu) return;
 
-    gc->swapMapX = tile_x;
-    gc->swapMapY = tile_y;
+    gc->build.swapMapX = tile_x;
+    gc->build.swapMapY = tile_y;
     gc->tileCursorX = tile_x;
     gc->tileCursorY = tile_y;
     int corner_distance[4];
     for (int corner = 0; corner < 4; ++corner) {
-        int dx = gc->viewportBaseX - gc->selectionTileX[corner];
-        int dy = gc->viewportBaseY - gc->selectionTileY[corner];
+        int dx = gc->viewportBaseX - gc->build.selectionTileX[corner];
+        int dy = gc->viewportBaseY - gc->build.selectionTileY[corner];
         corner_distance[corner] = abs(dx * dx + dy * dy);
     }
     int nearest = corner_distance[0];
@@ -225,21 +225,21 @@ void gc_computeViewportBounds(GameCanvas *gc) {
         tile_center_x -= 16;
     } else if (nearest == corner_distance[1]) {
         tile_center_y -= 8;
-        ++gc->swapMapX;
+        ++gc->build.swapMapX;
     } else if (nearest == corner_distance[2]) {
         tile_center_y += 8;
-        ++gc->swapMapY;
+        ++gc->build.swapMapY;
     } else {
         tile_center_x += 16;
-        ++gc->swapMapX;
-        ++gc->swapMapY;
+        ++gc->build.swapMapX;
+        ++gc->build.swapMapY;
     }
     tile_center_y -= gc->viewportCenterY
-                     + 4 * gc->world.heightMap[gc->swapMapX][gc->swapMapY];
+                     + 4 * gc->world.heightMap[gc->build.swapMapX][gc->build.swapMapY];
     gc->cursorScreenX = tile_center_x - gc->viewportCenterX;
     gc->cursorScreenY = tile_center_y;
     for (int corner = 0; corner < 4; ++corner) {
-        gc->selectionTileX[corner] -= gc->viewportCenterX;
-        gc->selectionTileY[corner] -= gc->viewportCenterY;
+        gc->build.selectionTileX[corner] -= gc->viewportCenterX;
+        gc->build.selectionTileY[corner] -= gc->viewportCenterY;
     }
 }

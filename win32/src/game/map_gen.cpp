@@ -72,9 +72,9 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
     int n, n2, n3, n4;
     if (bl) {
         gc_commitTerrainEdit(gc);
-        gc->terrainEditBuffer.clear();
-        n4 = gc->selectionStartX; n3 = gc->selectionStartY;
-        n2 = gc->selectionStartX + 10; n = gc->selectionStartY + 10;
+        gc->build.terrainEditBuffer.clear();
+        n4 = gc->build.selectionStartX; n3 = gc->build.selectionStartY;
+        n2 = gc->build.selectionStartX + 10; n = gc->build.selectionStartY + 10;
     } else {
         n4 = 0; n3 = 0; n2 = gc->world.mapWidth; n = gc->world.mapHeight;
     }

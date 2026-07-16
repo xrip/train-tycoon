@@ -120,24 +120,24 @@ bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
 // void commitTerrainEdit() -- copy the 10x10 edit buffer back into heightMap
 void gc_commitTerrainEdit(GameCanvas *gc) {
     for (int i = 0; i < 10; ++i) {
-        memcpy(gc->world.heightMap[gc->selectionStartX + i].data() + gc->selectionStartY,
-               gc->terrainEditBuffer[i].data(), 10);
+        memcpy(gc->world.heightMap[gc->build.selectionStartX + i].data() + gc->build.selectionStartY,
+               gc->build.terrainEditBuffer[i].data(), 10);
     }
 }
 
 // void setSelectionStart(int n, int n2)
 void gc_setSelectionStart(GameCanvas *gc, int32_t n, int32_t n2) {
-    gc->selectionStartX = n - 5;
-    gc->selectionStartY = n2 - 5;
-    if (gc->selectionStartX < 0) gc->selectionStartX = 0;
-    if (gc->selectionStartY < 0) gc->selectionStartY = 0;
-    if (gc->selectionStartX + 10 >= gc->world.mapWidth)  gc->selectionStartX = gc->world.mapWidth - 9;
-    if (gc->selectionStartY + 10 >= gc->world.mapHeight) gc->selectionStartY = gc->world.mapHeight - 9;
+    gc->build.selectionStartX = n - 5;
+    gc->build.selectionStartY = n2 - 5;
+    if (gc->build.selectionStartX < 0) gc->build.selectionStartX = 0;
+    if (gc->build.selectionStartY < 0) gc->build.selectionStartY = 0;
+    if (gc->build.selectionStartX + 10 >= gc->world.mapWidth)  gc->build.selectionStartX = gc->world.mapWidth - 9;
+    if (gc->build.selectionStartY + 10 >= gc->world.mapHeight) gc->build.selectionStartY = gc->world.mapHeight - 9;
     // this.terrainEditBuffer = new byte[10][10];
-    gc->terrainEditBuffer.resize(10, 10);
+    gc->build.terrainEditBuffer.resize(10, 10);
     for (int i = 0; i < 10; ++i) {
-        memcpy(gc->terrainEditBuffer[i].data(),
-               gc->world.heightMap[gc->selectionStartX + i].data() + gc->selectionStartY, 10);
+        memcpy(gc->build.terrainEditBuffer[i].data(),
+               gc->world.heightMap[gc->build.selectionStartX + i].data() + gc->build.selectionStartY, 10);
     }
     gc->build.terrainSmoothCost = 0;
 }

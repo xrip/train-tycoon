@@ -104,9 +104,6 @@ typedef struct GameCanvas {
     int32_t lastRenderedSpriteId;
     int32_t spriteJustChanged;
     bool initialIndustryPlaced;
-    Grid<int8_t> terrainEditBuffer;
-    int32_t selectionStartX;
-    int32_t selectionStartY;
     int32_t mapGenStage;
     int32_t tilesGeneratedInStage;
     int32_t totalTilesToGenerate;
@@ -119,12 +116,8 @@ typedef struct GameCanvas {
     int32_t lastKeyCode;
     int32_t keyRepeatStep;
     int32_t buildMenuItemIndex;
-    std::array<int32_t, 4> selectionTileX{};
-    std::array<int32_t, 4> selectionTileY{};
     int32_t cursorScreenX;
     int32_t cursorScreenY;
-    int32_t swapMapX;
-    int32_t swapMapY;
     int32_t tileCursorX;
     int32_t tileCursorY;
     bool vehicleMenuSelectIndex;

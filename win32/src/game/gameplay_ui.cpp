@@ -286,8 +286,8 @@ void gc_drawBuildMenuCursor(GameCanvas *gc, Surface *graphics) {
             midp_set_color(graphics, 0xFF0000);
         }
     }
-    gc_drawSelectionQuad(gc, graphics, gc->selectionTileX.data(),
-                         gc->selectionTileY.data());
+    gc_drawSelectionQuad(gc, graphics, gc->build.selectionTileX.data(),
+                         gc->build.selectionTileY.data());
 }
 
 // void drawBuildMenuRow(Graphics)

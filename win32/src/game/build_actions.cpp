@@ -558,12 +558,12 @@ void gc_openBuildMenu(GameCanvas *gc) {
                 case 4: gc_demolishAtCursor(gc); break;
                 case 5:
                     if (!gc->blockBuildMenu)
-                        gc_smoothTileAtInlined(gc, gc->swapMapX, gc->swapMapY,
+                        gc_smoothTileAtInlined(gc, gc->build.swapMapX, gc->build.swapMapY,
                                                false);
                     break;
                 case 6:
                     if (!gc->blockBuildMenu)
-                        gc_smoothTileAtInlined(gc, gc->swapMapX, gc->swapMapY,
+                        gc_smoothTileAtInlined(gc, gc->build.swapMapX, gc->build.swapMapY,
                                                true);
                     break;
                 case 9:

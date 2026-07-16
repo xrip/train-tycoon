@@ -3,6 +3,7 @@
 // the build/menu display rows stay on GameCanvas for UI-01.
 #ifndef BUILD_CONTROLLER_H
 #define BUILD_CONTROLLER_H
+#include "support/grid.h"
 #include <array>
 #include <cstdint>
 
@@ -40,6 +41,18 @@ struct BuildController {
     bool demolitionAffordable = false;
     int32_t terrainSmoothCost = 0;
     int32_t backgroundCost = 0;
+
+    // Terrain-edit and rectangle-selection state. terrainEditBuffer is the
+    // 10x10 scratch grid used while smoothing terrain; selectionStart and
+    // selectionTile track the picked rectangle corners; swapMap holds the tile
+    // being swapped. All runtime-only. Save byte order is unchanged.
+    Grid<int8_t> terrainEditBuffer;
+    int32_t selectionStartX = 0;
+    int32_t selectionStartY = 0;
+    std::array<int32_t, 4> selectionTileX{};
+    std::array<int32_t, 4> selectionTileY{};
+    int32_t swapMapX = 0;
+    int32_t swapMapY = 0;
 };
 
 #endif  // BUILD_CONTROLLER_H
