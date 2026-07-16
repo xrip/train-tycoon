@@ -30,11 +30,19 @@ generated output; the 13 scenario map goldens must not move.
 WORLD-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
 change.
 
+## Progress
+
+- Done: renamed the RNG helper `rint` -> `nextRngInt` (was shadowing libm) and
+  removed a dead `RNG` macro.
+- Done: named the generator state machine `gc->mapGenStage` 0..10 as
+  `mapgen::STAGE_*` (init, raise, lower, patches, six feature passes, scatter
+  obstacles) in `map_gen.cpp`. Debug and Release full gates passed on 2026-07-16,
+  all 13 scenario-map goldens unchanged.
+
 ## Next action
 
-Read `map_gen.cpp` end to end and map the generation stages (obstacle, terrain
-raise/lower, feature, city/industry placement) and their RNG use. Name the stage
-helpers and the terrain scratch fields (`terrainEditBuffer`, patch buffers) by
-behavior. Because map-gen output is RNG-sensitive, make only name/shape changes
-that leave the random sequence identical, and lean on the scenario map goldens
-after every leaf. Commit each leaf after the strict Debug and full tests pass.
+Name the remaining generator magic where evidence is clear: the slope-tile ids in
+`gc_toggleFlagInlined` (needs the deferred tile-shape taxonomy first, so record
+evidence before renaming), and the terrain scratch fields. Keep the random
+sequence identical and lean on the scenario map goldens after every leaf. Then
+close WORLD-02 and open PATH-01.

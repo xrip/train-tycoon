@@ -7,6 +7,23 @@
 
 static int nextRngInt(GameCanvas *gc) { return gc->rng.next_int(); }
 
+// GameCanvas::mapGenStage steps through the incremental generator in
+// gc_loadState25Setup: init, raise then lower terrain, place patches, six
+// terrain-feature passes, then scatter starting obstacles.
+namespace mapgen {
+inline constexpr int32_t STAGE_INIT = 0;
+inline constexpr int32_t STAGE_RAISE_TERRAIN = 1;
+inline constexpr int32_t STAGE_LOWER_TERRAIN = 2;
+inline constexpr int32_t STAGE_PLACE_PATCHES = 3;
+inline constexpr int32_t STAGE_FEATURE_0 = 4;
+inline constexpr int32_t STAGE_FEATURE_1 = 5;
+inline constexpr int32_t STAGE_FEATURE_2 = 6;
+inline constexpr int32_t STAGE_FEATURE_3 = 7;
+inline constexpr int32_t STAGE_FEATURE_4 = 8;
+inline constexpr int32_t STAGE_FEATURE_5 = 9;
+inline constexpr int32_t STAGE_SCATTER_OBSTACLES = 10;
+}  // namespace mapgen
+
 // byte randomCityTile()
 int8_t gc_randomCityTile(GameCanvas *gc) {
     int n = abs(nextRngInt(gc) % 22);
@@ -403,7 +420,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
         gc->world.tileElevation.resize(gc->world.mapWidth + 1, gc->world.mapHeight + 1);
         gc->world.heightMap.resize(gc->world.mapWidth + 2, gc->world.mapHeight + 2);
         gc->initialIndustryPlaced = false;
-        gc->mapGenStage = 0;
+        gc->mapGenStage = mapgen::STAGE_INIT;
         gc->tilesGeneratedInStage = 0;
         gc->totalTilesToGenerate = gc->terrainRaiseStepCount + gc->terrainLowerStepCount + gc->mapGenColumns * (gc->mapGenColumns - 1)
             + gc->mapGenRows + gc->weightAccel2 + gc->weightAccel + gc->terrainFeatureStage6Count
@@ -412,17 +429,17 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
     }
     if (n == 1) {
         int n2 = 0, n3, n4;
-        if (gc->mapGenStage == 0) { gc->mapGenStage = 1; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 1 && gc->tilesGeneratedInStage == gc->terrainRaiseStepCount) { gc->mapGenStage = 2; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
-        if (gc->mapGenStage == 2 && gc->tilesGeneratedInStage == gc->terrainLowerStepCount) { gc->mapGenStage = 3; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
-        if (gc->mapGenStage == 3 && gc->tilesGeneratedInStage == gc->mapGenColumns * (gc->mapGenColumns - 1) + gc->mapGenRows) { gc->mapGenStage = 4; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 4 && gc->tilesGeneratedInStage == gc->weightAccel2) { gc->mapGenStage = 5; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 5 && gc->tilesGeneratedInStage == gc->weightAccel) { gc->mapGenStage = 6; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 6 && gc->tilesGeneratedInStage == gc->terrainFeatureStage6Count) { gc->mapGenStage = 7; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 7 && gc->tilesGeneratedInStage == gc->terrainFeatureStage7Count) { gc->mapGenStage = 8; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 8 && gc->tilesGeneratedInStage == gc->weightAccel4) { gc->mapGenStage = 9; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 9 && gc->tilesGeneratedInStage == gc->weightAccel3) { gc->mapGenStage = 10; gc->tilesGeneratedInStage = 0; }
-        if (gc->mapGenStage == 1) {
+        if (gc->mapGenStage == mapgen::STAGE_INIT) { gc->mapGenStage = mapgen::STAGE_RAISE_TERRAIN; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_RAISE_TERRAIN && gc->tilesGeneratedInStage == gc->terrainRaiseStepCount) { gc->mapGenStage = mapgen::STAGE_LOWER_TERRAIN; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
+        if (gc->mapGenStage == mapgen::STAGE_LOWER_TERRAIN && gc->tilesGeneratedInStage == gc->terrainLowerStepCount) { gc->mapGenStage = mapgen::STAGE_PLACE_PATCHES; gc->tilesGeneratedInStage = 0; gc_toggleFlagInlined(gc, false); }
+        if (gc->mapGenStage == mapgen::STAGE_PLACE_PATCHES && gc->tilesGeneratedInStage == gc->mapGenColumns * (gc->mapGenColumns - 1) + gc->mapGenRows) { gc->mapGenStage = mapgen::STAGE_FEATURE_0; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_0 && gc->tilesGeneratedInStage == gc->weightAccel2) { gc->mapGenStage = mapgen::STAGE_FEATURE_1; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_1 && gc->tilesGeneratedInStage == gc->weightAccel) { gc->mapGenStage = mapgen::STAGE_FEATURE_2; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_2 && gc->tilesGeneratedInStage == gc->terrainFeatureStage6Count) { gc->mapGenStage = mapgen::STAGE_FEATURE_3; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_3 && gc->tilesGeneratedInStage == gc->terrainFeatureStage7Count) { gc->mapGenStage = mapgen::STAGE_FEATURE_4; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_4 && gc->tilesGeneratedInStage == gc->weightAccel4) { gc->mapGenStage = mapgen::STAGE_FEATURE_5; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_5 && gc->tilesGeneratedInStage == gc->weightAccel3) { gc->mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; gc->tilesGeneratedInStage = 0; }
+        if (gc->mapGenStage == mapgen::STAGE_RAISE_TERRAIN) {
             int center_x = abs(nextRngInt(gc) % gc->world.mapWidth);
             int center_y = abs(nextRngInt(gc) % gc->world.mapHeight);
             int width = abs(nextRngInt(gc) % 20) + 1;
@@ -431,7 +448,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
             gc_raiseTerrainArea(gc, center_x, center_y, width, height,
                                 elevation_step);
         }
-        if (gc->mapGenStage == 2) {
+        if (gc->mapGenStage == mapgen::STAGE_LOWER_TERRAIN) {
             int center_x = abs(nextRngInt(gc) % gc->world.mapWidth);
             int center_y = abs(nextRngInt(gc) % gc->world.mapHeight);
             int width = abs(nextRngInt(gc) % 20) + 1;
@@ -439,7 +456,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
             gc_lowerTerrainArea(gc, center_x, center_y, width, height, -1);
         }
         gc->trackBuildInProgress = false;
-        if (gc->mapGenStage == 3) {
+        if (gc->mapGenStage == mapgen::STAGE_PLACE_PATCHES) {
             for (n4 = 0; n4 < gc->mapGenColumns; ++n4) {
                 bool done = false;
                 for (n3 = 0; n3 < gc->mapGenRows && !done; ++n3) {
@@ -454,14 +471,14 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
                 if (done) break;
             }
         }
-        if (gc->mapGenStage == 4) gc_placeTerrainFeature(gc, 0);
-        if (gc->mapGenStage == 5) gc_placeTerrainFeature(gc, 1);
-        if (gc->mapGenStage == 6) gc_placeTerrainFeature(gc, 2);
-        if (gc->mapGenStage == 7) gc_placeTerrainFeature(gc, 3);
-        if (gc->mapGenStage == 8) gc_placeTerrainFeature(gc, 4);
-        if (gc->mapGenStage == 9) gc_placeTerrainFeature(gc, 5);
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_0) gc_placeTerrainFeature(gc, 0);
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_1) gc_placeTerrainFeature(gc, 1);
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_2) gc_placeTerrainFeature(gc, 2);
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_3) gc_placeTerrainFeature(gc, 3);
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_4) gc_placeTerrainFeature(gc, 4);
+        if (gc->mapGenStage == mapgen::STAGE_FEATURE_5) gc_placeTerrainFeature(gc, 5);
         if (gc->trackBuildInProgress) gc->loadStep = 0;
-        if (gc->mapGenStage == 10) {
+        if (gc->mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
             for (n4 = 0; n4 < gc->initialObstacleCount; ++n4) {
                 n3 = abs(nextRngInt(gc) % gc->world.mapWidth);
                 n2 = abs(nextRngInt(gc) % gc->world.mapHeight);
