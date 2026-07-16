@@ -170,13 +170,13 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 32: {
             int values[8] = {
-                gc->compareToPrevious ? gc->prevTotalSpent : gc->totalSpent,
-                gc->compareToPrevious ? gc->prevAiMoneySpent : gc->aiMoneySpent,
+                gc->compareToPrevious ? gc->prevTotalSpent : gc->economy.totalSpent,
+                gc->compareToPrevious ? gc->economy.prevAiMoneySpent : gc->economy.aiMoneySpent,
                 gc->compareToPrevious ? gc->prevFuelCost : gc->fuelCostAccrued,
                 gc->compareToPrevious ? gc->prevSubsidyCost : gc->subsidyCost,
                 gc->compareToPrevious ? gc->prevTerrainTotal : gc->terrainTotal,
                 gc->compareToPrevious ? gc->prevEnterpriseTotal : gc->decadeEnterpriseTax,
-                gc->compareToPrevious ? gc->prevTotalRevenue : gc->totalRevenue,
+                gc->compareToPrevious ? gc->economy.prevTotalRevenue : gc->economy.totalRevenue,
                 gc->compareToPrevious ? gc->previousYearProfit : gc->netProfit
             };
             if (field >= 0 && field < 8) return gc_formatCurrency(gc, values[field]);

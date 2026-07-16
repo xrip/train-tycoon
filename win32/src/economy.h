@@ -16,6 +16,16 @@ struct Economy {
     int32_t monthOfYear = 0;
     int32_t year = 0;
     int32_t enterpriseTaxPct = 0;
+
+    // Spending and revenue aggregates (lifetime and per-period totals).
+    int32_t totalSpent = 0;
+    int32_t aiMoneySpent = 0;
+    int32_t prevAiMoneySpent = 0;
+    int32_t totalRevenue = 0;
+    int32_t prevTotalRevenue = 0;
+    int32_t revenueTotal = 0;
+    int32_t lifetimeTrainRevenue = 0;
+    int32_t trainRevenueScore = 0;
 };
 
 #endif  // ECONOMY_H

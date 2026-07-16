@@ -164,9 +164,9 @@ void gc_postRevenueReset(GameCanvas *gc) {
 // void archiveOrRecall()
 void gc_archiveOrRecall(GameCanvas *gc) {
     gc->terrainTotal = gc->economy.loanBalance * gc->economy.interestRate / 1200;
-    gc->decadeEnterpriseTax = gc->totalRevenue * gc->economy.enterpriseTaxPct / 100;
-    gc->netProfit = gc->totalRevenue - gc->terrainTotal - gc->totalSpent
-                     - gc->aiMoneySpent - gc->fuelCostAccrued - gc->subsidyCost
+    gc->decadeEnterpriseTax = gc->economy.totalRevenue * gc->economy.enterpriseTaxPct / 100;
+    gc->netProfit = gc->economy.totalRevenue - gc->terrainTotal - gc->economy.totalSpent
+                     - gc->economy.aiMoneySpent - gc->fuelCostAccrued - gc->subsidyCost
                      - gc->decadeEnterpriseTax;
 }
 
@@ -174,14 +174,14 @@ void gc_archiveOrRecall(GameCanvas *gc) {
 void gc_computeYearEndMetrics(GameCanvas *gc) {
     gc_archiveOrRecall(gc);
     gc->yearProfitHistory[0] = gc->netProfit;
-    gc->yearRevenueHistory[0] = gc->totalRevenue;
+    gc->yearRevenueHistory[0] = gc->economy.totalRevenue;
     gc->decadeProfitHistory[0] = gc->decadeProfitGraphTotal + gc->netProfit;
-    gc->altDecadeRevenueTotal[0] = gc->revenueTotal + gc->totalRevenue;
-    gc->decadeSpentWithCurrent = gc->decadeCostTotal + gc->totalSpent;
-    gc->decadeAiSpentWithCurrent = gc->decadeSpentTotal + gc->aiMoneySpent;
+    gc->altDecadeRevenueTotal[0] = gc->economy.revenueTotal + gc->economy.totalRevenue;
+    gc->decadeSpentWithCurrent = gc->decadeCostTotal + gc->economy.totalSpent;
+    gc->decadeAiSpentWithCurrent = gc->decadeSpentTotal + gc->economy.aiMoneySpent;
     gc->decadeFuelWithCurrent = gc->decadeFuelCost + gc->fuelCostAccrued;
     gc->decadeSubsidyWithCurrent = gc->decadeSubsidyTotal + gc->subsidyCost;
-    gc->decadeRevenueWithCurrent = gc->decadeRevenueTotal + gc->totalRevenue;
+    gc->decadeRevenueWithCurrent = gc->decadeRevenueTotal + gc->economy.totalRevenue;
     gc->decadeProfitWithCurrent = gc->decadeProfitTotal + gc->netProfit;
     gc->decadeEnterpriseWithCurrent = gc->decadeEnterpriseTotal + gc->decadeEnterpriseTax;
 }
@@ -333,7 +333,7 @@ void gc_persistSnapshotMode0(GameCanvas *gc) {
 
 // int computeMapTrainMetric(int)
 int32_t gc_computeMapTrainMetric(GameCanvas *gc, int32_t n) {
-    int n2 = gc->trainRevenueScore;
+    int n2 = gc->economy.trainRevenueScore;
     for (int i = 0; i < gc->world.mapWidth; ++i) {
         for (int j = 0; j < gc->world.mapHeight; ++j) {
             if (gc->world.trackMap[i][j] != 65) continue;
@@ -390,7 +390,7 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
                 bl = gc->currentMilestoneScore <= gc->milestoneThreshold4
                      && gc->milestoneCoThreshold2 <= gc->milestoneThreshold5;
                 break;
-            case 12: bl = gc->currentMilestoneScore <= gc->lifetimeTrainRevenue; break;
+            case 12: bl = gc->currentMilestoneScore <= gc->economy.lifetimeTrainRevenue; break;
             case 13: bl = gc->economy.loanBalance == 0; break;
             case 14: bl = gc->economy.year == gc->currentMilestoneScore; break;
             case 15: bl = gc->currentMilestoneScore <= gc->aiWagonsBought; break;
@@ -459,11 +459,11 @@ void gc_newYearNotify(GameCanvas *gc) {
         gc->stationRevenue[n] = 0;
     }
     gc_archiveOrRecall(gc);
-    gc->prevTotalSpent = gc->totalSpent;
-    gc->prevAiMoneySpent = gc->aiMoneySpent;
+    gc->prevTotalSpent = gc->economy.totalSpent;
+    gc->economy.prevAiMoneySpent = gc->economy.aiMoneySpent;
     gc->prevFuelCost = gc->fuelCostAccrued;
     gc->prevSubsidyCost = gc->subsidyCost;
-    gc->prevTotalRevenue = gc->totalRevenue;
+    gc->economy.prevTotalRevenue = gc->economy.totalRevenue;
     gc->prevTerrainTotal = gc->terrainTotal;
     gc->prevEnterpriseTotal = gc->decadeEnterpriseTax;
     gc->previousYearProfit = gc->netProfit;
@@ -473,15 +473,15 @@ void gc_newYearNotify(GameCanvas *gc) {
         gc->yearCompanyValueHistory[n + 1] = gc->yearCompanyValueHistory[n];
     }
     gc->yearProfitHistory[0] = gc->yearRevenueHistory[0] = gc->yearCompanyValueHistory[0] = 0;
-    gc->decadeCostTotal += gc->totalSpent;
-    gc->decadeSpentTotal += gc->aiMoneySpent;
+    gc->decadeCostTotal += gc->economy.totalSpent;
+    gc->decadeSpentTotal += gc->economy.aiMoneySpent;
     gc->decadeFuelCost += gc->fuelCostAccrued;
     gc->decadeSubsidyTotal += gc->subsidyCost;
-    gc->decadeRevenueTotal += gc->totalRevenue;
+    gc->decadeRevenueTotal += gc->economy.totalRevenue;
     gc->decadeProfitTotal += gc->netProfit;
     gc->decadeEnterpriseTotal += gc->decadeEnterpriseTax;
     gc->decadeProfitGraphTotal += gc->netProfit;
-    gc->revenueTotal += gc->totalRevenue;
+    gc->economy.revenueTotal += gc->economy.totalRevenue;
     if (gc->economy.monthOfYear == 13) {
         gc->prevDecadeSpent = gc->decadeSpentWithCurrent;
         gc->prevDecadeAiSpent = gc->decadeAiSpentWithCurrent;
@@ -499,7 +499,7 @@ void gc_newYearNotify(GameCanvas *gc) {
             gc->altDecadeRevenueTotal[n + 1] = gc->altDecadeRevenueTotal[n];
             gc->altDecadeTotalCost[n + 1] = gc->altDecadeTotalCost[n];
         }
-        gc->decadeProfitGraphTotal = gc->revenueTotal = 0;
+        gc->decadeProfitGraphTotal = gc->economy.revenueTotal = 0;
         gc->decadeProfitHistory[0] = gc->altDecadeRevenueTotal[0] = 0;
         gc->altDecadeTotalCost[0] = 0;
     }
@@ -509,8 +509,8 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->economy.money -= gc->decadeEnterpriseTax;
     if (gc->decadeEnterpriseTax > 0)
         gc_pushMoneyHistory(gc, -gc->decadeEnterpriseTax);
-    gc->totalSpent = gc->aiMoneySpent = gc->fuelCostAccrued = 0;
-    gc->subsidyCost = gc->totalRevenue = gc->netProfit = 0;
+    gc->economy.totalSpent = gc->economy.aiMoneySpent = gc->fuelCostAccrued = 0;
+    gc->subsidyCost = gc->economy.totalRevenue = gc->netProfit = 0;
     gc->decadeEnterpriseTax = 0;
     gc->mapRedrawPending = true;
     gc->compareToPrevious = true;

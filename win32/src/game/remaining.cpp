@@ -116,7 +116,7 @@ int32_t gc_computeMilestoneScore(GameCanvas *gc) {
         case 11:
             current = gc->milestoneThreshold4 + gc->milestoneThreshold5;
             break;
-        case 12: current = gc->lifetimeTrainRevenue; break;
+        case 12: current = gc->economy.lifetimeTrainRevenue; break;
         case 13:
             current = gc->economy.loanCeiling - gc->economy.loanBalance;
             target = gc->economy.loanCeiling;

@@ -17,7 +17,7 @@ bool gc_spendMoney(GameCanvas *gc, int32_t n) {
     if (n <= gc->economy.money) {
         gc->economy.money -= n;
         gc->lastViewportCenterX = -1;
-        gc->totalSpent += n;
+        gc->economy.totalSpent += n;
         gc_pushMoneyHistory(gc, -n);
         return true;
     }

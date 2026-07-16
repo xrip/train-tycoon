@@ -152,11 +152,11 @@ void gc_fields_init(GameCanvas *gc) {
     gc->yearGraphMode = 0;
     gc->yearGraphAlt = false;
     gc->monthRolloverFlag = false;
-    gc->totalSpent = 0;
-    gc->aiMoneySpent = 0;
+    gc->economy.totalSpent = 0;
+    gc->economy.aiMoneySpent = 0;
     gc->fuelCostAccrued = 0;
     gc->subsidyCost = 0;
-    gc->totalRevenue = 0;
+    gc->economy.totalRevenue = 0;
     gc->terrainTotal = 0;
     gc->decadeEnterpriseTax = 0;
     gc->netProfit = 0;
@@ -169,10 +169,10 @@ void gc_fields_init(GameCanvas *gc) {
     gc->decadeEnterpriseWithCurrent = 0;
     gc->decadeProfitWithCurrent = 0;
     gc->prevTotalSpent = 0;
-    gc->prevAiMoneySpent = 0;
+    gc->economy.prevAiMoneySpent = 0;
     gc->prevFuelCost = 0;
     gc->prevSubsidyCost = 0;
-    gc->prevTotalRevenue = 0;
+    gc->economy.prevTotalRevenue = 0;
     gc->prevTerrainTotal = 0;
     gc->prevEnterpriseTotal = 0;
     gc->previousYearProfit = 0;
@@ -192,7 +192,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->savedLegacyMetricEb = 0;
     gc->decadeEnterpriseTotal = 0;
     gc->decadeProfitTotal = 0;
-    gc->revenueTotal = 0;
+    gc->economy.revenueTotal = 0;
     gc->decadeProfitGraphTotal = 0;
     gc->difficultyCycle = 1;
     gc->nextTrackPieceCode = 66;
@@ -229,7 +229,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->offerGenerationCount = 0;
     gc->lastOfferDateCode = 0;
     gc->menuRowEnabledCount = 0;
-    gc->lifetimeTrainRevenue = 0;
+    gc->economy.lifetimeTrainRevenue = 0;
     gc->milestoneThreshold1 = 0;
     gc->milestoneThreshold2 = 0;
     gc->milestoneThreshold3 = 0;
@@ -241,7 +241,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->music_auto_start = false;
     gc->music_enabled = false;
     gc->music_volume_level = 2;
-    gc->trainRevenueScore = 0;
+    gc->economy.trainRevenueScore = 0;
     gc->bestScenarioScore = 0;
     gc->numActiveTileAnimations = 0;
     gc->viewportCenterX = 0;

@@ -411,7 +411,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
         gc->world.trackMap[x][y] = 65;
     }
     gc->economy.money -= cost;
-    gc->totalSpent += cost;
+    gc->economy.totalSpent += cost;
     gc->lastViewportCenterX = -1;
     gc_pushMoneyHistory(gc, -cost);
     gc_incrementRowValueType13(gc, cost);
@@ -578,7 +578,7 @@ void gc_openBuildMenu(GameCanvas *gc) {
                 if (gc->selectionCost <= gc->economy.money) {
                     gc_setTrackOwnerCode(gc, 1);
                     gc->economy.money -= gc->selectionCost;
-                    gc->totalSpent += gc->selectionCost;
+                    gc->economy.totalSpent += gc->selectionCost;
                     gc_pushMoneyHistory(gc, -gc->selectionCost);
                     gc_incrementRowValueType13(gc, gc->selectionCost);
                 } else {
@@ -751,7 +751,7 @@ bool gc_buyTrainAtCursor(GameCanvas *gc) {
         gc_incrementCargoOptionCount(gc, car_type);
     }
     gc->economy.money -= gc->unitCost;
-    gc->aiMoneySpent += gc->unitCost;
+    gc->economy.aiMoneySpent += gc->unitCost;
     gc_pushMoneyHistory(gc, -gc->unitCost);
     ++gc->aiWagonsBought;
     return true;
@@ -777,7 +777,7 @@ bool gc_applyTrainUpgradeInlined(GameCanvas *gc, int32_t train,
             | (options[option] & 7) << (3 + 3 * option));
     }
     gc->economy.money -= cost;
-    gc->aiMoneySpent += cost;
+    gc->economy.aiMoneySpent += cost;
     if (cost != 0) gc_pushMoneyHistory(gc, -cost);
     return true;
 }

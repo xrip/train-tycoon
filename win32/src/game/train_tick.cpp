@@ -204,8 +204,8 @@ void gc_recordTrainRevenue(GameCanvas *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
         if (gc->menuRowType[row] == 1) gc->menuRowValue[row] += amount;
     }
-    gc->lifetimeTrainRevenue += amount;
-    gc->trainRevenueScore += amount / 73;
+    gc->economy.lifetimeTrainRevenue += amount;
+    gc->economy.trainRevenueScore += amount / 73;
 }
 
 // int unloadTrainRevenue(int,int)
@@ -334,7 +334,7 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
                 if (revenue > 0) {
                     gc->economy.money += revenue;
                     gc_pushMoneyHistory(gc, revenue);
-                    gc->totalRevenue += revenue;
+                    gc->economy.totalRevenue += revenue;
                     gc->fleet.trainRevenue[head] += revenue;
                     gc_recordTrainRevenue(gc, revenue);
                 }

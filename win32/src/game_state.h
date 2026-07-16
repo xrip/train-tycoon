@@ -229,11 +229,8 @@ typedef struct GameCanvas {
     int32_t yearGraphMode;
     bool yearGraphAlt;
     bool monthRolloverFlag;
-    int32_t totalSpent;
-    int32_t aiMoneySpent;
     int32_t fuelCostAccrued;
     int32_t subsidyCost;
-    int32_t totalRevenue;
     int32_t terrainTotal;
     int32_t decadeEnterpriseTax;
     int32_t netProfit;
@@ -246,10 +243,8 @@ typedef struct GameCanvas {
     int32_t decadeEnterpriseWithCurrent;
     int32_t decadeProfitWithCurrent;
     int32_t prevTotalSpent;
-    int32_t prevAiMoneySpent;
     int32_t prevFuelCost;
     int32_t prevSubsidyCost;
-    int32_t prevTotalRevenue;
     int32_t prevTerrainTotal;
     int32_t prevEnterpriseTotal;
     int32_t previousYearProfit;
@@ -269,7 +264,6 @@ typedef struct GameCanvas {
     int32_t savedLegacyMetricEb;
     int32_t decadeEnterpriseTotal;
     int32_t decadeProfitTotal;
-    int32_t revenueTotal;
     int32_t decadeProfitGraphTotal;
     std::array<int32_t, 12> yearProfitHistory{};
     std::array<int32_t, 12> yearRevenueHistory{};
@@ -315,7 +309,6 @@ typedef struct GameCanvas {
     int8_t scenarioMilestoneIndex;
     int32_t currentMilestoneScore;
     int32_t milestoneCoThreshold2;
-    int32_t lifetimeTrainRevenue;
     int32_t milestoneThreshold1;
     int32_t milestoneThreshold2;
     int32_t milestoneThreshold3;
@@ -329,7 +322,6 @@ typedef struct GameCanvas {
     bool music_enabled;
     int32_t music_volume_level;
     std::unique_ptr<MusicOutput> music_output;
-    int32_t trainRevenueScore;
     int32_t bestScenarioScore;
     std::array<int32_t, 13> scenarioScores{};
     std::array<int32_t, 14> leaderboardScores{};

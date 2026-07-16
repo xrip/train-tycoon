@@ -56,7 +56,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 case 3: gc->music_auto_start = true; gc->music_enabled = true; gc_setState(gc, +GameState::LoadingResources); break;
                 case 4: {
                     gc->economy.money += gc->currentTrainCostSnapshot * 70 / 100;
-                    gc->aiMoneySpent -= gc->currentTrainCostSnapshot * 70 / 100;
+                    gc->economy.aiMoneySpent -= gc->currentTrainCostSnapshot * 70 / 100;
                     if (gc->currentTrainCostSnapshot != 0)
                         gc_pushMoneyHistory(gc, gc->currentTrainCostSnapshot * 70 / 100);
                     int16_t s = gc->fleet.nextCar[gc->trainAtCursor];
@@ -163,7 +163,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                     gc->fleet.trainAgeOrTimer[gc->trainAtCursor] = 0;
                     gc->economy.money -= n4;
                     gc_pushMoneyHistory(gc, -n4);
-                    gc->aiMoneySpent += n4;
+                    gc->economy.aiMoneySpent += n4;
                     gc->difficultyPct = 100 - 3 * gc->fleet.trainAgeOrTimer[gc->trainAtCursor];
                     gc_computeTrainCost(gc);
                     gc->currentTrainCostSnapshot = gc->unitCost;
