@@ -89,15 +89,8 @@ typedef struct GameCanvas {
     bool cursorOverUI;
     bool cursorAllowZoomOut;
     int32_t cursorDragX;
-    bool mapRedrawPending;
     bool useDefaultOverlaySelection;
     bool pauseMenuOpen;
-    int32_t dialogContentHeight;
-    bool needsRepaint;
-    int32_t clipX;
-    int32_t clipY;
-    int32_t clipWidth;
-    int32_t clipHeight;
     bool initialIndustryPlaced;
     int32_t mapGenStage;
     int32_t tilesGeneratedInStage;

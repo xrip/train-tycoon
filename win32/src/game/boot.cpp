@@ -25,8 +25,8 @@ void gc_resetOverlayRenderState(GameCanvas *gc) {
     gc->cursorSelectX = -1;
     gc->cursorOverUI = false;
     gc->cursorAllowZoomOut = false;
-    gc->dialogContentHeight = 0;
-    gc->needsRepaint = false;
+    gc->renderer.dialogContentHeight = 0;
+    gc->renderer.needsRepaint = false;
 }
 
 void gc_loadPackedSpriteData(GameCanvas *gc, const char *resource_name) {

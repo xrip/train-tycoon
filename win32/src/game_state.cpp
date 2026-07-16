@@ -51,10 +51,10 @@ void gc_fields_init(GameCanvas *gc) {
     gc->cursorSelectY = -1;
     gc->cursorSelectX = -1;
     gc->cursorDragX = -1;
-    gc->mapRedrawPending = false;
+    gc->renderer.mapRedrawPending = false;
     gc->useDefaultOverlaySelection = true;
     gc->pauseMenuOpen = false;
-    gc->needsRepaint = false;
+    gc->renderer.needsRepaint = false;
     gc->renderer.lastRenderedSpriteId = -1;
     gc->renderer.spriteJustChanged = 0;
     gc->build.terrainSmoothCost = 0;

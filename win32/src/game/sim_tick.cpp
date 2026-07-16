@@ -512,7 +512,7 @@ void gc_newYearNotify(GameCanvas *gc) {
     gc->economy.totalSpent = gc->economy.aiMoneySpent = gc->economy.fuelCostAccrued = 0;
     gc->economy.subsidyCost = gc->economy.totalRevenue = gc->economy.netProfit = 0;
     gc->economy.decadeEnterpriseTax = 0;
-    gc->mapRedrawPending = true;
+    gc->renderer.mapRedrawPending = true;
     gc->compareToPrevious = true;
     gc->monthRolloverFlag = true;
     if (gc->economy.monthOfYear == 13) {

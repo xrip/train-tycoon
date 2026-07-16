@@ -29,6 +29,17 @@ struct Renderer {
     int32_t viewportY1 = 0;
     int32_t lastViewportCenterX = 0;
     int32_t viewportCenterYCached = 0;
+
+    // Per-frame draw bookkeeping: the active clip rectangle, the repaint and
+    // map-redraw request flags, and the measured dialog content height. All
+    // runtime-only. Draw order is unchanged.
+    int32_t clipX = 0;
+    int32_t clipY = 0;
+    int32_t clipWidth = 0;
+    int32_t clipHeight = 0;
+    bool needsRepaint = false;
+    bool mapRedrawPending = false;
+    int32_t dialogContentHeight = 0;
 };
 
 #endif  // RENDERER_H

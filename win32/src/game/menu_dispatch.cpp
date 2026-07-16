@@ -227,7 +227,7 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
                 default:
                     gc_setState(gc, +GameState::Playing); gc->menuDirty = true;
             }
-            gc->mapRedrawPending = true;
+            gc->renderer.mapRedrawPending = true;
             break;
         case 31:
             gc->monthRolloverFlag = false;
