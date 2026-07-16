@@ -240,9 +240,9 @@ void gc_setCanvasSize(GameCanvas *gc, int32_t n, int32_t n2) {
         gc->aJ = n2;
         gc->menuDirty = true;
         gc->lastViewportCenterX = -1;
-        if (gc->gameState == 20 && !gc->ready) {
-            if (gc->hx == 30) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = 30; }
-            if (gc->hx == 40) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = 40; }
+        if (gc->gameState == +GameState::MenuOverlay && !gc->ready) {
+            if (gc->hx == +GameState::Playing) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::Playing; }
+            if (gc->hx == +GameState::MapOverview) { gc->pendingTransitionCode = gc->transitionCode; gc->gameState = +GameState::MapOverview; }
         }
     }
 }
@@ -254,19 +254,19 @@ void gc_setState(GameCanvas *gc, int32_t n) {
     gc->snapshotLoadedFlag = false;
     gc->menuDirty = true;
     switch (n) {
-        case 0:
+        case +GameState::BootSplash0:
             gc_openSpriteStream(gc, "sprite_images.bin");
             gc_loadPackedSpriteData(gc, "packed_sprites.bin");
             gc->loadingTimer = 0;
             /* fall through */
-        case 1:
-        case 2:
+        case +GameState::BootSplash1:
+        case +GameState::BootSplash2:
             gc->cycle_flag = gc_decodePngFromSpriteStream(gc);
             gc->loadingStartTime = midp_current_time_millis();
             gc->loadingTimeout = false;
             gc->loadingTimer = 0;
             break;
-        case 4: {
+        case +GameState::IntroReady: {
             ResourceReader in = resources::open("sprite_image_map.bin");
             if (in) {
                 int n2 = in.read_byte();
@@ -284,7 +284,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             }
             break;
         }
-        case 10: {
+        case +GameState::LoadingResources: {
             gc->spriteLoadCounter = 0;
             ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
@@ -301,27 +301,27 @@ void gc_setState(GameCanvas *gc, int32_t n) {
             gc->tileSpriteIndex[68] = gc->tileSpriteIndex[66];
             break;
         }
-        case 20:
+        case +GameState::MenuOverlay:
             gc_resetOverlayRenderState(gc);
             if (!gc->useDefaultOverlaySelection) gc->cursorDragY = 2;
             gc->useDefaultOverlaySelection = true;
             break;
-        case 25:
+        case +GameState::GeneratingMap:
             gc->loadStep = 0;
             break;
-        case 30:
+        case +GameState::Playing:
             gc->backbuffer = NULL;
             gc->backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
             gc->backbuffer_surface = gc->backbuffer->drawing_surface();
             gc->lastViewportCenterX = -1;
             gc->menuDirty = true;
             break;
-        case 35: gc->loadStep = 4; gc->confirmToggle = 0; break;
-        case 45: gc->loadStep = 4; break;
-        case 55: gc->loadStep = 4; break;
-        case 65: gc->loadStep = 4; break;
-        case 105: gc->loadStep = 4; break;
-        case 120: gc->loadStep = 4; break;
+        case +GameState::BuildingMinimap: gc->loadStep = 4; gc->confirmToggle = 0; break;
+        case +GameState::BuildingPath: gc->loadStep = 4; break;
+        case +GameState::SavingGame: gc->loadStep = 4; break;
+        case +GameState::LoadingGame: gc->loadStep = 4; break;
+        case +GameState::AiTurn: gc->loadStep = 4; break;
+        case +GameState::HighScoreSync: gc->loadStep = 4; break;
     }
     gc->gameState = n;
 }
@@ -330,7 +330,7 @@ void gc_setState(GameCanvas *gc, int32_t n) {
 void gc_start(GameCanvas *gc, void *gameMIDlet) {
     gc->midlet = gameMIDlet;
     gc_persistSnapshotMode1(gc);
-    gc_setState(gc, 0);
+    gc_setState(gc, +GameState::BootSplash0);
     // Display.setCurrent + Thread(this).start() are replaced by the host loop.
 }
 
@@ -352,16 +352,16 @@ void gc_run(GameCanvas *gc) {
         gc->frameIndex = 1;
         while (gc->frameIndex > 0) {
             gc_update(gc);
-            if (gc->gameState != 20 && gc->gameState != 40) continue;
+            if (gc->gameState != +GameState::MenuOverlay && gc->gameState != +GameState::MapOverview) continue;
             gc->inputPending = false;
             break;
         }
         gc->frameIndex = 0;
     }
-    if (gc->gameState == 10) {
+    if (gc->gameState == +GameState::LoadingResources) {
         for (int n = 0; n < 5; ++n) gc_update(gc);
     }
-    if (gc->gameState == 30) {
+    if (gc->gameState == +GameState::Playing) {
         for (int n = 0; n < gc->simSpeed; ++n) {
             if (!gc->pauseFlag) gc_update(gc);
             if (!gc->menuRowEnabled[gc->buildMenuMode][gc->buildMenuItemIndex]) continue;

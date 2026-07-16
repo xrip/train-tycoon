@@ -5,7 +5,7 @@
 void gc_enterOutOfMoneyState(GameCanvas *gc) {
     gc->ready = false;
     gc->transitionCode = 11;
-    gc_setState(gc, 20);
+    gc_setState(gc, +GameState::MenuOverlay);
 }
 
 void gc_incrementRowValueType13(GameCanvas *gc, int32_t amount) {
@@ -203,13 +203,13 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
         gc->junctionDirCursor = (int8_t)(track & 0x3F);
         gc->ready = false;
         gc->transitionCode = 20;
-        gc_setState(gc, 20);
+        gc_setState(gc, +GameState::MenuOverlay);
     }
     if ((track & 0xC0) == 192) {
         gc->stationDirCursor = (int8_t)(track & 0x3F);
         gc->ready = false;
         gc->transitionCode = 21;
-        gc_setState(gc, 20);
+        gc_setState(gc, +GameState::MenuOverlay);
     }
     if (track != 65) return;
 
@@ -221,7 +221,7 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
         if (gc->serviceVehicleAtCursor != 5000) {
             gc->ready = false;
             gc->transitionCode = 22;
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
         }
         return;
     }
@@ -249,7 +249,7 @@ void gc_pickTrainsAtCursor(GameCanvas *gc) {
     gc->currentTrainCostSnapshot = gc->unitCost;
     gc->ready = false;
     gc->transitionCode = 26;
-    gc_setState(gc, 20);
+    gc_setState(gc, +GameState::MenuOverlay);
 }
 
 void gc_buildPlaceTrackPiece(GameCanvas *gc, int32_t piece) {
@@ -492,23 +492,23 @@ void gc_openBuildMenu(GameCanvas *gc) {
                     break;
                 case 2:
                     gc->ready = false; gc->transitionCode = 30;
-                    gc_setState(gc, 20); break;
+                    gc_setState(gc, +GameState::MenuOverlay); break;
                 case 3:
                     gc->ready = false; gc->transitionCode = 31;
-                    gc_setState(gc, 20); break;
+                    gc_setState(gc, +GameState::MenuOverlay); break;
                 case 4:
                     gc_rebuildMenuTypeIndexes(gc);
                     gc->ready = false; gc->transitionCode = 60;
-                    gc_setState(gc, 20); break;
+                    gc_setState(gc, +GameState::MenuOverlay); break;
                 case 5:
                     gc->ready = false; gc->transitionCode = 17;
-                    gc_setState(gc, 20); break;
+                    gc_setState(gc, +GameState::MenuOverlay); break;
                 case 8: gc->inputPending = true; break;
                 case 9:
                     gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
                     gc->useDefaultOverlaySelection = false;
                     gc->ready = false; gc->transitionCode = 1;
-                    gc_setState(gc, 20); break;
+                    gc_setState(gc, +GameState::MenuOverlay); break;
                 case 11: gc->pauseFlag = !gc->pauseFlag; break;
             }
             break;
@@ -612,7 +612,7 @@ void gc_openBuildMenu(GameCanvas *gc) {
                 gc->demolishX = gc->tileCursorX;
                 gc->demolishY = gc->tileCursorY;
                 gc->tileMap[gc->placementX][gc->placementY] = 0;
-                gc_setState(gc, 45);
+                gc_setState(gc, +GameState::BuildingPath);
             } else if (item == 9) {
                 gc->tileMap[gc->placementX][gc->placementY] = 0;
                 gc->buildMenuMode = 1;

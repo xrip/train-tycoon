@@ -198,15 +198,15 @@ bool gc_syncHighScores(GameCanvas *gc, bool upload) {
 
 void gc_hideNotify(GameCanvas *gc) {
     gc->paused = true;
-    if (gc->gameState > 10 && gc->gameState != 120) gc_stopMusic(gc);
-    if (gc->gameState == 30) {
+    if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_stopMusic(gc);
+    if (gc->gameState == +GameState::Playing) {
         gc->ready = false;
         gc->transitionCode = 1;
-        gc_setState(gc, 20);
+        gc_setState(gc, +GameState::MenuOverlay);
     }
 }
 
 void gc_showNotify(GameCanvas *gc) {
-    if (gc->gameState > 10 && gc->gameState != 120) gc_playMusic(gc);
+    if (gc->gameState > +GameState::LoadingResources && gc->gameState != +GameState::HighScoreSync) gc_playMusic(gc);
     gc->paused = false;
 }

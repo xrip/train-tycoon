@@ -1,0 +1,40 @@
+// Named game constants recovered during the model stage (MODEL-01).
+// Values are unchanged from the original numeric literals; only names are added.
+#ifndef GAME_CONSTANTS_H
+#define GAME_CONSTANTS_H
+#include <cstdint>
+
+// Values for GameCanvas::gameState (and its saved previous-state copy `hx`).
+// The field stays int32_t for save and arithmetic safety; these names replace
+// the raw state literals at read and write sites. Use unary `+` to get the
+// int32_t value, e.g. gc_setState(gc, +GameState::Playing).
+//
+// Flow: BootSplash0 -> BootSplash1 (loads fonts) -> IntroReady -> MenuOverlay.
+// Splash states 2 and 3 are defined by the switches but unreached in the
+// current boot path (BootSplash1 jumps straight to IntroReady).
+enum class GameState : int32_t {
+    BootSplash0      = 0,    // first splash: opens the sprite stream; black frame
+    BootSplash1      = 1,    // second splash: decodes fonts, then -> IntroReady
+    BootSplash2      = 2,    // defined by the switches; unreached in current flow
+    BootSplash3      = 3,    // defined by the switches; unreached in current flow
+    IntroReady       = 4,    // fonts ready: arm the main menu, then -> MenuOverlay
+    LoadingResources = 10,   // load scenario sprites and music (progress bar)
+    MenuOverlay      = 20,   // packed-sprite menu/dialog overlay and its dispatch
+    GeneratingMap    = 25,   // map generation progress screen
+    Playing          = 30,   // in-game map, money ticker, and input
+    BuildingMinimap  = 35,   // build the minimap image, then -> MapOverview
+    MapOverview      = 40,   // minimap / overview with pan
+    BuildingPath     = 45,   // compute a train route/path
+    SavingGame       = 55,   // write the map arrays to the save
+    LoadingGame      = 65,   // restore the map arrays from the save
+    AiTurn           = 105,  // AI turn: place cities/industry or advance
+    HighScoreSync    = 120,  // upload/sync high scores (network)
+};
+
+// Unary plus yields the underlying int32_t so the value fits the int32_t
+// gameState field, switch subjects, and case labels without a verbose cast.
+constexpr int32_t operator+(GameState state) noexcept {
+    return static_cast<int32_t>(state);
+}
+
+#endif  // GAME_CONSTANTS_H

@@ -48,10 +48,10 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
     gc->keyRepeatDelay = 0;
     gc->heldKey = 0;
     switch (gc->gameState) {
-        case 0: case 1: case 2: case 3:
+        case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3:
             gc->loadingTimeout = true;
             break;
-        case 20:
+        case +GameState::MenuOverlay:
             if (n == 56 || n == 54) {
                 gc_registerCityEntryInlined(gc, 1);
                 gc->keyRepeatDelay = 4;
@@ -68,15 +68,15 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
             gc->cursorDragX = -1;
             gc_registerCityEntryInlined(gc, 3);
             break;
-        case 30:
+        case +GameState::Playing:
             gc->lastKeyCode = n;
             gc->keySubState = 0;
             if (gc->inputSubState == 0) {
                 if (n == 42) { gc_cycleBuildMenuIndex(gc, false); gc->inputSubState = 7; gc->currentKey = n; }
                 if (n == 35) { gc_cycleBuildMenuIndex(gc, true); gc->inputSubState = 7; gc->currentKey = n; }
                 if (n == 53) gc_openBuildMenu(gc);
-                if (n != 48 || gc->gameState != 30) break;
-                gc_setState(gc, 35);
+                if (n != 48 || gc->gameState != +GameState::Playing) break;
+                gc_setState(gc, +GameState::BuildingMinimap);
                 break;
             }
             if (gc->inputSubState == 1) {
@@ -95,18 +95,18 @@ void gc_handleKey(GameCanvas *gc, int32_t n) {
             if (n != 42 && n != 35) break;
             gc->currentKey = n;
             break;
-        case 40:
+        case +GameState::MapOverview:
             gc->lastKeyCode = n;
             gc->keySubState = 40;
             if (n == 53) {
                 if (gc->confirmToggle == 0) {
-                    gc_setState(gc, 30);
+                    gc_setState(gc, +GameState::Playing);
                     gc->buildMenuItemIndex = 0;
                     gc->menuDirty = true;
                 } else {
                     gc->ready = false;
                     gc->transitionCode = 36;
-                    gc_setState(gc, 20);
+                    gc_setState(gc, +GameState::MenuOverlay);
                 }
             }
             if (n != 42 && n != 35) break;

@@ -25,17 +25,17 @@ void gc_paint(GameCanvas *gc, Surface *g) {
     int n = WIDTH, n2 = HEIGHT;
     if (gc->ce) return;
     gc_setCanvasSize(gc, n, n2);
-    if (gc->gameState != 40 && gc->gameState != 35 && gc->gameState != 45
-        && gc->gameState != 55 && gc->gameState != 65 && gc->gameState != 105
-        && gc->gameState != 120 && (gc->gameState != 20 || gc->ready)) {
+    if (gc->gameState != +GameState::MapOverview && gc->gameState != +GameState::BuildingMinimap && gc->gameState != +GameState::BuildingPath
+        && gc->gameState != +GameState::SavingGame && gc->gameState != +GameState::LoadingGame && gc->gameState != +GameState::AiTurn
+        && gc->gameState != +GameState::HighScoreSync && (gc->gameState != +GameState::MenuOverlay || gc->ready)) {
         midp_set_color(g, 0);
         midp_fill_rect(g, 0, 0, n, n2);
     }
     midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
     switch (gc->gameState) {
-        case 0: case 1: case 2: case 3: {
+        case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: case +GameState::BootSplash3: {
             midp_set_color(g, 0xFFFFFF);
-            if (gc->gameState == 0) midp_set_color(g, 0);
+            if (gc->gameState == +GameState::BootSplash0) midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             int n3 = gcs_screenWidth / 2;
             int n4 = gcs_hs / 2;
@@ -54,7 +54,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
             break;
         }
-        case 10: {
+        case +GameState::LoadingResources: {
             midp_set_color(g, 0xFFFFFF);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
@@ -67,7 +67,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_draw_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
             break;
         }
-        case 20: {
+        case +GameState::MenuOverlay: {
             if (gc->ready) {
                 midp_set_color(g, 0xFFFFFF);
                 midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
@@ -75,14 +75,14 @@ void gc_paint(GameCanvas *gc, Surface *g) {
                     midp_draw_image(g, gc->cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
             }
             if (gc->transitionCode == 36) {
-                gc->gameState = 40;
+                gc->gameState = +GameState::MapOverview;
                 gc_paint(gc, g);
-                gc->gameState = 20;
+                gc->gameState = +GameState::MenuOverlay;
             }
             gc_renderPackedSprite(gc, g, gc->transitionCode);
             break;
         }
-        case 25: {
+        case +GameState::GeneratingMap: {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
@@ -97,7 +97,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             midp_draw_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
             break;
         }
-        case 30: {
+        case +GameState::Playing: {
             gc->tickStart = midp_current_time_millis();
             gc_renderMap(gc, g);
             gc->tickEnd = midp_current_time_millis();
@@ -119,7 +119,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
                 gc_resetOverlayRenderState(gc);
                 gc->pendingTransitionCode = -1;
                 gc_renderPackedSprite(gc, g, gc->transitionCode);
-                gc_setState(gc, 20);
+                gc_setState(gc, +GameState::MenuOverlay);
             }
             if (gc->transitionDebounce <= 0) break;
             gc->transitionDebounce = (int8_t)(gc->transitionDebounce - 1);
@@ -128,14 +128,14 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             gc_resetOverlayRenderState(gc);
             gc->ready = false;
             gc_renderPackedSprite(gc, g, gc->transitionCode);
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
             break;
         }
-        case 35:
+        case +GameState::BuildingMinimap:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
                            gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[50]]));
             break;
-        case 40: {
+        case +GameState::MapOverview: {
             int n14;
             midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
             midp_set_color(g, 0);
@@ -163,7 +163,7 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             if (gc->ee) {
                 gc->ready = false;
                 gc->transitionCode = 36;
-                gc_setState(gc, 20);
+                gc_setState(gc, +GameState::MenuOverlay);
                 gc->ee = false;
             }
             if (gc->pendingTransitionCode <= -1) break;
@@ -171,26 +171,26 @@ void gc_paint(GameCanvas *gc, Surface *g) {
             gc_resetOverlayRenderState(gc);
             gc->pendingTransitionCode = -1;
             gc_renderPackedSprite(gc, g, gc->transitionCode);
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
             break;
         }
-        case 45:
+        case +GameState::BuildingPath:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
                            gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[51]]));
             break;
-        case 55:
+        case +GameState::SavingGame:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
                            gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[52]]));
             break;
-        case 65:
+        case +GameState::LoadingGame:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
                            gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[53]]));
             break;
-        case 105:
+        case +GameState::AiTurn:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
                            gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[49]]));
             break;
-        case 120:
+        case +GameState::HighScoreSync:
             gc_drawTextBox(gc, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
                            gc_tracked_codes(gc->spriteBitmapTable[gc->spriteIndexTable[66]]));
             break;
@@ -200,27 +200,27 @@ void gc_paint(GameCanvas *gc, Surface *g) {
 // public void update()
 void gc_update(GameCanvas *gc) {
     switch (gc->gameState) {
-        case 0: case 1: case 2: {
+        case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: {
             if (midp_current_time_millis() - gc->loadingStartTime > 5000L)
                 gc->loadingTimeout = true;
             ++gc->loadingTimer;
             if (!gc->loadingTimeout) break;
-            if (gc->gameState == 1) {
+            if (gc->gameState == +GameState::BootSplash1) {
                 for (int i = 0; i < 6; ++i) gc->font_images[i] = gc_decodePngFromSpriteStream(gc);
-                gc_setState(gc, 4);
+                gc_setState(gc, +GameState::IntroReady);
                 break;
             }
             gc_setState(gc, gc->gameState + 1);
             break;
         }
-        case 4:
+        case +GameState::IntroReady:
             gc->ready = true;
             gc->screenParam = 3;
             gc->transitionCode = 14;
             gc_resetOverlayRenderState(gc);
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
             break;
-        case 10:
+        case +GameState::LoadingResources:
             gc->tile_sprites[gc->spriteLoadCounter] = gc_decodePngFromSpriteStream(gc);
             ++gc->spriteLoadCounter;
             if (gc->spriteLoadCounter == gc->scenarioResourceCount / 2) {
@@ -231,9 +231,9 @@ void gc_update(GameCanvas *gc) {
             if (gc->spriteLoadCounter != gc->scenarioResourceCount) break;
             gc->ready = true;
             gc->transitionCode = 1;
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
             break;
-        case 25: {
+        case +GameState::GeneratingMap: {
             ++gc->loadStep;
             if (gc->loadStep == 2) {
                 gc_initSaveOrLoad(gc, 2);
@@ -330,10 +330,10 @@ void gc_update(GameCanvas *gc) {
             gc_loadState25Setup(gc, 1);
             if (gc->mapGenTilesDone != gc->totalTilesToGenerate) break;
             gc->mapGenTilesDone = 0;
-            gc_setState(gc, 30);
+            gc_setState(gc, +GameState::Playing);
             break;
         }
-        case 30: {
+        case +GameState::Playing: {
             gc->tickStart = midp_current_time_millis();
             if (++gc->timerA1 == 2) {
                 gc->timerA1 = 0;
@@ -496,7 +496,7 @@ void gc_update(GameCanvas *gc) {
                     if (gc->money < 0) {
                         gc->ready = false;
                         gc->transitionCode = 7;
-                        gc_setState(gc, 20);
+                        gc_setState(gc, +GameState::MenuOverlay);
                     }
                 }
                 int oldEra = gc->era;
@@ -511,7 +511,7 @@ void gc_update(GameCanvas *gc) {
                 if (oldEra != gc->era) {
                     gc->ready = false;
                     gc->transitionCode = 13;
-                    gc_setState(gc, 20);
+                    gc_setState(gc, +GameState::MenuOverlay);
                 }
             } else {
                 ++gc->counterA;
@@ -519,7 +519,7 @@ void gc_update(GameCanvas *gc) {
             gc->tickEnd = midp_current_time_millis();
             break;
         }
-        case 35: {
+        case +GameState::BuildingMinimap: {
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             int size = gc->mapHeight + gc->mapWidth;
@@ -583,17 +583,17 @@ void gc_update(GameCanvas *gc) {
                 }
                 previous_kind = -1;
             }
-            gc_setState(gc, 40);
+            gc_setState(gc, +GameState::MapOverview);
             break;
         }
-        case 40:
+        case +GameState::MapOverview:
             gc_viewportPanKey(gc);
             break;
-        case 45:
+        case +GameState::BuildingPath:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             if (gc_tryBuildPath(gc)) {
-                gc_setState(gc, 30);
+                gc_setState(gc, +GameState::Playing);
                 gc->buildMenuItemIndex = 0;
                 gc->buildCancelled = true;
                 gc->buildMenuMode = 2;
@@ -606,43 +606,43 @@ void gc_update(GameCanvas *gc) {
             gc->menuDirty = true;
             gc->ready = false;
             gc->transitionCode = 12;
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
             break;
-        case 55:
+        case +GameState::SavingGame:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             gc_saveAllMapArrays(gc);
             gc->buildMenuItemIndex = 0;
             gc->menuDirty = true;
-            gc_setState(gc, 30);
+            gc_setState(gc, +GameState::Playing);
             break;
-        case 65:
+        case +GameState::LoadingGame:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             gc_restoreAllMapArrays(gc);
             gc->pauseFlag = false;
             gc->buildMenuItemIndex = 0;
             gc->menuDirty = true;
-            gc_setState(gc, 30);
+            gc_setState(gc, +GameState::Playing);
             break;
-        case 105:
+        case +GameState::AiTurn:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             if (gc->nextTrackPieceCode - 66 < gc->difficultyCycle) {
                 gc_placeCitiesAndIndustry(gc);
-                gc_setState(gc, 30);
+                gc_setState(gc, +GameState::Playing);
                 break;
             }
             ++gc->nextTrackPieceCode;
             if (gc->nextTrackPieceCode == 69) gc->nextTrackPieceCode = 66;
-            gc_setState(gc, 30);
+            gc_setState(gc, +GameState::Playing);
             break;
-        case 120:
+        case +GameState::HighScoreSync:
             if (gc->loadStep > 0) --gc->loadStep;
             if (gc->loadStep != 2) break;
             gc->transitionCode = gc_syncHighScores(gc, gc->highScoreUploadRequested)
                                  ? 19 : 18;
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
             break;
     }
 }

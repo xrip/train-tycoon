@@ -86,6 +86,34 @@ not enough. Record uncertain evidence here before a rename.
   `seen_city_tiles`, `visible_train_tiles`, `patch_tiles`, and text-code
   values.
 
+### Recovered in MODEL-01
+
+- `GameCanvas::gameState` values now have names in `game_constants.h` as
+  `enum class GameState : int32_t`. The field stays `int32_t` for save and
+  arithmetic safety; a unary `constexpr operator+(GameState)` yields the value
+  so read/write/case sites stay short (`+GameState::Playing`). Numbers are
+  unchanged. Names come from each state's behavior:
+  - `BootSplash0..3` (0..3): startup splash steps; `BootSplash1` decodes fonts.
+    States 2 and 3 are defined by the switches but unreached in the current
+    boot path.
+  - `IntroReady` (4): fonts ready, arm the main menu.
+  - `LoadingResources` (10): load scenario sprites and music.
+  - `MenuOverlay` (20): packed-sprite menu/dialog overlay and its dispatch.
+  - `GeneratingMap` (25), `Playing` (30), `MapOverview` (40).
+  - `BuildingMinimap` (35): builds the minimap image, then `MapOverview`.
+  - `BuildingPath` (45): `gc_tryBuildPath`.
+  - `SavingGame` (55): `gc_saveAllMapArrays`.
+  - `LoadingGame` (65): `gc_restoreAllMapArrays`.
+  - `AiTurn` (105): AI places cities/industry or advances.
+  - `HighScoreSync` (120): `gc_syncHighScores` (network).
+- The previous-state copy field `hx` also holds `GameState` values and its two
+  comparisons were named; the field itself keeps its short name pending a
+  separate rename in the open name set.
+- Not renamed (uncertain, evidence recorded): `confirmTargetState` comes from
+  `buildMenuResultCodes` and also holds non-state codes (e.g. 17) used as a
+  sprite-text index, so it is not a `GameState`. `keySubState` is a key-repeat
+  counter that uses 40/80 arithmetically, not a state. Both were left as-is.
+
 ## D-007: Music output boundary
 
 Game music rules use one small `MusicOutput` interface. The app owns WinMM

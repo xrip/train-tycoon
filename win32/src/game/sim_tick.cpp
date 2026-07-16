@@ -108,7 +108,7 @@ void gc_removeTrainFromMapInlined(GameCanvas *gc, int32_t n, bool bl) {
     gc->lastViewportCenterX = -1;
     gc->ready = false;
     gc->transitionCode = 16;
-    gc_setState(gc, 20);
+    gc_setState(gc, +GameState::MenuOverlay);
 }
 
 // void mergeTrainAt(int)
@@ -128,7 +128,7 @@ void gc_mergeTrainAt(GameCanvas *gc, int32_t n) {
 void gc_maybeAiTakeTurn(GameCanvas *gc) {
     if (gc->buildMenuMode != 2 && gc->buildMenuMode != 4
         && gc->rng.next_int() % gc->aiFrequency > gc->aiThreshold)
-        gc_setState(gc, 105);
+        gc_setState(gc, +GameState::AiTurn);
 }
 
 // void dayResetAd()
@@ -406,7 +406,7 @@ void gc_everyTwoTickZ(GameCanvas *gc) {
         gc_persistSnapshotMode0(gc);
         gc->currentScenarioScore = gc_computeMapTrainMetric(gc, gc->scenarioStep - 2);
     }
-    gc_setState(gc, 20);
+    gc_setState(gc, +GameState::MenuOverlay);
 }
 
 // int scanMapForMetric()
@@ -519,12 +519,12 @@ void gc_newYearNotify(GameCanvas *gc) {
         if (gcs_annualReportEnabled) {
             gc->ready = false;
             gc->transitionCode = 35;
-            gc_setState(gc, 20);
+            gc_setState(gc, +GameState::MenuOverlay);
         }
     } else if (gcs_monthlyReportEnabled) {
         gc->ready = false;
         gc->transitionCode = 32;
-        gc_setState(gc, 20);
+        gc_setState(gc, +GameState::MenuOverlay);
     }
 }
 

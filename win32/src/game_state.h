@@ -1,6 +1,7 @@
 // Complete Train Tycoon game state and shared values.
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
+#include "game_constants.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
