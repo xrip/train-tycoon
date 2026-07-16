@@ -4,63 +4,62 @@
 #include "game_internal.h"
 
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
-static int imin(int a, int b) { return a < b ? a : b; }
 static int imax(int a, int b) { return a > b ? a : b; }
 
-void game_renderFontString(Game *game, Surface *g, int32_t n, int32_t n2,
-                        std::span<const int8_t> codes, bool bl) {
-    int n3 = n;
-    midp_set_color(g, 0);
+void game_renderFontString(Game *game, Surface *surface, int32_t x, int32_t baselineY,
+                        std::span<const int8_t> codes, bool preserveClip) {
+    int drawX = x;
+    midp_set_color(surface, 0);
     const int len = static_cast<int>(codes.size());
     for (int i = 0; i < len; ++i) {
-        int8_t by = codes[i];
-        if (bl) {
-            midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
-            midp_clip_rect(g, n3, n2 - 4, 5, 12);
+        int8_t code = codes[i];
+        if (preserveClip) {
+            midp_set_clip(surface, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
+            midp_clip_rect(surface, drawX, baselineY - 4, 5, 12);
         } else {
-            midp_set_clip(g, n3, n2 - 4, 5, 12);
+            midp_set_clip(surface, drawX, baselineY - 4, 5, 12);
         }
-        if (by == 0) { n3 += 6; continue; }
-        if (by < 32) {
-            midp_draw_image(g, game->assets.font_images[(by - 1) / 16].get(), n3 - 5 * ((by - 1) % 16), n2, 20);
-            n3 += 6;
+        if (code == 0) { drawX += 6; continue; }
+        if (code < 32) {
+            midp_draw_image(surface, game->assets.font_images[(code - 1) / 16].get(), drawX - 5 * ((code - 1) % 16), baselineY, 20);
+            drawX += 6;
             continue;
         }
-        if (by < 40) {
-            int8_t by2 = (int8_t)(codes[i + 1] >= 40 && codes[i + 1] <= 65 ? 1 : 0);
-            switch (by) {
+        if (code < 40) {
+            int8_t markYOffset = (int8_t)(codes[i + 1] >= 40 && codes[i + 1] <= 65 ? 1 : 0);
+            switch (code) {
                 case 32:
-                    midp_draw_line(g, n3 + 2, n2 - 2 + by2, n3 + 2, n2 - 2 + by2);
+                    midp_draw_line(surface, drawX + 2, baselineY - 2 + markYOffset, drawX + 2, baselineY - 2 + markYOffset);
                     break;
                 case 35:
-                    midp_draw_line(g, n3 + 2, n2 - 4 + by2, n3 + 2, n2 - 4 + by2);
+                    midp_draw_line(surface, drawX + 2, baselineY - 4 + markYOffset, drawX + 2, baselineY - 4 + markYOffset);
                     /* fall through */
                 case 34:
-                    midp_draw_line(g, n3 + 2, n2 - 2 + by2, n3 + 1, n2 - 3 + by2);
+                    midp_draw_line(surface, drawX + 2, baselineY - 2 + markYOffset, drawX + 1, baselineY - 3 + markYOffset);
                     /* fall through */
                 case 33:
-                    midp_draw_line(g, n3 + 2, n2 - 2 + by2, n3 + 3, n2 - 3 + by2);
+                    midp_draw_line(surface, drawX + 2, baselineY - 2 + markYOffset, drawX + 3, baselineY - 3 + markYOffset);
                     break;
                 case 37:
-                    midp_draw_line(g, n3 + 1, n2 - 2 + by2, n3 + 1, n2 - 2 + by2);
-                    midp_draw_line(g, n3 + 3, n2 - 2 + by2, n3 + 3, n2 - 2 + by2);
+                    midp_draw_line(surface, drawX + 1, baselineY - 2 + markYOffset, drawX + 1, baselineY - 2 + markYOffset);
+                    midp_draw_line(surface, drawX + 3, baselineY - 2 + markYOffset, drawX + 3, baselineY - 2 + markYOffset);
                     break;
             }
             continue;
         }
-        if (by < 70) {
-            midp_draw_image(g, game->assets.font_images[2 + (by - 40) / 16].get(), n3 - 5 * ((by - 40) % 16), n2, 20);
-            n3 += 6;
+        if (code < 70) {
+            midp_draw_image(surface, game->assets.font_images[2 + (code - 40) / 16].get(), drawX - 5 * ((code - 40) % 16), baselineY, 20);
+            drawX += 6;
             continue;
         }
-        if (by >= 100) continue;
-        midp_draw_image(g, game->assets.font_images[4 + (by - 70) / 16].get(), n3 - 5 * ((by - 70) % 16), n2, 20);
-        n3 += 6;
+        if (code >= 100) continue;
+        midp_draw_image(surface, game->assets.font_images[4 + (code - 70) / 16].get(), drawX - 5 * ((code - 70) % 16), baselineY, 20);
+        drawX += 6;
     }
-    if (bl) {
-        midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
+    if (preserveClip) {
+        midp_set_clip(surface, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
     } else {
-        midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
+        midp_set_clip(surface, 0, 0, canvasWidth, canvasHeight);
     }
 }
 
@@ -104,28 +103,28 @@ Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
     return NULL;
 }
 
-void game_drawTextBox(Game *game, Surface *g, int32_t n, int32_t n2,
-                    int32_t n3, int32_t n4,
+void game_drawTextBox(Game *game, Surface *surface, int32_t x, int32_t y,
+                    int32_t colorSet, int32_t alignment,
                     std::span<const int8_t> codes) {
-    int n5 = 0;
+    int textWidth = 0;
     const int len = static_cast<int>(codes.size());
     for (int i = 0; i < len; ++i) {
         if (codes[i] >= 32 && codes[i] <= 39) continue;
-        ++n5;
+        ++textWidth;
     }
-    n5 *= 6;
-    if ((n4 & 1) == 1) n -= n5 / 2 + 3;
-    if ((n4 & 2) == 2) n2 -= 5;
-    if ((n4 & 4) == 4) n -= n5 + 6;
-    if (n4 == 37) { n = 0; n2 = 15 + gameplayViewportHeight - 15; }
-    midp_set_color(g, game->graphColors[3 * n3]);
-    midp_fill_rect(g, n, n2, n5 + 5, 13);
-    midp_set_color(g, game->graphColors[3 * n3 + 1]);
-    midp_draw_rect(g, n, n2, n5 + 5, 13);
-    midp_set_color(g, game->graphColors[3 * n3 + 2]);
-    midp_draw_rect(g, n, n2 + 13, n5 + 5, 0);
-    midp_draw_rect(g, n + n5 + 5, n2, 0, 13);
-    game_renderFontString(game, g, n + 4, n2 + 5, codes, false);
+    textWidth *= 6;
+    if ((alignment & 1) == 1) x -= textWidth / 2 + 3;
+    if ((alignment & 2) == 2) y -= 5;
+    if ((alignment & 4) == 4) x -= textWidth + 6;
+    if (alignment == 37) { x = 0; y = 15 + gameplayViewportHeight - 15; }
+    midp_set_color(surface, game->graphColors[3 * colorSet]);
+    midp_fill_rect(surface, x, y, textWidth + 5, 13);
+    midp_set_color(surface, game->graphColors[3 * colorSet + 1]);
+    midp_draw_rect(surface, x, y, textWidth + 5, 13);
+    midp_set_color(surface, game->graphColors[3 * colorSet + 2]);
+    midp_draw_rect(surface, x, y + 13, textWidth + 5, 0);
+    midp_draw_rect(surface, x + textWidth + 5, y, 0, 13);
+    game_renderFontString(game, surface, x + 4, y + 5, codes, false);
 }
 
 void game_drawRectFill(Game *game, Surface *g, int32_t n, int32_t n2, int8_t by) {
@@ -156,223 +155,240 @@ void game_drawRectFill(Game *game, Surface *g, int32_t n, int32_t n2, int8_t by)
     game_renderFontString(game, g, n + 4, n2 + 3, train_codes, true);
 }
 
-void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
-    int n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13;
-    int8_t by;
-    if (game->renderer.lastRenderedSpriteId != n) {
+void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
+    if (game->renderer.lastRenderedSpriteId != spriteId) {
         game->renderer.spriteJustChanged = 1;
-        game->renderer.lastRenderedSpriteId = n;
+        game->renderer.lastRenderedSpriteId = spriteId;
     }
     if (game->renderer.spriteJustChanged != 0) game->renderer.needsRepaint = false;
     if (game->renderer.mapRedrawPending) {
         game->ui.menuDirty = true;
-        game_renderMap(game, g);
+        game_renderMap(game, surface);
         game->renderer.mapRedrawPending = false;
     }
-    int16_t s = game->assets.spriteOffsetTable[n];
-    int n14 = 65536 * unsignedByte(game->assets.spriteData[s + 1]) + 256 * unsignedByte(game->assets.spriteData[s + 2]) + unsignedByte(game->assets.spriteData[s + 3]);
-    int n15 = 65536 * unsignedByte(game->assets.spriteData[s + 4]) + 256 * unsignedByte(game->assets.spriteData[s + 5]) + unsignedByte(game->assets.spriteData[s + 6]);
-    int n16 = 65536 * unsignedByte(game->assets.spriteData[s + 7]) + 256 * unsignedByte(game->assets.spriteData[s + 8]) + unsignedByte(game->assets.spriteData[s + 9]);
-    int n17 = 65536 * unsignedByte(game->assets.spriteData[s + 10]) + 256 * unsignedByte(game->assets.spriteData[s + 11]) + unsignedByte(game->assets.spriteData[s + 12]);
-    int n18 = unsignedByte(game->assets.spriteData[s + 13]);
-    int n19 = unsignedByte(game->assets.spriteData[s + 14]);
-    if (game->renderer.dialogContentHeight < n19) game->renderer.dialogContentHeight = n19;
-    else n19 = game->renderer.dialogContentHeight;
-    if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) n18 += 6;
-    game->renderer.currentSpriteId = game->assets.spriteData[s + 15];
-    int n20 = (canvasWidth - n18) / 2;
-    int n21 = (canvasHeight - n19) / 2;
-    int n22 = 6, n23 = 6, n24 = 6;
+    int16_t spriteOffset = game->assets.spriteOffsetTable[spriteId];
+    int backgroundColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 1]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 2]) + unsignedByte(game->assets.spriteData[spriteOffset + 3]);
+    int edgeColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 4]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 5]) + unsignedByte(game->assets.spriteData[spriteOffset + 6]);
+    int borderColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 7]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 8]) + unsignedByte(game->assets.spriteData[spriteOffset + 9]);
+    int selectionColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 10]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 11]) + unsignedByte(game->assets.spriteData[spriteOffset + 12]);
+    int dialogWidth = unsignedByte(game->assets.spriteData[spriteOffset + 13]);
+    int dialogHeight = unsignedByte(game->assets.spriteData[spriteOffset + 14]);
+    if (game->renderer.dialogContentHeight < dialogHeight) game->renderer.dialogContentHeight = dialogHeight;
+    else dialogHeight = game->renderer.dialogContentHeight;
+    if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) dialogWidth += 6;
+    game->renderer.currentSpriteId = game->assets.spriteData[spriteOffset + 15];
+    int dialogX = (canvasWidth - dialogWidth) / 2;
+    int dialogY = (canvasHeight - dialogHeight) / 2;
+    int textContentY = 6, drawingContentY = 6, scrollButtonY = 6;
     if (game->renderer.needsRepaint) {
-        midp_set_color(g, n14); midp_fill_rect(g, n20, n21, n18, n19);
-        midp_set_color(g, n16); midp_draw_rect(g, n20, n21, n18, n19);
-        midp_set_color(g, n15); midp_draw_rect(g, n20, n21, 0, n19);
-        midp_draw_rect(g, n20, n21, n18, 0);
+        midp_set_color(surface, backgroundColor); midp_fill_rect(surface, dialogX, dialogY, dialogWidth, dialogHeight);
+        midp_set_color(surface, borderColor); midp_draw_rect(surface, dialogX, dialogY, dialogWidth, dialogHeight);
+        midp_set_color(surface, edgeColor); midp_draw_rect(surface, dialogX, dialogY, 0, dialogHeight);
+        midp_draw_rect(surface, dialogX, dialogY, dialogWidth, 0);
     }
     game->ui.pauseMenuOpen = false;
-    if ((game->assets.spriteData[s] & 1) == 1) {
+    if ((game->assets.spriteData[spriteOffset] & 1) == 1) {
         if (game->renderer.needsRepaint && game->ui.cursorDragY == -1) {
-            midp_set_color(g, n17);
-            midp_fill_rect(g, n20 + n18 - 10, n21 + 3, 7, 7);
+            midp_set_color(surface, selectionColor);
+            midp_fill_rect(surface, dialogX + dialogWidth - 10, dialogY + 3, 7, 7);
         }
         if (game->renderer.needsRepaint) {
-            midp_set_color(g, n16);
-            midp_draw_rect(g, n20 + n18 - 10, n21 + 3, 7, 7);
-            midp_draw_line(g, n20 + n18 - 8, n21 + 5, n20 + n18 - 5, n21 + 8);
-            midp_draw_line(g, n20 + n18 - 8, n21 + 8, n20 + n18 - 5, n21 + 5);
+            midp_set_color(surface, borderColor);
+            midp_draw_rect(surface, dialogX + dialogWidth - 10, dialogY + 3, 7, 7);
+            midp_draw_line(surface, dialogX + dialogWidth - 8, dialogY + 5, dialogX + dialogWidth - 5, dialogY + 8);
+            midp_draw_line(surface, dialogX + dialogWidth - 8, dialogY + 8, dialogX + dialogWidth - 5, dialogY + 5);
         }
         game->ui.pauseMenuOpen = true;
-        n24 = 19;
+        scrollButtonY = 19;
         // Capture the top-right close (X) button so the pointer layer can close
         // the overlay by clicking it -- same geometry as the drawn X box above.
-        game->clickMap.add_close(n20 + n18 - 10, n21 + 3, 7, 7);
+        game->clickMap.add_close(dialogX + dialogWidth - 10, dialogY + 3, 7, 7);
     } else if (game->ui.cursorDragY == -1) {
         game->ui.cursorDragY = -3;
     }
-    int n25 = s + 16;
-    if ((game->assets.spriteData[s] & 2) == 2) {
-        if (game->renderer.needsRepaint) midp_set_color(g, n16);
-        if (game->renderer.needsRepaint) midp_draw_rect(g, n20 + 2, n21 + 13, n18 - 4, 0);
-        game->renderer.clipX = n20; game->renderer.clipY = n21; game->renderer.clipWidth = n18; game->renderer.clipHeight = n19;
+    int dataOffset = spriteOffset + 16;
+    if ((game->assets.spriteData[spriteOffset] & 2) == 2) {
+        if (game->renderer.needsRepaint) midp_set_color(surface, borderColor);
+        if (game->renderer.needsRepaint) midp_draw_rect(surface, dialogX + 2, dialogY + 13, dialogWidth - 4, 0);
+        game->renderer.clipX = dialogX; game->renderer.clipY = dialogY; game->renderer.clipWidth = dialogWidth; game->renderer.clipHeight = dialogHeight;
         if (game->renderer.needsRepaint)
-            game_renderFontString(game, g, n20 + 3, n21 + 5,
-                                game_readPackedTextCodes(game, s + 16), true);
-        n25 += 1 + game->assets.spriteData[s + 16];
-        n22 = 19; n23 = 19; n24 = 19;
+            game_renderFontString(game, surface, dialogX + 3, dialogY + 5,
+                                game_readPackedTextCodes(game, spriteOffset + 16), true);
+        dataOffset += 1 + game->assets.spriteData[spriteOffset + 16];
+        textContentY = 19; drawingContentY = 19; scrollButtonY = 19;
     }
-    int n26 = n20 + 4;
-    game->renderer.clipX = n20 + 1;
-    game->renderer.clipY = n21 + n22 - 4;
-    game->renderer.clipWidth = n18 - 2;
-    game->renderer.clipHeight = n19 - n22 + 3;
-    midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
+    int contentX = dialogX + 4;
+    game->renderer.clipX = dialogX + 1;
+    game->renderer.clipY = dialogY + textContentY - 4;
+    game->renderer.clipWidth = dialogWidth - 2;
+    game->renderer.clipHeight = dialogHeight - textContentY + 3;
+    midp_set_clip(surface, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
     if (game->renderer.needsRepaint && game->ui.cursorOverUI) {
-        midp_set_color(g, n16);
-        midp_draw_rect(g, n20 + n18 - 6, n21 + n24 - 1, 4, 0);
-        midp_draw_rect(g, n20 + n18 - 5, n21 + n24 - 2, 2, 0);
-        midp_draw_rect(g, n20 + n18 - 4, n21 + n24 - 3, 0, 0);
+        midp_set_color(surface, borderColor);
+        midp_draw_rect(surface, dialogX + dialogWidth - 6, dialogY + scrollButtonY - 1, 4, 0);
+        midp_draw_rect(surface, dialogX + dialogWidth - 5, dialogY + scrollButtonY - 2, 2, 0);
+        midp_draw_rect(surface, dialogX + dialogWidth - 4, dialogY + scrollButtonY - 3, 0, 0);
     }
     if (game->renderer.needsRepaint && game->ui.cursorAllowZoomOut) {
-        midp_set_color(g, n16);
-        midp_draw_rect(g, n20 + n18 - 6, n21 + n19 - 5, 4, 0);
-        midp_draw_rect(g, n20 + n18 - 5, n21 + n19 - 4, 2, 0);
-        midp_draw_rect(g, n20 + n18 - 4, n21 + n19 - 3, 0, 0);
+        midp_set_color(surface, borderColor);
+        midp_draw_rect(surface, dialogX + dialogWidth - 6, dialogY + dialogHeight - 5, 4, 0);
+        midp_draw_rect(surface, dialogX + dialogWidth - 5, dialogY + dialogHeight - 4, 2, 0);
+        midp_draw_rect(surface, dialogX + dialogWidth - 4, dialogY + dialogHeight - 3, 0, 0);
     }
     game->ui.cursorSelectY = -2;
     game->ui.cursorSelectX = -2;
     game->ui.cursorOverUI = false;
     game->ui.cursorAllowZoomOut = false;
     game->ui.cursorDragX = -1;
-    int n27 = game->assets.spriteData[n25++];
-    for (n13 = 0; n13 < n27; ++n13) {
-        n12 = n21 + n22 - game->ui.cursorScale;
-        if (((by = game->assets.spriteData[n25++]) & 0x80) == 0) {
-            int n28;
-            n11 = (by & 4) == 4 ? 0 : game->assets.spriteData[n25++];
-            n10 = (by & 2) == 2 ? 0 : game->assets.spriteData[n25++];
-            n9 = (by & 0x40) == 64 ? 1 : 0;
-            n8 = (by & 0x20) == 32 ? 1 : 0;
-            n7 = n9 != 0 ? game->assets.spriteData[n25++] : 0;
-            n6 = n8 != 0 ? game->assets.spriteData[n25++] : 0;
-            n5 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
-            n4 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
-            n3 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
-            n2 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : 0;
-            int8_t by2 = (by & 0x10) == 16 ? game->assets.spriteData[n25++] : (int8_t)0;
-            std::optional<std::vector<int8_t>> text_codes = n8 != 0
-                ? game_resolveDialogValue(game, game->renderer.currentSpriteId, n6)
+    int contentItemCount = game->assets.spriteData[dataOffset++];
+    for (int itemIndex = 0; itemIndex < contentItemCount; ++itemIndex) {
+        int itemY = dialogY + textContentY - game->ui.cursorScale;
+        int8_t itemFlags = game->assets.spriteData[dataOffset++];
+        if ((itemFlags & 0x80) == 0) {
+            int xOffset = (itemFlags & 4) == 4 ? 0 : game->assets.spriteData[dataOffset++];
+            int yOffset = (itemFlags & 2) == 2 ? 0 : game->assets.spriteData[dataOffset++];
+            bool hasResourceCondition = (itemFlags & 0x40) == 0x40;
+            bool hasDynamicValue = (itemFlags & 0x20) == 0x20;
+            int resourceId = hasResourceCondition ? game->assets.spriteData[dataOffset++] : 0;
+            int valueId = hasDynamicValue ? game->assets.spriteData[dataOffset++] : 0;
+            int actionCode = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
+            int selectionLeft = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
+            int selectionTop = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
+            int selectionRight = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
+            int8_t selectionBottom = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : (int8_t)0;
+            std::optional<std::vector<int8_t>> textCodes = hasDynamicValue
+                ? game_resolveDialogValue(game, game->renderer.currentSpriteId, valueId)
                 : std::optional<std::vector<int8_t>>(
-                    game_readPackedTextCodes(game, n25));
-            int n29 = 0;
-            if (!text_codes) continue;
-            const int blen = static_cast<int>(text_codes->size());
-            for (n28 = 0; n28 < blen; ++n28) {
-                if ((*text_codes)[n28] >= 32 && (*text_codes)[n28] <= 39) continue;
-                ++n29;
+                    game_readPackedTextCodes(game, dataOffset));
+            int visibleCharacterCount = 0;
+            if (!textCodes) continue;
+            for (const int8_t code : *textCodes) {
+                if (code >= 32 && code <= 39) continue;
+                ++visibleCharacterCount;
             }
-            if (n8 == 0) n25 = n25 + game->assets.spriteData[n25] + 1;
-            if (n12 + n10 + 6 + by2 >= game->renderer.clipY + game->renderer.clipHeight) {
-                n28 = n19 + (n12 + n10 + 6 + by2 + n3 + 3 - (game->renderer.clipHeight + game->renderer.clipY));
-                if (game->renderer.dialogContentHeight < n28) game->renderer.dialogContentHeight = n28;
+            if (!hasDynamicValue) dataOffset = dataOffset + game->assets.spriteData[dataOffset] + 1;
+            if (itemY + yOffset + 6 + selectionBottom >= game->renderer.clipY + game->renderer.clipHeight) {
+                int neededHeight = dialogHeight + (itemY + yOffset + 6 + selectionBottom + selectionTop + 3
+                    - (game->renderer.clipHeight + game->renderer.clipY));
+                if (game->renderer.dialogContentHeight < neededHeight) game->renderer.dialogContentHeight = neededHeight;
                 if (game->renderer.dialogContentHeight > canvasHeight - 20) game->renderer.dialogContentHeight = canvasHeight - 20;
             }
-            if (game->renderer.needsRepaint && n12 + n10 + 6 + by2 >= game->renderer.clipY + game->renderer.clipHeight)
+            if (game->renderer.needsRepaint && itemY + yOffset + 6 + selectionBottom >= game->renderer.clipY + game->renderer.clipHeight)
                 game->ui.cursorAllowZoomOut = true;
-            if (n9 != 0 && (n9 == 0 || !game_isResourceTile(game, game->renderer.currentSpriteId, n7))) continue;
-            if (n12 + n10 - n3 - 3 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 + 8 + by2 >= game->renderer.clipY) {
-                if ((by & 0x10) == 16) {
-                    if (game->ui.cursorDragY == -3) game->ui.cursorDragY = n13;
+            if (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)) continue;
+            if (itemY + yOffset - selectionTop - 3 <= game->renderer.clipY + game->renderer.clipHeight
+                && itemY + yOffset + 8 + selectionBottom >= game->renderer.clipY) {
+                if ((itemFlags & 0x10) == 0x10) {
+                    if (game->ui.cursorDragY == -3) game->ui.cursorDragY = itemIndex;
                     // Capture every visible text row as a full-width hit band, including
                     // the topmost row whose band starts above the clip and so fails the
                     // fully-in-clip test below. Without this the default-selected first
                     // menu item is drawn and keyboard-selectable but not mouse-clickable.
-                    game->clickMap.add_menu_row(game->renderer.clipX, n12 + n10 - n3 - 3,
-                                                game->renderer.clipWidth, 10 + n3 + by2,
-                                                n13, n5);
-                    if (n12 + n10 + 8 + by2 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n10 - 3 - n3 >= game->renderer.clipY) {
-                        if (n13 < game->ui.cursorDragY) game->ui.cursorSelectY = n13;
-                        if (game->ui.cursorSelectX == -2 && n13 > game->ui.cursorDragY) game->ui.cursorSelectX = n13;
+                    game->clickMap.add_menu_row(game->renderer.clipX, itemY + yOffset - selectionTop - 3,
+                                                game->renderer.clipWidth, 10 + selectionTop + selectionBottom,
+                                                itemIndex, actionCode);
+                    if (itemY + yOffset + 8 + selectionBottom <= game->renderer.clipY + game->renderer.clipHeight
+                        && itemY + yOffset - 3 - selectionTop >= game->renderer.clipY) {
+                        if (itemIndex < game->ui.cursorDragY) game->ui.cursorSelectY = itemIndex;
+                        if (game->ui.cursorSelectX == -2 && itemIndex > game->ui.cursorDragY) game->ui.cursorSelectX = itemIndex;
                     }
-                    if (game->renderer.needsRepaint && game->ui.cursorDragY == n13) {
-                        midp_set_color(g, n17);
-                        midp_fill_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
-                        game->ui.cursorDragX = n5;
+                    if (game->renderer.needsRepaint && game->ui.cursorDragY == itemIndex) {
+                        midp_set_color(surface, selectionColor);
+                        midp_fill_rect(surface, contentX + xOffset - selectionLeft,
+                                       itemY + yOffset - selectionTop - 3,
+                                       6 * visibleCharacterCount + selectionLeft + selectionRight - 1,
+                                       10 + selectionTop + selectionBottom);
+                        game->ui.cursorDragX = actionCode;
                     }
-                    if (game->renderer.needsRepaint && (by & 8) == 8) {
-                        midp_set_color(g, n16);
-                        midp_draw_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 10 + n3 + by2);
-                        midp_set_color(g, n15);
-                        midp_draw_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 0, 10 + n3 + by2);
-                        midp_draw_rect(g, n26 + n11 - n4, n12 + n10 - n3 - 3, 6 * n29 + n4 + n2 - 1, 0);
+                    if (game->renderer.needsRepaint && (itemFlags & 8) == 8) {
+                        midp_set_color(surface, borderColor);
+                        midp_draw_rect(surface, contentX + xOffset - selectionLeft,
+                                       itemY + yOffset - selectionTop - 3,
+                                       6 * visibleCharacterCount + selectionLeft + selectionRight - 1,
+                                       10 + selectionTop + selectionBottom);
+                        midp_set_color(surface, edgeColor);
+                        midp_draw_rect(surface, contentX + xOffset - selectionLeft,
+                                       itemY + yOffset - selectionTop - 3, 0,
+                                       10 + selectionTop + selectionBottom);
+                        midp_draw_rect(surface, contentX + xOffset - selectionLeft,
+                                       itemY + yOffset - selectionTop - 3,
+                                       6 * visibleCharacterCount + selectionLeft + selectionRight - 1, 0);
                     }
                 }
                 if (game->renderer.needsRepaint)
-                    game_renderFontString(game, g, n26 + n11, n12 + n10,
-                                        *text_codes, true);
+                    game_renderFontString(game, surface, contentX + xOffset, itemY + yOffset,
+                                        *textCodes, true);
             }
-            n22 += 11 + n10;
+            textContentY += 11 + yOffset;
             continue;
         }
-        n11 = (by & 0x40) == 64 ? 1 : 0;
-        n10 = game->assets.spriteData[n25++];
-        n9 = (by & 0x20) == 32 ? 0 : game->assets.spriteData[n25++];
-        n8 = (by & 0x10) == 16 ? 0 : game->assets.spriteData[n25++];
-        n7 = n11 != 0 ? game->assets.spriteData[n25++] : 0;
-        Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, n10);
+        bool hasResourceCondition = (itemFlags & 0x40) == 0x40;
+        int slotIndex = game->assets.spriteData[dataOffset++];
+        int xOffset = (itemFlags & 0x20) == 0x20 ? 0 : game->assets.spriteData[dataOffset++];
+        int yOffset = (itemFlags & 0x10) == 0x10 ? 0 : game->assets.spriteData[dataOffset++];
+        int resourceId = hasResourceCondition ? game->assets.spriteData[dataOffset++] : 0;
+        Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, slotIndex);
         if (image == NULL) continue;
-        n5 = image->width();
-        n4 = image->height();
-        if (n11 != 0 && (n11 == 0 || !game_isResourceTile(game, game->renderer.currentSpriteId, n7))) continue;
-        if (game->renderer.needsRepaint && n12 + n8 <= game->renderer.clipY + game->renderer.clipHeight && n12 + n8 + n4 >= game->renderer.clipY)
-            midp_draw_image(g, image, n26 + n9, n12 + n8, 20);
-        if (game->renderer.needsRepaint && n12 + n8 + n4 >= game->renderer.clipY + game->renderer.clipHeight)
+        int imageHeight = image->height();
+        if (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)) continue;
+        if (game->renderer.needsRepaint && itemY + yOffset <= game->renderer.clipY + game->renderer.clipHeight
+            && itemY + yOffset + imageHeight >= game->renderer.clipY)
+            midp_draw_image(surface, image, contentX + xOffset, itemY + yOffset, 20);
+        if (game->renderer.needsRepaint && itemY + yOffset + imageHeight >= game->renderer.clipY + game->renderer.clipHeight)
             game->ui.cursorAllowZoomOut = true;
-        n22 += n4 + n8;
+        textContentY += imageHeight + yOffset;
     }
-    n27 = game->assets.spriteData[n25++];
-    for (n13 = 0; n13 < n27; ++n13) {
-        n12 = n21 + n23 - game->ui.cursorScale;
-        by = game->assets.spriteData[n25++];
-        n11 = by & 7;
-        n10 = 65536 * unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]) + unsignedByte(game->assets.spriteData[n25++]);
-        n9 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
-        n8 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
-        n7 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
-        n6 = unsignedByte(game->assets.spriteData[n25++]) + 256 * unsignedByte(game->assets.spriteData[n25++]);
-        n9 = (int16_t)((by & 8) == 8 ? game_neighboursMask(game, game->renderer.currentSpriteId, n9) : n9);
-        n8 = (int16_t)((by & 0x10) == 16 ? game_neighboursMask(game, game->renderer.currentSpriteId, n8) : n8);
-        n7 = (int16_t)((by & 0x20) == 32 ? game_neighboursMask(game, game->renderer.currentSpriteId, n7) : n7);
-        n6 = (int16_t)((by & 0x40) == 64 ? game_neighboursMask(game, game->renderer.currentSpriteId, n6) : n6);
-        n5 = (by & 0x80) == 128 ? 1 : 0;
-        n4 = n5 != 0 ? game->assets.spriteData[n25++] : 0;
-        n3 = n12 + n8;
-        n2 = n3 + n6;
-        if (!game->renderer.needsRepaint || (n5 != 0 && (n5 == 0 || !game_isResourceTile(game, game->renderer.currentSpriteId, n4)))) continue;
-        switch (n11) {
+    int drawingCommandCount = game->assets.spriteData[dataOffset++];
+    for (int commandIndex = 0; commandIndex < drawingCommandCount; ++commandIndex) {
+        int commandBaseY = dialogY + drawingContentY - game->ui.cursorScale;
+        int8_t commandFlags = game->assets.spriteData[dataOffset++];
+        int commandType = commandFlags & 7;
+        int color = 65536 * unsignedByte(game->assets.spriteData[dataOffset++])
+            + 256 * unsignedByte(game->assets.spriteData[dataOffset++])
+            + unsignedByte(game->assets.spriteData[dataOffset++]);
+        int x = unsignedByte(game->assets.spriteData[dataOffset++])
+            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
+        int y = unsignedByte(game->assets.spriteData[dataOffset++])
+            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
+        int widthOrX2 = unsignedByte(game->assets.spriteData[dataOffset++])
+            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
+        int heightOrY2 = unsignedByte(game->assets.spriteData[dataOffset++])
+            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
+        if ((commandFlags & 8) == 8) x = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, x);
+        if ((commandFlags & 0x10) == 0x10) y = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, y);
+        if ((commandFlags & 0x20) == 0x20) widthOrX2 = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, widthOrX2);
+        if ((commandFlags & 0x40) == 0x40) heightOrY2 = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, heightOrY2);
+        bool hasResourceCondition = (commandFlags & 0x80) == 0x80;
+        int resourceId = hasResourceCondition ? game->assets.spriteData[dataOffset++] : 0;
+        int lowestY = commandBaseY + y + heightOrY2;
+        if (!game->renderer.needsRepaint
+            || (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)))
+            continue;
+        switch (commandType) {
             case 0:
-                midp_set_color(g, n10);
-                midp_draw_line(g, n26 + n9, n12 + n8, n26 + n7, n12 + n6);
-                n3 = imin(n12 + n8, n12 + n6);
-                n2 = imax(n12 + n8, n12 + n6);
+                midp_set_color(surface, color);
+                midp_draw_line(surface, contentX + x, commandBaseY + y,
+                               contentX + widthOrX2, commandBaseY + heightOrY2);
+                lowestY = imax(commandBaseY + y, commandBaseY + heightOrY2);
                 break;
             case 1:
-                midp_set_color(g, n10);
-                midp_draw_rect(g, n26 + n9, n12 + n8, n7, n6);
+                midp_set_color(surface, color);
+                midp_draw_rect(surface, contentX + x, commandBaseY + y, widthOrX2, heightOrY2);
                 break;
             case 2:
-                midp_set_color(g, n10);
-                midp_fill_rect(g, n26 + n9, n12 + n8, n7, n6);
+                midp_set_color(surface, color);
+                midp_fill_rect(surface, contentX + x, commandBaseY + y, widthOrX2, heightOrY2);
                 break;
             case 3:
-                midp_set_color(g, n10);
-                midp_draw_arc(g, n26 + n9, n12 + n8, n7, n6, 0, 360);
+                midp_set_color(surface, color);
+                midp_draw_arc(surface, contentX + x, commandBaseY + y, widthOrX2, heightOrY2, 0, 360);
                 break;
             case 4:
-                midp_set_color(g, n10);
-                midp_fill_arc(g, n26 + n9, n12 + n8, n7, n6, 0, 360);
+                midp_set_color(surface, color);
+                midp_fill_arc(surface, contentX + x, commandBaseY + y, widthOrX2, heightOrY2, 0, 360);
                 break;
         }
-        if (!game->renderer.needsRepaint || n2 < game->renderer.clipY + game->renderer.clipHeight) continue;
+        if (lowestY < game->renderer.clipY + game->renderer.clipHeight) continue;
         game->ui.cursorAllowZoomOut = true;
     }
     if (game->renderer.needsRepaint) {
