@@ -309,7 +309,7 @@ void gc_clearPathDistanceGrid(GameCanvas *gc) {
                 if (gc->world.tileElevation[x][y] == -1) passable = 0;
                 if (tile != 0 && tile != 21 && tile != 22
                     && tile != 23 && tile != 24
-                    && (tile < 29 || tile > 33))
+                    && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST))
                     passable = 0;
             }
             if (tile == 71 && x > 0 && x < gc->world.mapWidth - 1

@@ -84,7 +84,7 @@ void gc_toggleFlagInlined(GameCanvas *gc, bool bl) {
             int8_t by2 = gc->world.heightMap[i][j + 1];
             int8_t by3 = gc->world.heightMap[i + 1][j];
             int8_t by4 = gc->world.heightMap[i + 1][j + 1];
-            if (gc->world.tileMap[i][j] >= 34) continue;
+            if (gc->world.tileMap[i][j] >= tile::BUILT_FIRST) continue;
             if (by == by2 && by == by3 && by == by4) {
                 gc->world.tileElevation[i][j] = by;
                 if (gc->world.tileMap[i][j] <= 28) gc->world.tileMap[i][j] = 0;
@@ -326,7 +326,7 @@ void gc_placeTerrainFeature(GameCanvas *gc, int32_t n) {
         if (n == 2) { n5 = 2; n4 = 2; }
         for (n3 = n7 - 3; n3 < n7 + n5 + 3; ++n3) {
             for (n2 = n6 - 3; n2 < n6 + n4 + 3; ++n2) {
-                if (gc->world.tileMap[n3][n2] > 33) bl = false;
+                if (gc->world.tileMap[n3][n2] >= tile::BUILT_FIRST) bl = false;
                 if (gc->world.tileElevation[n3][n2] != -1) continue;
                 bl = false;
             }
@@ -483,7 +483,7 @@ void gc_loadState25Setup(GameCanvas *gc, int32_t n) {
                 n3 = abs(nextRngInt(gc) % gc->world.mapWidth);
                 n2 = abs(nextRngInt(gc) % gc->world.mapHeight);
                 if (gc->world.tileMap[n3][n2] != 0 || gc->world.tileElevation[n3][n2] < 0) continue;
-                gc->world.tileMap[n3][n2] = (int8_t)(29 + abs(nextRngInt(gc) % 5));
+                gc->world.tileMap[n3][n2] = (int8_t)(tile::SCENERY_FIRST + abs(nextRngInt(gc) % 5));
             }
             gc->initialIndustryPlaced = true;
         }
@@ -497,7 +497,7 @@ void gc_pickCitySite(GameCanvas *gc) {
     int y = abs(nextRngInt(gc) % gc->world.mapHeight);
     gc->industryCategory = -1;
     int tile = gc->world.tileMap[x][y];
-    if (tile != 0 && (tile < 29 || tile > 33)) return;
+    if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
     int min_x = x - 2;
     int min_y = y - 2;
     int max_x = x + 2;
@@ -528,7 +528,7 @@ void gc_pickIndustrySite(GameCanvas *gc) {
     int y = abs(nextRngInt(gc) % gc->world.mapHeight);
     gc->industrySiteFound = false;
     int tile = gc->world.tileMap[x][y];
-    if (tile != 0 && (tile < 29 || tile > 33)) return;
+    if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
     int min_x = x - 2;
     int min_y = y - 2;
     int max_x = x + 2;
@@ -575,7 +575,7 @@ void gc_spawnTrainAt(GameCanvas *gc, int32_t x, int32_t y) {
 
 static bool can_extend_station_over(GameCanvas *gc, int x, int y) {
     int tile = gc->world.tileMap[x][y];
-    return tile == 0 || (tile >= 29 && tile <= 33);
+    return tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST);
 }
 
 void gc_autoExtendTrackStation(GameCanvas *gc, int32_t x, int32_t y) {

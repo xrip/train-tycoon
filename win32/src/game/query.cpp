@@ -50,11 +50,11 @@ int32_t gc_neighboursMask(GameCanvas *gc, int32_t n, int32_t n2) {
 bool gc_isAdjacentTileEmpty(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3, bool bl) {
     bool bl2 = true;
     if (n > 0) {
-        if (gc->world.tileMap[n - 1][n2] > 33) bl2 = false;
-        if (n2 > 0 && gc->world.tileMap[n - 1][n2 - 1] > 33) bl2 = false;
+        if (gc->world.tileMap[n - 1][n2] >= tile::BUILT_FIRST) bl2 = false;
+        if (n2 > 0 && gc->world.tileMap[n - 1][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
     }
-    if (n2 > 0 && gc->world.tileMap[n][n2 - 1] > 33) bl2 = false;
-    if (gc->world.tileMap[n][n2] > 33) bl2 = false;
+    if (n2 > 0 && gc->world.tileMap[n][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
+    if (gc->world.tileMap[n][n2] >= tile::BUILT_FIRST) bl2 = false;
     int32_t n4 = n - gc->selectionStartX;
     int32_t n5 = n2 - gc->selectionStartY;
     if (bl2) {

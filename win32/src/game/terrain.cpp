@@ -7,7 +7,7 @@
 bool gc_isPlaceableTerrain(GameCanvas *gc, int32_t n, int32_t n2) {
     return gc->world.tileElevation[n][n2] >= 0
            && (gc->world.tileMap[n][n2] == 0
-               || (gc->world.tileMap[n][n2] >= 29 && gc->world.tileMap[n][n2] <= 33))
+               || (gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST))
            && gc->world.trackMap[n][n2] == 0;
 }
 
@@ -42,7 +42,7 @@ bool gc_isCurveTile(GameCanvas *gc, int32_t n, int32_t n2) {
 
 // boolean isCityOrStationTile(int n, int n2)
 bool gc_isCityOrStationTile(GameCanvas *gc, int32_t n, int32_t n2) {
-    if ((gc->world.tileMap[n][n2] >= 29 && gc->world.tileMap[n][n2] <= 33)
+    if ((gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST)
         || (gc->world.tileMap[n][n2] >= 70 && gc->world.tileMap[n][n2] <= 80 && gc->world.trackMap[n][n2] == 65)
         || (gc->world.tileMap[n][n2] == tile::CROSSING && (gc->world.trackMap[n][n2] & 0x47) == 65)
         || (gc->world.tileMap[n][n2] == tile::CROSSING && (gc->world.trackMap[n][n2] & 0x78) == 72)
@@ -110,7 +110,7 @@ bool gc_isTileBuildable(GameCanvas *gc, int32_t x, int32_t y, int32_t type) {
     if (!gc->world.in_bounds(x, y)) return false;
     int tile = gc->world.tileMap[x][y];
     bool buildable = gc->world.tileElevation[x][y] >= 0
-                     && (tile == 0 || (tile >= 29 && tile <= 33))
+                     && (tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST))
                      && gc->world.trackMap[x][y] == 0;
     if (type == 3 && (tile == 71 || tile == 21 || tile == 23)) buildable = true;
     if (type == 4 && (tile == 70 || tile == 22 || tile == 24)) buildable = true;

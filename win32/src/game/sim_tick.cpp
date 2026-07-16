@@ -43,7 +43,7 @@ void gc_maybeAITick(GameCanvas *gc) {
     for (int n = 0; n < 64; ++n) gc->zonePopulation[n] = 0;
     for (int n = 0; n < gc->world.mapWidth; ++n) {
         for (int i = 0; i < gc->world.mapHeight; ++i) {
-            if (gc->world.tileMap[n][i] < 34 || gc->world.tileMap[n][i] > 40) continue;
+            if (gc->world.tileMap[n][i] < tile::BUILT_FIRST || gc->world.tileMap[n][i] > tile::CITY_ZONE_LAST) continue;
             int n2 = gc->world.trackMap[n][i] & 0x3F;
             ++gc->zonePopulation[n2];
         }
@@ -192,7 +192,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
     bool bl3 = !bl;
     int n3;
     if (bl) {
-        n3 = gc->world.tileMap[n][n2] >= 29 && gc->world.tileMap[n][n2] <= 33
+        n3 = gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST
              ? gc->baseTrainSpeed2 : -gc->accel2;
         if (gc->money >= n3 || gc->money < 0) {
             gc->backgroundCost += n3;
@@ -227,7 +227,7 @@ void gc_handleCursorClickInlined(GameCanvas *gc, int32_t n, int32_t n2,
 // void placeCityTileInlined(int,int,int)
 void gc_placeCityTileInlined(GameCanvas *gc, int32_t n, int32_t n2, int32_t n3) {
     if (gc->world.tileMap[n][n2] == 0
-        || (gc->world.tileMap[n][n2] >= 29 && gc->world.tileMap[n][n2] <= 33)) {
+        || (gc->world.tileMap[n][n2] >= tile::SCENERY_FIRST && gc->world.tileMap[n][n2] <= tile::SCENERY_LAST)) {
         gc->world.tileMap[n][n2] = gc_randomCityTile(gc);
         gc->world.trackMap[n][n2] = (int8_t)n3;
     }
@@ -238,7 +238,7 @@ bool gc_pickValidForestTile(GameCanvas *gc) {
     int n2 = std::abs(gc->rng.next_int() % (gc->world.mapWidth - 2)) + 1;
     int n = std::abs(gc->rng.next_int() % (gc->world.mapHeight - 2)) + 1;
     if (gc->world.tileMap[n2][n] != 0
-        && (gc->world.tileMap[n2][n] < 29 || gc->world.tileMap[n2][n] > 33))
+        && (gc->world.tileMap[n2][n] < tile::SCENERY_FIRST || gc->world.tileMap[n2][n] > tile::SCENERY_LAST))
         return false;
 
     int8_t by = gc->world.tileMap[n2 - 1][n];

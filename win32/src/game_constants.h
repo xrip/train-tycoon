@@ -55,7 +55,11 @@ inline constexpr int32_t AI_PIECE_WRAP = 69;    // one past the last AI piece co
 // road shape codes recorded in DECISIONS; only the strongly-evidenced sentinel
 // is named here.
 namespace tile {
-inline constexpr int32_t CROSSING = 76;  // two tracks cross; trackMap holds two owners
+inline constexpr int32_t CROSSING = 76;      // two tracks cross; trackMap holds two owners
+inline constexpr int32_t SCENERY_FIRST = 29; // passable scenery/obstacle tiles (5 variants)
+inline constexpr int32_t SCENERY_LAST = 33;
+inline constexpr int32_t BUILT_FIRST = 34;   // first non-terrain (built) tile; city zone starts here
+inline constexpr int32_t CITY_ZONE_LAST = 40; // last city population zone tile
 }  // namespace tile
 
 // Menu/dialog transition-code bases (GameCanvas::transitionCode and

@@ -2,47 +2,41 @@
 
 ## Item
 
-`WORLD-02` - terrain work and map generation.
+`PATH-01` - path search and its scratch state.
 
 ## Base
 
-- Commit: WORLD-01 closed green (`World` owns the map grids, dimensions, and
-  `in_bounds`).
+- Commit: WORLD-02 closed green (generation stages, RNG helper, tile-range
+  taxonomy named; slope shapes deferred).
 - Branch: `master`
 - User-owned untracked file: root `AGENTS.md`; do not add or change it.
 
 ## Goal
 
-Make map generation and terrain editing clear. The generation code lives in
-`win32/src/game/map_gen.cpp` and terrain work in `win32/src/game/terrain.cpp`.
-Give the generation stages and terrain scratch state readable names and shape,
-and let generation write through `World`. Keep the exact random call order and
-generated output; the 13 scenario map goldens must not move.
+Make the track path search clear and give its scratch state a home. The search
+lives in `win32/src/game/pathfinding.cpp` (breadth-first distance fill over
+`pathDistanceGrid`, the walk in `gc_validatePathStep`, and the track-owner
+bitfield writes). Name the search fields and steps by behavior and keep the
+exact search result and RNG/tie-break order.
 
 ## Non-goals
 
-- Do not change the RNG call order, generated tile/track output, or save bytes.
-  The scenario map digests are the guard.
-- Do not remove `GameCanvas`; generation still reads scenario/config fields on it.
+- Do not change the search result, tie-break order, or the built track output.
+  The scenario/build goldens are the guard.
+- Do not remove `GameCanvas`; the scratch grids can become a `Pathfinder` member
+  it owns, migrated behind the existing field access.
 
 ## Last proof
 
-WORLD-01 closed: Debug and Release full gates passed on 2026-07-16, no golden
+WORLD-02 closed: Debug and Release full gates passed on 2026-07-16, no golden
 change.
-
-## Progress
-
-- Done: renamed the RNG helper `rint` -> `nextRngInt` (was shadowing libm) and
-  removed a dead `RNG` macro.
-- Done: named the generator state machine `gc->mapGenStage` 0..10 as
-  `mapgen::STAGE_*` (init, raise, lower, patches, six feature passes, scatter
-  obstacles) in `map_gen.cpp`. Debug and Release full gates passed on 2026-07-16,
-  all 13 scenario-map goldens unchanged.
 
 ## Next action
 
-Name the remaining generator magic where evidence is clear: the slope-tile ids in
-`gc_toggleFlagInlined` (needs the deferred tile-shape taxonomy first, so record
-evidence before renaming), and the terrain scratch fields. Keep the random
-sequence identical and lean on the scenario map goldens after every leaf. Then
-close WORLD-02 and open PATH-01.
+Read `pathfinding.cpp` end to end. Identify the search scratch state
+(`pathDistanceGrid`, `nextPathX/Y`, `pathTieBreakCounter`, cost accumulators) and
+the step functions. Follow the standard loop: give the scratch state a
+`Pathfinder`-style owner (data first) via a mechanical member-path move like
+`World`, then name the step helpers. Keep the search order identical and lean on
+the goldens after each leaf; commit each leaf after the strict Debug and full
+tests pass.

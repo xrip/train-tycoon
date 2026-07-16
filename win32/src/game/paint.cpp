@@ -537,7 +537,7 @@ void gc_update(GameCanvas *gc) {
                     int track = gc->world.trackMap[x][y];
                     if (tile == 0) kind = 1;
                     if (tile >= 3 && tile <= 28) kind = 2;
-                    if (tile >= 29 && tile <= 33) kind = 3;
+                    if (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST) kind = 3;
                     if (tile >= 34 && tile <= 41) kind = 4;
                     if (tile >= 42 && tile <= 48) kind = 5;
                     if (tile >= 50 && tile <= 52) kind = 6;

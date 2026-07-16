@@ -223,10 +223,18 @@ Evidence gathered for the map tile ids, recorded before any rename (per the
   `gc_placeTerrainPatch` tests "is a structure tile (>= 34)", i.e. 33 is the top
   of the terrain range there, not the top of scenery. A blanket
   `SCENERY_LAST = 33` rename would mislabel the boundary check.
-- Decision: name the tile shapes in one focused taxonomy pass (its own leaf),
-  reading each predicate's intent, rather than piecemeal per-number renames. Until
-  then the shape-id literals stay. `tile::CROSSING` (76) remains the only named
-  tile sentinel.
+- Done (focused taxonomy leaf): named the range groups that are used as clear
+  membership tests: `tile::SCENERY_FIRST/LAST` (29..33) and `tile::BUILT_FIRST`
+  (34, first non-terrain tile) with `tile::CITY_ZONE_LAST` (40). Each boundary
+  predicate was named by its intent: `>= 29 && <= 33` -> "is scenery";
+  `> 33`/`>= 34` -> "is built" (`>= tile::BUILT_FIRST`, the `> 33` form rewritten
+  to the equivalent `>= 34`); `< 34 || > 40` -> "not a city-zone tile". Applied
+  across terrain, sim, map_gen, query, build, pathfinding, and the minimap in
+  paint. Map goldens unchanged.
+- Still deferred: the slope/cliff shape ids `3..28` computed in
+  `gc_toggleFlagInlined` from height-corner patterns. Those encode isometric
+  sprite orientations and need the tile sprite art to name without guessing, so
+  they stay literal for now.
 
 ## D-007: Music output boundary
 

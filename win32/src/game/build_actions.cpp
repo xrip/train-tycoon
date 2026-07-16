@@ -384,7 +384,7 @@ void gc_placeTrackAtCursorInlined(GameCanvas *gc, bool first_direction,
     if (gc->blockBuildMenu || gc->world.tileElevation[x][y] < 0
         || (gc->world.trackMap[x][y] != 0 && !(join_track && tile == join_tile))
         || !(tile == join_tile || tile == match_tile_a || tile == match_tile_b
-             || tile == 0 || (tile >= 29 && tile <= 33)))
+             || tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST)))
         return;
 
     int cost = tile == 0 ? 0 : gc->baseTrainSpeed;
