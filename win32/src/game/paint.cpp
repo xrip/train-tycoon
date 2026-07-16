@@ -30,19 +30,19 @@ void game_paint(Game *game, Surface *g) {
         midp_set_color(g, 0);
         midp_fill_rect(g, 0, 0, n, n2);
     }
-    midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
+    midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
     switch (game->gameState) {
         case GameState::BootSplash0: case GameState::BootSplash1: case GameState::BootSplash2: case GameState::BootSplash3: {
             midp_set_color(g, 0xFFFFFF);
             if (game->gameState == GameState::BootSplash0) midp_set_color(g, 0);
-            midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            int n3 = gcs_screenWidth / 2;
-            int n4 = gcs_hs / 2;
+            midp_fill_rect(g, 0, 0, canvasWidth, canvasHeight);
+            int n3 = canvasWidth / 2;
+            int n4 = canvasHeight / 2;
             int n5 = game->assets.cycle_flag->width() / 2;
             int n6 = game->assets.cycle_flag->height();
             int n7 = n6 / 10 + 1;
             for (int i = 0; i < 10; ++i) {
-                int n8 = (n3 + n5 + 30) * (game->loadingTimer - 5 * (i / 2)) / 10;
+                int n8 = (n3 + n5 + 30) * (game->loadingAnimationFrame - 5 * (i / 2)) / 10;
                 if (n8 < 0) n8 = 0;
                 if (n8 > n3 + n5 + 30) n8 = n3 + n5 + 30;
                 int n9 = n3 - (n3 + n5 + 30 - n8);
@@ -50,28 +50,28 @@ void game_paint(Game *game, Surface *g) {
                 midp_set_clip(g, n9 - n5, n4 - n6 / 2 + i * n7, n5 * 2, n7);
                 midp_draw_image(g, game->assets.cycle_flag.get(), n9, n4, 3);
             }
-            midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
+            midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
             break;
         }
         case GameState::LoadingResources: {
             midp_set_color(g, 0xFFFFFF);
-            midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            midp_draw_image(g, game->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
+            midp_fill_rect(g, 0, 0, canvasWidth, canvasHeight);
+            midp_draw_image(g, game->assets.cycle_flag.get(), canvasWidth / 2, canvasHeight / 2, 3);
             midp_set_color(g, RGB3(215, 222, 238));
-            midp_fill_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
-            int n10 = game->assets.spriteLoadCounter * (gcs_screenWidth - 20) / (game->scenario.scenarioResourceCount - 1);
+            midp_fill_rect(g, 10, canvasHeight - 13, canvasWidth - 21, 9);
+            int n10 = game->assets.spriteLoadCounter * (canvasWidth - 20) / (game->scenario.scenarioResourceCount - 1);
             midp_set_color(g, RGB3(60, 105, 144));
-            midp_fill_rect(g, 10, gcs_hs - 13, n10, 9);
+            midp_fill_rect(g, 10, canvasHeight - 13, n10, 9);
             midp_set_color(g, RGB3(49, 64, 90));
-            midp_draw_rect(g, 10, gcs_hs - 13, gcs_screenWidth - 21, 9);
+            midp_draw_rect(g, 10, canvasHeight - 13, canvasWidth - 21, 9);
             break;
         }
         case GameState::MenuOverlay: {
             if (game->ready) {
                 midp_set_color(g, 0xFFFFFF);
-                midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
+                midp_fill_rect(g, 0, 0, canvasWidth, canvasHeight);
                 if (game->assets.cycle_flag != NULL)
-                    midp_draw_image(g, game->assets.cycle_flag.get(), gcs_screenWidth / 2, gcs_hs / 2, 3);
+                    midp_draw_image(g, game->assets.cycle_flag.get(), canvasWidth / 2, canvasHeight / 2, 3);
             }
             if (game->ui.transitionCode == 36) {
                 game->gameState = GameState::MapOverview;
@@ -83,17 +83,17 @@ void game_paint(Game *game, Surface *g) {
         }
         case GameState::GeneratingMap: {
             midp_set_color(g, 0);
-            midp_fill_rect(g, 0, 0, gcs_screenWidth, gcs_hs);
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            midp_fill_rect(g, 0, 0, canvasWidth, canvasHeight);
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
-            midp_fill_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
+            midp_fill_rect(g, 10, canvasHeight - 23, canvasWidth - 21, 9);
             int n11 = game->world.totalTilesToGenerate < 2 ? 2 : game->world.totalTilesToGenerate;
-            int n12 = game->world.mapGenTilesDone * (gcs_screenWidth - 20) / (n11 - 1);
+            int n12 = game->world.mapGenTilesDone * (canvasWidth - 20) / (n11 - 1);
             midp_set_color(g, RGB3(60, 105, 144));
-            midp_fill_rect(g, 10, gcs_hs - 23, n12, 9);
+            midp_fill_rect(g, 10, canvasHeight - 23, n12, 9);
             midp_set_color(g, 0xFFFFFF);
-            midp_draw_rect(g, 10, gcs_hs - 23, gcs_screenWidth - 21, 9);
+            midp_draw_rect(g, 10, canvasHeight - 23, canvasWidth - 21, 9);
             break;
         }
         case GameState::Playing: {
@@ -101,12 +101,12 @@ void game_paint(Game *game, Surface *g) {
             if (game->ui.inputPending) {
                 int n13;
                 midp_set_color(g, 0);
-                midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_bottomBarY - 15);
-                for (n13 = 0; n13 < gcs_screenWidth; ++n13)
-                    midp_draw_line(g, n13 * 2, 0, gcs_hs + n13 * 2, gcs_hs);
-                for (n13 = 0; n13 < gcs_hs; ++n13)
-                    midp_draw_line(g, 0, n13 * 2, gcs_screenWidth, gcs_screenWidth + n13 * 2);
-                midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
+                midp_set_clip(g, 0, 15, canvasWidth, bottomBarY - 15);
+                for (n13 = 0; n13 < canvasWidth; ++n13)
+                    midp_draw_line(g, n13 * 2, 0, canvasHeight + n13 * 2, canvasHeight);
+                for (n13 = 0; n13 < canvasHeight; ++n13)
+                    midp_draw_line(g, 0, n13 * 2, canvasWidth, canvasWidth + n13 * 2);
+                midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
                 game_drawSpriteQuad(game, g, 234, 0, 15, 20);
             }
             game_drawMoneyTicker(game, g);
@@ -129,32 +129,32 @@ void game_paint(Game *game, Surface *g) {
             break;
         }
         case GameState::BuildingMinimap:
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
             break;
         case GameState::MapOverview: {
             int n14;
-            midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
+            midp_set_clip(g, 0, 15, canvasWidth, gameplayViewportHeight);
             midp_set_color(g, 0);
-            midp_fill_rect(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
+            midp_fill_rect(g, 0, 15, canvasWidth, gameplayViewportHeight);
             int n15 = game->renderer.viewportCenterX / 16;
             int n16 = game->renderer.viewportCenterY / 8;
             int n17 = game->world.mapWidth + game->world.mapHeight;
-            int n18 = gcs_screenWidth / 2 - n15 - gcs_screenWidth / 32;
-            if (gcs_screenWidth - n18 > n17) n18 = gcs_screenWidth - n17;
+            int n18 = canvasWidth / 2 - n15 - canvasWidth / 32;
+            if (canvasWidth - n18 > n17) n18 = canvasWidth - n17;
             if (n18 > 0) n18 = 0;
-            if (gcs_gameplayViewportHeight - (n14 = gcs_gameplayViewportHeight / 2 - n16 - gcs_gameplayViewportHeight / 16) > n17) n14 = gcs_gameplayViewportHeight - n17;
+            if (gameplayViewportHeight - (n14 = gameplayViewportHeight / 2 - n16 - gameplayViewportHeight / 16) > n17) n14 = gameplayViewportHeight - n17;
             if (n14 > 0) n14 = 0;
-            int n19 = n17 < gcs_screenWidth ? (gcs_screenWidth - n17) / 2 : 0;
-            int n20 = n17 < gcs_gameplayViewportHeight ? (gcs_gameplayViewportHeight - n17) / 2 : 0;
+            int n19 = n17 < canvasWidth ? (canvasWidth - n17) / 2 : 0;
+            int n20 = n17 < gameplayViewportHeight ? (gameplayViewportHeight - n17) / 2 : 0;
             midp_draw_image(g, game->renderer.backbuffer.get(), n18 + n19, 15 + n14 + n20, 20);
             int n21 = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.mapHalfWidth;
             int n22 = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.mapHalfWidth;
             int n23 = game->world.mapWidth - (n21 /= 32) + (n22 /= 32);
             int n24 = n21 + n22;
             midp_set_color(g, 0xFFFFFF);
-            midp_draw_rect(g, n24 + n18 + n19, 15 + n23 + n14 + n20, gcs_screenWidth / 16, gcs_gameplayViewportHeight / 8);
-            midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
+            midp_draw_rect(g, n24 + n18 + n19, 15 + n23 + n14 + n20, canvasWidth / 16, gameplayViewportHeight / 8);
+            midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
             game_drawConfirmBar(game, g);
             game_drawConfirmDialog(game, g);
             if (game->confirmCloseRequested) {
@@ -172,23 +172,23 @@ void game_paint(Game *game, Surface *g) {
             break;
         }
         case GameState::BuildingPath:
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
             break;
         case GameState::SavingGame:
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[52]]));
             break;
         case GameState::LoadingGame:
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[53]]));
             break;
         case GameState::AiTurn:
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[49]]));
             break;
         case GameState::HighScoreSync:
-            game_drawTextBox(game, g, gcs_screenWidth / 2, gcs_hs / 2, 0, 3,
+            game_drawTextBox(game, g, canvasWidth / 2, canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[66]]));
             break;
     }
@@ -199,7 +199,7 @@ void game_update(Game *game) {
         case GameState::BootSplash0: case GameState::BootSplash1: case GameState::BootSplash2: {
             if (midp_current_time_millis() - game->loadingStartTime > 5000L)
                 game->loadingTimeout = true;
-            ++game->loadingTimer;
+            ++game->loadingAnimationFrame;
             if (!game->loadingTimeout) break;
             if (game->gameState == GameState::BootSplash1) {
                 for (int i = 0; i < 6; ++i) game->assets.font_images[i] = game_decodePngFromSpriteStream(game);
@@ -230,8 +230,8 @@ void game_update(Game *game) {
             game_setState(game, GameState::MenuOverlay);
             break;
         case GameState::GeneratingMap: {
-            ++game->loadStep;
-            if (game->loadStep == 2) {
+            ++game->stateWorkStep;
+            if (game->stateWorkStep == 2) {
                 game_initSaveOrLoad(game, save::OP_RESET_SKIP);
                 game->economy.dayOfMonth = 1; game->economy.monthOfYear = 1; game->economy.year = 1950;
                 game->scenario.milestonesEnabled = false; game->ui.pauseFlag = false; game->scenario.aiEnabled = false;
@@ -317,12 +317,12 @@ void game_update(Game *game) {
                     }
                 }
             }
-            if (game->loadStep == 3) {
+            if (game->stateWorkStep == 3) {
                 game->ui.buildMenuItemIndex = 0;
                 game->ui.buildMenuMode = 0;
                 game_loadState25Setup(game, 0);
             }
-            if (game->loadStep <= 3) break;
+            if (game->stateWorkStep <= 3) break;
             game_loadState25Setup(game, 1);
             if (game->world.mapGenTilesDone != game->world.totalTilesToGenerate) break;
             game->world.mapGenTilesDone = 0;
@@ -334,8 +334,8 @@ void game_update(Game *game) {
             break;
         }
         case GameState::BuildingMinimap: {
-            if (game->loadStep > 0) --game->loadStep;
-            if (game->loadStep != 2) break;
+            if (game->stateWorkStep > 0) --game->stateWorkStep;
+            if (game->stateWorkStep != 2) break;
             int size = game->world.mapHeight + game->world.mapWidth;
             game->renderer.backbuffer = Image::create_blank(size, size);
             game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
@@ -404,8 +404,8 @@ void game_update(Game *game) {
             game_viewportPanKey(game);
             break;
         case GameState::BuildingPath:
-            if (game->loadStep > 0) --game->loadStep;
-            if (game->loadStep != 2) break;
+            if (game->stateWorkStep > 0) --game->stateWorkStep;
+            if (game->stateWorkStep != 2) break;
             if (game_tryBuildPath(game)) {
                 game_setState(game, GameState::Playing);
                 game->ui.buildMenuItemIndex = 0;
@@ -423,16 +423,16 @@ void game_update(Game *game) {
             game_setState(game, GameState::MenuOverlay);
             break;
         case GameState::SavingGame:
-            if (game->loadStep > 0) --game->loadStep;
-            if (game->loadStep != 2) break;
+            if (game->stateWorkStep > 0) --game->stateWorkStep;
+            if (game->stateWorkStep != 2) break;
             game_saveAllMapArrays(game);
             game->ui.buildMenuItemIndex = 0;
             game->ui.menuDirty = true;
             game_setState(game, GameState::Playing);
             break;
         case GameState::LoadingGame:
-            if (game->loadStep > 0) --game->loadStep;
-            if (game->loadStep != 2) break;
+            if (game->stateWorkStep > 0) --game->stateWorkStep;
+            if (game->stateWorkStep != 2) break;
             game_restoreAllMapArrays(game);
             game->ui.pauseFlag = false;
             game->ui.buildMenuItemIndex = 0;
@@ -440,8 +440,8 @@ void game_update(Game *game) {
             game_setState(game, GameState::Playing);
             break;
         case GameState::AiTurn:
-            if (game->loadStep > 0) --game->loadStep;
-            if (game->loadStep != 2) break;
+            if (game->stateWorkStep > 0) --game->stateWorkStep;
+            if (game->stateWorkStep != 2) break;
             if (game->build.nextTrackPieceCode - track::AI_PIECE_FIRST < game->scenario.difficultyCycle) {
                 game_placeCitiesAndIndustry(game);
                 game_setState(game, GameState::Playing);
@@ -452,8 +452,8 @@ void game_update(Game *game) {
             game_setState(game, GameState::Playing);
             break;
         case GameState::HighScoreSync:
-            if (game->loadStep > 0) --game->loadStep;
-            if (game->loadStep != 2) break;
+            if (game->stateWorkStep > 0) --game->stateWorkStep;
+            if (game->stateWorkStep != 2) break;
             game->ui.transitionCode = game_syncHighScores(game, game->scenario.highScoreUploadRequested)
                                  ? 19 : 18;
             game_setState(game, GameState::MenuOverlay);

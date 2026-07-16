@@ -12,9 +12,9 @@ void game_renderMap(Game *game, Surface *g) {
     n9 /= 32;
     n10 /= 32;
     if (game->renderer.viewportCenterX != game->renderer.lastViewportCenterX || game->renderer.viewportCenterY != game->renderer.viewportCenterYCached) {
-        midp_set_clip(bb, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
+        midp_set_clip(bb, 0, 15, canvasWidth, gameplayViewportHeight);
         midp_set_color(bb, 0);
-        midp_fill_rect(bb, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
+        midp_fill_rect(bb, 0, 15, canvasWidth, gameplayViewportHeight);
         game->renderer.visibleTrainCount = 0;
         game->renderer.viewportX0 = 2 * game->world.mapWidth;
         game->renderer.viewportY0 = 2 * game->world.mapHeight;
@@ -68,11 +68,11 @@ void game_renderMap(Game *game, Surface *g) {
         if (game->renderer.viewportY1 >= game->world.mapHeight) game->renderer.viewportY1 = game->world.mapHeight - 1;
         game->renderer.lastViewportCenterX = game->renderer.viewportCenterX;
         game->renderer.viewportCenterYCached = game->renderer.viewportCenterY;
-        midp_set_clip(bb, 0, 0, gcs_screenWidth, gcs_hs);
+        midp_set_clip(bb, 0, 0, canvasWidth, canvasHeight);
     }
     game_paintMain(game, g);
     midp_draw_image(g, game->renderer.backbuffer.get(), 0, 0, 20);
-    midp_set_clip(g, 0, 15, gcs_screenWidth, gcs_gameplayViewportHeight);
+    midp_set_clip(g, 0, 15, canvasWidth, gameplayViewportHeight);
     game_drawBuildMenuCursor(game, g);
     int visible_width = game->renderer.viewportX1 - game->renderer.viewportX0 + 1;
     int visible_height = game->renderer.viewportY1 - game->renderer.viewportY0 + 1;
@@ -101,7 +101,7 @@ void game_renderMap(Game *game, Surface *g) {
         if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
             n = n4 * 16 + n5 * 16 + 16 - game->renderer.viewportCenterX;
             n12 = game->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n5][n4] + 15;
-            if (!gcs_animationsDisabled) {
+            if (!animationsDisabled) {
                 if (n2 == 54 || n2 == 55)
                     midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[53]].get(), n, n12, 33);
                 if (game->world.phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
@@ -110,9 +110,9 @@ void game_renderMap(Game *game, Surface *g) {
                     if (game->world.tileMap[n5][n4] == 69) game->world.tileMap[n5][n4] = 65;
                 }
                 if (n2 != 55) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[n2]].get(), n, n12, 33);
-                else midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[243 + game->timerC2]].get(), n, n12, 33);
-                if (n2 == 50) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[240 + game->timerA2]].get(), n + 12, n12 - 28, 33);
-                if (n2 == 64) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[246 + game->timerB2]].get(), n + 3, n12 - 39, 33);
+                else midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[243 + game->tile55AnimationFrame]].get(), n, n12, 33);
+                if (n2 == 50) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[240 + game->tile50AnimationFrame]].get(), n + 12, n12 - 28, 33);
+                if (n2 == 64) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[246 + game->tile64AnimationFrame]].get(), n + 3, n12 - 39, 33);
             } else {
                 midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[41]].get(), n, n12, 33);
             }
@@ -136,7 +136,7 @@ void game_renderMap(Game *game, Surface *g) {
         if (n14 <= 0) continue;
         midp_draw_image(g, game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
     }
-    if (!gcs_selectionHidden) {
+    if (!selectionHidden) {
         for (n6 = 0; n6 < game->assets.numActiveTileAnimations; ++n6) {
             n5 = n9 + game->assets.tileOffsetX[n6];
             n4 = n10 + game->assets.tileOffsetY[n6];
@@ -149,6 +149,6 @@ void game_renderMap(Game *game, Surface *g) {
         }
     }
     game_drawBuildMenuRow(game, g);
-    midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
+    midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
     game_drawConfirmDialog(game, g);
 }

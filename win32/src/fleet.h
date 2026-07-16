@@ -9,7 +9,7 @@
 // across the save and the simulation, and the save byte order is unchanged.
 //
 // Field meanings are inherited as-is from the prior Game layout; several
-// (e.g. trainEraOrStage, trainAgeOrTimer) carry recorded uncertainty and are
+// (e.g. trainEra, trainAgeYears) carry recorded uncertainty and are
 // recovered in a later FLEET-01 sub-leaf once the tick code is re-read.
 struct Fleet {
     int8_t trainX[kTrainSlotCount]{};
@@ -17,10 +17,10 @@ struct Fleet {
     int8_t trainDir[kTrainSlotCount]{};
     int8_t trainPhase[kTrainSlotCount]{};
     int8_t trainFlags[kTrainSlotCount]{};
-    int8_t trainEraOrStage[kTrainSlotCount]{};
-    int8_t trainAgeOrTimer[kTrainSlotCount]{};
-    int8_t wagonEnergyRemaining[kTrainSlotCount]{};
-    int8_t trainEnergyOrCount[kTrainSlotCount]{};
+    int8_t trainEra[kTrainSlotCount]{};
+    int8_t trainAgeYears[kTrainSlotCount]{};
+    int8_t secondaryCargoOrBaseEnergy[kTrainSlotCount]{};
+    int8_t energyCargoOrRemovalTicks[kTrainSlotCount]{};
     int8_t lastServiceVehicle[kTrainSlotCount]{};
     int8_t cargoAge[kTrainSlotCount]{};
     int16_t nextCar[kTrainSlotCount]{};

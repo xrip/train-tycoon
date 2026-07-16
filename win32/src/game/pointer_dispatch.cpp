@@ -34,7 +34,7 @@ void pointer_click_bottom_bar(Game *game, int x) {
     const int item_count = static_cast<int>(game->ui.menuItemCode[mode].size());
     if (item_count <= 0) return;
     const int selected_x = unsigned_byte(game->ui.menuItemCode[mode][game->ui.buildMenuItemIndex]);
-    int scroll = selected_x + 15 - gcs_screenWidth;
+    int scroll = selected_x + 15 - canvasWidth;
     if (scroll < 0) scroll = 0;
     for (int item = 0; item < item_count; ++item) {
         const int ix = unsigned_byte(game->ui.menuItemCode[mode][item]) - scroll;
@@ -58,7 +58,7 @@ void pointer_click_bottom_bar(Game *game, int x) {
 void game_pointerMoved(Game *game, int32_t x, int32_t y) {
     game->ui.mouseOverField = false;
     if (game->gameState != GameState::Playing) return;
-    if (y < 15 || y >= gcs_bottomBarY) return;  // top status strip / bottom bar = UI chrome
+    if (y < 15 || y >= bottomBarY) return;  // top status strip / bottom bar = UI chrome
     int32_t anchor_x = x + game->renderer.viewportCenterX;
     int32_t anchor_y = y + game->renderer.viewportCenterY;
     game_computeViewportBounds(game, anchor_x, anchor_y);
@@ -79,17 +79,17 @@ void game_pointerMoved(Game *game, int32_t x, int32_t y) {
 void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y) {
     if (game->gameState != GameState::Playing) return;
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
-    if (y < 15 || y >= gcs_bottomBarY) return;  // only inside the gameplay viewport
+    if (y < 15 || y >= bottomBarY) return;  // only inside the gameplay viewport
 
     constexpr int32_t margin = 12;  // px from the edge that arms a pan
     constexpr int32_t step = 8;     // px/frame the camera moves (screen units)
 
     int32_t dx = 0;
     if (x <= margin) dx = -step;
-    else if (x >= gcs_screenWidth - 1 - margin) dx = step;
+    else if (x >= canvasWidth - 1 - margin) dx = step;
     int32_t dy = 0;
     const int32_t top = 15 + margin;
-    const int32_t bottom = gcs_bottomBarY - 1 - margin;
+    const int32_t bottom = bottomBarY - 1 - margin;
     if (y <= top) dy = -step;
     else if (y >= bottom) dy = step;
     if (dx == 0 && dy == 0) return;
@@ -131,7 +131,7 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
         }
         case GameState::Playing:
             // Control element: the bottom build-menu bar.
-            if (y >= gcs_bottomBarY) {
+            if (y >= bottomBarY) {
                 pointer_click_bottom_bar(game, static_cast<int>(x));
                 return;
             }
@@ -149,7 +149,7 @@ void game_pointerPressed(Game *game, int32_t x, int32_t y) {
         case GameState::MapOverview:
             // Control element: the confirm bar's two 14px buttons -- x=0 accepts
             // (return to play), x=18 exits (back to menu). Same as the 5/fire path.
-            if (y >= gcs_bottomBarY) {
+            if (y >= bottomBarY) {
                 if (x < 14) game->ui.confirmToggle = 0;
                 else if (x >= 18 && x < 32) game->ui.confirmToggle = 1;
                 else return;

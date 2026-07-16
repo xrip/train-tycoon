@@ -2,14 +2,14 @@
 #include "game_state.h"
 #include <string.h>
 
-int32_t gcs_screenWidth;
-int32_t gcs_hs;
-int32_t gcs_gameplayViewportHeight;
-int32_t gcs_bottomBarY;
-bool gcs_animationsDisabled;
-bool gcs_selectionHidden;
-bool gcs_monthlyReportEnabled;
-bool gcs_annualReportEnabled;
+int32_t canvasWidth;
+int32_t canvasHeight;
+int32_t gameplayViewportHeight;
+int32_t bottomBarY;
+bool animationsDisabled;
+bool selectionHidden;
+bool monthlyReportEnabled;
+bool annualReportEnabled;
 
 namespace {
 
@@ -61,14 +61,14 @@ constexpr int8_t kTileSpriteYOffsets[kTileYOffsetCount] = {
 
 void game_fields_init(Game *game) {
     *game = Game{};
-    gcs_screenWidth = 1;
-    gcs_hs = 1;
-    gcs_gameplayViewportHeight = gcs_hs - 30;
-    gcs_bottomBarY = gcs_hs - 15;
-    gcs_animationsDisabled = false;
-    gcs_selectionHidden = false;
-    gcs_monthlyReportEnabled = true;
-    gcs_annualReportEnabled = true;
+    canvasWidth = 1;
+    canvasHeight = 1;
+    gameplayViewportHeight = canvasHeight - 30;
+    bottomBarY = canvasHeight - 15;
+    animationsDisabled = false;
+    selectionHidden = false;
+    monthlyReportEnabled = true;
+    annualReportEnabled = true;
     game->world.mapHalfWidth = (game->world.mapWidth - 1) * 8;
     game->world.mapScreenWidth = (game->world.mapWidth + game->world.mapHeight) * 16;
     game->world.mapScreenHeight = (game->world.mapWidth + game->world.mapHeight) * 8;
@@ -97,7 +97,7 @@ void game_fields_init(Game *game) {
     memcpy(game->scenario.offerEffectSchedule, kOfferEffectSchedule,
            sizeof(kOfferEffectSchedule));
     game->rng.set_seed(midp_current_time_millis());
-    game->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+    game->renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
     game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
     memcpy(game->graphColors, kGraphColors, sizeof(kGraphColors));
     memcpy(game->assets.tileSpriteYOffsetByCode, kTileSpriteYOffsets,

@@ -136,7 +136,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     if (!game_buyTrainAtCursor(game)) break;
                     game_setState(game, GameState::Playing); break;
                 }
-                if (!game_applyTrainUpgradeInlined(game, game->trainAtCursor, game->build.wagonType, game->build.wagonOptionSlots)) break;
+                if (!game_applyTrainUpgrade(game, game->trainAtCursor, game->build.wagonType, game->build.wagonOptionSlots)) break;
                 game->ui.pendingTransitionCode = 26; game_setState(game, GameState::Playing); break;
             }
             game->ui.pendingTransitionCode = !game->build.discountApplied ? 22 : 26;
@@ -159,11 +159,11 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             } else if (n2 == 2) {
                 int n4 = game->build.baseTrainCostSnapshot - game->build.currentTrainCostSnapshot;
                 if (n4 <= game->economy.money) {
-                    game->fleet.trainAgeOrTimer[game->trainAtCursor] = 0;
+                    game->fleet.trainAgeYears[game->trainAtCursor] = 0;
                     game->economy.money -= n4;
                     game_pushMoneyHistory(game, -n4);
                     game->economy.aiMoneySpent += n4;
-                    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeOrTimer[game->trainAtCursor];
+                    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeYears[game->trainAtCursor];
                     game_computeTrainCost(game);
                     game->build.currentTrainCostSnapshot = game->build.unitCost;
                     game->ui.pendingTransitionCode = 26; game_setState(game, GameState::Playing);
@@ -181,10 +181,10 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             game_setState(game, GameState::Playing); break;
         case 10:
             switch (n2) {
-                case 1: gcs_animationsDisabled = !gcs_animationsDisabled; goto hbms_end;
-                case 2: gcs_selectionHidden = !gcs_selectionHidden; goto hbms_end;
-                case 3: gcs_monthlyReportEnabled = !gcs_monthlyReportEnabled; goto hbms_end;
-                case 4: gcs_annualReportEnabled = !gcs_annualReportEnabled; goto hbms_end;
+                case 1: animationsDisabled = !animationsDisabled; goto hbms_end;
+                case 2: selectionHidden = !selectionHidden; goto hbms_end;
+                case 3: monthlyReportEnabled = !monthlyReportEnabled; goto hbms_end;
+                case 4: annualReportEnabled = !annualReportEnabled; goto hbms_end;
                 case 5:
                     game->music_enabled = !game->music_enabled;
                     if (game->music_enabled) { game_playMusic(game); goto hbms_end; }
@@ -231,7 +231,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
         case 31:
             game->monthRolloverFlag = false;
             switch (n2) {
-                case 0: game->compareToPrevious = false; game_archiveOrRecall(game); game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
+                case 0: game->compareToPrevious = false; game_calculatePeriodProfit(game); game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
                 case 1: game->compareToPrevious = true; game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
                 case 2: game_setYearGraphMode(game, 0, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
                 case 3: game_setYearGraphMode(game, 0, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
@@ -245,7 +245,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 11: game_setYearGraphMode(game, 1, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
                 case 12: game_setYearGraphMode(game, 2, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
                 case 13: game_setYearGraphMode(game, 2, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 14: game->compareToPrevious = false; game_archiveOrRecall(game); game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
+                case 14: game->compareToPrevious = false; game_calculatePeriodProfit(game); game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
                 case 15: game->compareToPrevious = true; game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
             }
             game_setState(game, GameState::Playing); game->ui.menuDirty = true;

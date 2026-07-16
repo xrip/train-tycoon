@@ -305,8 +305,8 @@ land with the `BuildController`. PATH-01 closes here.
 
 `fleet.h` defines `struct Fleet` owning the sixteen per-train-slot record arrays
 that were loose on `GameCanvas`: position/dir/phase/flags (`trainX`, `trainY`,
-`trainDir`, `trainPhase`, `trainFlags`), state (`trainEraOrStage`,
-`trainAgeOrTimer`, `wagonEnergyRemaining`, `trainEnergyOrCount`, `cargoAge`,
+`trainDir`, `trainPhase`, `trainFlags`), state (`trainEra`,
+`trainAgeYears`, `secondaryCargoOrBaseEnergy`, `energyCargoOrRemovalTicks`, `cargoAge`,
 `trainStateCode`, `trainAiOverride`), the car linked-list pointer `nextCar`
 (`-1` terminator; a train is a chain of car slots), the last service site each
 train visited (`lastServiceVehicle`), and revenue history (`trainRevenue`,
@@ -318,7 +318,7 @@ Stable slot ids, save bytes, tick order, and draw order are unchanged; goldens
 did not move.
 
 A pure ownership move: the field names are inherited as-is. Some carry recorded
-uncertainty (`trainEraOrStage`, `trainAgeOrTimer`, `trainEnergyOrCount`) and are
+uncertainty (`trainEra`, `trainAgeYears`, `energyCargoOrRemovalTicks`) and are
 recovered in a later FLEET-01 sub-leaf once the tick code is re-read. Related
 per-train scalars not tied to a slot (`trainAtCursor`, `trainRevenueScore`,
 `lifetimeTrainRevenue`, `visibleTrains`, `trainSelection*`,

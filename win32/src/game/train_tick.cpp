@@ -45,8 +45,8 @@ int32_t game_spawnTrainCar(Game *game, int32_t previous_car, int32_t car_type) {
         game->fleet.trainY[new_car] = game->fleet.trainY[previous_car];
         game->fleet.trainDir[new_car] = game->fleet.trainDir[previous_car];
         game->fleet.trainPhase[new_car] = (int8_t)(game->fleet.trainPhase[previous_car] - 8);
-        game->fleet.trainEnergyOrCount[new_car] = 0;
-        game->fleet.wagonEnergyRemaining[new_car] = 0;
+        game->fleet.energyCargoOrRemovalTicks[new_car] = 0;
+        game->fleet.secondaryCargoOrBaseEnergy[new_car] = 0;
         game->fleet.lastServiceVehicle[new_car] = -1;
     }
     game->renderer.lastViewportCenterX = -1;
@@ -93,25 +93,25 @@ bool game_trainCanLoadAtServiceVehicle(Game *game, int32_t head,
         switch (game->fleet.trainFlags[car] & 0xF) {
             case 2:
                 if ((game->fleet.serviceLoadFlags[vehicle] & 1) == 1
-                    && game->fleet.trainEnergyOrCount[car] < 25)
+                    && game->fleet.energyCargoOrRemovalTicks[car] < 25)
                     return true;
                 if ((game->fleet.serviceLoadFlags[vehicle] & 0x10) == 0x10
-                    && game->fleet.wagonEnergyRemaining[car] < 15)
+                    && game->fleet.secondaryCargoOrBaseEnergy[car] < 15)
                     return true;
                 break;
             case 3:
                 if ((game->fleet.serviceLoadFlags[vehicle] & 4) == 4
-                    && game->fleet.trainEnergyOrCount[car] < 25)
+                    && game->fleet.energyCargoOrRemovalTicks[car] < 25)
                     return true;
                 break;
             case 4: case 5:
                 if ((game->fleet.serviceLoadFlags[vehicle] & 8) == 8
-                    && game->fleet.trainEnergyOrCount[car] < 30)
+                    && game->fleet.energyCargoOrRemovalTicks[car] < 30)
                     return true;
                 break;
             case 6: case 7:
                 if ((game->fleet.serviceLoadFlags[vehicle] & 2) == 2
-                    && game->fleet.trainEnergyOrCount[car] < 30)
+                    && game->fleet.energyCargoOrRemovalTicks[car] < 30)
                     return true;
                 break;
         }
@@ -126,14 +126,14 @@ void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
         int car_type = game->fleet.trainFlags[car] & 0xF;
         switch (car_type) {
             case 2:
-                game->fleet.trainEnergyOrCount[car] =
-                    (int8_t)(game->fleet.trainEnergyOrCount[car]
+                game->fleet.energyCargoOrRemovalTicks[car] =
+                    (int8_t)(game->fleet.energyCargoOrRemovalTicks[car]
                              + game_collectNearbyServiceResource(
-                                 game, vehicle, 0, 25 - game->fleet.trainEnergyOrCount[car]));
-                game->fleet.wagonEnergyRemaining[car] =
-                    (int8_t)(game->fleet.wagonEnergyRemaining[car]
+                                 game, vehicle, 0, 25 - game->fleet.energyCargoOrRemovalTicks[car]));
+                game->fleet.secondaryCargoOrBaseEnergy[car] =
+                    (int8_t)(game->fleet.secondaryCargoOrBaseEnergy[car]
                              + game_collectNearbyServiceResource(
-                                 game, vehicle, 4, 15 - game->fleet.wagonEnergyRemaining[car]));
+                                 game, vehicle, 4, 15 - game->fleet.secondaryCargoOrBaseEnergy[car]));
                 game->fleet.cargoAge[car] = 0;
                 if (vehicle != game->fleet.lastServiceVehicle[car] && !construction_done) {
                     game_advanceConstructionTimers(game, unsignedByte(game->fleet.trainX[car]),
@@ -142,33 +142,33 @@ void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
                 }
                 break;
             case 3:
-                game->fleet.trainEnergyOrCount[car] =
-                    (int8_t)(game->fleet.trainEnergyOrCount[car]
+                game->fleet.energyCargoOrRemovalTicks[car] =
+                    (int8_t)(game->fleet.energyCargoOrRemovalTicks[car]
                              + game_collectNearbyServiceResource(
-                                 game, vehicle, 1, 25 - game->fleet.trainEnergyOrCount[car]));
+                                 game, vehicle, 1, 25 - game->fleet.energyCargoOrRemovalTicks[car]));
                 game->fleet.cargoAge[car] = 0;
                 break;
             case 4: case 5:
-                game->fleet.trainEnergyOrCount[car] =
-                    (int8_t)(game->fleet.trainEnergyOrCount[car]
+                game->fleet.energyCargoOrRemovalTicks[car] =
+                    (int8_t)(game->fleet.energyCargoOrRemovalTicks[car]
                              + game_collectNearbyServiceResource(
-                                 game, vehicle, 2, 30 - game->fleet.trainEnergyOrCount[car]));
+                                 game, vehicle, 2, 30 - game->fleet.energyCargoOrRemovalTicks[car]));
                 game->fleet.cargoAge[car] = 0;
                 break;
             case 6: case 7:
-                game->fleet.trainEnergyOrCount[car] =
-                    (int8_t)(game->fleet.trainEnergyOrCount[car]
+                game->fleet.energyCargoOrRemovalTicks[car] =
+                    (int8_t)(game->fleet.energyCargoOrRemovalTicks[car]
                              + game_collectNearbyServiceResource(
-                                 game, vehicle, 3, 30 - game->fleet.trainEnergyOrCount[car]));
+                                 game, vehicle, 3, 30 - game->fleet.energyCargoOrRemovalTicks[car]));
                 game->fleet.cargoAge[car] = 0;
                 break;
         }
         if (car_type == 4 || car_type == 5)
             game->fleet.trainFlags[car] = (int8_t)((game->fleet.trainFlags[car] & 0xF0)
-                                  | (game->fleet.trainEnergyOrCount[car] >= 10 ? 5 : 4));
+                                  | (game->fleet.energyCargoOrRemovalTicks[car] >= 10 ? 5 : 4));
         if (car_type == 6 || car_type == 7)
             game->fleet.trainFlags[car] = (int8_t)((game->fleet.trainFlags[car] & 0xF0)
-                                  | (game->fleet.trainEnergyOrCount[car] >= 10 ? 7 : 6));
+                                  | (game->fleet.energyCargoOrRemovalTicks[car] >= 10 ? 7 : 6));
         game->fleet.lastServiceVehicle[car] = (int8_t)vehicle;
     } else {
         game->fleet.cargoAge[car] = 0;
@@ -203,50 +203,50 @@ int32_t game_unloadTrainRevenue(Game *game, int32_t car, int32_t vehicle) {
     int revenue = 0;
     if ((game->fleet.trainFlags[car] & 0x40) == 0
         && game->fleet.lastServiceVehicle[car] != vehicle
-        && (game->fleet.trainEnergyOrCount[car] > 0 || game->fleet.wagonEnergyRemaining[car] > 0)) {
+        && (game->fleet.energyCargoOrRemovalTicks[car] > 0 || game->fleet.secondaryCargoOrBaseEnergy[car] > 0)) {
         int age_scale = unsignedByte(game->fleet.cargoAge[car]) / 15 + 1;
         switch (game->fleet.trainFlags[car] & 0xF) {
             case 2:
                 if ((game->fleet.serviceUnloadFlags[vehicle] & 1) == 1) {
-                    int value = game->fleet.trainEnergyOrCount[car] * 3 * age_scale;
+                    int value = game->fleet.energyCargoOrRemovalTicks[car] * 3 * age_scale;
                     if (game->scenario.routeResourceFlags[4] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 4, game->fleet.trainEnergyOrCount[car]);
-                    game->fleet.trainEnergyOrCount[car] = 0;
+                    game_recordDeliveredResource(game, 4, game->fleet.energyCargoOrRemovalTicks[car]);
+                    game->fleet.energyCargoOrRemovalTicks[car] = 0;
                 }
                 if ((game->fleet.serviceUnloadFlags[vehicle] & 0x10) == 0x10) {
-                    int value = game->fleet.wagonEnergyRemaining[car] * 8 * age_scale;
+                    int value = game->fleet.secondaryCargoOrBaseEnergy[car] * 8 * age_scale;
                     if (game->scenario.routeResourceFlags[5] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 5, game->fleet.wagonEnergyRemaining[car]);
-                    game->fleet.wagonEnergyRemaining[car] = 0;
+                    game_recordDeliveredResource(game, 5, game->fleet.secondaryCargoOrBaseEnergy[car]);
+                    game->fleet.secondaryCargoOrBaseEnergy[car] = 0;
                 }
                 break;
             case 3:
                 if ((game->fleet.serviceUnloadFlags[vehicle] & 2) == 2) {
-                    int value = game->fleet.trainEnergyOrCount[car] * 10 * age_scale;
+                    int value = game->fleet.energyCargoOrRemovalTicks[car] * 10 * age_scale;
                     if (game->scenario.routeResourceFlags[3] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 3, game->fleet.trainEnergyOrCount[car]);
-                    game->fleet.trainEnergyOrCount[car] = 0;
+                    game_recordDeliveredResource(game, 3, game->fleet.energyCargoOrRemovalTicks[car]);
+                    game->fleet.energyCargoOrRemovalTicks[car] = 0;
                 }
                 break;
             case 4: case 5:
                 if ((game->fleet.serviceUnloadFlags[vehicle] & 4) == 4) {
-                    int value = game->fleet.trainEnergyOrCount[car] * 12 * age_scale;
+                    int value = game->fleet.energyCargoOrRemovalTicks[car] * 12 * age_scale;
                     if (game->scenario.routeResourceFlags[2] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 2, game->fleet.trainEnergyOrCount[car]);
-                    game->fleet.trainEnergyOrCount[car] = 0;
+                    game_recordDeliveredResource(game, 2, game->fleet.energyCargoOrRemovalTicks[car]);
+                    game->fleet.energyCargoOrRemovalTicks[car] = 0;
                 }
                 break;
             case 6: case 7:
                 if ((game->fleet.serviceUnloadFlags[vehicle] & 8) == 8) {
-                    int value = game->fleet.trainEnergyOrCount[car] * 13 * age_scale;
+                    int value = game->fleet.energyCargoOrRemovalTicks[car] * 13 * age_scale;
                     if (game->scenario.routeResourceFlags[1] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 1, game->fleet.trainEnergyOrCount[car]);
-                    game->fleet.trainEnergyOrCount[car] = 0;
+                    game_recordDeliveredResource(game, 1, game->fleet.energyCargoOrRemovalTicks[car]);
+                    game->fleet.energyCargoOrRemovalTicks[car] = 0;
                 }
                 break;
         }
@@ -268,14 +268,14 @@ static int normalize_track_variant(int variant) {
 void game_updateTrain(Game *game, int32_t head) {
     int stop_chain = 0;
     if ((game->fleet.trainFlags[head] & 0x40) == 0
-        || unsignedByte(game->fleet.trainEnergyOrCount[head]) <= 0) {
+        || unsignedByte(game->fleet.energyCargoOrRemovalTicks[head]) <= 0) {
         game->fleet.trainFlags[head] = (int8_t)(game->fleet.trainFlags[head] & 0xEF);
         if ((game->fleet.trainFlags[head] & 0x40) == 64) {
-            game->fleet.trainEnergyOrCount[head] =
-                (int8_t)(game->fleet.wagonEnergyRemaining[head]
+            game->fleet.energyCargoOrRemovalTicks[head] =
+                (int8_t)(game->fleet.secondaryCargoOrBaseEnergy[head]
                          + game_accumulateTrainTurns(game, head) / 2
                          + game_countCarsInTrain(game, head) / 2
-                         + game->fleet.trainAgeOrTimer[head] / 3);
+                         + game->fleet.trainAgeYears[head] / 3);
         }
 
         int old_x = unsignedByte(game->fleet.trainX[head]);
@@ -292,9 +292,9 @@ void game_updateTrain(Game *game, int32_t head) {
             if (game->fleet.trainStateCode[head] != 7) {
                 int engine_type = game->fleet.trainStateCode[head] & 7;
                 game->fleet.trainFlags[head] = (int8_t)(0xC0 | (engine_type >= 3 ? 1 : 0));
-                game->fleet.wagonEnergyRemaining[head] = (int8_t)(8 - engine_type);
-                game->fleet.trainEraOrStage[head] = (int8_t)engine_type;
-                game->fleet.trainAgeOrTimer[head] = 0;
+                game->fleet.secondaryCargoOrBaseEnergy[head] = (int8_t)(8 - engine_type);
+                game->fleet.trainEra[head] = (int8_t)engine_type;
+                game->fleet.trainAgeYears[head] = 0;
                 int car = game->fleet.nextCar[head];
                 while (car != -1) {
                     game->fleet.trainFlags[car] = 0;
@@ -326,7 +326,7 @@ void game_updateTrain(Game *game, int32_t head) {
                     game->fleet.trainRevenue[head] += revenue;
                     game_recordTrainRevenue(game, revenue);
                 }
-                game->fleet.trainEnergyOrCount[head] =
+                game->fleet.energyCargoOrRemovalTicks[head] =
                     (int8_t)(game_countCarsInTrain(game, head) * 40);
             }
             game->fleet.lastServiceVehicle[head] = (int8_t)service_vehicle;
@@ -334,7 +334,7 @@ void game_updateTrain(Game *game, int32_t head) {
         }
         if ((game->fleet.trainFlags[head] & 0x40) == 64 && game->fleet.trainPhase[head] == 4
             && at_service_tile && game->world.trackMap[old_x][old_y] != 65) {
-            game->fleet.trainEnergyOrCount[head] =
+            game->fleet.energyCargoOrRemovalTicks[head] =
                 (int8_t)(game_countCarsInTrain(game, head) * 40);
         }
 
@@ -424,8 +424,8 @@ void game_updateTrain(Game *game, int32_t head) {
             game_updateTrain(game, game->fleet.nextCar[head]);
     }
     if ((game->fleet.trainFlags[head] & 0x40) == 64) {
-        int energy = unsignedByte(game->fleet.trainEnergyOrCount[head]) - 3;
+        int energy = unsignedByte(game->fleet.energyCargoOrRemovalTicks[head]) - 3;
         if (energy < 0) energy = 0;
-        game->fleet.trainEnergyOrCount[head] = (int8_t)energy;
+        game->fleet.energyCargoOrRemovalTicks[head] = (int8_t)energy;
     }
 }

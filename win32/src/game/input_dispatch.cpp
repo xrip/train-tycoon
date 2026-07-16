@@ -1,10 +1,10 @@
 // Per-state key dispatch and
-// registerCityEntryInlined (menu cursor move / select).
+// Menu cursor movement and selection.
 #include "game_internal.h"
 #include "midp_input.h"
 
-// public void registerCityEntryInlined(byte by)  -- 1=down/right 2=up/left 3=select
-void game_registerCityEntryInlined(Game *game, int8_t by) {
+// Direction: 1=down/right, 2=up/left, 3=select.
+void game_registerCityEntry(Game *game, int8_t by) {
     switch (by) {
         case 1:
             if (game->ui.cursorSelectX != -2) { game->ui.cursorDragY = game->ui.cursorSelectX; break; }
@@ -52,20 +52,20 @@ void game_handleKey(Game *game, int32_t n) {
             break;
         case GameState::MenuOverlay:
             if (n == 56 || n == 54) {
-                game_registerCityEntryInlined(game, 1);
+                game_registerCityEntry(game, 1);
                 game->ui.keyRepeatDelay = 4;
                 game->ui.heldKey = n;
             }
             if (n == 50 || n == 52) {
-                game_registerCityEntryInlined(game, 2);
+                game_registerCityEntry(game, 2);
                 game->ui.keyRepeatDelay = 4;
                 game->ui.heldKey = n;
             }
-            if (n == 53) game_registerCityEntryInlined(game, 3);
+            if (n == 53) game_registerCityEntry(game, 3);
             if (!game->ui.pauseMenuOpen || n != 42) break;
             game->ui.cursorDragY = -3;
             game->ui.cursorDragX = -1;
-            game_registerCityEntryInlined(game, 3);
+            game_registerCityEntry(game, 3);
             break;
         case GameState::Playing:
             game->ui.lastKeyCode = n;

@@ -64,8 +64,8 @@ int8_t game_registerTrain(Game *game, int8_t by, int32_t n, int32_t n2) {
     return (int8_t)(game->ui.numSelectedTrains - 1);
 }
 
-// void toggleFlagInlined(boolean bl) -- recompute slope tiles from heightMap
-void game_toggleFlagInlined(Game *game, bool bl) {
+// Rebuild slope tiles from the height map.
+void game_rebuildTerrainTiles(Game *game, bool bl) {
     int n, n2, n3, n4;
     if (bl) {
         game_commitTerrainEdit(game);
@@ -122,7 +122,7 @@ void game_toggleFlagInlined(Game *game, bool bl) {
     }
 }
 
-void game_smoothTileAtInlined(Game *game, int32_t n, int32_t n2, bool bl) {
+void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl) {
     if ((bl && game->world.heightMap[n][n2] < 3) || (!bl && game->world.heightMap[n][n2] > -1)) {
         game_setSelectionStart(game, n, n2);
         if (game_isAdjacentTileEmpty(game, n, n2, game->world.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
@@ -131,12 +131,12 @@ void game_smoothTileAtInlined(Game *game, int32_t n, int32_t n2, bool bl) {
                     game->economy.money -= game->build.terrainSmoothCost;
                     game_pushMoneyHistory(game, -game->build.terrainSmoothCost);
                     game->economy.subsidyCost += game->build.terrainSmoothCost;
-                    game_toggleFlagInlined(game, true);
+                    game_rebuildTerrainTiles(game, true);
                 } else {
                     game_enterOutOfMoneyState(game);
                 }
             } else {
-                game_toggleFlagInlined(game, true);
+                game_rebuildTerrainTiles(game, true);
             }
         }
     }
@@ -163,26 +163,26 @@ void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > game->world.mapWidth || j > game->world.mapHeight) continue;
-            for (int k = 0; k < 3; ++k) game_smoothTileAtInlined(game, i, j, false);
-            if (nextRngInt(game) % 2 < 0 && i > 0) game_smoothTileAtInlined(game, i - 1, j, false);
-            if (nextRngInt(game) % 2 < 0 && j > 0) game_smoothTileAtInlined(game, i, j - 1, false);
-            if (nextRngInt(game) % 2 < 0 && i < game->world.mapWidth) game_smoothTileAtInlined(game, i + 1, j, false);
+            for (int k = 0; k < 3; ++k) game_smoothTileAt(game, i, j, false);
+            if (nextRngInt(game) % 2 < 0 && i > 0) game_smoothTileAt(game, i - 1, j, false);
+            if (nextRngInt(game) % 2 < 0 && j > 0) game_smoothTileAt(game, i, j - 1, false);
+            if (nextRngInt(game) % 2 < 0 && i < game->world.mapWidth) game_smoothTileAt(game, i + 1, j, false);
             if (nextRngInt(game) % 2 >= 0 || j >= game->world.mapHeight) continue;
-            game_smoothTileAtInlined(game, i, j + 1, false);
+            game_smoothTileAt(game, i, j + 1, false);
         }
     }
 }
 
-void game_trackBuildStepInlined(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
+void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
     int8_t by = -2;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i >= game->world.mapWidth || j >= game->world.mapHeight) continue;
             if (by == -2 && (by = game->world.heightMap[i][j]) < 0) by = 0;
-            while (by != game->world.heightMap[i][j]) game_smoothTileAtInlined(game, i, j, by > game->world.heightMap[i][j]);
-            while (by != game->world.heightMap[i + 1][j]) game_smoothTileAtInlined(game, i + 1, j, by > game->world.heightMap[i + 1][j]);
-            while (by != game->world.heightMap[i][j + 1]) game_smoothTileAtInlined(game, i, j + 1, by > game->world.heightMap[i][j + 1]);
-            while (by != game->world.heightMap[i + 1][j + 1]) game_smoothTileAtInlined(game, i + 1, j + 1, by > game->world.heightMap[i + 1][j + 1]);
+            while (by != game->world.heightMap[i][j]) game_smoothTileAt(game, i, j, by > game->world.heightMap[i][j]);
+            while (by != game->world.heightMap[i + 1][j]) game_smoothTileAt(game, i + 1, j, by > game->world.heightMap[i + 1][j]);
+            while (by != game->world.heightMap[i][j + 1]) game_smoothTileAt(game, i, j + 1, by > game->world.heightMap[i][j + 1]);
+            while (by != game->world.heightMap[i + 1][j + 1]) game_smoothTileAt(game, i + 1, j + 1, by > game->world.heightMap[i + 1][j + 1]);
         }
     }
 }
@@ -265,25 +265,25 @@ void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2) {
             if (n5 == -2 && (n5 = game->world.heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
             int64_t l = midp_current_time_millis();
             while (n5 != game->world.heightMap[n + by4][n2 + by3]) {
-                game_smoothTileAtInlined(game, n + by4, n2 + by3, n5 > game->world.heightMap[n + by4][n2 + by3]);
+                game_smoothTileAt(game, n + by4, n2 + by3, n5 > game->world.heightMap[n + by4][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != game->world.heightMap[n + by4 + 1][n2 + by3]) {
-                game_smoothTileAtInlined(game, n + by4 + 1, n2 + by3, n5 > game->world.heightMap[n + by4 + 1][n2 + by3]);
+                game_smoothTileAt(game, n + by4 + 1, n2 + by3, n5 > game->world.heightMap[n + by4 + 1][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != game->world.heightMap[n + by4][n2 + by3 + 1]) {
-                game_smoothTileAtInlined(game, n + by4, n2 + by3 + 1, n5 > game->world.heightMap[n + by4][n2 + by3 + 1]);
+                game_smoothTileAt(game, n + by4, n2 + by3 + 1, n5 > game->world.heightMap[n + by4][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != game->world.heightMap[n + by4 + 1][n2 + by3 + 1]) {
-                game_smoothTileAtInlined(game, n + by4 + 1, n2 + by3 + 1, n5 > game->world.heightMap[n + by4 + 1][n2 + by3 + 1]);
+                game_smoothTileAt(game, n + by4 + 1, n2 + by3 + 1, n5 > game->world.heightMap[n + by4 + 1][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
@@ -327,7 +327,7 @@ void game_placeTerrainFeature(Game *game, int32_t n) {
         break;
     } while (!bl);
     if (game->build.trackBuildInProgress) return;
-    game_trackBuildStepInlined(game, n7, n6, n5, n4);
+    game_trackBuildStep(game, n7, n6, n5, n4);
     n3 = game_addCityEntry(game, n);
     switch (n) {
         case 0:
@@ -421,8 +421,8 @@ void game_loadState25Setup(Game *game, int32_t n) {
     if (n == 1) {
         int n2 = 0, n3, n4;
         if (game->world.mapGenStage == mapgen::STAGE_INIT) { game->world.mapGenStage = mapgen::STAGE_RAISE_TERRAIN; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainRaiseStepCount) { game->world.mapGenStage = mapgen::STAGE_LOWER_TERRAIN; game->world.tilesGeneratedInStage = 0; game_toggleFlagInlined(game, false); }
-        if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainLowerStepCount) { game->world.mapGenStage = mapgen::STAGE_PLACE_PATCHES; game->world.tilesGeneratedInStage = 0; game_toggleFlagInlined(game, false); }
+        if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainRaiseStepCount) { game->world.mapGenStage = mapgen::STAGE_LOWER_TERRAIN; game->world.tilesGeneratedInStage = 0; game_rebuildTerrainTiles(game, false); }
+        if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainLowerStepCount) { game->world.mapGenStage = mapgen::STAGE_PLACE_PATCHES; game->world.tilesGeneratedInStage = 0; game_rebuildTerrainTiles(game, false); }
         if (game->world.mapGenStage == mapgen::STAGE_PLACE_PATCHES && game->world.tilesGeneratedInStage == game->world.mapGenColumns * (game->world.mapGenColumns - 1) + game->world.mapGenRows) { game->world.mapGenStage = mapgen::STAGE_FEATURE_0; game->world.tilesGeneratedInStage = 0; }
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0 && game->world.tilesGeneratedInStage == game->world.weightAccel2) { game->world.mapGenStage = mapgen::STAGE_FEATURE_1; game->world.tilesGeneratedInStage = 0; }
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1 && game->world.tilesGeneratedInStage == game->world.weightAccel) { game->world.mapGenStage = mapgen::STAGE_FEATURE_2; game->world.tilesGeneratedInStage = 0; }
@@ -468,7 +468,7 @@ void game_loadState25Setup(Game *game, int32_t n) {
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_3) game_placeTerrainFeature(game, 3);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4) game_placeTerrainFeature(game, 4);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5) game_placeTerrainFeature(game, 5);
-        if (game->build.trackBuildInProgress) game->loadStep = 0;
+        if (game->build.trackBuildInProgress) game->stateWorkStep = 0;
         if (game->world.mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
             for (n4 = 0; n4 < game->world.initialObstacleCount; ++n4) {
                 n3 = abs(nextRngInt(game) % game->world.mapWidth);

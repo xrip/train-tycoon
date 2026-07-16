@@ -17,7 +17,7 @@ void game_pushMoneyHistory(Game *game, int32_t n) {
     game->ui.moneyTickerFrames[0] = 80;
 }
 
-bool game_isTrackStepInlined(Game *game, int32_t n, int32_t n2, int32_t n3,
+bool game_isTrackStep(Game *game, int32_t n, int32_t n2, int32_t n3,
                           int32_t n4, int32_t n5) {
     bool bl = false;
     while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < game->world.mapWidth && n2 < game->world.mapHeight) {
@@ -111,7 +111,7 @@ bool game_isResourceTile(Game *game, int32_t n, int32_t n2) {
         if (n2 < 6 && game_countCarsInTrain(game, game->trainAtCursor) > n2) return true;
         if (n2 == 6 && game->fleet.trainStateCode[game->trainAtCursor] == 7) return true;
         if (n2 == 7 && game->fleet.trainStateCode[game->trainAtCursor] != 7) return true;
-        if (n2 == 8 && game->fleet.trainAgeOrTimer[game->trainAtCursor] > 0) return true;
+        if (n2 == 8 && game->fleet.trainAgeYears[game->trainAtCursor] > 0) return true;
     }
     return n == 60 && (n2 != 0 ? n2 <= game->ui.menuRowEnabledCount : game->ui.menuRowEnabledCount == 0);
 }

@@ -56,34 +56,34 @@ typedef struct Game {
     int32_t cachedHeaderDay;
     int32_t cachedHeaderMonth;
     int32_t cachedHeaderYear;
-    int32_t counterA;
+    int32_t dayFrameCounter;
     JavaRandom rng;
     int64_t loadingStartTime;
     bool loadingTimeout;
     bool ready = true;
-    int32_t loadStep;
-    int32_t timerA1;
-    int32_t timerA2;
-    int32_t timerB1;
-    int32_t timerB2;
-    int32_t timerC1;
-    int32_t timerC2;
+    int32_t stateWorkStep;
+    int32_t tile50AnimationPhase;
+    int32_t tile50AnimationFrame;
+    int32_t tile64AnimationPhase;
+    int32_t tile64AnimationFrame;
+    int32_t tile55AnimationPhase;
+    int32_t tile55AnimationFrame;
     int32_t graphColors[kGraphColorCount]{};  // 3 series x 3 colors for report graphs
     int32_t lastCanvasWidth = -1;   // last size passed to game_setCanvasSize
     int32_t lastCanvasHeight = -1;
     int32_t savedGameState;  // game state stashed for return after an overlay
-    int32_t loadingTimer;
-    int32_t dayTickThreshold = 50;  // frames per game-day (counterA counts up to this)
+    int32_t loadingAnimationFrame;
+    int32_t dayTickThreshold = 50;  // frames per game-day (dayFrameCounter counts up to this)
 } Game;
 
-extern int32_t gcs_screenWidth;
-extern int32_t gcs_hs;
-extern int32_t gcs_gameplayViewportHeight;
-extern int32_t gcs_bottomBarY;
-extern bool gcs_animationsDisabled;
-extern bool gcs_selectionHidden;
-extern bool gcs_monthlyReportEnabled;
-extern bool gcs_annualReportEnabled;
+extern int32_t canvasWidth;
+extern int32_t canvasHeight;
+extern int32_t gameplayViewportHeight;
+extern int32_t bottomBarY;
+extern bool animationsDisabled;
+extern bool selectionHidden;
+extern bool monthlyReportEnabled;
+extern bool annualReportEnabled;
 
 void game_fields_init(Game *game);
 

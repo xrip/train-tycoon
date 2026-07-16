@@ -60,7 +60,7 @@ void game_renderFontString(Game *game, Surface *g, int32_t n, int32_t n2,
     if (bl) {
         midp_set_clip(g, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
     } else {
-        midp_set_clip(g, 0, 0, gcs_screenWidth, gcs_hs);
+        midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
     }
 }
 
@@ -117,7 +117,7 @@ void game_drawTextBox(Game *game, Surface *g, int32_t n, int32_t n2,
     if ((n4 & 1) == 1) n -= n5 / 2 + 3;
     if ((n4 & 2) == 2) n2 -= 5;
     if ((n4 & 4) == 4) n -= n5 + 6;
-    if (n4 == 37) { n = 0; n2 = 15 + gcs_gameplayViewportHeight - 15; }
+    if (n4 == 37) { n = 0; n2 = 15 + gameplayViewportHeight - 15; }
     midp_set_color(g, game->graphColors[3 * n3]);
     midp_fill_rect(g, n, n2, n5 + 5, 13);
     midp_set_color(g, game->graphColors[3 * n3 + 1]);
@@ -151,8 +151,8 @@ void game_drawRectFill(Game *game, Surface *g, int32_t n, int32_t n2, int8_t by)
     midp_draw_rect(g, n + n3 + 5, n2, 0, 11);
     game->renderer.clipX = 0;
     game->renderer.clipY = 15;
-    game->renderer.clipWidth = gcs_screenWidth;
-    game->renderer.clipHeight = gcs_gameplayViewportHeight;
+    game->renderer.clipWidth = canvasWidth;
+    game->renderer.clipHeight = gameplayViewportHeight;
     game_renderFontString(game, g, n + 4, n2 + 3, train_codes, true);
 }
 
@@ -180,8 +180,8 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
     else n19 = game->renderer.dialogContentHeight;
     if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) n18 += 6;
     game->renderer.currentSpriteId = game->assets.spriteData[s + 15];
-    int n20 = (gcs_screenWidth - n18) / 2;
-    int n21 = (gcs_hs - n19) / 2;
+    int n20 = (canvasWidth - n18) / 2;
+    int n21 = (canvasHeight - n19) / 2;
     int n22 = 6, n23 = 6, n24 = 6;
     if (game->renderer.needsRepaint) {
         midp_set_color(g, n14); midp_fill_rect(g, n20, n21, n18, n19);
@@ -274,7 +274,7 @@ void game_renderPackedSprite(Game *game, Surface *g, int32_t n) {
             if (n12 + n10 + 6 + by2 >= game->renderer.clipY + game->renderer.clipHeight) {
                 n28 = n19 + (n12 + n10 + 6 + by2 + n3 + 3 - (game->renderer.clipHeight + game->renderer.clipY));
                 if (game->renderer.dialogContentHeight < n28) game->renderer.dialogContentHeight = n28;
-                if (game->renderer.dialogContentHeight > gcs_hs - 20) game->renderer.dialogContentHeight = gcs_hs - 20;
+                if (game->renderer.dialogContentHeight > canvasHeight - 20) game->renderer.dialogContentHeight = canvasHeight - 20;
             }
             if (game->renderer.needsRepaint && n12 + n10 + 6 + by2 >= game->renderer.clipY + game->renderer.clipHeight)
                 game->ui.cursorAllowZoomOut = true;

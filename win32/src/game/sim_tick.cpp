@@ -2,7 +2,7 @@
 #include "game_internal.h"
 #include <cstdlib>
 
-void game_dayResetP(Game *game) {
+void game_decayConstructionTimersQuarterly(Game *game) {
     if (game->economy.monthOfYear % 4 == 0) {
         for (int i = 0; i < 64; ++i) {
             if (game->world.constructionTimers[i] > 0)
@@ -36,7 +36,7 @@ void game_advanceConstructionTimers(Game *game, int32_t n, int32_t n2, int32_t n
     }
 }
 
-void game_maybeAITick(Game *game) {
+void game_recountZonePopulation(Game *game) {
     for (int n = 0; n < 64; ++n) game->world.zonePopulation[n] = 0;
     for (int n = 0; n < game->world.mapWidth; ++n) {
         for (int i = 0; i < game->world.mapHeight; ++i) {
@@ -47,7 +47,7 @@ void game_maybeAITick(Game *game) {
     }
 }
 
-void game_dayResetAg(Game *game) {
+void game_updateCityPopulation(Game *game) {
     for (int i = 0; i < 48; ++i) {
         game->world.cityPopulation[i] += (int8_t)(game->rng.next_int() % 8);
         if (game->world.cityPopulation[i] < 10) game->world.cityPopulation[i] = 10;
@@ -55,11 +55,11 @@ void game_dayResetAg(Game *game) {
     }
 }
 
-void game_revenueOrYear(Game *game) {
-    for (int n = 0; n < 500; ++n) ++game->fleet.trainAgeOrTimer[n];
+void game_ageTrainsOneYear(Game *game) {
+    for (int n = 0; n < 500; ++n) ++game->fleet.trainAgeYears[n];
 }
 
-void game_everyTwoTick(Game *game) {
+void game_chargeTrainRunningCosts(Game *game) {
     if (game->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
         if ((game->fleet.trainFlags[i] & 0x80) != 128 || (game->fleet.trainFlags[i] & 0x40) != 64)
@@ -87,14 +87,14 @@ bool game_isTrainHeadCarAt(Game *game, int32_t n, int32_t n2, int32_t n3) {
     return game_isTrainHeadCarAt(game, game->fleet.nextCar[n], n2, n3);
 }
 
-void game_removeTrainFromMapInlined(Game *game, int32_t n, bool bl) {
+void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
     if (n == -1) return;
-    game_removeTrainFromMapInlined(game, game->fleet.nextCar[n], bl);
+    game_removeTrainFromMap(game, game->fleet.nextCar[n], bl);
     game->fleet.trainFlags[n] = (int8_t)(game->fleet.trainFlags[n] | 0xE0);
     game->fleet.nextCar[n] = -1;
-    game->fleet.trainEnergyOrCount[n] = 7;
+    game->fleet.energyCargoOrRemovalTicks[n] = 7;
     if (bl)
-        game_handleCursorClickInlined(game, unsignedByte(game->fleet.trainX[n]),
+        game_queueTileChange(game, unsignedByte(game->fleet.trainX[n]),
                                     unsignedByte(game->fleet.trainY[n]), false, true);
     game->renderer.lastViewportCenterX = -1;
     game->ready = false;
@@ -109,8 +109,8 @@ void game_mergeTrainAt(Game *game, int32_t n) {
             || !game_isTrainHeadCarAt(game, i, unsignedByte(game->fleet.trainX[n]),
                                     unsignedByte(game->fleet.trainY[n])))
             continue;
-        game_removeTrainFromMapInlined(game, i, true);
-        game_removeTrainFromMapInlined(game, n, true);
+        game_removeTrainFromMap(game, i, true);
+        game_removeTrainFromMap(game, n, true);
     }
 }
 
@@ -120,7 +120,7 @@ void game_maybeAiTakeTurn(Game *game) {
         game_setState(game, GameState::AiTurn);
 }
 
-void game_dayResetAd(Game *game) {
+void game_upgradeOneAiTrainForEra(Game *game) {
     for (int i = 0; i < 500; ++i) {
         if ((game->fleet.trainFlags[i] & 0x80) != 128 || (game->fleet.trainFlags[i] & 0x40) != 64)
             continue;
@@ -128,27 +128,27 @@ void game_dayResetAd(Game *game) {
         int n = unsignedByte(game->fleet.trainY[i]);
         if ((game->world.trackMap[n2][n] != 66 && game->world.trackMap[n2][n] != 67
              && game->world.trackMap[n2][n] != 68)
-            || game->fleet.trainEraOrStage[i] >= game->era)
+            || game->fleet.trainEra[i] >= game->era)
             continue;
-        game->fleet.trainEraOrStage[i] = (int8_t)game->era;
+        game->fleet.trainEra[i] = (int8_t)game->era;
         game->fleet.trainFlags[i] = (int8_t)(0xC0 | game->era / 3);
-        game->fleet.wagonEnergyRemaining[i] = (int8_t)(8 - game->era);
+        game->fleet.secondaryCargoOrBaseEnergy[i] = (int8_t)(8 - game->era);
         break;
     }
 }
 
-void game_postRevenueReset(Game *game) {
+void game_resetAiDepotTrainAges(Game *game) {
     for (int i = 0; i < 500; ++i) {
         if ((game->fleet.trainFlags[i] & 0x80) != 128) continue;
         int n2 = unsignedByte(game->fleet.trainX[i]);
         int n = unsignedByte(game->fleet.trainY[i]);
         if (game->world.trackMap[n2][n] == 66 || game->world.trackMap[n2][n] == 67
             || game->world.trackMap[n2][n] == 68)
-            game->fleet.trainAgeOrTimer[i] = 0;
+            game->fleet.trainAgeYears[i] = 0;
     }
 }
 
-void game_archiveOrRecall(Game *game) {
+void game_calculatePeriodProfit(Game *game) {
     game->economy.terrainTotal = game->economy.loanBalance * game->economy.interestRate / 1200;
     game->economy.decadeEnterpriseTax = game->economy.totalRevenue * game->economy.enterpriseTaxPct / 100;
     game->economy.netProfit = game->economy.totalRevenue - game->economy.terrainTotal - game->economy.totalSpent
@@ -157,7 +157,7 @@ void game_archiveOrRecall(Game *game) {
 }
 
 void game_computeYearEndMetrics(Game *game) {
-    game_archiveOrRecall(game);
+    game_calculatePeriodProfit(game);
     game->economy.yearProfitHistory[0] = game->economy.netProfit;
     game->economy.yearRevenueHistory[0] = game->economy.totalRevenue;
     game->economy.decadeProfitHistory[0] = game->economy.decadeProfitGraphTotal + game->economy.netProfit;
@@ -171,7 +171,7 @@ void game_computeYearEndMetrics(Game *game) {
     game->economy.decadeEnterpriseWithCurrent = game->economy.decadeEnterpriseTotal + game->economy.decadeEnterpriseTax;
 }
 
-void game_handleCursorClickInlined(Game *game, int32_t n, int32_t n2,
+void game_queueTileChange(Game *game, int32_t n, int32_t n2,
                                  bool bl, bool bl2) {
     bool bl3 = !bl;
     int n3;
@@ -208,7 +208,7 @@ void game_handleCursorClickInlined(Game *game, int32_t n, int32_t n2,
     game->world.tileQueue[n3][2] = (int8_t)n2;
 }
 
-void game_placeCityTileInlined(Game *game, int32_t n, int32_t n2, int32_t n3) {
+void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3) {
     if (game->world.tileMap[n][n2] == 0
         || (game->world.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.tileMap[n][n2] <= tile::SCENERY_LAST)) {
         game->world.tileMap[n][n2] = game_randomCityTile(game);
@@ -274,32 +274,32 @@ bool game_pickValidForestTile(Game *game) {
 
     switch (game->world.tileMap[n2][n]) {
         case 42:
-            game_placeCityTileInlined(game, n2 - 1, n, n3);
-            game_placeCityTileInlined(game, n2 + 1, n, n3);
+            game_placeCityTile(game, n2 - 1, n, n3);
+            game_placeCityTile(game, n2 + 1, n, n3);
             break;
         case 43:
-            game_placeCityTileInlined(game, n2, n - 1, n3);
-            game_placeCityTileInlined(game, n2, n + 1, n3);
+            game_placeCityTile(game, n2, n - 1, n3);
+            game_placeCityTile(game, n2, n + 1, n3);
             break;
         case 45:
-            game_placeCityTileInlined(game, n2 - 1, n, n3);
-            game_placeCityTileInlined(game, n2, n + 1, n3);
-            game_placeCityTileInlined(game, n2 - 1, n + 1, n3);
+            game_placeCityTile(game, n2 - 1, n, n3);
+            game_placeCityTile(game, n2, n + 1, n3);
+            game_placeCityTile(game, n2 - 1, n + 1, n3);
             break;
         case 46:
-            game_placeCityTileInlined(game, n2 - 1, n, n3);
-            game_placeCityTileInlined(game, n2, n - 1, n3);
-            game_placeCityTileInlined(game, n2 - 1, n - 1, n3);
+            game_placeCityTile(game, n2 - 1, n, n3);
+            game_placeCityTile(game, n2, n - 1, n3);
+            game_placeCityTile(game, n2 - 1, n - 1, n3);
             break;
         case 47:
-            game_placeCityTileInlined(game, n2 + 1, n, n3);
-            game_placeCityTileInlined(game, n2, n - 1, n3);
-            game_placeCityTileInlined(game, n2 + 1, n - 1, n3);
+            game_placeCityTile(game, n2 + 1, n, n3);
+            game_placeCityTile(game, n2, n - 1, n3);
+            game_placeCityTile(game, n2 + 1, n - 1, n3);
             break;
         case 48:
-            game_placeCityTileInlined(game, n2 + 1, n, n3);
-            game_placeCityTileInlined(game, n2, n + 1, n3);
-            game_placeCityTileInlined(game, n2 + 1, n + 1, n3);
+            game_placeCityTile(game, n2 + 1, n, n3);
+            game_placeCityTile(game, n2, n + 1, n3);
+            game_placeCityTile(game, n2 + 1, n + 1, n3);
             break;
     }
     game->world.trackMap[n2][n] = (int8_t)n3;
@@ -336,7 +336,7 @@ int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
     return n2;
 }
 
-void game_everyTwoTickZ(Game *game) {
+void game_checkScenarioMilestone(Game *game) {
     bool bl = false;
     if (!game->scenario.milestonesEnabled) {
         switch (game->scenario.scenarioMilestoneIndex) {
@@ -410,7 +410,7 @@ int32_t game_scanMapForMetric(Game *game) {
         int n = unsignedByte(game->fleet.trainY[n3]);
         if (game->world.trackMap[n2][n] != 65) continue;
         if ((game->fleet.trainFlags[n3] & 0x40) == 64) {
-            switch (game->fleet.trainEraOrStage[n3]) {
+            switch (game->fleet.trainEra[n3]) {
                 case 0: n4 += game->economy.gWagonCost; break;
                 case 1: n4 += game->economy.gWagonCost2; break;
                 case 2: n4 += game->economy.gWagonCost3; break;
@@ -435,7 +435,7 @@ void game_newYearNotify(Game *game) {
         game->economy.prevStationRevenue[n] = game->economy.stationRevenue[n];
         game->economy.stationRevenue[n] = 0;
     }
-    game_archiveOrRecall(game);
+    game_calculatePeriodProfit(game);
     game->economy.prevTotalSpent = game->economy.totalSpent;
     game->economy.prevAiMoneySpent = game->economy.aiMoneySpent;
     game->economy.prevFuelCost = game->economy.fuelCostAccrued;
@@ -493,12 +493,12 @@ void game_newYearNotify(Game *game) {
     game->compareToPrevious = true;
     game->monthRolloverFlag = true;
     if (game->economy.monthOfYear == 13) {
-        if (gcs_annualReportEnabled) {
+        if (annualReportEnabled) {
             game->ready = false;
             game->ui.transitionCode = 35;
             game_setState(game, GameState::MenuOverlay);
         }
-    } else if (gcs_monthlyReportEnabled) {
+    } else if (monthlyReportEnabled) {
         game->ready = false;
         game->ui.transitionCode = 32;
         game_setState(game, GameState::MenuOverlay);
@@ -613,20 +613,20 @@ void game_tickInputOrAi(Game *game, bool bl) {
     }
 }
 
-// frame timers, tile-fade queue, train updates, then (when counterA reaches
+// frame timers, tile-fade queue, train updates, then (when dayFrameCounter reaches
 // dH) the day/month/year calendar cadence with its monthly/yearly hooks.
 void game_simulationTick(Game *game) {
-            if (++game->timerA1 == 2) {
-                game->timerA1 = 0;
-                if (++game->timerA2 == 3) game->timerA2 = 0;
+            if (++game->tile50AnimationPhase == 2) {
+                game->tile50AnimationPhase = 0;
+                if (++game->tile50AnimationFrame == 3) game->tile50AnimationFrame = 0;
             }
-            if (++game->timerB1 == 2) {
-                game->timerB1 = 0;
-                if (++game->timerB2 == 3) game->timerB2 = 0;
+            if (++game->tile64AnimationPhase == 2) {
+                game->tile64AnimationPhase = 0;
+                if (++game->tile64AnimationFrame == 3) game->tile64AnimationFrame = 0;
             }
-            if (++game->timerC1 == 3) {
-                game->timerC1 = 0;
-                if (++game->timerC2 == 3) game->timerC2 = 0;
+            if (++game->tile55AnimationPhase == 3) {
+                game->tile55AnimationPhase = 0;
+                if (++game->tile55AnimationFrame == 3) game->tile55AnimationFrame = 0;
             }
             if (++game->world.woodAgeTimer == 150) {
                 for (int n27 = 0; n27 < game->world.mapWidth; ++n27) {
@@ -698,8 +698,8 @@ void game_simulationTick(Game *game) {
                     || (game->fleet.trainFlags[n27] & 0x40) != 64)
                     continue;
                 if ((game->fleet.trainFlags[n27] & 0x20) == 32) {
-                    if (game->fleet.trainEnergyOrCount[n27] > 0) {
-                        --game->fleet.trainEnergyOrCount[n27];
+                    if (game->fleet.energyCargoOrRemovalTicks[n27] > 0) {
+                        --game->fleet.energyCargoOrRemovalTicks[n27];
                         continue;
                     }
                     game->fleet.trainPhase[n27] = 0;
@@ -711,22 +711,22 @@ void game_simulationTick(Game *game) {
                 if (game->fleet.trainPhase[n27] == 0) game_mergeTrainAt(game, n27);
             }
 
-            if (game->counterA >= game->dayTickThreshold) {
+            if (game->dayFrameCounter >= game->dayTickThreshold) {
                 game_computeYearEndMetrics(game);
                 if (game->frameIndex > 0) --game->frameIndex;
-                game->counterA = 0;
+                game->dayFrameCounter = 0;
                 ++game->economy.dayOfMonth;
                 game_everyMonthlyTick(game);
                 if (game->economy.dayOfMonth % 4 == 0) game_maybeAiTakeTurn(game);
                 if (game->economy.dayOfMonth % 2 == 0) {
                     if (game->economy.dayOfMonth % 10 == 0) game_everyTenTick(game);
-                    game_everyTwoTick(game);
-                    game_everyTwoTickZ(game);
+                    game_chargeTrainRunningCosts(game);
+                    game_checkScenarioMilestone(game);
                     if (game->scenario.aiExpansionEnabled) {
                         int found = 0;
                         for (int n = 0; n < 30; ++n)
                             found = found || game_pickValidForestTile(game);
-                        if (found) game_maybeAITick(game);
+                        if (found) game_recountZonePopulation(game);
                     }
                     game_tickInputOrAi(game, false);
                 }
@@ -747,9 +747,9 @@ void game_simulationTick(Game *game) {
                 if (oldMonth != game->economy.monthOfYear) {
                     game->economy.dayOfMonth = 1;
                     game_newYearNotify(game);
-                    game_dayResetP(game);
-                    game_dayResetAg(game);
-                    game_dayResetAd(game);
+                    game_decayConstructionTimersQuarterly(game);
+                    game_updateCityPopulation(game);
+                    game_upgradeOneAiTrainForEra(game);
                     switch (std::abs(game->rng.next_int() % 7)) {
                         case 0: game->economy.moneyBaseA += 9; game->economy.moneyBaseB += 9; break;
                         case 1: ++game->economy.baseTrainSpeed; game->economy.accel1 += 3; game->economy.brake1 += 3; break;
@@ -770,8 +770,8 @@ void game_simulationTick(Game *game) {
                     }
                 }
                 if (game->economy.monthOfYear == 13) {
-                    game_revenueOrYear(game);
-                    game_postRevenueReset(game);
+                    game_ageTrainsOneYear(game);
+                    game_resetAiDepotTrainAges(game);
                     game->economy.monthOfYear = 1;
                     ++game->economy.year;
                     if (game->economy.money < 0) {
@@ -795,6 +795,6 @@ void game_simulationTick(Game *game) {
                     game_setState(game, GameState::MenuOverlay);
                 }
             } else {
-                ++game->counterA;
+                ++game->dayFrameCounter;
             }
 }

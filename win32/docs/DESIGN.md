@@ -59,7 +59,7 @@ AddressSanitizer is run at stage exits with `/fsanitize=address` (add it to
 ## What is intentionally still on `Game`
 
 The top-level coordinator state (rng, era, gameState, frame/tick timers,
-counterA, loading flags, cachedHeader*, music, and the one save-only carried
+dayFrameCounter, loading flags, cachedHeader*, music, and the one save-only carried
 `savedLegacyMetricBq`). These are the aggregate's own frame/coordinator concerns,
 not a sub-part. See `docs/refactor/DECISIONS.md` and `STATUS.md` for the item
 history and the remaining cosmetic `gc_*` cleanup (CLEAN-01 leaf 2).

@@ -53,13 +53,13 @@ void game_viewportPanKey(Game *game) {
     }
     if (game->renderer.viewportCenterX < 0) game->renderer.viewportCenterX = 0;
     if (game->renderer.viewportCenterY < 0) game->renderer.viewportCenterY = 0;
-    if (game->renderer.viewportCenterX > game->world.mapScreenWidth - gcs_screenWidth)
-        game->renderer.viewportCenterX = game->world.mapScreenWidth - gcs_screenWidth;
-    if (game->renderer.viewportCenterY > game->world.mapScreenHeight - gcs_gameplayViewportHeight)
-        game->renderer.viewportCenterY = game->world.mapScreenHeight - gcs_gameplayViewportHeight;
-    game->renderer.viewportBaseX = game->renderer.viewportCenterX + gcs_screenWidth / 2;
+    if (game->renderer.viewportCenterX > game->world.mapScreenWidth - canvasWidth)
+        game->renderer.viewportCenterX = game->world.mapScreenWidth - canvasWidth;
+    if (game->renderer.viewportCenterY > game->world.mapScreenHeight - gameplayViewportHeight)
+        game->renderer.viewportCenterY = game->world.mapScreenHeight - gameplayViewportHeight;
+    game->renderer.viewportBaseX = game->renderer.viewportCenterX + canvasWidth / 2;
     game->renderer.viewportBaseY =
-        game->renderer.viewportCenterY + gcs_gameplayViewportHeight / 2;
+        game->renderer.viewportCenterY + gameplayViewportHeight / 2;
     game->renderer.mapScaleX = game->renderer.viewportBaseX * 2;
     game->renderer.mapScaleY = game->renderer.viewportBaseY * 2;
 }
@@ -106,15 +106,15 @@ void game_viewportZoomKey(Game *game) {
         moved_view = true;
         game->renderer.viewportCenterY = game->renderer.viewportBaseY - 11;
     }
-    if (game->renderer.viewportBaseX - game->renderer.viewportCenterX >= gcs_screenWidth - 20) {
+    if (game->renderer.viewportBaseX - game->renderer.viewportCenterX >= canvasWidth - 20) {
         moved_view = true;
-        game->renderer.viewportCenterX = game->renderer.viewportBaseX - gcs_screenWidth + 21;
+        game->renderer.viewportCenterX = game->renderer.viewportBaseX - canvasWidth + 21;
     }
     if (game->renderer.viewportBaseY - game->renderer.viewportCenterY
-        >= gcs_gameplayViewportHeight - 20) {
+        >= gameplayViewportHeight - 20) {
         moved_view = true;
         game->renderer.viewportCenterY =
-            game->renderer.viewportBaseY - gcs_gameplayViewportHeight + 21;
+            game->renderer.viewportBaseY - gameplayViewportHeight + 21;
     }
     if (game->renderer.viewportBaseX < 0) game->renderer.viewportBaseX = 0;
     if (game->renderer.viewportBaseY < 0) game->renderer.viewportBaseY = 0;
@@ -126,14 +126,14 @@ void game_viewportZoomKey(Game *game) {
         game->renderer.viewportCenterY = 0;
         moved_view = false;
     }
-    if (game->renderer.viewportCenterX > game->world.mapScreenWidth - gcs_screenWidth) {
-        game->renderer.viewportCenterX = game->world.mapScreenWidth - gcs_screenWidth;
+    if (game->renderer.viewportCenterX > game->world.mapScreenWidth - canvasWidth) {
+        game->renderer.viewportCenterX = game->world.mapScreenWidth - canvasWidth;
         moved_view = false;
     }
     if (game->renderer.viewportCenterY
-        > game->world.mapScreenHeight - gcs_gameplayViewportHeight) {
+        > game->world.mapScreenHeight - gameplayViewportHeight) {
         game->renderer.viewportCenterY =
-            game->world.mapScreenHeight - gcs_gameplayViewportHeight;
+            game->world.mapScreenHeight - gameplayViewportHeight;
         moved_view = false;
     }
     if (moved_view) game->ui.keySubState = 80;
@@ -159,7 +159,7 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
             tile_center_y = game->world.mapHalfWidth - x * 8 + y * 8 + 8;
-            game_computeIsoCornersInlined(game, x, y, game->build.selectionTileX,
+            game_computeIsoCorners(game, x, y, game->build.selectionTileX,
                                         game->build.selectionTileY, false);
             int opposite_edges =
                 game_crossProduct2D(anchorX, anchorY,

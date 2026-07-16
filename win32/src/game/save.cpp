@@ -155,7 +155,7 @@ void game_initSaveOrLoad(Game *game, int32_t mode) {
     IO_INT(economy.dayOfMonth);
     IO_INT(economy.monthOfYear);
     IO_INT(economy.year);
-    IO_INT(counterA);
+    IO_INT(dayFrameCounter);
     IO_INT(renderer.viewportBaseX);
     IO_INT(renderer.viewportBaseY);
     IO_INT(renderer.mapScaleX);
@@ -237,13 +237,13 @@ void game_initSaveOrLoad(Game *game, int32_t mode) {
     IO_BYTES(fleet.trainDir);
     IO_BYTES(fleet.trainPhase);
     IO_BYTES(fleet.trainFlags);
-    IO_BYTES(fleet.wagonEnergyRemaining);
-    IO_BYTES(fleet.trainEnergyOrCount);
+    IO_BYTES(fleet.secondaryCargoOrBaseEnergy);
+    IO_BYTES(fleet.energyCargoOrRemovalTicks);
     IO_BYTES(fleet.lastServiceVehicle);
     IO_BYTES(fleet.cargoAge);
     IO_SHORTS(fleet.nextCar);
-    IO_BYTES(fleet.trainEraOrStage);
-    IO_BYTES(fleet.trainAgeOrTimer);
+    IO_BYTES(fleet.trainEra);
+    IO_BYTES(fleet.trainAgeYears);
     IO_INTS(fleet.trainStateCode);
     IO_BYTES(fleet.trainAiOverride);
     IO_INT(world.industryCategory);

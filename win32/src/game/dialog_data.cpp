@@ -100,10 +100,10 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
 
         case 10:
             switch (field) {
-                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[gcs_animationsDisabled ? 21 : 20]]);
-                case 2: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[gcs_selectionHidden ? 21 : 20]]);
-                case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[gcs_monthlyReportEnabled ? 20 : 21]]);
-                case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[gcs_annualReportEnabled ? 20 : 21]]);
+                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[animationsDisabled ? 21 : 20]]);
+                case 2: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[selectionHidden ? 21 : 20]]);
+                case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[monthlyReportEnabled ? 20 : 21]]);
+                case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[annualReportEnabled ? 20 : 21]]);
                 case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->music_enabled ? 20 : 21]]);
                 case 6: return game_formatNumberWithSuffix(game->music_volume_level, 0);
             }
@@ -129,10 +129,10 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
 
         case 26: {
             if (field == 0)
-                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[60 + game->fleet.trainEraOrStage[game->trainAtCursor]]]);
+                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[60 + game->fleet.trainEra[game->trainAtCursor]]]);
             if (field == 6) return game_formatCurrency(game->fleet.trainRevenue[game->trainAtCursor]);
             if (field == 7) return game_formatCurrency(game->fleet.prevTrainRevenue[game->trainAtCursor]);
-            if (field == 8) return game_formatNumberWithSuffix(game->fleet.trainAgeOrTimer[game->trainAtCursor], 0);
+            if (field == 8) return game_formatNumberWithSuffix(game->fleet.trainAgeYears[game->trainAtCursor], 0);
             if (field == 9) return game_formatCurrency(game->build.currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return game_formatCurrency(game->build.baseTrainCostSnapshot - game->build.currentTrainCostSnapshot);
             if (field == 20)
@@ -147,10 +147,10 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             int type = game->fleet.trainFlags[car] & 0x0f;
             char text[32];
             if (type == 2)
-                snprintf(text, sizeof(text), "%d/%d", game->fleet.trainEnergyOrCount[car],
-                         game->fleet.wagonEnergyRemaining[car]);
+                snprintf(text, sizeof(text), "%d/%d", game->fleet.energyCargoOrRemovalTicks[car],
+                         game->fleet.secondaryCargoOrBaseEnergy[car]);
             else
-                snprintf(text, sizeof(text), "%d", game->fleet.trainEnergyOrCount[car]);
+                snprintf(text, sizeof(text), "%d", game->fleet.energyCargoOrRemovalTicks[car]);
             return game_encodeDisplayText(text);
         }
 

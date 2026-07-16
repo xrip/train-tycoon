@@ -102,7 +102,7 @@ bool game_findPathStep(Game *game, int32_t x, int32_t y,
     return true;
 }
 
-bool game_isTileMatchForPathInlined(Game *game, bool connected,
+bool game_isTileMatchForPath(Game *game, bool connected,
                                   int32_t x, int32_t y,
                                   int32_t tile_a, int32_t tile_b,
                                   int32_t tile_c, int32_t tile_d,
@@ -202,16 +202,16 @@ void game_validatePathStep(Game *game) {
                         && game->pathfinder.distanceGrid[map_x][map_y + 1] == 9;
             if ((left ? 1 : 0) + (right ? 1 : 0)
                 + (up ? 1 : 0) + (down ? 1 : 0) == 1) {
-                left = game_isTileMatchForPathInlined(
+                left = game_isTileMatchForPath(
                     game, left, map_x - 1, map_y,
                     71, 72, 74, 78, 80, 84, 88, 90, true);
-                right = game_isTileMatchForPathInlined(
+                right = game_isTileMatchForPath(
                     game, right, map_x + 1, map_y,
                     71, 73, 75, 78, 80, 85, 88, 90, true);
-                up = game_isTileMatchForPathInlined(
+                up = game_isTileMatchForPath(
                     game, up, map_x, map_y - 1,
                     70, 73, 74, 77, 79, 83, 87, 89, false);
-                down = game_isTileMatchForPathInlined(
+                down = game_isTileMatchForPath(
                     game, down, map_x, map_y + 1,
                     70, 72, 75, 77, 79, 86, 87, 89, false);
             }

@@ -478,19 +478,19 @@ TEST_CASE("full: year rollover has a fixed saved-state digest") {
     Game* game = make_game();
     generate_scenario(game, 0);
     game->rng.set_seed(kFixedRandomSeed);
-    gcs_monthlyReportEnabled = false;
-    gcs_annualReportEnabled = false;
+    monthlyReportEnabled = false;
+    annualReportEnabled = false;
     game->economy.dayOfMonth = 31;
     game->economy.monthOfYear = 12;
     game->economy.year = 1950;
-    game->counterA = game->dayTickThreshold;
+    game->dayFrameCounter = game->dayTickThreshold;
 
     game_simulationTick(game);
 
     CHECK(game->economy.dayOfMonth == 1);
     CHECK(game->economy.monthOfYear == 1);
     CHECK(game->economy.year == 1951);
-    CHECK(game->counterA == 0);
+    CHECK(game->dayFrameCounter == 0);
     CHECK(save_state_digest(game) == 8296142532964329289ULL);
     delete game;
 }
@@ -560,9 +560,9 @@ TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
 
     // generate_scenario never paints, so set the screen-size globals that the
     // first game_paint would normally establish (the live loop always has these).
-    gcs_screenWidth = kScreenWidth;
-    gcs_hs = kScreenHeight;
-    gcs_bottomBarY = gcs_hs - 15;
+    canvasWidth = kScreenWidth;
+    canvasHeight = kScreenHeight;
+    bottomBarY = canvasHeight - 15;
 
     // Mode-0 index 1 is always the "build" entry (item id 1); activating it
     // switches buildMenuMode to 1 and resets the item index to 0 (openBuildMenu
@@ -570,7 +570,7 @@ TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
     const int item1_x = static_cast<int>(static_cast<std::uint8_t>(game->ui.menuItemCode[0][1]));
     REQUIRE(item1_x > 0);
 
-    game_pointerPressed(game, item1_x, gcs_bottomBarY);
+    game_pointerPressed(game, item1_x, bottomBarY);
 
     CHECK(game->ui.buildMenuMode == 1);
     CHECK(game->ui.buildMenuItemIndex == 0);
@@ -582,14 +582,14 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     generate_scenario(game, 0);
     REQUIRE(game->gameState == 30);
 
-    gcs_screenWidth = kScreenWidth;
-    gcs_hs = kScreenHeight;
-    gcs_bottomBarY = gcs_hs - 15;
+    canvasWidth = kScreenWidth;
+    canvasHeight = kScreenHeight;
+    bottomBarY = canvasHeight - 15;
 
     // Hover the middle of the gameplay viewport. The viewport always shows the
     // map after generation, so its centre sits on a valid tile.
     const int hover_x = kScreenWidth / 2;
-    const int hover_y = (15 + gcs_bottomBarY) / 2;
+    const int hover_y = (15 + bottomBarY) / 2;
 
     game_pointerMoved(game, hover_x, hover_y);
     REQUIRE(game->ui.mouseOverField);
@@ -615,7 +615,7 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     CHECK(dy <= 8);
 
     // Hovering UI chrome (the bottom bar) must not claim a field tile.
-    game_pointerMoved(game, hover_x, gcs_bottomBarY);
+    game_pointerMoved(game, hover_x, bottomBarY);
     CHECK_FALSE(game->ui.mouseOverField);
     delete game;
 }
@@ -627,12 +627,12 @@ TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
 
     // generate_scenario never paints, so set the screen-size globals that the
     // first game_paint would normally establish (the live loop always has these).
-    gcs_screenWidth = kScreenWidth;
-    gcs_hs = kScreenHeight;
-    gcs_bottomBarY = gcs_hs - 15;
+    canvasWidth = kScreenWidth;
+    canvasHeight = kScreenHeight;
+    bottomBarY = canvasHeight - 15;
 
     const int mid_x = kScreenWidth / 2;
-    const int mid_y = (15 + gcs_bottomBarY) / 2;
+    const int mid_y = (15 + bottomBarY) / 2;
     const int cx0 = game->renderer.viewportCenterX;
     const int cy0 = game->renderer.viewportCenterY;
     const int msx0 = game->renderer.mapScaleX;

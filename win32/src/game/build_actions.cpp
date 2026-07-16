@@ -141,14 +141,14 @@ void game_demolishAtCursor(Game *game) {
                      || game->world.tileMap[x][cursor_y] == 84
                      || game->world.tileMap[x][cursor_y] == 85);
                  ++x)
-                game_handleCursorClickInlined(game, x, cursor_y, true, false);
+                game_queueTileChange(game, x, cursor_y, true, false);
             for (x = cursor_x - 1;
                  x >= 0
                  && (game->world.tileMap[x][cursor_y] == 81
                      || game->world.tileMap[x][cursor_y] == 84
                      || game->world.tileMap[x][cursor_y] == 85);
                  --x)
-                game_handleCursorClickInlined(game, x, cursor_y, true, false);
+                game_queueTileChange(game, x, cursor_y, true, false);
         } else {
             int y;
             for (y = cursor_y;
@@ -157,14 +157,14 @@ void game_demolishAtCursor(Game *game) {
                      || game->world.tileMap[cursor_x][y] == 83
                      || game->world.tileMap[cursor_x][y] == 86);
                  ++y)
-                game_handleCursorClickInlined(game, cursor_x, y, true, false);
+                game_queueTileChange(game, cursor_x, y, true, false);
             for (y = cursor_y - 1;
                  y >= 0
                  && (game->world.tileMap[cursor_x][y] == 82
                      || game->world.tileMap[cursor_x][y] == 83
                      || game->world.tileMap[cursor_x][y] == 86);
                  --y)
-                game_handleCursorClickInlined(game, cursor_x, y, true, false);
+                game_queueTileChange(game, cursor_x, y, true, false);
         }
     } else if (tile >= 87 && tile <= 90) {
         int vehicle = game_findServiceVehicleAt(game, cursor_x, cursor_y);
@@ -175,22 +175,22 @@ void game_demolishAtCursor(Game *game) {
                 if ((game->fleet.vehicleFlags[vehicle] & 0x40) == 0) {
                     game->world.trackMap[x][y - 1] = 0;
                     game->world.trackMap[x][y + 1] = 0;
-                    game_handleCursorClickInlined(game, x, y - 1, true, false);
-                    game_handleCursorClickInlined(game, x, y + 1, true, false);
+                    game_queueTileChange(game, x, y - 1, true, false);
+                    game_queueTileChange(game, x, y + 1, true, false);
                 } else {
                     game->world.trackMap[x - 1][y] = 0;
                     game->world.trackMap[x + 1][y] = 0;
-                    game_handleCursorClickInlined(game, x - 1, y, true, false);
-                    game_handleCursorClickInlined(game, x + 1, y, true, false);
+                    game_queueTileChange(game, x - 1, y, true, false);
+                    game_queueTileChange(game, x + 1, y, true, false);
                 }
             }
-            game_handleCursorClickInlined(game, x, y, true, false);
+            game_queueTileChange(game, x, y, true, false);
             game_advanceConstructionTimers(game, x, y, -6);
             game->world.trackMap[x][y] = 0;
             game->fleet.vehicleFlags[vehicle] = 0;
         }
     } else {
-        game_handleCursorClickInlined(game, cursor_x, cursor_y, true, false);
+        game_queueTileChange(game, cursor_x, cursor_y, true, false);
         game_advanceConstructionTimers(game, cursor_x, cursor_y, -6);
     }
     game_applyBackgroundCost(game);
@@ -226,7 +226,7 @@ void game_pickTrainsAtCursor(Game *game) {
         return;
     }
 
-    game->build.wagonType = game->fleet.trainEraOrStage[game->trainAtCursor];
+    game->build.wagonType = game->fleet.trainEra[game->trainAtCursor];
     for (int option = 0; option < 5; ++option) game->build.wagonOptionSlots[option] = -1;
     int car = game->fleet.nextCar[game->trainAtCursor];
     for (int option = 0; option < 5 && car != -1; ++option) {
@@ -244,7 +244,7 @@ void game_pickTrainsAtCursor(Game *game) {
     game->scenario.difficultyPct = 100;
     game_computeTrainCost(game);
     game->build.baseTrainCostSnapshot = game->build.unitCost;
-    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeOrTimer[game->trainAtCursor];
+    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeYears[game->trainAtCursor];
     game_computeTrainCost(game);
     game->build.currentTrainCostSnapshot = game->build.unitCost;
     game->ready = false;
@@ -316,7 +316,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
     game_rebuildCityList(game);
 }
 
-void game_computeTrackBuildInlined(Game *game, int32_t start_x,
+void game_computeTrackBuild(Game *game, int32_t start_x,
                                  int32_t start_y, int32_t step_x,
                                  int32_t step_y, int32_t target_tile,
                                  int32_t start_tile, int32_t end_tile,
@@ -373,7 +373,7 @@ void game_revertTrackTiles(Game *game) {
     }
 }
 
-void game_placeTrackAtCursorInlined(Game *game, bool first_direction,
+void game_placeTrackAtCursor(Game *game, bool first_direction,
                                   int32_t first_tile, int32_t second_tile,
                                   int32_t match_tile_a, int32_t match_tile_b,
                                   int32_t result_tile_a, int32_t result_tile_b,
@@ -534,19 +534,19 @@ void game_openBuildMenu(Game *game) {
                 case 2:
                     if (game->ui.blockBuildMenu) break;
                     if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 7)
-                        game_computeTrackBuildInlined(
+                        game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             0, -1, 10, 83, 86, 82);
                     if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 10)
-                        game_computeTrackBuildInlined(
+                        game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             0, 1, 7, 86, 83, 82);
                     if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 8)
-                        game_computeTrackBuildInlined(
+                        game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             -1, 0, 9, 84, 85, 81);
                     if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 9)
-                        game_computeTrackBuildInlined(
+                        game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             1, 0, 8, 85, 84, 81);
                     break;
@@ -558,12 +558,12 @@ void game_openBuildMenu(Game *game) {
                 case 4: game_demolishAtCursor(game); break;
                 case 5:
                     if (!game->ui.blockBuildMenu)
-                        game_smoothTileAtInlined(game, game->build.swapMapX, game->build.swapMapY,
+                        game_smoothTileAt(game, game->build.swapMapX, game->build.swapMapY,
                                                false);
                     break;
                 case 6:
                     if (!game->ui.blockBuildMenu)
-                        game_smoothTileAtInlined(game, game->build.swapMapX, game->build.swapMapY,
+                        game_smoothTileAt(game, game->build.swapMapX, game->build.swapMapY,
                                                true);
                     break;
                 case 9:
@@ -623,21 +623,21 @@ void game_openBuildMenu(Game *game) {
         case 5:
             switch (item) {
                 case 0:
-                    game_placeTrackAtCursorInlined(
+                    game_placeTrackAtCursor(
                         game, game->ui.vehicleMenuSelectIndex, 75, 74,
                         -1, -1, -1, -1, false, 0);
                     return;
                 case 1:
-                    game_placeTrackAtCursorInlined(
+                    game_placeTrackAtCursor(
                         game, game->ui.trainMenuSelectIndex, 72, 73,
                         -1, -1, -1, -1, false, 0);
                     return;
                 case 2:
-                    game_placeTrackAtCursorInlined(
+                    game_placeTrackAtCursor(
                         game, true, 70, 0, 21, 23, 77, 79, true, 71);
                     return;
                 case 3:
-                    game_placeTrackAtCursorInlined(
+                    game_placeTrackAtCursor(
                         game, true, 71, 0, 22, 24, 78, 80, true, 70);
                     return;
                 case 9:
@@ -682,12 +682,12 @@ int32_t game_allocateTrainSlot(Game *game, int32_t x, int32_t y,
         game->fleet.trainX[train] = (int8_t)x;
         game->fleet.trainY[train] = (int8_t)y;
         game->fleet.trainDir[train] = (int8_t)direction;
-        game->fleet.wagonEnergyRemaining[train] = (int8_t)energy;
+        game->fleet.secondaryCargoOrBaseEnergy[train] = (int8_t)energy;
         game->fleet.trainPhase[train] = 0;
-        game->fleet.trainEnergyOrCount[train] = 1;
+        game->fleet.energyCargoOrRemovalTicks[train] = 1;
         game->fleet.lastServiceVehicle[train] = -1;
-        game->fleet.trainEraOrStage[train] = (int8_t)era;
-        game->fleet.trainAgeOrTimer[train] = 0;
+        game->fleet.trainEra[train] = (int8_t)era;
+        game->fleet.trainAgeYears[train] = 0;
         game->fleet.trainStateCode[train] = 7;
         game->fleet.trainAiOverride[train] = 0;
     }
@@ -757,7 +757,7 @@ bool game_buyTrainAtCursor(Game *game) {
     return true;
 }
 
-bool game_applyTrainUpgradeInlined(Game *game, int32_t train,
+bool game_applyTrainUpgrade(Game *game, int32_t train,
                                  int32_t state_code, int32_t *options) {
     int cost = game->build.unitCost - game->build.currentTrainCostSnapshot;
     if (game->economy.money < cost) {

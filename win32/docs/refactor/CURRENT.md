@@ -21,7 +21,7 @@ gates green and ASan clean:
   `Assets`, `Renderer`, `UiController`, `SaveCodec`.
 
 `GameCanvas` is now a thin aggregate: the ten parts plus the top-level
-coordinator state (rng, era, gameState, frame/tick timers, counterA, loading
+coordinator state (rng, era, gameState, frame/tick timers, dayFrameCounter, loading
 flags, cachedHeader*, music, savedGameState, dayTickThreshold, graphColors).
 All obfuscated field names are recovered except `savedLegacyMetricBq`
 (save-only, carried metric). Ten dead write-only fields were removed.

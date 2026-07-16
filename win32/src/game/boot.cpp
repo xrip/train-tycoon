@@ -151,10 +151,10 @@ void game_loadGame(Game *game, int32_t slot, int32_t mode) {
 }
 
 void game_writeSaveSnapshot(Game *game) {
-    gcs_animationsDisabled = game_saveOrLoadBool(game, gcs_animationsDisabled);
-    gcs_selectionHidden = game_saveOrLoadBool(game, gcs_selectionHidden);
-    gcs_monthlyReportEnabled = game_saveOrLoadBool(game, gcs_monthlyReportEnabled);
-    gcs_annualReportEnabled = game_saveOrLoadBool(game, gcs_annualReportEnabled);
+    animationsDisabled = game_saveOrLoadBool(game, animationsDisabled);
+    selectionHidden = game_saveOrLoadBool(game, selectionHidden);
+    monthlyReportEnabled = game_saveOrLoadBool(game, monthlyReportEnabled);
+    annualReportEnabled = game_saveOrLoadBool(game, annualReportEnabled);
     game->scenario.scenarioStepCompare = game_saveIntToBuffer(game, game->scenario.scenarioStepCompare);
     game->scenario.bestScenarioScore = game_saveIntToBuffer(game, game->scenario.bestScenarioScore);
     game->music_volume_level = game_saveIntToBuffer(game, game->music_volume_level);
@@ -177,7 +177,7 @@ void game_appendTileDrawOffset(ByteBuffer& x_offsets,
 }
 
 // public void k(int n, int n2) -- build+sort the iso tile-draw order tables
-void game_k(Game *game, int32_t n, int32_t n2) {
+void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2) {
     ByteBuffer x_offsets;
     ByteBuffer y_offsets;
     int n3, n4, n5;
@@ -221,13 +221,13 @@ void game_k(Game *game, int32_t n, int32_t n2) {
 
 void game_setCanvasSize(Game *game, int32_t n, int32_t n2) {
     if (game->lastCanvasWidth != n || game->lastCanvasHeight != n2) {
-        gcs_screenWidth = n;
-        gcs_hs = n2;
-        game->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+        canvasWidth = n;
+        canvasHeight = n2;
+        game->renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
         game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
-        gcs_gameplayViewportHeight = gcs_hs - 30;
-        gcs_bottomBarY = gcs_hs - 15;
-        game_k(game, n, n2);
+        gameplayViewportHeight = canvasHeight - 30;
+        bottomBarY = canvasHeight - 15;
+        game_buildTileDrawOrder(game, n, n2);
         game->lastCanvasWidth = n;
         game->lastCanvasHeight = n2;
         game->ui.menuDirty = true;
@@ -248,14 +248,14 @@ void game_setState(Game *game, int32_t n) {
         case GameState::BootSplash0:
             game_openSpriteStream(game, "sprite_images.bin");
             game_loadPackedSpriteData(game, "packed_sprites.bin");
-            game->loadingTimer = 0;
+            game->loadingAnimationFrame = 0;
             /* fall through */
         case GameState::BootSplash1:
         case GameState::BootSplash2:
             game->assets.cycle_flag = game_decodePngFromSpriteStream(game);
             game->loadingStartTime = midp_current_time_millis();
             game->loadingTimeout = false;
-            game->loadingTimer = 0;
+            game->loadingAnimationFrame = 0;
             break;
         case GameState::IntroReady: {
             ResourceReader in = resources::open("sprite_image_map.bin");
@@ -298,21 +298,21 @@ void game_setState(Game *game, int32_t n) {
             game->ui.useDefaultOverlaySelection = true;
             break;
         case GameState::GeneratingMap:
-            game->loadStep = 0;
+            game->stateWorkStep = 0;
             break;
         case GameState::Playing:
             game->renderer.backbuffer = NULL;
-            game->renderer.backbuffer = Image::create_blank(gcs_screenWidth, gcs_hs);
+            game->renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
             game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
             game->renderer.lastViewportCenterX = -1;
             game->ui.menuDirty = true;
             break;
-        case GameState::BuildingMinimap: game->loadStep = 4; game->ui.confirmToggle = 0; break;
-        case GameState::BuildingPath: game->loadStep = 4; break;
-        case GameState::SavingGame: game->loadStep = 4; break;
-        case GameState::LoadingGame: game->loadStep = 4; break;
-        case GameState::AiTurn: game->loadStep = 4; break;
-        case GameState::HighScoreSync: game->loadStep = 4; break;
+        case GameState::BuildingMinimap: game->stateWorkStep = 4; game->ui.confirmToggle = 0; break;
+        case GameState::BuildingPath: game->stateWorkStep = 4; break;
+        case GameState::SavingGame: game->stateWorkStep = 4; break;
+        case GameState::LoadingGame: game->stateWorkStep = 4; break;
+        case GameState::AiTurn: game->stateWorkStep = 4; break;
+        case GameState::HighScoreSync: game->stateWorkStep = 4; break;
     }
     game->gameState = n;
 }
