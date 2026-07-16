@@ -3,7 +3,6 @@
 #include <string.h>
 #include <vector>
 
-// void ensureSaveBufferCapacity(int n)
 void gc_ensureSaveBufferCapacity(Game *gc, int32_t n) {
     // Grow by n, preserving existing bytes and zeroing the new tail.
     gc->saveCodec.saveBuffer.resize(static_cast<std::size_t>(gc->saveCodec.snapshotSize + n));
@@ -67,7 +66,6 @@ void gc_saveOrLoadIntSpan(Game *gc, int32_t *nArray, int len) {
     }
 }
 
-// boolean loadSnapshotAndReturn()
 bool gc_loadSnapshotAndReturn(Game *gc) {
     gc_loadGame(gc, 0, save::MODE_READ);
     return gc->saveCodec.snapshotLoaded;

@@ -12,12 +12,10 @@ int32_t gc_readSaveByteUnsigned(Game *gc) {
                : 256 + gc->saveCodec.saveBuffer[gc->saveCodec.saveReadOffset++];
 }
 
-// boolean saveOrLoadBool(boolean bl)
 bool gc_saveOrLoadBool(Game *gc, bool bl) {
     return gc_saveOrLoadByte(gc, (int8_t)(bl ? 1 : 0)) == 1;
 }
 
-// byte saveOrLoadByte(byte by)
 int8_t gc_saveOrLoadByte(Game *gc, int8_t by) {
     if (gc->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
     int8_t by2 = by;
@@ -30,7 +28,6 @@ int8_t gc_saveOrLoadByte(Game *gc, int8_t by) {
     return by2;
 }
 
-// int saveIntToBuffer(int n)
 int32_t gc_saveIntToBuffer(Game *gc, int32_t n) {
     if (gc->saveCodec.savePendingMode == save::MODE_SKIP) return 0;
     int32_t n2 = n;

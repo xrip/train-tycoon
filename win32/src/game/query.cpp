@@ -2,14 +2,12 @@
 #include "game_methods.h"
 #include <stdlib.h> // abs
 
-// int computeKeyRepeatDelay()
 int32_t gc_computeKeyRepeatDelay(Game *gc) {
     if (gc->ui.keySubState < 30) gc->ui.keySubState += gc->ui.keyRepeatStep;
     gc->ui.keySubState = (int8_t)gc->ui.keySubState;
     return gc->ui.keySubState / 3;
 }
 
-// void pushMoneyHistory(int n)
 void gc_pushMoneyHistory(Game *gc, int32_t n) {
     gc->economy.moneyHistory[2] = gc->economy.moneyHistory[1];
     gc->economy.moneyHistory[1] = gc->economy.moneyHistory[0];
@@ -19,7 +17,6 @@ void gc_pushMoneyHistory(Game *gc, int32_t n) {
     gc->ui.moneyTickerFrames[0] = 80;
 }
 
-// boolean isTrackStepInlined(int n, int n2, int n3, int n4, int n5)
 bool gc_isTrackStepInlined(Game *gc, int32_t n, int32_t n2, int32_t n3,
                           int32_t n4, int32_t n5) {
     bool bl = false;
@@ -31,7 +28,6 @@ bool gc_isTrackStepInlined(Game *gc, int32_t n, int32_t n2, int32_t n3,
     return bl;
 }
 
-// int neighboursMask(int n, int n2)
 int32_t gc_neighboursMask(Game *gc, int32_t n, int32_t n2) {
     if (n == 34) {
         if (gc->ui.yearGraphMode == 0 || gc->ui.yearGraphMode == 2) {
@@ -46,7 +42,6 @@ int32_t gc_neighboursMask(Game *gc, int32_t n, int32_t n2) {
     return 0;
 }
 
-// boolean isAdjacentTileEmpty(int n, int n2, int n3, boolean bl)  (recursive smooth)
 bool gc_isAdjacentTileEmpty(Game *gc, int32_t n, int32_t n2, int32_t n3, bool bl) {
     bool bl2 = true;
     if (n > 0) {
@@ -78,7 +73,6 @@ bool gc_isAdjacentTileEmpty(Game *gc, int32_t n, int32_t n2, int32_t n3, bool bl
     return bl2;
 }
 
-// boolean isResourceTile(int n, int n2)
 bool gc_isResourceTile(Game *gc, int32_t n, int32_t n2) {
     if (n != 1) gc->ui.snapshotLoadedFlag = false;
     if (n == 1) {

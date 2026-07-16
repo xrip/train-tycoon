@@ -35,7 +35,6 @@ static void format_money(int32_t value, char *out, int out_size) {
     out[pos] = '\0';
 }
 
-// int drawMenuRow(Graphics,int,int,int,boolean)
 int32_t gc_drawMenuRow(Game *gc, Surface *graphics, int32_t sprite,
                        int32_t item_index, int32_t x, bool spaced) {
     gc_drawSpriteQuad(gc, graphics, sprite, x, gcs_bottomBarY, 20);
@@ -43,7 +42,6 @@ int32_t gc_drawMenuRow(Game *gc, Surface *graphics, int32_t sprite,
     return x + 15 + (spaced ? 3 : 0);
 }
 
-// void drawHeaderBar(Graphics)
 void gc_drawHeaderBar(Game *gc, Surface *graphics) {
     if (gc->cachedHeaderDay == gc->economy.dayOfMonth
         && gc->cachedHeaderMonth == gc->economy.monthOfYear
@@ -81,7 +79,6 @@ void gc_drawHeaderBar(Game *gc, Surface *graphics) {
     gc->cachedHeaderYear = gc->economy.year;
 }
 
-// void drawConfirmBar(Graphics)
 void gc_drawConfirmBar(Game *gc, Surface *graphics) {
     gc_drawHeaderBar(gc, graphics);
     midp_set_color(graphics, 0x606060);
@@ -93,7 +90,6 @@ void gc_drawConfirmBar(Game *gc, Surface *graphics) {
     midp_draw_rect(graphics, 18 * gc->ui.confirmToggle + 1, gcs_bottomBarY + 1, 12, 12);
 }
 
-// void paintMain(Graphics)
 void gc_paintMain(Game *gc, Surface *graphics) {
     (void)graphics;
     gc_drawHeaderBar(gc, gc->renderer.backbuffer_surface);
@@ -133,7 +129,6 @@ void gc_paintMain(Game *gc, Surface *graphics) {
     gc->ui.menuDirty = false;
 }
 
-// int drawNumber(Graphics,int,int)
 int32_t gc_drawNumber(Game *gc, Surface *graphics,
                       int32_t value, int32_t y) {
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
@@ -144,7 +139,6 @@ int32_t gc_drawNumber(Game *gc, Surface *graphics,
     return y + 15;
 }
 
-// void drawMoneyTicker(Graphics)
 void gc_drawMoneyTicker(Game *gc, Surface *graphics) {
     midp_set_color(graphics, 0xFF0000);
     int y = 0;
@@ -162,7 +156,6 @@ void gc_drawMoneyTicker(Game *gc, Surface *graphics) {
     }
 }
 
-// void drawConfirmDialog(Graphics)
 void gc_drawConfirmDialog(Game *gc, Surface *graphics) {
     if (gc->ui.confirmCounter <= 0) return;
     if (gc->ui.confirmTargetState >= 0) {
@@ -173,7 +166,6 @@ void gc_drawConfirmDialog(Game *gc, Surface *graphics) {
     --gc->ui.confirmCounter;
 }
 
-// void computeIsoCornersInlined(int,int,int[],int[],boolean)
 void gc_computeIsoCornersInlined(Game *gc, int32_t x, int32_t y,
                                  int32_t *screen_x, int32_t *screen_y,
                                  bool viewport_relative) {
@@ -195,7 +187,6 @@ void gc_computeIsoCornersInlined(Game *gc, int32_t x, int32_t y,
     }
 }
 
-// void drawSelectionQuad(Graphics,int[],int[])
 void gc_drawSelectionQuad(Game *gc, Surface *graphics,
                           int32_t *screen_x, int32_t *screen_y) {
     (void)gc;
@@ -217,7 +208,6 @@ void gc_drawSelectionQuad(Game *gc, Surface *graphics,
                    screen_x[3] + 1, screen_y[3] + 15);
 }
 
-// void drawBuildMenuCursor(Graphics)
 void gc_drawBuildMenuCursor(Game *gc, Surface *graphics) {
     if (gc->ui.blockBuildMenu) return;
     int action = gc->ui.menuTransitionCode[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex];
@@ -290,7 +280,6 @@ void gc_drawBuildMenuCursor(Game *gc, Surface *graphics) {
                          gc->build.selectionTileY.data());
 }
 
-// void drawBuildMenuRow(Graphics)
 void gc_drawBuildMenuRow(Game *gc, Surface *graphics) {
     if (!gc->ui.menuRowEnabled[gc->ui.buildMenuMode][gc->ui.buildMenuItemIndex]) return;
     int menu_x = gc->renderer.viewportBaseX - gc->renderer.viewportCenterX;

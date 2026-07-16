@@ -2,7 +2,6 @@
 #include "game_methods.h"
 #include <cstdlib>
 
-// int accumulateTrainTurns(int)
 int32_t gc_accumulateTrainTurns(Game *gc, int32_t car) {
     if (car == -1) return 0;
     int tile = gc->world.tileMap[gc_byteToUnsignedInt(gc, gc->fleet.trainX[car])][gc_byteToUnsignedInt(gc, gc->fleet.trainY[car])];
@@ -14,7 +13,6 @@ int32_t gc_accumulateTrainTurns(Game *gc, int32_t car) {
     return gc_accumulateTrainTurns(gc, gc->fleet.nextCar[car]) + turn;
 }
 
-// int findServiceVehicleAt(int,int)
 int32_t gc_findServiceVehicleAt(Game *gc, int32_t x, int32_t y) {
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
         if ((gc->fleet.vehicleFlags[vehicle] & 0x80) != 128) continue;
@@ -31,7 +29,6 @@ int32_t gc_findServiceVehicleAt(Game *gc, int32_t x, int32_t y) {
     return 5000;
 }
 
-// int spawnTrainCar(int,int)
 int32_t gc_spawnTrainCar(Game *gc, int32_t previous_car, int32_t car_type) {
     int new_car = 500;
     for (int car = 0; car < 500; ++car) {
@@ -56,7 +53,6 @@ int32_t gc_spawnTrainCar(Game *gc, int32_t previous_car, int32_t car_type) {
     return new_car;
 }
 
-// void resetTrailingCars(int,int,int)
 void gc_resetTrailingCars(Game *gc, int32_t head, int32_t car, int32_t phase) {
     if (car == -1) return;
     gc_resetTrailingCars(gc, head, gc->fleet.nextCar[car], phase - 8);
@@ -66,7 +62,6 @@ void gc_resetTrailingCars(Game *gc, int32_t head, int32_t car, int32_t phase) {
     gc->fleet.trainPhase[car] = (int8_t)(phase - 8);
 }
 
-// int takeServiceResource(int,int,int)
 int32_t gc_takeServiceResource(Game *gc, int32_t vehicle,
                                int32_t resource, int32_t wanted) {
     int taken = gc->fleet.serviceResourceStock[vehicle][resource] > wanted
@@ -76,7 +71,6 @@ int32_t gc_takeServiceResource(Game *gc, int32_t vehicle,
     return taken;
 }
 
-// int collectNearbyServiceResource(int,int,int)
 int32_t gc_collectNearbyServiceResource(Game *gc, int32_t vehicle,
                                         int32_t resource, int32_t wanted) {
     int total = gc_takeServiceResource(gc, vehicle, resource, wanted);
@@ -91,7 +85,6 @@ int32_t gc_collectNearbyServiceResource(Game *gc, int32_t vehicle,
     return total;
 }
 
-// boolean trainCanLoadAtServiceVehicle(int,int)
 bool gc_trainCanLoadAtServiceVehicle(Game *gc, int32_t head,
                                      int32_t vehicle) {
     int car = gc->fleet.nextCar[head];
@@ -126,7 +119,6 @@ bool gc_trainCanLoadAtServiceVehicle(Game *gc, int32_t head,
     return gc_trainCanLoadAtServiceVehicle(gc, car, vehicle);
 }
 
-// void loadTrainAtServiceVehicle(int,int,boolean)
 void gc_loadTrainAtServiceVehicle(Game *gc, int32_t car,
                                   int32_t vehicle, bool construction_done) {
     if (car == -1) return;
@@ -184,7 +176,6 @@ void gc_loadTrainAtServiceVehicle(Game *gc, int32_t car,
     gc_loadTrainAtServiceVehicle(gc, gc->fleet.nextCar[car], vehicle, construction_done);
 }
 
-// void recordDeliveredResource(int,int)
 void gc_recordDeliveredResource(Game *gc, int32_t resource, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
         if (gc->ui.menuRowType[row] == 3 + resource)
@@ -199,7 +190,6 @@ void gc_recordDeliveredResource(Game *gc, int32_t resource, int32_t amount) {
     }
 }
 
-// void recordTrainRevenue(int)
 void gc_recordTrainRevenue(Game *gc, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
         if (gc->ui.menuRowType[row] == 1) gc->ui.menuRowValue[row] += amount;
@@ -208,7 +198,6 @@ void gc_recordTrainRevenue(Game *gc, int32_t amount) {
     gc->economy.trainRevenueScore += amount / 73;
 }
 
-// int unloadTrainRevenue(int,int)
 int32_t gc_unloadTrainRevenue(Game *gc, int32_t car, int32_t vehicle) {
     if (car == -1) return 0;
     int revenue = 0;
@@ -276,7 +265,6 @@ static int normalize_track_variant(int variant) {
     }
 }
 
-// void updateTrain(int)
 void gc_updateTrain(Game *gc, int32_t head) {
     int stop_chain = 0;
     if ((gc->fleet.trainFlags[head] & 0x40) == 0

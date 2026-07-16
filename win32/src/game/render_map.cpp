@@ -4,7 +4,6 @@
 #include "game_methods.h"
 #include <vector>
 
-// public void renderMap(Graphics graphics)
 void gc_renderMap(Game *gc, Surface *g) {
     Surface *bb = gc->renderer.backbuffer_surface;
     int n, n2, n3, n4, n5, n6, n7;

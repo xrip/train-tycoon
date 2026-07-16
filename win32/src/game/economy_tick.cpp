@@ -2,7 +2,6 @@
 #include "game_methods.h"
 #include <cstdlib>
 
-// void placeTrainAt(int,int)
 void gc_placeTrainAt(Game *gc, int32_t duration_units, int32_t row) {
     int delay_days = duration_units * 60 + 20 + gc->rng.next_int() % 20;
     int due_day = gc->ui.placeTrainDay[row] + delay_days;
@@ -47,7 +46,6 @@ static void copy_menu_row_to_slot5(Game *gc, int row) {
     gc->ready = false;
 }
 
-// void applyMenuRowEffect(int)
 void gc_applyMenuRowEffect(Game *gc, int32_t row) {
     if (gc->ui.menuRowAltType[row] == 1 || gc->ui.menuRowAltType[row] == 2) {
         gc->economy.money += gc->ui.menuRowRevenue[row];
@@ -78,7 +76,6 @@ void gc_applyMenuRowEffect(Game *gc, int32_t row) {
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
-// void duplicateMenuRow(int)
 void gc_duplicateMenuRow(Game *gc, int32_t row) {
     copy_menu_row_to_slot5(gc, row);
     gc->scenario.duplicateRowState = 4;
@@ -86,7 +83,6 @@ void gc_duplicateMenuRow(Game *gc, int32_t row) {
     gc_setState(gc, +GameState::MenuOverlay);
 }
 
-// void everyMonthlyTick()
 void gc_everyMonthlyTick(Game *gc) {
     if (!gc->scenario.monthlyOffersEnabled) return;
     for (int resource = 0; resource < 6; ++resource) {

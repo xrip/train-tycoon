@@ -1,7 +1,6 @@
 // Small geometry and input functions.
 #include "game_methods.h"
 
-// public int byteToUnsignedInt(byte n)
 int32_t gc_byteToUnsignedInt(Game *gc, int8_t n) {
     (void)gc;
     return n < 0 ? 256 + n : n;

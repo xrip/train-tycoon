@@ -36,7 +36,6 @@ void gc_resetKeyState(Game *gc, int32_t n) {
     gc->ui.inputSubState = 0;
 }
 
-// void cycleBuildMenuIndex(boolean forward)
 void gc_cycleBuildMenuIndex(Game *gc, bool forward) {
     gc->ui.buildMenuItemIndex += forward ? 1 : -1;
     int item_count = static_cast<int>(gc->ui.buildMenuItems[gc->ui.buildMenuMode].size());
@@ -48,7 +47,6 @@ void gc_cycleBuildMenuIndex(Game *gc, bool forward) {
     gc->ui.confirmCounter = 20;
 }
 
-// void viewportPanKey()
 void gc_viewportPanKey(Game *gc) {
     int key = gc->ui.lastKeyCode;
     if (key == 56 || key == 6) gc->renderer.viewportCenterY += 30;
@@ -84,7 +82,6 @@ void gc_viewportPanKey(Game *gc) {
     gc->renderer.mapScaleY = gc->renderer.viewportBaseY * 2;
 }
 
-// void viewportZoomKey()
 void gc_viewportZoomKey(Game *gc) {
     int step = gc_computeKeyRepeatDelay(gc);
     int key = gc->ui.lastKeyCode;
@@ -163,7 +160,6 @@ void gc_viewportZoomKey(Game *gc) {
     gc->renderer.mapScaleY = gc->renderer.viewportBaseY * 2;
 }
 
-// void computeViewportBounds()
 void gc_computeViewportBounds(Game *gc) {
     int tile_center_x = 0;
     int tile_center_y = 0;

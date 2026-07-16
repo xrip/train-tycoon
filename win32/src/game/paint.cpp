@@ -19,7 +19,6 @@ static int read_u24_le(ResourceReader& resource) {
 #define WIDTH  MIDP_SCREEN_W   // this.getWidth()
 #define HEIGHT MIDP_SCREEN_H   // this.getHeight()
 
-// public void paint(Graphics graphics)
 void gc_paint(Game *gc, Surface *g) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
@@ -197,7 +196,6 @@ void gc_paint(Game *gc, Surface *g) {
     }
 }
 
-// public void update()
 void gc_update(Game *gc) {
     switch (gc->gameState) {
         case +GameState::BootSplash0: case +GameState::BootSplash1: case +GameState::BootSplash2: {

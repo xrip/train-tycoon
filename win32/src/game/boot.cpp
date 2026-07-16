@@ -11,13 +11,11 @@ static int read_u16_be(ResourceReader& resource) {
     return high * 256 + low;
 }
 
-// public void keyPressed(int n)
 void gc_keyPressed(Game *gc, int32_t n) {
     if (gc->ui.inputPending) { gc->ui.inputPending = false; return; }
     gc->ui.currentKey = n;
 }
 
-// public void resetOverlayRenderState()
 void gc_resetOverlayRenderState(Game *gc) {
     gc->ui.cursorScale = 0;
     gc->ui.cursorDragY = -1;
@@ -117,14 +115,12 @@ std::unique_ptr<Image> gc_decodePngFromSpriteStream(Game *gc) {
         reinterpret_cast<const uint8_t*>(png_bytes.data()), png_bytes.size()));
 }
 
-// byte[] m(int n)
 std::vector<int8_t> gc_readPackedTextCodes(Game *gc, int32_t offset) {
     const int code_count = gc->assets.spriteData[offset];
     return {gc->assets.spriteData.data() + offset + 1,
             gc->assets.spriteData.data() + offset + 1 + code_count};
 }
 
-// void loadGame(int n, int n2)
 void gc_loadGame(Game *gc, int32_t slot, int32_t mode) {
     gc->saveCodec.saveSlot = slot;
     gc->saveCodec.savePendingMode = mode;
@@ -154,7 +150,6 @@ void gc_loadGame(Game *gc, int32_t slot, int32_t mode) {
     }
 }
 
-// void writeSaveSnapshot()
 void gc_writeSaveSnapshot(Game *gc) {
     gcs_animationsDisabled = gc_saveOrLoadBool(gc, gcs_animationsDisabled);
     gcs_selectionHidden = gc_saveOrLoadBool(gc, gcs_selectionHidden);
@@ -168,7 +163,6 @@ void gc_writeSaveSnapshot(Game *gc) {
     gc_saveOrLoadByteArrayInlined(gc, gc->scenario.playerNameCodes);
 }
 
-// void persistSnapshotMode1()
 void gc_persistSnapshotMode1(Game *gc) {
     gc_loadGame(gc, 5, save::MODE_READ);
     gc_writeSaveSnapshot(gc);
@@ -226,7 +220,6 @@ void gc_k(Game *gc, int32_t n, int32_t n2) {
     } while (n5 != 0);
 }
 
-// void setCanvasSize(int n, int n2)
 void gc_setCanvasSize(Game *gc, int32_t n, int32_t n2) {
     if (gc->lastCanvasWidth != n || gc->lastCanvasHeight != n2) {
         gcs_screenWidth = n;
@@ -247,7 +240,6 @@ void gc_setCanvasSize(Game *gc, int32_t n, int32_t n2) {
     }
 }
 
-// public void setState(int n)
 void gc_setState(Game *gc, int32_t n) {
     gc->savedGameState = gc->gameState;
     if (!gc->ready) gc->assets.cycle_flag = NULL;

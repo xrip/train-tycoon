@@ -24,7 +24,6 @@ inline constexpr int32_t STAGE_FEATURE_5 = 9;
 inline constexpr int32_t STAGE_SCATTER_OBSTACLES = 10;
 }  // namespace mapgen
 
-// byte randomCityTile()
 int8_t gc_randomCityTile(Game *gc) {
     int n = abs(nextRngInt(gc) % 22);
     if (n < 6) return 34;
@@ -37,7 +36,6 @@ int8_t gc_randomCityTile(Game *gc) {
     return 0;
 }
 
-// byte addCityEntry(int n)
 int8_t gc_addCityEntry(Game *gc, int32_t n) {
     gc->world.stationDirectionCode[gc->ui.cityListIndex] = (int8_t)n;
     gc->world.cityPopulation[gc->ui.cityListIndex] = (int8_t)(50 + nextRngInt(gc) % 20);
@@ -46,7 +44,6 @@ int8_t gc_addCityEntry(Game *gc, int32_t n) {
     return (int8_t)(gc->ui.cityListIndex - 1);
 }
 
-// byte registerTrain(byte by, int n, int n2)
 int8_t gc_registerTrain(Game *gc, int8_t by, int32_t n, int32_t n2) {
     gc->world.constructionTimers[gc->ui.numSelectedTrains] = 50;
     gc->world.zonePopulation[gc->ui.numSelectedTrains] = by;
@@ -125,7 +122,6 @@ void gc_toggleFlagInlined(Game *gc, bool bl) {
     }
 }
 
-// void smoothTileAtInlined(int n, int n2, boolean bl)
 void gc_smoothTileAtInlined(Game *gc, int32_t n, int32_t n2, bool bl) {
     if ((bl && gc->world.heightMap[n][n2] < 3) || (!bl && gc->world.heightMap[n][n2] > -1)) {
         gc_setSelectionStart(gc, n, n2);
@@ -147,7 +143,6 @@ void gc_smoothTileAtInlined(Game *gc, int32_t n, int32_t n2, bool bl) {
     gc->renderer.lastViewportCenterX = -1;
 }
 
-// void raiseTerrainArea(int n, int n2, int n3, int n4, int n5)
 void gc_raiseTerrainArea(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
@@ -163,7 +158,6 @@ void gc_raiseTerrainArea(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4
     }
 }
 
-// void lowerTerrainArea(int n, int n2, int n3, int n4, int n5)
 void gc_lowerTerrainArea(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
     (void)n5;
     for (int i = n; i < n + n3; ++i) {
@@ -179,7 +173,6 @@ void gc_lowerTerrainArea(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4
     }
 }
 
-// void trackBuildStepInlined(int n, int n2, int n3, int n4)
 void gc_trackBuildStepInlined(Game *gc, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
     int8_t by = -2;
     for (int i = n; i < n + n3; ++i) {
@@ -194,7 +187,6 @@ void gc_trackBuildStepInlined(Game *gc, int32_t n, int32_t n2, int32_t n3, int32
     }
 }
 
-// void placeTerrainPatch(int n, int n2)
 void gc_placeTerrainPatch(Game *gc, int32_t n, int32_t n2) {
     int n3, n4, n5, n6;
     int8_t by, by2, by3, by4;
@@ -311,7 +303,6 @@ void gc_placeTerrainPatch(Game *gc, int32_t n, int32_t n2) {
     }
 }
 
-// void placeTerrainFeature(int n)
 void gc_placeTerrainFeature(Game *gc, int32_t n) {
     int n2, n3, n4, n5, n6, n7;
     bool bl;
