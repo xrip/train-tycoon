@@ -23,9 +23,9 @@ void gc_placeTrainAt(GameCanvas *gc, int32_t duration_units, int32_t row) {
 }
 
 static void copy_menu_row_to_slot5(GameCanvas *gc, int row) {
-    gc->offerTypeTransitionCode = gc->menuRowType[row] + 40;
-    gc->offerEffectTransitionCode = gc->menuRowAltType[row] + 60;
-    gc->offerRowIndex = 5;
+    gc->scenario.offerTypeTransitionCode = gc->menuRowType[row] + 40;
+    gc->scenario.offerEffectTransitionCode = gc->menuRowAltType[row] + 60;
+    gc->scenario.offerRowIndex = 5;
     gc->menuRowType[5] = gc->menuRowType[row];
     gc->menuRowCost[5] = gc->menuRowCost[row];
     gc->menuRowValue[5] = gc->menuRowValue[row];
@@ -57,8 +57,8 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
     if (gc->menuRowAltType[row] == 4 && gc->era < 5) ++gc->era;
     if (gc->menuRowAltType[row] >= 5 && gc->menuRowAltType[row] <= 10) {
         int resource = gc->menuRowAltType[row] - 5;
-        gc->routeResourceFlags[resource] =
-            (int8_t)(gc->routeResourceFlags[resource] + gc->menuRowEra[row]);
+        gc->scenario.routeResourceFlags[resource] =
+            (int8_t)(gc->scenario.routeResourceFlags[resource] + gc->menuRowEra[row]);
     }
     if (gc->menuRowAltType[row] == 11) {
         gc->economy.loanBalance -= gc->economy.loanBalance * gc->menuRowEra[row] / 100;
@@ -73,7 +73,7 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
     if (gc->menuRowAltType[row] == 12 && gc->economy.interestRate > 1)
         --gc->economy.interestRate;
     copy_menu_row_to_slot5(gc, row);
-    gc->duplicateRowState = 3;
+    gc->scenario.duplicateRowState = 3;
     gc->transitionCode = 9;
     gc_setState(gc, +GameState::MenuOverlay);
 }
@@ -81,7 +81,7 @@ void gc_applyMenuRowEffect(GameCanvas *gc, int32_t row) {
 // void duplicateMenuRow(int)
 void gc_duplicateMenuRow(GameCanvas *gc, int32_t row) {
     copy_menu_row_to_slot5(gc, row);
-    gc->duplicateRowState = 4;
+    gc->scenario.duplicateRowState = 4;
     gc->transitionCode = 8;
     gc_setState(gc, +GameState::MenuOverlay);
 }
@@ -90,7 +90,7 @@ void gc_duplicateMenuRow(GameCanvas *gc, int32_t row) {
 void gc_everyMonthlyTick(GameCanvas *gc) {
     if (!gc->flagsB) return;
     for (int resource = 0; resource < 6; ++resource) {
-        if (gc->routeResourceFlags[resource] > 0) --gc->routeResourceFlags[resource];
+        if (gc->scenario.routeResourceFlags[resource] > 0) --gc->scenario.routeResourceFlags[resource];
     }
     for (int row = 0; row < 5; ++row) {
         if ((gc->menuRowType[row] == 1
@@ -107,7 +107,7 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
     }
 
     int date = gc->economy.dayOfMonth + 32 * gc->economy.monthOfYear + 370 * (gc->economy.year - 1950);
-    if (date - gc->lastOfferDateCode <= 150 + gc->rng.next_int() % 20)
+    if (date - gc->scenario.lastOfferDateCode <= 150 + gc->rng.next_int() % 20)
         return;
     int free_row = -1;
     for (int row = 0; row < 5; ++row) {
@@ -187,7 +187,7 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
             int effect_code = 0;
             while (effect_code == 0) {
                 effect_code = 1 + std::abs(gc->rng.next_int() % 12);
-                const std::vector<int8_t> &allowed_types = gc->offerTypesByEffect[effect_code - 1];
+                const std::vector<int8_t> &allowed_types = gc->scenario.offerTypesByEffect[effect_code - 1];
                 bool valid = false;
                 for (int i = 0; i < static_cast<int>(allowed_types.size()); ++i) {
                     if (allowed_types[i] == offer_type) valid = true;
@@ -195,17 +195,17 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
                 if (effect_code == 12 && gc->economy.interestRate <= 1) valid = false;
                 if (effect_code == 3 && gc->economy.loanCeiling >= 1000000) valid = false;
                 if (effect_code == 4 && gc->era >= 5) valid = false;
-                if (gc->offerGenerationCount
-                    < gc->offerEffectSchedule[effect_code - 1][0])
+                if (gc->scenario.offerGenerationCount
+                    < gc->scenario.offerEffectSchedule[effect_code - 1][0])
                     valid = false;
-                if (gc->offerGenerationCount < gc->offerEffectNextCount[effect_code - 1])
+                if (gc->scenario.offerGenerationCount < gc->scenario.offerEffectNextCount[effect_code - 1])
                     valid = false;
                 if (!valid) effect_code = 0;
             }
             int effect_index = effect_code - 1;
-            gc->offerEffectNextCount[effect_index] =
-                (int16_t)(gc->offerEffectNextCount[effect_index]
-                          + gc_byteToUnsignedInt(gc, gc->offerEffectSchedule[effect_index][1]));
+            gc->scenario.offerEffectNextCount[effect_index] =
+                (int16_t)(gc->scenario.offerEffectNextCount[effect_index]
+                          + gc_byteToUnsignedInt(gc, gc->scenario.offerEffectSchedule[effect_index][1]));
             if (effect_code == 1) {
                 gc->menuRowEra[free_row] =
                     (int8_t)(30 + std::abs(gc->rng.next_int() % 50));
@@ -229,10 +229,10 @@ void gc_everyMonthlyTick(GameCanvas *gc) {
         if (gc->menuRowType[free_row] != 0) {
             gc->ready = false;
             gc->transitionCode = 40;
-            gc->offerRowIndex = (int8_t)free_row;
+            gc->scenario.offerRowIndex = (int8_t)free_row;
             gc_setState(gc, +GameState::MenuOverlay);
-            ++gc->offerGenerationCount;
+            ++gc->scenario.offerGenerationCount;
         }
     }
-    gc->lastOfferDateCode = date;
+    gc->scenario.lastOfferDateCode = date;
 }

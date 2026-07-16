@@ -92,10 +92,10 @@ void gc_fields_init(GameCanvas *gc) {
     gc->difficultySlot = 0;
     gc->difficultyB = 0;
     gc->difficultyC = 0;
-    gc->offerRowIndex = 0;
-    gc->duplicateRowState = 0;
+    gc->scenario.offerRowIndex = 0;
+    gc->scenario.duplicateRowState = 0;
     gc->highScoreUploadRequested = false;
-    gc->routeSlotIndex = 0;
+    gc->scenario.routeSlotIndex = 0;
     gc->spriteCycleCursor = 0;
     gc->snapshotLoadedFlag = false;
     gc->cH = false;
@@ -198,7 +198,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->nextTrackPieceCode = 66;
     gc->scenario.aiFrequency = 15;
     gc->scenario.aiThreshold = 12;
-    gc->offerTypesByEffect = {{
+    gc->scenario.offerTypesByEffect = {{
         {1, 3, 13},
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
         {1, 2, 3, 13, 14, 15},
@@ -212,7 +212,7 @@ void gc_fields_init(GameCanvas *gc) {
         {1, 2, 3, 13},
         {1, 2, 3, 14},
     }};
-    gc->offerEffectSchedule = {{
+    gc->scenario.offerEffectSchedule = {{
         {{0, 0}},
         {{0, 0}},
         {{5, 20}},
@@ -226,8 +226,8 @@ void gc_fields_init(GameCanvas *gc) {
         {{0, 0}},
         {{8, 100}},
     }};
-    gc->offerGenerationCount = 0;
-    gc->lastOfferDateCode = 0;
+    gc->scenario.offerGenerationCount = 0;
+    gc->scenario.lastOfferDateCode = 0;
     gc->menuRowEnabledCount = 0;
     gc->economy.lifetimeTrainRevenue = 0;
     gc->scenario.milestoneThreshold1 = 0;

@@ -238,14 +238,14 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
             if (field == 1) {
-                const auto day = gc_formatNumberWithSuffix(gc, gc->menuRowParamA[gc->offerRowIndex], 11);
-                const auto month = gc_formatNumberWithSuffix(gc, gc->menuRowParamB[gc->offerRowIndex], 11);
-                const auto year = gc_formatNumberWithSuffix(gc, gc->menuRowParamC[gc->offerRowIndex] + 1950, 0);
+                const auto day = gc_formatNumberWithSuffix(gc, gc->menuRowParamA[gc->scenario.offerRowIndex], 11);
+                const auto month = gc_formatNumberWithSuffix(gc, gc->menuRowParamB[gc->scenario.offerRowIndex], 11);
+                const auto year = gc_formatNumberWithSuffix(gc, gc->menuRowParamC[gc->scenario.offerRowIndex] + 1950, 0);
                 return join_three_codes(day, month, year);
             }
-            if (field == 2) return gc_formatCurrency(gc, gc->menuRowCost[gc->offerRowIndex]);
-            if (field == 3) return gc_formatNumberWithSuffix(gc, gc_computeMenuRowDisplayValue(gc, gc->offerRowIndex), 29);
-            if (field == 4) return gc_formatNumberWithSuffix(gc, gc->menuRowCost[gc->offerRowIndex], 0);
+            if (field == 2) return gc_formatCurrency(gc, gc->menuRowCost[gc->scenario.offerRowIndex]);
+            if (field == 3) return gc_formatNumberWithSuffix(gc, gc_computeMenuRowDisplayValue(gc, gc->scenario.offerRowIndex), 29);
+            if (field == 4) return gc_formatNumberWithSuffix(gc, gc->menuRowCost[gc->scenario.offerRowIndex], 0);
             break;
 
         case 60:
@@ -261,16 +261,16 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 61: case 62: case 63: case 64: case 65: case 66:
         case 67: case 68: case 69: case 70: case 71: case 72:
-            if (field == 1) return gc_formatNumberWithSuffix(gc, gc->menuRowEra[gc->offerRowIndex], 29);
-            if (field == 2) return gc_formatCurrency(gc, gc->menuRowRevenue[gc->offerRowIndex]);
-            if (field == 3) return gc_formatNumberWithSuffix(gc, gc->menuRowEra[gc->offerRowIndex], 0);
+            if (field == 1) return gc_formatNumberWithSuffix(gc, gc->menuRowEra[gc->scenario.offerRowIndex], 29);
+            if (field == 2) return gc_formatCurrency(gc, gc->menuRowRevenue[gc->scenario.offerRowIndex]);
+            if (field == 3) return gc_formatNumberWithSuffix(gc, gc->menuRowEra[gc->scenario.offerRowIndex], 0);
             break;
 
         case 27:
             if (field == 1) return copy_codes(gc->playerNameCodes);
             if (field == 0) {
                 gc->playerNameCursorMarker.fill(0);
-                gc->playerNameCursorMarker[gc->routeSlotIndex] = 28;
+                gc->playerNameCursorMarker[gc->scenario.routeSlotIndex] = 28;
                 return copy_codes(gc->playerNameCursorMarker);
             }
             break;

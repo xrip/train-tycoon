@@ -66,7 +66,7 @@ void gc_revenueOrYear(GameCanvas *gc) {
 
 // void everyTwoTick()
 void gc_everyTwoTick(GameCanvas *gc) {
-    if (gc->routeResourceFlags[0] != 0) return;
+    if (gc->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
         if ((gc->fleet.trainFlags[i] & 0x80) != 128 || (gc->fleet.trainFlags[i] & 0x40) != 64)
             continue;

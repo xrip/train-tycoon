@@ -5,6 +5,7 @@
 #define SCENARIO_H
 #include <array>
 #include <cstdint>
+#include <vector>
 
 // Scenario owns the campaign scoring and milestone progression. The milestone
 // index/flag and thresholds are saved through the main codec; the best score
@@ -34,6 +35,22 @@ struct Scenario {
     int8_t aiFrequency = 0;
     int8_t aiThreshold = 0;
     int32_t aiWagonsBought = 0;
+
+    // Periodic contract/subsidy offer generation. offerEffectNextCount,
+    // offerGenerationCount, and lastOfferDateCode are saved; the rest are
+    // runtime-only. The shared menu-row display arrays (menuRow*) that these
+    // offers populate stay on GameCanvas for UI-01. Save byte order is unchanged.
+    int8_t offerRowIndex = 0;
+    int8_t duplicateRowState = 0;
+    int32_t offerTypeTransitionCode = 0;
+    int32_t offerEffectTransitionCode = 0;
+    int8_t routeSlotIndex = 0;
+    std::array<int8_t, 6> routeResourceFlags{};
+    std::array<std::vector<int8_t>, 12> offerTypesByEffect{};
+    std::array<std::array<int8_t, 2>, 12> offerEffectSchedule{};
+    int32_t offerGenerationCount = 0;
+    std::array<int16_t, 12> offerEffectNextCount{};
+    int32_t lastOfferDateCode = 0;
 };
 
 #endif  // SCENARIO_H

@@ -220,14 +220,14 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
             case 2:
                 if ((gc->fleet.serviceUnloadFlags[vehicle] & 1) == 1) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 3 * age_scale;
-                    if (gc->routeResourceFlags[4] > 0) value *= 2;
+                    if (gc->scenario.routeResourceFlags[4] > 0) value *= 2;
                     revenue += value;
                     gc_recordDeliveredResource(gc, 4, gc->fleet.trainEnergyOrCount[car]);
                     gc->fleet.trainEnergyOrCount[car] = 0;
                 }
                 if ((gc->fleet.serviceUnloadFlags[vehicle] & 0x10) == 0x10) {
                     int value = gc->fleet.wagonEnergyRemaining[car] * 8 * age_scale;
-                    if (gc->routeResourceFlags[5] > 0) value *= 2;
+                    if (gc->scenario.routeResourceFlags[5] > 0) value *= 2;
                     revenue += value;
                     gc_recordDeliveredResource(gc, 5, gc->fleet.wagonEnergyRemaining[car]);
                     gc->fleet.wagonEnergyRemaining[car] = 0;
@@ -236,7 +236,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
             case 3:
                 if ((gc->fleet.serviceUnloadFlags[vehicle] & 2) == 2) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 10 * age_scale;
-                    if (gc->routeResourceFlags[3] > 0) value *= 2;
+                    if (gc->scenario.routeResourceFlags[3] > 0) value *= 2;
                     revenue += value;
                     gc_recordDeliveredResource(gc, 3, gc->fleet.trainEnergyOrCount[car]);
                     gc->fleet.trainEnergyOrCount[car] = 0;
@@ -245,7 +245,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
             case 4: case 5:
                 if ((gc->fleet.serviceUnloadFlags[vehicle] & 4) == 4) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 12 * age_scale;
-                    if (gc->routeResourceFlags[2] > 0) value *= 2;
+                    if (gc->scenario.routeResourceFlags[2] > 0) value *= 2;
                     revenue += value;
                     gc_recordDeliveredResource(gc, 2, gc->fleet.trainEnergyOrCount[car]);
                     gc->fleet.trainEnergyOrCount[car] = 0;
@@ -254,7 +254,7 @@ int32_t gc_unloadTrainRevenue(GameCanvas *gc, int32_t car, int32_t vehicle) {
             case 6: case 7:
                 if ((gc->fleet.serviceUnloadFlags[vehicle] & 8) == 8) {
                     int value = gc->fleet.trainEnergyOrCount[car] * 13 * age_scale;
-                    if (gc->routeResourceFlags[1] > 0) value *= 2;
+                    if (gc->scenario.routeResourceFlags[1] > 0) value *= 2;
                     revenue += value;
                     gc_recordDeliveredResource(gc, 1, gc->fleet.trainEnergyOrCount[car]);
                     gc->fleet.trainEnergyOrCount[car] = 0;

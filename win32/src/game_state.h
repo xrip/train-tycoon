@@ -171,15 +171,10 @@ typedef struct GameCanvas {
     int8_t difficultySlot;
     int8_t difficultyB;
     int8_t difficultyC;
-    int8_t offerRowIndex;
-    int8_t duplicateRowState;
     int32_t activeScenario;
-    int32_t offerTypeTransitionCode;
-    int32_t offerEffectTransitionCode;
     bool highScoreUploadRequested;
     std::array<int8_t, 10> playerNameCodes{};
     std::array<int8_t, 10> playerNameCursorMarker{};
-    int8_t routeSlotIndex;
     int8_t spriteCycleCursor;
     bool snapshotLoadedFlag;
     bool cH;
@@ -235,9 +230,6 @@ typedef struct GameCanvas {
     int32_t industryTileY;
     int8_t difficultyCycle;
     int32_t nextTrackPieceCode;
-    std::array<int8_t, 6> routeResourceFlags{};
-    std::array<std::vector<int8_t>, 12> offerTypesByEffect{};
-    std::array<std::array<int8_t, 2>, 12> offerEffectSchedule{};
     std::array<int8_t, 6> menuRowType{};
     std::array<int8_t, 6> placeTrainDay{};
     std::array<int8_t, 6> menuRowParamA{};
@@ -250,11 +242,8 @@ typedef struct GameCanvas {
     std::array<int8_t, 6> menuRowAltType{};
     std::array<int8_t, 6> menuRowEra{};
     std::array<int32_t, 6> menuRowRevenue{};
-    int32_t offerGenerationCount;
-    std::array<int16_t, 12> offerEffectNextCount{};
     bool flagsB;
     int32_t savedLegacyMetricBq;
-    int32_t lastOfferDateCode;
     int32_t menuRowEnabledCount;
     std::array<int8_t, 5> enabledMenuRowIndexes{};
     bool music_playing;

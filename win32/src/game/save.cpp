@@ -280,10 +280,10 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BYTES(menuRowAltType);
     IO_BYTES(menuRowEra);
     IO_INTS(menuRowRevenue);
-    IO_SHORTS(offerEffectNextCount);
-    IO_INT(offerGenerationCount);
+    IO_SHORTS(scenario.offerEffectNextCount);
+    IO_INT(scenario.offerGenerationCount);
     IO_INT(savedLegacyMetricBq);
-    IO_INT(lastOfferDateCode);
+    IO_INT(scenario.lastOfferDateCode);
     IO_BOOL(flagsB);
     IO_BYTE(scenarioBits);
     IO_BYTE(scenario.scenarioMilestoneIndex);

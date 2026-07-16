@@ -204,8 +204,8 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc->pendingTransitionCode = 1; gc_setState(gc, +GameState::Playing); break;
         case 8:
         case 9:
-            if (n2 == 1) { gc->pendingTransitionCode = gc->offerTypeTransitionCode; gc_setState(gc, +GameState::Playing); break; }
-            if (n2 == 2) { gc->pendingTransitionCode = gc->offerEffectTransitionCode; gc_setState(gc, +GameState::Playing); break; }
+            if (n2 == 1) { gc->pendingTransitionCode = gc->scenario.offerTypeTransitionCode; gc_setState(gc, +GameState::Playing); break; }
+            if (n2 == 2) { gc->pendingTransitionCode = gc->scenario.offerEffectTransitionCode; gc_setState(gc, +GameState::Playing); break; }
             gc_setState(gc, +GameState::Playing); break;
         case 11: case 12: case 13: case 16:
             gc_setState(gc, +GameState::Playing); break;
@@ -261,37 +261,37 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
         case 40:
             switch (n2) {
                 case 1:
-                    gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + transition::OFFER_TYPE_BASE;
-                    gc->duplicateRowState = 2; break;
+                    gc->pendingTransitionCode = gc->menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                    gc->scenario.duplicateRowState = 2; break;
                 case 2:
-                    gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + transition::OFFER_ALT_BASE;
-                    gc->duplicateRowState = 2; break;
+                    gc->pendingTransitionCode = gc->menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                    gc->scenario.duplicateRowState = 2; break;
             }
             gc_setState(gc, +GameState::Playing); break;
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
-            if (gc->duplicateRowState == 1) gc->pendingTransitionCode = 60;
-            if (gc->duplicateRowState == 2) gc->pendingTransitionCode = 40;
-            if (gc->duplicateRowState == 3) gc->pendingTransitionCode = 9;
-            if (gc->duplicateRowState == 4) gc->pendingTransitionCode = 8;
+            if (gc->scenario.duplicateRowState == 1) gc->pendingTransitionCode = 60;
+            if (gc->scenario.duplicateRowState == 2) gc->pendingTransitionCode = 40;
+            if (gc->scenario.duplicateRowState == 3) gc->pendingTransitionCode = 9;
+            if (gc->scenario.duplicateRowState == 4) gc->pendingTransitionCode = 8;
             gc_setState(gc, +GameState::Playing); break;
         case 60:
             if (n2 % 2 == 1) {
-                gc->offerRowIndex = gc->enabledMenuRowIndexes[n2 / 2];
-                gc->pendingTransitionCode = gc->menuRowType[gc->offerRowIndex] + transition::OFFER_TYPE_BASE;
+                gc->scenario.offerRowIndex = gc->enabledMenuRowIndexes[n2 / 2];
+                gc->pendingTransitionCode = gc->menuRowType[gc->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
             }
             if (n2 % 2 == 0) {
-                gc->offerRowIndex = gc->enabledMenuRowIndexes[(n2 - 1) / 2];
-                gc->pendingTransitionCode = gc->menuRowAltType[gc->offerRowIndex] + transition::OFFER_ALT_BASE;
+                gc->scenario.offerRowIndex = gc->enabledMenuRowIndexes[(n2 - 1) / 2];
+                gc->pendingTransitionCode = gc->menuRowAltType[gc->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
             }
-            gc->duplicateRowState = 1;
+            gc->scenario.duplicateRowState = 1;
             gc_setState(gc, +GameState::Playing); break;
         case 61: case 62: case 63: case 64: case 65: case 66:
         case 67: case 68: case 69: case 70: case 71: case 72:
-            if (gc->duplicateRowState == 1) gc->pendingTransitionCode = 60;
-            if (gc->duplicateRowState == 2) gc->pendingTransitionCode = 40;
-            if (gc->duplicateRowState == 3) gc->pendingTransitionCode = 9;
-            if (gc->duplicateRowState == 4) gc->pendingTransitionCode = 8;
+            if (gc->scenario.duplicateRowState == 1) gc->pendingTransitionCode = 60;
+            if (gc->scenario.duplicateRowState == 2) gc->pendingTransitionCode = 40;
+            if (gc->scenario.duplicateRowState == 3) gc->pendingTransitionCode = 9;
+            if (gc->scenario.duplicateRowState == 4) gc->pendingTransitionCode = 8;
             gc_setState(gc, +GameState::Playing); break;
         case 28:
             if (n2 == 41) { gc->highScoreUploadRequested = false; gc_setState(gc, +GameState::HighScoreSync); break; }
@@ -299,24 +299,24 @@ void gc_handleBuildMenuState(GameCanvas *gc, int32_t n, int32_t n2) {
             gc->pendingTransitionCode = n2 == 40 ? 27 : 1; gc_setState(gc, +GameState::Playing); break;
         case 27:
             if (n2 == 40) { gc->highScoreUploadRequested = true; gc_setState(gc, +GameState::HighScoreSync); break; }
-            if (n2 == 0) gc->routeSlotIndex = (int8_t)(gc->routeSlotIndex - 1);
-            if (n2 == 1) gc->routeSlotIndex = (int8_t)(gc->routeSlotIndex + 1);
-            if (gc->routeSlotIndex < 0) gc->routeSlotIndex = 9;
-            if (gc->routeSlotIndex == 10) gc->routeSlotIndex = 0;
-            gc->spriteCycleCursor = gc->playerNameCodes[gc->routeSlotIndex];
+            if (n2 == 0) gc->scenario.routeSlotIndex = (int8_t)(gc->scenario.routeSlotIndex - 1);
+            if (n2 == 1) gc->scenario.routeSlotIndex = (int8_t)(gc->scenario.routeSlotIndex + 1);
+            if (gc->scenario.routeSlotIndex < 0) gc->scenario.routeSlotIndex = 9;
+            if (gc->scenario.routeSlotIndex == 10) gc->scenario.routeSlotIndex = 0;
+            gc->spriteCycleCursor = gc->playerNameCodes[gc->scenario.routeSlotIndex];
             if (n2 == 2) {
                 gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor - 1);
                 if (gc->spriteCycleCursor < 0) gc->spriteCycleCursor = 95;
                 if (gc->spriteCycleCursor == 69) gc->spriteCycleCursor = 65;
                 if (gc->spriteCycleCursor == 39) gc->spriteCycleCursor = 17;
-                gc->playerNameCodes[gc->routeSlotIndex] = gc->spriteCycleCursor;
+                gc->playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
             }
             if (n2 == 3) {
                 gc->spriteCycleCursor = (int8_t)(gc->spriteCycleCursor + 1);
                 if (gc->spriteCycleCursor == 18) gc->spriteCycleCursor = 40;
                 if (gc->spriteCycleCursor == 66) gc->spriteCycleCursor = 70;
                 if (gc->spriteCycleCursor == 96) gc->spriteCycleCursor = 0;
-                gc->playerNameCodes[gc->routeSlotIndex] = gc->spriteCycleCursor;
+                gc->playerNameCodes[gc->scenario.routeSlotIndex] = gc->spriteCycleCursor;
             }
             if (n2 >= 0) break;
             gc_persistSnapshotMode0(gc);
