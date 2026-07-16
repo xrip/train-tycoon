@@ -35,7 +35,6 @@ typedef struct GameCanvas {
     bool paintSuspended;   // when true, gc_paint returns without drawing
     bool displayInitialized;
     bool confirmCloseRequested;  // one-shot: close confirm dialog to the menu overlay
-    bool flagsA;
     bool snapshotLoadSucceeded;
     Pathfinder pathfinder;
     int32_t serviceVehicleAtCursor;
@@ -44,7 +43,6 @@ typedef struct GameCanvas {
     int32_t era;
     bool compareToPrevious;
     bool monthRolloverFlag;
-    bool flagsB;
     int32_t savedLegacyMetricBq;
     bool music_playing;
     bool music_available;

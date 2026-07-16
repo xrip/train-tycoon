@@ -240,7 +240,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_BYTES(fleet.serviceUnloadFlags);
     gc_saveOrLoadShortMatrixInlined(gc, gc->fleet.serviceResourceStock);
     IO_BYTE(ui.numSelectedTrains);
-    IO_BOOL(flagsA);
+    IO_BOOL(scenario.aiExpansionEnabled);
     IO_BYTES(world.constructionTimers);
     IO_SHORTS(world.zonePopulation);
     IO_SHORTS(ui.trainSelectionIndex);
@@ -284,7 +284,7 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(scenario.offerGenerationCount);
     IO_INT(savedLegacyMetricBq);
     IO_INT(scenario.lastOfferDateCode);
-    IO_BOOL(flagsB);
+    IO_BOOL(scenario.monthlyOffersEnabled);
     IO_BYTE(scenario.scenarioBits);
     IO_BYTE(scenario.scenarioMilestoneIndex);
     IO_BOOL(scenario.milestonesEnabled);

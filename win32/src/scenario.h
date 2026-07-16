@@ -74,6 +74,13 @@ struct Scenario {
     bool highScoreUploadRequested = false;
     std::array<int8_t, 10> playerNameCodes{};
     std::array<int8_t, 10> playerNameCursorMarker{};
+
+    // Scenario feature flags (from the scenario_flags byte). aiExpansionEnabled
+    // turns on the AI opponent's forest expansion and turns; monthlyOffersEnabled
+    // turns on the monthly offer/economy tick. Both are saved; save byte order is
+    // unchanged.
+    bool aiExpansionEnabled = false;
+    bool monthlyOffersEnabled = false;
 };
 
 #endif  // SCENARIO_H

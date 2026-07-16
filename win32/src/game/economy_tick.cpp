@@ -88,7 +88,7 @@ void gc_duplicateMenuRow(GameCanvas *gc, int32_t row) {
 
 // void everyMonthlyTick()
 void gc_everyMonthlyTick(GameCanvas *gc) {
-    if (!gc->flagsB) return;
+    if (!gc->scenario.monthlyOffersEnabled) return;
     for (int resource = 0; resource < 6; ++resource) {
         if (gc->scenario.routeResourceFlags[resource] > 0) --gc->scenario.routeResourceFlags[resource];
     }

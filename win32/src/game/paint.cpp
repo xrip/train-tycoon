@@ -300,8 +300,8 @@ void gc_update(GameCanvas *gc) {
                         gc->scenario.scenarioMilestoneIndex = (int8_t)milestone_index;
                         gc->scenario.currentMilestoneScore = milestone_score; gc->scenario.milestoneCoThreshold2 = milestone_threshold;
                         gc_initBuildMenuForScenario(gc, build_menu_scenario);
-                        gc->flagsA = (scenario_flags & 2) == 2;
-                        gc->flagsB = (scenario_flags & 4) == 4;
+                        gc->scenario.aiExpansionEnabled = (scenario_flags & 2) == 2;
+                        gc->scenario.monthlyOffersEnabled = (scenario_flags & 4) == 4;
                         if ((scenario_flags & 1) != 1) { gc->scenario.aiFrequency = 25; gc->scenario.aiThreshold = 100; }
                         else { gc->scenario.aiFrequency = 32; gc->scenario.aiThreshold = 29; }
                         gc->scenario.scenarioNoticeId = notice_id;

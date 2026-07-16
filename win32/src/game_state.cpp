@@ -75,7 +75,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->ui.confirmToggle = 0;
     gc->ui.confirmCounter = 0;
     gc->ui.confirmTargetState = -1;
-    gc->flagsA = true;
+    gc->scenario.aiExpansionEnabled = true;
     gc->build.junctionDirCursor = 0;
     gc->ui.numSelectedTrains = 0;
     gc->build.stationDirCursor = 0;

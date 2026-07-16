@@ -748,7 +748,7 @@ void gc_simulationTick(GameCanvas *gc) {
                     if (gc->economy.dayOfMonth % 10 == 0) gc_everyTenTick(gc);
                     gc_everyTwoTick(gc);
                     gc_everyTwoTickZ(gc);
-                    if (gc->flagsA) {
+                    if (gc->scenario.aiExpansionEnabled) {
                         int found = 0;
                         for (int n = 0; n < 30; ++n)
                             found = found || gc_pickValidForestTile(gc);
