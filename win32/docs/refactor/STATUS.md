@@ -27,8 +27,9 @@ Only one row may be `in_progress`.
 | WORLD-01 | done | Debug and Release full tests passed, 2026-07-16 | World owns map grids, dimensions, in_bounds; entangled queries deferred |
 | WORLD-02 | done | Debug and Release full tests passed, 2026-07-16 | Generation stages, RNG helper, and tile-range taxonomy named; slope shapes deferred |
 | PATH-01 | done | Debug and Release full tests passed, 2026-07-16 | Path search scratch in `Pathfinder`; endpoints named `pathAnchor/Target`; cost/owner codes deferred to BUILD-01 |
-| FLEET-01 | in_progress | Leaf 1 green (Debug + Release full), 2026-07-16 | Train records in `Fleet` (16 arrays); service/city records and train-name recovery pending |
-| FLEET-02 | queued | - | Movement, cargo, merge, load, and unload rules |
+| FLEET-01 | done | Debug and Release full tests passed, 2026-07-16 | Train + service records in `Fleet`; city records in `World`; revenue deferred to ECON-01 |
+| FLEET-02 | done | Debug and Release full tests passed, 2026-07-16 | Movement-rule tables in `Fleet`; rule functions stay free until stage-3 exit |
+| ECON-01 | in_progress | FLEET-02 green | Money, loans, calendar, history, and reports |
 | ECON-01 | queued | - | Economy and calendar |
 | SCENARIO-01 | queued | - | Scenarios and AI |
 | SIM-01 | queued | - | Tick coordinator |

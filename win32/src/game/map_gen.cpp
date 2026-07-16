@@ -39,9 +39,9 @@ int8_t gc_randomCityTile(GameCanvas *gc) {
 
 // byte addCityEntry(int n)
 int8_t gc_addCityEntry(GameCanvas *gc, int32_t n) {
-    gc->stationDirectionCode[gc->cityListIndex] = (int8_t)n;
-    gc->cityPopulation[gc->cityListIndex] = (int8_t)(50 + nextRngInt(gc) % 20);
-    gc->cityIndex[gc->cityListIndex] = 0;
+    gc->world.stationDirectionCode[gc->cityListIndex] = (int8_t)n;
+    gc->world.cityPopulation[gc->cityListIndex] = (int8_t)(50 + nextRngInt(gc) % 20);
+    gc->world.cityIndex[gc->cityListIndex] = 0;
     gc->cityListIndex = (int8_t)(gc->cityListIndex + 1);
     return (int8_t)(gc->cityListIndex - 1);
 }

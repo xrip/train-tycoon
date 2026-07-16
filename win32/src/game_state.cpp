@@ -113,7 +113,7 @@ void gc_fields_init(GameCanvas *gc) {
     gc->currentTrainCostSnapshot = 0;
     gc->difficultyPct = 100;
     gc->era = 1;
-    gc->forwardTrackSteps = {{
+    gc->fleet.forwardTrackSteps = {{
         {{0, 1, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
         {{2, 3, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}},
         {{4, 5, 1, 0, 1, 2, 3, 6, 5, 11, 6, 2}},
@@ -121,7 +121,7 @@ void gc_fields_init(GameCanvas *gc) {
         {{8, 9, 0, 1, 0, 0, 2, 4, 5, 10, 6, 0}},
         {{10, 11, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}},
     }};
-    gc->reverseTrackSteps = {{
+    gc->fleet.reverseTrackSteps = {{
         {{1, 0, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},
         {{3, 2, -1, 0, 1, 3, 2, 5, 4, 8, 6, 3}},
         {{5, 4, 0, -1, 0, 1, 3, 7, 4, 9, 6, 1}},

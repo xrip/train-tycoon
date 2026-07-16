@@ -81,7 +81,7 @@ void gc_computeTrainCost(GameCanvas *gc) {
 }
 
 void gc_rebuildCityList(GameCanvas *gc) {
-    for (int city = 0; city < 48; ++city) gc->cityIndex[city] = 0;
+    for (int city = 0; city < 48; ++city) gc->world.cityIndex[city] = 0;
     const int seen_count = 64 * gc->world.mapWidth * gc->world.mapHeight;
     std::vector<uint8_t> seen_city_tiles(
         static_cast<std::size_t>(seen_count));
@@ -105,7 +105,7 @@ void gc_rebuildCityList(GameCanvas *gc) {
                     int seen_index = (city * gc->world.mapWidth + x) * gc->world.mapHeight + y;
                     if (seen_city_tiles[seen_index]) continue;
                     seen_city_tiles[seen_index] = 1;
-                    gc->cityIndex[city] = (int8_t)(gc->cityIndex[city] + 1);
+                    gc->world.cityIndex[city] = (int8_t)(gc->world.cityIndex[city] + 1);
                 }
             }
         }

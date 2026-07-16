@@ -231,9 +231,9 @@ void gc_initSaveOrLoad(GameCanvas *gc, int32_t mode) {
     IO_INT(decadeEnterpriseTotal);
     IO_INT(decadeProfitTotal);
     IO_BYTE(cityListIndex);
-    IO_BYTES(stationDirectionCode);
-    IO_BYTES(cityPopulation);
-    IO_BYTES(cityIndex);
+    IO_BYTES(world.stationDirectionCode);
+    IO_BYTES(world.cityPopulation);
+    IO_BYTES(world.cityIndex);
     IO_BYTES(fleet.vehicleFlags);
     IO_BYTES(fleet.serviceVehicleX);
     IO_BYTES(fleet.serviceVehicleY);

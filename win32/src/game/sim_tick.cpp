@@ -53,9 +53,9 @@ void gc_maybeAITick(GameCanvas *gc) {
 // void dayResetAg()
 void gc_dayResetAg(GameCanvas *gc) {
     for (int i = 0; i < 48; ++i) {
-        gc->cityPopulation[i] += (int8_t)(gc->rng.next_int() % 8);
-        if (gc->cityPopulation[i] < 10) gc->cityPopulation[i] = 10;
-        if (gc->cityPopulation[i] > 90) gc->cityPopulation[i] = 90;
+        gc->world.cityPopulation[i] += (int8_t)(gc->rng.next_int() % 8);
+        if (gc->world.cityPopulation[i] < 10) gc->world.cityPopulation[i] = 10;
+        if (gc->world.cityPopulation[i] > 90) gc->world.cityPopulation[i] = 90;
     }
 }
 
@@ -581,7 +581,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     && (gc->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry1[n11]) {
                     seenIndustry1[n11] = true;
-                    int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
+                    int n10 = gc->world.cityPopulation[n11] * 4 / 30 / gc->world.cityIndex[n11];
                     if (n10 == 0) n10 = 1;
                     gc->fleet.serviceResourceStock[i][1] =
                         (int16_t)(gc->fleet.serviceResourceStock[i][1] + n10);
@@ -592,7 +592,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     && (gc->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry2[n11]) {
                     seenIndustry2[n11] = true;
-                    int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
+                    int n10 = gc->world.cityPopulation[n11] * 4 / 30 / gc->world.cityIndex[n11];
                     if (n10 == 0) n10 = 1;
                     gc->fleet.serviceResourceStock[i][2] =
                         (int16_t)(gc->fleet.serviceResourceStock[i][2] + n10);
@@ -603,7 +603,7 @@ void gc_tickInputOrAi(GameCanvas *gc, bool bl) {
                     && (gc->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry3[n11]) {
                     seenIndustry3[n11] = true;
-                    int n10 = gc->cityPopulation[n11] * 4 / 30 / gc->cityIndex[n11];
+                    int n10 = gc->world.cityPopulation[n11] * 4 / 30 / gc->world.cityIndex[n11];
                     if (n10 == 0) n10 = 1;
                     gc->fleet.serviceResourceStock[i][3] =
                         (int16_t)(gc->fleet.serviceResourceStock[i][3] + n10);

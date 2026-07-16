@@ -39,6 +39,13 @@ struct Fleet {
     std::array<std::array<int16_t, 5>, 250> serviceResourceStock{};
     std::array<int8_t, 250> serviceUnloadFlags{};
     std::array<int8_t, 250> serviceLoadFlags{};
+
+    // Movement-rule lookup tables: for each track-shape variant, the [0] entry is
+    // the entering train direction and [1] the exiting direction (forward/reverse
+    // travel). Used by gc_updateTrain to step trains along track. Constant,
+    // populated at init, not saved.
+    std::array<std::array<int8_t, 12>, 6> forwardTrackSteps{};
+    std::array<std::array<int8_t, 12>, 6> reverseTrackSteps{};
 };
 
 #endif  // FLEET_H

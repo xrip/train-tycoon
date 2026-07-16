@@ -163,9 +163,6 @@ typedef struct GameCanvas {
     std::array<int16_t, 64> trainSelectionX{};
     int8_t stationDirCursor;
     int8_t cityListIndex;
-    std::array<int8_t, 48> stationDirectionCode{};
-    std::array<int8_t, 48> cityPopulation{};
-    std::array<int8_t, 48> cityIndex{};
     int32_t pendingTransitionCode;
     bool discountApplied;
     int32_t baseTrainCostSnapshot;
@@ -215,8 +212,6 @@ typedef struct GameCanvas {
     Fleet fleet;
     int32_t trainAtCursor;
     int32_t era;
-    std::array<std::array<int8_t, 12>, 6> forwardTrackSteps{};
-    std::array<std::array<int8_t, 12>, 6> reverseTrackSteps{};
     int32_t dI;
     std::array<std::array<int16_t, 8>, 8> trainSpriteDirectionTable{};
     std::vector<int8_t> saveBuffer;

@@ -376,9 +376,9 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
             }
             current_variant = normalize_track_variant(current_variant);
             const std::array<int8_t, 12> &step =
-                gc->forwardTrackSteps[current_variant][0] == gc->fleet.trainDir[head]
-                ? gc->forwardTrackSteps[current_variant]
-                : gc->reverseTrackSteps[current_variant];
+                gc->fleet.forwardTrackSteps[current_variant][0] == gc->fleet.trainDir[head]
+                ? gc->fleet.forwardTrackSteps[current_variant]
+                : gc->fleet.reverseTrackSteps[current_variant];
             next_x += step[2];
             next_y += step[3];
             if (next_x >= 0 && next_y >= 0
@@ -425,10 +425,10 @@ void gc_updateTrain(GameCanvas *gc, int32_t head) {
                     }
                 }
             } else {
-                if (gc->forwardTrackSteps[current_variant][0] == gc->fleet.trainDir[head])
-                    gc->fleet.trainDir[head] = gc->forwardTrackSteps[current_variant][1];
-                else if (gc->reverseTrackSteps[current_variant][0] == gc->fleet.trainDir[head])
-                    gc->fleet.trainDir[head] = gc->reverseTrackSteps[current_variant][1];
+                if (gc->fleet.forwardTrackSteps[current_variant][0] == gc->fleet.trainDir[head])
+                    gc->fleet.trainDir[head] = gc->fleet.forwardTrackSteps[current_variant][1];
+                else if (gc->fleet.reverseTrackSteps[current_variant][0] == gc->fleet.trainDir[head])
+                    gc->fleet.trainDir[head] = gc->fleet.reverseTrackSteps[current_variant][1];
                 gc_resetTrailingCars(gc, head, gc->fleet.nextCar[head], 0);
             }
         }

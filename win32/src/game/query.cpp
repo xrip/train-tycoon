@@ -92,9 +92,9 @@ bool gc_isResourceTile(GameCanvas *gc, int32_t n, int32_t n2) {
     }
     if (n == 5 && gc->scenarioStepCompare > n2) return true;
     if (n == 21) {
-        if (n2 == 0 && gc->stationDirectionCode[gc->stationDirCursor] % 2 == 0) return true;
-        if (n2 == 1 && gc->stationDirectionCode[gc->stationDirCursor] % 2 == 1) return true;
-        if (n2 == 2 && gc->stationDirectionCode[gc->stationDirCursor] % 2 == 1) return true;
+        if (n2 == 0 && gc->world.stationDirectionCode[gc->stationDirCursor] % 2 == 0) return true;
+        if (n2 == 1 && gc->world.stationDirectionCode[gc->stationDirCursor] % 2 == 1) return true;
+        if (n2 == 2 && gc->world.stationDirectionCode[gc->stationDirCursor] % 2 == 1) return true;
     }
     if (n == 22) {
         int slot = gc->serviceVehicleAtCursor;

@@ -95,8 +95,8 @@ std::optional<std::vector<int8_t>> gc_resolveDialogValue(
 
         case 21:
             switch (field) {
-                case 0: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[100 + gc->stationDirectionCode[gc->stationDirCursor]]]);
-                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[106 + gc->stationDirectionCode[gc->stationDirCursor] / 2]]);
+                case 0: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[100 + gc->world.stationDirectionCode[gc->stationDirCursor]]]);
+                case 1: return copy_codes(gc->spriteBitmapTable[gc->spriteIndexTable[106 + gc->world.stationDirectionCode[gc->stationDirCursor] / 2]]);
                 case 2: return gc_formatNumberWithSuffix(gc, gc->prevStationRevenue[gc->stationDirCursor], 0);
             }
             break;

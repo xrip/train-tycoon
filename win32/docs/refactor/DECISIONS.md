@@ -296,10 +296,35 @@ Leaf 2 added the service-vehicle records to `Fleet` (250-slot: `vehicleFlags`,
 `serviceLoadFlags` is runtime-only (recomputed on load, not saved). Same
 mechanical rename and `IO_*`/matrix save-site fix; goldens did not move.
 
-Remaining FLEET-01 leaf: the city/station records (48-slot: `stationDirectionCode`,
-`cityPopulation`, `cityIndex`, `stationRevenue`, `prevStationRevenue`). Their
-final owner is decided when this leaf lands, since `stationRevenue` overlaps
-`Economy`.
+Leaf 3 moved the city/station records to their geographic home, `World`
+(48-slot: `stationDirectionCode`, `cityPopulation`, `cityIndex`) — cities are map
+features, so they belong with the map data (D-012), not the fleet. The per-station
+revenue history (`stationRevenue`, `prevStationRevenue`) overlaps `Economy` and
+stays on `GameCanvas` for ECON-01. FLEET-01 closes here: all three slot-indexed
+entity-record groups (trains and service vehicles in `Fleet`, cities in `World`)
+are extracted; the city map-query operations (`gc_isCityOrStationTile` and friends)
+can move onto `World`/`Fleet` once their remaining train/economy co-dependencies
+land.
+
+## D-016: Fleet movement-rule tables; rule functions stay free (FLEET-02)
+
+The movement/cargo/merge/load/unload functions in `train_tick.cpp`
+(`gc_updateTrain`, `gc_loadTrainAtServiceVehicle`, `gc_unloadTrainRevenue`,
+`gc_spawnTrainCar`, `gc_resetTrailingCars`, etc.) were already clear behavioral
+names, so FLEET-02 had no rename work. Its clean increment was data: the
+movement-rule lookup tables `forwardTrackSteps[6][12]` / `reverseTrackSteps[6][12]`
+(for each track-shape variant, the entering `[0]` and exiting `[1]` train
+direction for forward/reverse travel) moved into `Fleet`. They are constant,
+populated in `game_state.cpp` at init, and not saved.
+
+The rule functions themselves stay as free functions taking `GameCanvas*`.
+Converting them to `Fleet` methods is deferred to the stage-3 exit ("core rules
+no longer use GameCanvas"): each touches `Fleet` + `World` + `Economy` + service
+state, so it needs all collaborators extracted first, and the C-with-Classes
+style permits free functions for operations. The function-signature refactor
+(`GameCanvas*` -> specific owner refs) is done holistically at the stage exit,
+not forced per-item. `trainSpriteDirectionTable` is render data and defers to
+RENDER-01.
 
 ## D-007: Music output boundary
 
