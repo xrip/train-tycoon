@@ -29,9 +29,8 @@ Only one row may be `in_progress`.
 | PATH-01 | done | Debug and Release full tests passed, 2026-07-16 | Path search scratch in `Pathfinder`; endpoints named `pathAnchor/Target`; cost/owner codes deferred to BUILD-01 |
 | FLEET-01 | done | Debug and Release full tests passed, 2026-07-16 | Train + service records in `Fleet`; city records in `World`; revenue deferred to ECON-01 |
 | FLEET-02 | done | Debug and Release full tests passed, 2026-07-16 | Movement-rule tables in `Fleet`; rule functions stay free until stage-3 exit |
-| ECON-01 | in_progress | FLEET-02 green | Money, loans, calendar, history, and reports |
-| ECON-01 | queued | - | Economy and calendar |
-| SCENARIO-01 | queued | - | Scenarios and AI |
+| ECON-01 | done | Debug and Release full tests passed, 2026-07-16 | Economy owns money, loans, calendar, revenue/spend aggregates, station revenue, and decade/period report totals; cost-model constants and build/train-buy costs stay for BUILD-01 |
+| SCENARIO-01 | in_progress | ECON-01 green | Scenarios and AI |
 | SIM-01 | queued | - | Tick coordinator |
 | BUILD-01 | queued | - | Build actions |
 | ASSET-01 | queued | - | Game assets |
