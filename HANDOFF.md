@@ -160,9 +160,10 @@ Remove-Item Env:\TRAIN_TYCOON_MIDI_TEST_MS
 
 ## Next work, in order
 
-1. Name the `gc_setState`/`gameState` values first (most-used constant group).
-   Read each call site's behavior, add a named constant set in a small header,
-   and replace the literals in small green leaves. Keep the numbers identical.
+1. Done (commit `7976ccf`): the `gc_setState`/`gameState` values are named in
+   `win32/src/game_constants.h` as `enum class GameState : int32_t`, with a
+   unary `operator+` helper. Numbers unchanged; Debug and Release full gates
+   passed on 2026-07-16. See DECISIONS "Recovered in MODEL-01".
 2. Name tile and track codes, then menu transition codes and resource kinds.
    Use behavior and cross-references; record uncertain evidence in
    `DECISIONS.md` before a rename.
