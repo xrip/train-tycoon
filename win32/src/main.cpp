@@ -22,7 +22,7 @@
 
 #include "midp.h"
 #include "game_state.h"
-#include "game_methods.h"
+#include "game.h"
 #include "platform/winmm_music_player.h"
 #include "support/resource_reader.h"
 #include <filesystem>

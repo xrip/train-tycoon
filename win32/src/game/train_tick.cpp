@@ -1,5 +1,5 @@
 // Train movement, loading, and delivery.
-#include "game_methods.h"
+#include "game.h"
 #include <cstdlib>
 
 int32_t game_accumulateTrainTurns(Game *game, int32_t car) {

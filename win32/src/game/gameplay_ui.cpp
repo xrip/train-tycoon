@@ -1,5 +1,5 @@
 // Game-map header, bottom bar, and overlays.
-#include "game_methods.h"
+#include "game.h"
 
 #include <algorithm>
 #include <stdio.h>

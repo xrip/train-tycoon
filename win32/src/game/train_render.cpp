@@ -1,5 +1,5 @@
 // Moving train sprite placement.
-#include "game_methods.h"
+#include "game.h"
 
 #include <string.h>
 

@@ -1,5 +1,5 @@
 // Dynamic values used by data-driven dialogs.
-#include "game_methods.h"
+#include "game.h"
 
 #include <stdio.h>
 #include <string.h>

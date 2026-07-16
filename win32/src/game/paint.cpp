@@ -1,5 +1,5 @@
 // Game paint and update state machines.
-#include "game_methods.h"
+#include "game.h"
 #include <cstdlib>
 
 static int read_u16_le(ResourceReader& resource) {

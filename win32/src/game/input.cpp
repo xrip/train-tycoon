@@ -1,5 +1,5 @@
 // Game input state and actions.
-#include "game_methods.h"
+#include "game.h"
 
 #include <stdlib.h>
 

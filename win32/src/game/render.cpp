@@ -1,7 +1,7 @@
 // Packed-sprite UI and text drawing.
 // renderPackedSprite draws the menu/dialog layouts (state 20). renderFontString
 // draws text from the `ca[]` font atlas. u() resolves per-slot sub-sprites.
-#include "game_methods.h"
+#include "game.h"
 
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 static int imin(int a, int b) { return a < b ? a : b; }

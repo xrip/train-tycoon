@@ -1,5 +1,5 @@
 // Small geometry and input functions.
-#include "game_methods.h"
+#include "game.h"
 
 int32_t game_byteToUnsignedInt(Game *game, int8_t n) {
     (void)game;

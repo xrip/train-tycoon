@@ -1,5 +1,5 @@
 // Terrain and tile queries and changes.
-#include "game_methods.h"
+#include "game.h"
 #include <stdlib.h>
 #include <string.h>
 

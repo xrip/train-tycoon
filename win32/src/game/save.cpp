@@ -1,5 +1,5 @@
 // Save-buffer reading, writing, and compression.
-#include "game_methods.h"
+#include "game.h"
 #include "support/record_store.h"
 
 #include <stdlib.h>

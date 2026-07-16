@@ -1,5 +1,5 @@
 // Simulation tick functions.
-#include "game_methods.h"
+#include "game.h"
 #include <cstdlib>
 
 void game_dayResetP(Game *game) {

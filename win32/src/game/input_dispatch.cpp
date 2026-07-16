@@ -1,6 +1,6 @@
 // Per-state key dispatch and
 // registerCityEntryInlined (menu cursor move / select).
-#include "game_methods.h"
+#include "game.h"
 #include "midp_input.h"
 
 // public void registerCityEntryInlined(byte by)  -- 1=down/right 2=up/left 3=select

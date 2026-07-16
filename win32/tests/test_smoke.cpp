@@ -1,6 +1,6 @@
 #include "doctest/doctest.h"
 
-#include "game_methods.h"
+#include "game.h"
 #include "midp_input.h"
 #include "stable_digest.h"
 #include "support/input_queue.h"

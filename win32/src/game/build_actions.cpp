@@ -1,5 +1,5 @@
 // Direct game-map build and selection actions.
-#include "game_methods.h"
+#include "game.h"
 #include <vector>
 
 void game_enterOutOfMoneyState(Game *game) {

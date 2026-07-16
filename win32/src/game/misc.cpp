@@ -1,5 +1,5 @@
 // Small general game functions.
-#include "game_methods.h"
+#include "game.h"
 
 void game_drawSpriteQuad(Game *game, Surface *graphics, int32_t n,
                        int32_t n2, int32_t n3, int32_t n4) {

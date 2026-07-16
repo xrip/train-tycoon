@@ -1,5 +1,5 @@
 // Monthly economy and offer processing.
-#include "game_methods.h"
+#include "game.h"
 #include <cstdlib>
 
 void game_placeTrainAt(Game *game, int32_t duration_units, int32_t row) {

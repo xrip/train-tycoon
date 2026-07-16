@@ -1,6 +1,6 @@
 // Train Tycoon game function declarations.
-#ifndef GAME_METHODS_H
-#define GAME_METHODS_H
+#ifndef GAME_H
+#define GAME_H
 #include "game_state.h"
 #include "support/byte_buffer.h"
 

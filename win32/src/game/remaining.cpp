@@ -1,5 +1,5 @@
 // Score, graph, text, and life-cycle functions.
-#include "game_methods.h"
+#include "game.h"
 
 #include <stdio.h>
 #include <string.h>

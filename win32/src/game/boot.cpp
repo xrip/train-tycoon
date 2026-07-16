@@ -1,5 +1,5 @@
 // Game start, resources, sprites, state changes, and save start.
-#include "game_methods.h"
+#include "game.h"
 #include "support/record_store.h"
 #include <stdlib.h>
 #include <string.h>
