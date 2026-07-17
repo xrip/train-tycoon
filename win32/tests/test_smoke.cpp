@@ -38,7 +38,7 @@ std::uint64_t save_state_digest(Game* game) {
 
 std::uint64_t paint_digest(Game* game, Surface* screen) {
     std::memset(framebuffer, 0, sizeof(framebuffer));
-    game_paint(game, screen);
+    game->render(*screen);
     StableDigest digest;
     digest.add_pixels(framebuffer, std::size(framebuffer));
     return digest.value();
@@ -75,7 +75,7 @@ void generate_scenario(Game* game, int scenario) {
 }
 
 void load_game_resources(Game* game) {
-    game_start(game);
+    game->start();
     game->loadingStartTime = 0;
     game_update(game);
     game->loadingStartTime = 0;
@@ -867,7 +867,7 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
     int scroll = selected_x + 15 - canvasWidth;
     if (scroll < 0) scroll = 0;
     const int icon_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]) - scroll;
-    game_pointerPressed(game, icon_x, bottomBarY);
+    game->pointer_pressed(icon_x, bottomBarY);
 
     CHECK(static_cast<uint8_t>(game->world.trackMap[bx][by]) != 65);  // nothing placed at drift
     CHECK(game->ui.buildMenuItemIndex == 0);                          // tool stays armed
@@ -1124,23 +1124,23 @@ TEST_CASE("fast: game music rules use a silent output") {
     Game* game = make_game();
     auto* output = static_cast<SilentMusicOutput*>(game->music.output.get());
 
-    game_loadMusic(game);
+    game->load_music();
     CHECK(game->music.available);
     CHECK_FALSE(game->music.playing);
     CHECK(output->volume() == 40);
 
-    game_playMusic(game);
+    game->play_music();
     CHECK(output->play_count() == 0);
     game->music.enabled = true;
-    game_playMusic(game);
+    game->play_music();
     CHECK(game->music.playing);
     CHECK(output->play_count() == 1);
-    game_playMusic(game);
+    game->play_music();
     CHECK(output->play_count() == 1);
 
-    game_setMusicVolume(game, 5);
+    game->set_music_volume(5);
     CHECK(output->volume() == 100);
-    game_stopMusic(game);
+    game->stop_music();
     CHECK_FALSE(game->music.playing);
     CHECK(output->stop_count() == 1);
 
@@ -1181,15 +1181,15 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     std::memset(framebuffer, 0, sizeof(framebuffer));
     Surface screen;
     midp_gfx_init_screen(&screen, framebuffer, kScreenWidth, kScreenHeight);
-    game_paint(game, &screen);
+    game->render(screen);
     StableDigest first_frame;
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(first_frame.value() == 13699798000239068498ULL);
 
     const int old_viewport_x = game->renderer.viewportCenterX;
-    game_keyPressed(game, 54);
-    game_run(game);
-    game_paint(game, &screen);
+    game->key_pressed(54);
+    game->advance_frame();
+    game->render(screen);
     CHECK(game->gameState == 30);
     CHECK(game->renderer.backbuffer != nullptr);
     CHECK(game->renderer.viewportCenterX != old_viewport_x);
@@ -1235,13 +1235,13 @@ TEST_CASE("full: report and graph dialogs have fixed frame digests") {
     game->ready = false;
     game->ui.transitionCode = 32;
     game_setState(game, GameState::MenuOverlay);
-    game_paint(game, &screen);
+    game->render(screen);
     CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
 
     game_setYearGraphMode(game, 0, false);
     game->ui.transitionCode = 33;
     game_setState(game, GameState::MenuOverlay);
-    game_paint(game, &screen);
+    game->render(screen);
     CHECK(paint_digest(game, &screen) == 1138514185145564824ULL);
     delete game;
 }
@@ -1296,7 +1296,7 @@ TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
     const int item1_x = static_cast<int>(static_cast<std::uint8_t>(game->ui.menuItemCode[0][1]));
     REQUIRE(item1_x > 0);
 
-    game_pointerPressed(game, item1_x, bottomBarY);
+    game->pointer_pressed(item1_x, bottomBarY);
 
     CHECK(game->ui.buildMenuMode == 1);
     CHECK(game->ui.buildMenuItemIndex == 0);
@@ -1317,7 +1317,7 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     const int hover_x = kScreenWidth / 2;
     const int hover_y = (15 + bottomBarY) / 2;
 
-    game_pointerMoved(game, hover_x, hover_y);
+    game->pointer_moved(hover_x, hover_y);
     REQUIRE(game->ui.mouseOverField);
 
     const int tx = game->ui.tileCursorX;
@@ -1341,7 +1341,7 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     CHECK(dy <= 8);
 
     // Hovering UI chrome (the bottom bar) must not claim a field tile.
-    game_pointerMoved(game, hover_x, bottomBarY);
+    game->pointer_moved(hover_x, bottomBarY);
     CHECK_FALSE(game->ui.mouseOverField);
     delete game;
 }
@@ -1365,21 +1365,21 @@ TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
     const int msy0 = game->renderer.mapScaleY;
 
     // Middle of the viewport never arms a pan.
-    game_pointerEdgeScroll(game, mid_x, mid_y);
+    game->pointer_edge_scroll(mid_x, mid_y);
     CHECK(game->renderer.viewportCenterX == cx0);
     CHECK(game->renderer.viewportCenterY == cy0);
 
     // Right edge pans right; mapScale (= 2*viewportBase) moves 2x the camera
     // delta so the run loop's camera-follow sees an unchanged cursor offset and
     // doesn't fight the pan. A cardinal edge only moves one axis.
-    game_pointerEdgeScroll(game, kScreenWidth - 1, mid_y);
+    game->pointer_edge_scroll(kScreenWidth - 1, mid_y);
     const int right_dx = game->renderer.viewportCenterX - cx0;
     CHECK(right_dx > 0);
     CHECK(game->renderer.mapScaleX - msx0 == 2 * right_dx);
     CHECK(game->renderer.viewportCenterY == cy0);
 
     // Top-right corner pans along both axes (right + up).
-    game_pointerEdgeScroll(game, kScreenWidth - 1, 15);
+    game->pointer_edge_scroll(kScreenWidth - 1, 15);
     const int dx = game->renderer.viewportCenterX - (cx0 + right_dx);
     const int dy = game->renderer.viewportCenterY - cy0;
     CHECK(dx > 0);

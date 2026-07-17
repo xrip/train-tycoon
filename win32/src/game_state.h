@@ -20,10 +20,28 @@
 #include "support/java_random.h"
 #include "support/resource_reader.h"
 #include <memory>
+#include <string_view>
 #include <vector>
 
 typedef struct Game {
     Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed);
+
+    void start();
+    void advance_frame();
+    void render(Surface& surface);
+    void key_pressed(int32_t key_code);
+    void key_released(int32_t key_code);
+    void pointer_pressed(int32_t x, int32_t y);
+    void pointer_moved(int32_t x, int32_t y);
+    void pointer_edge_scroll(int32_t x, int32_t y);
+    void update_audio();
+    void load_music();
+    void play_music();
+    void stop_music();
+    void set_music_volume(int32_t level);
+    bool music_available() const;
+    bool music_playing() const;
+    std::string_view music_error() const;
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

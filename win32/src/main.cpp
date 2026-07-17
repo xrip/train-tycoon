@@ -53,14 +53,14 @@ static bool run_midi_device_test(int total_millis) {
     MusicOutput* output = test.music.output.get();
     test.music.enabled = true;
     test.music.volumeLevel = 1;
-    game_loadMusic(&test);
+    test.load_music();
     if (!test.music.available || !output->is_loaded()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI load failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
         return false;
     }
-    game_playMusic(&test);
+    test.play_music();
     if (!test.music.playing || !output->is_playing()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI first play failed: %.*s\n",
@@ -73,13 +73,13 @@ static bool run_midi_device_test(int total_millis) {
         output->update();
         midp_sleep(10);
     }
-    game_stopMusic(&test);
+    test.stop_music();
     if (test.music.playing || output->is_playing()) {
         fprintf(stderr, "MIDI stop state failed\n");
         return false;
     }
-    game_setMusicVolume(&test, 3);
-    game_playMusic(&test);
+    test.set_music_volume(3);
+    test.play_music();
     if (!test.music.playing || !output->is_playing()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI second play failed: %.*s\n",
@@ -91,7 +91,7 @@ static bool run_midi_device_test(int total_millis) {
         output->update();
         midp_sleep(10);
     }
-    game_stopMusic(&test);
+    test.stop_music();
     return true;
 }
 
@@ -105,17 +105,17 @@ int main(void) {
         return 1;
 
     Game game(std::make_unique<WinMmMusicPlayer>(), midp_current_time_millis());
-    game_start(&game); // resource load + initial state (no thread spawn)
+    game.start(); // resource load + initial state (no thread spawn)
 
     Surface screen;
     midp_gfx_init_screen(&screen, g_framebuffer, MIDP_SCREEN_W, MIDP_SCREEN_H);
 
     for (;;) {
-        game.music.update();
+        game.update_audio();
         int keycode; bool pressed;
         while (midp_input_poll(&keycode, &pressed)) {
-            if (pressed) game_keyPressed(&game, keycode);
-            else         game_keyReleased(&game, keycode);
+            if (pressed) game.key_pressed(keycode);
+            else         game.key_released(keycode);
         }
 
         // Mouse position (framebuffer pixels); valid while the pointer is inside
@@ -129,16 +129,16 @@ int main(void) {
         // bottom-bar items, overlay menu rows, confirm buttons).
         int click_x, click_y;
         if (mfb_poll_lclick(&click_x, &click_y))
-            game_pointerPressed(&game, click_x, click_y);
+            game.pointer_pressed(click_x, click_y);
 
         // Edge-scroll: pan the map when the mouse sits near a viewport edge.
         // Applied before game_run so game_viewportZoomKey (inside run) clamps
         // the advance to the map and keeps viewportBase in lockstep with the
         // camera (see game_pointerEdgeScroll).
         if (mouse_inside)
-            game_pointerEdgeScroll(&game, mouse_x, mouse_y);
+            game.pointer_edge_scroll(mouse_x, mouse_y);
 
-        game_run(&game);           // one iteration of the original run() loop
+        game.advance_frame();      // one iteration of the original run() loop
 
         // Apply the mouse hover AFTER game_run. The Playing run loop re-anchors the
         // tile cursor to the screen centre every tick (game_viewportZoomKey ->
@@ -148,11 +148,11 @@ int main(void) {
         // (Clicks still resolve correctly either way -- pointerPressed resolves and
         // consumes the tile inline, before run() can reset it.)
         if (mouse_inside)
-            game_pointerMoved(&game, mouse_x, mouse_y);
+            game.pointer_moved(mouse_x, mouse_y);
         else
             game.ui.mouseOverField = false;
 
-        game_paint(&game, &screen);
+        game.render(screen);
 
         if (!mfb_update(g_framebuffer, TARGET_FPS))
             break;
