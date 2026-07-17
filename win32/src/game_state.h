@@ -23,21 +23,23 @@
 #include <vector>
 
 typedef struct Game {
-    bool stopRequested;
+    Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed);
+
+    bool stopRequested = false;
     int32_t simSpeed = 1;
-    int32_t frameIndex;
-    bool displayInitialized;
-    bool confirmCloseRequested;  // one-shot: close confirm dialog to the menu overlay
-    bool snapshotLoadSucceeded;
+    int32_t frameIndex = 0;
+    bool displayInitialized = false;
+    bool confirmCloseRequested = false;  // one-shot: close confirm dialog to the menu overlay
+    bool snapshotLoadSucceeded = false;
     Pathfinder pathfinder;
-    int32_t serviceVehicleAtCursor;
+    int32_t serviceVehicleAtCursor = 0;
     Fleet fleet;
-    int32_t trainAtCursor;
-    bool compareToPrevious;
-    bool monthRolloverFlag;
-    int32_t savedLegacyMetricBq;
+    int32_t trainAtCursor = 0;
+    bool compareToPrevious = false;
+    bool monthRolloverFlag = false;
+    int32_t savedLegacyMetricBq = 0;
     MusicController music;
-    int32_t gameState;
+    int32_t gameState = 0;
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
     Economy economy;
     OfferBoard offerBoard;
@@ -48,27 +50,27 @@ typedef struct Game {
     UiController ui;
     SaveCodec saveCodec;
     ClickMap clickMap;  // captured overlay menu-row hit-rects, filled in game_paint
-    int32_t cachedHeaderMoney;
-    int32_t cachedHeaderDay;
-    int32_t cachedHeaderMonth;
-    int32_t cachedHeaderYear;
-    int32_t dayFrameCounter;
+    int32_t cachedHeaderMoney = 0;
+    int32_t cachedHeaderDay = 0;
+    int32_t cachedHeaderMonth = 0;
+    int32_t cachedHeaderYear = 0;
+    int32_t dayFrameCounter = 0;
     JavaRandom rng;
-    int64_t loadingStartTime;
-    bool loadingTimeout;
+    int64_t loadingStartTime = 0;
+    bool loadingTimeout = false;
     bool ready = true;
-    int32_t stateWorkStep;
-    int32_t tile50AnimationPhase;
-    int32_t tile50AnimationFrame;
-    int32_t tile64AnimationPhase;
-    int32_t tile64AnimationFrame;
-    int32_t tile55AnimationPhase;
-    int32_t tile55AnimationFrame;
+    int32_t stateWorkStep = 0;
+    int32_t tile50AnimationPhase = 0;
+    int32_t tile50AnimationFrame = 0;
+    int32_t tile64AnimationPhase = 0;
+    int32_t tile64AnimationFrame = 0;
+    int32_t tile55AnimationPhase = 0;
+    int32_t tile55AnimationFrame = 0;
     int32_t graphColors[kGraphColorCount]{};  // 3 series x 3 colors for report graphs
     int32_t lastCanvasWidth = -1;   // last size passed to game_setCanvasSize
     int32_t lastCanvasHeight = -1;
-    int32_t savedGameState;  // game state stashed for return after an overlay
-    int32_t loadingAnimationFrame;
+    int32_t savedGameState = 0;  // game state stashed for return after an overlay
+    int32_t loadingAnimationFrame = 0;
     int32_t dayTickThreshold = 50;  // frames per game-day (dayFrameCounter counts up to this)
 } Game;
 
@@ -78,7 +80,5 @@ extern int32_t gameplayViewportHeight;
 extern int32_t bottomBarY;
 extern bool animationsDisabled;
 extern bool selectionHidden;
-
-void game_fields_init(Game *game);
 
 #endif

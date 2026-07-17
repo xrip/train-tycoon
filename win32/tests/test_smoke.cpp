@@ -25,11 +25,7 @@ constexpr std::int64_t kFixedRandomSeed = 0x5eed1234;
 std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 
 Game* make_game() {
-    auto* game = new Game{};
-    game_fields_init(game);
-    game->music.output = std::make_unique<SilentMusicOutput>();
-    game->rng.set_seed(kFixedRandomSeed);
-    return game;
+    return new Game(std::make_unique<SilentMusicOutput>(), kFixedRandomSeed);
 }
 
 std::uint64_t save_state_digest(Game* game) {
@@ -97,7 +93,7 @@ void load_game_resources(Game* game) {
 } // namespace
 
 TEST_CASE("fast: game initialization restores all non-zero defaults") {
-    Game defaults{};
+    Game defaults(std::make_unique<SilentMusicOutput>(), kFixedRandomSeed);
     CHECK(defaults.simSpeed == 1);
     CHECK(defaults.economy.money == 200000);
     CHECK(defaults.ui.cursorDragX == -1);
@@ -127,10 +123,8 @@ TEST_CASE("fast: game initialization restores all non-zero defaults") {
     CHECK(game->graphColors[8] == 51200);
     CHECK(game->assets.tileSpriteYOffsetByCode[24] == -4);
 
-    game->economy.money = 1;
-    game->fleet.forwardTrackSteps[0][1] = 99;
-    game->scenario.offerTypesByEffect[0].clear();
-    game_fields_init(game);
+    delete game;
+    game = make_game();
 
     CHECK(game->economy.money == 200000);
     CHECK(game->fleet.forwardTrackSteps[0][1] == 1);

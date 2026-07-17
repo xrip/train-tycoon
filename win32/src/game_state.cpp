@@ -1,6 +1,7 @@
 // Train Tycoon game-state initial values.
 #include "game_state.h"
 #include <string.h>
+#include <utility>
 
 int32_t canvasWidth;
 int32_t canvasHeight;
@@ -57,45 +58,45 @@ constexpr int8_t kTileSpriteYOffsets[kTileYOffsetCount] = {
 
 }  // namespace
 
-void game_fields_init(Game *game) {
-    *game = Game{};
+Game::Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed) {
     canvasWidth = 1;
     canvasHeight = 1;
     gameplayViewportHeight = canvasHeight - 30;
     bottomBarY = canvasHeight - 15;
     animationsDisabled = false;
     selectionHidden = false;
-    game->world.terrain.mapHalfWidth = (game->world.terrain.mapWidth - 1) * 8;
-    game->world.terrain.mapScreenWidth = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 16;
-    game->world.terrain.mapScreenHeight = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 8;
-    game->renderer.viewportHalfWidth = game->world.terrain.mapScreenWidth / 2;
-    game->renderer.viewportHalfHeight = game->world.terrain.mapScreenHeight / 2;
-    game->renderer.viewportBaseX = game->renderer.viewportHalfWidth;
-    game->renderer.viewportBaseY = game->renderer.viewportHalfHeight;
-    game->renderer.mapScaleX = game->renderer.viewportHalfWidth * 2;
-    game->renderer.mapScaleY = game->renderer.viewportHalfHeight * 2;
-    memcpy(game->fleet.forwardTrackSteps, kForwardTrackSteps, sizeof(kForwardTrackSteps));
-    memcpy(game->fleet.reverseTrackSteps, kReverseTrackSteps, sizeof(kReverseTrackSteps));
-    memcpy(game->assets.trainSpriteDirectionTable, kTrainSpriteDirections,
+    world.terrain.mapHalfWidth = (world.terrain.mapWidth - 1) * 8;
+    world.terrain.mapScreenWidth = (world.terrain.mapWidth + world.terrain.mapHeight) * 16;
+    world.terrain.mapScreenHeight = (world.terrain.mapWidth + world.terrain.mapHeight) * 8;
+    renderer.viewportHalfWidth = world.terrain.mapScreenWidth / 2;
+    renderer.viewportHalfHeight = world.terrain.mapScreenHeight / 2;
+    renderer.viewportBaseX = renderer.viewportHalfWidth;
+    renderer.viewportBaseY = renderer.viewportHalfHeight;
+    renderer.mapScaleX = renderer.viewportHalfWidth * 2;
+    renderer.mapScaleY = renderer.viewportHalfHeight * 2;
+    memcpy(fleet.forwardTrackSteps, kForwardTrackSteps, sizeof(kForwardTrackSteps));
+    memcpy(fleet.reverseTrackSteps, kReverseTrackSteps, sizeof(kReverseTrackSteps));
+    memcpy(assets.trainSpriteDirectionTable, kTrainSpriteDirections,
            sizeof(kTrainSpriteDirections));
-    game->scenario.offerTypesByEffect[0] = {1, 3, 13};
-    game->scenario.offerTypesByEffect[1] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    game->scenario.offerTypesByEffect[2] = {1, 2, 3, 13, 14, 15};
-    game->scenario.offerTypesByEffect[3] = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
-    game->scenario.offerTypesByEffect[4] = {1, 2, 3, 13, 14, 15};
-    game->scenario.offerTypesByEffect[5] = {4, 9};
-    game->scenario.offerTypesByEffect[6] = {5, 10};
-    game->scenario.offerTypesByEffect[7] = {6, 11};
-    game->scenario.offerTypesByEffect[8] = {7, 12};
-    game->scenario.offerTypesByEffect[9] = {8, 12};
-    game->scenario.offerTypesByEffect[10] = {1, 2, 3, 13};
-    game->scenario.offerTypesByEffect[11] = {1, 2, 3, 14};
-    memcpy(game->scenario.offerEffectSchedule, kOfferEffectSchedule,
+    scenario.offerTypesByEffect[0] = {1, 3, 13};
+    scenario.offerTypesByEffect[1] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    scenario.offerTypesByEffect[2] = {1, 2, 3, 13, 14, 15};
+    scenario.offerTypesByEffect[3] = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+    scenario.offerTypesByEffect[4] = {1, 2, 3, 13, 14, 15};
+    scenario.offerTypesByEffect[5] = {4, 9};
+    scenario.offerTypesByEffect[6] = {5, 10};
+    scenario.offerTypesByEffect[7] = {6, 11};
+    scenario.offerTypesByEffect[8] = {7, 12};
+    scenario.offerTypesByEffect[9] = {8, 12};
+    scenario.offerTypesByEffect[10] = {1, 2, 3, 13};
+    scenario.offerTypesByEffect[11] = {1, 2, 3, 14};
+    memcpy(scenario.offerEffectSchedule, kOfferEffectSchedule,
            sizeof(kOfferEffectSchedule));
-    game->rng.set_seed(midp_current_time_millis());
-    game->renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
-    game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
-    memcpy(game->graphColors, kGraphColors, sizeof(kGraphColors));
-    memcpy(game->assets.tileSpriteYOffsetByCode, kTileSpriteYOffsets,
+    rng.set_seed(random_seed);
+    music.output = std::move(music_output);
+    renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
+    renderer.backbuffer_surface = renderer.backbuffer->drawing_surface();
+    memcpy(graphColors, kGraphColors, sizeof(kGraphColors));
+    memcpy(assets.tileSpriteYOffsetByCode, kTileSpriteYOffsets,
            sizeof(kTileSpriteYOffsets));
 }
