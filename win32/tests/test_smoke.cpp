@@ -830,6 +830,25 @@ TEST_CASE("fast: build tools that act on the cursor tile are classified") {
     CHECK_FALSE(BuildController::tool_acts_on_cursor_tile(2, 0));   // confirm auto-route
 }
 
+TEST_CASE("fast: build controller owns train cost calculation") {
+    BuildController build;
+    Economy economy;
+    Scenario scenario;
+    economy.gWagonCost2 = 100;
+    economy.costGroupC3 = 30;
+    scenario.difficultyPct = 50;
+    build.wagonType = 1;
+    build.wagonDiscountType = 1;
+    for (int option = 0; option < kWagonOptionCount; ++option) {
+        build.wagonOptionSlots[option] = -1;
+        build.wagonCountMatch[option] = -2;
+    }
+    build.wagonOptionSlots[0] = 2;
+    build.wagonCountMatch[0] = 2;
+    build.compute_train_cost(economy, scenario);
+    CHECK(build.unitCost == 65);
+}
+
 TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it") {
     Game* game = make_game();
     generate_scenario(game, 0);

@@ -7,6 +7,9 @@
 #include "support/grid.h"
 #include <cstdint>
 
+struct Economy;
+struct Scenario;
+
 // BuildController owns the transient state of a build action. Track-laying leaf:
 // the walk start/step, the in-progress flag and tile count, the preview/existing
 // track owner codes (deferred from PATH-01), the next track piece code, the
@@ -14,6 +17,7 @@
 // rest are runtime-only. Save byte order is unchanged.
 struct BuildController {
     static bool tool_acts_on_cursor_tile(int32_t mode, int32_t item);
+    void compute_train_cost(const Economy& economy, const Scenario& scenario);
 
     int32_t trackStartX = 0;
     int32_t trackStartY = 0;

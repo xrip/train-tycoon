@@ -89,7 +89,6 @@ void game_setTrackOwnerCode(Game *game, int32_t n);
 void game_clearPathDistanceGrid(Game *game);
 bool game_isCurveTile(Game *game, int32_t n, int32_t n2);
 bool game_isCityOrStationTile(Game *game, int32_t n, int32_t n2);
-void game_computeTrainCost(Game *game);
 void game_addSelectedOption(Game *game, int32_t n);
 void game_popSelectedOption(Game *game);
 bool game_buyTrainAtCursor(Game *game);

@@ -52,30 +52,31 @@ int32_t Fleet::allocate_service_site(int32_t type, int32_t x, int32_t y,
     return slot;
 }
 
-void game_computeTrainCost(Game *game) {
-    switch (game->build.wagonType) {
-        case 0: game->build.unitCost = game->economy.gWagonCost; break;
-        case 1: game->build.unitCost = game->economy.gWagonCost2; break;
-        case 2: game->build.unitCost = game->economy.gWagonCost3; break;
-        case 3: game->build.unitCost = game->economy.gWagonCost4; break;
-        case 4: game->build.unitCost = game->economy.gWagonCost5; break;
-        case 5: game->build.unitCost = game->economy.gWagonCost6; break;
+void BuildController::compute_train_cost(const Economy& economy,
+                                         const Scenario& scenario) {
+    switch (wagonType) {
+        case 0: unitCost = economy.gWagonCost; break;
+        case 1: unitCost = economy.gWagonCost2; break;
+        case 2: unitCost = economy.gWagonCost3; break;
+        case 3: unitCost = economy.gWagonCost4; break;
+        case 4: unitCost = economy.gWagonCost5; break;
+        case 5: unitCost = economy.gWagonCost6; break;
     }
-    if (game->build.wagonType == game->build.wagonDiscountType)
-        game->build.unitCost = game->build.unitCost * game->scenario.difficultyPct / 100;
+    if (wagonType == wagonDiscountType)
+        unitCost = unitCost * scenario.difficultyPct / 100;
 
     for (int option = 0; option < 5; ++option) {
         int option_cost;
-        switch (game->build.wagonOptionSlots[option]) {
-            case 0: option_cost = game->economy.costGroupC1; break;
-            case 1: option_cost = game->economy.costGroupC2; break;
-            case 2: option_cost = game->economy.costGroupC3; break;
-            case 3: option_cost = game->economy.costGroupC4; break;
+        switch (wagonOptionSlots[option]) {
+            case 0: option_cost = economy.costGroupC1; break;
+            case 1: option_cost = economy.costGroupC2; break;
+            case 2: option_cost = economy.costGroupC3; break;
+            case 3: option_cost = economy.costGroupC4; break;
             default: continue;
         }
-        if (game->build.wagonOptionSlots[option] == game->build.wagonCountMatch[option])
-            option_cost = option_cost * game->scenario.difficultyPct / 100;
-        game->build.unitCost += option_cost;
+        if (wagonOptionSlots[option] == wagonCountMatch[option])
+            option_cost = option_cost * scenario.difficultyPct / 100;
+        unitCost += option_cost;
     }
 }
 
@@ -241,10 +242,10 @@ void game_pickTrainsAtCursor(Game *game) {
         game->build.wagonCountMatch[option] = game->build.wagonOptionSlots[option];
     game->build.wagonDiscountType = game->build.wagonType;
     game->scenario.difficultyPct = 100;
-    game_computeTrainCost(game);
+    game->build.compute_train_cost(game->economy, game->scenario);
     game->build.baseTrainCostSnapshot = game->build.unitCost;
     game->scenario.difficultyPct = 100 - 3 * game->fleet.trainCars[game->trainAtCursor].ageYears;
-    game_computeTrainCost(game);
+    game->build.compute_train_cost(game->economy, game->scenario);
     game->build.currentTrainCostSnapshot = game->build.unitCost;
     game->ready = false;
     game->ui.transitionCode = 26;

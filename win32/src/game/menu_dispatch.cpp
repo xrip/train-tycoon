@@ -124,7 +124,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 for (int n3 = 0; n3 < 5; ++n3) game->build.wagonCountMatch[n3] = -1;
                 game->scenario.difficultyPct = 100;
                 game->build.discountApplied = false;
-                game_computeTrainCost(game);
+                game->build.compute_train_cost(game->economy, game->scenario);
                 game->ui.pendingTransitionCode = 23; game_setState(game, GameState::Playing); goto hbms_end;
             }
             game_setState(game, GameState::Playing); break;
@@ -142,7 +142,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             game->ui.pendingTransitionCode = !game->build.discountApplied ? 22 : 26;
             game_setState(game, GameState::Playing); break;
         case 24:
-            if (n2 >= 0 && n2 < 6) { game->build.wagonType = n2; game_computeTrainCost(game); }
+            if (n2 >= 0 && n2 < 6) { game->build.wagonType = n2; game->build.compute_train_cost(game->economy, game->scenario); }
             game->ui.pendingTransitionCode = 23; game_setState(game, GameState::Playing); break;
         case 25:
             if (n2 == 3) game_addSelectedOption(game, 0);
@@ -150,7 +150,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             else if (n2 == 0) game_addSelectedOption(game, 2);
             else if (n2 == 2) game_addSelectedOption(game, 3);
             else if (n2 == 9) game_popSelectedOption(game);
-            game_computeTrainCost(game);
+            game->build.compute_train_cost(game->economy, game->scenario);
             game->ui.pendingTransitionCode = 23; game_setState(game, GameState::Playing); break;
         case 26:
             if (n2 == 1) {
@@ -164,7 +164,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     game_pushMoneyHistory(game, -n4);
                     game->economy.aiMoneySpent += n4;
                     game->scenario.difficultyPct = 100 - 3 * game->fleet.trainCars[game->trainAtCursor].ageYears;
-                    game_computeTrainCost(game);
+                    game->build.compute_train_cost(game->economy, game->scenario);
                     game->build.currentTrainCostSnapshot = game->build.unitCost;
                     game->ui.pendingTransitionCode = 26; game_setState(game, GameState::Playing);
                 } else {
