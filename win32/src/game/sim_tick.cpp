@@ -231,7 +231,8 @@ bool Terrain::queue_change(int32_t x, int32_t y, bool visual_only) {
 void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3) {
     if (game->world.terrain.tileMap[n][n2] == 0
         || (game->world.terrain.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.terrain.tileMap[n][n2] <= tile::SCENERY_LAST)) {
-        game->world.terrain.tileMap[n][n2] = game_randomCityTile(game);
+        game->world.terrain.tileMap[n][n2] =
+            game->world.random_city_tile(game->rng);
         game->world.trackMap[n][n2] = (int8_t)n3;
     }
 }

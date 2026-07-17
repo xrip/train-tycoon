@@ -97,6 +97,7 @@ struct World {
     void pick_industry_site(JavaRandom& random);
     void auto_extend_track_station(int32_t x, int32_t y,
                                    int32_t track_piece_code);
+    int8_t random_city_tile(JavaRandom& random) const;
 };
 
 #endif  // WORLD_H

@@ -58,6 +58,8 @@ typedef struct Game {
     void run_map_generation_step(int32_t mode);
     void spawn_train_at(int32_t x, int32_t y);
     void place_cities_and_industry();
+    int8_t add_city_entry(int32_t direction);
+    int8_t register_map_train(int8_t zone_population, int32_t y, int32_t x);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

@@ -24,8 +24,8 @@ inline constexpr int32_t STAGE_FEATURE_5 = 9;
 inline constexpr int32_t STAGE_SCATTER_OBSTACLES = 10;
 }  // namespace mapgen
 
-int8_t game_randomCityTile(Game *game) {
-    int n = abs(nextRngInt(game) % 22);
+int8_t World::random_city_tile(JavaRandom& random) const {
+    int n = abs(random.next_int() % 22);
     if (n < 6) return 34;
     if (n < 11) return 35;
     if (n < 15) return 36;
@@ -36,7 +36,8 @@ int8_t game_randomCityTile(Game *game) {
     return 0;
 }
 
-int8_t game_addCityEntry(Game *game, int32_t n) {
+int8_t Game::add_city_entry(int32_t n) {
+    Game* game = this;
     game->world.cities[game->ui.cityListIndex].stationDirection = (int8_t)n;
     game->world.cities[game->ui.cityListIndex].population = (int8_t)(50 + nextRngInt(game) % 20);
     game->world.cities[game->ui.cityListIndex].zoneTileCount = 0;
@@ -44,7 +45,8 @@ int8_t game_addCityEntry(Game *game, int32_t n) {
     return (int8_t)(game->ui.cityListIndex - 1);
 }
 
-int8_t game_registerTrain(Game *game, int8_t by, int32_t n, int32_t n2) {
+int8_t Game::register_map_train(int8_t by, int32_t n, int32_t n2) {
+    Game* game = this;
     game->world.constructionTimers[game->ui.numSelectedTrains] = 50;
     game->world.zonePopulation[game->ui.numSelectedTrains] = by;
     game->ui.trainSelectionY[game->ui.numSelectedTrains] = (int16_t)n;
@@ -254,7 +256,7 @@ void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2) {
             if (by == 44) patch_tiles[n5][by4] = 42;
             if (n3 == 44) patch_tiles[n5][by4] = 42;
             if (by3 == 0) continue;
-            patch_tiles[n5][by4] = game_randomCityTile(game);
+            patch_tiles[n5][by4] = game->world.random_city_tile(game->rng);
         }
     }
     n5 = -2;
@@ -293,7 +295,7 @@ void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2) {
     for (by3 = 0; by3 < n7; ++by3)
         for (int8_t by6 = 0; by6 < by5; ++by6)
             if (!(patch_tiles[by3][by6] > 40 || patch_tiles[by3][by6] < 34)) by4 = (int8_t)(by4 + 1);
-    by3 = game_registerTrain(game, by4, n + n7 / 2, n2 + by5 / 2);
+    by3 = game->register_map_train(by4, n + n7 / 2, n2 + by5 / 2);
     for (int i = 0; i < n7; ++i) {
         for (n4 = 0; n4 < by5; ++n4) {
             if (n + i >= game->world.terrain.mapWidth || n2 + n4 >= game->world.terrain.mapHeight || patch_tiles[i][n4] == 0) continue;
@@ -328,7 +330,7 @@ void game_placeTerrainFeature(Game *game, int32_t n) {
     } while (!bl);
     if (game->build.trackBuildInProgress) return;
     game_trackBuildStep(game, n7, n6, n5, n4);
-    n3 = game_addCityEntry(game, n);
+    n3 = game->add_city_entry(n);
     switch (n) {
         case 0:
             if (n5 == 2 && n4 == 2) {

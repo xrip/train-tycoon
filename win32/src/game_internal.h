@@ -27,7 +27,6 @@ bool game_isAdjacentTileEmpty(Game *game, int32_t n, int32_t n2, int32_t n3, boo
 void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl);
 void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
 void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
-int8_t game_randomCityTile(Game *game);
 void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2);
 void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void game_placeTerrainFeature(Game *game, int32_t n);
@@ -66,10 +65,8 @@ void game_pushMoneyHistory(Game *game, int32_t n);
 int32_t game_drawNumber(Game *game, Surface* graphics, int32_t n, int32_t n2);
 void game_drawMoneyTicker(Game *game, Surface* graphics);
 void game_drawConfirmDialog(Game *game, Surface* graphics);
-int8_t game_registerTrain(Game *game, int8_t by, int32_t n, int32_t n2);
 void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3);
 bool game_pickValidForestTile(Game *game);
-int8_t game_addCityEntry(Game *game, int32_t n);
 std::vector<int8_t> game_formatCurrency(int32_t value);
 std::vector<int8_t> game_formatNumberWithSuffix(int32_t value, int32_t suffix);
 std::vector<int8_t> game_encodeDisplayText(const char* text);
