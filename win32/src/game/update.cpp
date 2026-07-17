@@ -134,10 +134,10 @@ void updateGeneratingMap(Game *game) {
     if (game->stateWorkStep == 3) {
         game->ui.buildMenuItemIndex = 0;
         game->ui.buildMenuMode = 0;
-        game_runMapGenerationStep(game, 0);
+        game->run_map_generation_step(0);
     }
     if (game->stateWorkStep <= 3) return;
-    game_runMapGenerationStep(game, 1);
+    game->run_map_generation_step(1);
     if (game->world.mapGenTilesDone != game->world.totalTilesToGenerate) return;
     game->world.mapGenTilesDone = 0;
     game_setState(game, GameState::Playing);
@@ -266,7 +266,7 @@ void updateAiTurn(Game *game) {
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     if (game->build.nextTrackPieceCode - track::AI_PIECE_FIRST < game->scenario.difficultyCycle) {
-        game_placeCitiesAndIndustry(game);
+        game->place_cities_and_industry();
         game_setState(game, GameState::Playing);
         return;
     }

@@ -93,6 +93,10 @@ struct World {
     bool is_curve_tile(int32_t x, int32_t y) const;
     bool is_city_or_station_tile(const Fleet& fleet, int32_t x,
                                  int32_t y) const;
+    void pick_city_site(JavaRandom& random);
+    void pick_industry_site(JavaRandom& random);
+    void auto_extend_track_station(int32_t x, int32_t y,
+                                   int32_t track_piece_code);
 };
 
 #endif  // WORLD_H

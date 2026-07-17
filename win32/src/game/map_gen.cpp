@@ -502,16 +502,17 @@ void generateOneMapStep(Game *game) {
 } // namespace
 
 // Set up the map generator (mode 0), or run one ordered generation step (mode 1).
-void game_runMapGenerationStep(Game *game, int32_t mode) {
+void Game::run_map_generation_step(int32_t mode) {
+    Game* game = this;
     if (mode == 0) beginMapGeneration(game);
     if (mode == 1) generateOneMapStep(game);
 }
 
-void game_pickCitySite(Game *game) {
-    int x = abs(nextRngInt(game) % game->world.terrain.mapWidth);
-    int y = abs(nextRngInt(game) % game->world.terrain.mapHeight);
-    game->world.industryCategory = -1;
-    int tile = game->world.terrain.tileMap[x][y];
+void World::pick_city_site(JavaRandom& random) {
+    int x = abs(random.next_int() % terrain.mapWidth);
+    int y = abs(random.next_int() % terrain.mapHeight);
+    industryCategory = -1;
+    int tile = terrain.tileMap[x][y];
     if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
     int min_x = x - 2;
     int min_y = y - 2;
@@ -519,30 +520,30 @@ void game_pickCitySite(Game *game) {
     int max_y = y + 2;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= game->world.terrain.mapWidth) max_x = game->world.terrain.mapWidth - 1;
-    if (max_y >= game->world.terrain.mapHeight) max_y = game->world.terrain.mapHeight - 1;
+    if (max_x >= terrain.mapWidth) max_x = terrain.mapWidth - 1;
+    if (max_y >= terrain.mapHeight) max_y = terrain.mapHeight - 1;
     for (int near_x = min_x;
-         near_x <= max_x && game->world.industryCategory <= 0; ++near_x) {
+         near_x <= max_x && industryCategory <= 0; ++near_x) {
         for (int near_y = min_y;
-             near_y <= max_y && game->world.industryCategory <= 0; ++near_y) {
-            tile = game->world.terrain.tileMap[near_x][near_y];
-            if (tile >= 34 && tile <= 40) game->world.industryCategory = 0;
-            if (tile >= 65 && tile <= 68) game->world.industryCategory = 1;
-            if (tile >= 53 && tile <= 55) game->world.industryCategory = 2;
-            if (tile >= 59 && tile <= 61) game->world.industryCategory = 3;
+             near_y <= max_y && industryCategory <= 0; ++near_y) {
+            tile = terrain.tileMap[near_x][near_y];
+            if (tile >= 34 && tile <= 40) industryCategory = 0;
+            if (tile >= 65 && tile <= 68) industryCategory = 1;
+            if (tile >= 53 && tile <= 55) industryCategory = 2;
+            if (tile >= 59 && tile <= 61) industryCategory = 3;
         }
     }
-    if (game->world.industryCategory >= 0) {
-        game->world.cityStationX = x;
-        game->world.cityStationY = y;
+    if (industryCategory >= 0) {
+        cityStationX = x;
+        cityStationY = y;
     }
 }
 
-void game_pickIndustrySite(Game *game) {
-    int x = abs(nextRngInt(game) % game->world.terrain.mapWidth);
-    int y = abs(nextRngInt(game) % game->world.terrain.mapHeight);
-    game->world.industrySiteFound = false;
-    int tile = game->world.terrain.tileMap[x][y];
+void World::pick_industry_site(JavaRandom& random) {
+    int x = abs(random.next_int() % terrain.mapWidth);
+    int y = abs(random.next_int() % terrain.mapHeight);
+    industrySiteFound = false;
+    int tile = terrain.tileMap[x][y];
     if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
     int min_x = x - 2;
     int min_y = y - 2;
@@ -550,30 +551,31 @@ void game_pickIndustrySite(Game *game) {
     int max_y = y + 2;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= game->world.terrain.mapWidth) max_x = game->world.terrain.mapWidth - 1;
-    if (max_y >= game->world.terrain.mapHeight) max_y = game->world.terrain.mapHeight - 1;
+    if (max_x >= terrain.mapWidth) max_x = terrain.mapWidth - 1;
+    if (max_y >= terrain.mapHeight) max_y = terrain.mapHeight - 1;
     for (int near_x = min_x;
-         near_x <= max_x && !game->world.industrySiteFound; ++near_x) {
+         near_x <= max_x && !industrySiteFound; ++near_x) {
         for (int near_y = min_y;
-             near_y <= max_y && !game->world.industrySiteFound; ++near_y) {
-            tile = game->world.terrain.tileMap[near_x][near_y];
-            if (tile >= 34 && tile <= 40 && game->world.industryCategory == 0)
-                game->world.industrySiteFound = true;
-            if (tile >= 62 && tile <= 64 && game->world.industryCategory == 1)
-                game->world.industrySiteFound = true;
-            if (tile >= 50 && tile <= 52 && game->world.industryCategory == 2)
-                game->world.industrySiteFound = true;
-            if (tile >= 56 && tile <= 58 && game->world.industryCategory == 3)
-                game->world.industrySiteFound = true;
+             near_y <= max_y && !industrySiteFound; ++near_y) {
+            tile = terrain.tileMap[near_x][near_y];
+            if (tile >= 34 && tile <= 40 && industryCategory == 0)
+                industrySiteFound = true;
+            if (tile >= 62 && tile <= 64 && industryCategory == 1)
+                industrySiteFound = true;
+            if (tile >= 50 && tile <= 52 && industryCategory == 2)
+                industrySiteFound = true;
+            if (tile >= 56 && tile <= 58 && industryCategory == 3)
+                industrySiteFound = true;
         }
     }
-    if (game->world.industrySiteFound) {
-        game->world.industryStationX = x;
-        game->world.industryTileY = y;
+    if (industrySiteFound) {
+        industryStationX = x;
+        industryTileY = y;
     }
 }
 
-void game_spawnTrainAt(Game *game, int32_t x, int32_t y) {
+void Game::spawn_train_at(int32_t x, int32_t y) {
+    Game* game = this;
     int engine_type = game->scenario.currentEra / 3;
     int wagon_count = game->build.selectionCost / 8000 + 1;
     if (wagon_count > 5) wagon_count = 5;
@@ -592,72 +594,74 @@ void game_spawnTrainAt(Game *game, int32_t x, int32_t y) {
     }
 }
 
-static bool can_extend_station_over(Game *game, int x, int y) {
-    int tile = game->world.terrain.tileMap[x][y];
+static bool can_extend_station_over(const World& world, int x, int y) {
+    int tile = world.terrain.tileMap[x][y];
     return tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST);
 }
 
-void game_autoExtendTrackStation(Game *game, int32_t x, int32_t y) {
-    bool track_left = x > 0 && game->world.trackMap[x - 1][y] == track::PRESENT;
-    bool track_right = x < game->world.terrain.mapWidth - 1 && game->world.trackMap[x + 1][y] == track::PRESENT;
-    bool track_up = y > 0 && game->world.trackMap[x][y - 1] == track::PRESENT;
-    bool track_down = y < game->world.terrain.mapHeight - 1 && game->world.trackMap[x][y + 1] == track::PRESENT;
+void World::auto_extend_track_station(int32_t x, int32_t y,
+                                      int32_t track_piece_code) {
+    bool track_left = x > 0 && trackMap[x - 1][y] == track::PRESENT;
+    bool track_right = x < terrain.mapWidth - 1 && trackMap[x + 1][y] == track::PRESENT;
+    bool track_up = y > 0 && trackMap[x][y - 1] == track::PRESENT;
+    bool track_down = y < terrain.mapHeight - 1 && trackMap[x][y + 1] == track::PRESENT;
     if (track_left || track_right) {
-        game->world.terrain.tileMap[x][y] = 88;
-        game->world.trackMap[x][y] = (int8_t)game->build.nextTrackPieceCode;
+        terrain.tileMap[x][y] = 88;
+        trackMap[x][y] = (int8_t)track_piece_code;
         if (track_right && x > 1
-            && can_extend_station_over(game, x - 1, y)
-            && can_extend_station_over(game, x - 2, y)) {
-            game->world.terrain.tileMap[x][y] = 90;
-            game->world.terrain.tileMap[x - 1][y] = 88;
-            game->world.terrain.tileMap[x - 2][y] = 90;
-            game->world.trackMap[x - 1][y] = (int8_t)game->build.nextTrackPieceCode;
-            game->world.trackMap[x - 2][y] = (int8_t)game->build.nextTrackPieceCode;
+            && can_extend_station_over(*this, x - 1, y)
+            && can_extend_station_over(*this, x - 2, y)) {
+            terrain.tileMap[x][y] = 90;
+            terrain.tileMap[x - 1][y] = 88;
+            terrain.tileMap[x - 2][y] = 90;
+            trackMap[x - 1][y] = (int8_t)track_piece_code;
+            trackMap[x - 2][y] = (int8_t)track_piece_code;
         }
-        if (track_left && x < game->world.terrain.mapWidth - 2
-            && can_extend_station_over(game, x + 1, y)
-            && can_extend_station_over(game, x + 2, y)) {
-            game->world.terrain.tileMap[x][y] = 90;
-            game->world.terrain.tileMap[x + 1][y] = 88;
-            game->world.terrain.tileMap[x + 2][y] = 90;
-            game->world.trackMap[x + 1][y] = (int8_t)game->build.nextTrackPieceCode;
-            game->world.trackMap[x + 2][y] = (int8_t)game->build.nextTrackPieceCode;
+        if (track_left && x < terrain.mapWidth - 2
+            && can_extend_station_over(*this, x + 1, y)
+            && can_extend_station_over(*this, x + 2, y)) {
+            terrain.tileMap[x][y] = 90;
+            terrain.tileMap[x + 1][y] = 88;
+            terrain.tileMap[x + 2][y] = 90;
+            trackMap[x + 1][y] = (int8_t)track_piece_code;
+            trackMap[x + 2][y] = (int8_t)track_piece_code;
         }
     }
     if (track_up || track_down) {
-        game->world.terrain.tileMap[x][y] = 87;
-        game->world.trackMap[x][y] = (int8_t)game->build.nextTrackPieceCode;
+        terrain.tileMap[x][y] = 87;
+        trackMap[x][y] = (int8_t)track_piece_code;
         if (track_up && y > 1
-            && can_extend_station_over(game, x, y - 1)
-            && can_extend_station_over(game, x, y - 2)) {
-            game->world.terrain.tileMap[x][y] = 89;
-            game->world.terrain.tileMap[x][y - 1] = 87;
-            game->world.terrain.tileMap[x][y - 2] = 89;
-            game->world.trackMap[x][y - 1] = (int8_t)game->build.nextTrackPieceCode;
-            game->world.trackMap[x][y - 2] = (int8_t)game->build.nextTrackPieceCode;
+            && can_extend_station_over(*this, x, y - 1)
+            && can_extend_station_over(*this, x, y - 2)) {
+            terrain.tileMap[x][y] = 89;
+            terrain.tileMap[x][y - 1] = 87;
+            terrain.tileMap[x][y - 2] = 89;
+            trackMap[x][y - 1] = (int8_t)track_piece_code;
+            trackMap[x][y - 2] = (int8_t)track_piece_code;
         }
         // The original bytecode tests track_up here too (not track_down).
-        if (track_up && y < game->world.terrain.mapHeight - 2
-            && can_extend_station_over(game, x, y + 1)
-            && can_extend_station_over(game, x, y + 2)) {
-            game->world.terrain.tileMap[x][y] = 89;
-            game->world.terrain.tileMap[x][y + 1] = 87;
-            game->world.terrain.tileMap[x][y + 2] = 89;
-            game->world.trackMap[x][y + 1] = (int8_t)game->build.nextTrackPieceCode;
-            game->world.trackMap[x][y + 2] = (int8_t)game->build.nextTrackPieceCode;
+        if (track_up && y < terrain.mapHeight - 2
+            && can_extend_station_over(*this, x, y + 1)
+            && can_extend_station_over(*this, x, y + 2)) {
+            terrain.tileMap[x][y] = 89;
+            terrain.tileMap[x][y + 1] = 87;
+            terrain.tileMap[x][y + 2] = 89;
+            trackMap[x][y + 1] = (int8_t)track_piece_code;
+            trackMap[x][y + 2] = (int8_t)track_piece_code;
         }
     }
 }
 
-void game_placeCitiesAndIndustry(Game *game) {
+void Game::place_cities_and_industry() {
+    Game* game = this;
     int city_attempts = 0;
     int industry_attempts = 0;
     do {
-        game_pickCitySite(game);
+        game->world.pick_city_site(game->rng);
     } while (++city_attempts != 50 && game->world.industryCategory == -1);
     if (city_attempts >= 50) return;
     do {
-        game_pickIndustrySite(game);
+        game->world.pick_industry_site(game->rng);
     } while (++industry_attempts != 50 && !game->world.industrySiteFound);
     if (industry_attempts >= 50) return;
 
@@ -666,9 +670,13 @@ void game_placeCitiesAndIndustry(Game *game) {
     game->pathfinder.targetX = game->world.industryStationX;
     game->pathfinder.targetY = game->world.industryTileY;
     if (!game_tryBuildPath(game)) return;
-    game_autoExtendTrackStation(game, game->world.cityStationX, game->world.cityStationY);
-    game_autoExtendTrackStation(game, game->world.industryStationX, game->world.industryTileY);
-    game_spawnTrainAt(game, game->world.cityStationX, game->world.cityStationY);
+    game->world.auto_extend_track_station(
+        game->world.cityStationX, game->world.cityStationY,
+        game->build.nextTrackPieceCode);
+    game->world.auto_extend_track_station(
+        game->world.industryStationX, game->world.industryTileY,
+        game->build.nextTrackPieceCode);
+    spawn_train_at(game->world.cityStationX, game->world.cityStationY);
     game_setTrackOwnerCode(game, game->build.nextTrackPieceCode - track::PRESENT);
     ++game->build.nextTrackPieceCode;
     if (game->build.nextTrackPieceCode == track::AI_PIECE_WRAP) game->build.nextTrackPieceCode = track::AI_PIECE_FIRST;

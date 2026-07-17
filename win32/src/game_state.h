@@ -55,6 +55,9 @@ typedef struct Game {
     void reset_ai_depot_train_ages();
     void record_delivered_resource(int32_t resource, int32_t amount);
     void record_train_revenue(int32_t amount);
+    void run_map_generation_step(int32_t mode);
+    void spawn_train_at(int32_t x, int32_t y);
+    void place_cities_and_industry();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
