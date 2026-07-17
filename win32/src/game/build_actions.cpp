@@ -119,7 +119,7 @@ void game_applyBackgroundCost(Game *game) {
     if (game->build.demolitionAffordable) {
         game->economy.subsidyCost += game->build.backgroundCost;
         game->economy.money -= game->build.backgroundCost;
-        game_pushMoneyHistory(game, -game->build.backgroundCost);
+        game->record_money_change(-game->build.backgroundCost);
     } else {
         game_enterOutOfMoneyState(game);
     }
@@ -422,7 +422,7 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
     game->economy.money -= cost;
     game->economy.totalSpent += cost;
     game->renderer.lastViewportCenterX = -1;
-    game_pushMoneyHistory(game, -cost);
+    game->record_money_change(-cost);
     game->offerBoard.add_progress(13, cost);
     game->world.advance_construction_timers(x, y, -4);
 }
@@ -607,7 +607,7 @@ void game_openBuildMenu(Game *game) {
                     game_setTrackOwnerCode(game, 1);
                     game->economy.money -= game->build.selectionCost;
                     game->economy.totalSpent += game->build.selectionCost;
-                    game_pushMoneyHistory(game, -game->build.selectionCost);
+                    game->record_money_change(-game->build.selectionCost);
                     game->offerBoard.add_progress(13, game->build.selectionCost);
                 } else {
                     game_normalizeTrackBits(game);
@@ -783,7 +783,7 @@ bool game_buyTrainAtCursor(Game *game) {
     }
     game->economy.money -= game->build.unitCost;
     game->economy.aiMoneySpent += game->build.unitCost;
-    game_pushMoneyHistory(game, -game->build.unitCost);
+    game->record_money_change(-game->build.unitCost);
     ++game->scenario.aiWagonsBought;
     return true;
 }
@@ -809,6 +809,6 @@ bool game_applyTrainUpgrade(Game *game, int32_t train,
     }
     game->economy.money -= cost;
     game->economy.aiMoneySpent += cost;
-    if (cost != 0) game_pushMoneyHistory(game, -cost);
+    if (cost != 0) game->record_money_change(-cost);
     return true;
 }

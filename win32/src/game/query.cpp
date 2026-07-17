@@ -8,7 +8,8 @@ int32_t UiController::advance_key_repeat() {
     return keySubState / 3;
 }
 
-void game_pushMoneyHistory(Game *game, int32_t n) {
+void Game::record_money_change(int32_t n) {
+    Game* game = this;
     game->economy.push_money_history(n);
     game->ui.moneyTickerFrames[2] = game->ui.moneyTickerFrames[1];
     game->ui.moneyTickerFrames[1] = game->ui.moneyTickerFrames[0];

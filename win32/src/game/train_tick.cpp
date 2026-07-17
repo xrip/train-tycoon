@@ -325,7 +325,7 @@ void game_updateTrain(Game *game, int32_t head) {
             if (service_vehicle != game->fleet.trainCars[head].lastServiceSite) {
                 if (revenue > 0) {
                     game->economy.money += revenue;
-                    game_pushMoneyHistory(game, revenue);
+                    game->record_money_change(revenue);
                     game->economy.totalRevenue += revenue;
                     game->fleet.trainCars[head].revenue += revenue;
                     game->record_train_revenue(revenue);

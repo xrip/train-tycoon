@@ -57,7 +57,8 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     game->economy.money += game->build.currentTrainCostSnapshot * 70 / 100;
                     game->economy.aiMoneySpent -= game->build.currentTrainCostSnapshot * 70 / 100;
                     if (game->build.currentTrainCostSnapshot != 0)
-                        game_pushMoneyHistory(game, game->build.currentTrainCostSnapshot * 70 / 100);
+                        game->record_money_change(
+                            game->build.currentTrainCostSnapshot * 70 / 100);
                     int16_t s = game->fleet.trainCars[game->trainAtCursor].nextCar;
                     game_decrementTrainCargoOptionCounts(game, s);
                     game->fleet.trainCars[game->trainAtCursor].flags = 0;
@@ -161,7 +162,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 if (n4 <= game->economy.money) {
                     game->fleet.trainCars[game->trainAtCursor].ageYears = 0;
                     game->economy.money -= n4;
-                    game_pushMoneyHistory(game, -n4);
+                    game->record_money_change(-n4);
                     game->economy.aiMoneySpent += n4;
                     game->scenario.difficultyPct = 100 - 3 * game->fleet.trainCars[game->trainAtCursor].ageYears;
                     game->build.compute_train_cost(game->economy, game->scenario);

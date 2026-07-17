@@ -60,7 +60,6 @@ int32_t game_drawMenuRow(Game *game, Surface* graphics, int32_t n, int32_t n2, i
 void game_drawConfirmBar(Game *game, Surface* graphics);
 void game_drawHeaderBar(Game *game, Surface* graphics);
 void game_paintMain(Game *game, Surface* graphics);
-void game_pushMoneyHistory(Game *game, int32_t n);
 int32_t game_drawNumber(Game *game, Surface* graphics, int32_t n, int32_t n2);
 void game_drawMoneyTicker(Game *game, Surface* graphics);
 void game_drawConfirmDialog(Game *game, Surface* graphics);

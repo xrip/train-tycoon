@@ -56,7 +56,7 @@ void Game::apply_offer_effect(int32_t row) {
     Game* game = this;
     if (game->offerBoard.offers[row].effectType == 1 || game->offerBoard.offers[row].effectType == 2) {
         game->economy.money += game->offerBoard.offers[row].effectAmount;
-        game_pushMoneyHistory(game, game->offerBoard.offers[row].effectAmount);
+        game->record_money_change(game->offerBoard.offers[row].effectAmount);
     }
     if (game->offerBoard.offers[row].effectType == 3) game->economy.loanCeiling += game->offerBoard.offers[row].effectAmount;
     if (game->offerBoard.offers[row].effectType == 4

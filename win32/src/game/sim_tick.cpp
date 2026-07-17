@@ -501,10 +501,11 @@ void game_newYearNotify(Game *game) {
     }
     game->economy.altDecadeTotalCost[0] = game_scanMapForMetric(game);
     game->economy.money -= game->economy.terrainTotal;
-    if (game->economy.terrainTotal > 0) game_pushMoneyHistory(game, -game->economy.terrainTotal);
+    if (game->economy.terrainTotal > 0)
+        game->record_money_change(-game->economy.terrainTotal);
     game->economy.money -= game->economy.decadeEnterpriseTax;
     if (game->economy.decadeEnterpriseTax > 0)
-        game_pushMoneyHistory(game, -game->economy.decadeEnterpriseTax);
+        game->record_money_change(-game->economy.decadeEnterpriseTax);
     game->economy.totalSpent = game->economy.aiMoneySpent = game->economy.fuelCostAccrued = 0;
     game->economy.subsidyCost = game->economy.totalRevenue = game->economy.netProfit = 0;
     game->economy.decadeEnterpriseTax = 0;

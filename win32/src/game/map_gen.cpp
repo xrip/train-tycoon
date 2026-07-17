@@ -133,7 +133,7 @@ void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl) {
             if (game->world.initialIndustryPlaced) {
                 if (game->build.terrainSmoothCost <= game->economy.money) {
                     game->economy.money -= game->build.terrainSmoothCost;
-                    game_pushMoneyHistory(game, -game->build.terrainSmoothCost);
+                    game->record_money_change(-game->build.terrainSmoothCost);
                     game->economy.subsidyCost += game->build.terrainSmoothCost;
                     game->world.terrain.rebuild(game->build, true);
                 } else {

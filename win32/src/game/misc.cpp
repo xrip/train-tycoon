@@ -14,7 +14,7 @@ void game_openSpriteStream(Game *game, const char *resource_name) {
 bool game_spendMoney(Game *game, int32_t n) {
     if (game->economy.spend(n)) {
         game->renderer.lastViewportCenterX = -1;
-        game_pushMoneyHistory(game, -n);
+        game->record_money_change(-n);
         return true;
     }
     game_enterOutOfMoneyState(game);
