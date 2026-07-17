@@ -26,25 +26,29 @@ static void copy_menu_row_to_slot5(Game *game, int row) {
     game->scenario.offerTypeTransitionCode = game->offerBoard.offers[row].objectiveType + 40;
     game->scenario.offerEffectTransitionCode = game->offerBoard.offers[row].effectType + 60;
     game->scenario.offerRowIndex = 5;
-    game->offerBoard.offers[5].objectiveType = game->offerBoard.offers[row].objectiveType;
-    game->offerBoard.offers[5].target = game->offerBoard.offers[row].target;
-    game->offerBoard.offers[5].progress = game->offerBoard.offers[row].progress;
-    game->offerBoard.offers[5].effectType = game->offerBoard.offers[row].effectType;
-    game->offerBoard.offers[5].effectValue = game->offerBoard.offers[row].effectValue;
-    game->offerBoard.offers[5].effectAmount = game->offerBoard.offers[row].effectAmount;
-    game->offerBoard.offers[5].issuedDay = game->offerBoard.offers[row].issuedDay;
-    game->offerBoard.offers[5].issuedMonth = game->offerBoard.offers[row].issuedMonth;
-    game->offerBoard.offers[5].issuedYear = game->offerBoard.offers[row].issuedYear;
-    game->offerBoard.offers[5].dueDay = game->offerBoard.offers[row].dueDay;
-    game->offerBoard.offers[5].dueMonth = game->offerBoard.offers[row].dueMonth;
-    game->offerBoard.offers[5].dueYear = game->offerBoard.offers[row].dueYear;
-    game->offerBoard.offers[row].objectiveType = 0;
-    game->offerBoard.offers[row].target = 0;
-    game->offerBoard.offers[row].progress = 0;
-    game->offerBoard.offers[row].effectType = 0;
-    game->offerBoard.offers[row].effectValue = 0;
-    game->offerBoard.offers[row].effectAmount = 0;
+    game->offerBoard.copy_to_summary_and_clear(row);
     game->ready = false;
+}
+
+void OfferBoard::copy_to_summary_and_clear(int32_t row) {
+    offers[5].objectiveType = offers[row].objectiveType;
+    offers[5].target = offers[row].target;
+    offers[5].progress = offers[row].progress;
+    offers[5].effectType = offers[row].effectType;
+    offers[5].effectValue = offers[row].effectValue;
+    offers[5].effectAmount = offers[row].effectAmount;
+    offers[5].issuedDay = offers[row].issuedDay;
+    offers[5].issuedMonth = offers[row].issuedMonth;
+    offers[5].issuedYear = offers[row].issuedYear;
+    offers[5].dueDay = offers[row].dueDay;
+    offers[5].dueMonth = offers[row].dueMonth;
+    offers[5].dueYear = offers[row].dueYear;
+    offers[row].objectiveType = 0;
+    offers[row].target = 0;
+    offers[row].progress = 0;
+    offers[row].effectType = 0;
+    offers[row].effectValue = 0;
+    offers[row].effectAmount = 0;
 }
 
 void game_applyMenuRowEffect(Game *game, int32_t row) {

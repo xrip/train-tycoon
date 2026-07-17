@@ -543,6 +543,46 @@ TEST_CASE("fast: offer board schedules due dates with fixed random order") {
     CHECK(actual_random.next_int() == expected_random.next_int());
 }
 
+TEST_CASE("fast: offer board copies the summary slot and clears active data") {
+    OfferBoard board;
+    Offer& active = board.offers[2];
+    active.objectiveType = 7;
+    active.issuedDay = 8;
+    active.dueDay = 9;
+    active.issuedMonth = 10;
+    active.dueMonth = 11;
+    active.issuedYear = 12;
+    active.dueYear = 13;
+    active.target = 1400;
+    active.progress = 1500;
+    active.effectType = 6;
+    active.effectValue = 17;
+    active.effectAmount = 1800;
+
+    board.copy_to_summary_and_clear(2);
+    const Offer& summary = board.offers[5];
+    CHECK(summary.objectiveType == 7);
+    CHECK(summary.issuedDay == 8);
+    CHECK(summary.dueDay == 9);
+    CHECK(summary.issuedMonth == 10);
+    CHECK(summary.dueMonth == 11);
+    CHECK(summary.issuedYear == 12);
+    CHECK(summary.dueYear == 13);
+    CHECK(summary.target == 1400);
+    CHECK(summary.progress == 1500);
+    CHECK(summary.effectType == 6);
+    CHECK(summary.effectValue == 17);
+    CHECK(summary.effectAmount == 1800);
+    CHECK(active.objectiveType == 0);
+    CHECK(active.target == 0);
+    CHECK(active.progress == 0);
+    CHECK(active.effectType == 0);
+    CHECK(active.effectValue == 0);
+    CHECK(active.effectAmount == 0);
+    CHECK(active.issuedDay == 8);
+    CHECK(active.dueDay == 9);
+}
+
 TEST_CASE("fast: economy spending and money history are owned rules") {
     Economy economy;
     economy.money = 100;
