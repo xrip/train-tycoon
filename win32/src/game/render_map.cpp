@@ -25,9 +25,9 @@ void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
         return;
 
     Surface *backbuffer = game->renderer.backbuffer_surface;
-    midp_set_clip(backbuffer, 0, 15, canvasWidth, gameplayViewportHeight);
+    midp_set_clip(backbuffer, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
     midp_set_color(backbuffer, 0);
-    midp_fill_rect(backbuffer, 0, 15, canvasWidth, gameplayViewportHeight);
+    midp_fill_rect(backbuffer, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
     game->renderer.visibleTrainCount = 0;
     game->renderer.viewportX0 = 2 * game->world.terrain.mapWidth;
     game->renderer.viewportY0 = 2 * game->world.terrain.mapHeight;
@@ -78,7 +78,7 @@ void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
     if (game->renderer.viewportY1 >= game->world.terrain.mapHeight) game->renderer.viewportY1 = game->world.terrain.mapHeight - 1;
     game->renderer.lastViewportCenterX = game->renderer.camera.viewportCenterX;
     game->renderer.viewportCenterYCached = game->renderer.camera.viewportCenterY;
-    midp_set_clip(backbuffer, 0, 0, canvasWidth, canvasHeight);
+    midp_set_clip(backbuffer, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
 }
 
 } // namespace
@@ -91,7 +91,7 @@ void game_renderMap(Game *game, Surface *g) {
     redrawStaticMapIfNeeded(game, origin);
     game_paintMain(game, g);
     midp_draw_image(g, game->renderer.backbuffer.get(), 0, 0, 20);
-    midp_set_clip(g, 0, 15, canvasWidth, gameplayViewportHeight);
+    midp_set_clip(g, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
     game_drawBuildMenuCursor(game, g);
     int visible_width = game->renderer.viewportX1 - game->renderer.viewportX0 + 1;
     int visible_height = game->renderer.viewportY1 - game->renderer.viewportY0 + 1;
@@ -169,6 +169,6 @@ void game_renderMap(Game *game, Surface *g) {
         }
     }
     game_drawBuildMenuRow(game, g);
-    midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
+    midp_set_clip(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
     game_drawConfirmDialog(game, g);
 }

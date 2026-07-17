@@ -108,15 +108,15 @@ void Game::viewport_zoom_key() {
         moved_view = true;
         game->renderer.camera.viewportCenterY = game->renderer.camera.viewportBaseY - 11;
     }
-    if (game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX >= canvasWidth - 20) {
+    if (game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX >= game->renderer.canvasWidth - 20) {
         moved_view = true;
-        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX - canvasWidth + 21;
+        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX - game->renderer.canvasWidth + 21;
     }
     if (game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY
-        >= gameplayViewportHeight - 20) {
+        >= game->renderer.gameplayViewportHeight - 20) {
         moved_view = true;
         game->renderer.camera.viewportCenterY =
-            game->renderer.camera.viewportBaseY - gameplayViewportHeight + 21;
+            game->renderer.camera.viewportBaseY - game->renderer.gameplayViewportHeight + 21;
     }
     if (game->renderer.camera.viewportBaseX < 0) game->renderer.camera.viewportBaseX = 0;
     if (game->renderer.camera.viewportBaseY < 0) game->renderer.camera.viewportBaseY = 0;
@@ -128,14 +128,14 @@ void Game::viewport_zoom_key() {
         game->renderer.camera.viewportCenterY = 0;
         moved_view = false;
     }
-    if (game->renderer.camera.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth) {
-        game->renderer.camera.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
+    if (game->renderer.camera.viewportCenterX > game->world.terrain.mapScreenWidth - game->renderer.canvasWidth) {
+        game->renderer.camera.viewportCenterX = game->world.terrain.mapScreenWidth - game->renderer.canvasWidth;
         moved_view = false;
     }
     if (game->renderer.camera.viewportCenterY
-        > game->world.terrain.mapScreenHeight - gameplayViewportHeight) {
+        > game->world.terrain.mapScreenHeight - game->renderer.gameplayViewportHeight) {
         game->renderer.camera.viewportCenterY =
-            game->world.terrain.mapScreenHeight - gameplayViewportHeight;
+            game->world.terrain.mapScreenHeight - game->renderer.gameplayViewportHeight;
         moved_view = false;
     }
     if (moved_view) game->ui.keySubState = 80;

@@ -59,7 +59,7 @@ void game_renderFontString(Game *game, Surface *surface, int32_t x, int32_t base
     if (preserveClip) {
         midp_set_clip(surface, game->renderer.clipX, game->renderer.clipY, game->renderer.clipWidth, game->renderer.clipHeight);
     } else {
-        midp_set_clip(surface, 0, 0, canvasWidth, canvasHeight);
+        midp_set_clip(surface, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
     }
 }
 
@@ -116,7 +116,7 @@ void game_drawTextBox(Game *game, Surface *surface, int32_t x, int32_t y,
     if ((alignment & 1) == 1) x -= textWidth / 2 + 3;
     if ((alignment & 2) == 2) y -= 5;
     if ((alignment & 4) == 4) x -= textWidth + 6;
-    if (alignment == 37) { x = 0; y = 15 + gameplayViewportHeight - 15; }
+    if (alignment == 37) { x = 0; y = 15 + game->renderer.gameplayViewportHeight - 15; }
     midp_set_color(surface, game->graphColors[3 * colorSet]);
     midp_fill_rect(surface, x, y, textWidth + 5, 13);
     midp_set_color(surface, game->graphColors[3 * colorSet + 1]);
@@ -154,8 +154,8 @@ void game_drawSelectedTrainLabel(Game *game, Surface *surface, int32_t x, int32_
     midp_draw_rect(surface, x + textWidth + 5, y, 0, 11);
     game->renderer.clipX = 0;
     game->renderer.clipY = 15;
-    game->renderer.clipWidth = canvasWidth;
-    game->renderer.clipHeight = gameplayViewportHeight;
+    game->renderer.clipWidth = game->renderer.canvasWidth;
+    game->renderer.clipHeight = game->renderer.gameplayViewportHeight;
     game_renderFontString(game, surface, x + 4, y + 3, train_codes, true);
 }
 
@@ -356,8 +356,8 @@ void PackedDialogRender::setupFrame() {
     else dialogHeight = game->renderer.dialogContentHeight;
     if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) dialogWidth += 6;
     game->renderer.currentSpriteId = header.spriteId;
-    dialogX = (canvasWidth - dialogWidth) / 2;
-    dialogY = (canvasHeight - dialogHeight) / 2;
+    dialogX = (game->renderer.canvasWidth - dialogWidth) / 2;
+    dialogY = (game->renderer.canvasHeight - dialogHeight) / 2;
     if (game->renderer.needsRepaint) {
         midp_set_color(surface, backgroundColor); midp_fill_rect(surface, dialogX, dialogY, dialogWidth, dialogHeight);
         midp_set_color(surface, borderColor); midp_draw_rect(surface, dialogX, dialogY, dialogWidth, dialogHeight);
@@ -447,7 +447,7 @@ void PackedDialogRender::renderContent() {
                 int neededHeight = dialogHeight + (itemY + yOffset + 6 + selectionBottom + selectionTop + 3
                     - (game->renderer.clipHeight + game->renderer.clipY));
                 if (game->renderer.dialogContentHeight < neededHeight) game->renderer.dialogContentHeight = neededHeight;
-                if (game->renderer.dialogContentHeight > canvasHeight - 20) game->renderer.dialogContentHeight = canvasHeight - 20;
+                if (game->renderer.dialogContentHeight > game->renderer.canvasHeight - 20) game->renderer.dialogContentHeight = game->renderer.canvasHeight - 20;
             }
             if (game->renderer.needsRepaint && itemY + yOffset + 6 + selectionBottom >= game->renderer.clipY + game->renderer.clipHeight)
                 game->ui.cursorAllowZoomOut = true;

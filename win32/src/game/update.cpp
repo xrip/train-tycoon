@@ -222,8 +222,8 @@ void updateBuildingMinimap(Game *game) {
 void updateMapOverview(Game *game) {
     game->renderer.camera.pan(
         game->ui.lastKeyCode, game->world.terrain.mapScreenWidth,
-        game->world.terrain.mapScreenHeight, canvasWidth,
-        gameplayViewportHeight);
+        game->world.terrain.mapScreenHeight, game->renderer.canvasWidth,
+        game->renderer.gameplayViewportHeight);
 }
 
 void updateBuildingPath(Game *game) {

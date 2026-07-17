@@ -892,8 +892,8 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
             if (buildable(x, y)) { bx = x; by = y; break; }
     REQUIRE(ax >= 0); REQUIRE(bx >= 0);
 
-    canvasWidth = 240;
-    bottomBarY = 300;
+    game->renderer.canvasWidth = 240;
+    game->renderer.bottomBarY = 300;
     game->economy.money = 1000000;
     game->ui.pauseFlag = false;
     game->ui.inputPending = false;
@@ -908,10 +908,10 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
     // does). This must ARM the tool, not place a depot at the drifted tile.
     const int mode = 3;
     const int selected_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]);
-    int scroll = selected_x + 15 - canvasWidth;
+    int scroll = selected_x + 15 - game->renderer.canvasWidth;
     if (scroll < 0) scroll = 0;
     const int icon_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]) - scroll;
-    game->pointer_pressed(icon_x, bottomBarY);
+    game->pointer_pressed(icon_x, game->renderer.bottomBarY);
 
     CHECK(static_cast<uint8_t>(game->world.trackMap[bx][by]) != 65);  // nothing placed at drift
     CHECK(game->ui.buildMenuItemIndex == 0);                          // tool stays armed
@@ -1366,11 +1366,11 @@ TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
     REQUIRE(game->gameState == 30);
     REQUIRE(game->ui.buildMenuMode == 0);
 
-    // generate_scenario never paints, so set the screen-size globals that the
+    // generate_scenario never paints, so set the render layout that the
     // first game_paint would normally establish (the live loop always has these).
-    canvasWidth = kScreenWidth;
-    canvasHeight = kScreenHeight;
-    bottomBarY = canvasHeight - 15;
+    game->renderer.canvasWidth = kScreenWidth;
+    game->renderer.canvasHeight = kScreenHeight;
+    game->renderer.bottomBarY = game->renderer.canvasHeight - 15;
 
     // Mode-0 index 1 is always the "build" entry (item id 1); activating it
     // switches buildMenuMode to 1 and resets the item index to 0 (openBuildMenu
@@ -1378,7 +1378,7 @@ TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
     const int item1_x = static_cast<int>(static_cast<std::uint8_t>(game->ui.menuItemCode[0][1]));
     REQUIRE(item1_x > 0);
 
-    game->pointer_pressed(item1_x, bottomBarY);
+    game->pointer_pressed(item1_x, game->renderer.bottomBarY);
 
     CHECK(game->ui.buildMenuMode == 1);
     CHECK(game->ui.buildMenuItemIndex == 0);
@@ -1390,14 +1390,14 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     generate_scenario(game, 0);
     REQUIRE(game->gameState == 30);
 
-    canvasWidth = kScreenWidth;
-    canvasHeight = kScreenHeight;
-    bottomBarY = canvasHeight - 15;
+    game->renderer.canvasWidth = kScreenWidth;
+    game->renderer.canvasHeight = kScreenHeight;
+    game->renderer.bottomBarY = game->renderer.canvasHeight - 15;
 
     // Hover the middle of the gameplay viewport. The viewport always shows the
     // map after generation, so its centre sits on a valid tile.
     const int hover_x = kScreenWidth / 2;
-    const int hover_y = (15 + bottomBarY) / 2;
+    const int hover_y = (15 + game->renderer.bottomBarY) / 2;
 
     game->pointer_moved(hover_x, hover_y);
     REQUIRE(game->ui.mouseOverField);
@@ -1423,7 +1423,7 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     CHECK(dy <= 8);
 
     // Hovering UI chrome (the bottom bar) must not claim a field tile.
-    game->pointer_moved(hover_x, bottomBarY);
+    game->pointer_moved(hover_x, game->renderer.bottomBarY);
     CHECK_FALSE(game->ui.mouseOverField);
     delete game;
 }
@@ -1433,14 +1433,14 @@ TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
     generate_scenario(game, 0);
     REQUIRE(game->gameState == 30);
 
-    // generate_scenario never paints, so set the screen-size globals that the
+    // generate_scenario never paints, so set the render layout that the
     // first game_paint would normally establish (the live loop always has these).
-    canvasWidth = kScreenWidth;
-    canvasHeight = kScreenHeight;
-    bottomBarY = canvasHeight - 15;
+    game->renderer.canvasWidth = kScreenWidth;
+    game->renderer.canvasHeight = kScreenHeight;
+    game->renderer.bottomBarY = game->renderer.canvasHeight - 15;
 
     const int mid_x = kScreenWidth / 2;
-    const int mid_y = (15 + bottomBarY) / 2;
+    const int mid_y = (15 + game->renderer.bottomBarY) / 2;
     const int cx0 = game->renderer.camera.viewportCenterX;
     const int cy0 = game->renderer.camera.viewportCenterY;
     const int msx0 = game->renderer.camera.mapScaleX;

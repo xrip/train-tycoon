@@ -3,11 +3,6 @@
 #include <string.h>
 #include <utility>
 
-int32_t canvasWidth;
-int32_t canvasHeight;
-int32_t gameplayViewportHeight;
-int32_t bottomBarY;
-
 namespace {
 
 constexpr int8_t kForwardTrackSteps[kTrackDirectionCount][kTrackStepValueCount] = {
@@ -57,10 +52,6 @@ constexpr int8_t kTileSpriteYOffsets[kTileYOffsetCount] = {
 }  // namespace
 
 Game::Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed) {
-    canvasWidth = 1;
-    canvasHeight = 1;
-    gameplayViewportHeight = canvasHeight - 30;
-    bottomBarY = canvasHeight - 15;
     world.terrain.mapHalfWidth = (world.terrain.mapWidth - 1) * 8;
     world.terrain.mapScreenWidth = (world.terrain.mapWidth + world.terrain.mapHeight) * 16;
     world.terrain.mapScreenHeight = (world.terrain.mapWidth + world.terrain.mapHeight) * 8;
@@ -90,8 +81,7 @@ Game::Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed) {
            sizeof(kOfferEffectSchedule));
     rng.set_seed(random_seed);
     music.output = std::move(music_output);
-    renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
-    renderer.backbuffer_surface = renderer.backbuffer->drawing_surface();
+    renderer.resize_canvas(1, 1);
     memcpy(graphColors, kGraphColors, sizeof(kGraphColors));
     memcpy(assets.tileSpriteYOffsetByCode, kTileSpriteYOffsets,
            sizeof(kTileSpriteYOffsets));

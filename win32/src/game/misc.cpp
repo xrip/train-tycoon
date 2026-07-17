@@ -1,6 +1,15 @@
 // Small general game functions.
 #include "game_internal.h"
 
+void Renderer::resize_canvas(int32_t width, int32_t height) {
+    canvasWidth = width;
+    canvasHeight = height;
+    gameplayViewportHeight = height - 30;
+    bottomBarY = height - 15;
+    backbuffer = Image::create_blank(width, height);
+    backbuffer_surface = backbuffer->drawing_surface();
+}
+
 void Renderer::draw_sprite_quad(Surface& surface, const Assets& assets,
                                 int32_t n, int32_t n2, int32_t n3,
                                 int32_t n4) const {

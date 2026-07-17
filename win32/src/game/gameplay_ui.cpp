@@ -37,7 +37,7 @@ static void format_money(int32_t value, char *out, int out_size) {
 
 int32_t game_drawMenuRow(Game *game, Surface *graphics, int32_t sprite,
                        int32_t item_index, int32_t x, bool spaced) {
-    game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, x, bottomBarY, 20);
+    game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, x, game->renderer.bottomBarY, 20);
     if (game->ui.buildMenuItemIndex == item_index) game->ui.selectedMenuRowX = x;
     return x + 15 + (spaced ? 3 : 0);
 }
@@ -50,12 +50,12 @@ void game_drawHeaderBar(Game *game, Surface *graphics) {
         return;
 
     midp_set_color(graphics, 0x909090);
-    midp_fill_rect(graphics, 0, 0, canvasWidth, 14);
+    midp_fill_rect(graphics, 0, 0, game->renderer.canvasWidth, 14);
     midp_set_color(graphics, 0xBBBBBB);
-    midp_draw_rect(graphics, 0, 0, canvasWidth, 14);
+    midp_draw_rect(graphics, 0, 0, game->renderer.canvasWidth, 14);
     midp_set_color(graphics, 0x222222);
-    midp_draw_line(graphics, 1, 14, canvasWidth, 14);
-    midp_draw_line(graphics, canvasWidth - 1, 1, canvasWidth - 1, 14);
+    midp_draw_line(graphics, 1, 14, game->renderer.canvasWidth, 14);
+    midp_draw_line(graphics, game->renderer.canvasWidth - 1, 1, game->renderer.canvasWidth - 1, 14);
 
     char money_text[32];
     format_money(game->economy.money, money_text, sizeof(money_text));
@@ -63,14 +63,14 @@ void game_drawHeaderBar(Game *game, Surface *graphics) {
     game_renderFontString(game, graphics, 1, 5, money_bytes, false);
 
     char date_text[24];
-    if (canvasWidth < 140)
+    if (game->renderer.canvasWidth < 140)
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
                  game->economy.dayOfMonth, game->economy.monthOfYear, game->economy.year - 1900);
     else
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
                  game->economy.dayOfMonth, game->economy.monthOfYear, game->economy.year);
     const auto date_bytes = make_font_bytes(date_text, false);
-    game_renderFontString(game, graphics, canvasWidth - (canvasWidth < 140 ? 49 : 61),
+    game_renderFontString(game, graphics, game->renderer.canvasWidth - (game->renderer.canvasWidth < 140 ? 49 : 61),
                         5, date_bytes, false);
 
     game->cachedHeaderMoney = game->economy.money;
@@ -82,12 +82,12 @@ void game_drawHeaderBar(Game *game, Surface *graphics) {
 void game_drawConfirmBar(Game *game, Surface *graphics) {
     game_drawHeaderBar(game, graphics);
     midp_set_color(graphics, 0x606060);
-    midp_fill_rect(graphics, 0, bottomBarY, canvasWidth, 15);
+    midp_fill_rect(graphics, 0, game->renderer.bottomBarY, game->renderer.canvasWidth, 15);
     game_drawMenuRow(game, graphics, 201, 10, 0, false);
     game_drawMenuRow(game, graphics, 235, 10, 18, false);
     midp_set_color(graphics, 0xFFFFFF);
-    midp_draw_rect(graphics, 18 * game->ui.confirmToggle, bottomBarY, 14, 14);
-    midp_draw_rect(graphics, 18 * game->ui.confirmToggle + 1, bottomBarY + 1, 12, 12);
+    midp_draw_rect(graphics, 18 * game->ui.confirmToggle, game->renderer.bottomBarY, 14, 14);
+    midp_draw_rect(graphics, 18 * game->ui.confirmToggle + 1, game->renderer.bottomBarY + 1, 12, 12);
 }
 
 void game_paintMain(Game *game, Surface *graphics) {
@@ -95,20 +95,20 @@ void game_paintMain(Game *game, Surface *graphics) {
     game_drawHeaderBar(game, game->renderer.backbuffer_surface);
     if (!game->ui.menuDirty) return;
     midp_set_color(game->renderer.backbuffer_surface, 0x606060);
-    midp_fill_rect(game->renderer.backbuffer_surface, 0, bottomBarY, canvasWidth, 15);
+    midp_fill_rect(game->renderer.backbuffer_surface, 0, game->renderer.bottomBarY, game->renderer.canvasWidth, 15);
     int selected_x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode]
                                                [game->ui.buildMenuItemIndex]);
-    int scroll = selected_x + 15 - canvasWidth;
+    int scroll = selected_x + 15 - game->renderer.canvasWidth;
     if (scroll < 0) scroll = 0;
     int item_count = static_cast<int>(game->ui.buildMenuItems[game->ui.buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
         int x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
         int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
-        game->renderer.draw_sprite_quad(*game->renderer.backbuffer_surface, game->assets, sprite, x, bottomBarY, 20);
+        game->renderer.draw_sprite_quad(*game->renderer.backbuffer_surface, game->assets, sprite, x, game->renderer.bottomBarY, 20);
         if (item != game->ui.buildMenuItemIndex) continue;
         midp_set_color(game->renderer.backbuffer_surface, 0xFFFFFF);
-        midp_draw_rect(game->renderer.backbuffer_surface, x, bottomBarY, 14, 14);
-        midp_draw_rect(game->renderer.backbuffer_surface, x + 1, bottomBarY + 1, 12, 12);
+        midp_draw_rect(game->renderer.backbuffer_surface, x, game->renderer.bottomBarY, 14, 14);
+        midp_draw_rect(game->renderer.backbuffer_surface, x + 1, game->renderer.bottomBarY + 1, 12, 12);
     }
     if (game->ui.buildMenuMode == 2) {
         char cost_text[24];
@@ -124,7 +124,7 @@ void game_paintMain(Game *game, Surface *graphics) {
         for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
         std::copy(currency_codes.begin(), currency_codes.end(),
                   bytes.begin() + text_len + 1);
-        game_renderFontString(game, game->renderer.backbuffer_surface, 35, bottomBarY + 5, bytes, false);
+        game_renderFontString(game, game->renderer.backbuffer_surface, 35, game->renderer.bottomBarY + 5, bytes, false);
     }
     game->ui.menuDirty = false;
 }
@@ -135,7 +135,7 @@ int32_t game_drawNumber(Game *game, Surface *graphics,
     char text[24];
     snprintf(text, sizeof(text), "%lld", (long long)magnitude);
     const auto bytes = make_font_bytes(text, true);
-    game_drawTextBox(game, graphics, canvasWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
+    game_drawTextBox(game, graphics, game->renderer.canvasWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
     return y + 15;
 }
 

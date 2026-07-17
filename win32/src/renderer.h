@@ -21,6 +21,7 @@ struct World;
 // bounds -- both are part of the save format and keep their exact byte order.
 // lastViewportCenterX / viewportCenterYCached cache the last drawn camera centre.
 struct Renderer {
+    void resize_canvas(int32_t width, int32_t height);
     void draw_sprite_quad(Surface& surface, const Assets& assets,
                           int32_t sprite, int32_t x, int32_t y,
                           int32_t anchor) const;
@@ -30,6 +31,10 @@ struct Renderer {
 
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface = nullptr;
+    int32_t canvasWidth = 1;
+    int32_t canvasHeight = 1;
+    int32_t gameplayViewportHeight = -29;
+    int32_t bottomBarY = -14;
     int32_t currentSpriteId = 0;
     int32_t lastRenderedSpriteId = -1;
     int32_t spriteJustChanged = 0;

@@ -179,12 +179,7 @@ void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2) {
 
 void game_setCanvasSize(Game *game, int32_t n, int32_t n2) {
     if (game->lastCanvasWidth != n || game->lastCanvasHeight != n2) {
-        canvasWidth = n;
-        canvasHeight = n2;
-        game->renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
-        game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
-        gameplayViewportHeight = canvasHeight - 30;
-        bottomBarY = canvasHeight - 15;
+        game->renderer.resize_canvas(n, n2);
         game_buildTileDrawOrder(game, n, n2);
         game->lastCanvasWidth = n;
         game->lastCanvasHeight = n2;
@@ -260,8 +255,8 @@ void game_setState(Game *game, int32_t n) {
             break;
         case GameState::Playing:
             game->renderer.backbuffer = NULL;
-            game->renderer.backbuffer = Image::create_blank(canvasWidth, canvasHeight);
-            game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
+            game->renderer.resize_canvas(game->renderer.canvasWidth,
+                                         game->renderer.canvasHeight);
             game->renderer.lastViewportCenterX = -1;
             game->ui.menuDirty = true;
             break;

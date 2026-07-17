@@ -122,8 +122,4 @@ typedef struct Game {
     int32_t dayTickThreshold = 50;  // frames per game-day (dayFrameCounter counts up to this)
 } Game;
 
-extern int32_t canvasWidth;
-extern int32_t canvasHeight;
-extern int32_t gameplayViewportHeight;
-extern int32_t bottomBarY;
 #endif
