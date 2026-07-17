@@ -134,8 +134,9 @@ void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
                                  vehicle, 4, 15 - game->fleet.trainCars[car].secondaryCargoOrBaseEnergy));
                 game->fleet.trainCars[car].cargoAge = 0;
                 if (vehicle != game->fleet.trainCars[car].lastServiceSite && !construction_done) {
-                    game_advanceConstructionTimers(game, unsignedByte(game->fleet.trainCars[car].x),
-                                                 unsignedByte(game->fleet.trainCars[car].y), 4);
+                    game->world.advance_construction_timers(
+                        unsignedByte(game->fleet.trainCars[car].x),
+                        unsignedByte(game->fleet.trainCars[car].y), 4);
                     construction_done = true;
                 }
                 break;

@@ -130,7 +130,7 @@ void game_demolishAtCursor(Game *game) {
     game->build.backgroundCost = 0;
     int tile = game->world.terrain.tileMap[cursor_x][cursor_y];
     if (tile >= 81 && tile <= 86) {
-        game_advanceConstructionTimers(game, cursor_x, cursor_y, -3);
+        game->world.advance_construction_timers(cursor_x, cursor_y, -3);
         tile = game->world.terrain.tileMap[cursor_x][cursor_y];
         if (tile == 81 || tile == 84 || tile == 85) {
             int x;
@@ -184,13 +184,13 @@ void game_demolishAtCursor(Game *game) {
                 }
             }
             game_queueTileChange(game, x, y, true, false);
-            game_advanceConstructionTimers(game, x, y, -6);
+            game->world.advance_construction_timers(x, y, -6);
             game->world.trackMap[x][y] = 0;
             game->fleet.serviceSites[vehicle].flags = 0;
         }
     } else {
         game_queueTileChange(game, cursor_x, cursor_y, true, false);
-        game_advanceConstructionTimers(game, cursor_x, cursor_y, -6);
+        game->world.advance_construction_timers(cursor_x, cursor_y, -6);
     }
     game_applyBackgroundCost(game);
 }
@@ -263,7 +263,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                 break;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
-            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -8);
+            game->world.advance_construction_timers(
+                game->ui.tileCursorX, game->ui.tileCursorY, -8);
             game_incrementRowValueType13(game, game->economy.costPower);
             break;
         case 1:
@@ -275,7 +276,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                 break;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
-            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -8);
+            game->world.advance_construction_timers(
+                game->ui.tileCursorX, game->ui.tileCursorY, -8);
             game_incrementRowValueType13(game, game->economy.costPower);
             break;
         case 2:
@@ -291,7 +293,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 65;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 65;
-            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -11);
+            game->world.advance_construction_timers(
+                game->ui.tileCursorX, game->ui.tileCursorY, -11);
             game_incrementRowValueType13(game, game->economy.costStruct);
             break;
         case 3:
@@ -307,7 +310,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game->world.trackMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 65;
             game->world.trackMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 65;
-            game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -11);
+            game->world.advance_construction_timers(
+                game->ui.tileCursorX, game->ui.tileCursorY, -11);
             game_incrementRowValueType13(game, game->economy.costStruct);
             break;
     }
@@ -348,7 +352,7 @@ void game_computeTrackBuild(Game *game, int32_t start_x,
     game->world.trackMap[start_x][start_y] = 65;
     while ((start_x += step_x) != end_x || (start_y += step_y) != end_y) {
         game->world.terrain.tileMap[start_x][start_y] = (int8_t)middle_tile;
-        game_advanceConstructionTimers(game, start_x, start_y, -4);
+        game->world.advance_construction_timers(start_x, start_y, -4);
         game->world.trackMap[start_x][start_y] = 65;
     }
     game->renderer.lastViewportCenterX = -1;
@@ -414,7 +418,7 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
     game->renderer.lastViewportCenterX = -1;
     game_pushMoneyHistory(game, -cost);
     game_incrementRowValueType13(game, cost);
-    game_advanceConstructionTimers(game, x, y, -4);
+    game->world.advance_construction_timers(x, y, -4);
 }
 
 void game_normalizeTrackBits(Game *game) {
@@ -449,7 +453,8 @@ void game_setTrackOwnerCode(Game *game, int32_t owner) {
     for (int x = 0; x < game->world.terrain.mapWidth; ++x) {
         for (int y = 0; y < game->world.terrain.mapHeight; ++y) {
             if (game->world.trackMap[x][y] == track::PRESENT) {
-                if (owner == 1) game_advanceConstructionTimers(game, x, y, -4);
+                if (owner == 1)
+                    game->world.advance_construction_timers(x, y, -4);
                 game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | owner);
             }
             if (game->world.terrain.tileMap[x][y] != 76) continue;

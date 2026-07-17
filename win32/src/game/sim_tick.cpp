@@ -2,56 +2,56 @@
 #include "game_internal.h"
 #include <cstdlib>
 
-void game_decayConstructionTimersQuarterly(Game *game) {
-    if (game->economy.monthOfYear % 4 == 0) {
+void World::decay_construction_timers_quarterly(int32_t month) {
+    if (month % 4 == 0) {
         for (int i = 0; i < 64; ++i) {
-            if (game->world.constructionTimers[i] > 0)
-                --game->world.constructionTimers[i];
+            if (constructionTimers[i] > 0) --constructionTimers[i];
         }
     }
 }
 
-void game_advanceConstructionTimers(Game *game, int32_t n, int32_t n2, int32_t n3) {
+void World::advance_construction_timers(int32_t n, int32_t n2, int32_t n3) {
     bool seen[64] = {false};
     for (int i = n - 5; i <= n + 5; ++i) {
         for (int j = n2 - 5; j <= n2 + 5; ++j) {
-            if (!game->world.in_bounds(i, j)
-                || (game->world.trackMap[i][j] & 0xC0) != 128)
+            if (!in_bounds(i, j) || (trackMap[i][j] & 0xC0) != 128)
                 continue;
-            int n4 = game->world.trackMap[i][j] & 0x3F;
+            int n4 = trackMap[i][j] & 0x3F;
             if (seen[n4]) continue;
             seen[n4] = true;
             int n5;
             if (n3 < 0) {
-                n5 = game->world.constructionTimers[n4] * n3 * 3 / 200 - 1;
+                n5 = constructionTimers[n4] * n3 * 3 / 200 - 1;
                 if (n5 < n3) n3 = n5;
             } else {
-                n5 = (100 - game->world.constructionTimers[n4]) / 30 * n3 / 3 + 1;
+                n5 = (100 - constructionTimers[n4]) / 30 * n3 / 3 + 1;
                 if (n5 > n3) n5 = n3;
             }
-            game->world.constructionTimers[n4] = (int8_t)(game->world.constructionTimers[n4] + n5);
-            if (game->world.constructionTimers[n4] < 0) game->world.constructionTimers[n4] = 0;
-            if (game->world.constructionTimers[n4] > 100) game->world.constructionTimers[n4] = 100;
+            constructionTimers[n4] = (int8_t)(constructionTimers[n4] + n5);
+            if (constructionTimers[n4] < 0) constructionTimers[n4] = 0;
+            if (constructionTimers[n4] > 100) constructionTimers[n4] = 100;
         }
     }
 }
 
-void game_recountZonePopulation(Game *game) {
-    for (int n = 0; n < 64; ++n) game->world.zonePopulation[n] = 0;
-    for (int n = 0; n < game->world.terrain.mapWidth; ++n) {
-        for (int i = 0; i < game->world.terrain.mapHeight; ++i) {
-            if (game->world.terrain.tileMap[n][i] < tile::BUILT_FIRST || game->world.terrain.tileMap[n][i] > tile::CITY_ZONE_LAST) continue;
-            int n2 = game->world.trackMap[n][i] & 0x3F;
-            ++game->world.zonePopulation[n2];
+void World::recount_zone_population() {
+    for (int n = 0; n < 64; ++n) zonePopulation[n] = 0;
+    for (int n = 0; n < terrain.mapWidth; ++n) {
+        for (int i = 0; i < terrain.mapHeight; ++i) {
+            if (terrain.tileMap[n][i] < tile::BUILT_FIRST
+                || terrain.tileMap[n][i] > tile::CITY_ZONE_LAST)
+                continue;
+            int n2 = trackMap[n][i] & 0x3F;
+            ++zonePopulation[n2];
         }
     }
 }
 
-void game_updateCityPopulation(Game *game) {
+void World::update_city_population(JavaRandom& random) {
     for (int i = 0; i < 48; ++i) {
-        game->world.cities[i].population += (int8_t)(game->rng.next_int() % 8);
-        if (game->world.cities[i].population < 10) game->world.cities[i].population = 10;
-        if (game->world.cities[i].population > 90) game->world.cities[i].population = 90;
+        cities[i].population += (int8_t)(random.next_int() % 8);
+        if (cities[i].population < 10) cities[i].population = 10;
+        if (cities[i].population > 90) cities[i].population = 90;
     }
 }
 
@@ -736,8 +736,8 @@ void advanceMonthIfDayEnded(Game *game) {
 void applyNewMonthChanges(Game *game) {
     game->economy.dayOfMonth = 1;
     game_newYearNotify(game);
-    game_decayConstructionTimersQuarterly(game);
-    game_updateCityPopulation(game);
+    game->world.decay_construction_timers_quarterly(game->economy.monthOfYear);
+    game->world.update_city_population(game->rng);
     game_upgradeOneAiTrainForEra(game);
     switch (std::abs(game->rng.next_int() % 7)) {
         case 0: game->economy.moneyBaseA += 9; game->economy.moneyBaseB += 9; break;
@@ -812,7 +812,7 @@ void advanceGameDay(Game *game) {
             int forestFound = 0;
             for (int attempt = 0; attempt < 30; ++attempt)
                 forestFound = forestFound || game_pickValidForestTile(game);
-            if (forestFound) game_recountZonePopulation(game);
+            if (forestFound) game->world.recount_zone_population();
         }
         game_tickInputOrAi(game, false);
     }

@@ -6,6 +6,8 @@
 #include "support/grid.h"
 #include <cstdint>
 
+class JavaRandom;
+
 // World owns terrain, track, cities, growth, and map-generation state. resize
 // keeps the terrain and track grids at matching map dimensions.
 struct City {
@@ -81,6 +83,10 @@ struct World {
     bool is_tile_buildable(int32_t x, int32_t y, int32_t type) const;
     bool has_track_step(int32_t x, int32_t y, int32_t step_x,
                         int32_t step_y, int32_t tile_code) const;
+    void decay_construction_timers_quarterly(int32_t month);
+    void advance_construction_timers(int32_t x, int32_t y, int32_t amount);
+    void recount_zone_population();
+    void update_city_population(JavaRandom& random);
 };
 
 #endif  // WORLD_H

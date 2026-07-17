@@ -451,6 +451,41 @@ TEST_CASE("fast: city records keep defaults and save field positions") {
     delete game;
 }
 
+TEST_CASE("fast: world owns zone timers, population, and city growth") {
+    World world;
+    world.resize(12, 12);
+    world.constructionTimers[3] = 60;
+    world.trackMap[5][5] = static_cast<int8_t>(0x80 | 3);
+    world.trackMap[6][5] = static_cast<int8_t>(0x80 | 3);
+    world.advance_construction_timers(5, 5, -4);
+    CHECK(world.constructionTimers[3] == 56);
+    world.decay_construction_timers_quarterly(3);
+    CHECK(world.constructionTimers[3] == 56);
+    world.decay_construction_timers_quarterly(4);
+    CHECK(world.constructionTimers[3] == 55);
+
+    world.terrain.tileMap[2][2] = tile::BUILT_FIRST;
+    world.trackMap[2][2] = 3;
+    world.terrain.tileMap[3][2] = tile::CITY_ZONE_LAST;
+    world.trackMap[3][2] = 3;
+    world.terrain.tileMap[4][2] = tile::CITY_ZONE_LAST + 1;
+    world.trackMap[4][2] = 3;
+    world.recount_zone_population();
+    CHECK(world.zonePopulation[3] == 2);
+
+    JavaRandom actual_random{};
+    JavaRandom expected_random{};
+    actual_random.set_seed(2468);
+    expected_random.set_seed(2468);
+    world.cities[0].population = 50;
+    int expected_first = 50 + expected_random.next_int() % 8;
+    for (int city = 1; city < kCitySlotCount; ++city)
+        (void)expected_random.next_int();
+    world.update_city_population(actual_random);
+    CHECK(world.cities[0].population == expected_first);
+    CHECK(actual_random.next_int() == expected_random.next_int());
+}
+
 TEST_CASE("fast: offer records keep defaults and save field positions") {
     Game* game = make_game();
     CHECK(game->offerBoard.offers[0].objectiveType == 0);
