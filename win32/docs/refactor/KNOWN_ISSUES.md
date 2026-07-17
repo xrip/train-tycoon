@@ -2,21 +2,17 @@
 
 Open items need their own rule test and behavior decision.
 
-## K-001: Game lifetime does not release owned state
+## K-001: Uncertain legacy codes
 
-Tests and `main` delete only the outer `GameCanvas`. Image fields now have
-normal ownership, but more than 100 other pointer fields own data. The C++
-ownership stage will give them normal lifetime without a game rule change.
+Some overloaded cargo fields, service-site bits, slope values, and tile overlay
+codes still have names that state only proved use. Do not guess stronger names
+without checking every native use and adding a direct rule test.
 
-## K-002: Possible zero division
+## Resolved: type-2 offer with zero money
 
-`gc_computeMenuRowDisplayValue` has a branch that can divide by `money` when
-`money` is zero. It needs a separate rule test and behavior decision.
-
-## K-003: Unused or unclear fields
-
-Several short fields are only set during first-value work and have no native
-read. Do not remove them before the naming and dead-code proof item.
+The old progress calculation divided by company money when it was zero. A
+direct test now locks the rule at `0%`; positive and negative results stay the
+same.
 
 ## K-004: High-score network is not present
 

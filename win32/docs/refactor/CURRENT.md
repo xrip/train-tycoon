@@ -2,63 +2,30 @@
 
 ## Item
 
-`KISS-01` - remove needless C++ library form, dead state, weak names, and large
-mixed-purpose coordinators without changing game behavior.
-
-## Base and checkpoints
-
-- Base: `ce9e091` (`Add pointer edge scrolling`).
-- Behavior lock: `780f9f4`.
-- Public API and dead-state cleanup: `e3dda1e`.
-- Plain fixed game storage and concrete save walkers: `68507b8`.
-- Core name recovery: `34ba7a9`.
-- Ordered simulation, map generation, paint, map redraw, and packed-dialog
-  work: `f022c9f`, `d056f1d`, `ea5a3a3`, `c6c932c`, `c739969`.
-- Branch: `master`.
-- User-owned `.idea/` data is not part of this work.
+`DOMAIN-01` - C-with-Classes domain refactor.
 
 ## Result
 
-- `game.h` is the small application boundary. Shared core declarations are in
-  `game_internal.h`.
-- Dead host, timing, input, and helper state is gone.
-- Fixed game records use plain named arrays. `std::vector`, `std::unique_ptr`,
-  `Grid`, `std::span`, and `std::optional` stay only where size, ownership, a
-  borrowed text range, or a missing dialog value needs them.
-- Save work uses concrete byte, short, int, and grid walkers. Save field order
-  and bytes are fixed by tests.
-- `GameState` is a plain exact-value enum; no unary conversion helper remains.
-- The simulation tick and incremental map generator are ordered coordinators.
-  Static map redraw and overview paint are separate jobs. Packed dialog bytes
-  have names for their header, content items, selection bands, images, and draw
-  commands.
-- `savedLegacyMetricBq` stays because it is part of the old save form.
-- `game_syncHighScores` stays because live state-machine code calls it, even
-  though the native implementation is now a no-op.
+- `Game` is a class in `game.h` with the small app API; state is private.
+- The old free `game_*` API, `game_state.h`, and `game_internal.h` are gone.
+- `SaveCodec`, `Terrain`, `World`, `Fleet`, `Economy`, `OfferBoard`,
+  `Scenario`, `Pathfinder`, `BuildController`, `Assets`, `Renderer`, `Camera`,
+  `UiController`, and `MusicController` own their state and proved rules.
+- Train cars, service sites, cities, and offers are joined fixed records with
+  stable slots and no dual storage.
+- The app stack-owns `Game`. Tests use `SilentMusicOutput`, a fixed seed, and
+  the single friend `GameTestAccess`.
+- Save bytes, resource bytes, random order, tick order, and draw order did not
+  change. No golden value moved in structural commits.
+- The type-2 offer zero-money case has a direct test and returns `0%`.
 
-## Locked proof
+## Proof now
 
-The full Debug test set locks:
-
-- reset defaults and resource setup;
-- all scenario map digests;
-- exact save size, bytes, and round trip;
-- year-boundary saved-state digest;
-- packed report and graph pixel digests;
-- input and main frame digests.
-
-No golden value may move during `KISS-01`.
-
-## Proof result
-
-- Debug full: pass.
+- Debug fast and full: pass.
 - Release full: pass.
-- Fresh AddressSanitizer Debug full: pass after adding the MSVC ASan run-time
-  directory to `PATH`.
-- Bounded Release MIDI/launch path: exit 0.
+- Static source audit: no free `game_*` API and no function taking `Game*`.
+- Fresh AddressSanitizer full: pass (`build-asan-domain`).
+- Bounded Release MIDI device path: pass (2 seconds, exit 0).
 - Full visual play remains a human check.
 
-## Separate issue
-
-`game_computeMenuRowDisplayValue` can divide by zero for a bad row value. This
-is a game bug, not a behavior-safe cleanup, so it needs its own test and change.
+User-owned `.idea/` and `tools/` data are outside this work.

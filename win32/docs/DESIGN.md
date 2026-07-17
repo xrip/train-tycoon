@@ -1,65 +1,67 @@
-# Train Tycoon (win32) — design guide
+# Train Tycoon native design
 
-This is the native C++20 source of truth. It keeps the original game's behavior,
-resource read order, random call order, draw order, tick order, and the legacy
-`.rms` save byte order. Every refactor commit is behavior-identical: the
-fixed-seed golden-digest tests must not move.
+This C++20 source keeps the old save bytes, resource reads, stable slot ids,
+random reads, tick order, and draw order. Fixed-seed tests lock these rules.
 
-## The `Game` aggregate and its parts
+## Owner tree
 
-`Game` (in `src/game_state.h`, formerly `GameCanvas`) is a thin aggregate. It
-joins the owned parts and holds only the top-level coordinator state (the RNG,
-the tech era, the game-state selector, the frame/tick timers, loading flags,
-cached header values, and the music player). It is deliberately **not** a large
-public state bag — the game data lives in its parts:
+`Game`, defined in `src/game.h`, is the public app boundary and the coordinator
+for work that changes three or more owners.
 
-| Part | Header | Owns |
-|---|---|---|
-| `World` | `world.h` | map grids (tile/track/elevation/height), dimensions, city records, tile-animation queue, per-zone growth, map-generation params |
-| `Pathfinder` | `pathfinder.h` | BFS distance scratch, back-walk cursor, tie-break counter, path endpoints |
-| `Fleet` | `fleet.h` | train and service-vehicle records (stable slot ids), movement/cargo rule tables |
-| `Economy` | `economy.h` | money, loans, calendar, tax/interest, revenue/spend aggregates, station revenue, decade/period report totals, the era-scaled cost/performance model |
-| `Scenario` | `scenario.h` | campaign scores/leaderboard, milestones, AI opponent state, offer generation, identity/difficulty, high-score entry, feature flags |
-| `BuildController` | `build_controller.h` | track-laying, train-buy dialog, terrain-edit/selection, placement cursors |
-| `Assets` | `assets.h` | packed sprite data tables, loaded font/tile/cycle images, the sprite stream reader |
-| `Renderer` | `renderer.h` | backbuffer + borrowed surface, current-sprite tracking, culled visible-train list, drawn tile bounds, the camera/view transform, clip/repaint frame state |
-| `UiController` | `ui_controller.h` | menu rows and grids, dialog/confirm/transition state, report-graph display, on-map selection, cursor and key input |
-| `SaveCodec` | `save_codec.h` | serialization buffer and read cursor, snapshot bookkeeping |
+| Owner | Main state and rules |
+|---|---|
+| `World` | `Terrain`, track grid, `City[48]`, growth, and map generation state |
+| `Terrain` | tile, elevation, and height grids; size, edits, rebuild, and queued tile work |
+| `Fleet` | `TrainCar[500]`, `ServiceSite[250]`, chains, movement, cargo, load, and unload |
+| `Economy` | money, calendar, reports, costs, profit, and history |
+| `OfferBoard` | `Offer[6]`, issue dates, progress, expiry, generation, and effects |
+| `Scenario` | identity, difficulty, era, AI policy, milestones, and scores |
+| `Pathfinder` | search state and ordered path search |
+| `BuildController` | build, remove, terrain-edit, and train-buy action state |
+| `Assets` | packed data, images, text data, and fixed asset tables |
+| `Renderer` | draw caches, canvas state, graph colors, and `Camera` |
+| `UiController` | input, menus, reports, selection, and screen flow |
+| `SaveCodec` | concrete save walkers, compression, and snapshot state |
+| `MusicController` | output ownership, volume, load, enabled, and playing state |
 
-A part is a plain `struct` of data (C with Classes): fields plus, where useful, a
-small helper such as `World::in_bounds`. Game rules are free functions in
-`src/game/*.cpp` that read and write the parts through the `Game` aggregate.
+Owners do not keep a pointer or reference to another owner. A rule receives a
+needed partner by reference. Small text, number, and geometry operations stay
+free and file-local.
 
-## Invariants the tests lock
+## Public API
 
-- **Save bytes**: `game/save.cpp` writes fields in the exact legacy order via the
-  `IO_*` macros. Moving a field into a part changes the macro argument
-  (`field` -> `owner.field`) but never the order.
-- **Tick order**: the per-frame simulation runs in `game_simulationTick`
-  (`game/sim_tick.cpp`): animation timers, queued tile work, train updates, then
-  the day/month/year calendar cadence with its monthly and yearly hooks.
-- **Random order**: the 48-bit LCG (`JavaRandom`) is called in the same order as
-  the original; map generation depends on it.
-- **Signed bytes / stable slot ids / draw order**: unchanged.
+The app can start, advance, render, send key or pointer input, and control music
+through `Game`. All owner state and internal coordinator methods are private.
+Tests use the one friend `GameTestAccess`, defined under `tests/`; product code
+has no test setters. `SaveCodec` has direct access for the fixed save walk.
 
-## Building and testing
+## Fixed records and save form
 
-```
-cd win32
-cmake --preset windows-x64            # configure (VS 2022, x64)
+Train cars, service sites, cities, and offers are plain fixed records with
+stable integer slots. There is no heap object per record. Defaults keep the old
+zero-filled values and sentinels.
+
+`SaveCodec` writes fields in the old field-major order. It never writes raw
+record memory or `sizeof(record)`. City revenue is stored in `City`, but its
+bytes remain at the old early save position.
+
+## Order rules
+
+- Map generation keeps each random read and stage call in its old order.
+- A simulation frame runs animation, queued tile work, trains, then calendar.
+- Multi-byte reads use ordered statements.
+- Render-time state changes remain in `Game`; model inputs to draw helpers are
+  const where drawing does not own the old timing change.
+
+## Build and test
+
+```powershell
 cmake --build --preset build-debug
-ctest --preset test-debug-full --output-on-failure
+ctest --preset test-debug-full
 cmake --build --preset build-release
-ctest --preset test-release-full --output-on-failure
+ctest --preset test-release-full
 ```
 
-AddressSanitizer is run at stage exits with `/fsanitize=address` (add it to
-`CMAKE_CXX_FLAGS` alongside `/EHsc` in a throwaway build dir).
-
-## What is intentionally still on `Game`
-
-The top-level coordinator state (rng, era, gameState, dayFrameCounter, loading
-flags, cachedHeader*, music, and the one save-only carried
-`savedLegacyMetricBq`). These are the aggregate's own frame/coordinator concerns,
-not a sub-part. See `docs/refactor/DECISIONS.md` and `STATUS.md` for the item
-history.
+Run a fresh AddressSanitizer tree at each main stage. The final human check is a
+normal play session with build, train, offer, year, save/load, overview, input,
+and music work.

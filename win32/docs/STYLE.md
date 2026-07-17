@@ -52,6 +52,11 @@ state the supported byte forms more clearly.
 - Do not add a raw owning pointer. Existing raw ownership is removed only by
   its planned ownership item.
 - Keep file, image, record-store, and WinMM handles in small RAII classes.
+- An owner does not store a pointer or reference to another domain owner.
+- Pass required partners by reference. Keep work that changes three or more
+  owners in a private `Game` coordinator.
+- Keep stable integer slots for fixed game records; do not add one heap object
+  per train, car, city, offer, service site, or tile.
 
 ## Source form
 

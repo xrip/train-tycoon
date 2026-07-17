@@ -4,7 +4,7 @@ The plan's final proof is a mix of automated gates and one human step. Everythin
 that can be automated is scripted and currently green; only the human visual
 proof remains.
 
-## Automated — all green (2026-07-16)
+## Automated — all green (2026-07-17)
 
 | Check | How | Status |
 |---|---|---|
@@ -12,7 +12,7 @@ proof remains.
 | Release build + full tests | `cmake --build --preset build-release` then `ctest --preset test-release-full` | pass |
 | AddressSanitizer full tests | build with `/fsanitize=address /EHsc`, run full ctest | pass, 0 errors |
 | All scenarios | `full: all scenario maps have fixed digests` covers all 13 scenarios | pass |
-| Long simulation | `generate_scenario` drives up to 200,000 `game_update` steps per scenario | pass |
+| Long simulation | `generate_scenario` drives up to 200,000 private state-machine steps per scenario | pass |
 | Rendered frames | `full: scenario zero input and frames have fixed digests` (pixel digests) | pass |
 | Save round trip | `fast: save buffer bytes and round trip` | pass |
 | MIDI device (headless) | `TRAIN_TYCOON_MIDI_TEST_MS=2000 ./build/Release/train_tycoon.exe` -> exit 0 | pass |

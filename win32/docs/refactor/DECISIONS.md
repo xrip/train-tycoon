@@ -1,5 +1,8 @@
 # Refactor decisions
 
+Entries before D-020 record the path taken and may use old names or deferred
+placements. D-020 and `docs/DESIGN.md` state the final form where they differ.
+
 ## D-001: Language and style
 
 - End state: C++20.
@@ -402,12 +405,23 @@ syntax:
 - `std::span` only at borrowed text and byte interfaces;
 - `std::optional` only for a dialog value that can be absent;
 - concrete save walkers instead of template overload sets;
-- a small public `game.h` and one private `game_internal.h`;
+- one self-contained public `game.h`; internal methods and state are private;
 - ordered file-local helpers for the simulation tick, map generation, overview
   paint, static map redraw, and packed dialog byte reader.
 
 The locked save and pixel digests were added before these changes. No golden
 value changed.
+
+## D-020: Domain owners and a private Game boundary
+
+The final domain move uses owner classes with plain fixed records. Owners do
+not store links to other owners; needed partners are method arguments. Work
+that changes three or more owners stays an ordered private `Game` coordinator.
+
+`Game` exposes only start, frame, render, input, and music calls. `SaveCodec`
+has the needed save-walk access. Integration tests use one friend access type
+defined only under `tests/`. The old free API and the two broad game-state
+headers were removed.
 
 ## D-006: Plain native resources
 
