@@ -8,36 +8,36 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
         case 1:
             switch (n2) {
                 case 1:
-                    if (game->ready) { game->ui.transitionCode = 4; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 4; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 4; game->set_state(GameState::Playing); break;
                 case 2:
                     game->ui.screenParam = 1;
-                    if (game->ready) { game->ui.transitionCode = 14; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 14; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 14; game->set_state(GameState::Playing); break;
                 case 3:
                     game->ui.screenParam = 0;
-                    if (game->ready) { game->ui.transitionCode = 14; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 14; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 14; game->set_state(GameState::Playing); break;
                 case 4:
-                    if (game->ready) { game->ui.transitionCode = 10; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 10; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 10; game->set_state(GameState::Playing); break;
                 case 5:
-                    if (game->ready) { game->ui.transitionCode = 2; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 2; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 2; game->set_state(GameState::Playing); break;
                 case 6:
-                    if (game->ready) { game->ui.transitionCode = 3; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 3; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 3; game->set_state(GameState::Playing); break;
                 case 7:
                     game->set_state(GameState::Playing); break;
                 case 8:
-                    if (game->ready) { game->ui.transitionCode = 5; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 5; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 5; game->set_state(GameState::Playing); break;
                 case 9:
-                    if (game->ready) { game->ui.transitionCode = 28; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 28; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 28; game->set_state(GameState::Playing); break;
                 case 99:
                     game->ui.screenParam = 2;
-                    if (game->ready) { game->ui.transitionCode = 14; game_resetOverlayRenderState(game); break; }
+                    if (game->ready) { game->ui.transitionCode = 14; game->reset_overlay_render_state(); break; }
                     game->ui.pendingTransitionCode = 14; game->set_state(GameState::Playing); break;
             }
             break;
@@ -45,7 +45,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             if (n2 == 2) {
                 if (game->ui.screenParam == 4) { game->ui.pendingTransitionCode = 26; game->set_state(GameState::Playing); break; }
                 if (game->ui.screenParam == 3) { game->set_state(GameState::LoadingResources); break; }
-                if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
+                if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
                 game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
             }
             switch (game->ui.screenParam) {
@@ -75,16 +75,16 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             game->set_state(GameState::Playing); break;
         case 2:
         case 3:
-            if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
         case 6:
             game->set_state(GameState::Playing); break;
         case 7:
             game->ready = false; game->scenario.aiEnabled = true; game->ui.transitionCode = 1;
-            game_resetOverlayRenderState(game); game->set_state(GameState::MenuOverlay); break;
+            game->reset_overlay_render_state(); game->set_state(GameState::MenuOverlay); break;
         case 5:
             if (n2 >= 2) { game->scenario.activeScenario = n2; game->set_state(GameState::GeneratingMap); break; }
-            if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
         case 4:
             switch (n2) {
@@ -110,7 +110,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 10:
                     game->scenario.activeScenario = game->scenario.scenarioMilestone; game->set_state(GameState::GeneratingMap); goto hbms_end;
             }
-            if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
         case 20:
             game->set_state(GameState::Playing); break;
@@ -196,11 +196,11 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     game->set_music_volume(game->music.volumeLevel); goto hbms_end;
             }
             game_persistSnapshotMode0(game);
-            if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
         case 18:
         case 19:
-            if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
         case 8:
         case 9:
@@ -295,7 +295,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             game->set_state(GameState::Playing); break;
         case 28:
             if (n2 == 41) { game->scenario.highScoreUploadRequested = false; game->set_state(GameState::HighScoreSync); break; }
-            if (game->ready) { game->ui.transitionCode = n2 == 40 ? 27 : 1; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = n2 == 40 ? 27 : 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = n2 == 40 ? 27 : 1; game->set_state(GameState::Playing); break;
         case 27:
             if (n2 == 40) { game->scenario.highScoreUploadRequested = true; game->set_state(GameState::HighScoreSync); break; }
@@ -320,7 +320,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             }
             if (n2 >= 0) break;
             game_persistSnapshotMode0(game);
-            if (game->ready) { game->ui.transitionCode = 28; game_resetOverlayRenderState(game); break; }
+            if (game->ready) { game->ui.transitionCode = 28; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 28; game->set_state(GameState::Playing); break;
     }
 hbms_end:

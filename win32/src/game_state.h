@@ -84,6 +84,9 @@ typedef struct Game {
                           int32_t height);
     void place_terrain_patch(int32_t x, int32_t y);
     void place_terrain_feature(int32_t type);
+    void reset_overlay_render_state();
+    void load_settings_snapshot();
+    void set_canvas_size(int32_t width, int32_t height);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
@@ -128,7 +131,7 @@ typedef struct Game {
     int32_t tile55AnimationPhase = 0;
     int32_t tile55AnimationFrame = 0;
     int32_t graphColors[kGraphColorCount]{};  // 3 series x 3 colors for report graphs
-    int32_t lastCanvasWidth = -1;   // last size passed to game_setCanvasSize
+    int32_t lastCanvasWidth = -1;   // last size passed to set_canvas_size
     int32_t lastCanvasHeight = -1;
     int32_t savedGameState = 0;  // game state stashed for return after an overlay
     int32_t loadingAnimationFrame = 0;

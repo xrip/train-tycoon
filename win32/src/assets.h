@@ -21,6 +21,7 @@ struct Assets {
     void load_packed_sprite_data(const char* resource_name);
     std::unique_ptr<Image> decode_png_from_sprite_stream();
     std::vector<int8_t> read_packed_text_codes(int32_t offset) const;
+    void build_tile_draw_order(int32_t width, int32_t height);
 
     std::vector<int16_t> spriteOffsetTable;
     std::vector<int8_t> spriteData;

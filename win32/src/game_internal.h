@@ -11,7 +11,6 @@
 constexpr int32_t unsignedByte(int8_t value) {
     return static_cast<uint8_t>(value);
 }
-void game_resetOverlayRenderState(Game *game);
 void game_renderPackedSprite(Game *game, Surface* graphics, int32_t n);
 void game_renderFontString(Game *game, Surface* graphics, int32_t n, int32_t n2,
                          std::span<const int8_t> codes, bool bl);
@@ -61,7 +60,6 @@ void game_loadTrainAtServiceVehicle(Game *game, int32_t n, int32_t n2, bool bl);
 void game_decrementTrainCargoOptionCounts(Game *game, int32_t n);
 bool game_applyTrainUpgrade(Game *game, int32_t n, int32_t n2, int32_t* nArray);
 void game_persistSnapshotMode0(Game *game);
-void game_persistSnapshotMode1(Game *game);
 void game_newYearNotify(Game *game);
 int32_t game_scanMapForMetric(Game *game);
 void game_checkScenarioMilestone(Game *game);
@@ -69,13 +67,9 @@ void game_rebuildMenuTypeIndexes(Game *game);
 void game_incrementCargoOptionCount(Game *game, int32_t n);
 void game_decrementCargoOptionCount(Game *game, int32_t n);
 int32_t game_computeMapTrainMetric(Game *game, int32_t n);
-void game_appendTileDrawOffset(ByteBuffer& x_offsets,
-                             ByteBuffer& y_offsets, int32_t x, int32_t y);
-void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2);
 void game_drawTextBox(Game *game, Surface* graphics, int32_t n, int32_t n2,
                     int32_t n3, int32_t n4, std::span<const int8_t> codes);
 void game_enterOutOfMoneyState(Game *game);
 void game_drawSelectedTrainLabel(Game *game, Surface* graphics, int32_t x, int32_t y, int8_t selectionIndex);
-void game_setCanvasSize(Game *game, int32_t n, int32_t n2);
 
 #endif  // GAME_INTERNAL_H

@@ -16,7 +16,8 @@ void Game::key_pressed(int32_t n) {
     game->ui.currentKey = n;
 }
 
-void game_resetOverlayRenderState(Game *game) {
+void Game::reset_overlay_render_state() {
+    Game *game = this;
     game->ui.cursorScale = 0;
     game->ui.cursorDragY = -1;
     game->ui.cursorSelectY = -1;
@@ -121,21 +122,23 @@ std::vector<int8_t> Assets::read_packed_text_codes(int32_t offset) const {
             spriteData.data() + offset + 1 + code_count};
 }
 
-void game_persistSnapshotMode1(Game *game) {
+void Game::load_settings_snapshot() {
+    Game *game = this;
     game->saveCodec.load_slot(5, save::MODE_READ);
     game->saveCodec.walk_settings(*game);
     game->set_music_volume(game->music.volumeLevel);
 }
 
 // Add one isometric tile-draw offset pair.
-void game_appendTileDrawOffset(ByteBuffer& x_offsets,
-                             ByteBuffer& y_offsets, int32_t x, int32_t y) {
+static void append_tile_draw_offset(ByteBuffer& x_offsets,
+                                    ByteBuffer& y_offsets,
+                                    int32_t x, int32_t y) {
     x_offsets.write(x);
     y_offsets.write(y);
 }
 
 // public void k(int n, int n2) -- build+sort the iso tile-draw order tables
-void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2) {
+void Assets::build_tile_draw_order(int32_t n, int32_t n2) {
     ByteBuffer x_offsets;
     ByteBuffer y_offsets;
     int n3, n4, n5;
@@ -146,41 +149,42 @@ void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2) {
         for (n4 = -1; n4 < n7; ++n4) {
             n3 = n4 - n5 / 2;
             int n8 = n5 % 2 == 0 ? 0 + n4 + n5 / 2 : -1 + n4 + n5 / 2;
-            game_appendTileDrawOffset(x_offsets, y_offsets, n3, n8);
+            append_tile_draw_offset(x_offsets, y_offsets, n3, n8);
         }
     }
     const auto x_offset_bytes = x_offsets.bytes();
     const auto y_offset_bytes = y_offsets.bytes();
     int sz = static_cast<int>(x_offset_bytes.size());
-    game->assets.tileOffsetX.resize(static_cast<std::size_t>(sz));
-    memcpy(game->assets.tileOffsetX.data(), x_offset_bytes.data(), (size_t)sz);
-    game->assets.tileOffsetY.resize(static_cast<std::size_t>(sz));
-    memcpy(game->assets.tileOffsetY.data(), y_offset_bytes.data(), (size_t)sz);
-    game->assets.numActiveTileAnimations = sz;
+    tileOffsetX.resize(static_cast<std::size_t>(sz));
+    memcpy(tileOffsetX.data(), x_offset_bytes.data(), (size_t)sz);
+    tileOffsetY.resize(static_cast<std::size_t>(sz));
+    memcpy(tileOffsetY.data(), y_offset_bytes.data(), (size_t)sz);
+    numActiveTileAnimations = sz;
     do {
         n5 = 0;
-        for (n4 = 0; n4 < game->assets.numActiveTileAnimations - 1; ++n4) {
-            if (game->assets.tileOffsetY[n4] <= game->assets.tileOffsetY[n4 + 1]) continue;
-            n3 = game->assets.tileOffsetY[n4]; game->assets.tileOffsetY[n4] = game->assets.tileOffsetY[n4 + 1]; game->assets.tileOffsetY[n4 + 1] = (int8_t)n3;
-            n3 = game->assets.tileOffsetX[n4]; game->assets.tileOffsetX[n4] = game->assets.tileOffsetX[n4 + 1]; game->assets.tileOffsetX[n4 + 1] = (int8_t)n3;
+        for (n4 = 0; n4 < numActiveTileAnimations - 1; ++n4) {
+            if (tileOffsetY[n4] <= tileOffsetY[n4 + 1]) continue;
+            n3 = tileOffsetY[n4]; tileOffsetY[n4] = tileOffsetY[n4 + 1]; tileOffsetY[n4 + 1] = (int8_t)n3;
+            n3 = tileOffsetX[n4]; tileOffsetX[n4] = tileOffsetX[n4 + 1]; tileOffsetX[n4 + 1] = (int8_t)n3;
             n5 = 1;
         }
     } while (n5 != 0);
     do {
         n5 = 0;
-        for (n4 = 1; n4 < game->assets.numActiveTileAnimations; ++n4) {
-            if (game->assets.tileOffsetX[n4] <= game->assets.tileOffsetX[n4 - 1] || game->assets.tileOffsetY[n4] != game->assets.tileOffsetY[n4 - 1]) continue;
-            n3 = game->assets.tileOffsetY[n4]; game->assets.tileOffsetY[n4] = game->assets.tileOffsetY[n4 - 1]; game->assets.tileOffsetY[n4 - 1] = (int8_t)n3;
-            n3 = game->assets.tileOffsetX[n4]; game->assets.tileOffsetX[n4] = game->assets.tileOffsetX[n4 - 1]; game->assets.tileOffsetX[n4 - 1] = (int8_t)n3;
+        for (n4 = 1; n4 < numActiveTileAnimations; ++n4) {
+            if (tileOffsetX[n4] <= tileOffsetX[n4 - 1] || tileOffsetY[n4] != tileOffsetY[n4 - 1]) continue;
+            n3 = tileOffsetY[n4]; tileOffsetY[n4] = tileOffsetY[n4 - 1]; tileOffsetY[n4 - 1] = (int8_t)n3;
+            n3 = tileOffsetX[n4]; tileOffsetX[n4] = tileOffsetX[n4 - 1]; tileOffsetX[n4 - 1] = (int8_t)n3;
             n5 = 1;
         }
     } while (n5 != 0);
 }
 
-void game_setCanvasSize(Game *game, int32_t n, int32_t n2) {
+void Game::set_canvas_size(int32_t n, int32_t n2) {
+    Game *game = this;
     if (game->lastCanvasWidth != n || game->lastCanvasHeight != n2) {
         game->renderer.resize_canvas(n, n2);
-        game_buildTileDrawOrder(game, n, n2);
+        game->assets.build_tile_draw_order(n, n2);
         game->lastCanvasWidth = n;
         game->lastCanvasHeight = n2;
         game->ui.menuDirty = true;
@@ -247,7 +251,7 @@ void Game::set_state(int32_t n) {
             break;
         }
         case GameState::MenuOverlay:
-            game_resetOverlayRenderState(game);
+            game->reset_overlay_render_state();
             if (!game->ui.useDefaultOverlaySelection) game->ui.cursorDragY = 2;
             game->ui.useDefaultOverlaySelection = true;
             break;
@@ -274,7 +278,7 @@ void Game::set_state(int32_t n) {
 // The host owns the loop; start only loads saved settings and enters boot.
 void Game::start() {
     Game* game = this;
-    game_persistSnapshotMode1(game);
+    game->load_settings_snapshot();
     game->set_state(GameState::BootSplash0);
     // Display.setCurrent + Thread(this).start() are replaced by the host loop.
 }

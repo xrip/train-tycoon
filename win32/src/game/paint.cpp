@@ -41,7 +41,7 @@ void paintMapOverview(Game *game, Surface *g) {
     }
     if (game->ui.pendingTransitionCode <= -1) return;
     game->ui.transitionCode = game->ui.pendingTransitionCode;
-    game_resetOverlayRenderState(game);
+    game->reset_overlay_render_state();
     game->ui.pendingTransitionCode = -1;
     game_renderPackedSprite(game, g, game->ui.transitionCode);
     game->set_state(GameState::MenuOverlay);
@@ -55,7 +55,7 @@ void Game::render(Surface& surface) {
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
     game->clickMap.clear();  // rebuild overlay hit-rects fresh each frame
-    game_setCanvasSize(game, n, n2);
+    game->set_canvas_size(n, n2);
     if (game->gameState != GameState::MapOverview && game->gameState != GameState::BuildingMinimap && game->gameState != GameState::BuildingPath
         && game->gameState != GameState::SavingGame && game->gameState != GameState::LoadingGame && game->gameState != GameState::AiTurn
         && game->gameState != GameState::HighScoreSync && (game->gameState != GameState::MenuOverlay || game->ready)) {
@@ -145,7 +145,7 @@ void Game::render(Surface& surface) {
             if (game->ui.pauseFlag) game->renderer.draw_sprite_quad(*g, game->assets, 236, 0, 15, 0);
             if (game->ui.pendingTransitionCode > -1) {
                 game->ui.transitionCode = game->ui.pendingTransitionCode;
-                game_resetOverlayRenderState(game);
+                game->reset_overlay_render_state();
                 game->ui.pendingTransitionCode = -1;
                 game_renderPackedSprite(game, g, game->ui.transitionCode);
                 game->set_state(GameState::MenuOverlay);
@@ -154,7 +154,7 @@ void Game::render(Surface& surface) {
             game->ui.transitionDebounce = (int8_t)(game->ui.transitionDebounce - 1);
             if (game->ui.transitionDebounce != 0) break;
             game->ui.transitionCode = transition::SCENARIO_NOTICE_BASE + game->scenario.scenarioNoticeCode;
-            game_resetOverlayRenderState(game);
+            game->reset_overlay_render_state();
             game->ready = false;
             game_renderPackedSprite(game, g, game->ui.transitionCode);
             game->set_state(GameState::MenuOverlay);

@@ -110,7 +110,7 @@ void updateIntroReady(Game *game) {
     game->ready = true;
     game->ui.screenParam = 3;
     game->ui.transitionCode = 14;
-    game_resetOverlayRenderState(game);
+    game->reset_overlay_render_state();
     game->set_state(GameState::MenuOverlay);
 }
 
