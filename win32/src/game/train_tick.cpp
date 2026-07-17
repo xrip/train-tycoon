@@ -279,7 +279,8 @@ static int normalize_track_variant(int variant) {
     }
 }
 
-void game_updateTrain(Game *game, int32_t head) {
+void Game::update_train(int32_t head) {
+    Game *game = this;
     int stop_chain = 0;
     if (!train_flag::isHead(game->fleet.trainCars[head].flags)
         || unsignedByte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) <= 0) {
@@ -444,7 +445,7 @@ void game_updateTrain(Game *game, int32_t head) {
             }
         }
         if (stop_chain == 0 && collision == 0 && game->fleet.trainCars[head].nextCar != -1)
-            game_updateTrain(game, game->fleet.trainCars[head].nextCar);
+            game->update_train(game->fleet.trainCars[head].nextCar);
     }
     if (train_flag::isHead(game->fleet.trainCars[head].flags)) {
         int energy = unsignedByte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) - 3;

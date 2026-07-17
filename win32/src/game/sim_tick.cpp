@@ -733,8 +733,8 @@ void updateActiveTrains(Game *game) {
             game->fleet.trainCars[trainIndex].flags = 0;
             continue;
         }
-        game_updateTrain(game, trainIndex);
-        game_updateTrain(game, trainIndex);
+        game->update_train(trainIndex);
+        game->update_train(trainIndex);
         if (game->fleet.trainCars[trainIndex].phase == 0)
             game->merge_train_at(trainIndex);
     }

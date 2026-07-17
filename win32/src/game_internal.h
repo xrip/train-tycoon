@@ -51,7 +51,6 @@ void game_popSelectedOption(Game *game);
 bool game_buyTrainAtCursor(Game *game);
 void game_tickInputOrAi(Game *game, bool bl);
 void game_simulationTick(Game *game);
-void game_updateTrain(Game *game, int32_t n);
 void game_decrementTrainCargoOptionCounts(Game *game, int32_t n);
 bool game_applyTrainUpgrade(Game *game, int32_t n, int32_t n2, int32_t* nArray);
 void game_persistSnapshotMode0(Game *game);

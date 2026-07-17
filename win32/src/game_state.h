@@ -89,6 +89,7 @@ typedef struct Game {
     void set_canvas_size(int32_t width, int32_t height);
     void render_packed_sprite(Surface& surface, int32_t sprite_id);
     int32_t unload_train_revenue(int32_t car, int32_t service_site);
+    void update_train(int32_t head);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

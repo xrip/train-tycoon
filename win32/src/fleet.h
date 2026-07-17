@@ -106,7 +106,7 @@ struct Fleet {
 
     // Movement-rule lookup tables: for each track-shape variant, the [0] entry is
     // the entering train direction and [1] the exiting direction (forward/reverse
-    // travel). Used by game_updateTrain to step trains along track. Constant,
+    // travel). Used by Game::update_train to step trains along track. Constant,
     // populated at init, not saved.
     int8_t forwardTrackSteps[kTrackDirectionCount][kTrackStepValueCount]{};
     int8_t reverseTrackSteps[kTrackDirectionCount][kTrackStepValueCount]{};
