@@ -124,7 +124,8 @@ void Terrain::rebuild(BuildController& build, bool bl) {
     }
 }
 
-void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl) {
+void Game::smooth_tile_at(int32_t n, int32_t n2, bool bl) {
+    Game *game = this;
     if ((bl && game->world.terrain.heightMap[n][n2] < 3) || (!bl && game->world.terrain.heightMap[n][n2] > -1)) {
         game->build.set_terrain_selection(game->world.terrain, n, n2);
         if (game->build.adjust_terrain_point(
@@ -147,7 +148,9 @@ void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl) {
     game->renderer.lastViewportCenterX = -1;
 }
 
-void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
+void Game::raise_terrain_area(int32_t n, int32_t n2, int32_t n3,
+                              int32_t n4, int32_t n5) {
+    Game *game = this;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
@@ -171,36 +174,41 @@ void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
     }
 }
 
-void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5) {
+void Game::lower_terrain_area(int32_t n, int32_t n2, int32_t n3,
+                              int32_t n4, int32_t n5) {
+    Game *game = this;
     (void)n5;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
-            for (int k = 0; k < 3; ++k) game_smoothTileAt(game, i, j, false);
-            if (nextRngInt(game) % 2 < 0 && i > 0) game_smoothTileAt(game, i - 1, j, false);
-            if (nextRngInt(game) % 2 < 0 && j > 0) game_smoothTileAt(game, i, j - 1, false);
-            if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth) game_smoothTileAt(game, i + 1, j, false);
+            for (int k = 0; k < 3; ++k) game->smooth_tile_at(i, j, false);
+            if (nextRngInt(game) % 2 < 0 && i > 0) game->smooth_tile_at(i - 1, j, false);
+            if (nextRngInt(game) % 2 < 0 && j > 0) game->smooth_tile_at(i, j - 1, false);
+            if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth) game->smooth_tile_at(i + 1, j, false);
             if (nextRngInt(game) % 2 >= 0 || j >= game->world.terrain.mapHeight) continue;
-            game_smoothTileAt(game, i, j + 1, false);
+            game->smooth_tile_at(i, j + 1, false);
         }
     }
 }
 
-void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
+void Game::track_build_step(int32_t n, int32_t n2, int32_t n3,
+                            int32_t n4) {
+    Game *game = this;
     int8_t by = -2;
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i >= game->world.terrain.mapWidth || j >= game->world.terrain.mapHeight) continue;
             if (by == -2 && (by = game->world.terrain.heightMap[i][j]) < 0) by = 0;
-            while (by != game->world.terrain.heightMap[i][j]) game_smoothTileAt(game, i, j, by > game->world.terrain.heightMap[i][j]);
-            while (by != game->world.terrain.heightMap[i + 1][j]) game_smoothTileAt(game, i + 1, j, by > game->world.terrain.heightMap[i + 1][j]);
-            while (by != game->world.terrain.heightMap[i][j + 1]) game_smoothTileAt(game, i, j + 1, by > game->world.terrain.heightMap[i][j + 1]);
-            while (by != game->world.terrain.heightMap[i + 1][j + 1]) game_smoothTileAt(game, i + 1, j + 1, by > game->world.terrain.heightMap[i + 1][j + 1]);
+            while (by != game->world.terrain.heightMap[i][j]) game->smooth_tile_at(i, j, by > game->world.terrain.heightMap[i][j]);
+            while (by != game->world.terrain.heightMap[i + 1][j]) game->smooth_tile_at(i + 1, j, by > game->world.terrain.heightMap[i + 1][j]);
+            while (by != game->world.terrain.heightMap[i][j + 1]) game->smooth_tile_at(i, j + 1, by > game->world.terrain.heightMap[i][j + 1]);
+            while (by != game->world.terrain.heightMap[i + 1][j + 1]) game->smooth_tile_at(i + 1, j + 1, by > game->world.terrain.heightMap[i + 1][j + 1]);
         }
     }
 }
 
-void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2) {
+void Game::place_terrain_patch(int32_t n, int32_t n2) {
+    Game *game = this;
     int n3, n4, n5, n6;
     int8_t by, by2, by3, by4;
     int n7 = abs(nextRngInt(game) % 5) + game->world.terrainPatchBaseSize;
@@ -278,25 +286,25 @@ void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2) {
             if (n5 == -2 && (n5 = game->world.terrain.heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
             int64_t l = midp_current_time_millis();
             while (n5 != game->world.terrain.heightMap[n + by4][n2 + by3]) {
-                game_smoothTileAt(game, n + by4, n2 + by3, n5 > game->world.terrain.heightMap[n + by4][n2 + by3]);
+                game->smooth_tile_at(n + by4, n2 + by3, n5 > game->world.terrain.heightMap[n + by4][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != game->world.terrain.heightMap[n + by4 + 1][n2 + by3]) {
-                game_smoothTileAt(game, n + by4 + 1, n2 + by3, n5 > game->world.terrain.heightMap[n + by4 + 1][n2 + by3]);
+                game->smooth_tile_at(n + by4 + 1, n2 + by3, n5 > game->world.terrain.heightMap[n + by4 + 1][n2 + by3]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != game->world.terrain.heightMap[n + by4][n2 + by3 + 1]) {
-                game_smoothTileAt(game, n + by4, n2 + by3 + 1, n5 > game->world.terrain.heightMap[n + by4][n2 + by3 + 1]);
+                game->smooth_tile_at(n + by4, n2 + by3 + 1, n5 > game->world.terrain.heightMap[n + by4][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
             l = midp_current_time_millis();
             while (n5 != game->world.terrain.heightMap[n + by4 + 1][n2 + by3 + 1]) {
-                game_smoothTileAt(game, n + by4 + 1, n2 + by3 + 1, n5 > game->world.terrain.heightMap[n + by4 + 1][n2 + by3 + 1]);
+                game->smooth_tile_at(n + by4 + 1, n2 + by3 + 1, n5 > game->world.terrain.heightMap[n + by4 + 1][n2 + by3 + 1]);
                 if (midp_current_time_millis() - l <= 1000) continue;
                 game->build.trackBuildInProgress = true; return;
             }
@@ -316,7 +324,8 @@ void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2) {
     }
 }
 
-void game_placeTerrainFeature(Game *game, int32_t n) {
+void Game::place_terrain_feature(int32_t n) {
+    Game *game = this;
     int n2, n3, n4, n5, n6, n7;
     bool bl;
     if (game->build.trackBuildInProgress) return;
@@ -340,7 +349,7 @@ void game_placeTerrainFeature(Game *game, int32_t n) {
         break;
     } while (!bl);
     if (game->build.trackBuildInProgress) return;
-    game_trackBuildStep(game, n7, n6, n5, n4);
+    game->track_build_step(n7, n6, n5, n4);
     n3 = game->add_city_entry(n);
     switch (n) {
         case 0:
@@ -449,7 +458,7 @@ void generateTerrainHeightStep(Game *game) {
             int width = abs(nextRngInt(game) % 20) + 1;
             int height = abs(nextRngInt(game) % 20) + 1;
             int elevation_step = abs(nextRngInt(game) % 2) + 1;
-            game_raiseTerrainArea(game, center_x, center_y, width, height,
+            game->raise_terrain_area(center_x, center_y, width, height,
                                 elevation_step);
         }
         if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN) {
@@ -457,7 +466,7 @@ void generateTerrainHeightStep(Game *game) {
             int center_y = abs(nextRngInt(game) % game->world.terrain.mapHeight);
             int width = abs(nextRngInt(game) % 20) + 1;
             int height = abs(nextRngInt(game) % 20) + 1;
-            game_lowerTerrainArea(game, center_x, center_y, width, height, -1);
+            game->lower_terrain_area(center_x, center_y, width, height, -1);
         }
 }
 
@@ -472,7 +481,7 @@ void generateTerrainPatchStep(Game *game) {
                     int cellHeight = game->world.terrain.mapHeight / game->world.mapGenRows;
                     int patchX = column * cellWidth + abs(nextRngInt(game) % (cellWidth / 2));
                     int patchY = row * cellHeight + abs(nextRngInt(game) % (cellHeight / 2));
-                    game_placeTerrainPatch(game, patchX, patchY);
+                    game->place_terrain_patch(patchX, patchY);
                     done = true;
                 }
                 if (done) break;
@@ -481,12 +490,12 @@ void generateTerrainPatchStep(Game *game) {
 }
 
 void generateTerrainFeatureStep(Game *game) {
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0) game_placeTerrainFeature(game, 0);
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1) game_placeTerrainFeature(game, 1);
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_2) game_placeTerrainFeature(game, 2);
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_3) game_placeTerrainFeature(game, 3);
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4) game_placeTerrainFeature(game, 4);
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5) game_placeTerrainFeature(game, 5);
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0) game->place_terrain_feature(0);
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1) game->place_terrain_feature(1);
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_2) game->place_terrain_feature(2);
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_3) game->place_terrain_feature(3);
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4) game->place_terrain_feature(4);
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5) game->place_terrain_feature(5);
         if (game->build.trackBuildInProgress) game->stateWorkStep = 0;
 }
 

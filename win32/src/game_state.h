@@ -75,6 +75,15 @@ typedef struct Game {
     void handle_key(int32_t key_code);
     void handle_dialog_input(int8_t direction);
     void set_state(int32_t state);
+    void smooth_tile_at(int32_t x, int32_t y, bool raise);
+    void raise_terrain_area(int32_t x, int32_t y, int32_t width,
+                            int32_t height, int32_t level);
+    void lower_terrain_area(int32_t x, int32_t y, int32_t width,
+                            int32_t height, int32_t level);
+    void track_build_step(int32_t x, int32_t y, int32_t width,
+                          int32_t height);
+    void place_terrain_patch(int32_t x, int32_t y);
+    void place_terrain_feature(int32_t type);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

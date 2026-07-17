@@ -586,12 +586,12 @@ void game_openBuildMenu(Game *game) {
                 case 4: game_demolishAtCursor(game); break;
                 case 5:
                     if (!game->ui.blockBuildMenu)
-                        game_smoothTileAt(game, game->build.swapMapX, game->build.swapMapY,
+                        game->smooth_tile_at(game->build.swapMapX, game->build.swapMapY,
                                                false);
                     break;
                 case 6:
                     if (!game->ui.blockBuildMenu)
-                        game_smoothTileAt(game, game->build.swapMapX, game->build.swapMapY,
+                        game->smooth_tile_at(game->build.swapMapX, game->build.swapMapY,
                                                true);
                     break;
                 case 9:
