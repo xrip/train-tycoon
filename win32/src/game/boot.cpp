@@ -10,7 +10,8 @@ static int read_u16_be(ResourceReader& resource) {
     return high * 256 + low;
 }
 
-void game_keyPressed(Game *game, int32_t n) {
+void Game::key_pressed(int32_t n) {
+    Game* game = this;
     if (game->ui.inputPending) { game->ui.inputPending = false; return; }
     game->ui.currentKey = n;
 }
@@ -123,7 +124,7 @@ std::vector<int8_t> game_readPackedTextCodes(Game *game, int32_t offset) {
 void game_persistSnapshotMode1(Game *game) {
     game->saveCodec.load_slot(5, save::MODE_READ);
     game->saveCodec.walk_settings(*game);
-    game_setMusicVolume(game, game->music.volumeLevel);
+    game->set_music_volume(game->music.volumeLevel);
 }
 
 // Add one isometric tile-draw offset pair.
@@ -275,7 +276,8 @@ void game_setState(Game *game, int32_t n) {
 }
 
 // The host owns the loop; start only loads saved settings and enters boot.
-void game_start(Game *game) {
+void Game::start() {
+    Game* game = this;
     game_persistSnapshotMode1(game);
     game_setState(game, GameState::BootSplash0);
     // Display.setCurrent + Thread(this).start() are replaced by the host loop.
@@ -283,7 +285,8 @@ void game_start(Game *game) {
 
 // public void run() -- ONE iteration of the original game-thread loop.
 // The host (main.c) calls this each frame; timing/repaint/sleep are host-owned.
-void game_run(Game *game) {
+void Game::advance_frame() {
+    Game* game = this;
     if (game->stopRequested) return;
     if (game->ui.keyRepeatDelay == 0) {
         if (game->ui.heldKey != 0) game->ui.currentKey = game->ui.heldKey;

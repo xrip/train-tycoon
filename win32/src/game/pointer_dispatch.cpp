@@ -61,7 +61,8 @@ void pointer_click_bottom_bar(Game *game, int x) {
 // tile cursor, the selection diamond, and the cursor arrow all track the mouse.
 // mouseOverField is cleared up front and only set again when the hover lands on a
 // valid in-map tile; main clears it when the mouse leaves the window.
-void game_pointerMoved(Game *game, int32_t x, int32_t y) {
+void Game::pointer_moved(int32_t x, int32_t y) {
+    Game* game = this;
     game->ui.mouseOverField = false;
     if (game->gameState != GameState::Playing) return;
     if (y < 15 || y >= bottomBarY) return;  // top status strip / bottom bar = UI chrome
@@ -82,7 +83,8 @@ void game_pointerMoved(Game *game, int32_t x, int32_t y) {
 // under it. Gated to match the arrow path: Playing only, and only while a
 // build-menu row is enabled (game_viewportZoomKey is skipped otherwise, so the
 // advance would never be clamped/processed). margin/step are tuning knobs.
-void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y) {
+void Game::pointer_edge_scroll(int32_t x, int32_t y) {
+    Game* game = this;
     if (game->gameState != GameState::Playing) return;
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
     if (y < 15 || y >= bottomBarY) return;  // only inside the gameplay viewport
@@ -106,7 +108,8 @@ void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y) {
     game->renderer.mapScaleY += dy * 2;
 }
 
-void game_pointerPressed(Game *game, int32_t x, int32_t y) {
+void Game::pointer_pressed(int32_t x, int32_t y) {
+    Game* game = this;
     if (game->ui.inputPending) { game->ui.inputPending = false; return; }
     switch (game->gameState) {
         case GameState::BootSplash0: case GameState::BootSplash1:

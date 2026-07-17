@@ -11,13 +11,6 @@
 constexpr int32_t unsignedByte(int8_t value) {
     return static_cast<uint8_t>(value);
 }
-void game_run(Game *game);
-void game_start(Game *game);
-void game_pointerPressed(Game *game, int32_t n, int32_t n2);
-void game_pointerMoved(Game *game, int32_t x, int32_t y);
-void game_pointerEdgeScroll(Game *game, int32_t x, int32_t y);
-void game_keyPressed(Game *game, int32_t n);
-void game_keyReleased(Game *game, int32_t n);
 void game_drawSpriteQuad(Game *game, Surface* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void game_handleKey(Game *game, int32_t n);
 void game_resetKeyState(Game *game, int32_t n);
@@ -139,10 +132,6 @@ void game_incrementCargoOptionCount(Game *game, int32_t n);
 void game_decrementCargoOptionCount(Game *game, int32_t n);
 void game_incrementRowValueType13(Game *game, int32_t n);
 void game_incrementRowValueType14(Game *game, int32_t n);
-void game_loadMusic(Game *game);
-void game_playMusic(Game *game);
-void game_setMusicVolume(Game *game, int32_t n);
-void game_stopMusic(Game *game);
 int32_t game_computeMapTrainMetric(Game *game, int32_t n);
 bool game_syncHighScores(Game *game, bool bl);
 void game_appendTileDrawOffset(ByteBuffer& x_offsets,
@@ -153,7 +142,6 @@ void game_drawTextBox(Game *game, Surface* graphics, int32_t n, int32_t n2,
 void game_enterOutOfMoneyState(Game *game);
 void game_drawSelectedTrainLabel(Game *game, Surface* graphics, int32_t x, int32_t y, int8_t selectionIndex);
 void game_setCanvasSize(Game *game, int32_t n, int32_t n2);
-void game_paint(Game *game, Surface* graphics);
 void game_setState(Game *game, int32_t n);
 void game_update(Game *game);
 void game_renderMap(Game *game, Surface* graphics);

@@ -118,8 +118,8 @@ void updateLoadingResources(Game *game) {
     game->assets.tile_sprites[game->assets.spriteLoadCounter] = game_decodePngFromSpriteStream(game);
     ++game->assets.spriteLoadCounter;
     if (game->assets.spriteLoadCounter == game->scenario.scenarioResourceCount / 2) {
-        game_loadMusic(game);
-        if (game->music.autoStart) { game_playMusic(game); game->music.enabled = true; }
+        game->load_music();
+        if (game->music.autoStart) { game->play_music(); game->music.enabled = true; }
         else game->music.enabled = false;
     }
     if (game->assets.spriteLoadCounter != game->scenario.scenarioResourceCount) return;

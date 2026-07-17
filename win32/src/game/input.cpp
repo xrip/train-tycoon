@@ -3,7 +3,8 @@
 
 #include <stdlib.h>
 
-void game_keyReleased(Game *game, int32_t n) {
+void Game::key_released(int32_t n) {
+    Game* game = this;
     (void)n;
     game->ui.currentKey = -999;
 }

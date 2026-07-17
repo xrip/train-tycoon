@@ -49,7 +49,9 @@ void paintMapOverview(Game *game, Surface *g) {
 
 } // namespace
 
-void game_paint(Game *game, Surface *g) {
+void Game::render(Surface& surface) {
+    Game* game = this;
+    Surface* g = &surface;
     // setFullScreenMode(true) is a no-op on this backend.
     int n = WIDTH, n2 = HEIGHT;
     game->clickMap.clear();  // rebuild overlay hit-rects fresh each frame
@@ -105,7 +107,7 @@ void game_paint(Game *game, Surface *g) {
             }
             if (game->ui.transitionCode == 36) {
                 game->gameState = GameState::MapOverview;
-                game_paint(game, g);
+                game->render(*g);
                 game->gameState = GameState::MenuOverlay;
             }
             game_renderPackedSprite(game, g, game->ui.transitionCode);

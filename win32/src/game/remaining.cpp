@@ -183,20 +183,24 @@ void MusicController::update() {
     if (output) output->update();
 }
 
-void game_loadMusic(Game *game) {
-    game->music.load(resources::path_for("music.mid"));
+void Game::update_audio() {
+    music.update();
 }
 
-void game_playMusic(Game *game) {
-    game->music.play();
+void Game::load_music() {
+    music.load(resources::path_for("music.mid"));
 }
 
-void game_setMusicVolume(Game *game, int32_t level) {
-    game->music.set_volume(level);
+void Game::play_music() {
+    music.play();
 }
 
-void game_stopMusic(Game *game) {
-    game->music.stop();
+void Game::set_music_volume(int32_t level) {
+    music.set_volume(level);
+}
+
+void Game::stop_music() {
+    music.stop();
 }
 
 bool game_syncHighScores(Game *game, bool upload) {

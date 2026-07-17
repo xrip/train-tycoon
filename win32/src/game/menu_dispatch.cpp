@@ -187,12 +187,12 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 4: game->ui.annualReportEnabled = !game->ui.annualReportEnabled; goto hbms_end;
                 case 5:
                     game->music.enabled = !game->music.enabled;
-                    if (game->music.enabled) { game_playMusic(game); goto hbms_end; }
-                    game_stopMusic(game); goto hbms_end;
+                    if (game->music.enabled) { game->play_music(); goto hbms_end; }
+                    game->stop_music(); goto hbms_end;
                 case 6:
                     ++game->music.volumeLevel;
                     if (game->music.volumeLevel == 6) game->music.volumeLevel = 1;
-                    game_setMusicVolume(game, game->music.volumeLevel); goto hbms_end;
+                    game->set_music_volume(game->music.volumeLevel); goto hbms_end;
             }
             game_persistSnapshotMode0(game);
             if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
