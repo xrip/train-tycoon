@@ -23,7 +23,6 @@
 #endif
 
 #include "midp.h"
-#include "game_state.h"
 #include "game.h"
 #include "platform/winmm_music_player.h"
 #include "support/resource_reader.h"
@@ -49,19 +48,20 @@ static void set_resource_root_from_executable(void) {
 
 static bool run_midi_device_test(int total_millis) {
     if (total_millis < 200) total_millis = 200;
-    Game test(std::make_unique<WinMmMusicPlayer>(), midp_current_time_millis());
-    MusicOutput* output = test.music.output.get();
-    test.music.enabled = true;
-    test.music.volumeLevel = 1;
-    test.load_music();
-    if (!test.music.available || !output->is_loaded()) {
+    MusicController music;
+    music.output = std::make_unique<WinMmMusicPlayer>();
+    MusicOutput* output = music.output.get();
+    music.enabled = true;
+    music.volumeLevel = 1;
+    music.load(resources::path_for("music.mid"));
+    if (!music.available || !output->is_loaded()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI load failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
         return false;
     }
-    test.play_music();
-    if (!test.music.playing || !output->is_playing()) {
+    music.play();
+    if (!music.playing || !output->is_playing()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI first play failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
@@ -73,14 +73,14 @@ static bool run_midi_device_test(int total_millis) {
         output->update();
         midp_sleep(10);
     }
-    test.stop_music();
-    if (test.music.playing || output->is_playing()) {
+    music.stop();
+    if (music.playing || output->is_playing()) {
         fprintf(stderr, "MIDI stop state failed\n");
         return false;
     }
-    test.set_music_volume(3);
-    test.play_music();
-    if (!test.music.playing || !output->is_playing()) {
+    music.set_volume(3);
+    music.play();
+    if (!music.playing || !output->is_playing()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI second play failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
@@ -91,7 +91,7 @@ static bool run_midi_device_test(int total_millis) {
         output->update();
         midp_sleep(10);
     }
-    test.stop_music();
+    music.stop();
     return true;
 }
 
@@ -150,7 +150,7 @@ int main(void) {
         if (mouse_inside)
             game.pointer_moved(mouse_x, mouse_y);
         else
-            game.ui.mouseOverField = false;
+            game.pointer_moved(-1, -1);
 
         game.render(screen);
 

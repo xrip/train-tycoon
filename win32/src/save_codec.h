@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <vector>
 
-struct Game;
+class Game;
 
 // SaveCodec owns the transient codec state: the byte buffer being written or
 // read, the read cursor, the target slot and pending mode, the snapshot size and

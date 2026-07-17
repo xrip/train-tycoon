@@ -1,5 +1,5 @@
 // Train Tycoon game-state initial values.
-#include "game_state.h"
+#include "game.h"
 #include <string.h>
 #include <utility>
 

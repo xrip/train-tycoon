@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 
 #include "game.h"
+#include "game_test_access.h"
 #include "support/byte_buffer.h"
 #include "support/numeric.h"
 #include "click_map.h"
@@ -31,10 +32,10 @@ Game* make_game() {
 }
 
 std::uint64_t save_state_digest(Game* game) {
-    game->saveCodec.walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, 4);
     StableDigest digest;
-    digest.add_bytes(game->saveCodec.saveBuffer.data(),
-                     static_cast<std::size_t>(game->saveCodec.snapshotSize));
+    digest.add_bytes(GameTestAccess::save_codec(*game).saveBuffer.data(),
+                     static_cast<std::size_t>(GameTestAccess::save_codec(*game).snapshotSize));
     return digest.value();
 }
 
@@ -48,90 +49,90 @@ std::uint64_t paint_digest(Game* game, Surface* screen) {
 
 std::uint64_t map_digest(const Game* game) {
     StableDigest digest;
-    digest.add_i32(game->scenario.activeScenario);
-    digest.add_i32(game->world.terrain.mapWidth);
-    digest.add_i32(game->world.terrain.mapHeight);
-    digest.add_i32(game->economy.money);
-    digest.add_i32(game->economy.loanCeiling);
-    digest.add_i32(game->economy.loanBalance);
-    for (int x = 0; x < game->world.terrain.mapWidth; ++x) {
-        digest.add_bytes(game->world.terrain.tileMap[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight));
-        digest.add_bytes(game->world.trackMap[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight));
-        digest.add_bytes(game->world.terrain.tileElevation[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight));
+    digest.add_i32(GameTestAccess::scenario(*game).activeScenario);
+    digest.add_i32(GameTestAccess::world(*game).terrain.mapWidth);
+    digest.add_i32(GameTestAccess::world(*game).terrain.mapHeight);
+    digest.add_i32(GameTestAccess::economy(*game).money);
+    digest.add_i32(GameTestAccess::economy(*game).loanCeiling);
+    digest.add_i32(GameTestAccess::economy(*game).loanBalance);
+    for (int x = 0; x < GameTestAccess::world(*game).terrain.mapWidth; ++x) {
+        digest.add_bytes(GameTestAccess::world(*game).terrain.tileMap[x].data(), static_cast<std::size_t>(GameTestAccess::world(*game).terrain.mapHeight));
+        digest.add_bytes(GameTestAccess::world(*game).trackMap[x].data(), static_cast<std::size_t>(GameTestAccess::world(*game).terrain.mapHeight));
+        digest.add_bytes(GameTestAccess::world(*game).terrain.tileElevation[x].data(), static_cast<std::size_t>(GameTestAccess::world(*game).terrain.mapHeight));
     }
-    for (int x = 0; x < game->world.terrain.mapWidth + 2; ++x) {
-        digest.add_bytes(game->world.terrain.heightMap[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight + 2));
+    for (int x = 0; x < GameTestAccess::world(*game).terrain.mapWidth + 2; ++x) {
+        digest.add_bytes(GameTestAccess::world(*game).terrain.heightMap[x].data(), static_cast<std::size_t>(GameTestAccess::world(*game).terrain.mapHeight + 2));
     }
     return digest.value();
 }
 
 void generate_scenario(Game* game, int scenario) {
-    game->scenario.activeScenario = scenario;
-    game->set_state(25);
-    for (int step = 0; game->gameState == 25 && step < 200000; ++step) {
-        game->update_state_machine();
+    GameTestAccess::scenario(*game).activeScenario = scenario;
+    GameTestAccess::set_state(*game, 25);
+    for (int step = 0; GameTestAccess::state(*game) == 25 && step < 200000; ++step) {
+        GameTestAccess::update_state_machine(*game);
     }
-    REQUIRE(game->gameState == 30);
-    REQUIRE(!game->world.terrain.tileMap.empty());
-    REQUIRE(!game->world.trackMap.empty());
+    REQUIRE(GameTestAccess::state(*game) == 30);
+    REQUIRE(!GameTestAccess::world(*game).terrain.tileMap.empty());
+    REQUIRE(!GameTestAccess::world(*game).trackMap.empty());
 }
 
 void load_game_resources(Game* game) {
     game->start();
-    game->loadingStartTime = 0;
-    game->update_state_machine();
-    game->loadingStartTime = 0;
-    game->update_state_machine();
-    game->update_state_machine();
-    REQUIRE(game->gameState == GameState::MenuOverlay);
+    GameTestAccess::loading_start_time(*game) = 0;
+    GameTestAccess::update_state_machine(*game);
+    GameTestAccess::loading_start_time(*game) = 0;
+    GameTestAccess::update_state_machine(*game);
+    GameTestAccess::update_state_machine(*game);
+    REQUIRE(GameTestAccess::state(*game) == GameState::MenuOverlay);
 
-    game->set_state(GameState::LoadingResources);
-    for (int step = 0; game->gameState == GameState::LoadingResources && step < 1000; ++step) {
-        game->update_state_machine();
+    GameTestAccess::set_state(*game, GameState::LoadingResources);
+    for (int step = 0; GameTestAccess::state(*game) == GameState::LoadingResources && step < 1000; ++step) {
+        GameTestAccess::update_state_machine(*game);
     }
-    REQUIRE(game->gameState == GameState::MenuOverlay);
+    REQUIRE(GameTestAccess::state(*game) == GameState::MenuOverlay);
 }
 
 } // namespace
 
 TEST_CASE("fast: game initialization restores all non-zero defaults") {
     Game defaults(std::make_unique<SilentMusicOutput>(), kFixedRandomSeed);
-    CHECK(defaults.simSpeed == 1);
-    CHECK(defaults.economy.money == 200000);
-    CHECK(defaults.ui.cursorDragX == -1);
-    CHECK(defaults.renderer.lastRenderedSpriteId == -1);
+    CHECK(GameTestAccess::simulation_speed(defaults) == 1);
+    CHECK(GameTestAccess::economy(defaults).money == 200000);
+    CHECK(GameTestAccess::ui(defaults).cursorDragX == -1);
+    CHECK(GameTestAccess::renderer(defaults).lastRenderedSpriteId == -1);
 
     Game* game = make_game();
 
-    CHECK(game->simSpeed == 1);
-    CHECK(game->economy.money == 200000);
-    CHECK(game->economy.loanCeiling == 600000);
-    CHECK(game->economy.dayOfMonth == 1);
-    CHECK(game->economy.monthOfYear == 1);
-    CHECK(game->economy.year == 1950);
-    CHECK(game->scenario.difficultyPct == 100);
-    CHECK(game->scenario.difficultyCycle == 1);
-    CHECK(game->scenario.aiFrequency == 15);
-    CHECK(game->scenario.aiThreshold == 12);
-    CHECK(game->build.nextTrackPieceCode == 66);
-    CHECK(game->dayTickThreshold == 50);
-    CHECK(game->lastCanvasWidth == -1);
-    CHECK(game->lastCanvasHeight == -1);
-    CHECK(game->fleet.forwardTrackSteps[0][1] == 1);
-    CHECK(game->fleet.reverseTrackSteps[5][11] == 1);
-    CHECK(game->assets.trainSpriteDirectionTable[7][7] == 188);
-    CHECK(game->scenario.offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
-    CHECK(game->scenario.offerEffectSchedule[3][1] == -56);
-    CHECK(game->renderer.graphColors[8] == 51200);
-    CHECK(game->assets.tileSpriteYOffsetByCode[24] == -4);
+    CHECK(GameTestAccess::simulation_speed(*game) == 1);
+    CHECK(GameTestAccess::economy(*game).money == 200000);
+    CHECK(GameTestAccess::economy(*game).loanCeiling == 600000);
+    CHECK(GameTestAccess::economy(*game).dayOfMonth == 1);
+    CHECK(GameTestAccess::economy(*game).monthOfYear == 1);
+    CHECK(GameTestAccess::economy(*game).year == 1950);
+    CHECK(GameTestAccess::scenario(*game).difficultyPct == 100);
+    CHECK(GameTestAccess::scenario(*game).difficultyCycle == 1);
+    CHECK(GameTestAccess::scenario(*game).aiFrequency == 15);
+    CHECK(GameTestAccess::scenario(*game).aiThreshold == 12);
+    CHECK(GameTestAccess::build(*game).nextTrackPieceCode == 66);
+    CHECK(GameTestAccess::day_tick_threshold(*game) == 50);
+    CHECK(GameTestAccess::last_canvas_width(*game) == -1);
+    CHECK(GameTestAccess::last_canvas_height(*game) == -1);
+    CHECK(GameTestAccess::fleet(*game).forwardTrackSteps[0][1] == 1);
+    CHECK(GameTestAccess::fleet(*game).reverseTrackSteps[5][11] == 1);
+    CHECK(GameTestAccess::assets(*game).trainSpriteDirectionTable[7][7] == 188);
+    CHECK(GameTestAccess::scenario(*game).offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
+    CHECK(GameTestAccess::scenario(*game).offerEffectSchedule[3][1] == -56);
+    CHECK(GameTestAccess::renderer(*game).graphColors[8] == 51200);
+    CHECK(GameTestAccess::assets(*game).tileSpriteYOffsetByCode[24] == -4);
 
     delete game;
     game = make_game();
 
-    CHECK(game->economy.money == 200000);
-    CHECK(game->fleet.forwardTrackSteps[0][1] == 1);
-    CHECK(game->scenario.offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
-    CHECK(game->renderer.backbuffer != nullptr);
+    CHECK(GameTestAccess::economy(*game).money == 200000);
+    CHECK(GameTestAccess::fleet(*game).forwardTrackSteps[0][1] == 1);
+    CHECK(GameTestAccess::scenario(*game).offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
+    CHECK(GameTestAccess::renderer(*game).backbuffer != nullptr);
     delete game;
 }
 
@@ -294,26 +295,26 @@ TEST_CASE("fast: proven train flag queries") {
 
 TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
     Game* game = make_game();
-    CHECK(game->fleet.trainCars[0].nextCar == 0);
-    CHECK(game->fleet.trainCars[kTrainSlotCount - 1].flags == 0);
+    CHECK(GameTestAccess::fleet(*game).trainCars[0].nextCar == 0);
+    CHECK(GameTestAccess::fleet(*game).trainCars[kTrainSlotCount - 1].flags == 0);
 
-    TrainCar& first = game->fleet.trainCars[3];
+    TrainCar& first = GameTestAccess::fleet(*game).trainCars[3];
     first.x = 11;
     first.direction = 2;
     first.secondaryCargoOrBaseEnergy = 17;
     first.nextCar = 321;
     first.revenue = 1234567;
-    TrainCar& last = game->fleet.trainCars[kTrainSlotCount - 1];
+    TrainCar& last = GameTestAccess::fleet(*game).trainCars[kTrainSlotCount - 1];
     last.y = 22;
     last.flags = static_cast<int8_t>(train_flag::USED_SLOT | 5);
     last.ageYears = 9;
     last.stateCode = -7654321;
     last.previousRevenue = 456789;
 
-    game->saveCodec.walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, 4);
     first = TrainCar{};
     last = TrainCar{};
-    game->saveCodec.walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, 5);
 
     CHECK(first.x == 11);
     CHECK(first.direction == 2);
@@ -326,38 +327,38 @@ TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
     CHECK(last.stateCode == -7654321);
     CHECK(last.previousRevenue == 456789);
 
-    const int slot = game->fleet.allocate_train_car(1, 2, 3, 4, 5, 6);
+    const int slot = GameTestAccess::fleet(*game).allocate_train_car(1, 2, 3, 4, 5, 6);
     CHECK(slot == 0);
-    CHECK(game->fleet.trainCars[slot].x == 1);
-    CHECK(game->fleet.trainCars[slot].y == 2);
-    CHECK(game->fleet.trainCars[slot].nextCar == -1);
+    CHECK(GameTestAccess::fleet(*game).trainCars[slot].x == 1);
+    CHECK(GameTestAccess::fleet(*game).trainCars[slot].y == 2);
+    CHECK(GameTestAccess::fleet(*game).trainCars[slot].nextCar == -1);
 
-    for (TrainCar& car : game->fleet.trainCars)
+    for (TrainCar& car : GameTestAccess::fleet(*game).trainCars)
         car.flags = static_cast<int8_t>(train_flag::USED_SLOT);
-    CHECK(game->fleet.allocate_train_car(1, 2, 3, 4, 5, 6) == kTrainSlotCount);
+    CHECK(GameTestAccess::fleet(*game).allocate_train_car(1, 2, 3, 4, 5, 6) == kTrainSlotCount);
     delete game;
 }
 
 TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
     Game* game = make_game();
-    CHECK(game->fleet.serviceSites[0].flags == 0);
-    CHECK(game->fleet.serviceSites[kServiceVehicleSlotCount - 1].resourceStock[4] == 0);
+    CHECK(GameTestAccess::fleet(*game).serviceSites[0].flags == 0);
+    CHECK(GameTestAccess::fleet(*game).serviceSites[kServiceVehicleSlotCount - 1].resourceStock[4] == 0);
 
-    ServiceSite& first = game->fleet.serviceSites[3];
+    ServiceSite& first = GameTestAccess::fleet(*game).serviceSites[3];
     first.flags = static_cast<int8_t>(0x83);
     first.x = 14;
     first.unloadFlags = 9;
     first.resourceStock[0] = 1234;
     first.resourceStock[4] = -2345;
     first.loadFlags = 7;
-    ServiceSite& last = game->fleet.serviceSites[kServiceVehicleSlotCount - 1];
+    ServiceSite& last = GameTestAccess::fleet(*game).serviceSites[kServiceVehicleSlotCount - 1];
     last.y = 27;
     last.resourceStock[2] = 30000;
 
-    game->saveCodec.walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, 4);
     first = ServiceSite{};
     last = ServiceSite{};
-    game->saveCodec.walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, 5);
 
     CHECK(static_cast<uint8_t>(first.flags) == 0x83);
     CHECK(first.x == 14);
@@ -368,13 +369,13 @@ TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
     CHECK(last.y == 27);
     CHECK(last.resourceStock[2] == 30000);
 
-    const int slot = game->fleet.allocate_service_site(2, 4, 5, true, false);
+    const int slot = GameTestAccess::fleet(*game).allocate_service_site(2, 4, 5, true, false);
     CHECK(slot == 0);
-    CHECK(game->fleet.serviceSites[slot].x == 4);
-    CHECK(game->fleet.serviceSites[slot].y == 5);
-    for (ServiceSite& site : game->fleet.serviceSites)
+    CHECK(GameTestAccess::fleet(*game).serviceSites[slot].x == 4);
+    CHECK(GameTestAccess::fleet(*game).serviceSites[slot].y == 5);
+    for (ServiceSite& site : GameTestAccess::fleet(*game).serviceSites)
         site.flags = static_cast<int8_t>(0x80);
-    CHECK(game->fleet.allocate_service_site(2, 4, 5, true, false) == 5000);
+    CHECK(GameTestAccess::fleet(*game).allocate_service_site(2, 4, 5, true, false) == 5000);
     delete game;
 }
 
@@ -429,26 +430,26 @@ TEST_CASE("fast: fleet and world roll yearly revenue under their records") {
 
 TEST_CASE("fast: city records keep defaults and save field positions") {
     Game* game = make_game();
-    CHECK(game->world.cities[0].stationDirection == 0);
-    CHECK(game->world.cities[kCitySlotCount - 1].stationRevenue == 0);
+    CHECK(GameTestAccess::world(*game).cities[0].stationDirection == 0);
+    CHECK(GameTestAccess::world(*game).cities[kCitySlotCount - 1].stationRevenue == 0);
 
-    City& first = game->world.cities[4];
+    City& first = GameTestAccess::world(*game).cities[4];
     first.stationDirection = 5;
     first.population = 71;
     first.zoneTileCount = 12;
     first.stationRevenue = 12345;
     first.previousStationRevenue = -23456;
-    City& last = game->world.cities[kCitySlotCount - 1];
+    City& last = GameTestAccess::world(*game).cities[kCitySlotCount - 1];
     last.stationDirection = 2;
     last.population = 44;
     last.zoneTileCount = 8;
     last.stationRevenue = -30000;
     last.previousStationRevenue = 30000;
 
-    game->saveCodec.walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, 4);
     first = City{};
     last = City{};
-    game->saveCodec.walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, 5);
 
     CHECK(first.stationDirection == 5);
     CHECK(first.population == 71);
@@ -511,10 +512,10 @@ TEST_CASE("fast: world recounts unique city zone tiles") {
 
 TEST_CASE("fast: offer records keep defaults and save field positions") {
     Game* game = make_game();
-    CHECK(game->offerBoard.offers[0].objectiveType == 0);
-    CHECK(game->offerBoard.offers[kMenuRowCount - 1].effectAmount == 0);
+    CHECK(GameTestAccess::offer_board(*game).offers[0].objectiveType == 0);
+    CHECK(GameTestAccess::offer_board(*game).offers[kMenuRowCount - 1].effectAmount == 0);
 
-    Offer& first = game->offerBoard.offers[1];
+    Offer& first = GameTestAccess::offer_board(*game).offers[1];
     first.objectiveType = 2;
     first.issuedDay = 3;
     first.dueDay = 4;
@@ -527,15 +528,15 @@ TEST_CASE("fast: offer records keep defaults and save field positions") {
     first.effectType = 9;
     first.effectValue = 10;
     first.effectAmount = 345678;
-    Offer& last = game->offerBoard.offers[kMenuRowCount - 1];
+    Offer& last = GameTestAccess::offer_board(*game).offers[kMenuRowCount - 1];
     last.objectiveType = 14;
     last.target = -7654321;
     last.effectAmount = 7654321;
 
-    game->saveCodec.walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, 4);
     first = Offer{};
     last = Offer{};
-    game->saveCodec.walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, 5);
 
     CHECK(first.objectiveType == 2);
     CHECK(first.issuedDay == 3);
@@ -557,16 +558,16 @@ TEST_CASE("fast: offer records keep defaults and save field positions") {
 
 TEST_CASE("fast: type two offer progress handles zero money") {
     Game* game = make_game();
-    Offer& offer = game->offerBoard.offers[0];
+    Offer& offer = GameTestAccess::offer_board(*game).offers[0];
     offer.objectiveType = 2;
     offer.target = 1000;
 
-    game->economy.money = 500;
-    CHECK(game->offerBoard.display_progress(0, game->economy) == 50);
-    game->economy.money = -500;
-    CHECK(game->offerBoard.display_progress(0, game->economy) == 0);
-    game->economy.money = 0;
-    CHECK(game->offerBoard.display_progress(0, game->economy) == 0);
+    GameTestAccess::economy(*game).money = 500;
+    CHECK(GameTestAccess::offer_board(*game).display_progress(0, GameTestAccess::economy(*game)) == 50);
+    GameTestAccess::economy(*game).money = -500;
+    CHECK(GameTestAccess::offer_board(*game).display_progress(0, GameTestAccess::economy(*game)) == 0);
+    GameTestAccess::economy(*game).money = 0;
+    CHECK(GameTestAccess::offer_board(*game).display_progress(0, GameTestAccess::economy(*game)) == 0);
     delete game;
 }
 
@@ -787,11 +788,11 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
 
     // Find a buildable, empty interior tile for a depot.
     int ax = -1, ay = -1;
-    for (int y = 8; y < game->world.terrain.mapHeight - 8 && ay < 0; ++y) {
-        for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x) {
-            if (game->world.terrain.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
-                && game->world.terrain.tileElevation[x][y] == 0
-                && game->world.is_tile_buildable(x, y, 0)) {
+    for (int y = 8; y < GameTestAccess::world(*game).terrain.mapHeight - 8 && ay < 0; ++y) {
+        for (int x = 8; x < GameTestAccess::world(*game).terrain.mapWidth - 8; ++x) {
+            if (GameTestAccess::world(*game).terrain.tileMap[x][y] == 0 && GameTestAccess::world(*game).trackMap[x][y] == 0
+                && GameTestAccess::world(*game).terrain.tileElevation[x][y] == 0
+                && GameTestAccess::world(*game).is_tile_buildable(x, y, 0)) {
                 ax = x; ay = y; break;
             }
         }
@@ -799,45 +800,45 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
     REQUIRE(ax >= 0);
 
     // Place a 1-cell depot at the chosen tile via the real build action.
-    game->economy.money = 1000000;
-    game->ui.tileCursorX = ax;
-    game->ui.tileCursorY = ay;
-    game->build_place_track_piece(0);
-    REQUIRE(static_cast<uint8_t>(game->world.trackMap[ax][ay]) == 65);  // depot on player track
+    GameTestAccess::economy(*game).money = 1000000;
+    GameTestAccess::ui(*game).tileCursorX = ax;
+    GameTestAccess::ui(*game).tileCursorY = ay;
+    GameTestAccess::build_place_track_piece(*game, 0);
+    REQUIRE(static_cast<uint8_t>(GameTestAccess::world(*game).trackMap[ax][ay]) == 65);  // depot on player track
 
     // Open the buy dialog on the depot (captures serviceVehicleAtCursor).
-    game->ui.tileCursorX = ax;
-    game->ui.tileCursorY = ay;
-    game->pick_trains_at_cursor();
-    REQUIRE(game->serviceVehicleAtCursor != 5000);
+    GameTestAccess::ui(*game).tileCursorX = ax;
+    GameTestAccess::ui(*game).tileCursorY = ay;
+    GameTestAccess::pick_trains_at_cursor(*game);
+    REQUIRE(GameTestAccess::service_site_at_cursor(*game) != 5000);
 
     // Choose an engine with two wood wagons, as the buy menu would.
-    game->build.wagonType = 0;
-    game->build.unitCost = 1;
-    game->economy.money = 1000000;
-    for (int i = 0; i < 5; ++i) game->build.wagonOptionSlots[i] = -1;
-    game->build.wagonOptionSlots[0] = 3;  // wood
-    game->build.wagonOptionSlots[1] = 3;  // wood
+    GameTestAccess::build(*game).wagonType = 0;
+    GameTestAccess::build(*game).unitCost = 1;
+    GameTestAccess::economy(*game).money = 1000000;
+    for (int i = 0; i < 5; ++i) GameTestAccess::build(*game).wagonOptionSlots[i] = -1;
+    GameTestAccess::build(*game).wagonOptionSlots[0] = 3;  // wood
+    GameTestAccess::build(*game).wagonOptionSlots[1] = 3;  // wood
 
     // The Playing loop re-anchors tileCursor to the screen-center tile every
     // tick; by the time "buy" fires it has drifted off the depot. Simulate that
     // drift with an empty, non-track tile.
     int bx = ax + 3, by = ay;
-    REQUIRE(static_cast<uint8_t>(game->world.trackMap[bx][by]) != 65);
-    game->ui.tileCursorX = bx;
-    game->ui.tileCursorY = by;
+    REQUIRE(static_cast<uint8_t>(GameTestAccess::world(*game).trackMap[bx][by]) != 65);
+    GameTestAccess::ui(*game).tileCursorX = bx;
+    GameTestAccess::ui(*game).tileCursorY = by;
 
-    REQUIRE(game->buy_train_at_cursor());
+    REQUIRE(GameTestAccess::buy_train_at_cursor(*game));
 
     // The freshly-bought engine must sit on the depot we selected, on player
     // track (65) so it can actually run -- not on the drifted screen-center tile.
-    int head = game->fleet.find_train_head_at(ax, ay);
+    int head = GameTestAccess::fleet(*game).find_train_head_at(ax, ay);
     CHECK(head != 5000);
-    CHECK(game->fleet.find_train_head_at(bx, by) == 5000);
+    CHECK(GameTestAccess::fleet(*game).find_train_head_at(bx, by) == 5000);
     if (head != 5000) {
-        CHECK(static_cast<uint8_t>(game->world.trackMap[
-            static_cast<uint8_t>(game->fleet.trainCars[head].x)][
-            static_cast<uint8_t>(game->fleet.trainCars[head].y)]) == 65);
+        CHECK(static_cast<uint8_t>(GameTestAccess::world(*game).trackMap[
+            static_cast<uint8_t>(GameTestAccess::fleet(*game).trainCars[head].x)][
+            static_cast<uint8_t>(GameTestAccess::fleet(*game).trainCars[head].y)]) == 65);
     }
     delete game;
 }
@@ -881,49 +882,49 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
     generate_scenario(game, 0);
 
     auto buildable = [&](int x, int y) {
-        return game->world.terrain.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
-               && game->world.terrain.tileElevation[x][y] == 0
-               && game->world.is_tile_buildable(x, y, 0);
+        return GameTestAccess::world(*game).terrain.tileMap[x][y] == 0 && GameTestAccess::world(*game).trackMap[x][y] == 0
+               && GameTestAccess::world(*game).terrain.tileElevation[x][y] == 0
+               && GameTestAccess::world(*game).is_tile_buildable(x, y, 0);
     };
     int ax = -1, ay = -1, bx = -1, by = -1;
-    for (int y = 8; y < game->world.terrain.mapHeight - 8 && ay < 0; ++y)
-        for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x)
+    for (int y = 8; y < GameTestAccess::world(*game).terrain.mapHeight - 8 && ay < 0; ++y)
+        for (int x = 8; x < GameTestAccess::world(*game).terrain.mapWidth - 8; ++x)
             if (buildable(x, y)) { ax = x; ay = y; break; }
-    for (int y = ay + 4; y < game->world.terrain.mapHeight - 8 && by < 0; ++y)
-        for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x)
+    for (int y = ay + 4; y < GameTestAccess::world(*game).terrain.mapHeight - 8 && by < 0; ++y)
+        for (int x = 8; x < GameTestAccess::world(*game).terrain.mapWidth - 8; ++x)
             if (buildable(x, y)) { bx = x; by = y; break; }
     REQUIRE(ax >= 0); REQUIRE(bx >= 0);
 
-    game->renderer.canvasWidth = 240;
-    game->renderer.bottomBarY = 300;
-    game->economy.money = 1000000;
-    game->ui.pauseFlag = false;
-    game->ui.inputPending = false;
-    game->ui.buildMenuMode = 3;          // station sub-menu
-    game->ui.buildMenuItemIndex = 0;     // vertical depot
+    GameTestAccess::renderer(*game).canvasWidth = 240;
+    GameTestAccess::renderer(*game).bottomBarY = 300;
+    GameTestAccess::economy(*game).money = 1000000;
+    GameTestAccess::ui(*game).pauseFlag = false;
+    GameTestAccess::ui(*game).inputPending = false;
+    GameTestAccess::ui(*game).buildMenuMode = 3;          // station sub-menu
+    GameTestAccess::ui(*game).buildMenuItemIndex = 0;     // vertical depot
 
     // The cursor has drifted to the screen-center tile B.
-    game->ui.tileCursorX = bx;
-    game->ui.tileCursorY = by;
+    GameTestAccess::ui(*game).tileCursorX = bx;
+    GameTestAccess::ui(*game).tileCursorY = by;
 
     // Click the depot icon in the bottom bar (compute its x the way the handler
     // does). This must ARM the tool, not place a depot at the drifted tile.
     const int mode = 3;
-    const int selected_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]);
-    int scroll = selected_x + 15 - game->renderer.canvasWidth;
+    const int selected_x = static_cast<uint8_t>(GameTestAccess::ui(*game).menuItemCode[mode][0]);
+    int scroll = selected_x + 15 - GameTestAccess::renderer(*game).canvasWidth;
     if (scroll < 0) scroll = 0;
-    const int icon_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]) - scroll;
-    game->pointer_pressed(icon_x, game->renderer.bottomBarY);
+    const int icon_x = static_cast<uint8_t>(GameTestAccess::ui(*game).menuItemCode[mode][0]) - scroll;
+    game->pointer_pressed(icon_x, GameTestAccess::renderer(*game).bottomBarY);
 
-    CHECK(static_cast<uint8_t>(game->world.trackMap[bx][by]) != 65);  // nothing placed at drift
-    CHECK(game->ui.buildMenuItemIndex == 0);                          // tool stays armed
+    CHECK(static_cast<uint8_t>(GameTestAccess::world(*game).trackMap[bx][by]) != 65);  // nothing placed at drift
+    CHECK(GameTestAccess::ui(*game).buildMenuItemIndex == 0);                          // tool stays armed
 
     // Now the player clicks the map on tile A: openBuildMenu runs with the tile
     // cursor on the clicked tile, and the armed depot tool places there.
-    game->ui.tileCursorX = ax;
-    game->ui.tileCursorY = ay;
-    game->open_build_menu();
-    CHECK(static_cast<uint8_t>(game->world.trackMap[ax][ay]) == 65);  // depot placed where clicked
+    GameTestAccess::ui(*game).tileCursorX = ax;
+    GameTestAccess::ui(*game).tileCursorY = ay;
+    GameTestAccess::open_build_menu(*game);
+    CHECK(static_cast<uint8_t>(GameTestAccess::world(*game).trackMap[ax][ay]) == 65);  // depot placed where clicked
     delete game;
 }
 
@@ -1000,17 +1001,17 @@ TEST_CASE("fast: record store keeps record bytes and ids") {
 
 TEST_CASE("fast: small path search") {
     Game* game = make_game();
-    game->world.resize(5, 5);
-    game->pathfinder.anchorX = 1;
-    game->pathfinder.anchorY = 2;
-    game->pathfinder.targetX = 3;
-    game->pathfinder.targetY = 2;
-    game->economy.accel1 = 10;
+    GameTestAccess::world(*game).resize(5, 5);
+    GameTestAccess::pathfinder(*game).anchorX = 1;
+    GameTestAccess::pathfinder(*game).anchorY = 2;
+    GameTestAccess::pathfinder(*game).targetX = 3;
+    GameTestAccess::pathfinder(*game).targetY = 2;
+    GameTestAccess::economy(*game).accel1 = 10;
 
-    CHECK(game->pathfinder.try_build_path(game->world, game->build,
-                                          game->economy));
-    CHECK(game->build.trackTileCount > 0);
-    CHECK(game->build.selectionCost > 0);
+    CHECK(GameTestAccess::pathfinder(*game).try_build_path(GameTestAccess::world(*game), GameTestAccess::build(*game),
+                                          GameTestAccess::economy(*game)));
+    CHECK(GameTestAccess::build(*game).trackTileCount > 0);
+    CHECK(GameTestAccess::build(*game).selectionCost > 0);
     delete game;
 }
 
@@ -1158,42 +1159,42 @@ TEST_CASE("fast: terrain queue keeps slot order and rejects a duplicate") {
 
 TEST_CASE("fast: save buffer bytes and round trip") {
     Game* game = make_game();
-    game->economy.money = 123456;
-    game->economy.dayOfMonth = 17;
-    game->economy.monthOfYear = 8;
-    game->economy.year = 1973;
-    game->economy.loanBalance = -7654321;
-    game->renderer.visibleTrains[0] = -1234;
-    game->saveCodec.walk(*game, 4);
+    GameTestAccess::economy(*game).money = 123456;
+    GameTestAccess::economy(*game).dayOfMonth = 17;
+    GameTestAccess::economy(*game).monthOfYear = 8;
+    GameTestAccess::economy(*game).year = 1973;
+    GameTestAccess::economy(*game).loanBalance = -7654321;
+    GameTestAccess::renderer(*game).visibleTrains[0] = -1234;
+    GameTestAccess::save_codec(*game).walk(*game, 4);
 
-    const int plain_size = game->saveCodec.snapshotSize;
+    const int plain_size = GameTestAccess::save_codec(*game).snapshotSize;
     REQUIRE(plain_size > 0);
     StableDigest save_digest;
-    save_digest.add_bytes(game->saveCodec.saveBuffer.data(), static_cast<std::size_t>(plain_size));
+    save_digest.add_bytes(GameTestAccess::save_codec(*game).saveBuffer.data(), static_cast<std::size_t>(plain_size));
     CHECK(plain_size == 19242);
     CHECK(save_digest.value() == 16273675477449773753ULL);
     auto* plain = static_cast<int8_t*>(std::malloc(static_cast<std::size_t>(plain_size)));
     REQUIRE(plain != nullptr);
-    std::memcpy(plain, game->saveCodec.saveBuffer.data(), static_cast<std::size_t>(plain_size));
+    std::memcpy(plain, GameTestAccess::save_codec(*game).saveBuffer.data(), static_cast<std::size_t>(plain_size));
 
-    game->saveCodec.compress();
-    game->saveCodec.decompress();
-    CHECK(game->saveCodec.snapshotSize == plain_size);
-    CHECK(std::memcmp(game->saveCodec.saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
+    GameTestAccess::save_codec(*game).compress();
+    GameTestAccess::save_codec(*game).decompress();
+    CHECK(GameTestAccess::save_codec(*game).snapshotSize == plain_size);
+    CHECK(std::memcmp(GameTestAccess::save_codec(*game).saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
 
-    game->economy.money = 0;
-    game->economy.dayOfMonth = 0;
-    game->economy.monthOfYear = 0;
-    game->economy.year = 0;
-    game->economy.loanBalance = 0;
-    game->renderer.visibleTrains[0] = 0;
-    game->saveCodec.walk(*game, 5);
-    CHECK(game->economy.money == 123456);
-    CHECK(game->economy.dayOfMonth == 17);
-    CHECK(game->economy.monthOfYear == 8);
-    CHECK(game->economy.year == 1973);
-    CHECK(game->economy.loanBalance == -7654321);
-    CHECK(game->renderer.visibleTrains[0] == -1234);
+    GameTestAccess::economy(*game).money = 0;
+    GameTestAccess::economy(*game).dayOfMonth = 0;
+    GameTestAccess::economy(*game).monthOfYear = 0;
+    GameTestAccess::economy(*game).year = 0;
+    GameTestAccess::economy(*game).loanBalance = 0;
+    GameTestAccess::renderer(*game).visibleTrains[0] = 0;
+    GameTestAccess::save_codec(*game).walk(*game, 5);
+    CHECK(GameTestAccess::economy(*game).money == 123456);
+    CHECK(GameTestAccess::economy(*game).dayOfMonth == 17);
+    CHECK(GameTestAccess::economy(*game).monthOfYear == 8);
+    CHECK(GameTestAccess::economy(*game).year == 1973);
+    CHECK(GameTestAccess::economy(*game).loanBalance == -7654321);
+    CHECK(GameTestAccess::renderer(*game).visibleTrains[0] == -1234);
 
     std::free(plain);
     delete game;
@@ -1207,18 +1208,18 @@ TEST_CASE("fast: MIDI resource is valid") {
 
 TEST_CASE("fast: game music rules use a silent output") {
     Game* game = make_game();
-    auto* output = static_cast<SilentMusicOutput*>(game->music.output.get());
+    auto* output = static_cast<SilentMusicOutput*>(GameTestAccess::music(*game).output.get());
 
     game->load_music();
-    CHECK(game->music.available);
-    CHECK_FALSE(game->music.playing);
+    CHECK(GameTestAccess::music(*game).available);
+    CHECK_FALSE(GameTestAccess::music(*game).playing);
     CHECK(output->volume() == 40);
 
     game->play_music();
     CHECK(output->play_count() == 0);
-    game->music.enabled = true;
+    GameTestAccess::music(*game).enabled = true;
     game->play_music();
-    CHECK(game->music.playing);
+    CHECK(GameTestAccess::music(*game).playing);
     CHECK(output->play_count() == 1);
     game->play_music();
     CHECK(output->play_count() == 1);
@@ -1226,7 +1227,7 @@ TEST_CASE("fast: game music rules use a silent output") {
     game->set_music_volume(5);
     CHECK(output->volume() == 100);
     game->stop_music();
-    CHECK_FALSE(game->music.playing);
+    CHECK_FALSE(GameTestAccess::music(*game).playing);
     CHECK(output->stop_count() == 1);
 
     delete game;
@@ -1271,13 +1272,13 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(first_frame.value() == 13699798000239068498ULL);
 
-    const int old_viewport_x = game->renderer.camera.viewportCenterX;
+    const int old_viewport_x = GameTestAccess::renderer(*game).camera.viewportCenterX;
     game->key_pressed(54);
     game->advance_frame();
     game->render(screen);
-    CHECK(game->gameState == 30);
-    CHECK(game->renderer.backbuffer != nullptr);
-    CHECK(game->renderer.camera.viewportCenterX != old_viewport_x);
+    CHECK(GameTestAccess::state(*game) == 30);
+    CHECK(GameTestAccess::renderer(*game).backbuffer != nullptr);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX != old_viewport_x);
     StableDigest moved_frame;
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(moved_frame.value() == 2749731419861486662ULL);
@@ -1288,20 +1289,20 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
 TEST_CASE("full: year rollover has a fixed saved-state digest") {
     Game* game = make_game();
     generate_scenario(game, 0);
-    game->rng.set_seed(kFixedRandomSeed);
-    game->ui.monthlyReportEnabled = false;
-    game->ui.annualReportEnabled = false;
-    game->economy.dayOfMonth = 31;
-    game->economy.monthOfYear = 12;
-    game->economy.year = 1950;
-    game->dayFrameCounter = game->dayTickThreshold;
+    GameTestAccess::random(*game).set_seed(kFixedRandomSeed);
+    GameTestAccess::ui(*game).monthlyReportEnabled = false;
+    GameTestAccess::ui(*game).annualReportEnabled = false;
+    GameTestAccess::economy(*game).dayOfMonth = 31;
+    GameTestAccess::economy(*game).monthOfYear = 12;
+    GameTestAccess::economy(*game).year = 1950;
+    GameTestAccess::day_frame_counter(*game) = GameTestAccess::day_tick_threshold(*game);
 
-    game->simulation_tick();
+    GameTestAccess::simulation_tick(*game);
 
-    CHECK(game->economy.dayOfMonth == 1);
-    CHECK(game->economy.monthOfYear == 1);
-    CHECK(game->economy.year == 1951);
-    CHECK(game->dayFrameCounter == 0);
+    CHECK(GameTestAccess::economy(*game).dayOfMonth == 1);
+    CHECK(GameTestAccess::economy(*game).monthOfYear == 1);
+    CHECK(GameTestAccess::economy(*game).year == 1951);
+    CHECK(GameTestAccess::day_frame_counter(*game) == 0);
     CHECK(save_state_digest(game) == 8296142532964329289ULL);
     delete game;
 }
@@ -1317,15 +1318,15 @@ TEST_CASE("full: report and graph dialogs have fixed frame digests") {
     // before the first paint is sent back to Playing by the resize path.
     paint_digest(game, &screen);
 
-    game->ready = false;
-    game->ui.transitionCode = 32;
-    game->set_state(GameState::MenuOverlay);
+    GameTestAccess::ready(*game) = false;
+    GameTestAccess::ui(*game).transitionCode = 32;
+    GameTestAccess::set_state(*game, GameState::MenuOverlay);
     game->render(screen);
     CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
 
-    game->ui.set_year_graph_mode(game->economy, 0, false);
-    game->ui.transitionCode = 33;
-    game->set_state(GameState::MenuOverlay);
+    GameTestAccess::ui(*game).set_year_graph_mode(GameTestAccess::economy(*game), 0, false);
+    GameTestAccess::ui(*game).transitionCode = 33;
+    GameTestAccess::set_state(*game, GameState::MenuOverlay);
     game->render(screen);
     CHECK(paint_digest(game, &screen) == 1138514185145564824ULL);
     delete game;
@@ -1366,58 +1367,58 @@ TEST_CASE("fast: click map records and hit-tests overlay elements") {
 TEST_CASE("full: a bottom-bar click selects and activates the hit item") {
     Game* game = make_game();
     generate_scenario(game, 0);
-    REQUIRE(game->gameState == 30);
-    REQUIRE(game->ui.buildMenuMode == 0);
+    REQUIRE(GameTestAccess::state(*game) == 30);
+    REQUIRE(GameTestAccess::ui(*game).buildMenuMode == 0);
 
     // generate_scenario never paints, so set the render layout that the
     // first game_paint would normally establish (the live loop always has these).
-    game->renderer.canvasWidth = kScreenWidth;
-    game->renderer.canvasHeight = kScreenHeight;
-    game->renderer.bottomBarY = game->renderer.canvasHeight - 15;
+    GameTestAccess::renderer(*game).canvasWidth = kScreenWidth;
+    GameTestAccess::renderer(*game).canvasHeight = kScreenHeight;
+    GameTestAccess::renderer(*game).bottomBarY = GameTestAccess::renderer(*game).canvasHeight - 15;
 
     // Mode-0 index 1 is always the "build" entry (item id 1); activating it
     // switches buildMenuMode to 1 and resets the item index to 0 (openBuildMenu
     // mode-0 case 1). Click that icon's x on the bottom bar.
-    const int item1_x = static_cast<int>(static_cast<std::uint8_t>(game->ui.menuItemCode[0][1]));
+    const int item1_x = static_cast<int>(static_cast<std::uint8_t>(GameTestAccess::ui(*game).menuItemCode[0][1]));
     REQUIRE(item1_x > 0);
 
-    game->pointer_pressed(item1_x, game->renderer.bottomBarY);
+    game->pointer_pressed(item1_x, GameTestAccess::renderer(*game).bottomBarY);
 
-    CHECK(game->ui.buildMenuMode == 1);
-    CHECK(game->ui.buildMenuItemIndex == 0);
+    CHECK(GameTestAccess::ui(*game).buildMenuMode == 1);
+    CHECK(GameTestAccess::ui(*game).buildMenuItemIndex == 0);
     delete game;
 }
 
 TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     Game* game = make_game();
     generate_scenario(game, 0);
-    REQUIRE(game->gameState == 30);
+    REQUIRE(GameTestAccess::state(*game) == 30);
 
-    game->renderer.canvasWidth = kScreenWidth;
-    game->renderer.canvasHeight = kScreenHeight;
-    game->renderer.bottomBarY = game->renderer.canvasHeight - 15;
+    GameTestAccess::renderer(*game).canvasWidth = kScreenWidth;
+    GameTestAccess::renderer(*game).canvasHeight = kScreenHeight;
+    GameTestAccess::renderer(*game).bottomBarY = GameTestAccess::renderer(*game).canvasHeight - 15;
 
     // Hover the middle of the gameplay viewport. The viewport always shows the
     // map after generation, so its centre sits on a valid tile.
     const int hover_x = kScreenWidth / 2;
-    const int hover_y = (15 + game->renderer.bottomBarY) / 2;
+    const int hover_y = (15 + GameTestAccess::renderer(*game).bottomBarY) / 2;
 
     game->pointer_moved(hover_x, hover_y);
-    REQUIRE(game->ui.mouseOverField);
+    REQUIRE(GameTestAccess::ui(*game).mouseOverField);
 
-    const int tx = game->ui.tileCursorX;
-    const int ty = game->ui.tileCursorY;
+    const int tx = GameTestAccess::ui(*game).tileCursorX;
+    const int ty = GameTestAccess::ui(*game).tileCursorY;
     CHECK(tx >= 0);
-    CHECK(tx < game->world.terrain.mapWidth);
+    CHECK(tx < GameTestAccess::world(*game).terrain.mapWidth);
     CHECK(ty >= 0);
-    CHECK(ty < game->world.terrain.mapHeight);
+    CHECK(ty < GameTestAccess::world(*game).terrain.mapHeight);
 
     // Round-trip: the resolved tile's screen centre (the flat iso forward
     // transform the resolver mirrors) must sit within one tile of the hover.
     const int tile_screen_x =
-        ty * 16 + tx * 16 + 16 - game->renderer.camera.viewportCenterX;
+        ty * 16 + tx * 16 + 16 - GameTestAccess::renderer(*game).camera.viewportCenterX;
     const int tile_screen_y =
-        game->world.terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - game->renderer.camera.viewportCenterY;
+        GameTestAccess::world(*game).terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - GameTestAccess::renderer(*game).camera.viewportCenterY;
     const int dx = tile_screen_x - hover_x;
     const int dy = tile_screen_y - hover_y;
     CHECK(dx >= -16);
@@ -1426,50 +1427,50 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     CHECK(dy <= 8);
 
     // Hovering UI chrome (the bottom bar) must not claim a field tile.
-    game->pointer_moved(hover_x, game->renderer.bottomBarY);
-    CHECK_FALSE(game->ui.mouseOverField);
+    game->pointer_moved(hover_x, GameTestAccess::renderer(*game).bottomBarY);
+    CHECK_FALSE(GameTestAccess::ui(*game).mouseOverField);
     delete game;
 }
 
 TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
     Game* game = make_game();
     generate_scenario(game, 0);
-    REQUIRE(game->gameState == 30);
+    REQUIRE(GameTestAccess::state(*game) == 30);
 
     // generate_scenario never paints, so set the render layout that the
     // first game_paint would normally establish (the live loop always has these).
-    game->renderer.canvasWidth = kScreenWidth;
-    game->renderer.canvasHeight = kScreenHeight;
-    game->renderer.bottomBarY = game->renderer.canvasHeight - 15;
+    GameTestAccess::renderer(*game).canvasWidth = kScreenWidth;
+    GameTestAccess::renderer(*game).canvasHeight = kScreenHeight;
+    GameTestAccess::renderer(*game).bottomBarY = GameTestAccess::renderer(*game).canvasHeight - 15;
 
     const int mid_x = kScreenWidth / 2;
-    const int mid_y = (15 + game->renderer.bottomBarY) / 2;
-    const int cx0 = game->renderer.camera.viewportCenterX;
-    const int cy0 = game->renderer.camera.viewportCenterY;
-    const int msx0 = game->renderer.camera.mapScaleX;
-    const int msy0 = game->renderer.camera.mapScaleY;
+    const int mid_y = (15 + GameTestAccess::renderer(*game).bottomBarY) / 2;
+    const int cx0 = GameTestAccess::renderer(*game).camera.viewportCenterX;
+    const int cy0 = GameTestAccess::renderer(*game).camera.viewportCenterY;
+    const int msx0 = GameTestAccess::renderer(*game).camera.mapScaleX;
+    const int msy0 = GameTestAccess::renderer(*game).camera.mapScaleY;
 
     // Middle of the viewport never arms a pan.
     game->pointer_edge_scroll(mid_x, mid_y);
-    CHECK(game->renderer.camera.viewportCenterX == cx0);
-    CHECK(game->renderer.camera.viewportCenterY == cy0);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX == cx0);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterY == cy0);
 
     // Right edge pans right; mapScale (= 2*viewportBase) moves 2x the camera
     // delta so the run loop's camera-follow sees an unchanged cursor offset and
     // doesn't fight the pan. A cardinal edge only moves one axis.
     game->pointer_edge_scroll(kScreenWidth - 1, mid_y);
-    const int right_dx = game->renderer.camera.viewportCenterX - cx0;
+    const int right_dx = GameTestAccess::renderer(*game).camera.viewportCenterX - cx0;
     CHECK(right_dx > 0);
-    CHECK(game->renderer.camera.mapScaleX - msx0 == 2 * right_dx);
-    CHECK(game->renderer.camera.viewportCenterY == cy0);
+    CHECK(GameTestAccess::renderer(*game).camera.mapScaleX - msx0 == 2 * right_dx);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterY == cy0);
 
     // Top-right corner pans along both axes (right + up).
     game->pointer_edge_scroll(kScreenWidth - 1, 15);
-    const int dx = game->renderer.camera.viewportCenterX - (cx0 + right_dx);
-    const int dy = game->renderer.camera.viewportCenterY - cy0;
+    const int dx = GameTestAccess::renderer(*game).camera.viewportCenterX - (cx0 + right_dx);
+    const int dy = GameTestAccess::renderer(*game).camera.viewportCenterY - cy0;
     CHECK(dx > 0);
     CHECK(dy < 0);
-    CHECK(game->renderer.camera.mapScaleY - msy0 == 2 * dy);
+    CHECK(GameTestAccess::renderer(*game).camera.mapScaleY - msy0 == 2 * dy);
 
     delete game;
 }
