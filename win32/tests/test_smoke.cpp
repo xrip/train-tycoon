@@ -67,7 +67,7 @@ void generate_scenario(Game* game, int scenario) {
     game->scenario.activeScenario = scenario;
     game_setState(game, 25);
     for (int step = 0; game->gameState == 25 && step < 200000; ++step) {
-        game_update(game);
+        game->update_state_machine();
     }
     REQUIRE(game->gameState == 30);
     REQUIRE(!game->world.terrain.tileMap.empty());
@@ -77,15 +77,15 @@ void generate_scenario(Game* game, int scenario) {
 void load_game_resources(Game* game) {
     game->start();
     game->loadingStartTime = 0;
-    game_update(game);
+    game->update_state_machine();
     game->loadingStartTime = 0;
-    game_update(game);
-    game_update(game);
+    game->update_state_machine();
+    game->update_state_machine();
     REQUIRE(game->gameState == GameState::MenuOverlay);
 
     game_setState(game, GameState::LoadingResources);
     for (int step = 0; game->gameState == GameState::LoadingResources && step < 1000; ++step) {
-        game_update(game);
+        game->update_state_machine();
     }
     REQUIRE(game->gameState == GameState::MenuOverlay);
 }

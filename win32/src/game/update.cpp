@@ -286,7 +286,8 @@ void updateHighScoreSync(Game *game) {
 
 } // namespace
 
-void game_update(Game *game) {
+void Game::update_state_machine() {
+    Game* game = this;
     switch (game->gameState) {
         case GameState::BootSplash0:
         case GameState::BootSplash1:

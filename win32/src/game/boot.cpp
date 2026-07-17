@@ -299,7 +299,7 @@ void Game::advance_frame() {
     if (game->ui.inputPending) {
         game->frameIndex = 1;
         while (game->frameIndex > 0) {
-            game_update(game);
+            game->update_state_machine();
             if (game->gameState != GameState::MenuOverlay && game->gameState != GameState::MapOverview) continue;
             game->ui.inputPending = false;
             break;
@@ -307,15 +307,15 @@ void Game::advance_frame() {
         game->frameIndex = 0;
     }
     if (game->gameState == GameState::LoadingResources) {
-        for (int n = 0; n < 5; ++n) game_update(game);
+        for (int n = 0; n < 5; ++n) game->update_state_machine();
     }
     if (game->gameState == GameState::Playing) {
         for (int n = 0; n < game->simSpeed; ++n) {
-            if (!game->ui.pauseFlag) game_update(game);
+            if (!game->ui.pauseFlag) game->update_state_machine();
             if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) continue;
             game_viewportZoomKey(game);
         }
     } else {
-        game_update(game);
+        game->update_state_machine();
     }
 }

@@ -143,7 +143,6 @@ void game_enterOutOfMoneyState(Game *game);
 void game_drawSelectedTrainLabel(Game *game, Surface* graphics, int32_t x, int32_t y, int8_t selectionIndex);
 void game_setCanvasSize(Game *game, int32_t n, int32_t n2);
 void game_setState(Game *game, int32_t n);
-void game_update(Game *game);
 void game_renderMap(Game *game, Surface* graphics);
 
 #endif  // GAME_INTERNAL_H

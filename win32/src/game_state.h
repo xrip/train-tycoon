@@ -42,6 +42,7 @@ typedef struct Game {
     bool music_available() const;
     bool music_playing() const;
     std::string_view music_error() const;
+    void update_state_machine();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
