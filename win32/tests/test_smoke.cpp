@@ -647,6 +647,20 @@ TEST_CASE("fast: UI controller owns key repeat timing") {
     CHECK(ui.keySubState == 30);
 }
 
+TEST_CASE("fast: UI controller maps report graph values") {
+    UiController ui;
+    ui.yearGraphValues[2] = 7;
+    ui.yearGraphMode = 0;
+    CHECK(ui.report_graph_value(34, 2) == 72);
+    CHECK(ui.report_graph_value(34, 22) == 71);
+    CHECK(ui.report_graph_value(34, 65) == 65);
+    ui.yearGraphMode = 1;
+    CHECK(ui.report_graph_value(34, 2) == 42);
+    CHECK(ui.report_graph_value(34, 22) == 41);
+    CHECK(ui.report_graph_value(34, 65) == 35);
+    CHECK(ui.report_graph_value(33, 2) == 0);
+}
+
 TEST_CASE("fast: economy computes period and year-end report values") {
     Economy economy;
     economy.loanBalance = 120000;

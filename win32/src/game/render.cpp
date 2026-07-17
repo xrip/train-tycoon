@@ -288,13 +288,17 @@ PackedDrawingCommand readDrawingCommand(Game *game, PackedDialogReader& reader) 
     command.widthOrX2 = reader.u16();
     command.heightOrY2 = reader.u16();
     if ((command.flags & 8) != 0)
-        command.x = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.x));
+        command.x = static_cast<int16_t>(game->ui.report_graph_value(
+            game->renderer.currentSpriteId, command.x));
     if ((command.flags & 0x10) != 0)
-        command.y = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.y));
+        command.y = static_cast<int16_t>(game->ui.report_graph_value(
+            game->renderer.currentSpriteId, command.y));
     if ((command.flags & 0x20) != 0)
-        command.widthOrX2 = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.widthOrX2));
+        command.widthOrX2 = static_cast<int16_t>(game->ui.report_graph_value(
+            game->renderer.currentSpriteId, command.widthOrX2));
     if ((command.flags & 0x40) != 0)
-        command.heightOrY2 = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.heightOrY2));
+        command.heightOrY2 = static_cast<int16_t>(game->ui.report_graph_value(
+            game->renderer.currentSpriteId, command.heightOrY2));
     command.hasResourceCondition = (command.flags & 0x80) != 0;
     command.resourceId = command.hasResourceCondition ? reader.byte() : 0;
     return command;

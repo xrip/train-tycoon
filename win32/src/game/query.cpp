@@ -33,16 +33,17 @@ bool World::has_track_step(int32_t n, int32_t n2, int32_t n3,
     return bl;
 }
 
-int32_t game_neighboursMask(Game *game, int32_t n, int32_t n2) {
-    if (n == 34) {
-        if (game->ui.yearGraphMode == 0 || game->ui.yearGraphMode == 2) {
-            if (n2 == 65) return 65;
-            if (n2 >= 20) return 64 + game->ui.yearGraphValues[n2 - 20];
-            return 65 + game->ui.yearGraphValues[n2];
+int32_t UiController::report_graph_value(int32_t sprite_id,
+                                         int32_t index) const {
+    if (sprite_id == 34) {
+        if (yearGraphMode == 0 || yearGraphMode == 2) {
+            if (index == 65) return 65;
+            if (index >= 20) return 64 + yearGraphValues[index - 20];
+            return 65 + yearGraphValues[index];
         }
-        if (n2 == 65) return 35;
-        if (n2 >= 20) return 34 + game->ui.yearGraphValues[n2 - 20];
-        return 35 + game->ui.yearGraphValues[n2];
+        if (index == 65) return 35;
+        if (index >= 20) return 34 + yearGraphValues[index - 20];
+        return 35 + yearGraphValues[index];
     }
     return 0;
 }

@@ -11,6 +11,7 @@
 // records live in OfferBoard.
 struct UiController {
     int32_t advance_key_repeat();
+    int32_t report_graph_value(int32_t sprite_id, int32_t index) const;
 
     // Build-menu navigation and content state. The grids hold the current menu's
     // item ids, result codes, item/text/transition codes, and per-row enabled
