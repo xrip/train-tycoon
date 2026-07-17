@@ -508,6 +508,13 @@ TEST_CASE("fast: fleet lookup and chain count use stable slots") {
     CHECK(fleet.has_car_at(head, 4, 3));
     CHECK(fleet.find_train_head_at(4, 3) == head);
     CHECK(fleet.find_train_head_at(1, 1) == 5000);
+    fleet.reset_trailing_cars(head, car, 0);
+    CHECK(fleet.trainCars[car].x == fleet.trainCars[head].x);
+    CHECK(fleet.trainCars[car].y == fleet.trainCars[head].y);
+    CHECK(fleet.trainCars[car].phase == -8);
+    fleet.age_one_year();
+    CHECK(fleet.trainCars[head].ageYears == 1);
+    CHECK(fleet.trainCars[kTrainSlotCount - 1].ageYears == 1);
 
     const int site = fleet.allocate_service_site(1, 6, 7, true, true);
     CHECK(fleet.find_service_site_at(6, 7) == site);

@@ -55,8 +55,8 @@ void game_updateCityPopulation(Game *game) {
     }
 }
 
-void game_ageTrainsOneYear(Game *game) {
-    for (int n = 0; n < 500; ++n) ++game->fleet.trainCars[n].ageYears;
+void Fleet::age_one_year() {
+    for (TrainCar& car : trainCars) ++car.ageYears;
 }
 
 void game_chargeTrainRunningCosts(Game *game) {
@@ -769,7 +769,7 @@ void applyNewMonthChanges(Game *game) {
 
 void advanceYearIfNeeded(Game *game) {
     if (game->economy.monthOfYear == 13) {
-        game_ageTrainsOneYear(game);
+        game->fleet.age_one_year();
         game_resetAiDepotTrainAges(game);
         game->economy.monthOfYear = 1;
         ++game->economy.year;

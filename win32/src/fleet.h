@@ -74,6 +74,8 @@ struct Fleet {
     int32_t find_service_site_at(int32_t x, int32_t y) const;
     int32_t count_cars(int32_t car) const;
     int32_t append_car(int32_t previous_car, int32_t car_type);
+    void age_one_year();
+    void reset_trailing_cars(int32_t head, int32_t car, int32_t phase);
 
     TrainCar trainCars[kTrainSlotCount]{};
 

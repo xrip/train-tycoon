@@ -52,13 +52,13 @@ int32_t Fleet::append_car(int32_t previous_car, int32_t car_type) {
     return new_car;
 }
 
-void game_resetTrailingCars(Game *game, int32_t head, int32_t car, int32_t phase) {
+void Fleet::reset_trailing_cars(int32_t head, int32_t car, int32_t phase) {
     if (car == -1) return;
-    game_resetTrailingCars(game, head, game->fleet.trainCars[car].nextCar, phase - 8);
-    game->fleet.trainCars[car].x = game->fleet.trainCars[head].x;
-    game->fleet.trainCars[car].y = game->fleet.trainCars[head].y;
-    game->fleet.trainCars[car].direction = game->fleet.trainCars[head].direction;
-    game->fleet.trainCars[car].phase = (int8_t)(phase - 8);
+    reset_trailing_cars(head, trainCars[car].nextCar, phase - 8);
+    trainCars[car].x = trainCars[head].x;
+    trainCars[car].y = trainCars[head].y;
+    trainCars[car].direction = trainCars[head].direction;
+    trainCars[car].phase = (int8_t)(phase - 8);
 }
 
 int32_t game_takeServiceResource(Game *game, int32_t vehicle,
@@ -396,7 +396,8 @@ void game_updateTrain(Game *game, int32_t head) {
                 }
                 if (!moved) {
                     game->fleet.trainCars[head].direction = step[1];
-                    game_resetTrailingCars(game, head, game->fleet.trainCars[head].nextCar, 0);
+                    game->fleet.reset_trailing_cars(
+                        head, game->fleet.trainCars[head].nextCar, 0);
                 }
                 if (moved && train_flag::isHead(game->fleet.trainCars[head].flags)
                     && next_variant == 6) {
@@ -422,7 +423,8 @@ void game_updateTrain(Game *game, int32_t head) {
                     game->fleet.trainCars[head].direction = game->fleet.forwardTrackSteps[current_variant][1];
                 else if (game->fleet.reverseTrackSteps[current_variant][0] == game->fleet.trainCars[head].direction)
                     game->fleet.trainCars[head].direction = game->fleet.reverseTrackSteps[current_variant][1];
-                game_resetTrailingCars(game, head, game->fleet.trainCars[head].nextCar, 0);
+                game->fleet.reset_trailing_cars(
+                    head, game->fleet.trainCars[head].nextCar, 0);
             }
         }
         if (stop_chain == 0 && collision == 0 && game->fleet.trainCars[head].nextCar != -1)
