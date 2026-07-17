@@ -33,7 +33,7 @@ Game* make_game() {
 }
 
 std::uint64_t save_state_digest(Game* game) {
-    game_initSaveOrLoad(game, 4);
+    game->saveCodec.walk(*game, 4);
     StableDigest digest;
     digest.add_bytes(game->saveCodec.saveBuffer.data(),
                      static_cast<std::size_t>(game->saveCodec.snapshotSize));
@@ -521,7 +521,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->economy.year = 1973;
     game->economy.loanBalance = -7654321;
     game->renderer.visibleTrains[0] = -1234;
-    game_initSaveOrLoad(game, 4);
+    game->saveCodec.walk(*game, 4);
 
     const int plain_size = game->saveCodec.snapshotSize;
     REQUIRE(plain_size > 0);
@@ -533,8 +533,8 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     REQUIRE(plain != nullptr);
     std::memcpy(plain, game->saveCodec.saveBuffer.data(), static_cast<std::size_t>(plain_size));
 
-    game_compressSaveBuffer(game);
-    game_decompressSaveBuffer(game);
+    game->saveCodec.compress();
+    game->saveCodec.decompress();
     CHECK(game->saveCodec.snapshotSize == plain_size);
     CHECK(std::memcmp(game->saveCodec.saveBuffer.data(), plain, static_cast<std::size_t>(plain_size)) == 0);
 
@@ -544,7 +544,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     game->economy.year = 0;
     game->economy.loanBalance = 0;
     game->renderer.visibleTrains[0] = 0;
-    game_initSaveOrLoad(game, 5);
+    game->saveCodec.walk(*game, 5);
     CHECK(game->economy.money == 123456);
     CHECK(game->economy.dayOfMonth == 17);
     CHECK(game->economy.monthOfYear == 8);

@@ -77,7 +77,7 @@ bool game_isResourceTile(Game *game, int32_t n, int32_t n2) {
     if (n != 1) game->ui.snapshotLoadedFlag = false;
     if (n == 1) {
         if (!game->ui.snapshotLoadedFlag) {
-            game->snapshotLoadSucceeded = game_loadSnapshotAndReturn(game);
+            game->snapshotLoadSucceeded = game->saveCodec.load_main_snapshot();
             game->ui.snapshotLoadedFlag = true;
         }
         if (n2 == 0 && game->scenario.aiEnabled) return false;

@@ -308,9 +308,9 @@ bool game_pickValidForestTile(Game *game) {
 }
 
 void game_persistSnapshotMode0(Game *game) {
-    game_loadGame(game, 5, save::MODE_WRITE);
-    game_writeSaveSnapshot(game);
-    game_saveGame(game);
+    game->saveCodec.load_slot(5, save::MODE_WRITE);
+    game->saveCodec.walk_settings(*game);
+    game->saveCodec.persist();
 }
 
 int32_t game_computeMapTrainMetric(Game *game, int32_t n) {

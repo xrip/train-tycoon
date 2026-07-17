@@ -1,6 +1,5 @@
 // Game start, resources, sprites, state changes, and save start.
 #include "game_internal.h"
-#include "support/record_store.h"
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
@@ -121,51 +120,9 @@ std::vector<int8_t> game_readPackedTextCodes(Game *game, int32_t offset) {
             game->assets.spriteData.data() + offset + 1 + code_count};
 }
 
-void game_loadGame(Game *game, int32_t slot, int32_t mode) {
-    game->saveCodec.saveSlot = slot;
-    game->saveCodec.savePendingMode = mode;
-    game->saveCodec.saveReadOffset = 0;
-    game->saveCodec.snapshotSize = 0;
-    game->saveCodec.snapshotLoaded = false;
-    if (game->saveCodec.savePendingMode == save::MODE_READ) {
-        std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
-        if (store) {
-            int nr = store->record_count();
-            for (int i = 0; i < nr; ++i) {
-                int id = store->record_id_at(i);
-                const auto record = store->record(id);
-                if (!record) continue;
-                const int len = static_cast<int>(record->size());
-                if (len > 0 && (int8_t)(*record)[0] == slot) {
-                    game->saveCodec.saveBuffer.assign(static_cast<std::size_t>(len - 1), 0);
-                    memcpy(game->saveCodec.saveBuffer.data(), record->data() + 1,
-                           (size_t)(len - 1));
-                    game->saveCodec.snapshotSize = len - 1;
-                    game->saveCodec.snapshotLoaded = true;
-                }
-            }
-        }
-    } else {
-        game->saveCodec.snapshotLoaded = true;
-    }
-}
-
-void game_writeSaveSnapshot(Game *game) {
-    animationsDisabled = game_saveOrLoadBool(game, animationsDisabled);
-    selectionHidden = game_saveOrLoadBool(game, selectionHidden);
-    monthlyReportEnabled = game_saveOrLoadBool(game, monthlyReportEnabled);
-    annualReportEnabled = game_saveOrLoadBool(game, annualReportEnabled);
-    game->scenario.scenarioStepCompare = game_saveIntToBuffer(game, game->scenario.scenarioStepCompare);
-    game->scenario.bestScenarioScore = game_saveIntToBuffer(game, game->scenario.bestScenarioScore);
-    game->music_volume_level = game_saveIntToBuffer(game, game->music_volume_level);
-    game_saveOrLoadInts(game, game->scenario.scenarioScores, kScenarioCount);
-    game_saveOrLoadInts(game, game->scenario.leaderboardScores, kLeaderboardScoreCount);
-    game_saveOrLoadBytes(game, game->scenario.playerNameCodes, kPlayerNameCodeCount);
-}
-
 void game_persistSnapshotMode1(Game *game) {
-    game_loadGame(game, 5, save::MODE_READ);
-    game_writeSaveSnapshot(game);
+    game->saveCodec.load_slot(5, save::MODE_READ);
+    game->saveCodec.walk_settings(*game);
     game_setMusicVolume(game, game->music_volume_level);
 }
 

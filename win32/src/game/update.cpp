@@ -57,7 +57,7 @@ void applyScenarioDefinition(Game *game, const ScenarioDefinition& definition) {
 }
 
 void beginMapGeneration(Game *game) {
-    game_initSaveOrLoad(game, save::OP_RESET_SKIP);
+    game->saveCodec.walk(*game, save::OP_RESET_SKIP);
     game->economy.dayOfMonth = 1; game->economy.monthOfYear = 1; game->economy.year = 1950;
     game->scenario.milestonesEnabled = false; game->ui.pauseFlag = false; game->scenario.aiEnabled = false;
     game->economy.moneyBaseA = 974; game->economy.moneyBaseB = 974;
@@ -246,7 +246,7 @@ void updateBuildingPath(Game *game) {
 void updateSavingGame(Game *game) {
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
-    game_saveAllMapArrays(game);
+    game->saveCodec.save_all(*game);
     game->ui.buildMenuItemIndex = 0;
     game->ui.menuDirty = true;
     game_setState(game, GameState::Playing);
@@ -255,7 +255,7 @@ void updateSavingGame(Game *game) {
 void updateLoadingGame(Game *game) {
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
-    game_restoreAllMapArrays(game);
+    game->saveCodec.restore_all(*game);
     game->ui.pauseFlag = false;
     game->ui.buildMenuItemIndex = 0;
     game->ui.menuDirty = true;

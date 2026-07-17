@@ -90,16 +90,16 @@ inline constexpr int32_t OFFER_ALT_BASE = 60;       // menuRowAltType[row] + thi
 inline constexpr int32_t SCENARIO_NOTICE_BASE = 80; // scenarioNotice id   + this
 }  // namespace transition
 
-// Save-codec direction (Game::savePendingMode, also the mode argument of
-// game_loadGame). One IO_* field walk serves save and load; the mode decides which
+// Save-codec direction (SaveCodec::savePendingMode, also the mode argument of
+// SaveCodec::load_slot). One IO_* field walk serves save and load; the mode decides which
 // way bytes move. See save.cpp / save_arrays.cpp.
 namespace save {
 inline constexpr int32_t MODE_WRITE = 0;  // serialize fields into the buffer
 inline constexpr int32_t MODE_READ = 1;   // deserialize fields from the buffer
 inline constexpr int32_t MODE_SKIP = 2;   // touch nothing: return 0 and zero arrays
 
-// game_initSaveOrLoad operation selector. Only these three values are reached.
-// Selector values 4 and 5 exist in game_initSaveOrLoad but are never called; that
+// SaveCodec::walk operation selector. Only these three values are reached.
+// Selector values 4 and 5 also support the in-memory save tests; that
 // dead branch is a smell recorded for a separate cleanup, not removed here.
 inline constexpr int32_t OP_SAVE_MAIN = 0;   // write the main snapshot to slot 0
 inline constexpr int32_t OP_LOAD_MAIN = 1;   // read the main snapshot from slot 0
