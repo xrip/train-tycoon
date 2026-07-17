@@ -53,6 +53,8 @@ typedef struct Game {
     void maybe_take_ai_turn();
     void upgrade_one_ai_train_for_era();
     void reset_ai_depot_train_ages();
+    void record_delivered_resource(int32_t resource, int32_t amount);
+    void record_train_revenue(int32_t amount);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

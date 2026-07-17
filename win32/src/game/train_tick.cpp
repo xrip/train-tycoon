@@ -175,11 +175,9 @@ void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
     game_loadTrainAtServiceVehicle(game, game->fleet.trainCars[car].nextCar, vehicle, construction_done);
 }
 
-void game_recordDeliveredResource(Game *game, int32_t resource, int32_t amount) {
-    for (int row = 0; row < 5; ++row) {
-        if (game->offerBoard.offers[row].objectiveType == 3 + resource)
-            game->offerBoard.offers[row].progress += amount;
-    }
+void Game::record_delivered_resource(int32_t resource, int32_t amount) {
+    Game* game = this;
+    game->offerBoard.add_progress(3 + resource, amount);
     switch (resource) {
         case 1: game->scenario.milestoneThreshold1 += amount; break;
         case 2: game->scenario.milestoneThreshold2 += amount; break;
@@ -189,10 +187,9 @@ void game_recordDeliveredResource(Game *game, int32_t resource, int32_t amount) 
     }
 }
 
-void game_recordTrainRevenue(Game *game, int32_t amount) {
-    for (int row = 0; row < 5; ++row) {
-        if (game->offerBoard.offers[row].objectiveType == 1) game->offerBoard.offers[row].progress += amount;
-    }
+void Game::record_train_revenue(int32_t amount) {
+    Game* game = this;
+    game->offerBoard.add_progress(1, amount);
     game->economy.lifetimeTrainRevenue += amount;
     game->economy.trainRevenueScore += amount / 73;
 }
@@ -210,14 +207,16 @@ int32_t game_unloadTrainRevenue(Game *game, int32_t car, int32_t vehicle) {
                     int value = game->fleet.trainCars[car].energyCargoOrRemovalTicks * 3 * age_scale;
                     if (game->scenario.routeResourceFlags[4] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 4, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
+                    game->record_delivered_resource(
+                        4, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
                     game->fleet.trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 if ((game->fleet.serviceSites[vehicle].unloadFlags & 0x10) == 0x10) {
                     int value = game->fleet.trainCars[car].secondaryCargoOrBaseEnergy * 8 * age_scale;
                     if (game->scenario.routeResourceFlags[5] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 5, game->fleet.trainCars[car].secondaryCargoOrBaseEnergy);
+                    game->record_delivered_resource(
+                        5, game->fleet.trainCars[car].secondaryCargoOrBaseEnergy);
                     game->fleet.trainCars[car].secondaryCargoOrBaseEnergy = 0;
                 }
                 break;
@@ -226,7 +225,8 @@ int32_t game_unloadTrainRevenue(Game *game, int32_t car, int32_t vehicle) {
                     int value = game->fleet.trainCars[car].energyCargoOrRemovalTicks * 10 * age_scale;
                     if (game->scenario.routeResourceFlags[3] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 3, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
+                    game->record_delivered_resource(
+                        3, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
                     game->fleet.trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 break;
@@ -235,7 +235,8 @@ int32_t game_unloadTrainRevenue(Game *game, int32_t car, int32_t vehicle) {
                     int value = game->fleet.trainCars[car].energyCargoOrRemovalTicks * 12 * age_scale;
                     if (game->scenario.routeResourceFlags[2] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 2, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
+                    game->record_delivered_resource(
+                        2, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
                     game->fleet.trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 break;
@@ -244,7 +245,8 @@ int32_t game_unloadTrainRevenue(Game *game, int32_t car, int32_t vehicle) {
                     int value = game->fleet.trainCars[car].energyCargoOrRemovalTicks * 13 * age_scale;
                     if (game->scenario.routeResourceFlags[1] > 0) value *= 2;
                     revenue += value;
-                    game_recordDeliveredResource(game, 1, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
+                    game->record_delivered_resource(
+                        1, game->fleet.trainCars[car].energyCargoOrRemovalTicks);
                     game->fleet.trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 break;
@@ -325,7 +327,7 @@ void game_updateTrain(Game *game, int32_t head) {
                     game_pushMoneyHistory(game, revenue);
                     game->economy.totalRevenue += revenue;
                     game->fleet.trainCars[head].revenue += revenue;
-                    game_recordTrainRevenue(game, revenue);
+                    game->record_train_revenue(revenue);
                 }
                 game->fleet.trainCars[head].energyCargoOrRemovalTicks =
                     (int8_t)(game->fleet.count_cars(head) * 40);
