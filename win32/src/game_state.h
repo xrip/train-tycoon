@@ -62,6 +62,8 @@ typedef struct Game {
     int8_t register_map_train(int8_t zone_population, int32_t y, int32_t x);
     void record_money_change(int32_t amount);
     bool matches_resource_condition(int32_t group, int32_t value);
+    bool spend_money(int32_t amount);
+    void update_ten_day_metric();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

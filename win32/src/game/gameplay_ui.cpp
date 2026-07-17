@@ -37,7 +37,7 @@ static void format_money(int32_t value, char *out, int out_size) {
 
 int32_t game_drawMenuRow(Game *game, Surface *graphics, int32_t sprite,
                        int32_t item_index, int32_t x, bool spaced) {
-    game_drawSpriteQuad(game, graphics, sprite, x, bottomBarY, 20);
+    game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, x, bottomBarY, 20);
     if (game->ui.buildMenuItemIndex == item_index) game->ui.selectedMenuRowX = x;
     return x + 15 + (spaced ? 3 : 0);
 }
@@ -104,7 +104,7 @@ void game_paintMain(Game *game, Surface *graphics) {
     for (int item = 0; item < item_count; ++item) {
         int x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
         int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
-        game_drawSpriteQuad(game, game->renderer.backbuffer_surface, sprite, x, bottomBarY, 20);
+        game->renderer.draw_sprite_quad(*game->renderer.backbuffer_surface, game->assets, sprite, x, bottomBarY, 20);
         if (item != game->ui.buildMenuItemIndex) continue;
         midp_set_color(game->renderer.backbuffer_surface, 0xFFFFFF);
         midp_draw_rect(game->renderer.backbuffer_surface, x, bottomBarY, 14, 14);
@@ -300,7 +300,7 @@ void game_drawBuildMenuRow(Game *game, Surface *graphics) {
         menu_y = game->ui.cursorScreenY;
     }
     if (game->ui.blockBuildMenu) {
-        game_drawSpriteQuad(game, graphics, 200, menu_x, menu_y + 15, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 200, menu_x, menu_y + 15, 20);
         midp_set_color(graphics, 0xFF0000);
         midp_draw_arc(graphics, menu_x + 5, menu_y + 20, 7, 7, 0, 360);
         midp_draw_line(graphics, menu_x + 7, menu_y + 25,
@@ -309,16 +309,16 @@ void game_drawBuildMenuRow(Game *game, Surface *graphics) {
     }
     if (game->ui.buildMenuMode == 1
         && (game->ui.buildMenuItemIndex == 5 || game->ui.buildMenuItemIndex == 6))
-        game_drawSpriteQuad(game, graphics, 249, game->ui.cursorScreenX - 2,
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 249, game->ui.cursorScreenX - 2,
                           game->ui.cursorScreenY + 13, 20);
-    game_drawSpriteQuad(game, graphics, 200, menu_x, menu_y + 15, 20);
+    game->renderer.draw_sprite_quad(*graphics, game->assets, 200, menu_x, menu_y + 15, 20);
     if (game->ui.buildMenuMode != 0 || game->ui.buildMenuItemIndex != 0) {
         int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode]
                                                [game->ui.buildMenuItemIndex]);
-        game_drawSpriteQuad(game, graphics, sprite, menu_x + 5, menu_y + 19, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, menu_x + 5, menu_y + 19, 20);
     }
     if (game->ui.buildMenuMode != 3 || game->ui.buildMenuItemIndex >= 4) return;
-    game_drawSpriteQuad(game, graphics, game->ui.buildMenuItemIndex + 230,
+    game->renderer.draw_sprite_quad(*graphics, game->assets, game->ui.buildMenuItemIndex + 230,
                       menu_x + 5, menu_y + 19, 20);
 
     int min_x = game->ui.tileCursorX - 3;
@@ -344,21 +344,21 @@ void game_drawBuildMenuRow(Game *game, Surface *graphics) {
     }
     int icon_x = 0;
     if (population_tiles / 3 > 0) {
-        game_drawSpriteQuad(game, graphics, 190, icon_x, 15, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 190, icon_x, 15, 20);
         icon_x += 15;
     }
     if (population_tiles / 7 > 0) {
-        game_drawSpriteQuad(game, graphics, 191, icon_x, 15, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 191, icon_x, 15, 20);
         icon_x += 15;
     }
     if (has_type_62_68) {
-        game_drawSpriteQuad(game, graphics, 192, icon_x, 15, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 192, icon_x, 15, 20);
         icon_x += 15;
     }
     if (has_type_56_61) {
-        game_drawSpriteQuad(game, graphics, 194, icon_x, 15, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 194, icon_x, 15, 20);
         icon_x += 15;
     }
     if (has_type_50_55)
-        game_drawSpriteQuad(game, graphics, 193, icon_x, 15, 20);
+        game->renderer.draw_sprite_quad(*graphics, game->assets, 193, icon_x, 15, 20);
 }

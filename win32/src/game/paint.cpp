@@ -139,10 +139,10 @@ void Game::render(Surface& surface) {
                 for (n13 = 0; n13 < canvasHeight; ++n13)
                     midp_draw_line(g, 0, n13 * 2, canvasWidth, canvasWidth + n13 * 2);
                 midp_set_clip(g, 0, 0, canvasWidth, canvasHeight);
-                game_drawSpriteQuad(game, g, 234, 0, 15, 20);
+                game->renderer.draw_sprite_quad(*g, game->assets, 234, 0, 15, 20);
             }
             game_drawMoneyTicker(game, g);
-            if (game->ui.pauseFlag) game_drawSpriteQuad(game, g, 236, 0, 15, 0);
+            if (game->ui.pauseFlag) game->renderer.draw_sprite_quad(*g, game->assets, 236, 0, 15, 0);
             if (game->ui.pendingTransitionCode > -1) {
                 game->ui.transitionCode = game->ui.pendingTransitionCode;
                 game_resetOverlayRenderState(game);

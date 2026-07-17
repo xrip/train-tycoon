@@ -204,7 +204,7 @@ void game_setState(Game *game, int32_t n) {
     game->ui.menuDirty = true;
     switch (n) {
         case GameState::BootSplash0:
-            game_openSpriteStream(game, "sprite_images.bin");
+            game->assets.open_sprite_stream("sprite_images.bin");
             game_loadPackedSpriteData(game, "packed_sprites.bin");
             game->loadingAnimationFrame = 0;
             /* fall through */

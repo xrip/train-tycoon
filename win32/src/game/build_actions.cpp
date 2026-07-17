@@ -265,7 +265,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                 || (slot = game->fleet.allocate_service_site(
                         1, game->ui.tileCursorX, game->ui.tileCursorY, false, false))
                        == 5000
-                || !game_spendMoney(game, game->economy.costPower))
+                || !game->spend_money(game->economy.costPower))
                 break;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
@@ -278,7 +278,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                 || (slot = game->fleet.allocate_service_site(
                         1, game->ui.tileCursorX, game->ui.tileCursorY, true, false))
                        == 5000
-                || !game_spendMoney(game, game->economy.costPower))
+                || !game->spend_money(game->economy.costPower))
                 break;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
@@ -291,7 +291,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                 || (slot = game->fleet.allocate_service_site(
                         1, game->ui.tileCursorX, game->ui.tileCursorY, false, true))
                        == 5000
-                || !game_spendMoney(game, game->economy.costStruct))
+                || !game->spend_money(game->economy.costStruct))
                 break;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 89;
@@ -308,7 +308,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                 || (slot = game->fleet.allocate_service_site(
                         1, game->ui.tileCursorX, game->ui.tileCursorY, true, true))
                        == 5000
-                || !game_spendMoney(game, game->economy.costStruct))
+                || !game->spend_money(game->economy.costStruct))
                 break;
             game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
             game->world.terrain.tileMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 90;

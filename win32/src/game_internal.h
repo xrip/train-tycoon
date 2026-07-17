@@ -11,10 +11,8 @@
 constexpr int32_t unsignedByte(int8_t value) {
     return static_cast<uint8_t>(value);
 }
-void game_drawSpriteQuad(Game *game, Surface* graphics, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void game_handleKey(Game *game, int32_t n);
 void game_resetKeyState(Game *game, int32_t n);
-void game_openSpriteStream(Game *game, const char* resource_name);
 std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game);
 void game_resetOverlayRenderState(Game *game);
 void game_loadPackedSpriteData(Game *game, const char* resource_name);
@@ -46,7 +44,6 @@ void game_demolishAtCursor(Game *game);
 void game_pickTrainsAtCursor(Game *game);
 void game_buildPlaceTrackPiece(Game *game, int32_t n);
 void game_openBuildMenu(Game *game);
-bool game_spendMoney(Game *game, int32_t n);
 void game_computeTrackBuild(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6, int32_t n7, int32_t n8);
 void game_revertTrackTiles(Game *game);
 void game_placeTrackAtCursor(Game *game, bool bl, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6, bool bl2, int32_t n7);
@@ -91,7 +88,6 @@ void game_decrementTrainCargoOptionCounts(Game *game, int32_t n);
 bool game_applyTrainUpgrade(Game *game, int32_t n, int32_t n2, int32_t* nArray);
 void game_persistSnapshotMode0(Game *game);
 void game_persistSnapshotMode1(Game *game);
-void game_everyTenTick(Game *game);
 void game_newYearNotify(Game *game);
 int32_t game_scanMapForMetric(Game *game);
 void game_setYearGraphMode(Game *game, int32_t n, bool bl);

@@ -17,6 +17,8 @@
 // the tile-animation offset lists. All runtime-only (not saved). Values and the
 // resource read order are unchanged.
 struct Assets {
+    void open_sprite_stream(const char* resource_name);
+
     std::vector<int16_t> spriteOffsetTable;
     std::vector<int8_t> spriteData;
     std::vector<int8_t> spriteIndexTable;

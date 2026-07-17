@@ -832,7 +832,8 @@ void advanceGameDay(Game *game) {
     game->monthly_offer_tick();
     if (game->economy.dayOfMonth % 4 == 0) game->maybe_take_ai_turn();
     if (game->economy.dayOfMonth % 2 == 0) {
-        if (game->economy.dayOfMonth % 10 == 0) game_everyTenTick(game);
+        if (game->economy.dayOfMonth % 10 == 0)
+            game->update_ten_day_metric();
         game->charge_train_running_costs();
         game_checkScenarioMilestone(game);
         if (game->scenario.aiExpansionEnabled) {

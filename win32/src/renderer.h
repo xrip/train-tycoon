@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <memory>
 
+struct Assets;
+
 // Renderer owns the backbuffer and the on-screen view bookkeeping. backbuffer is
 // the off-screen image and backbuffer_surface is a borrowed view into it. The
 // sprite-id fields track the currently drawn packed sprite. visibleTrains /
@@ -16,6 +18,10 @@
 // bounds -- both are part of the save format and keep their exact byte order.
 // lastViewportCenterX / viewportCenterYCached cache the last drawn camera centre.
 struct Renderer {
+    void draw_sprite_quad(Surface& surface, const Assets& assets,
+                          int32_t sprite, int32_t x, int32_t y,
+                          int32_t anchor) const;
+
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface = nullptr;
     int32_t currentSpriteId = 0;
