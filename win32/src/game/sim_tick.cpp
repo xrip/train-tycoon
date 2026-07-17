@@ -336,49 +336,53 @@ int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
     return n2;
 }
 
-void game_checkScenarioMilestone(Game *game) {
+bool Scenario::complete_milestone_if_met(const Economy& economy) {
     bool bl = false;
-    if (!game->scenario.milestonesEnabled) {
-        switch (game->scenario.scenarioMilestoneIndex) {
-            case 1: bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold1; break;
-            case 2: bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold2; break;
-            case 3: bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold3; break;
-            case 4: bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold4; break;
-            case 5: bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold5; break;
+    if (!milestonesEnabled) {
+        switch (scenarioMilestoneIndex) {
+            case 1: bl = currentMilestoneScore <= milestoneThreshold1; break;
+            case 2: bl = currentMilestoneScore <= milestoneThreshold2; break;
+            case 3: bl = currentMilestoneScore <= milestoneThreshold3; break;
+            case 4: bl = currentMilestoneScore <= milestoneThreshold4; break;
+            case 5: bl = currentMilestoneScore <= milestoneThreshold5; break;
             case 6:
-                bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold1
-                     && game->scenario.milestoneCoThreshold2 <= game->scenario.milestoneThreshold2;
+                bl = currentMilestoneScore <= milestoneThreshold1
+                     && milestoneCoThreshold2 <= milestoneThreshold2;
                 break;
             case 7:
-                bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold1
-                     && game->scenario.milestoneCoThreshold2 <= game->scenario.milestoneThreshold3;
+                bl = currentMilestoneScore <= milestoneThreshold1
+                     && milestoneCoThreshold2 <= milestoneThreshold3;
                 break;
             case 8:
-                bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold1
-                     && game->scenario.milestoneCoThreshold2 <= game->scenario.milestoneThreshold4;
+                bl = currentMilestoneScore <= milestoneThreshold1
+                     && milestoneCoThreshold2 <= milestoneThreshold4;
                 break;
             case 9:
-                bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold2
-                     && game->scenario.milestoneCoThreshold2 <= game->scenario.milestoneThreshold3;
+                bl = currentMilestoneScore <= milestoneThreshold2
+                     && milestoneCoThreshold2 <= milestoneThreshold3;
                 break;
             case 10:
-                bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold2
-                     && game->scenario.milestoneCoThreshold2 <= game->scenario.milestoneThreshold4;
+                bl = currentMilestoneScore <= milestoneThreshold2
+                     && milestoneCoThreshold2 <= milestoneThreshold4;
                 break;
             case 11:
-                bl = game->scenario.currentMilestoneScore <= game->scenario.milestoneThreshold4
-                     && game->scenario.milestoneCoThreshold2 <= game->scenario.milestoneThreshold5;
+                bl = currentMilestoneScore <= milestoneThreshold4
+                     && milestoneCoThreshold2 <= milestoneThreshold5;
                 break;
-            case 12: bl = game->scenario.currentMilestoneScore <= game->economy.lifetimeTrainRevenue; break;
-            case 13: bl = game->economy.loanBalance == 0; break;
-            case 14: bl = game->economy.year == game->scenario.currentMilestoneScore; break;
-            case 15: bl = game->scenario.currentMilestoneScore <= game->scenario.aiWagonsBought; break;
+            case 12: bl = currentMilestoneScore <= economy.lifetimeTrainRevenue; break;
+            case 13: bl = economy.loanBalance == 0; break;
+            case 14: bl = economy.year == currentMilestoneScore; break;
+            case 15: bl = currentMilestoneScore <= aiWagonsBought; break;
         }
     }
-    if (!bl) return;
+    if (bl) milestonesEnabled = true;
+    return bl;
+}
+
+void game_checkScenarioMilestone(Game *game) {
+    if (!game->scenario.complete_milestone_if_met(game->economy)) return;
     game->ready = false;
     game->ui.transitionCode = 6;
-    game->scenario.milestonesEnabled = true;
     if (game->scenario.scenarioStep >= 2) {
         if (game->scenario.scenarioStepCompare < game->scenario.scenarioStep)
             game->scenario.scenarioStepCompare = game->scenario.scenarioStep;

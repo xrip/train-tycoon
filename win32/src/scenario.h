@@ -7,12 +7,16 @@
 #include <cstdint>
 #include <vector>
 
+struct Economy;
+
 // Scenario owns the campaign scoring and milestone progression. The milestone
 // index/flag and thresholds are saved through the main codec; the best score
 // and the score/leaderboard tables are saved through the high-score store
 // (game/boot.cpp). scenarioMilestone and currentScenarioScore are runtime-only.
 // Values and save byte order are unchanged.
 struct Scenario {
+    bool complete_milestone_if_met(const Economy& economy);
+
     int32_t currentEra = 1;
 
     int8_t scenarioMilestone = 0;

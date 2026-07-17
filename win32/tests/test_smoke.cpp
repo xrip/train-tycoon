@@ -698,6 +698,28 @@ TEST_CASE("fast: economy computes period and year-end report values") {
     CHECK(economy.decadeEnterpriseWithCurrent == 18000);
 }
 
+TEST_CASE("fast: scenario owns milestone completion rules") {
+    Economy economy;
+    Scenario scenario;
+    scenario.scenarioMilestoneIndex = 6;
+    scenario.currentMilestoneScore = 40;
+    scenario.milestoneCoThreshold2 = 60;
+    scenario.milestoneThreshold1 = 39;
+    scenario.milestoneThreshold2 = 60;
+    CHECK_FALSE(scenario.complete_milestone_if_met(economy));
+    CHECK_FALSE(scenario.milestonesEnabled);
+    scenario.milestoneThreshold1 = 40;
+    CHECK(scenario.complete_milestone_if_met(economy));
+    CHECK(scenario.milestonesEnabled);
+
+    Scenario loan_scenario;
+    loan_scenario.scenarioMilestoneIndex = 13;
+    economy.loanBalance = 1;
+    CHECK_FALSE(loan_scenario.complete_milestone_if_met(economy));
+    economy.loanBalance = 0;
+    CHECK(loan_scenario.complete_milestone_if_met(economy));
+}
+
 TEST_CASE("fast: fleet lookup and chain count use stable slots") {
     Fleet fleet;
     const int head = fleet.allocate_train_car(2, 3, 0, 1, 0, 7);
