@@ -26,7 +26,8 @@ void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
 void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2);
 void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void game_placeTerrainFeature(Game *game, int32_t n);
-int32_t game_crossProduct2D(int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6);
+int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
+                         int32_t n4, int32_t n5, int32_t n6);
 void game_computeIsoCorners(Game *game, int32_t n, int32_t n2, int32_t* nArray, int32_t* nArray2, bool bl);
 // Resolve the tile under a map-screen-space point (anchorX/Y) and refresh the
 // tile cursor, its screen position, and the selection diamond. anchorX/Y are in
