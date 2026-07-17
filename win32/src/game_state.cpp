@@ -8,8 +8,6 @@ int32_t gameplayViewportHeight;
 int32_t bottomBarY;
 bool animationsDisabled;
 bool selectionHidden;
-bool monthlyReportEnabled;
-bool annualReportEnabled;
 
 namespace {
 
@@ -67,8 +65,6 @@ void game_fields_init(Game *game) {
     bottomBarY = canvasHeight - 15;
     animationsDisabled = false;
     selectionHidden = false;
-    monthlyReportEnabled = true;
-    annualReportEnabled = true;
     game->world.terrain.mapHalfWidth = (game->world.terrain.mapWidth - 1) * 8;
     game->world.terrain.mapScreenWidth = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 16;
     game->world.terrain.mapScreenHeight = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 8;

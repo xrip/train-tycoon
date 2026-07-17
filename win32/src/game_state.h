@@ -79,8 +79,6 @@ extern int32_t gameplayViewportHeight;
 extern int32_t bottomBarY;
 extern bool animationsDisabled;
 extern bool selectionHidden;
-extern bool monthlyReportEnabled;
-extern bool annualReportEnabled;
 
 void game_fields_init(Game *game);
 

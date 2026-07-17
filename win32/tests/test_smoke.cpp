@@ -1172,8 +1172,8 @@ TEST_CASE("full: year rollover has a fixed saved-state digest") {
     Game* game = make_game();
     generate_scenario(game, 0);
     game->rng.set_seed(kFixedRandomSeed);
-    monthlyReportEnabled = false;
-    annualReportEnabled = false;
+    game->ui.monthlyReportEnabled = false;
+    game->ui.annualReportEnabled = false;
     game->economy.dayOfMonth = 31;
     game->economy.monthOfYear = 12;
     game->economy.year = 1950;

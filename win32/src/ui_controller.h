@@ -13,6 +13,9 @@ struct UiController {
     int32_t advance_key_repeat();
     int32_t report_graph_value(int32_t sprite_id, int32_t index) const;
 
+    bool monthlyReportEnabled = true;
+    bool annualReportEnabled = true;
+
     // Build-menu navigation and content state. The grids hold the current menu's
     // item ids, result codes, item/text/transition codes, and per-row enabled
     // flags; the scalar cursors and mode indices track the selection; the

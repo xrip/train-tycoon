@@ -491,12 +491,12 @@ void game_newYearNotify(Game *game) {
     game->compareToPrevious = true;
     game->monthRolloverFlag = true;
     if (game->economy.monthOfYear == 13) {
-        if (annualReportEnabled) {
+        if (game->ui.annualReportEnabled) {
             game->ready = false;
             game->ui.transitionCode = 35;
             game_setState(game, GameState::MenuOverlay);
         }
-    } else if (monthlyReportEnabled) {
+    } else if (game->ui.monthlyReportEnabled) {
         game->ready = false;
         game->ui.transitionCode = 32;
         game_setState(game, GameState::MenuOverlay);

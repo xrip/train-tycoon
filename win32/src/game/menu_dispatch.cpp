@@ -183,8 +183,8 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             switch (n2) {
                 case 1: animationsDisabled = !animationsDisabled; goto hbms_end;
                 case 2: selectionHidden = !selectionHidden; goto hbms_end;
-                case 3: monthlyReportEnabled = !monthlyReportEnabled; goto hbms_end;
-                case 4: annualReportEnabled = !annualReportEnabled; goto hbms_end;
+                case 3: game->ui.monthlyReportEnabled = !game->ui.monthlyReportEnabled; goto hbms_end;
+                case 4: game->ui.annualReportEnabled = !game->ui.annualReportEnabled; goto hbms_end;
                 case 5:
                     game->music.enabled = !game->music.enabled;
                     if (game->music.enabled) { game_playMusic(game); goto hbms_end; }
