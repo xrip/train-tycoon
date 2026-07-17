@@ -65,6 +65,8 @@ typedef struct Game {
     bool spend_money(int32_t amount);
     void update_ten_day_metric();
     bool sync_high_scores(bool upload);
+    void viewport_zoom_key();
+    void compute_viewport_bounds(int32_t anchor_x, int32_t anchor_y);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

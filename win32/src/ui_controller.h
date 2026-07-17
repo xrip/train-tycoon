@@ -16,6 +16,8 @@ struct UiController {
     int32_t report_graph_value(int32_t sprite_id, int32_t index) const;
     void set_year_graph_mode(const Economy& economy, int32_t mode,
                              bool alternate);
+    void reset_key_state(int32_t key);
+    void cycle_build_menu_index(bool forward);
 
     bool monthlyReportEnabled = true;
     bool annualReportEnabled = true;

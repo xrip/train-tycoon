@@ -4,6 +4,10 @@
 #include <cstdint>
 
 struct Camera {
+    void pan(int32_t key, int32_t map_screen_width,
+             int32_t map_screen_height, int32_t canvas_width,
+             int32_t viewport_height);
+
     int32_t viewportCenterX = 0;
     int32_t viewportCenterY = 0;
     int32_t viewportBaseX = 0;

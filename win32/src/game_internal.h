@@ -12,7 +12,6 @@ constexpr int32_t unsignedByte(int8_t value) {
     return static_cast<uint8_t>(value);
 }
 void game_handleKey(Game *game, int32_t n);
-void game_resetKeyState(Game *game, int32_t n);
 std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game);
 void game_resetOverlayRenderState(Game *game);
 void game_loadPackedSpriteData(Game *game, const char* resource_name);
@@ -27,8 +26,6 @@ void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
 void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2);
 void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void game_placeTerrainFeature(Game *game, int32_t n);
-void game_viewportPanKey(Game *game);
-void game_viewportZoomKey(Game *game);
 int32_t game_crossProduct2D(int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6);
 void game_computeIsoCorners(Game *game, int32_t n, int32_t n2, int32_t* nArray, int32_t* nArray2, bool bl);
 // Resolve the tile under a map-screen-space point (anchorX/Y) and refresh the
@@ -36,7 +33,6 @@ void game_computeIsoCorners(Game *game, int32_t n, int32_t n2, int32_t* nArray, 
 // the same space as viewportBaseX/Y (absolute map-pixel coords, not view-relative).
 // The keyboard zoom path passes viewportBase (screen centre); the pointer path
 // passes the mouse position translated into map space.
-void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY);
 void game_drawSelectionQuad(Game *game, Surface* graphics, int32_t* nArray, int32_t* nArray2);
 void game_drawBuildMenuCursor(Game *game, Surface* graphics);
 void game_drawBuildMenuRow(Game *game, Surface* graphics);
@@ -52,7 +48,6 @@ void game_applyBackgroundCost(Game *game);
 void game_initBuildMenuRow(Game *game, int32_t n, int32_t n2);
 void game_addMenuItem(Game *game, int32_t n, int32_t n2, int32_t n3, bool bl, bool bl2, int32_t n4);
 void game_initBuildMenuForScenario(Game *game, int32_t n);
-void game_cycleBuildMenuIndex(Game *game, bool bl);
 int32_t game_drawMenuRow(Game *game, Surface* graphics, int32_t n, int32_t n2, int32_t n3, bool bl);
 void game_drawConfirmBar(Game *game, Surface* graphics);
 void game_drawHeaderBar(Game *game, Surface* graphics);

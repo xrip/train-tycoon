@@ -68,7 +68,7 @@ void Game::pointer_moved(int32_t x, int32_t y) {
     if (y < 15 || y >= bottomBarY) return;  // top status strip / bottom bar = UI chrome
     int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
     int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
-    game_computeViewportBounds(game, anchor_x, anchor_y);
+    game->compute_viewport_bounds(anchor_x, anchor_y);
     game->ui.mouseOverField = !game->ui.blockBuildMenu;
 }
 
@@ -151,7 +151,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             if (y >= 15) {
                 int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
                 int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
-                game_computeViewportBounds(game, anchor_x, anchor_y);
+                game->compute_viewport_bounds(anchor_x, anchor_y);
                 if (!game->ui.blockBuildMenu) game_openBuildMenu(game);
             }
             return;

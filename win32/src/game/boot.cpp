@@ -294,7 +294,8 @@ void Game::advance_frame() {
         --game->ui.keyRepeatDelay;
     }
     if (game->ui.currentKey != 0 && game->ui.currentKey != -999) game_handleKey(game, game->ui.currentKey);
-    if (game->ui.currentKey == -999) game_resetKeyState(game, game->ui.currentKey);
+    if (game->ui.currentKey == -999)
+        game->ui.reset_key_state(game->ui.currentKey);
     if (game->ui.inputSubState > 0) --game->ui.inputSubState;
     if (game->ui.inputPending) {
         game->frameIndex = 1;
@@ -313,7 +314,7 @@ void Game::advance_frame() {
         for (int n = 0; n < game->simSpeed; ++n) {
             if (!game->ui.pauseFlag) game->update_state_machine();
             if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) continue;
-            game_viewportZoomKey(game);
+            game->viewport_zoom_key();
         }
     } else {
         game->update_state_machine();
