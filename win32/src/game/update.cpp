@@ -99,7 +99,7 @@ void updateBootSplash(Game *game) {
     if (!game->loadingTimeout) return;
     if (game->gameState == GameState::BootSplash1) {
         for (int i = 0; i < 6; ++i)
-            game->assets.font_images[i] = game_decodePngFromSpriteStream(game);
+            game->assets.font_images[i] = game->assets.decode_png_from_sprite_stream();
         game_setState(game, GameState::IntroReady);
         return;
     }
@@ -115,7 +115,8 @@ void updateIntroReady(Game *game) {
 }
 
 void updateLoadingResources(Game *game) {
-    game->assets.tile_sprites[game->assets.spriteLoadCounter] = game_decodePngFromSpriteStream(game);
+    game->assets.tile_sprites[game->assets.spriteLoadCounter] =
+        game->assets.decode_png_from_sprite_stream();
     ++game->assets.spriteLoadCounter;
     if (game->assets.spriteLoadCounter == game->scenario.scenarioResourceCount / 2) {
         game->load_music();

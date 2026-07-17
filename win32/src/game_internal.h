@@ -11,10 +11,7 @@
 constexpr int32_t unsignedByte(int8_t value) {
     return static_cast<uint8_t>(value);
 }
-std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game);
 void game_resetOverlayRenderState(Game *game);
-void game_loadPackedSpriteData(Game *game, const char* resource_name);
-std::vector<int8_t> game_readPackedTextCodes(Game *game, int32_t offset);
 void game_renderPackedSprite(Game *game, Surface* graphics, int32_t n);
 void game_renderFontString(Game *game, Surface* graphics, int32_t n, int32_t n2,
                          std::span<const int8_t> codes, bool bl);

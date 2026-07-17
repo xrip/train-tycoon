@@ -182,7 +182,7 @@ public:
     }
 
     std::vector<int8_t> text() {
-        std::vector<int8_t> codes = game_readPackedTextCodes(game_, offset_);
+        std::vector<int8_t> codes = game_->assets.read_packed_text_codes(offset_);
         skip(1 + unsignedByte(game_->assets.spriteData[offset_]));
         return codes;
     }

@@ -27,58 +27,58 @@ void game_resetOverlayRenderState(Game *game) {
     game->renderer.needsRepaint = false;
 }
 
-void game_loadPackedSpriteData(Game *game, const char *resource_name) {
+void Assets::load_packed_sprite_data(const char *resource_name) {
     ResourceReader in = resources::open(resource_name);
     if (!in) return;
     int n = in.read_byte();
     int n2 = in.read_byte();
     int n3 = read_u16_be(in);
     int n4 = 0;
-    game->assets.spriteOffsetTable.assign(static_cast<std::size_t>(n2 + 1), 0);
-    game->assets.spriteData.assign(static_cast<std::size_t>(n3), 0);
+    spriteOffsetTable.assign(static_cast<std::size_t>(n2 + 1), 0);
+    spriteData.assign(static_cast<std::size_t>(n3), 0);
     for (int i = 0; i < n; ++i) {
         int n5 = in.read_byte();
         int n6 = read_u16_be(in);
-        game->assets.spriteOffsetTable[n5] = (int16_t)n4;
+        spriteOffsetTable[n5] = (int16_t)n4;
         for (int j = 0; j < n6; ++j) {
-            game->assets.spriteData[n4] = (int8_t)in.read_byte();
+            spriteData[n4] = (int8_t)in.read_byte();
             ++n4;
         }
     }
 }
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
-std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game) {
+std::unique_ptr<Image> Assets::decode_png_from_sprite_stream() {
     std::vector<int8_t> png_bytes;
     int png_size = 0;
-    int image_format = game->assets.sprite_stream.read_byte();
+    int image_format = sprite_stream.read_byte();
     if (image_format == 2) {
-        png_size = read_u16_be(game->assets.sprite_stream);
+        png_size = read_u16_be(sprite_stream);
         png_bytes.resize(static_cast<std::size_t>(png_size));
         png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
         for (int index = 4; index < png_size; ++index)
-            png_bytes[index] = (int8_t)game->assets.sprite_stream.read_byte();
+            png_bytes[index] = (int8_t)sprite_stream.read_byte();
     }
     if (image_format == 1) {
-        int image_data_size = read_u16_be(game->assets.sprite_stream);
-        int palette_byte_count = game->assets.sprite_stream.read_byte() * 3;
-        int transparency_count = game->assets.sprite_stream.read_byte();
+        int image_data_size = read_u16_be(sprite_stream);
+        int palette_byte_count = sprite_stream.read_byte() * 3;
+        int transparency_count = sprite_stream.read_byte();
         png_size = image_data_size + palette_byte_count + 69 +
                    transparency_count * 13;
         png_bytes.resize(static_cast<std::size_t>(png_size));
         png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
         png_bytes[4] = 13; png_bytes[5] = 10; png_bytes[6] = 26; png_bytes[7] = 10;
         png_bytes[11] = 13; png_bytes[12] = 73; png_bytes[13] = 72; png_bytes[14] = 68; png_bytes[15] = 82;
-        png_bytes[18] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[19] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[22] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[23] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[24] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[18] = (int8_t)sprite_stream.read_byte();
+        png_bytes[19] = (int8_t)sprite_stream.read_byte();
+        png_bytes[22] = (int8_t)sprite_stream.read_byte();
+        png_bytes[23] = (int8_t)sprite_stream.read_byte();
+        png_bytes[24] = (int8_t)sprite_stream.read_byte();
         png_bytes[25] = 3;
-        png_bytes[29] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[30] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[31] = (int8_t)game->assets.sprite_stream.read_byte();
-        png_bytes[32] = (int8_t)game->assets.sprite_stream.read_byte();
+        png_bytes[29] = (int8_t)sprite_stream.read_byte();
+        png_bytes[30] = (int8_t)sprite_stream.read_byte();
+        png_bytes[31] = (int8_t)sprite_stream.read_byte();
+        png_bytes[32] = (int8_t)sprite_stream.read_byte();
         png_bytes[35] = (int8_t)(palette_byte_count >> 8 & 0xFF);
         png_bytes[36] = (int8_t)(palette_byte_count & 0xFF);
         png_bytes[37] = 80; png_bytes[38] = 76; png_bytes[39] = 84; png_bytes[40] = 69;
@@ -86,7 +86,7 @@ std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game) {
         for (output_index = 0; output_index < palette_byte_count + 4;
              ++output_index) {
             png_bytes[41 + output_index] =
-                (int8_t)game->assets.sprite_stream.read_byte();
+                (int8_t)sprite_stream.read_byte();
         }
         output_index = 41 + palette_byte_count + 4;
         if (transparency_count == 1) {
@@ -105,7 +105,7 @@ std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game) {
         png_bytes[output_index++] = (int8_t)(image_data_size & 0xFF);
         png_bytes[output_index++] = 73; png_bytes[output_index++] = 68; png_bytes[output_index++] = 65; png_bytes[output_index++] = 84;
         for (int index = 0; index < image_data_size + 4; ++index)
-            png_bytes[output_index++] = (int8_t)game->assets.sprite_stream.read_byte();
+            png_bytes[output_index++] = (int8_t)sprite_stream.read_byte();
         output_index += 4;
         png_bytes[output_index++] = 73; png_bytes[output_index++] = 69; png_bytes[output_index++] = 78; png_bytes[output_index++] = 68;
         png_bytes[output_index++] = -82; png_bytes[output_index++] = 66; png_bytes[output_index++] = 96; png_bytes[output_index++] = -126;
@@ -115,10 +115,10 @@ std::unique_ptr<Image> game_decodePngFromSpriteStream(Game *game) {
         reinterpret_cast<const uint8_t*>(png_bytes.data()), png_bytes.size()));
 }
 
-std::vector<int8_t> game_readPackedTextCodes(Game *game, int32_t offset) {
-    const int code_count = game->assets.spriteData[offset];
-    return {game->assets.spriteData.data() + offset + 1,
-            game->assets.spriteData.data() + offset + 1 + code_count};
+std::vector<int8_t> Assets::read_packed_text_codes(int32_t offset) const {
+    const int code_count = spriteData[offset];
+    return {spriteData.data() + offset + 1,
+            spriteData.data() + offset + 1 + code_count};
 }
 
 void game_persistSnapshotMode1(Game *game) {
@@ -200,12 +200,12 @@ void game_setState(Game *game, int32_t n) {
     switch (n) {
         case GameState::BootSplash0:
             game->assets.open_sprite_stream("sprite_images.bin");
-            game_loadPackedSpriteData(game, "packed_sprites.bin");
+            game->assets.load_packed_sprite_data("packed_sprites.bin");
             game->loadingAnimationFrame = 0;
             /* fall through */
         case GameState::BootSplash1:
         case GameState::BootSplash2:
-            game->assets.cycle_flag = game_decodePngFromSpriteStream(game);
+            game->assets.cycle_flag = game->assets.decode_png_from_sprite_stream();
             game->loadingStartTime = midp_current_time_millis();
             game->loadingTimeout = false;
             game->loadingAnimationFrame = 0;
