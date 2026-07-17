@@ -31,25 +31,24 @@ int32_t game_findTrainHeadAt(Game *game, int32_t x, int32_t y) {
     return 5000;
 }
 
-int32_t game_allocateServiceVehicleSlot(Game *game, int32_t type,
-                                      int32_t x, int32_t y,
-                                      bool horizontal, bool extended) {
+int32_t Fleet::allocate_service_site(int32_t type, int32_t x, int32_t y,
+                                     bool horizontal, bool extended) {
     int slot = 5000;
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
-        if ((game->fleet.serviceSites[vehicle].flags & 0x80) == 0) {
+        if ((serviceSites[vehicle].flags & 0x80) == 0) {
             slot = vehicle;
             break;
         }
     }
     if (slot == 5000) return slot;
 
-    game->fleet.serviceSites[slot].flags = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
+    serviceSites[slot].flags = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
                                       | (extended ? 0x20 : 0) | type);
-    game->fleet.serviceSites[slot].x = (int8_t)x;
-    game->fleet.serviceSites[slot].y = (int8_t)y;
-    game->fleet.serviceSites[slot].unloadFlags = 0;
+    serviceSites[slot].x = (int8_t)x;
+    serviceSites[slot].y = (int8_t)y;
+    serviceSites[slot].unloadFlags = 0;
     for (int resource = 0; resource < 5; ++resource)
-        game->fleet.serviceSites[slot].resourceStock[resource] = 0;
+        serviceSites[slot].resourceStock[resource] = 0;
     return slot;
 }
 
@@ -257,8 +256,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
     switch (piece) {
         case 0:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 0)
-                || (slot = game_allocateServiceVehicleSlot(
-                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, false, false))
+                || (slot = game->fleet.allocate_service_site(
+                        1, game->ui.tileCursorX, game->ui.tileCursorY, false, false))
                        == 5000
                 || !game_spendMoney(game, game->economy.costPower))
                 break;
@@ -269,8 +268,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             break;
         case 1:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 0)
-                || (slot = game_allocateServiceVehicleSlot(
-                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, true, false))
+                || (slot = game->fleet.allocate_service_site(
+                        1, game->ui.tileCursorX, game->ui.tileCursorY, true, false))
                        == 5000
                 || !game_spendMoney(game, game->economy.costPower))
                 break;
@@ -281,8 +280,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             break;
         case 2:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 5)
-                || (slot = game_allocateServiceVehicleSlot(
-                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, false, true))
+                || (slot = game->fleet.allocate_service_site(
+                        1, game->ui.tileCursorX, game->ui.tileCursorY, false, true))
                        == 5000
                 || !game_spendMoney(game, game->economy.costStruct))
                 break;
@@ -297,8 +296,8 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             break;
         case 3:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 6)
-                || (slot = game_allocateServiceVehicleSlot(
-                        game, 1, game->ui.tileCursorX, game->ui.tileCursorY, true, true))
+                || (slot = game->fleet.allocate_service_site(
+                        1, game->ui.tileCursorX, game->ui.tileCursorY, true, true))
                        == 5000
                 || !game_spendMoney(game, game->economy.costStruct))
                 break;
@@ -684,33 +683,32 @@ void game_popSelectedOption(Game *game) {
     }
 }
 
-int32_t game_allocateTrainSlot(Game *game, int32_t x, int32_t y,
-                             int32_t engine_type, int32_t era,
-                             int32_t direction, int32_t energy) {
+int32_t Fleet::allocate_train_car(int32_t x, int32_t y,
+                                  int32_t engine_type, int32_t era,
+                                  int32_t direction, int32_t energy) {
     int train = 500;
     for (int slot = 0; slot < 500; ++slot) {
-        if (!train_flag::isUsed(game->fleet.trainCars[slot].flags)) {
+        if (!train_flag::isUsed(trainCars[slot].flags)) {
             train = slot;
             break;
         }
     }
     if (train != 500) {
-        game->fleet.trainCars[train].flags = static_cast<int8_t>(
+        trainCars[train].flags = static_cast<int8_t>(
             train_flag::USED_SLOT | train_flag::HEAD | engine_type);
-        game->fleet.trainCars[train].nextCar = -1;
-        game->fleet.trainCars[train].x = (int8_t)x;
-        game->fleet.trainCars[train].y = (int8_t)y;
-        game->fleet.trainCars[train].direction = (int8_t)direction;
-        game->fleet.trainCars[train].secondaryCargoOrBaseEnergy = (int8_t)energy;
-        game->fleet.trainCars[train].phase = 0;
-        game->fleet.trainCars[train].energyCargoOrRemovalTicks = 1;
-        game->fleet.trainCars[train].lastServiceSite = -1;
-        game->fleet.trainCars[train].era = (int8_t)era;
-        game->fleet.trainCars[train].ageYears = 0;
-        game->fleet.trainCars[train].stateCode = 7;
-        game->fleet.trainCars[train].aiOverride = 0;
+        trainCars[train].nextCar = -1;
+        trainCars[train].x = (int8_t)x;
+        trainCars[train].y = (int8_t)y;
+        trainCars[train].direction = (int8_t)direction;
+        trainCars[train].secondaryCargoOrBaseEnergy = (int8_t)energy;
+        trainCars[train].phase = 0;
+        trainCars[train].energyCargoOrRemovalTicks = 1;
+        trainCars[train].lastServiceSite = -1;
+        trainCars[train].era = (int8_t)era;
+        trainCars[train].ageYears = 0;
+        trainCars[train].stateCode = 7;
+        trainCars[train].aiOverride = 0;
     }
-    game->renderer.lastViewportCenterX = -1;
     return train;
 }
 
@@ -764,10 +762,11 @@ bool game_buyTrainAtCursor(Game *game) {
     // the depot; using it here would strand the engine on an empty tile.
     int station_x = unsignedByte(game->fleet.serviceSites[game->serviceVehicleAtCursor].x);
     int station_y = unsignedByte(game->fleet.serviceSites[game->serviceVehicleAtCursor].y);
-    int train = game_allocateTrainSlot(
-        game, station_x, station_y,
+    int train = game->fleet.allocate_train_car(
+        station_x, station_y,
         game->build.wagonType < 3 ? 0 : 1, game->build.wagonType,
         direction, 8 - game->build.wagonType);
+    game->renderer.lastViewportCenterX = -1;
     for (int option = 0; option < 5; ++option) {
         if (game->build.wagonOptionSlots[option] < 0) continue;
         int car_type = 2 + game->build.wagonOptionSlots[option];

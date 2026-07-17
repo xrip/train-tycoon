@@ -581,9 +581,10 @@ void game_spawnTrainAt(Game *game, int32_t x, int32_t y) {
     if (game->world.industryCategory == 1) cargo_type = 3;
     if (game->world.industryCategory == 2) cargo_type = 4;
     if (game->world.industryCategory == 3) cargo_type = 6;
-    int train = game_allocateTrainSlot(
-        game, x, y, engine_type, game->era,
+    int train = game->fleet.allocate_train_car(
+        x, y, engine_type, game->era,
         game->world.terrain.tileMap[x][y] == 87 ? 0 : 2, 8 - game->era);
+    game->renderer.lastViewportCenterX = -1;
     for (int wagon = 0; wagon < wagon_count; ++wagon)
         train = game_spawnTrainCar(game, train, cargo_type);
 }

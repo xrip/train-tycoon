@@ -330,7 +330,7 @@ TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
     CHECK(last.stateCode == -7654321);
     CHECK(last.previousRevenue == 456789);
 
-    const int slot = game_allocateTrainSlot(game, 1, 2, 3, 4, 5, 6);
+    const int slot = game->fleet.allocate_train_car(1, 2, 3, 4, 5, 6);
     CHECK(slot == 0);
     CHECK(game->fleet.trainCars[slot].x == 1);
     CHECK(game->fleet.trainCars[slot].y == 2);
@@ -338,7 +338,7 @@ TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
 
     for (TrainCar& car : game->fleet.trainCars)
         car.flags = static_cast<int8_t>(train_flag::USED_SLOT);
-    CHECK(game_allocateTrainSlot(game, 1, 2, 3, 4, 5, 6) == kTrainSlotCount);
+    CHECK(game->fleet.allocate_train_car(1, 2, 3, 4, 5, 6) == kTrainSlotCount);
     delete game;
 }
 
@@ -372,13 +372,13 @@ TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
     CHECK(last.y == 27);
     CHECK(last.resourceStock[2] == 30000);
 
-    const int slot = game_allocateServiceVehicleSlot(game, 2, 4, 5, true, false);
+    const int slot = game->fleet.allocate_service_site(2, 4, 5, true, false);
     CHECK(slot == 0);
     CHECK(game->fleet.serviceSites[slot].x == 4);
     CHECK(game->fleet.serviceSites[slot].y == 5);
     for (ServiceSite& site : game->fleet.serviceSites)
         site.flags = static_cast<int8_t>(0x80);
-    CHECK(game_allocateServiceVehicleSlot(game, 2, 4, 5, true, false) == 5000);
+    CHECK(game->fleet.allocate_service_site(2, 4, 5, true, false) == 5000);
     delete game;
 }
 

@@ -65,6 +65,11 @@ struct ServiceSite {
 // is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.
 struct Fleet {
+    int32_t allocate_service_site(int32_t type, int32_t x, int32_t y,
+                                  bool horizontal, bool extended);
+    int32_t allocate_train_car(int32_t x, int32_t y, int32_t engine_type,
+                               int32_t era, int32_t direction, int32_t energy);
+
     TrainCar trainCars[kTrainSlotCount]{};
 
     // Service-vehicle records (250-slot): the depots/stations where trains load
