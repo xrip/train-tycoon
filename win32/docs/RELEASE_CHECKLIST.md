@@ -15,6 +15,8 @@ proof remains.
 | Long simulation | `generate_scenario` drives up to 200,000 private state-machine steps per scenario | pass |
 | Rendered frames | `full: scenario zero input and frames have fixed digests` (pixel digests) | pass |
 | Save round trip | `fast: save buffer bytes and round trip` | pass |
+| Train movement and cargo | direct straight-step, load, unload, revenue, and delivery tests | pass |
+| Renderer model safety | before/after World and Fleet digest around direct train drawing | pass |
 | MIDI device (headless) | `TRAIN_TYCOON_MIDI_TEST_MS=2000 ./build/Release/train_tycoon.exe` -> exit 0 | pass |
 
 ## Human step — required, not automatable
