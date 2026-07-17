@@ -284,7 +284,7 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_SHORTS(ui.trainSelectionIndex);
     IO_SHORTS(ui.trainSelectionY);
     IO_SHORTS(ui.trainSelectionX);
-    IO_INT(era);
+    IO_INT(scenario.currentEra);
     IO_CAR_BYTE(x);
     IO_CAR_BYTE(y);
     IO_CAR_BYTE(direction);

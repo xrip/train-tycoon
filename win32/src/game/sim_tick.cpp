@@ -121,12 +121,14 @@ void game_upgradeOneAiTrainForEra(Game *game) {
         int n = unsignedByte(game->fleet.trainCars[i].y);
         if ((game->world.trackMap[n2][n] != 66 && game->world.trackMap[n2][n] != 67
              && game->world.trackMap[n2][n] != 68)
-            || game->fleet.trainCars[i].era >= game->era)
+            || game->fleet.trainCars[i].era >= game->scenario.currentEra)
             continue;
-        game->fleet.trainCars[i].era = (int8_t)game->era;
+        game->fleet.trainCars[i].era = (int8_t)game->scenario.currentEra;
         game->fleet.trainCars[i].flags = static_cast<int8_t>(
-            train_flag::USED_SLOT | train_flag::HEAD | game->era / 3);
-        game->fleet.trainCars[i].secondaryCargoOrBaseEnergy = (int8_t)(8 - game->era);
+            train_flag::USED_SLOT | train_flag::HEAD
+            | game->scenario.currentEra / 3);
+        game->fleet.trainCars[i].secondaryCargoOrBaseEnergy =
+            (int8_t)(8 - game->scenario.currentEra);
         break;
     }
 }
@@ -781,16 +783,20 @@ void advanceYearIfNeeded(Game *game) {
 }
 
 void advanceEraIfNeeded(Game *game) {
-    int previousEra = game->era;
-    if (game->economy.dayOfMonth == 5 && game->economy.monthOfYear == 3 && game->economy.year == 1951 && game->era < 2)
-        game->era = 2;
-    if (game->economy.dayOfMonth == 17 && game->economy.monthOfYear == 7 && game->economy.year == 1953 && game->era < 3)
-        game->era = 3;
-    if (game->economy.dayOfMonth == 4 && game->economy.monthOfYear == 12 && game->economy.year == 1957 && game->era < 4)
-        game->era = 4;
-    if (game->economy.dayOfMonth == 26 && game->economy.monthOfYear == 2 && game->economy.year == 1962 && game->era < 5)
-        game->era = 5;
-    if (previousEra != game->era) {
+    int previousEra = game->scenario.currentEra;
+    if (game->economy.dayOfMonth == 5 && game->economy.monthOfYear == 3
+        && game->economy.year == 1951 && game->scenario.currentEra < 2)
+        game->scenario.currentEra = 2;
+    if (game->economy.dayOfMonth == 17 && game->economy.monthOfYear == 7
+        && game->economy.year == 1953 && game->scenario.currentEra < 3)
+        game->scenario.currentEra = 3;
+    if (game->economy.dayOfMonth == 4 && game->economy.monthOfYear == 12
+        && game->economy.year == 1957 && game->scenario.currentEra < 4)
+        game->scenario.currentEra = 4;
+    if (game->economy.dayOfMonth == 26 && game->economy.monthOfYear == 2
+        && game->economy.year == 1962 && game->scenario.currentEra < 5)
+        game->scenario.currentEra = 5;
+    if (previousEra != game->scenario.currentEra) {
         game->ready = false;
         game->ui.transitionCode = 13;
         game_setState(game, GameState::MenuOverlay);

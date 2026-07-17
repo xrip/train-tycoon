@@ -57,7 +57,9 @@ void game_applyMenuRowEffect(Game *game, int32_t row) {
         game_pushMoneyHistory(game, game->offerBoard.offers[row].effectAmount);
     }
     if (game->offerBoard.offers[row].effectType == 3) game->economy.loanCeiling += game->offerBoard.offers[row].effectAmount;
-    if (game->offerBoard.offers[row].effectType == 4 && game->era < 5) ++game->era;
+    if (game->offerBoard.offers[row].effectType == 4
+        && game->scenario.currentEra < 5)
+        ++game->scenario.currentEra;
     if (game->offerBoard.offers[row].effectType >= 5 && game->offerBoard.offers[row].effectType <= 10) {
         int resource = game->offerBoard.offers[row].effectType - 5;
         game->scenario.routeResourceFlags[resource] =
@@ -195,7 +197,8 @@ void game_everyMonthlyTick(Game *game) {
                 }
                 if (effect_code == 12 && game->economy.interestRate <= 1) valid = false;
                 if (effect_code == 3 && game->economy.loanCeiling >= 1000000) valid = false;
-                if (effect_code == 4 && game->era >= 5) valid = false;
+                if (effect_code == 4 && game->scenario.currentEra >= 5)
+                    valid = false;
                 if (game->scenario.offerGenerationCount
                     < game->scenario.offerEffectSchedule[effect_code - 1][0])
                     valid = false;

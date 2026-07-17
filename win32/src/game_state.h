@@ -33,7 +33,6 @@ typedef struct Game {
     int32_t serviceVehicleAtCursor;
     Fleet fleet;
     int32_t trainAtCursor;
-    int32_t era = 1;
     bool compareToPrevious;
     bool monthRolloverFlag;
     int32_t savedLegacyMetricBq;

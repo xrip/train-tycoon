@@ -13,6 +13,8 @@
 // (game/boot.cpp). scenarioMilestone and currentScenarioScore are runtime-only.
 // Values and save byte order are unchanged.
 struct Scenario {
+    int32_t currentEra = 1;
+
     int8_t scenarioMilestone = 0;
     int8_t scenarioMilestoneIndex = 0;
     int32_t currentScenarioScore = 0;

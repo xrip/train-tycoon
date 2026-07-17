@@ -33,7 +33,7 @@ void applyScenarioDefinition(Game *game, const ScenarioDefinition& definition) {
     game->economy.loanCeiling = definition.loanCeiling;
     game->economy.loanBalance = definition.startingLoan;
     game->economy.interestRate = static_cast<int8_t>(definition.interestRate);
-    game->era = definition.eraNumber - 1;
+    game->scenario.currentEra = definition.eraNumber - 1;
     game->scenario.scenarioMilestoneIndex = static_cast<int8_t>(definition.milestoneIndex);
     game->scenario.currentMilestoneScore = definition.milestoneScore;
     game->scenario.milestoneCoThreshold2 = definition.milestoneThreshold;

@@ -574,7 +574,7 @@ void game_pickIndustrySite(Game *game) {
 }
 
 void game_spawnTrainAt(Game *game, int32_t x, int32_t y) {
-    int engine_type = game->era / 3;
+    int engine_type = game->scenario.currentEra / 3;
     int wagon_count = game->build.selectionCost / 8000 + 1;
     if (wagon_count > 5) wagon_count = 5;
     int cargo_type = 2;
@@ -582,8 +582,9 @@ void game_spawnTrainAt(Game *game, int32_t x, int32_t y) {
     if (game->world.industryCategory == 2) cargo_type = 4;
     if (game->world.industryCategory == 3) cargo_type = 6;
     int train = game->fleet.allocate_train_car(
-        x, y, engine_type, game->era,
-        game->world.terrain.tileMap[x][y] == 87 ? 0 : 2, 8 - game->era);
+        x, y, engine_type, game->scenario.currentEra,
+        game->world.terrain.tileMap[x][y] == 87 ? 0 : 2,
+        8 - game->scenario.currentEra);
     game->renderer.lastViewportCenterX = -1;
     for (int wagon = 0; wagon < wagon_count; ++wagon) {
         train = game->fleet.append_car(train, cargo_type);

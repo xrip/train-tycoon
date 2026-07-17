@@ -112,7 +112,7 @@ bool game_isResourceTile(Game *game, int32_t n, int32_t n2) {
         if (n2 == 10 && (game->fleet.serviceSites[slot].unloadFlags & 8) == 8) return true;
         if (n2 == 11 && (game->fleet.serviceSites[slot].unloadFlags & 0x10) == 16) return true;
     }
-    if (n == 24 && n2 <= game->era) return true;
+    if (n == 24 && n2 <= game->scenario.currentEra) return true;
     if (n == 26) {
         if (n2 < 6 && game->fleet.count_cars(game->trainAtCursor) > n2) return true;
         if (n2 == 6 && game->fleet.trainCars[game->trainAtCursor].stateCode == 7) return true;
