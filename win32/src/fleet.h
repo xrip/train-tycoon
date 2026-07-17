@@ -29,30 +29,32 @@ constexpr int type(int8_t flags) {
 }
 } // namespace train_flag
 
+// One stable train/car slot. Zero-filled defaults match the old arrays; in
+// particular, nextCar stays 0 until allocation sets the -1 chain terminator.
+struct TrainCar {
+    int8_t x = 0;
+    int8_t y = 0;
+    int8_t direction = 0;
+    int8_t phase = 0;
+    int8_t flags = 0;
+    int8_t era = 0;
+    int8_t ageYears = 0;
+    int8_t secondaryCargoOrBaseEnergy = 0;
+    int8_t energyCargoOrRemovalTicks = 0;
+    int8_t lastServiceSite = 0;
+    int8_t cargoAge = 0;
+    int16_t nextCar = 0;
+    int32_t stateCode = 0;
+    int8_t aiOverride = 0;
+    int32_t revenue = 0;
+    int32_t previousRevenue = 0;
+};
+
 // Fleet owns the per-train-slot records. Each slot id is one train/car; a train
 // is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.
-//
-// Field meanings are inherited as-is from the prior Game layout; several
-// (e.g. trainEra, trainAgeYears) carry recorded uncertainty and are
-// recovered in a later FLEET-01 sub-leaf once the tick code is re-read.
 struct Fleet {
-    int8_t trainX[kTrainSlotCount]{};
-    int8_t trainY[kTrainSlotCount]{};
-    int8_t trainDir[kTrainSlotCount]{};
-    int8_t trainPhase[kTrainSlotCount]{};
-    int8_t trainFlags[kTrainSlotCount]{};
-    int8_t trainEra[kTrainSlotCount]{};
-    int8_t trainAgeYears[kTrainSlotCount]{};
-    int8_t secondaryCargoOrBaseEnergy[kTrainSlotCount]{};
-    int8_t energyCargoOrRemovalTicks[kTrainSlotCount]{};
-    int8_t lastServiceVehicle[kTrainSlotCount]{};
-    int8_t cargoAge[kTrainSlotCount]{};
-    int16_t nextCar[kTrainSlotCount]{};
-    int32_t trainStateCode[kTrainSlotCount]{};
-    int8_t trainAiOverride[kTrainSlotCount]{};
-    int32_t trainRevenue[kTrainSlotCount]{};
-    int32_t prevTrainRevenue[kTrainSlotCount]{};
+    TrainCar trainCars[kTrainSlotCount]{};
 
     // Service-vehicle records (250-slot): the depots/stations where trains load
     // and unload. serviceResourceStock[site][5] is the per-resource stock;

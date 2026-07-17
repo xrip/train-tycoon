@@ -129,28 +129,28 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
 
         case 26: {
             if (field == 0)
-                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[60 + game->fleet.trainEra[game->trainAtCursor]]]);
-            if (field == 6) return game_formatCurrency(game->fleet.trainRevenue[game->trainAtCursor]);
-            if (field == 7) return game_formatCurrency(game->fleet.prevTrainRevenue[game->trainAtCursor]);
-            if (field == 8) return game_formatNumberWithSuffix(game->fleet.trainAgeYears[game->trainAtCursor], 0);
+                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[60 + game->fleet.trainCars[game->trainAtCursor].era]]);
+            if (field == 6) return game_formatCurrency(game->fleet.trainCars[game->trainAtCursor].revenue);
+            if (field == 7) return game_formatCurrency(game->fleet.trainCars[game->trainAtCursor].previousRevenue);
+            if (field == 8) return game_formatNumberWithSuffix(game->fleet.trainCars[game->trainAtCursor].ageYears, 0);
             if (field == 9) return game_formatCurrency(game->build.currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return game_formatCurrency(game->build.baseTrainCostSnapshot - game->build.currentTrainCostSnapshot);
             if (field == 20)
                 return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[
-                    game->fleet.trainAiOverride[game->trainAtCursor] == 0 ? 21 : 20]]);
+                    game->fleet.trainCars[game->trainAtCursor].aiOverride == 0 ? 21 : 20]]);
             if (field <= 0 || field >= 6) break;
             int car = 0;
             if (game_countCarsInTrain(game, game->trainAtCursor) > field) {
                 car = game->trainAtCursor;
-                for (int i = 0; i < field; ++i) car = game->fleet.nextCar[car];
+                for (int i = 0; i < field; ++i) car = game->fleet.trainCars[car].nextCar;
             }
-            int type = train_flag::type(game->fleet.trainFlags[car]);
+            int type = train_flag::type(game->fleet.trainCars[car].flags);
             char text[32];
             if (type == 2)
-                snprintf(text, sizeof(text), "%d/%d", game->fleet.energyCargoOrRemovalTicks[car],
-                         game->fleet.secondaryCargoOrBaseEnergy[car]);
+                snprintf(text, sizeof(text), "%d/%d", game->fleet.trainCars[car].energyCargoOrRemovalTicks,
+                         game->fleet.trainCars[car].secondaryCargoOrBaseEnergy);
             else
-                snprintf(text, sizeof(text), "%d", game->fleet.energyCargoOrRemovalTicks[car]);
+                snprintf(text, sizeof(text), "%d", game->fleet.trainCars[car].energyCargoOrRemovalTicks);
             return game_encodeDisplayText(text);
         }
 

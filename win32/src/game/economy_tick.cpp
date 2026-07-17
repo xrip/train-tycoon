@@ -126,16 +126,16 @@ void game_everyMonthlyTick(Game *game) {
         int type3_count = 0;
         int type267_count = 0;
         for (int train = 0; train < 500; ++train) {
-            if (!train_flag::isUsed(game->fleet.trainFlags[train])
-                || game->world.trackMap[unsignedByte(game->fleet.trainX[train])]
-                               [unsignedByte(game->fleet.trainY[train])] != 65)
+            if (!train_flag::isUsed(game->fleet.trainCars[train].flags)
+                || game->world.trackMap[unsignedByte(game->fleet.trainCars[train].x)]
+                               [unsignedByte(game->fleet.trainCars[train].y)] != 65)
                 continue;
             ++active_train_count;
-            if (train_flag::isHead(game->fleet.trainFlags[train])) {
+            if (train_flag::isHead(game->fleet.trainCars[train].flags)) {
                 ++engine_count;
                 continue;
             }
-            switch (game->fleet.trainFlags[train] & 7) {
+            switch (game->fleet.trainCars[train].flags & 7) {
                 case 2: ++type267_count; break;
                 case 3: ++type3_count; break;
                 case 4: case 5: ++type45_count; break;

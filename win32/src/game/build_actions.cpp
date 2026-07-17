@@ -15,16 +15,16 @@ void game_incrementRowValueType13(Game *game, int32_t amount) {
 
 bool game_isAnyTrainCarAt(Game *game, int32_t car, int32_t x, int32_t y) {
     if (car == -1) return false;
-    if (unsignedByte(game->fleet.trainX[car]) == x
-        && unsignedByte(game->fleet.trainY[car]) == y)
+    if (unsignedByte(game->fleet.trainCars[car].x) == x
+        && unsignedByte(game->fleet.trainCars[car].y) == y)
         return true;
-    return game_isAnyTrainCarAt(game, game->fleet.nextCar[car], x, y);
+    return game_isAnyTrainCarAt(game, game->fleet.trainCars[car].nextCar, x, y);
 }
 
 int32_t game_findTrainHeadAt(Game *game, int32_t x, int32_t y) {
     for (int train = 0; train < 500; ++train) {
-        if (train_flag::isUsed(game->fleet.trainFlags[train])
-            && train_flag::isHead(game->fleet.trainFlags[train])
+        if (train_flag::isUsed(game->fleet.trainCars[train].flags)
+            && train_flag::isHead(game->fleet.trainCars[train].flags)
             && game_isAnyTrainCarAt(game, train, x, y))
             return train;
     }
@@ -226,17 +226,17 @@ void game_pickTrainsAtCursor(Game *game) {
         return;
     }
 
-    game->build.wagonType = game->fleet.trainEra[game->trainAtCursor];
+    game->build.wagonType = game->fleet.trainCars[game->trainAtCursor].era;
     for (int option = 0; option < 5; ++option) game->build.wagonOptionSlots[option] = -1;
-    int car = game->fleet.nextCar[game->trainAtCursor];
+    int car = game->fleet.trainCars[game->trainAtCursor].nextCar;
     for (int option = 0; option < 5 && car != -1; ++option) {
-        switch (train_flag::type(game->fleet.trainFlags[car])) {
+        switch (train_flag::type(game->fleet.trainCars[car].flags)) {
             case 2: game->build.wagonOptionSlots[option] = 0; break;
             case 3: game->build.wagonOptionSlots[option] = 1; break;
             case 4: case 5: game->build.wagonOptionSlots[option] = 2; break;
             case 6: case 7: game->build.wagonOptionSlots[option] = 3; break;
         }
-        car = game->fleet.nextCar[car];
+        car = game->fleet.trainCars[car].nextCar;
     }
     for (int option = 0; option < 5; ++option)
         game->build.wagonCountMatch[option] = game->build.wagonOptionSlots[option];
@@ -244,7 +244,7 @@ void game_pickTrainsAtCursor(Game *game) {
     game->scenario.difficultyPct = 100;
     game_computeTrainCost(game);
     game->build.baseTrainCostSnapshot = game->build.unitCost;
-    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeYears[game->trainAtCursor];
+    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainCars[game->trainAtCursor].ageYears;
     game_computeTrainCost(game);
     game->build.currentTrainCostSnapshot = game->build.unitCost;
     game->ready = false;
@@ -689,26 +689,26 @@ int32_t game_allocateTrainSlot(Game *game, int32_t x, int32_t y,
                              int32_t direction, int32_t energy) {
     int train = 500;
     for (int slot = 0; slot < 500; ++slot) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[slot])) {
+        if (!train_flag::isUsed(game->fleet.trainCars[slot].flags)) {
             train = slot;
             break;
         }
     }
     if (train != 500) {
-        game->fleet.trainFlags[train] = static_cast<int8_t>(
+        game->fleet.trainCars[train].flags = static_cast<int8_t>(
             train_flag::USED_SLOT | train_flag::HEAD | engine_type);
-        game->fleet.nextCar[train] = -1;
-        game->fleet.trainX[train] = (int8_t)x;
-        game->fleet.trainY[train] = (int8_t)y;
-        game->fleet.trainDir[train] = (int8_t)direction;
-        game->fleet.secondaryCargoOrBaseEnergy[train] = (int8_t)energy;
-        game->fleet.trainPhase[train] = 0;
-        game->fleet.energyCargoOrRemovalTicks[train] = 1;
-        game->fleet.lastServiceVehicle[train] = -1;
-        game->fleet.trainEra[train] = (int8_t)era;
-        game->fleet.trainAgeYears[train] = 0;
-        game->fleet.trainStateCode[train] = 7;
-        game->fleet.trainAiOverride[train] = 0;
+        game->fleet.trainCars[train].nextCar = -1;
+        game->fleet.trainCars[train].x = (int8_t)x;
+        game->fleet.trainCars[train].y = (int8_t)y;
+        game->fleet.trainCars[train].direction = (int8_t)direction;
+        game->fleet.trainCars[train].secondaryCargoOrBaseEnergy = (int8_t)energy;
+        game->fleet.trainCars[train].phase = 0;
+        game->fleet.trainCars[train].energyCargoOrRemovalTicks = 1;
+        game->fleet.trainCars[train].lastServiceSite = -1;
+        game->fleet.trainCars[train].era = (int8_t)era;
+        game->fleet.trainCars[train].ageYears = 0;
+        game->fleet.trainCars[train].stateCode = 7;
+        game->fleet.trainCars[train].aiOverride = 0;
     }
     game->renderer.lastViewportCenterX = -1;
     return train;
@@ -742,8 +742,8 @@ void game_decrementCargoOptionCount(Game *game, int32_t car_type) {
 
 void game_decrementTrainCargoOptionCounts(Game *game, int32_t car) {
     if (car == -1) return;
-    game_decrementCargoOptionCount(game, game->fleet.trainFlags[car] & 7);
-    game_decrementTrainCargoOptionCounts(game, game->fleet.nextCar[car]);
+    game_decrementCargoOptionCount(game, game->fleet.trainCars[car].flags & 7);
+    game_decrementTrainCargoOptionCounts(game, game->fleet.trainCars[car].nextCar);
 }
 
 void game_incrementRowValueType14(Game *game, int32_t amount) {
@@ -789,16 +789,16 @@ bool game_applyTrainUpgrade(Game *game, int32_t train,
         game_enterOutOfMoneyState(game);
         return false;
     }
-    game->fleet.trainStateCode[train] = (int16_t)state_code;
-    game_decrementTrainCargoOptionCounts(game, game->fleet.nextCar[train]);
+    game->fleet.trainCars[train].stateCode = (int16_t)state_code;
+    game_decrementTrainCargoOptionCounts(game, game->fleet.trainCars[train].nextCar);
     for (int option = 0; option < 5; ++option) {
         if (options[option] > -1) {
             int car_type = options[option] + 2;
             if (car_type == 5) ++car_type;
             game_incrementCargoOptionCount(game, car_type);
         }
-        game->fleet.trainStateCode[train] = (int16_t)(
-            game->fleet.trainStateCode[train]
+        game->fleet.trainCars[train].stateCode = (int16_t)(
+            game->fleet.trainCars[train].stateCode
             | (options[option] & 7) << (3 + 3 * option));
     }
     game->economy.money -= cost;

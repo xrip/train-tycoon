@@ -56,46 +56,46 @@ void game_updateCityPopulation(Game *game) {
 }
 
 void game_ageTrainsOneYear(Game *game) {
-    for (int n = 0; n < 500; ++n) ++game->fleet.trainAgeYears[n];
+    for (int n = 0; n < 500; ++n) ++game->fleet.trainCars[n].ageYears;
 }
 
 void game_chargeTrainRunningCosts(Game *game) {
     if (game->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[i]) || !train_flag::isHead(game->fleet.trainFlags[i]))
+        if (!train_flag::isUsed(game->fleet.trainCars[i].flags) || !train_flag::isHead(game->fleet.trainCars[i].flags))
             continue;
-        int n2 = unsignedByte(game->fleet.trainX[i]);
-        int n = unsignedByte(game->fleet.trainY[i]);
+        int n2 = unsignedByte(game->fleet.trainCars[i].x);
+        int n = unsignedByte(game->fleet.trainCars[i].y);
         if (game->world.trackMap[n2][n] != 65) continue;
         int n3 = game_countCarsInTrain(game, i) * 2;
-        if (train_flag::type(game->fleet.trainFlags[i]) == 0) n3 += 3;
-        else if (train_flag::type(game->fleet.trainFlags[i]) == 1) n3 += 7;
-        game->fleet.trainRevenue[i] -= n3;
+        if (train_flag::type(game->fleet.trainCars[i].flags) == 0) n3 += 3;
+        else if (train_flag::type(game->fleet.trainCars[i].flags) == 1) n3 += 7;
+        game->fleet.trainCars[i].revenue -= n3;
         game->economy.money -= n3;
         game->economy.fuelCostAccrued += n3;
     }
 }
 
 int32_t game_countCarsInTrain(Game *game, int32_t n) {
-    return n != -1 ? game_countCarsInTrain(game, game->fleet.nextCar[n]) + 1 : 0;
+    return n != -1 ? game_countCarsInTrain(game, game->fleet.trainCars[n].nextCar) + 1 : 0;
 }
 
 bool game_isTrainHeadCarAt(Game *game, int32_t n, int32_t n2, int32_t n3) {
     if (n == -1) return false;
-    if (unsignedByte(game->fleet.trainX[n]) == n2 && unsignedByte(game->fleet.trainY[n]) == n3)
+    if (unsignedByte(game->fleet.trainCars[n].x) == n2 && unsignedByte(game->fleet.trainCars[n].y) == n3)
         return true;
-    return game_isTrainHeadCarAt(game, game->fleet.nextCar[n], n2, n3);
+    return game_isTrainHeadCarAt(game, game->fleet.trainCars[n].nextCar, n2, n3);
 }
 
 void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
     if (n == -1) return;
-    game_removeTrainFromMap(game, game->fleet.nextCar[n], bl);
-    game->fleet.trainFlags[n] = (int8_t)(game->fleet.trainFlags[n] | 0xE0);
-    game->fleet.nextCar[n] = -1;
-    game->fleet.energyCargoOrRemovalTicks[n] = 7;
+    game_removeTrainFromMap(game, game->fleet.trainCars[n].nextCar, bl);
+    game->fleet.trainCars[n].flags = (int8_t)(game->fleet.trainCars[n].flags | 0xE0);
+    game->fleet.trainCars[n].nextCar = -1;
+    game->fleet.trainCars[n].energyCargoOrRemovalTicks = 7;
     if (bl)
-        game_queueTileChange(game, unsignedByte(game->fleet.trainX[n]),
-                                    unsignedByte(game->fleet.trainY[n]), false, true);
+        game_queueTileChange(game, unsignedByte(game->fleet.trainCars[n].x),
+                                    unsignedByte(game->fleet.trainCars[n].y), false, true);
     game->renderer.lastViewportCenterX = -1;
     game->ready = false;
     game->ui.transitionCode = 16;
@@ -104,10 +104,10 @@ void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
 
 void game_mergeTrainAt(Game *game, int32_t n) {
     for (int i = 0; i < 500; ++i) {
-        if (n == i || !train_flag::isUsed(game->fleet.trainFlags[i])
-            || !train_flag::isHead(game->fleet.trainFlags[i])
-            || !game_isTrainHeadCarAt(game, i, unsignedByte(game->fleet.trainX[n]),
-                                    unsignedByte(game->fleet.trainY[n])))
+        if (n == i || !train_flag::isUsed(game->fleet.trainCars[i].flags)
+            || !train_flag::isHead(game->fleet.trainCars[i].flags)
+            || !game_isTrainHeadCarAt(game, i, unsignedByte(game->fleet.trainCars[n].x),
+                                    unsignedByte(game->fleet.trainCars[n].y)))
             continue;
         game_removeTrainFromMap(game, i, true);
         game_removeTrainFromMap(game, n, true);
@@ -122,30 +122,30 @@ void game_maybeAiTakeTurn(Game *game) {
 
 void game_upgradeOneAiTrainForEra(Game *game) {
     for (int i = 0; i < 500; ++i) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[i]) || !train_flag::isHead(game->fleet.trainFlags[i]))
+        if (!train_flag::isUsed(game->fleet.trainCars[i].flags) || !train_flag::isHead(game->fleet.trainCars[i].flags))
             continue;
-        int n2 = unsignedByte(game->fleet.trainX[i]);
-        int n = unsignedByte(game->fleet.trainY[i]);
+        int n2 = unsignedByte(game->fleet.trainCars[i].x);
+        int n = unsignedByte(game->fleet.trainCars[i].y);
         if ((game->world.trackMap[n2][n] != 66 && game->world.trackMap[n2][n] != 67
              && game->world.trackMap[n2][n] != 68)
-            || game->fleet.trainEra[i] >= game->era)
+            || game->fleet.trainCars[i].era >= game->era)
             continue;
-        game->fleet.trainEra[i] = (int8_t)game->era;
-        game->fleet.trainFlags[i] = static_cast<int8_t>(
+        game->fleet.trainCars[i].era = (int8_t)game->era;
+        game->fleet.trainCars[i].flags = static_cast<int8_t>(
             train_flag::USED_SLOT | train_flag::HEAD | game->era / 3);
-        game->fleet.secondaryCargoOrBaseEnergy[i] = (int8_t)(8 - game->era);
+        game->fleet.trainCars[i].secondaryCargoOrBaseEnergy = (int8_t)(8 - game->era);
         break;
     }
 }
 
 void game_resetAiDepotTrainAges(Game *game) {
     for (int i = 0; i < 500; ++i) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[i])) continue;
-        int n2 = unsignedByte(game->fleet.trainX[i]);
-        int n = unsignedByte(game->fleet.trainY[i]);
+        if (!train_flag::isUsed(game->fleet.trainCars[i].flags)) continue;
+        int n2 = unsignedByte(game->fleet.trainCars[i].x);
+        int n = unsignedByte(game->fleet.trainCars[i].y);
         if (game->world.trackMap[n2][n] == 66 || game->world.trackMap[n2][n] == 67
             || game->world.trackMap[n2][n] == 68)
-            game->fleet.trainAgeYears[i] = 0;
+            game->fleet.trainCars[i].ageYears = 0;
     }
 }
 
@@ -320,10 +320,10 @@ int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
             if (game->world.trackMap[i][j] != 65) continue;
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
-                if (!train_flag::isUsed(game->fleet.trainFlags[k])
-                    || unsignedByte(game->fleet.trainX[k]) != i || unsignedByte(game->fleet.trainY[k]) != j)
+                if (!train_flag::isUsed(game->fleet.trainCars[k].flags)
+                    || unsignedByte(game->fleet.trainCars[k].x) != i || unsignedByte(game->fleet.trainCars[k].y) != j)
                     continue;
-                n2 += train_flag::isHead(game->fleet.trainFlags[k]) ? 400 : 55;
+                n2 += train_flag::isHead(game->fleet.trainCars[k].flags) ? 400 : 55;
             }
         }
     }
@@ -406,12 +406,12 @@ int32_t game_scanMapForMetric(Game *game) {
         }
     }
     for (int n3 = 0; n3 < 500; ++n3) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[n3])) continue;
-        int n2 = unsignedByte(game->fleet.trainX[n3]);
-        int n = unsignedByte(game->fleet.trainY[n3]);
+        if (!train_flag::isUsed(game->fleet.trainCars[n3].flags)) continue;
+        int n2 = unsignedByte(game->fleet.trainCars[n3].x);
+        int n = unsignedByte(game->fleet.trainCars[n3].y);
         if (game->world.trackMap[n2][n] != 65) continue;
-        if (train_flag::isHead(game->fleet.trainFlags[n3])) {
-            switch (game->fleet.trainEra[n3]) {
+        if (train_flag::isHead(game->fleet.trainCars[n3].flags)) {
+            switch (game->fleet.trainCars[n3].era) {
                 case 0: n4 += game->economy.gWagonCost; break;
                 case 1: n4 += game->economy.gWagonCost2; break;
                 case 2: n4 += game->economy.gWagonCost3; break;
@@ -429,8 +429,8 @@ int32_t game_scanMapForMetric(Game *game) {
 
 void game_newYearNotify(Game *game) {
     for (int n = 0; n < 500; ++n) {
-        game->fleet.prevTrainRevenue[n] = game->fleet.trainRevenue[n];
-        game->fleet.trainRevenue[n] = 0;
+        game->fleet.trainCars[n].previousRevenue = game->fleet.trainCars[n].revenue;
+        game->fleet.trainCars[n].revenue = 0;
     }
     for (int n = 0; n < 48; ++n) {
         game->economy.prevStationRevenue[n] = game->economy.stationRevenue[n];
@@ -702,21 +702,21 @@ void applyQueuedTileChanges(Game *game) {
 
 void updateActiveTrains(Game *game) {
     for (int trainIndex = 0; trainIndex < kTrainSlotCount; ++trainIndex) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[trainIndex])
-            || !train_flag::isHead(game->fleet.trainFlags[trainIndex]))
+        if (!train_flag::isUsed(game->fleet.trainCars[trainIndex].flags)
+            || !train_flag::isHead(game->fleet.trainCars[trainIndex].flags))
             continue;
-        if (train_flag::isRemovalPending(game->fleet.trainFlags[trainIndex])) {
-            if (game->fleet.energyCargoOrRemovalTicks[trainIndex] > 0) {
-                --game->fleet.energyCargoOrRemovalTicks[trainIndex];
+        if (train_flag::isRemovalPending(game->fleet.trainCars[trainIndex].flags)) {
+            if (game->fleet.trainCars[trainIndex].energyCargoOrRemovalTicks > 0) {
+                --game->fleet.trainCars[trainIndex].energyCargoOrRemovalTicks;
                 continue;
             }
-            game->fleet.trainPhase[trainIndex] = 0;
-            game->fleet.trainFlags[trainIndex] = 0;
+            game->fleet.trainCars[trainIndex].phase = 0;
+            game->fleet.trainCars[trainIndex].flags = 0;
             continue;
         }
         game_updateTrain(game, trainIndex);
         game_updateTrain(game, trainIndex);
-        if (game->fleet.trainPhase[trainIndex] == 0) game_mergeTrainAt(game, trainIndex);
+        if (game->fleet.trainCars[trainIndex].phase == 0) game_mergeTrainAt(game, trainIndex);
     }
 }
 

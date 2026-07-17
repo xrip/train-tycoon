@@ -12,22 +12,22 @@ static void draw_train_image(Game *game, Surface *graphics,
 void game_drawSpriteSingle(Game *game, Surface *graphics,
                          int32_t train) {
     int16_t sprites[8];
-    memcpy(sprites, game->assets.trainSpriteDirectionTable[train_flag::type(game->fleet.trainFlags[train])],
+    memcpy(sprites, game->assets.trainSpriteDirectionTable[train_flag::type(game->fleet.trainCars[train].flags)],
            sizeof(sprites));
 
-    int tile_x = unsignedByte(game->fleet.trainX[train]);
-    int tile_y = unsignedByte(game->fleet.trainY[train]);
-    if (train_flag::isHead(game->fleet.trainFlags[train])) {
+    int tile_x = unsignedByte(game->fleet.trainCars[train].x);
+    int tile_y = unsignedByte(game->fleet.trainCars[train].y);
+    if (train_flag::isHead(game->fleet.trainCars[train].flags)) {
         int tile = game->world.tileMap[tile_x][tile_y];
         int track = unsignedByte(game->world.trackMap[tile_x][tile_y]);
         bool lower_sprite = tile != tile::CROSSING && track > 65;
         if (tile == 76) {
             int low_track = track & 7;
             int high_track = (track >> 3) & 7;
-            if ((game->fleet.trainDir[train] == 0 || game->fleet.trainDir[train] == 1) &&
+            if ((game->fleet.trainCars[train].direction == 0 || game->fleet.trainCars[train].direction == 1) &&
                 low_track > 1)
                 lower_sprite = true;
-            if ((game->fleet.trainDir[train] == 2 || game->fleet.trainDir[train] == 3) &&
+            if ((game->fleet.trainCars[train].direction == 2 || game->fleet.trainCars[train].direction == 3) &&
                 high_track > 1)
                 lower_sprite = true;
         }
@@ -39,10 +39,10 @@ void game_drawSpriteSingle(Game *game, Surface *graphics,
     int x = tile_y * 16 + tile_x * 16 + 16 - game->renderer.viewportCenterX;
     int y = game->world.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
             game->renderer.viewportCenterY - 4 * game->world.tileElevation[tile_x][tile_y] + 15;
-    int phase = game->fleet.trainPhase[train];
+    int phase = game->fleet.trainCars[train].phase;
     if (phase < 0) return;
 
-    switch (game->fleet.trainDir[train]) {
+    switch (game->fleet.trainCars[train].direction) {
         case 0:
             if (tile == 82) y -= 4;
             if (tile == 79)

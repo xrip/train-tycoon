@@ -58,10 +58,10 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     game->economy.aiMoneySpent -= game->build.currentTrainCostSnapshot * 70 / 100;
                     if (game->build.currentTrainCostSnapshot != 0)
                         game_pushMoneyHistory(game, game->build.currentTrainCostSnapshot * 70 / 100);
-                    int16_t s = game->fleet.nextCar[game->trainAtCursor];
+                    int16_t s = game->fleet.trainCars[game->trainAtCursor].nextCar;
                     game_decrementTrainCargoOptionCounts(game, s);
-                    game->fleet.trainFlags[game->trainAtCursor] = 0;
-                    while (s != -1) { game->fleet.trainFlags[s] = 0; s = game->fleet.nextCar[s]; }
+                    game->fleet.trainCars[game->trainAtCursor].flags = 0;
+                    while (s != -1) { game->fleet.trainCars[s].flags = 0; s = game->fleet.trainCars[s].nextCar; }
                     game_setState(game, GameState::Playing);
                     break;
                 }
@@ -159,11 +159,11 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             } else if (n2 == 2) {
                 int n4 = game->build.baseTrainCostSnapshot - game->build.currentTrainCostSnapshot;
                 if (n4 <= game->economy.money) {
-                    game->fleet.trainAgeYears[game->trainAtCursor] = 0;
+                    game->fleet.trainCars[game->trainAtCursor].ageYears = 0;
                     game->economy.money -= n4;
                     game_pushMoneyHistory(game, -n4);
                     game->economy.aiMoneySpent += n4;
-                    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainAgeYears[game->trainAtCursor];
+                    game->scenario.difficultyPct = 100 - 3 * game->fleet.trainCars[game->trainAtCursor].ageYears;
                     game_computeTrainCost(game);
                     game->build.currentTrainCostSnapshot = game->build.unitCost;
                     game->ui.pendingTransitionCode = 26; game_setState(game, GameState::Playing);
@@ -175,7 +175,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 game->ui.pendingTransitionCode = 14; game_setState(game, GameState::Playing);
             }
             if (n2 == 4) {
-                game->fleet.trainAiOverride[game->trainAtCursor] = (int8_t)(game->fleet.trainAiOverride[game->trainAtCursor] == 0 ? 1 : 0);
+                game->fleet.trainCars[game->trainAtCursor].aiOverride = (int8_t)(game->fleet.trainCars[game->trainAtCursor].aiOverride == 0 ? 1 : 0);
                 break;
             }
             game_setState(game, GameState::Playing); break;

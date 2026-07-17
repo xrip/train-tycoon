@@ -296,6 +296,52 @@ TEST_CASE("fast: proven train flag queries") {
     CHECK(train_flag::type(static_cast<int8_t>(0xF3)) == 3);
 }
 
+TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
+    Game* game = make_game();
+    CHECK(game->fleet.trainCars[0].nextCar == 0);
+    CHECK(game->fleet.trainCars[kTrainSlotCount - 1].flags == 0);
+
+    TrainCar& first = game->fleet.trainCars[3];
+    first.x = 11;
+    first.direction = 2;
+    first.secondaryCargoOrBaseEnergy = 17;
+    first.nextCar = 321;
+    first.revenue = 1234567;
+    TrainCar& last = game->fleet.trainCars[kTrainSlotCount - 1];
+    last.y = 22;
+    last.flags = static_cast<int8_t>(train_flag::USED_SLOT | 5);
+    last.ageYears = 9;
+    last.stateCode = -7654321;
+    last.previousRevenue = 456789;
+
+    game->saveCodec.walk(*game, 4);
+    first = TrainCar{};
+    last = TrainCar{};
+    game->saveCodec.walk(*game, 5);
+
+    CHECK(first.x == 11);
+    CHECK(first.direction == 2);
+    CHECK(first.secondaryCargoOrBaseEnergy == 17);
+    CHECK(first.nextCar == 321);
+    CHECK(first.revenue == 1234567);
+    CHECK(last.y == 22);
+    CHECK(train_flag::type(last.flags) == 5);
+    CHECK(last.ageYears == 9);
+    CHECK(last.stateCode == -7654321);
+    CHECK(last.previousRevenue == 456789);
+
+    const int slot = game_allocateTrainSlot(game, 1, 2, 3, 4, 5, 6);
+    CHECK(slot == 0);
+    CHECK(game->fleet.trainCars[slot].x == 1);
+    CHECK(game->fleet.trainCars[slot].y == 2);
+    CHECK(game->fleet.trainCars[slot].nextCar == -1);
+
+    for (TrainCar& car : game->fleet.trainCars)
+        car.flags = static_cast<int8_t>(train_flag::USED_SLOT);
+    CHECK(game_allocateTrainSlot(game, 1, 2, 3, 4, 5, 6) == kTrainSlotCount);
+    delete game;
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);
@@ -351,8 +397,8 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
     CHECK(game_findTrainHeadAt(game, bx, by) == 5000);
     if (head != 5000) {
         CHECK(static_cast<uint8_t>(game->world.trackMap[
-            static_cast<uint8_t>(game->fleet.trainX[head])][
-            static_cast<uint8_t>(game->fleet.trainY[head])]) == 65);
+            static_cast<uint8_t>(game->fleet.trainCars[head].x)][
+            static_cast<uint8_t>(game->fleet.trainCars[head].y)]) == 65);
     }
     delete game;
 }

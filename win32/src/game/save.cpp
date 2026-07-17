@@ -183,6 +183,12 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #define IO_BYTES(field) io_bytes(game->field, FIELD_COUNT(field))
 #define IO_SHORTS(field) io_shorts(game->field, FIELD_COUNT(field))
 #define IO_INTS(field) io_ints(game->field, FIELD_COUNT(field))
+#define IO_CAR_BYTE(member) \
+    for (TrainCar& car : game->fleet.trainCars) car.member = io_byte(car.member)
+#define IO_CAR_SHORT(member) \
+    for (TrainCar& car : game->fleet.trainCars) io_shorts(&car.member, 1)
+#define IO_CAR_INT(member) \
+    for (TrainCar& car : game->fleet.trainCars) car.member = io_int(car.member)
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
@@ -213,8 +219,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_INTS(economy.decadeProfitHistory);
     IO_INTS(economy.altDecadeRevenueTotal);
     IO_INTS(economy.altDecadeTotalCost);
-    IO_INTS(fleet.trainRevenue);
-    IO_INTS(fleet.prevTrainRevenue);
+    IO_CAR_INT(revenue);
+    IO_CAR_INT(previousRevenue);
     IO_SHORTS(economy.stationRevenue);
     IO_SHORTS(economy.prevStationRevenue);
     IO_INT(economy.revenueTotal);
@@ -269,20 +275,20 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_SHORTS(ui.trainSelectionY);
     IO_SHORTS(ui.trainSelectionX);
     IO_INT(era);
-    IO_BYTES(fleet.trainX);
-    IO_BYTES(fleet.trainY);
-    IO_BYTES(fleet.trainDir);
-    IO_BYTES(fleet.trainPhase);
-    IO_BYTES(fleet.trainFlags);
-    IO_BYTES(fleet.secondaryCargoOrBaseEnergy);
-    IO_BYTES(fleet.energyCargoOrRemovalTicks);
-    IO_BYTES(fleet.lastServiceVehicle);
-    IO_BYTES(fleet.cargoAge);
-    IO_SHORTS(fleet.nextCar);
-    IO_BYTES(fleet.trainEra);
-    IO_BYTES(fleet.trainAgeYears);
-    IO_INTS(fleet.trainStateCode);
-    IO_BYTES(fleet.trainAiOverride);
+    IO_CAR_BYTE(x);
+    IO_CAR_BYTE(y);
+    IO_CAR_BYTE(direction);
+    IO_CAR_BYTE(phase);
+    IO_CAR_BYTE(flags);
+    IO_CAR_BYTE(secondaryCargoOrBaseEnergy);
+    IO_CAR_BYTE(energyCargoOrRemovalTicks);
+    IO_CAR_BYTE(lastServiceSite);
+    IO_CAR_BYTE(cargoAge);
+    IO_CAR_SHORT(nextCar);
+    IO_CAR_BYTE(era);
+    IO_CAR_BYTE(ageYears);
+    IO_CAR_INT(stateCode);
+    IO_CAR_BYTE(aiOverride);
     IO_INT(world.industryCategory);
     IO_BOOL(world.industrySiteFound);
     IO_INT(build.nextTrackPieceCode);
@@ -351,6 +357,9 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #undef IO_BYTES
 #undef IO_SHORTS
 #undef IO_INTS
+#undef IO_CAR_BYTE
+#undef IO_CAR_SHORT
+#undef IO_CAR_INT
 #undef FIELD_COUNT
 
     if (mode == save::OP_SAVE_MAIN) {

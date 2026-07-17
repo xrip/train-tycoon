@@ -101,9 +101,9 @@ void game_renderMap(Game *game, Surface *g) {
         static_cast<std::size_t>(visible_width * visible_height));
     game->renderer.visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
-        if (!train_flag::isUsed(game->fleet.trainFlags[n6])) continue;
-        n5 = unsignedByte(game->fleet.trainX[n6]);
-        n4 = unsignedByte(game->fleet.trainY[n6]);
+        if (!train_flag::isUsed(game->fleet.trainCars[n6].flags)) continue;
+        n5 = unsignedByte(game->fleet.trainCars[n6].x);
+        n4 = unsignedByte(game->fleet.trainCars[n6].y);
         if (n5 < game->renderer.viewportX0 || n4 < game->renderer.viewportY0 || n5 > game->renderer.viewportX1 || n4 > game->renderer.viewportY1) continue;
         game->renderer.visibleTrains[game->renderer.visibleTrainCount++] = (int16_t)n6;
         visible_train_tiles[(n5 - game->renderer.viewportX0) * visible_height +
@@ -140,7 +140,7 @@ void game_renderMap(Game *game, Surface *g) {
                                 n4 - game->renderer.viewportY0]) {
             for (n = 0; n < game->renderer.visibleTrainCount; ++n) {
                 n12 = game->renderer.visibleTrains[n];
-                if (!train_flag::isUsed(game->fleet.trainFlags[n12]) || n5 != unsignedByte(game->fleet.trainX[n12]) || n4 != unsignedByte(game->fleet.trainY[n12])) continue;
+                if (!train_flag::isUsed(game->fleet.trainCars[n12].flags) || n5 != unsignedByte(game->fleet.trainCars[n12].x) || n4 != unsignedByte(game->fleet.trainCars[n12].y)) continue;
                 game_drawSpriteSingle(game, g, n12);
             }
         }
