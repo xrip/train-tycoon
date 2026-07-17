@@ -94,20 +94,20 @@ bool game_isCityOrStationTile(Game *game, int32_t n, int32_t n2) {
     return false;
 }
 
-bool game_isTileBuildable(Game *game, int32_t x, int32_t y, int32_t type) {
+bool World::is_tile_buildable(int32_t x, int32_t y, int32_t type) const {
     if (type == 5)
-        return game_isTileBuildable(game, x, y, 0)
-               && game_isTileBuildable(game, x, y - 1, 0)
-               && game_isTileBuildable(game, x, y + 1, 0);
+        return is_tile_buildable(x, y, 0)
+               && is_tile_buildable(x, y - 1, 0)
+               && is_tile_buildable(x, y + 1, 0);
     if (type == 6)
-        return game_isTileBuildable(game, x, y, 0)
-               && game_isTileBuildable(game, x - 1, y, 0)
-               && game_isTileBuildable(game, x + 1, y, 0);
-    if (!game->world.in_bounds(x, y)) return false;
-    int tile = game->world.terrain.tileMap[x][y];
-    bool buildable = game->world.terrain.tileElevation[x][y] >= 0
+        return is_tile_buildable(x, y, 0)
+               && is_tile_buildable(x - 1, y, 0)
+               && is_tile_buildable(x + 1, y, 0);
+    if (!in_bounds(x, y)) return false;
+    int tile = terrain.tileMap[x][y];
+    bool buildable = terrain.tileElevation[x][y] >= 0
                      && (tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST))
-                     && game->world.trackMap[x][y] == 0;
+                     && trackMap[x][y] == 0;
     if (type == 3 && (tile == 71 || tile == 21 || tile == 23)) buildable = true;
     if (type == 4 && (tile == 70 || tile == 22 || tile == 24)) buildable = true;
     return buildable;

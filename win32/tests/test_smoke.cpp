@@ -489,7 +489,7 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
         for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x) {
             if (game->world.terrain.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
                 && game->world.terrain.tileElevation[x][y] == 0
-                && game_isTileBuildable(game, x, y, 0)) {
+                && game->world.is_tile_buildable(x, y, 0)) {
                 ax = x; ay = y; break;
             }
         }
@@ -562,7 +562,7 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
     auto buildable = [&](int x, int y) {
         return game->world.terrain.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
                && game->world.terrain.tileElevation[x][y] == 0
-               && game_isTileBuildable(game, x, y, 0);
+               && game->world.is_tile_buildable(x, y, 0);
     };
     int ax = -1, ay = -1, bx = -1, by = -1;
     for (int y = 8; y < game->world.terrain.mapHeight - 8 && ay < 0; ++y)
@@ -726,6 +726,16 @@ TEST_CASE("fast: world track tile placement changes both grids") {
     world.place_track_tile(1, 2, 53, 3);
     CHECK(world.terrain.tileMap[1][2] == 53);
     CHECK(static_cast<uint8_t>(world.trackMap[1][2]) == 0xC3);
+}
+
+TEST_CASE("fast: world buildable query checks bounds and full footprint") {
+    World world;
+    world.resize(5, 5);
+    CHECK(world.is_tile_buildable(2, 2, 0));
+    CHECK(world.is_tile_buildable(2, 2, 5));
+    CHECK_FALSE(world.is_tile_buildable(-1, 2, 0));
+    world.terrain.tileMap[2][3] = tile::BUILT_FIRST;
+    CHECK_FALSE(world.is_tile_buildable(2, 2, 5));
 }
 
 TEST_CASE("fast: terrain commits the build edit buffer") {

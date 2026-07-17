@@ -108,7 +108,6 @@ void game_clearPathDistanceGrid(Game *game);
 bool game_isTrackStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
 bool game_isCurveTile(Game *game, int32_t n, int32_t n2);
 bool game_isCityOrStationTile(Game *game, int32_t n, int32_t n2);
-bool game_isTileBuildable(Game *game, int32_t n, int32_t n2, int32_t n3);
 int32_t game_findServiceVehicleAt(Game *game, int32_t n, int32_t n2);
 int32_t game_allocateServiceVehicleSlot(Game *game, int32_t n, int32_t n2, int32_t n3, bool bl, bool bl2);
 void game_computeTrainCost(Game *game);

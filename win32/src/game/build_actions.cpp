@@ -256,7 +256,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
     int slot;
     switch (piece) {
         case 0:
-            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 0)
+            if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 0)
                 || (slot = game_allocateServiceVehicleSlot(
                         game, 1, game->ui.tileCursorX, game->ui.tileCursorY, false, false))
                        == 5000
@@ -268,7 +268,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game_incrementRowValueType13(game, game->economy.costPower);
             break;
         case 1:
-            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 0)
+            if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 0)
                 || (slot = game_allocateServiceVehicleSlot(
                         game, 1, game->ui.tileCursorX, game->ui.tileCursorY, true, false))
                        == 5000
@@ -280,7 +280,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game_incrementRowValueType13(game, game->economy.costPower);
             break;
         case 2:
-            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 5)
+            if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 5)
                 || (slot = game_allocateServiceVehicleSlot(
                         game, 1, game->ui.tileCursorX, game->ui.tileCursorY, false, true))
                        == 5000
@@ -296,7 +296,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game_incrementRowValueType13(game, game->economy.costStruct);
             break;
         case 3:
-            if (!game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY, 6)
+            if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 6)
                 || (slot = game_allocateServiceVehicleSlot(
                         game, 1, game->ui.tileCursorX, game->ui.tileCursorY, true, true))
                        == 5000

@@ -213,7 +213,7 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
     int action = game->ui.menuTransitionCode[game->ui.buildMenuMode][game->ui.buildMenuItemIndex];
     if (action == 0) return;
     if (action >= 1 && action <= 7) {
-        bool buildable = game_isTileBuildable(game, game->ui.tileCursorX, game->ui.tileCursorY,
+        bool buildable = game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY,
                                             action - 1);
         midp_set_color(graphics, buildable ? 0x00FF00 : 0xFF0000);
     }
