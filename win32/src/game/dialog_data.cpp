@@ -68,7 +68,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[35 + game->scenario.difficultySlot]]);
                 case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[40 + game->scenario.difficultyB]]);
                 case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[40 + game->scenario.difficultyC]]);
-                case 6: return game_formatNumberWithSuffix(game->scenario.difficultyCycle, 0);
+                case 6: return format_number_with_suffix(game->scenario.difficultyCycle, 0);
             }
             break;
 
@@ -82,8 +82,8 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                         game->assets.spriteIndexTable[86 + (selection & 0xff)]];
                     return join_codes(wagon, engine);
                 }
-                case 1: return game_formatNumberWithSuffix(game->world.zonePopulation[game->build.junctionDirCursor] * 13, 0);
-                case 2: return game_formatNumberWithSuffix(game->world.constructionTimers[game->build.junctionDirCursor], 29);
+                case 1: return format_number_with_suffix(game->world.zonePopulation[game->build.junctionDirCursor] * 13, 0);
+                case 2: return format_number_with_suffix(game->world.constructionTimers[game->build.junctionDirCursor], 29);
             }
             break;
 
@@ -91,12 +91,12 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             switch (field) {
                 case 0: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[100 + game->world.cities[game->build.stationDirCursor].stationDirection]]);
                 case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[106 + game->world.cities[game->build.stationDirCursor].stationDirection / 2]]);
-                case 2: return game_formatNumberWithSuffix(game->world.cities[game->build.stationDirCursor].previousStationRevenue, 0);
+                case 2: return format_number_with_suffix(game->world.cities[game->build.stationDirCursor].previousStationRevenue, 0);
             }
             break;
 
         case 17:
-            return game_formatNumberWithSuffix(
+            return format_number_with_suffix(
                 game->scenario.milestone_progress(game->economy), 29);
 
         case 10:
@@ -106,7 +106,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->ui.monthlyReportEnabled ? 20 : 21]]);
                 case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->ui.annualReportEnabled ? 20 : 21]]);
                 case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->music.enabled ? 20 : 21]]);
-                case 6: return game_formatNumberWithSuffix(game->music.volumeLevel, 0);
+                case 6: return format_number_with_suffix(game->music.volumeLevel, 0);
             }
             break;
 
@@ -125,7 +125,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             return game_formatCurrency(game->build.unitCost - game->build.currentTrainCostSnapshot);
 
         case 22:
-            return game_formatNumberWithSuffix(
+            return format_number_with_suffix(
                 game->fleet.serviceSites[game->serviceVehicleAtCursor].resourceStock[field], 0);
 
         case 26: {
@@ -133,7 +133,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[60 + game->fleet.trainCars[game->trainAtCursor].era]]);
             if (field == 6) return game_formatCurrency(game->fleet.trainCars[game->trainAtCursor].revenue);
             if (field == 7) return game_formatCurrency(game->fleet.trainCars[game->trainAtCursor].previousRevenue);
-            if (field == 8) return game_formatNumberWithSuffix(game->fleet.trainCars[game->trainAtCursor].ageYears, 0);
+            if (field == 8) return format_number_with_suffix(game->fleet.trainCars[game->trainAtCursor].ageYears, 0);
             if (field == 9) return game_formatCurrency(game->build.currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return game_formatCurrency(game->build.baseTrainCostSnapshot - game->build.currentTrainCostSnapshot);
             if (field == 20)
@@ -152,14 +152,14 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                          game->fleet.trainCars[car].secondaryCargoOrBaseEnergy);
             else
                 snprintf(text, sizeof(text), "%d", game->fleet.trainCars[car].energyCargoOrRemovalTicks);
-            return game_encodeDisplayText(text);
+            return encode_display_text(text);
         }
 
         case 30:
             switch (field) {
                 case 0: return game_formatCurrency(game->economy.loanBalance);
                 case 1: return game_formatCurrency(game->economy.loanCeiling);
-                case 2: return game_formatNumberWithSuffix(game->economy.interestRate, 29);
+                case 2: return format_number_with_suffix(game->economy.interestRate, 29);
             }
             break;
 
@@ -210,12 +210,12 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             } else {
                 if (field >= 20) {
                     if (!game->ui.yearGraphAlt)
-                        return game_formatNumberWithSuffix(game->ui.altYearArray[field - 20], 0);
+                        return format_number_with_suffix(game->ui.altYearArray[field - 20], 0);
                     return std::nullopt;
                 }
                 return !game->ui.yearGraphAlt
-                    ? game_formatNumberWithSuffix(game->ui.yearGraphOffsets[field] + 1940, 20)
-                    : game_formatNumberWithSuffix(game->ui.altYearArray[field] + 1940, 0);
+                    ? format_number_with_suffix(game->ui.yearGraphOffsets[field] + 1940, 20)
+                    : format_number_with_suffix(game->ui.altYearArray[field] + 1940, 0);
             }
             // The original falls through when the graph mode is invalid.
         case 34:
@@ -223,26 +223,26 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[54 + game->ui.yearGraphMode]]);
             if (field >= 20) {
                 if (!game->ui.yearGraphAlt)
-                    return game_formatNumberWithSuffix(game->ui.altYearArray[field - 20], 0);
+                    return format_number_with_suffix(game->ui.altYearArray[field - 20], 0);
                 return std::nullopt;
             }
             return !game->ui.yearGraphAlt
-                ? game_formatNumberWithSuffix(game->ui.yearGraphOffsets[field] + 40, 20)
-                : game_formatNumberWithSuffix(game->ui.altYearArray[field] + 1940, 0);
+                ? format_number_with_suffix(game->ui.yearGraphOffsets[field] + 40, 20)
+                : format_number_with_suffix(game->ui.altYearArray[field] + 1940, 0);
 
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
             if (field == 1) {
-                const auto day = game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueDay, 11);
-                const auto month = game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueMonth, 11);
-                const auto year = game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueYear + 1950, 0);
+                const auto day = format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueDay, 11);
+                const auto month = format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueMonth, 11);
+                const auto year = format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueYear + 1950, 0);
                 return join_three_codes(day, month, year);
             }
             if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].target);
-            if (field == 3) return game_formatNumberWithSuffix(
+            if (field == 3) return format_number_with_suffix(
                 game->offerBoard.display_progress(game->scenario.offerRowIndex,
                                                   game->economy), 29);
-            if (field == 4) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].target, 0);
+            if (field == 4) return format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].target, 0);
             break;
 
         case 60:
@@ -253,16 +253,16 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                         game->ui.enabledMenuRowIndexes[index]].objectiveType + 160])]);
             } else {
                 int index = (field - 1) / 2;
-                return game_formatNumberWithSuffix(
+                return format_number_with_suffix(
                     game->offerBoard.display_progress(
                         game->ui.enabledMenuRowIndexes[index], game->economy), 29);
             }
 
         case 61: case 62: case 63: case 64: case 65: case 66:
         case 67: case 68: case 69: case 70: case 71: case 72:
-            if (field == 1) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 29);
+            if (field == 1) return format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 29);
             if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].effectAmount);
-            if (field == 3) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 0);
+            if (field == 3) return format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 0);
             break;
 
         case 27:
@@ -277,15 +277,15 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             break;
 
         case 28:
-            if (field == 0) return game_formatNumberWithSuffix(game->scenario.bestScenarioScore, 0);
+            if (field == 0) return format_number_with_suffix(game->scenario.bestScenarioScore, 0);
             if (field >= 1 && field <= 13)
-                return game_formatNumberWithSuffix(game->scenario.scenarioScores[field - 1], 0);
+                return format_number_with_suffix(game->scenario.scenarioScores[field - 1], 0);
             if (field >= 20 && field <= 33)
-                return game_formatNumberWithSuffix(game->scenario.leaderboardScores[field - 20], 0);
+                return format_number_with_suffix(game->scenario.leaderboardScores[field - 20], 0);
             break;
 
         case 6:
-            return game_formatNumberWithSuffix(game->scenario.currentScenarioScore, 0);
+            return format_number_with_suffix(game->scenario.currentScenarioScore, 0);
     }
     return std::nullopt;
 }

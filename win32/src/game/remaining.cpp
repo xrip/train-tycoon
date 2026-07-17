@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-std::vector<int8_t> game_formatNumberWithSuffix(int32_t value, int32_t suffix) {
+std::vector<int8_t> format_number_with_suffix(int32_t value, int32_t suffix) {
     char text[24];
     snprintf(text, sizeof(text), "%d", value);
     int length = (int)strlen(text);
@@ -15,7 +15,7 @@ std::vector<int8_t> game_formatNumberWithSuffix(int32_t value, int32_t suffix) {
     return result;
 }
 
-std::vector<int8_t> game_encodeDisplayText(const char *text) {
+std::vector<int8_t> encode_display_text(const char *text) {
     int length = (int)strlen(text);
     std::vector<int8_t> result(static_cast<size_t>(length));
     for (int i = 0; i < length; ++i) {
