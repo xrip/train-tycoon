@@ -161,6 +161,14 @@ typedef struct Game {
     void update_loading_game();
     void update_ai_turn();
     void update_high_score_sync();
+    void advance_tile_animation_frames();
+    void apply_queued_tile_changes();
+    void update_active_trains();
+    void advance_month_if_day_ended();
+    void apply_new_month_changes();
+    void advance_year_if_needed();
+    void advance_era_if_needed();
+    void advance_game_day();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

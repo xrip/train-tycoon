@@ -642,9 +642,8 @@ void Game::tick_input_or_ai(bool bl) {
     }
 }
 
-namespace {
-
-void advanceTileAnimationFrames(Game *game) {
+void Game::advance_tile_animation_frames() {
+    Game *game = this;
     if (++game->tile50AnimationPhase == 2) {
         game->tile50AnimationPhase = 0;
         if (++game->tile50AnimationFrame == 3) game->tile50AnimationFrame = 0;
@@ -672,7 +671,8 @@ void advanceTileAnimationFrames(Game *game) {
     if (++game->world.terrain.phaseTimer == 10) game->world.terrain.phaseTimer = 0;
 }
 
-void applyQueuedTileChanges(Game *game) {
+void Game::apply_queued_tile_changes() {
+    Game *game = this;
     for (int queueIndex = 0; queueIndex < kTileQueueCount; ++queueIndex) {
         TileChange& change = game->world.terrain.tileQueue[queueIndex];
         if (change.countdown <= 0) continue;
@@ -728,7 +728,8 @@ void applyQueuedTileChanges(Game *game) {
     }
 }
 
-void updateActiveTrains(Game *game) {
+void Game::update_active_trains() {
+    Game *game = this;
     for (int trainIndex = 0; trainIndex < kTrainSlotCount; ++trainIndex) {
         if (!train_flag::isUsed(game->fleet.trainCars[trainIndex].flags)
             || !train_flag::isHead(game->fleet.trainCars[trainIndex].flags))
@@ -749,7 +750,8 @@ void updateActiveTrains(Game *game) {
     }
 }
 
-void advanceMonthIfDayEnded(Game *game) {
+void Game::advance_month_if_day_ended() {
+    Game *game = this;
     switch (game->economy.monthOfYear) {
         case 1: case 3: case 5: case 7: case 8: case 10: case 12:
             if (game->economy.dayOfMonth == 32) ++game->economy.monthOfYear;
@@ -765,7 +767,8 @@ void advanceMonthIfDayEnded(Game *game) {
     }
 }
 
-void applyNewMonthChanges(Game *game) {
+void Game::apply_new_month_changes() {
+    Game *game = this;
     game->economy.dayOfMonth = 1;
     game->new_year_notify();
     game->world.decay_construction_timers_quarterly(game->economy.monthOfYear);
@@ -798,7 +801,8 @@ void applyNewMonthChanges(Game *game) {
     }
 }
 
-void advanceYearIfNeeded(Game *game) {
+void Game::advance_year_if_needed() {
+    Game *game = this;
     if (game->economy.monthOfYear == 13) {
         game->fleet.age_one_year();
         game->reset_ai_depot_train_ages();
@@ -812,7 +816,8 @@ void advanceYearIfNeeded(Game *game) {
     }
 }
 
-void advanceEraIfNeeded(Game *game) {
+void Game::advance_era_if_needed() {
+    Game *game = this;
     int previousEra = game->scenario.currentEra;
     if (game->economy.dayOfMonth == 5 && game->economy.monthOfYear == 3
         && game->economy.year == 1951 && game->scenario.currentEra < 2)
@@ -833,7 +838,8 @@ void advanceEraIfNeeded(Game *game) {
     }
 }
 
-void advanceGameDay(Game *game) {
+void Game::advance_game_day() {
+    Game *game = this;
     game->economy.compute_year_end_metrics();
     if (game->frameIndex > 0) --game->frameIndex;
     game->dayFrameCounter = 0;
@@ -855,22 +861,20 @@ void advanceGameDay(Game *game) {
     }
 
     int previousMonth = game->economy.monthOfYear;
-    advanceMonthIfDayEnded(game);
-    if (previousMonth != game->economy.monthOfYear) applyNewMonthChanges(game);
-    advanceYearIfNeeded(game);
-    advanceEraIfNeeded(game);
+    game->advance_month_if_day_ended();
+    if (previousMonth != game->economy.monthOfYear) game->apply_new_month_changes();
+    game->advance_year_if_needed();
+    game->advance_era_if_needed();
 }
-
-} // namespace
 
 // Advance frame animation, queued map work, trains, and the calendar in that order.
 void Game::simulation_tick() {
     Game *game = this;
-    advanceTileAnimationFrames(game);
-    applyQueuedTileChanges(game);
-    updateActiveTrains(game);
+    game->advance_tile_animation_frames();
+    game->apply_queued_tile_changes();
+    game->update_active_trains();
     if (game->dayFrameCounter >= game->dayTickThreshold) {
-        advanceGameDay(game);
+        game->advance_game_day();
     } else {
         ++game->dayFrameCounter;
     }
