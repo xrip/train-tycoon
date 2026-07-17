@@ -5,6 +5,7 @@
 #include <cstdint>
 
 struct World;
+struct Scenario;
 
 namespace train_flag {
 // Bit 0x10 is used by movement code, but its exact meaning is still open.
@@ -63,6 +64,11 @@ struct ServiceSite {
     int8_t loadFlags = 0;
 };
 
+struct UnloadResult {
+    int32_t revenue = 0;
+    int32_t delivered[kResourceTypeCount]{};
+};
+
 // Fleet owns the per-train-slot records. Each slot id is one train/car; a train
 // is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.
@@ -87,6 +93,8 @@ struct Fleet {
     int32_t accumulate_turns(const World& world, int32_t car) const;
     void load_at_service_site(World& world, int32_t car, int32_t site,
                               bool construction_done);
+    UnloadResult unload_at_service_site(const Scenario& scenario,
+                                        int32_t car, int32_t site);
 
     TrainCar trainCars[kTrainSlotCount]{};
 
