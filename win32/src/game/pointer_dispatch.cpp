@@ -20,16 +20,14 @@ int unsigned_byte(int8_t b) {
     return static_cast<int>(static_cast<std::uint8_t>(b));
 }
 
-// Splash / loading / generation screens: any tap advances, same as any key.
-void pointer_advance_loader(Game *game) {
-    game->loadingTimeout = true;
-}
+}  // namespace
 
 // Playing bottom bar: re-derive each item icon's x (the same math paint_main
 // uses to draw them) and activate the clicked one. Selecting + opening in one
 // click mirrors "cycle to item, then press 5/fire" -- open_build_menu reads
 // buildMenuItemIndex and dispatches the item's action.
-void pointer_click_bottom_bar(Game *game, int x) {
+void Game::click_bottom_bar(int32_t x) {
+    Game *game = this;
     const int mode = game->ui.buildMenuMode;
     const int item_count = static_cast<int>(game->ui.menuItemCode[mode].size());
     if (item_count <= 0) return;
@@ -52,8 +50,6 @@ void pointer_click_bottom_bar(Game *game, int x) {
         }
     }
 }
-
-}  // namespace
 
 // Mouse hover over the gameplay field. Translates the view-space mouse position
 // into the map-screen space game_computeViewportBounds expects (absolute map
@@ -116,7 +112,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
         case GameState::BootSplash2: case GameState::BootSplash3:
         case GameState::LoadingResources:
         case GameState::GeneratingMap:
-            pointer_advance_loader(game);
+            game->loadingTimeout = true;
             return;
         case GameState::MenuOverlay: {
             const int hx = static_cast<int>(x);
@@ -141,7 +137,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
         case GameState::Playing:
             // Control element: the bottom build-menu bar.
             if (y >= game->renderer.bottomBarY) {
-                pointer_click_bottom_bar(game, static_cast<int>(x));
+                game->click_bottom_bar(x);
                 return;
             }
             // Game field: resolve the tile under the click and fire the active

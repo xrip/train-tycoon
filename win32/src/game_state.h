@@ -169,6 +169,8 @@ typedef struct Game {
     void advance_year_if_needed();
     void advance_era_if_needed();
     void advance_game_day();
+    void click_bottom_bar(int32_t x);
+    void paint_map_overview(Surface& surface);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

@@ -5,9 +5,9 @@
 #define WIDTH  MIDP_SCREEN_W   // this.getWidth()
 #define HEIGHT MIDP_SCREEN_H   // this.getHeight()
 
-namespace {
-
-void paintMapOverview(Game *game, Surface *g) {
+void Game::paint_map_overview(Surface& surface) {
+    Game *game = this;
+    Surface *g = &surface;
     midp_set_clip(g, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
     midp_set_color(g, 0);
     midp_fill_rect(g, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
@@ -46,8 +46,6 @@ void paintMapOverview(Game *game, Surface *g) {
     game->render_packed_sprite(*g, game->ui.transitionCode);
     game->set_state(GameState::MenuOverlay);
 }
-
-} // namespace
 
 void Game::render(Surface& surface) {
     Game* game = this;
@@ -165,7 +163,7 @@ void Game::render(Surface& surface) {
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
             break;
         case GameState::MapOverview:
-            paintMapOverview(game, g);
+            game->paint_map_overview(*g);
             break;
         case GameState::BuildingPath:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
