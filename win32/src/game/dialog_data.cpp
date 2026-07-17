@@ -33,7 +33,7 @@ static std::vector<int8_t> join_three_codes(std::span<const int8_t> first,
     return result;
 }
 
-std::vector<int8_t> game_formatCurrency(int32_t value) {
+static std::vector<int8_t> format_currency(int32_t value) {
     uint32_t magnitude = value < 0 ? 0u - (uint32_t)value : (uint32_t)value;
     char digits[16];
     snprintf(digits, sizeof(digits), "%u", magnitude);
@@ -52,240 +52,240 @@ std::vector<int8_t> game_formatCurrency(int32_t value) {
     return result;
 }
 
-std::optional<std::vector<int8_t>> game_resolveDialogValue(
-    Game *game, int32_t screen, int32_t field) {
+std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
+    int32_t screen, int32_t field) {
     switch (screen) {
         case 14:
-            if (game->ui.screenParam >= 0 && game->ui.screenParam <= 4)
-                return copy_codes(game->assets.spriteBitmapTable[
-                    game->assets.spriteIndexTable[11 + game->ui.screenParam]]);
+            if (this->ui.screenParam >= 0 && this->ui.screenParam <= 4)
+                return copy_codes(this->assets.spriteBitmapTable[
+                    this->assets.spriteIndexTable[11 + this->ui.screenParam]]);
             break;
 
         case 4:
             switch (field) {
-                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[25 + game->scenario.scenarioMilestone]]);
-                case 2: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[30 + game->scenario.difficultyA]]);
-                case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[35 + game->scenario.difficultySlot]]);
-                case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[40 + game->scenario.difficultyB]]);
-                case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[40 + game->scenario.difficultyC]]);
-                case 6: return format_number_with_suffix(game->scenario.difficultyCycle, 0);
+                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[25 + this->scenario.scenarioMilestone]]);
+                case 2: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[30 + this->scenario.difficultyA]]);
+                case 3: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[35 + this->scenario.difficultySlot]]);
+                case 4: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[40 + this->scenario.difficultyB]]);
+                case 5: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[40 + this->scenario.difficultyC]]);
+                case 6: return format_number_with_suffix(this->scenario.difficultyCycle, 0);
             }
             break;
 
         case 20:
             switch (field) {
                 case 0: {
-                    int selection = game->ui.trainSelectionIndex[game->build.junctionDirCursor];
-                    const std::vector<int8_t> &engine = game->assets.spriteBitmapTable[
-                        game->assets.spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
-                    const std::vector<int8_t> &wagon = game->assets.spriteBitmapTable[
-                        game->assets.spriteIndexTable[86 + (selection & 0xff)]];
+                    int selection = this->ui.trainSelectionIndex[this->build.junctionDirCursor];
+                    const std::vector<int8_t> &engine = this->assets.spriteBitmapTable[
+                        this->assets.spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
+                    const std::vector<int8_t> &wagon = this->assets.spriteBitmapTable[
+                        this->assets.spriteIndexTable[86 + (selection & 0xff)]];
                     return join_codes(wagon, engine);
                 }
-                case 1: return format_number_with_suffix(game->world.zonePopulation[game->build.junctionDirCursor] * 13, 0);
-                case 2: return format_number_with_suffix(game->world.constructionTimers[game->build.junctionDirCursor], 29);
+                case 1: return format_number_with_suffix(this->world.zonePopulation[this->build.junctionDirCursor] * 13, 0);
+                case 2: return format_number_with_suffix(this->world.constructionTimers[this->build.junctionDirCursor], 29);
             }
             break;
 
         case 21:
             switch (field) {
-                case 0: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[100 + game->world.cities[game->build.stationDirCursor].stationDirection]]);
-                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[106 + game->world.cities[game->build.stationDirCursor].stationDirection / 2]]);
-                case 2: return format_number_with_suffix(game->world.cities[game->build.stationDirCursor].previousStationRevenue, 0);
+                case 0: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[100 + this->world.cities[this->build.stationDirCursor].stationDirection]]);
+                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[106 + this->world.cities[this->build.stationDirCursor].stationDirection / 2]]);
+                case 2: return format_number_with_suffix(this->world.cities[this->build.stationDirCursor].previousStationRevenue, 0);
             }
             break;
 
         case 17:
             return format_number_with_suffix(
-                game->scenario.milestone_progress(game->economy), 29);
+                this->scenario.milestone_progress(this->economy), 29);
 
         case 10:
             switch (field) {
-                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[animationsDisabled ? 21 : 20]]);
-                case 2: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[selectionHidden ? 21 : 20]]);
-                case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->ui.monthlyReportEnabled ? 20 : 21]]);
-                case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->ui.annualReportEnabled ? 20 : 21]]);
-                case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->music.enabled ? 20 : 21]]);
-                case 6: return format_number_with_suffix(game->music.volumeLevel, 0);
+                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[animationsDisabled ? 21 : 20]]);
+                case 2: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[selectionHidden ? 21 : 20]]);
+                case 3: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->ui.monthlyReportEnabled ? 20 : 21]]);
+                case 4: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->ui.annualReportEnabled ? 20 : 21]]);
+                case 5: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->music.enabled ? 20 : 21]]);
+                case 6: return format_number_with_suffix(this->music.volumeLevel, 0);
             }
             break;
 
         case 24:
             switch (field) {
-                case 0: return game_formatCurrency(game->economy.gWagonCost);
-                case 1: return game_formatCurrency(game->economy.gWagonCost2);
-                case 2: return game_formatCurrency(game->economy.gWagonCost3);
-                case 3: return game_formatCurrency(game->economy.gWagonCost4);
-                case 4: return game_formatCurrency(game->economy.gWagonCost5);
-                case 5: return game_formatCurrency(game->economy.gWagonCost6);
+                case 0: return format_currency(this->economy.gWagonCost);
+                case 1: return format_currency(this->economy.gWagonCost2);
+                case 2: return format_currency(this->economy.gWagonCost3);
+                case 3: return format_currency(this->economy.gWagonCost4);
+                case 4: return format_currency(this->economy.gWagonCost5);
+                case 5: return format_currency(this->economy.gWagonCost6);
             }
             break;
 
         case 23:
-            return game_formatCurrency(game->build.unitCost - game->build.currentTrainCostSnapshot);
+            return format_currency(this->build.unitCost - this->build.currentTrainCostSnapshot);
 
         case 22:
             return format_number_with_suffix(
-                game->fleet.serviceSites[game->serviceVehicleAtCursor].resourceStock[field], 0);
+                this->fleet.serviceSites[this->serviceVehicleAtCursor].resourceStock[field], 0);
 
         case 26: {
             if (field == 0)
-                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[60 + game->fleet.trainCars[game->trainAtCursor].era]]);
-            if (field == 6) return game_formatCurrency(game->fleet.trainCars[game->trainAtCursor].revenue);
-            if (field == 7) return game_formatCurrency(game->fleet.trainCars[game->trainAtCursor].previousRevenue);
-            if (field == 8) return format_number_with_suffix(game->fleet.trainCars[game->trainAtCursor].ageYears, 0);
-            if (field == 9) return game_formatCurrency(game->build.currentTrainCostSnapshot * 70 / 100);
-            if (field == 10) return game_formatCurrency(game->build.baseTrainCostSnapshot - game->build.currentTrainCostSnapshot);
+                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[60 + this->fleet.trainCars[this->trainAtCursor].era]]);
+            if (field == 6) return format_currency(this->fleet.trainCars[this->trainAtCursor].revenue);
+            if (field == 7) return format_currency(this->fleet.trainCars[this->trainAtCursor].previousRevenue);
+            if (field == 8) return format_number_with_suffix(this->fleet.trainCars[this->trainAtCursor].ageYears, 0);
+            if (field == 9) return format_currency(this->build.currentTrainCostSnapshot * 70 / 100);
+            if (field == 10) return format_currency(this->build.baseTrainCostSnapshot - this->build.currentTrainCostSnapshot);
             if (field == 20)
-                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[
-                    game->fleet.trainCars[game->trainAtCursor].aiOverride == 0 ? 21 : 20]]);
+                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[
+                    this->fleet.trainCars[this->trainAtCursor].aiOverride == 0 ? 21 : 20]]);
             if (field <= 0 || field >= 6) break;
             int car = 0;
-            if (game->fleet.count_cars(game->trainAtCursor) > field) {
-                car = game->trainAtCursor;
-                for (int i = 0; i < field; ++i) car = game->fleet.trainCars[car].nextCar;
+            if (this->fleet.count_cars(this->trainAtCursor) > field) {
+                car = this->trainAtCursor;
+                for (int i = 0; i < field; ++i) car = this->fleet.trainCars[car].nextCar;
             }
-            int type = train_flag::type(game->fleet.trainCars[car].flags);
+            int type = train_flag::type(this->fleet.trainCars[car].flags);
             char text[32];
             if (type == 2)
-                snprintf(text, sizeof(text), "%d/%d", game->fleet.trainCars[car].energyCargoOrRemovalTicks,
-                         game->fleet.trainCars[car].secondaryCargoOrBaseEnergy);
+                snprintf(text, sizeof(text), "%d/%d", this->fleet.trainCars[car].energyCargoOrRemovalTicks,
+                         this->fleet.trainCars[car].secondaryCargoOrBaseEnergy);
             else
-                snprintf(text, sizeof(text), "%d", game->fleet.trainCars[car].energyCargoOrRemovalTicks);
+                snprintf(text, sizeof(text), "%d", this->fleet.trainCars[car].energyCargoOrRemovalTicks);
             return encode_display_text(text);
         }
 
         case 30:
             switch (field) {
-                case 0: return game_formatCurrency(game->economy.loanBalance);
-                case 1: return game_formatCurrency(game->economy.loanCeiling);
-                case 2: return format_number_with_suffix(game->economy.interestRate, 29);
+                case 0: return format_currency(this->economy.loanBalance);
+                case 1: return format_currency(this->economy.loanCeiling);
+                case 2: return format_number_with_suffix(this->economy.interestRate, 29);
             }
             break;
 
         case 32: {
             int values[8] = {
-                game->compareToPrevious ? game->economy.prevTotalSpent : game->economy.totalSpent,
-                game->compareToPrevious ? game->economy.prevAiMoneySpent : game->economy.aiMoneySpent,
-                game->compareToPrevious ? game->economy.prevFuelCost : game->economy.fuelCostAccrued,
-                game->compareToPrevious ? game->economy.prevSubsidyCost : game->economy.subsidyCost,
-                game->compareToPrevious ? game->economy.prevTerrainTotal : game->economy.terrainTotal,
-                game->compareToPrevious ? game->economy.prevEnterpriseTotal : game->economy.decadeEnterpriseTax,
-                game->compareToPrevious ? game->economy.prevTotalRevenue : game->economy.totalRevenue,
-                game->compareToPrevious ? game->economy.previousYearProfit : game->economy.netProfit
+                this->compareToPrevious ? this->economy.prevTotalSpent : this->economy.totalSpent,
+                this->compareToPrevious ? this->economy.prevAiMoneySpent : this->economy.aiMoneySpent,
+                this->compareToPrevious ? this->economy.prevFuelCost : this->economy.fuelCostAccrued,
+                this->compareToPrevious ? this->economy.prevSubsidyCost : this->economy.subsidyCost,
+                this->compareToPrevious ? this->economy.prevTerrainTotal : this->economy.terrainTotal,
+                this->compareToPrevious ? this->economy.prevEnterpriseTotal : this->economy.decadeEnterpriseTax,
+                this->compareToPrevious ? this->economy.prevTotalRevenue : this->economy.totalRevenue,
+                this->compareToPrevious ? this->economy.previousYearProfit : this->economy.netProfit
             };
-            if (field >= 0 && field < 8) return game_formatCurrency(values[field]);
+            if (field >= 0 && field < 8) return format_currency(values[field]);
             break;
         }
 
         case 35: {
             int values[8] = {
-                game->compareToPrevious ? game->economy.prevDecadeSpent : game->economy.decadeSpentWithCurrent,
-                game->compareToPrevious ? game->economy.prevDecadeAiSpent : game->economy.decadeAiSpentWithCurrent,
-                game->compareToPrevious ? game->economy.prevDecadeFuel : game->economy.decadeFuelWithCurrent,
-                game->compareToPrevious ? game->economy.prevDecadeSubsidy : game->economy.decadeSubsidyWithCurrent,
-                game->compareToPrevious ? game->economy.previousLegacyDecadeMetric : game->economy.legacyDecadeMetric,
-                game->compareToPrevious ? game->economy.previousDecadeEnterpriseTax : game->economy.decadeEnterpriseWithCurrent,
-                game->compareToPrevious ? game->economy.prevDecadeRevenue : game->economy.decadeRevenueWithCurrent,
-                game->compareToPrevious ? game->economy.previousDecadeProfit : game->economy.decadeProfitWithCurrent
+                this->compareToPrevious ? this->economy.prevDecadeSpent : this->economy.decadeSpentWithCurrent,
+                this->compareToPrevious ? this->economy.prevDecadeAiSpent : this->economy.decadeAiSpentWithCurrent,
+                this->compareToPrevious ? this->economy.prevDecadeFuel : this->economy.decadeFuelWithCurrent,
+                this->compareToPrevious ? this->economy.prevDecadeSubsidy : this->economy.decadeSubsidyWithCurrent,
+                this->compareToPrevious ? this->economy.previousLegacyDecadeMetric : this->economy.legacyDecadeMetric,
+                this->compareToPrevious ? this->economy.previousDecadeEnterpriseTax : this->economy.decadeEnterpriseWithCurrent,
+                this->compareToPrevious ? this->economy.prevDecadeRevenue : this->economy.decadeRevenueWithCurrent,
+                this->compareToPrevious ? this->economy.previousDecadeProfit : this->economy.decadeProfitWithCurrent
             };
-            if (field >= 0 && field < 8) return game_formatCurrency(values[field]);
+            if (field >= 0 && field < 8) return format_currency(values[field]);
             break;
         }
 
         case 33:
             if (field == 65)
-                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[57 + game->ui.yearGraphMode]]);
+                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[57 + this->ui.yearGraphMode]]);
             if (field >= 40) {
                 int index = field - 40;
-                if (!game->ui.yearGraphAlt) {
-                    if (game->ui.yearGraphMode == 0) return game_formatCurrency(game->economy.yearProfitHistory[index]);
-                    if (game->ui.yearGraphMode == 1) return game_formatCurrency(game->economy.yearRevenueHistory[index]);
-                    if (game->ui.yearGraphMode == 2) return game_formatCurrency(game->economy.yearCompanyValueHistory[index]);
+                if (!this->ui.yearGraphAlt) {
+                    if (this->ui.yearGraphMode == 0) return format_currency(this->economy.yearProfitHistory[index]);
+                    if (this->ui.yearGraphMode == 1) return format_currency(this->economy.yearRevenueHistory[index]);
+                    if (this->ui.yearGraphMode == 2) return format_currency(this->economy.yearCompanyValueHistory[index]);
                 } else {
-                    if (game->ui.yearGraphMode == 0) return game_formatCurrency(game->economy.decadeProfitHistory[index]);
-                    if (game->ui.yearGraphMode == 1) return game_formatCurrency(game->economy.altDecadeRevenueTotal[index]);
-                    if (game->ui.yearGraphMode == 2) return game_formatCurrency(game->economy.altDecadeTotalCost[index]);
+                    if (this->ui.yearGraphMode == 0) return format_currency(this->economy.decadeProfitHistory[index]);
+                    if (this->ui.yearGraphMode == 1) return format_currency(this->economy.altDecadeRevenueTotal[index]);
+                    if (this->ui.yearGraphMode == 2) return format_currency(this->economy.altDecadeTotalCost[index]);
                 }
             } else {
                 if (field >= 20) {
-                    if (!game->ui.yearGraphAlt)
-                        return format_number_with_suffix(game->ui.altYearArray[field - 20], 0);
+                    if (!this->ui.yearGraphAlt)
+                        return format_number_with_suffix(this->ui.altYearArray[field - 20], 0);
                     return std::nullopt;
                 }
-                return !game->ui.yearGraphAlt
-                    ? format_number_with_suffix(game->ui.yearGraphOffsets[field] + 1940, 20)
-                    : format_number_with_suffix(game->ui.altYearArray[field] + 1940, 0);
+                return !this->ui.yearGraphAlt
+                    ? format_number_with_suffix(this->ui.yearGraphOffsets[field] + 1940, 20)
+                    : format_number_with_suffix(this->ui.altYearArray[field] + 1940, 0);
             }
             // The original falls through when the graph mode is invalid.
         case 34:
             if (field == 65)
-                return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[54 + game->ui.yearGraphMode]]);
+                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[54 + this->ui.yearGraphMode]]);
             if (field >= 20) {
-                if (!game->ui.yearGraphAlt)
-                    return format_number_with_suffix(game->ui.altYearArray[field - 20], 0);
+                if (!this->ui.yearGraphAlt)
+                    return format_number_with_suffix(this->ui.altYearArray[field - 20], 0);
                 return std::nullopt;
             }
-            return !game->ui.yearGraphAlt
-                ? format_number_with_suffix(game->ui.yearGraphOffsets[field] + 40, 20)
-                : format_number_with_suffix(game->ui.altYearArray[field] + 1940, 0);
+            return !this->ui.yearGraphAlt
+                ? format_number_with_suffix(this->ui.yearGraphOffsets[field] + 40, 20)
+                : format_number_with_suffix(this->ui.altYearArray[field] + 1940, 0);
 
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
             if (field == 1) {
-                const auto day = format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueDay, 11);
-                const auto month = format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueMonth, 11);
-                const auto year = format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueYear + 1950, 0);
+                const auto day = format_number_with_suffix(this->offerBoard.offers[this->scenario.offerRowIndex].dueDay, 11);
+                const auto month = format_number_with_suffix(this->offerBoard.offers[this->scenario.offerRowIndex].dueMonth, 11);
+                const auto year = format_number_with_suffix(this->offerBoard.offers[this->scenario.offerRowIndex].dueYear + 1950, 0);
                 return join_three_codes(day, month, year);
             }
-            if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].target);
+            if (field == 2) return format_currency(this->offerBoard.offers[this->scenario.offerRowIndex].target);
             if (field == 3) return format_number_with_suffix(
-                game->offerBoard.display_progress(game->scenario.offerRowIndex,
-                                                  game->economy), 29);
-            if (field == 4) return format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].target, 0);
+                this->offerBoard.display_progress(this->scenario.offerRowIndex,
+                                                  this->economy), 29);
+            if (field == 4) return format_number_with_suffix(this->offerBoard.offers[this->scenario.offerRowIndex].target, 0);
             break;
 
         case 60:
             if (field % 2 == 1) {
                 int index = field / 2;
-                return copy_codes(game->assets.spriteBitmapTable[unsignedByte(
-                    game->assets.spriteIndexTable[game->offerBoard.offers[
-                        game->ui.enabledMenuRowIndexes[index]].objectiveType + 160])]);
+                return copy_codes(this->assets.spriteBitmapTable[unsignedByte(
+                    this->assets.spriteIndexTable[this->offerBoard.offers[
+                        this->ui.enabledMenuRowIndexes[index]].objectiveType + 160])]);
             } else {
                 int index = (field - 1) / 2;
                 return format_number_with_suffix(
-                    game->offerBoard.display_progress(
-                        game->ui.enabledMenuRowIndexes[index], game->economy), 29);
+                    this->offerBoard.display_progress(
+                        this->ui.enabledMenuRowIndexes[index], this->economy), 29);
             }
 
         case 61: case 62: case 63: case 64: case 65: case 66:
         case 67: case 68: case 69: case 70: case 71: case 72:
-            if (field == 1) return format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 29);
-            if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].effectAmount);
-            if (field == 3) return format_number_with_suffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 0);
+            if (field == 1) return format_number_with_suffix(this->offerBoard.offers[this->scenario.offerRowIndex].effectValue, 29);
+            if (field == 2) return format_currency(this->offerBoard.offers[this->scenario.offerRowIndex].effectAmount);
+            if (field == 3) return format_number_with_suffix(this->offerBoard.offers[this->scenario.offerRowIndex].effectValue, 0);
             break;
 
         case 27:
             if (field == 1)
-                return copy_codes(game->scenario.playerNameCodes, kPlayerNameCodeCount);
+                return copy_codes(this->scenario.playerNameCodes, kPlayerNameCodeCount);
             if (field == 0) {
-                memset(game->scenario.playerNameCursorMarker, 0,
-                       sizeof(game->scenario.playerNameCursorMarker));
-                game->scenario.playerNameCursorMarker[game->scenario.playerNameCursor] = 28;
-                return copy_codes(game->scenario.playerNameCursorMarker, kPlayerNameCodeCount);
+                memset(this->scenario.playerNameCursorMarker, 0,
+                       sizeof(this->scenario.playerNameCursorMarker));
+                this->scenario.playerNameCursorMarker[this->scenario.playerNameCursor] = 28;
+                return copy_codes(this->scenario.playerNameCursorMarker, kPlayerNameCodeCount);
             }
             break;
 
         case 28:
-            if (field == 0) return format_number_with_suffix(game->scenario.bestScenarioScore, 0);
+            if (field == 0) return format_number_with_suffix(this->scenario.bestScenarioScore, 0);
             if (field >= 1 && field <= 13)
-                return format_number_with_suffix(game->scenario.scenarioScores[field - 1], 0);
+                return format_number_with_suffix(this->scenario.scenarioScores[field - 1], 0);
             if (field >= 20 && field <= 33)
-                return format_number_with_suffix(game->scenario.leaderboardScores[field - 20], 0);
+                return format_number_with_suffix(this->scenario.leaderboardScores[field - 20], 0);
             break;
 
         case 6:
-            return format_number_with_suffix(game->scenario.currentScenarioScore, 0);
+            return format_number_with_suffix(this->scenario.currentScenarioScore, 0);
     }
     return std::nullopt;
 }

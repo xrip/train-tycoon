@@ -255,7 +255,7 @@ PackedContentItem readContentItem(Game *game, PackedDialogReader& reader) {
             item.selectionBottom = reader.byte();
         }
         item.textCodes = item.hasDynamicValue
-            ? game_resolveDialogValue(game, game->renderer.currentSpriteId, item.valueId)
+            ? game->resolve_dialog_value(game->renderer.currentSpriteId, item.valueId)
             : std::optional<std::vector<int8_t>>(reader.text());
         return item;
     }

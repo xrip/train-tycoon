@@ -20,6 +20,7 @@
 #include "support/java_random.h"
 #include "support/resource_reader.h"
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -67,6 +68,8 @@ typedef struct Game {
     bool sync_high_scores(bool upload);
     void viewport_zoom_key();
     void compute_viewport_bounds(int32_t anchor_x, int32_t anchor_y);
+    std::optional<std::vector<int8_t>> resolve_dialog_value(int32_t screen,
+                                                            int32_t field);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
