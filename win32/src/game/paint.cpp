@@ -129,7 +129,7 @@ void Game::render(Surface& surface) {
             break;
         }
         case GameState::Playing: {
-            game_renderMap(game, g);
+            game->render_map(*g);
             if (game->ui.inputPending) {
                 int n13;
                 midp_set_color(g, 0);

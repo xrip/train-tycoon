@@ -342,7 +342,7 @@ void PackedDialogRender::setupFrame() {
     if (game->renderer.spriteJustChanged != 0) game->renderer.needsRepaint = false;
     if (game->renderer.mapRedrawPending) {
         game->ui.menuDirty = true;
-        game_renderMap(game, surface);
+        game->render_map(*surface);
         game->renderer.mapRedrawPending = false;
     }
     const PackedDialogHeader header = readDialogHeader(reader);

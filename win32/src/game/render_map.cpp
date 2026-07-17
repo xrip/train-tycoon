@@ -83,7 +83,9 @@ void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
 
 } // namespace
 
-void game_renderMap(Game *game, Surface *g) {
+void Game::render_map(Surface& surface) {
+    Game *game = this;
+    Surface *g = &surface;
     int n, n2, n3, n4, n5, n6;
     MapOrigin origin = getMapOrigin(game);
     int n9 = origin.x;

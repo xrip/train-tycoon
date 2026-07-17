@@ -71,6 +71,7 @@ typedef struct Game {
     void compute_viewport_bounds(int32_t anchor_x, int32_t anchor_y);
     std::optional<std::vector<int8_t>> resolve_dialog_value(int32_t screen,
                                                             int32_t field);
+    void render_map(Surface& surface);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
