@@ -5,7 +5,7 @@
 void game_enterOutOfMoneyState(Game *game) {
     game->ready = false;
     game->ui.transitionCode = 11;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void OfferBoard::add_progress(int32_t objective_type, int32_t amount) {
@@ -208,13 +208,13 @@ void game_pickTrainsAtCursor(Game *game) {
         game->build.junctionDirCursor = (int8_t)(track & 0x3F);
         game->ready = false;
         game->ui.transitionCode = 20;
-        game_setState(game, GameState::MenuOverlay);
+        game->set_state(GameState::MenuOverlay);
     }
     if ((track & 0xC0) == 192) {
         game->build.stationDirCursor = (int8_t)(track & 0x3F);
         game->ready = false;
         game->ui.transitionCode = 21;
-        game_setState(game, GameState::MenuOverlay);
+        game->set_state(GameState::MenuOverlay);
     }
     if (track != 65) return;
 
@@ -226,7 +226,7 @@ void game_pickTrainsAtCursor(Game *game) {
         if (game->serviceVehicleAtCursor != 5000) {
             game->ready = false;
             game->ui.transitionCode = 22;
-            game_setState(game, GameState::MenuOverlay);
+            game->set_state(GameState::MenuOverlay);
         }
         return;
     }
@@ -254,7 +254,7 @@ void game_pickTrainsAtCursor(Game *game) {
     game->build.currentTrainCostSnapshot = game->build.unitCost;
     game->ready = false;
     game->ui.transitionCode = 26;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
@@ -520,23 +520,23 @@ void game_openBuildMenu(Game *game) {
                     break;
                 case 2:
                     game->ready = false; game->ui.transitionCode = 30;
-                    game_setState(game, GameState::MenuOverlay); break;
+                    game->set_state(GameState::MenuOverlay); break;
                 case 3:
                     game->ready = false; game->ui.transitionCode = 31;
-                    game_setState(game, GameState::MenuOverlay); break;
+                    game->set_state(GameState::MenuOverlay); break;
                 case 4:
                     game_rebuildMenuTypeIndexes(game);
                     game->ready = false; game->ui.transitionCode = 60;
-                    game_setState(game, GameState::MenuOverlay); break;
+                    game->set_state(GameState::MenuOverlay); break;
                 case 5:
                     game->ready = false; game->ui.transitionCode = 17;
-                    game_setState(game, GameState::MenuOverlay); break;
+                    game->set_state(GameState::MenuOverlay); break;
                 case 8: game->ui.inputPending = true; break;
                 case 9:
                     game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
                     game->ui.useDefaultOverlaySelection = false;
                     game->ready = false; game->ui.transitionCode = 1;
-                    game_setState(game, GameState::MenuOverlay); break;
+                    game->set_state(GameState::MenuOverlay); break;
                 case 11: game->ui.pauseFlag = !game->ui.pauseFlag; break;
             }
             break;
@@ -640,7 +640,7 @@ void game_openBuildMenu(Game *game) {
                 game->pathfinder.targetX = game->ui.tileCursorX;
                 game->pathfinder.targetY = game->ui.tileCursorY;
                 game->world.terrain.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
-                game_setState(game, GameState::BuildingPath);
+                game->set_state(GameState::BuildingPath);
             } else if (item == 9) {
                 game->world.terrain.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
                 game->ui.buildMenuMode = 1;

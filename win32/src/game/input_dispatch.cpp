@@ -77,7 +77,7 @@ void Game::handle_key(int32_t n) {
                 if (n == 35) { game->ui.cycle_build_menu_index(true); game->ui.inputSubState = 7; game->ui.currentKey = n; }
                 if (n == 53) game_openBuildMenu(game);
                 if (n != 48 || game->gameState != GameState::Playing) break;
-                game_setState(game, GameState::BuildingMinimap);
+                game->set_state(GameState::BuildingMinimap);
                 break;
             }
             if (game->ui.inputSubState == 1) {
@@ -101,13 +101,13 @@ void Game::handle_key(int32_t n) {
             game->ui.keySubState = 40;
             if (n == 53) {
                 if (game->ui.confirmToggle == 0) {
-                    game_setState(game, GameState::Playing);
+                    game->set_state(GameState::Playing);
                     game->ui.buildMenuItemIndex = 0;
                     game->ui.menuDirty = true;
                 } else {
                     game->ready = false;
                     game->ui.transitionCode = 36;
-                    game_setState(game, GameState::MenuOverlay);
+                    game->set_state(GameState::MenuOverlay);
                 }
             }
             if (n != 42 && n != 35) break;

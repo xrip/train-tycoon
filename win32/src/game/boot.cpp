@@ -192,7 +192,8 @@ void game_setCanvasSize(Game *game, int32_t n, int32_t n2) {
     }
 }
 
-void game_setState(Game *game, int32_t n) {
+void Game::set_state(int32_t n) {
+    Game *game = this;
     game->savedGameState = game->gameState;
     if (!game->ready) game->assets.cycle_flag = NULL;
     game->ui.snapshotLoadedFlag = false;
@@ -274,7 +275,7 @@ void game_setState(Game *game, int32_t n) {
 void Game::start() {
     Game* game = this;
     game_persistSnapshotMode1(game);
-    game_setState(game, GameState::BootSplash0);
+    game->set_state(GameState::BootSplash0);
     // Display.setCurrent + Thread(this).start() are replaced by the host loop.
 }
 

@@ -100,10 +100,10 @@ void updateBootSplash(Game *game) {
     if (game->gameState == GameState::BootSplash1) {
         for (int i = 0; i < 6; ++i)
             game->assets.font_images[i] = game->assets.decode_png_from_sprite_stream();
-        game_setState(game, GameState::IntroReady);
+        game->set_state(GameState::IntroReady);
         return;
     }
-    game_setState(game, game->gameState + 1);
+    game->set_state(game->gameState + 1);
 }
 
 void updateIntroReady(Game *game) {
@@ -111,7 +111,7 @@ void updateIntroReady(Game *game) {
     game->ui.screenParam = 3;
     game->ui.transitionCode = 14;
     game_resetOverlayRenderState(game);
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void updateLoadingResources(Game *game) {
@@ -126,7 +126,7 @@ void updateLoadingResources(Game *game) {
     if (game->assets.spriteLoadCounter != game->scenario.scenarioResourceCount) return;
     game->ready = true;
     game->ui.transitionCode = 1;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void updateGeneratingMap(Game *game) {
@@ -141,7 +141,7 @@ void updateGeneratingMap(Game *game) {
     game->run_map_generation_step(1);
     if (game->world.mapGenTilesDone != game->world.totalTilesToGenerate) return;
     game->world.mapGenTilesDone = 0;
-    game_setState(game, GameState::Playing);
+    game->set_state(GameState::Playing);
 }
 
 void updatePlaying(Game *game) {
@@ -212,7 +212,7 @@ void buildMinimapOverview(Game *game) {
         }
         previousKind = -1;
     }
-    game_setState(game, GameState::MapOverview);
+    game->set_state(GameState::MapOverview);
 }
 
 void updateBuildingMinimap(Game *game) {
@@ -231,7 +231,7 @@ void updateBuildingPath(Game *game) {
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     if (game_tryBuildPath(game)) {
-        game_setState(game, GameState::Playing);
+        game->set_state(GameState::Playing);
         game->ui.buildMenuItemIndex = 0;
         game->build.buildCancelled = true;
         game->ui.buildMenuMode = 2;
@@ -244,7 +244,7 @@ void updateBuildingPath(Game *game) {
     game->ui.menuDirty = true;
     game->ready = false;
     game->ui.transitionCode = 12;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void updateSavingGame(Game *game) {
@@ -253,7 +253,7 @@ void updateSavingGame(Game *game) {
     game->saveCodec.save_all(*game);
     game->ui.buildMenuItemIndex = 0;
     game->ui.menuDirty = true;
-    game_setState(game, GameState::Playing);
+    game->set_state(GameState::Playing);
 }
 
 void updateLoadingGame(Game *game) {
@@ -263,7 +263,7 @@ void updateLoadingGame(Game *game) {
     game->ui.pauseFlag = false;
     game->ui.buildMenuItemIndex = 0;
     game->ui.menuDirty = true;
-    game_setState(game, GameState::Playing);
+    game->set_state(GameState::Playing);
 }
 
 void updateAiTurn(Game *game) {
@@ -271,13 +271,13 @@ void updateAiTurn(Game *game) {
     if (game->stateWorkStep != 2) return;
     if (game->build.nextTrackPieceCode - track::AI_PIECE_FIRST < game->scenario.difficultyCycle) {
         game->place_cities_and_industry();
-        game_setState(game, GameState::Playing);
+        game->set_state(GameState::Playing);
         return;
     }
     ++game->build.nextTrackPieceCode;
     if (game->build.nextTrackPieceCode == track::AI_PIECE_WRAP)
         game->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
-    game_setState(game, GameState::Playing);
+    game->set_state(GameState::Playing);
 }
 
 void updateHighScoreSync(Game *game) {
@@ -285,7 +285,7 @@ void updateHighScoreSync(Game *game) {
     if (game->stateWorkStep != 2) return;
     game->ui.transitionCode = game->sync_high_scores(game->scenario.highScoreUploadRequested)
                               ? 19 : 18;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 } // namespace

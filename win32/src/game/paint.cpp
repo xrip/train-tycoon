@@ -36,7 +36,7 @@ void paintMapOverview(Game *game, Surface *g) {
     if (game->confirmCloseRequested) {
         game->ready = false;
         game->ui.transitionCode = 36;
-        game_setState(game, GameState::MenuOverlay);
+        game->set_state(GameState::MenuOverlay);
         game->confirmCloseRequested = false;
     }
     if (game->ui.pendingTransitionCode <= -1) return;
@@ -44,7 +44,7 @@ void paintMapOverview(Game *game, Surface *g) {
     game_resetOverlayRenderState(game);
     game->ui.pendingTransitionCode = -1;
     game_renderPackedSprite(game, g, game->ui.transitionCode);
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 } // namespace
@@ -148,7 +148,7 @@ void Game::render(Surface& surface) {
                 game_resetOverlayRenderState(game);
                 game->ui.pendingTransitionCode = -1;
                 game_renderPackedSprite(game, g, game->ui.transitionCode);
-                game_setState(game, GameState::MenuOverlay);
+                game->set_state(GameState::MenuOverlay);
             }
             if (game->ui.transitionDebounce <= 0) break;
             game->ui.transitionDebounce = (int8_t)(game->ui.transitionDebounce - 1);
@@ -157,7 +157,7 @@ void Game::render(Surface& surface) {
             game_resetOverlayRenderState(game);
             game->ready = false;
             game_renderPackedSprite(game, g, game->ui.transitionCode);
-            game_setState(game, GameState::MenuOverlay);
+            game->set_state(GameState::MenuOverlay);
             break;
         }
         case GameState::BuildingMinimap:

@@ -82,7 +82,7 @@ void Game::apply_offer_effect(int32_t row) {
     copy_offer_to_summary(row);
     game->scenario.duplicateRowState = 3;
     game->ui.transitionCode = 9;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void Game::duplicate_offer(int32_t row) {
@@ -90,7 +90,7 @@ void Game::duplicate_offer(int32_t row) {
     copy_offer_to_summary(row);
     game->scenario.duplicateRowState = 4;
     game->ui.transitionCode = 8;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void Game::monthly_offer_tick() {
@@ -239,7 +239,7 @@ void Game::monthly_offer_tick() {
             game->ready = false;
             game->ui.transitionCode = 40;
             game->scenario.offerRowIndex = (int8_t)free_row;
-            game_setState(game, GameState::MenuOverlay);
+            game->set_state(GameState::MenuOverlay);
             ++game->scenario.offerGenerationCount;
         }
     }

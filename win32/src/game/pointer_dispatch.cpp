@@ -163,13 +163,13 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
                 else if (x >= 18 && x < 32) game->ui.confirmToggle = 1;
                 else return;
                 if (game->ui.confirmToggle == 0) {
-                    game_setState(game, GameState::Playing);
+                    game->set_state(GameState::Playing);
                     game->ui.buildMenuItemIndex = 0;
                     game->ui.menuDirty = true;
                 } else {
                     game->ready = false;
                     game->ui.transitionCode = 36;
-                    game_setState(game, GameState::MenuOverlay);
+                    game->set_state(GameState::MenuOverlay);
                 }
             }
             // Minimap pan-on-click is deferred with the screen->map inverse.

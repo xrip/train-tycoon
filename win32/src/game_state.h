@@ -74,6 +74,7 @@ typedef struct Game {
     void render_map(Surface& surface);
     void handle_key(int32_t key_code);
     void handle_dialog_input(int8_t direction);
+    void set_state(int32_t state);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

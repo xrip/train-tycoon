@@ -108,7 +108,7 @@ void Game::remove_train_from_map(int32_t n, bool bl) {
     game->renderer.lastViewportCenterX = -1;
     game->ready = false;
     game->ui.transitionCode = 16;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 void Game::merge_train_at(int32_t n) {
@@ -128,7 +128,7 @@ void Game::maybe_take_ai_turn() {
     Game* game = this;
     if (game->ui.buildMenuMode != 2 && game->ui.buildMenuMode != 4
         && game->rng.next_int() % game->scenario.aiFrequency > game->scenario.aiThreshold)
-        game_setState(game, GameState::AiTurn);
+        game->set_state(GameState::AiTurn);
 }
 
 void Game::upgrade_one_ai_train_for_era() {
@@ -410,7 +410,7 @@ void game_checkScenarioMilestone(Game *game) {
         game_persistSnapshotMode0(game);
         game->scenario.currentScenarioScore = game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
     }
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
 }
 
 int32_t game_scanMapForMetric(Game *game) {
@@ -516,12 +516,12 @@ void game_newYearNotify(Game *game) {
         if (game->ui.annualReportEnabled) {
             game->ready = false;
             game->ui.transitionCode = 35;
-            game_setState(game, GameState::MenuOverlay);
+            game->set_state(GameState::MenuOverlay);
         }
     } else if (game->ui.monthlyReportEnabled) {
         game->ready = false;
         game->ui.transitionCode = 32;
-        game_setState(game, GameState::MenuOverlay);
+        game->set_state(GameState::MenuOverlay);
     }
 }
 
@@ -798,7 +798,7 @@ void advanceYearIfNeeded(Game *game) {
         if (game->economy.money < 0) {
             game->ready = false;
             game->ui.transitionCode = 7;
-            game_setState(game, GameState::MenuOverlay);
+            game->set_state(GameState::MenuOverlay);
         }
     }
 }
@@ -820,7 +820,7 @@ void advanceEraIfNeeded(Game *game) {
     if (previousEra != game->scenario.currentEra) {
         game->ready = false;
         game->ui.transitionCode = 13;
-        game_setState(game, GameState::MenuOverlay);
+        game->set_state(GameState::MenuOverlay);
     }
 }
 

@@ -65,7 +65,7 @@ std::uint64_t map_digest(const Game* game) {
 
 void generate_scenario(Game* game, int scenario) {
     game->scenario.activeScenario = scenario;
-    game_setState(game, 25);
+    game->set_state(25);
     for (int step = 0; game->gameState == 25 && step < 200000; ++step) {
         game->update_state_machine();
     }
@@ -83,7 +83,7 @@ void load_game_resources(Game* game) {
     game->update_state_machine();
     REQUIRE(game->gameState == GameState::MenuOverlay);
 
-    game_setState(game, GameState::LoadingResources);
+    game->set_state(GameState::LoadingResources);
     for (int step = 0; game->gameState == GameState::LoadingResources && step < 1000; ++step) {
         game->update_state_machine();
     }
@@ -1316,13 +1316,13 @@ TEST_CASE("full: report and graph dialogs have fixed frame digests") {
 
     game->ready = false;
     game->ui.transitionCode = 32;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
     game->render(screen);
     CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
 
     game->ui.set_year_graph_mode(game->economy, 0, false);
     game->ui.transitionCode = 33;
-    game_setState(game, GameState::MenuOverlay);
+    game->set_state(GameState::MenuOverlay);
     game->render(screen);
     CHECK(paint_digest(game, &screen) == 1138514185145564824ULL);
     delete game;
