@@ -31,7 +31,6 @@ void game_renderFontString(Game *game, Surface* graphics, int32_t n, int32_t n2,
 void game_registerCityEntry(Game *game, int8_t by);
 void game_setSelectionStart(Game *game, int32_t n, int32_t n2);
 bool game_isAdjacentTileEmpty(Game *game, int32_t n, int32_t n2, int32_t n3, bool bl);
-void game_rebuildTerrainTiles(Game *game, bool bl);
 void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl);
 void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
 void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);

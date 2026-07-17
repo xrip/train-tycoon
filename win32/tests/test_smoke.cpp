@@ -725,6 +725,22 @@ TEST_CASE("fast: terrain commits the build edit buffer") {
     CHECK(world.terrain.heightMap[12][13] == 23);
 }
 
+TEST_CASE("fast: terrain rebuild makes a flat tile from equal heights") {
+    World world;
+    world.resize(6, 6);
+    BuildController build;
+    world.terrain.tileMap[2][3] = 11;
+    world.terrain.heightMap[2][3] = 2;
+    world.terrain.heightMap[2][4] = 2;
+    world.terrain.heightMap[3][3] = 2;
+    world.terrain.heightMap[3][4] = 2;
+
+    world.terrain.rebuild(build, false);
+
+    CHECK(world.terrain.tileMap[2][3] == 0);
+    CHECK(world.terrain.tileElevation[2][3] == 2);
+}
+
 TEST_CASE("fast: save buffer bytes and round trip") {
     Game* game = make_game();
     game->economy.money = 123456;
