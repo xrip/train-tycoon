@@ -13,7 +13,4 @@
 // the same space as viewportBaseX/Y (absolute map-pixel coords, not view-relative).
 // The keyboard zoom path passes viewportBase (screen centre); the pointer path
 // passes the mouse position translated into map space.
-std::vector<int8_t> format_number_with_suffix(int32_t value, int32_t suffix);
-std::vector<int8_t> encode_display_text(const char* text);
-
 #endif  // GAME_INTERNAL_H

@@ -5,6 +5,29 @@
 #include <stdio.h>
 #include <string.h>
 
+static std::vector<int8_t> format_number_with_suffix(int32_t value,
+                                                      int32_t suffix) {
+    char text[24];
+    snprintf(text, sizeof(text), "%d", value);
+    int length = (int)strlen(text);
+    std::vector<int8_t> result(static_cast<size_t>(length + 1));
+    for (int i = 0; i < length; ++i)
+        result[i] = text[i] == '-' ? 22 : (int8_t)(text[i] - 47);
+    result[length] = (int8_t)suffix;
+    return result;
+}
+
+static std::vector<int8_t> encode_display_text(const char *text) {
+    int length = (int)strlen(text);
+    std::vector<int8_t> result(static_cast<size_t>(length));
+    for (int i = 0; i < length; ++i) {
+        char ch = text[i];
+        result[i] = ch == '-' ? 22 : ch == '.' ? 11 : ch == '/' ? 20
+                    : ch == '%' ? 29 : (int8_t)(ch - 47);
+    }
+    return result;
+}
+
 static std::vector<int8_t> copy_codes(const std::vector<int8_t> &codes) {
     return codes;
 }

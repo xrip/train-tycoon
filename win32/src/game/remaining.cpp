@@ -1,31 +1,6 @@
 // Score, graph, text, and life-cycle functions.
 #include "game_internal.h"
 
-#include <stdio.h>
-#include <string.h>
-
-std::vector<int8_t> format_number_with_suffix(int32_t value, int32_t suffix) {
-    char text[24];
-    snprintf(text, sizeof(text), "%d", value);
-    int length = (int)strlen(text);
-    std::vector<int8_t> result(static_cast<size_t>(length + 1));
-    for (int i = 0; i < length; ++i)
-        result[i] = text[i] == '-' ? 22 : (int8_t)(text[i] - 47);
-    result[length] = (int8_t)suffix;
-    return result;
-}
-
-std::vector<int8_t> encode_display_text(const char *text) {
-    int length = (int)strlen(text);
-    std::vector<int8_t> result(static_cast<size_t>(length));
-    for (int i = 0; i < length; ++i) {
-        char ch = text[i];
-        result[i] = ch == '-' ? 22 : ch == '.' ? 11 : ch == '/' ? 20
-                    : ch == '%' ? 29 : (int8_t)(ch - 47);
-    }
-    return result;
-}
-
 void UiController::set_year_graph_mode(const Economy& economy, int32_t mode, bool alternate) {
     yearGraphMode = mode;
     yearGraphAlt = alternate;
