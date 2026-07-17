@@ -462,6 +462,58 @@ TEST_CASE("fast: train movement follows the fixed straight-track step") {
     CHECK(fleet.trainCars[head].cargoAge == 1);
 }
 
+TEST_CASE("full: renderer train drawing does not change domain state") {
+    Game game(std::make_unique<SilentMusicOutput>(), kFixedRandomSeed);
+    generate_scenario(&game, 0);
+    World& world = GameTestAccess::world(game);
+    Fleet& fleet = GameTestAccess::fleet(game);
+    Assets& assets = GameTestAccess::assets(game);
+    Renderer& renderer = GameTestAccess::renderer(game);
+    world.terrain.tileMap[2][2] = 70;
+    world.trackMap[2][2] = 65;
+    const int head = fleet.allocate_train_car(2, 2, 0, 0, 0, 8);
+    fleet.trainCars[head].phase = -1;
+    Surface screen;
+    midp_gfx_init_screen(&screen, framebuffer, kScreenWidth, kScreenHeight);
+    auto model_digest = [&world, &fleet]() {
+        StableDigest digest;
+        digest.add_i32(world.terrain.mapWidth);
+        digest.add_i32(world.terrain.mapHeight);
+        for (int x = 0; x < world.terrain.mapWidth; ++x) {
+            digest.add_bytes(world.terrain.tileMap[x].data(),
+                             static_cast<std::size_t>(world.terrain.mapHeight));
+            digest.add_bytes(world.trackMap[x].data(),
+                             static_cast<std::size_t>(world.terrain.mapHeight));
+            digest.add_bytes(world.terrain.tileElevation[x].data(),
+                             static_cast<std::size_t>(world.terrain.mapHeight));
+        }
+        for (const TrainCar& car : fleet.trainCars) {
+            digest.add_i32(car.x);
+            digest.add_i32(car.y);
+            digest.add_i32(car.direction);
+            digest.add_i32(car.phase);
+            digest.add_i32(car.flags);
+            digest.add_i32(car.nextCar);
+            digest.add_i32(car.stateCode);
+            digest.add_i32(car.revenue);
+        }
+        for (const ServiceSite& site : fleet.serviceSites) {
+            digest.add_i32(site.flags);
+            digest.add_i32(site.x);
+            digest.add_i32(site.y);
+            for (int stock : site.resourceStock) digest.add_i32(stock);
+            digest.add_i32(site.unloadFlags);
+            digest.add_i32(site.loadFlags);
+        }
+        return digest.value();
+    };
+    const std::uint64_t before = model_digest();
+
+    renderer.draw_train(screen, assets, world, fleet, head);
+
+    CHECK(model_digest() == before);
+}
+
 TEST_CASE("fast: fleet and world roll yearly revenue under their records") {
     Fleet fleet;
     fleet.trainCars[2].revenue = 123;
