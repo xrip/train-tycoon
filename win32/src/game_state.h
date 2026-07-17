@@ -171,6 +171,7 @@ typedef struct Game {
     void advance_game_day();
     void click_bottom_bar(int32_t x);
     void paint_map_overview(Surface& surface);
+    void redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

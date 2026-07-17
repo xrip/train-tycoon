@@ -4,22 +4,8 @@
 #include "game_internal.h"
 #include <vector>
 
-namespace {
-
-struct MapOrigin {
-    int x;
-    int y;
-};
-
-MapOrigin getMapOrigin(const Game *game) {
-    int x = game->renderer.camera.viewportCenterX - 2 * game->renderer.camera.viewportCenterY
-        + 16 + 2 * game->world.terrain.mapHalfWidth;
-    int y = game->renderer.camera.viewportCenterX + 2 * game->renderer.camera.viewportCenterY
-        - 16 - 2 * game->world.terrain.mapHalfWidth;
-    return {x / 32, y / 32};
-}
-
-void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
+void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
+    Game *game = this;
     if (game->renderer.camera.viewportCenterX == game->renderer.lastViewportCenterX
         && game->renderer.camera.viewportCenterY == game->renderer.viewportCenterYCached)
         return;
@@ -34,8 +20,8 @@ void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
     game->renderer.viewportX1 = -game->world.terrain.mapWidth;
     game->renderer.viewportY1 = -game->world.terrain.mapWidth;
     for (int drawIndex = 0; drawIndex < game->assets.numActiveTileAnimations; ++drawIndex) {
-        int mapX = origin.x + game->assets.tileOffsetX[drawIndex];
-        int mapY = origin.y + game->assets.tileOffsetY[drawIndex];
+        int mapX = origin_x + game->assets.tileOffsetX[drawIndex];
+        int mapY = origin_y + game->assets.tileOffsetY[drawIndex];
         if (mapX >= 0 && mapX < game->world.terrain.mapWidth && mapY >= 0 && mapY < game->world.terrain.mapHeight) {
             int tileCode = unsignedByte(game->world.terrain.tileMap[mapX][mapY]);
             if (tileCode >= 128) tileCode -= 128;
@@ -81,16 +67,17 @@ void redrawStaticMapIfNeeded(Game *game, const MapOrigin &origin) {
     midp_set_clip(backbuffer, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
 }
 
-} // namespace
-
 void Game::render_map(Surface& surface) {
     Game *game = this;
     Surface *g = &surface;
     int n, n2, n3, n4, n5, n6;
-    MapOrigin origin = getMapOrigin(game);
-    int n9 = origin.x;
-    int n10 = origin.y;
-    redrawStaticMapIfNeeded(game, origin);
+    int origin_x = game->renderer.camera.viewportCenterX - 2 * game->renderer.camera.viewportCenterY
+        + 16 + 2 * game->world.terrain.mapHalfWidth;
+    int origin_y = game->renderer.camera.viewportCenterX + 2 * game->renderer.camera.viewportCenterY
+        - 16 - 2 * game->world.terrain.mapHalfWidth;
+    int n9 = origin_x / 32;
+    int n10 = origin_y / 32;
+    game->redraw_static_map_if_needed(n9, n10);
     game->paint_main(*g);
     midp_draw_image(g, game->renderer.backbuffer.get(), 0, 0, 20);
     midp_set_clip(g, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
