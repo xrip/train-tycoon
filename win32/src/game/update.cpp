@@ -1,9 +1,8 @@
 #include "game_internal.h"
 #include "scenario_definition.h"
 
-namespace {
-
-void applyScenarioDefinition(Game *game, const ScenarioDefinition& definition) {
+void Game::apply_scenario_definition(const ScenarioDefinition& definition) {
+    Game *game = this;
     game->scenario.scenarioStep = definition.scenarioIndex;
     game->world.terrain.mapWidth = game->world.terrain.mapHeight = definition.mapSize;
     game->world.terrain.mapHalfWidth = (game->world.terrain.mapWidth - 1) * 8;
@@ -56,7 +55,8 @@ void applyScenarioDefinition(Game *game, const ScenarioDefinition& definition) {
     }
 }
 
-void beginMapGeneration(Game *game) {
+void Game::begin_map_generation() {
+    Game *game = this;
     game->saveCodec.walk(*game, save::OP_RESET_SKIP);
     game->economy.dayOfMonth = 1; game->economy.monthOfYear = 1; game->economy.year = 1950;
     game->scenario.milestonesEnabled = false; game->ui.pauseFlag = false; game->scenario.aiEnabled = false;
@@ -76,7 +76,7 @@ void beginMapGeneration(Game *game) {
             ScenarioDefinition definition;
             if (!readScenarioDefinition(resource, definition)) break;
             if (definition.scenarioIndex == game->scenario.activeScenario)
-                applyScenarioDefinition(game, definition);
+                game->apply_scenario_definition(definition);
         }
     }
     if (game->scenario.activeScenario <= 1) {
@@ -92,7 +92,8 @@ void beginMapGeneration(Game *game) {
     }
 }
 
-void updateBootSplash(Game *game) {
+void Game::update_boot_splash() {
+    Game *game = this;
     if (midp_current_time_millis() - game->loadingStartTime > 5000L)
         game->loadingTimeout = true;
     ++game->loadingAnimationFrame;
@@ -106,7 +107,8 @@ void updateBootSplash(Game *game) {
     game->set_state(game->gameState + 1);
 }
 
-void updateIntroReady(Game *game) {
+void Game::update_intro_ready() {
+    Game *game = this;
     game->ready = true;
     game->ui.screenParam = 3;
     game->ui.transitionCode = 14;
@@ -114,7 +116,8 @@ void updateIntroReady(Game *game) {
     game->set_state(GameState::MenuOverlay);
 }
 
-void updateLoadingResources(Game *game) {
+void Game::update_loading_resources() {
+    Game *game = this;
     game->assets.tile_sprites[game->assets.spriteLoadCounter] =
         game->assets.decode_png_from_sprite_stream();
     ++game->assets.spriteLoadCounter;
@@ -129,9 +132,10 @@ void updateLoadingResources(Game *game) {
     game->set_state(GameState::MenuOverlay);
 }
 
-void updateGeneratingMap(Game *game) {
+void Game::update_generating_map() {
+    Game *game = this;
     ++game->stateWorkStep;
-    if (game->stateWorkStep == 2) beginMapGeneration(game);
+    if (game->stateWorkStep == 2) game->begin_map_generation();
     if (game->stateWorkStep == 3) {
         game->ui.buildMenuItemIndex = 0;
         game->ui.buildMenuMode = 0;
@@ -144,11 +148,13 @@ void updateGeneratingMap(Game *game) {
     game->set_state(GameState::Playing);
 }
 
-void updatePlaying(Game *game) {
+void Game::update_playing() {
+    Game *game = this;
     game->simulation_tick();
 }
 
-void setMinimapColor(Game *game, int kind, int x, int y) {
+void Game::set_minimap_color(int kind, int x, int y) {
+    Game *game = this;
     Surface *surface = game->renderer.backbuffer_surface;
     switch (kind) {
         case 1:
@@ -175,7 +181,8 @@ void setMinimapColor(Game *game, int kind, int x, int y) {
     }
 }
 
-void buildMinimapOverview(Game *game) {
+void Game::build_minimap_overview() {
+    Game *game = this;
     const int size = game->world.terrain.mapHeight + game->world.terrain.mapWidth;
     game->renderer.backbuffer = Image::create_blank(size, size);
     game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
@@ -206,7 +213,7 @@ void buildMinimapOverview(Game *game) {
                 if (trackCode == track::PRESENT + 3) kind = 14;
                 if (trackCode == track::PRESENT + 4) kind = 15;
             }
-            if (kind != previousKind) setMinimapColor(game, kind, x, y);
+            if (kind != previousKind) game->set_minimap_color(kind, x, y);
             previousKind = kind;
             midp_draw_line(game->renderer.backbuffer_surface, drawX, drawY, drawX + 1, drawY);
         }
@@ -215,19 +222,22 @@ void buildMinimapOverview(Game *game) {
     game->set_state(GameState::MapOverview);
 }
 
-void updateBuildingMinimap(Game *game) {
+void Game::update_building_minimap() {
+    Game *game = this;
     if (game->stateWorkStep > 0) --game->stateWorkStep;
-    if (game->stateWorkStep == 2) buildMinimapOverview(game);
+    if (game->stateWorkStep == 2) game->build_minimap_overview();
 }
 
-void updateMapOverview(Game *game) {
+void Game::update_map_overview() {
+    Game *game = this;
     game->renderer.camera.pan(
         game->ui.lastKeyCode, game->world.terrain.mapScreenWidth,
         game->world.terrain.mapScreenHeight, game->renderer.canvasWidth,
         game->renderer.gameplayViewportHeight);
 }
 
-void updateBuildingPath(Game *game) {
+void Game::update_building_path() {
+    Game *game = this;
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     if (game->pathfinder.try_build_path(game->world, game->build,
@@ -248,7 +258,8 @@ void updateBuildingPath(Game *game) {
     game->set_state(GameState::MenuOverlay);
 }
 
-void updateSavingGame(Game *game) {
+void Game::update_saving_game() {
+    Game *game = this;
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     game->saveCodec.save_all(*game);
@@ -257,7 +268,8 @@ void updateSavingGame(Game *game) {
     game->set_state(GameState::Playing);
 }
 
-void updateLoadingGame(Game *game) {
+void Game::update_loading_game() {
+    Game *game = this;
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     game->saveCodec.restore_all(*game);
@@ -267,7 +279,8 @@ void updateLoadingGame(Game *game) {
     game->set_state(GameState::Playing);
 }
 
-void updateAiTurn(Game *game) {
+void Game::update_ai_turn() {
+    Game *game = this;
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     if (game->build.nextTrackPieceCode - track::AI_PIECE_FIRST < game->scenario.difficultyCycle) {
@@ -281,7 +294,8 @@ void updateAiTurn(Game *game) {
     game->set_state(GameState::Playing);
 }
 
-void updateHighScoreSync(Game *game) {
+void Game::update_high_score_sync() {
+    Game *game = this;
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
     game->ui.transitionCode = game->sync_high_scores(game->scenario.highScoreUploadRequested)
@@ -289,24 +303,22 @@ void updateHighScoreSync(Game *game) {
     game->set_state(GameState::MenuOverlay);
 }
 
-} // namespace
-
 void Game::update_state_machine() {
     Game* game = this;
     switch (game->gameState) {
         case GameState::BootSplash0:
         case GameState::BootSplash1:
-        case GameState::BootSplash2: updateBootSplash(game); break;
-        case GameState::IntroReady: updateIntroReady(game); break;
-        case GameState::LoadingResources: updateLoadingResources(game); break;
-        case GameState::GeneratingMap: updateGeneratingMap(game); break;
-        case GameState::Playing: updatePlaying(game); break;
-        case GameState::BuildingMinimap: updateBuildingMinimap(game); break;
-        case GameState::MapOverview: updateMapOverview(game); break;
-        case GameState::BuildingPath: updateBuildingPath(game); break;
-        case GameState::SavingGame: updateSavingGame(game); break;
-        case GameState::LoadingGame: updateLoadingGame(game); break;
-        case GameState::AiTurn: updateAiTurn(game); break;
-        case GameState::HighScoreSync: updateHighScoreSync(game); break;
+        case GameState::BootSplash2: game->update_boot_splash(); break;
+        case GameState::IntroReady: game->update_intro_ready(); break;
+        case GameState::LoadingResources: game->update_loading_resources(); break;
+        case GameState::GeneratingMap: game->update_generating_map(); break;
+        case GameState::Playing: game->update_playing(); break;
+        case GameState::BuildingMinimap: game->update_building_minimap(); break;
+        case GameState::MapOverview: game->update_map_overview(); break;
+        case GameState::BuildingPath: game->update_building_path(); break;
+        case GameState::SavingGame: game->update_saving_game(); break;
+        case GameState::LoadingGame: game->update_loading_game(); break;
+        case GameState::AiTurn: game->update_ai_turn(); break;
+        case GameState::HighScoreSync: game->update_high_score_sync(); break;
     }
 }

@@ -25,6 +25,8 @@
 #include <string_view>
 #include <vector>
 
+struct ScenarioDefinition;
+
 typedef struct Game {
     Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed);
 
@@ -136,6 +138,22 @@ typedef struct Game {
     void draw_build_menu_cursor(Surface& surface);
     void draw_build_menu_row(Surface& surface);
     void handle_build_menu_state(int32_t screen, int32_t option);
+    void apply_scenario_definition(const ScenarioDefinition& definition);
+    void begin_map_generation();
+    void update_boot_splash();
+    void update_intro_ready();
+    void update_loading_resources();
+    void update_generating_map();
+    void update_playing();
+    void set_minimap_color(int32_t kind, int32_t x, int32_t y);
+    void build_minimap_overview();
+    void update_building_minimap();
+    void update_map_overview();
+    void update_building_path();
+    void update_saving_game();
+    void update_loading_game();
+    void update_ai_turn();
+    void update_high_score_sync();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
