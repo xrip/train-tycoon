@@ -43,6 +43,7 @@ public:
 
     void commit_edit(const BuildController& build);
     void rebuild(BuildController& build, bool edit_only);
+    bool queue_change(int32_t x, int32_t y, bool visual_only);
 
     bool in_bounds(int32_t x, int32_t y) const {
         return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;

@@ -187,26 +187,31 @@ void game_queueTileChange(Game *game, int32_t n, int32_t n2,
             game->build.demolitionAffordable = false;
         }
     }
-    for (n3 = 49; n3 >= 0; --n3) {
-        if (game->world.terrain.tileQueue[n3].countdown != 0
-            && unsignedByte(game->world.terrain.tileQueue[n3].x) == n
-            && unsignedByte(game->world.terrain.tileQueue[n3].y) == n2)
-            bl3 = false;
-    }
     if (!bl3) return;
-    if (unsignedByte(game->world.terrain.tileMap[n][n2]) < 128)
-        game->world.terrain.tileMap[n][n2] = (int8_t)(game->world.terrain.tileMap[n][n2] + 128);
-    n3 = 0;
-    for (int i = 49; i >= 0; --i) {
-        if (game->world.terrain.tileQueue[i].countdown == 0) {
-            n3 = i;
+    game->world.terrain.queue_change(n, n2, bl2);
+}
+
+bool Terrain::queue_change(int32_t x, int32_t y, bool visual_only) {
+    for (int index = kTileQueueCount - 1; index >= 0; --index) {
+        if (tileQueue[index].countdown != 0
+            && unsignedByte(tileQueue[index].x) == x
+            && unsignedByte(tileQueue[index].y) == y)
+            return false;
+    }
+    if (unsignedByte(tileMap[x][y]) < 128)
+        tileMap[x][y] = (int8_t)(tileMap[x][y] + 128);
+    int slot = 0;
+    for (int index = kTileQueueCount - 1; index >= 0; --index) {
+        if (tileQueue[index].countdown == 0) {
+            slot = index;
             break;
         }
     }
-    game->world.terrain.tileQueue[n3].countdown = 14;
-    game->world.terrain.tileQueueVisualOnly[n3] = bl2;
-    game->world.terrain.tileQueue[n3].x = static_cast<int8_t>(n);
-    game->world.terrain.tileQueue[n3].y = static_cast<int8_t>(n2);
+    tileQueue[slot].countdown = 14;
+    tileQueueVisualOnly[slot] = visual_only;
+    tileQueue[slot].x = static_cast<int8_t>(x);
+    tileQueue[slot].y = static_cast<int8_t>(y);
+    return true;
 }
 
 void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3) {

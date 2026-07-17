@@ -741,6 +741,21 @@ TEST_CASE("fast: terrain rebuild makes a flat tile from equal heights") {
     CHECK(world.terrain.tileElevation[2][3] == 2);
 }
 
+TEST_CASE("fast: terrain queue keeps slot order and rejects a duplicate") {
+    Terrain terrain;
+    terrain.resize(6, 6);
+    terrain.tileMap[2][3] = 10;
+
+    CHECK(terrain.queue_change(2, 3, true));
+    CHECK_FALSE(terrain.queue_change(2, 3, false));
+    CHECK(unsignedByte(terrain.tileMap[2][3]) == 138);
+    CHECK(terrain.tileQueue[kTileQueueCount - 1].countdown == 14);
+    CHECK(terrain.tileQueue[kTileQueueCount - 1].x == 2);
+    CHECK(terrain.tileQueue[kTileQueueCount - 1].y == 3);
+    CHECK(terrain.tileQueueVisualOnly[kTileQueueCount - 1]);
+    CHECK(terrain.tileQueue[kTileQueueCount - 2].countdown == 0);
+}
+
 TEST_CASE("fast: save buffer bytes and round trip") {
     Game* game = make_game();
     game->economy.money = 123456;
