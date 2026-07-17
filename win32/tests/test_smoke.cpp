@@ -1268,13 +1268,13 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(first_frame.value() == 13699798000239068498ULL);
 
-    const int old_viewport_x = game->renderer.viewportCenterX;
+    const int old_viewport_x = game->renderer.camera.viewportCenterX;
     game->key_pressed(54);
     game->advance_frame();
     game->render(screen);
     CHECK(game->gameState == 30);
     CHECK(game->renderer.backbuffer != nullptr);
-    CHECK(game->renderer.viewportCenterX != old_viewport_x);
+    CHECK(game->renderer.camera.viewportCenterX != old_viewport_x);
     StableDigest moved_frame;
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
     CHECK(moved_frame.value() == 2749731419861486662ULL);
@@ -1412,9 +1412,9 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     // Round-trip: the resolved tile's screen centre (the flat iso forward
     // transform the resolver mirrors) must sit within one tile of the hover.
     const int tile_screen_x =
-        ty * 16 + tx * 16 + 16 - game->renderer.viewportCenterX;
+        ty * 16 + tx * 16 + 16 - game->renderer.camera.viewportCenterX;
     const int tile_screen_y =
-        game->world.terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - game->renderer.viewportCenterY;
+        game->world.terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - game->renderer.camera.viewportCenterY;
     const int dx = tile_screen_x - hover_x;
     const int dy = tile_screen_y - hover_y;
     CHECK(dx >= -16);
@@ -1441,32 +1441,32 @@ TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
 
     const int mid_x = kScreenWidth / 2;
     const int mid_y = (15 + bottomBarY) / 2;
-    const int cx0 = game->renderer.viewportCenterX;
-    const int cy0 = game->renderer.viewportCenterY;
-    const int msx0 = game->renderer.mapScaleX;
-    const int msy0 = game->renderer.mapScaleY;
+    const int cx0 = game->renderer.camera.viewportCenterX;
+    const int cy0 = game->renderer.camera.viewportCenterY;
+    const int msx0 = game->renderer.camera.mapScaleX;
+    const int msy0 = game->renderer.camera.mapScaleY;
 
     // Middle of the viewport never arms a pan.
     game->pointer_edge_scroll(mid_x, mid_y);
-    CHECK(game->renderer.viewportCenterX == cx0);
-    CHECK(game->renderer.viewportCenterY == cy0);
+    CHECK(game->renderer.camera.viewportCenterX == cx0);
+    CHECK(game->renderer.camera.viewportCenterY == cy0);
 
     // Right edge pans right; mapScale (= 2*viewportBase) moves 2x the camera
     // delta so the run loop's camera-follow sees an unchanged cursor offset and
     // doesn't fight the pan. A cardinal edge only moves one axis.
     game->pointer_edge_scroll(kScreenWidth - 1, mid_y);
-    const int right_dx = game->renderer.viewportCenterX - cx0;
+    const int right_dx = game->renderer.camera.viewportCenterX - cx0;
     CHECK(right_dx > 0);
-    CHECK(game->renderer.mapScaleX - msx0 == 2 * right_dx);
-    CHECK(game->renderer.viewportCenterY == cy0);
+    CHECK(game->renderer.camera.mapScaleX - msx0 == 2 * right_dx);
+    CHECK(game->renderer.camera.viewportCenterY == cy0);
 
     // Top-right corner pans along both axes (right + up).
     game->pointer_edge_scroll(kScreenWidth - 1, 15);
-    const int dx = game->renderer.viewportCenterX - (cx0 + right_dx);
-    const int dy = game->renderer.viewportCenterY - cy0;
+    const int dx = game->renderer.camera.viewportCenterX - (cx0 + right_dx);
+    const int dy = game->renderer.camera.viewportCenterY - cy0;
     CHECK(dx > 0);
     CHECK(dy < 0);
-    CHECK(game->renderer.mapScaleY - msy0 == 2 * dy);
+    CHECK(game->renderer.camera.mapScaleY - msy0 == 2 * dy);
 
     delete game;
 }

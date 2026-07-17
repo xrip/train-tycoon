@@ -68,12 +68,12 @@ Game::Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed) {
     world.terrain.mapHalfWidth = (world.terrain.mapWidth - 1) * 8;
     world.terrain.mapScreenWidth = (world.terrain.mapWidth + world.terrain.mapHeight) * 16;
     world.terrain.mapScreenHeight = (world.terrain.mapWidth + world.terrain.mapHeight) * 8;
-    renderer.viewportHalfWidth = world.terrain.mapScreenWidth / 2;
-    renderer.viewportHalfHeight = world.terrain.mapScreenHeight / 2;
-    renderer.viewportBaseX = renderer.viewportHalfWidth;
-    renderer.viewportBaseY = renderer.viewportHalfHeight;
-    renderer.mapScaleX = renderer.viewportHalfWidth * 2;
-    renderer.mapScaleY = renderer.viewportHalfHeight * 2;
+    renderer.camera.viewportHalfWidth = world.terrain.mapScreenWidth / 2;
+    renderer.camera.viewportHalfHeight = world.terrain.mapScreenHeight / 2;
+    renderer.camera.viewportBaseX = renderer.camera.viewportHalfWidth;
+    renderer.camera.viewportBaseY = renderer.camera.viewportHalfHeight;
+    renderer.camera.mapScaleX = renderer.camera.viewportHalfWidth * 2;
+    renderer.camera.mapScaleY = renderer.camera.viewportHalfHeight * 2;
     memcpy(fleet.forwardTrackSteps, kForwardTrackSteps, sizeof(kForwardTrackSteps));
     memcpy(fleet.reverseTrackSteps, kReverseTrackSteps, sizeof(kReverseTrackSteps));
     memcpy(assets.trainSpriteDirectionTable, kTrainSpriteDirections,

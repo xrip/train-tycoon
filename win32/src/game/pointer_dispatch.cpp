@@ -66,8 +66,8 @@ void Game::pointer_moved(int32_t x, int32_t y) {
     game->ui.mouseOverField = false;
     if (game->gameState != GameState::Playing) return;
     if (y < 15 || y >= bottomBarY) return;  // top status strip / bottom bar = UI chrome
-    int32_t anchor_x = x + game->renderer.viewportCenterX;
-    int32_t anchor_y = y + game->renderer.viewportCenterY;
+    int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
+    int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
     game_computeViewportBounds(game, anchor_x, anchor_y);
     game->ui.mouseOverField = !game->ui.blockBuildMenu;
 }
@@ -102,10 +102,10 @@ void Game::pointer_edge_scroll(int32_t x, int32_t y) {
     else if (y >= bottom) dy = step;
     if (dx == 0 && dy == 0) return;
 
-    game->renderer.viewportCenterX += dx;
-    game->renderer.viewportCenterY += dy;
-    game->renderer.mapScaleX += dx * 2;  // keep viewportBase (= mapScale/2) locked to the camera
-    game->renderer.mapScaleY += dy * 2;
+    game->renderer.camera.viewportCenterX += dx;
+    game->renderer.camera.viewportCenterY += dy;
+    game->renderer.camera.mapScaleX += dx * 2;  // keep viewportBase (= mapScale/2) locked to the camera
+    game->renderer.camera.mapScaleY += dy * 2;
 }
 
 void Game::pointer_pressed(int32_t x, int32_t y) {
@@ -149,8 +149,8 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             // (game_pointerMoved usually already resolved the hover tile; recompute
             // so a click without a prior hover still lands on the right tile.)
             if (y >= 15) {
-                int32_t anchor_x = x + game->renderer.viewportCenterX;
-                int32_t anchor_y = y + game->renderer.viewportCenterY;
+                int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
+                int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
                 game_computeViewportBounds(game, anchor_x, anchor_y);
                 if (!game->ui.blockBuildMenu) game_openBuildMenu(game);
             }

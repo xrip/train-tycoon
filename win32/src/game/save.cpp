@@ -202,17 +202,17 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 
     IO_INT(world.terrain.mapWidth);
     IO_INT(world.terrain.mapHeight);
-    IO_INT(renderer.viewportCenterX);
-    IO_INT(renderer.viewportCenterY);
+    IO_INT(renderer.camera.viewportCenterX);
+    IO_INT(renderer.camera.viewportCenterY);
     IO_INT(economy.money);
     IO_INT(economy.dayOfMonth);
     IO_INT(economy.monthOfYear);
     IO_INT(economy.year);
     IO_INT(dayFrameCounter);
-    IO_INT(renderer.viewportBaseX);
-    IO_INT(renderer.viewportBaseY);
-    IO_INT(renderer.mapScaleX);
-    IO_INT(renderer.mapScaleY);
+    IO_INT(renderer.camera.viewportBaseX);
+    IO_INT(renderer.camera.viewportBaseY);
+    IO_INT(renderer.camera.mapScaleX);
+    IO_INT(renderer.camera.mapScaleY);
     IO_SHORTS(renderer.visibleTrains);
     IO_INT(renderer.visibleTrainCount);
     IO_INT(renderer.viewportX0);
@@ -423,8 +423,8 @@ void SaveCodec::restore_all(Game& game) {
     bytesCompressed = 0;
     walk(game, save::OP_LOAD_MAIN);
     game.world.resize(game.world.terrain.mapWidth, game.world.terrain.mapHeight);
-    game.renderer.viewportHalfWidth = game.world.terrain.mapScreenWidth / 2;
-    game.renderer.viewportHalfHeight = game.world.terrain.mapScreenHeight / 2;
+    game.renderer.camera.viewportHalfWidth = game.world.terrain.mapScreenWidth / 2;
+    game.renderer.camera.viewportHalfHeight = game.world.terrain.mapScreenHeight / 2;
     game_initBuildMenuForScenario(&game, -1);
     load_slot(1, save::MODE_READ);
     decompress();

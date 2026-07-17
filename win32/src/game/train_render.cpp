@@ -36,9 +36,9 @@ void game_drawSpriteSingle(Game *game, Surface *graphics,
     }
 
     int tile = unsignedByte(game->world.terrain.tileMap[tile_x][tile_y]);
-    int x = tile_y * 16 + tile_x * 16 + 16 - game->renderer.viewportCenterX;
+    int x = tile_y * 16 + tile_x * 16 + 16 - game->renderer.camera.viewportCenterX;
     int y = game->world.terrain.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
-            game->renderer.viewportCenterY - 4 * game->world.terrain.tileElevation[tile_x][tile_y] + 15;
+            game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[tile_x][tile_y] + 15;
     int phase = game->fleet.trainCars[train].phase;
     if (phase < 0) return;
 

@@ -32,115 +32,115 @@ void game_cycleBuildMenuIndex(Game *game, bool forward) {
 
 void game_viewportPanKey(Game *game) {
     int key = game->ui.lastKeyCode;
-    if (key == 56 || key == 6) game->renderer.viewportCenterY += 30;
-    if (key == 50 || key == 1) game->renderer.viewportCenterY -= 30;
-    if (key == 54 || key == 5) game->renderer.viewportCenterX += 60;
-    if (key == 52 || key == 2) game->renderer.viewportCenterX -= 60;
+    if (key == 56 || key == 6) game->renderer.camera.viewportCenterY += 30;
+    if (key == 50 || key == 1) game->renderer.camera.viewportCenterY -= 30;
+    if (key == 54 || key == 5) game->renderer.camera.viewportCenterX += 60;
+    if (key == 52 || key == 2) game->renderer.camera.viewportCenterX -= 60;
     if (key == 49) {
-        game->renderer.viewportCenterY -= 30;
-        game->renderer.viewportCenterX -= 60;
+        game->renderer.camera.viewportCenterY -= 30;
+        game->renderer.camera.viewportCenterX -= 60;
     }
     if (key == 51) {
-        game->renderer.viewportCenterY -= 30;
-        game->renderer.viewportCenterX += 60;
+        game->renderer.camera.viewportCenterY -= 30;
+        game->renderer.camera.viewportCenterX += 60;
     }
     if (key == 55) {
-        game->renderer.viewportCenterY += 30;
-        game->renderer.viewportCenterX -= 60;
+        game->renderer.camera.viewportCenterY += 30;
+        game->renderer.camera.viewportCenterX -= 60;
     }
     if (key == 57) {
-        game->renderer.viewportCenterY += 30;
-        game->renderer.viewportCenterX += 60;
+        game->renderer.camera.viewportCenterY += 30;
+        game->renderer.camera.viewportCenterX += 60;
     }
-    if (game->renderer.viewportCenterX < 0) game->renderer.viewportCenterX = 0;
-    if (game->renderer.viewportCenterY < 0) game->renderer.viewportCenterY = 0;
-    if (game->renderer.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth)
-        game->renderer.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
-    if (game->renderer.viewportCenterY > game->world.terrain.mapScreenHeight - gameplayViewportHeight)
-        game->renderer.viewportCenterY = game->world.terrain.mapScreenHeight - gameplayViewportHeight;
-    game->renderer.viewportBaseX = game->renderer.viewportCenterX + canvasWidth / 2;
-    game->renderer.viewportBaseY =
-        game->renderer.viewportCenterY + gameplayViewportHeight / 2;
-    game->renderer.mapScaleX = game->renderer.viewportBaseX * 2;
-    game->renderer.mapScaleY = game->renderer.viewportBaseY * 2;
+    if (game->renderer.camera.viewportCenterX < 0) game->renderer.camera.viewportCenterX = 0;
+    if (game->renderer.camera.viewportCenterY < 0) game->renderer.camera.viewportCenterY = 0;
+    if (game->renderer.camera.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth)
+        game->renderer.camera.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
+    if (game->renderer.camera.viewportCenterY > game->world.terrain.mapScreenHeight - gameplayViewportHeight)
+        game->renderer.camera.viewportCenterY = game->world.terrain.mapScreenHeight - gameplayViewportHeight;
+    game->renderer.camera.viewportBaseX = game->renderer.camera.viewportCenterX + canvasWidth / 2;
+    game->renderer.camera.viewportBaseY =
+        game->renderer.camera.viewportCenterY + gameplayViewportHeight / 2;
+    game->renderer.camera.mapScaleX = game->renderer.camera.viewportBaseX * 2;
+    game->renderer.camera.mapScaleY = game->renderer.camera.viewportBaseY * 2;
 }
 
 void game_viewportZoomKey(Game *game) {
     int step = game->ui.advance_key_repeat();
     int key = game->ui.lastKeyCode;
-    if (key == 56 || key == 6) game->renderer.mapScaleY += step * 2;
-    if (key == 50 || key == 1) game->renderer.mapScaleY -= step * 2;
-    if (key == 54 || key == 5) game->renderer.mapScaleX += step * 2;
-    if (key == 52 || key == 2) game->renderer.mapScaleX -= step * 2;
+    if (key == 56 || key == 6) game->renderer.camera.mapScaleY += step * 2;
+    if (key == 50 || key == 1) game->renderer.camera.mapScaleY -= step * 2;
+    if (key == 54 || key == 5) game->renderer.camera.mapScaleX += step * 2;
+    if (key == 52 || key == 2) game->renderer.camera.mapScaleX -= step * 2;
     if (key == 49) {
-        game->renderer.mapScaleY -= step;
-        game->renderer.mapScaleX -= step * 2;
+        game->renderer.camera.mapScaleY -= step;
+        game->renderer.camera.mapScaleX -= step * 2;
     }
     if (key == 51) {
-        game->renderer.mapScaleY -= step;
-        game->renderer.mapScaleX += step * 2;
+        game->renderer.camera.mapScaleY -= step;
+        game->renderer.camera.mapScaleX += step * 2;
     }
     if (key == 55) {
-        game->renderer.mapScaleY += step;
-        game->renderer.mapScaleX -= step * 2;
+        game->renderer.camera.mapScaleY += step;
+        game->renderer.camera.mapScaleX -= step * 2;
     }
     if (key == 57) {
-        game->renderer.mapScaleY += step;
-        game->renderer.mapScaleX += step * 2;
+        game->renderer.camera.mapScaleY += step;
+        game->renderer.camera.mapScaleX += step * 2;
     }
 
-    game->renderer.viewportBaseX = game->renderer.mapScaleX / 2;
-    game->renderer.viewportBaseY = game->renderer.mapScaleY / 2;
-    if (game->renderer.viewportBaseX > game->world.terrain.mapScreenWidth - 8)
-        game->renderer.viewportBaseX = game->world.terrain.mapScreenWidth - 8;
-    if (game->renderer.viewportBaseY > game->world.terrain.mapScreenHeight - 4)
-        game->renderer.viewportBaseY = game->world.terrain.mapScreenHeight - 4;
+    game->renderer.camera.viewportBaseX = game->renderer.camera.mapScaleX / 2;
+    game->renderer.camera.viewportBaseY = game->renderer.camera.mapScaleY / 2;
+    if (game->renderer.camera.viewportBaseX > game->world.terrain.mapScreenWidth - 8)
+        game->renderer.camera.viewportBaseX = game->world.terrain.mapScreenWidth - 8;
+    if (game->renderer.camera.viewportBaseY > game->world.terrain.mapScreenHeight - 4)
+        game->renderer.camera.viewportBaseY = game->world.terrain.mapScreenHeight - 4;
 
     bool moved_view = false;
-    if (game->renderer.viewportCenterX > 0
-        && game->renderer.viewportBaseX - game->renderer.viewportCenterX <= 10) {
+    if (game->renderer.camera.viewportCenterX > 0
+        && game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX <= 10) {
         moved_view = true;
-        game->renderer.viewportCenterX = game->renderer.viewportBaseX - 11;
+        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX - 11;
     }
-    if (game->renderer.viewportCenterY > 0
-        && game->renderer.viewportBaseY - game->renderer.viewportCenterY <= 10) {
+    if (game->renderer.camera.viewportCenterY > 0
+        && game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY <= 10) {
         moved_view = true;
-        game->renderer.viewportCenterY = game->renderer.viewportBaseY - 11;
+        game->renderer.camera.viewportCenterY = game->renderer.camera.viewportBaseY - 11;
     }
-    if (game->renderer.viewportBaseX - game->renderer.viewportCenterX >= canvasWidth - 20) {
+    if (game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX >= canvasWidth - 20) {
         moved_view = true;
-        game->renderer.viewportCenterX = game->renderer.viewportBaseX - canvasWidth + 21;
+        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX - canvasWidth + 21;
     }
-    if (game->renderer.viewportBaseY - game->renderer.viewportCenterY
+    if (game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY
         >= gameplayViewportHeight - 20) {
         moved_view = true;
-        game->renderer.viewportCenterY =
-            game->renderer.viewportBaseY - gameplayViewportHeight + 21;
+        game->renderer.camera.viewportCenterY =
+            game->renderer.camera.viewportBaseY - gameplayViewportHeight + 21;
     }
-    if (game->renderer.viewportBaseX < 0) game->renderer.viewportBaseX = 0;
-    if (game->renderer.viewportBaseY < 0) game->renderer.viewportBaseY = 0;
-    if (game->renderer.viewportCenterX < 0) {
-        game->renderer.viewportCenterX = 0;
+    if (game->renderer.camera.viewportBaseX < 0) game->renderer.camera.viewportBaseX = 0;
+    if (game->renderer.camera.viewportBaseY < 0) game->renderer.camera.viewportBaseY = 0;
+    if (game->renderer.camera.viewportCenterX < 0) {
+        game->renderer.camera.viewportCenterX = 0;
         moved_view = false;
     }
-    if (game->renderer.viewportCenterY < 0) {
-        game->renderer.viewportCenterY = 0;
+    if (game->renderer.camera.viewportCenterY < 0) {
+        game->renderer.camera.viewportCenterY = 0;
         moved_view = false;
     }
-    if (game->renderer.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth) {
-        game->renderer.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
+    if (game->renderer.camera.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth) {
+        game->renderer.camera.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
         moved_view = false;
     }
-    if (game->renderer.viewportCenterY
+    if (game->renderer.camera.viewportCenterY
         > game->world.terrain.mapScreenHeight - gameplayViewportHeight) {
-        game->renderer.viewportCenterY =
+        game->renderer.camera.viewportCenterY =
             game->world.terrain.mapScreenHeight - gameplayViewportHeight;
         moved_view = false;
     }
     if (moved_view) game->ui.keySubState = 80;
-    game_computeViewportBounds(game, game->renderer.viewportBaseX, game->renderer.viewportBaseY);
-    game->renderer.mapScaleX = game->renderer.viewportBaseX * 2;
-    game->renderer.mapScaleY = game->renderer.viewportBaseY * 2;
+    game_computeViewportBounds(game, game->renderer.camera.viewportBaseX, game->renderer.camera.viewportBaseY);
+    game->renderer.camera.mapScaleX = game->renderer.camera.viewportBaseX * 2;
+    game->renderer.camera.mapScaleY = game->renderer.camera.viewportBaseY * 2;
 }
 
 void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
@@ -213,12 +213,12 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
         ++game->build.swapMapX;
         ++game->build.swapMapY;
     }
-    tile_center_y -= game->renderer.viewportCenterY
+    tile_center_y -= game->renderer.camera.viewportCenterY
                      + 4 * game->world.terrain.heightMap[game->build.swapMapX][game->build.swapMapY];
-    game->ui.cursorScreenX = tile_center_x - game->renderer.viewportCenterX;
+    game->ui.cursorScreenX = tile_center_x - game->renderer.camera.viewportCenterX;
     game->ui.cursorScreenY = tile_center_y;
     for (int corner = 0; corner < 4; ++corner) {
-        game->build.selectionTileX[corner] -= game->renderer.viewportCenterX;
-        game->build.selectionTileY[corner] -= game->renderer.viewportCenterY;
+        game->build.selectionTileX[corner] -= game->renderer.camera.viewportCenterX;
+        game->build.selectionTileY[corner] -= game->renderer.camera.viewportCenterY;
     }
 }

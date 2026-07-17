@@ -181,8 +181,8 @@ void game_computeIsoCorners(Game *game, int32_t x, int32_t y,
     screen_y[3] = center_y - 4 * game->world.terrain.heightMap[x + 1][y + 1];
     if (viewport_relative) {
         for (int corner = 0; corner < 4; ++corner) {
-            screen_x[corner] -= game->renderer.viewportCenterX;
-            screen_y[corner] -= game->renderer.viewportCenterY;
+            screen_x[corner] -= game->renderer.camera.viewportCenterX;
+            screen_y[corner] -= game->renderer.camera.viewportCenterY;
         }
     }
 }
@@ -285,8 +285,8 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
 
 void game_drawBuildMenuRow(Game *game, Surface *graphics) {
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
-    int menu_x = game->renderer.viewportBaseX - game->renderer.viewportCenterX;
-    int menu_y = game->renderer.viewportBaseY - game->renderer.viewportCenterY;
+    int menu_x = game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX;
+    int menu_y = game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY;
     // The keyboard cursor is anchored at the screen centre (viewportBase); the
     // run loop re-anchors it there every tick. When the mouse drives the cursor,
     // game_pointerMoved has already resolved the hovered tile and written its
