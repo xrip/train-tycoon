@@ -720,6 +720,14 @@ TEST_CASE("fast: world place check reads terrain and track") {
     CHECK_FALSE(world.is_placeable_terrain(1, 1));
 }
 
+TEST_CASE("fast: world track tile placement changes both grids") {
+    World world;
+    world.resize(4, 4);
+    world.place_track_tile(1, 2, 53, 3);
+    CHECK(world.terrain.tileMap[1][2] == 53);
+    CHECK(static_cast<uint8_t>(world.trackMap[1][2]) == 0xC3);
+}
+
 TEST_CASE("fast: terrain commits the build edit buffer") {
     World world;
     world.resize(20, 20);

@@ -11,9 +11,10 @@ bool World::is_placeable_terrain(int32_t x, int32_t y) const {
            && trackMap[x][y] == 0;
 }
 
-void game_placeTrackTile(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4) {
-    game->world.terrain.tileMap[n][n2] = (int8_t)n3;
-    game->world.trackMap[n][n2] = (int8_t)(0xC0 | n4);
+void World::place_track_tile(int32_t x, int32_t y, int32_t tile_code,
+                             int32_t track_owner) {
+    terrain.tileMap[x][y] = (int8_t)tile_code;
+    trackMap[x][y] = (int8_t)(0xC0 | track_owner);
 }
 
 void game_clearBuildPathTile(Game *game, int32_t n, int32_t n2) {

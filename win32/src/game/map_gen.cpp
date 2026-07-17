@@ -332,73 +332,73 @@ void game_placeTerrainFeature(Game *game, int32_t n) {
     switch (n) {
         case 0:
             if (n5 == 2 && n4 == 2) {
-                game_placeTrackTile(game, n7, n6, 52, n3); game_placeTrackTile(game, n7, n6 + 1, 52, n3);
-                game_placeTrackTile(game, n7 + 1, n6, 51, n3); game_placeTrackTile(game, n7 + 1, n6 + 1, 50, n3);
+                game->world.place_track_tile(n7, n6, 52, n3); game->world.place_track_tile(n7, n6 + 1, 52, n3);
+                game->world.place_track_tile(n7 + 1, n6, 51, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 50, n3);
             }
             if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game_placeTrackTile(game, n7, n6, 52, n3); game_placeTrackTile(game, n7, n6 + 1, 52, n3);
-                game_placeTrackTile(game, n7 + 1, n6, 51, n3); game_placeTrackTile(game, n7 + 2, n6, 51, n3);
-                game_placeTrackTile(game, n7 + 1, n6 + 1, 50, n3); game_placeTrackTile(game, n7 + 2, n6 + 1, 50, n3);
+                game->world.place_track_tile(n7, n6, 52, n3); game->world.place_track_tile(n7, n6 + 1, 52, n3);
+                game->world.place_track_tile(n7 + 1, n6, 51, n3); game->world.place_track_tile(n7 + 2, n6, 51, n3);
+                game->world.place_track_tile(n7 + 1, n6 + 1, 50, n3); game->world.place_track_tile(n7 + 2, n6 + 1, 50, n3);
             }
             if (n5 != 2 || n4 != 3) break;
-            game_placeTrackTile(game, n7, n6, 52, n3); game_placeTrackTile(game, n7 + 1, n6, 52, n3);
-            game_placeTrackTile(game, n7, n6 + 1, 50, n3); game_placeTrackTile(game, n7 + 1, n6 + 1, 51, n3);
-            game_placeTrackTile(game, n7, n6 + 2, 50, n3); game_placeTrackTile(game, n7 + 1, n6 + 2, 51, n3);
+            game->world.place_track_tile(n7, n6, 52, n3); game->world.place_track_tile(n7 + 1, n6, 52, n3);
+            game->world.place_track_tile(n7, n6 + 1, 50, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 51, n3);
+            game->world.place_track_tile(n7, n6 + 2, 50, n3); game->world.place_track_tile(n7 + 1, n6 + 2, 51, n3);
             break;
         case 1:
             if (n5 == 2 && n4 == 2) {
-                game_placeTrackTile(game, n7, n6, 53, n3); game_placeTrackTile(game, n7, n6 + 1, 53, n3);
-                game_placeTrackTile(game, n7 + 1, n6, 55, n3); game_placeTrackTile(game, n7 + 1, n6 + 1, 54, n3);
+                game->world.place_track_tile(n7, n6, 53, n3); game->world.place_track_tile(n7, n6 + 1, 53, n3);
+                game->world.place_track_tile(n7 + 1, n6, 55, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 54, n3);
             }
             if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game_placeTrackTile(game, n7, n6, 53, n3); game_placeTrackTile(game, n7, n6 + 1, 53, n3);
-                game_placeTrackTile(game, n7 + 1, n6, 55, n3); game_placeTrackTile(game, n7 + 2, n6, 55, n3);
-                game_placeTrackTile(game, n7 + 1, n6 + 1, 54, n3); game_placeTrackTile(game, n7 + 2, n6 + 1, 54, n3);
+                game->world.place_track_tile(n7, n6, 53, n3); game->world.place_track_tile(n7, n6 + 1, 53, n3);
+                game->world.place_track_tile(n7 + 1, n6, 55, n3); game->world.place_track_tile(n7 + 2, n6, 55, n3);
+                game->world.place_track_tile(n7 + 1, n6 + 1, 54, n3); game->world.place_track_tile(n7 + 2, n6 + 1, 54, n3);
             }
             if (n5 != 2 || n4 != 3) break;
-            game_placeTrackTile(game, n7, n6, 53, n3); game_placeTrackTile(game, n7 + 1, n6, 53, n3);
-            game_placeTrackTile(game, n7, n6 + 1, 55, n3); game_placeTrackTile(game, n7 + 1, n6 + 1, 55, n3);
-            game_placeTrackTile(game, n7, n6 + 2, 54, n3); game_placeTrackTile(game, n7 + 1, n6 + 2, 54, n3);
+            game->world.place_track_tile(n7, n6, 53, n3); game->world.place_track_tile(n7 + 1, n6, 53, n3);
+            game->world.place_track_tile(n7, n6 + 1, 55, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 55, n3);
+            game->world.place_track_tile(n7, n6 + 2, 54, n3); game->world.place_track_tile(n7 + 1, n6 + 2, 54, n3);
             break;
         case 2:
             if (n5 != 2 || n4 != 2) break;
-            game_placeTrackTile(game, n7, n6, 57 + abs(nextRngInt(game) % 2), n3);
-            game_placeTrackTile(game, n7, n6 + 1, 56, n3);
-            game_placeTrackTile(game, n7 + 1, n6, 57 + abs(nextRngInt(game) % 2), n3);
-            game_placeTrackTile(game, n7 + 1, n6 + 1, 57 + abs(nextRngInt(game) % 2), n3);
+            game->world.place_track_tile(n7, n6, 57 + abs(nextRngInt(game) % 2), n3);
+            game->world.place_track_tile(n7, n6 + 1, 56, n3);
+            game->world.place_track_tile(n7 + 1, n6, 57 + abs(nextRngInt(game) % 2), n3);
+            game->world.place_track_tile(n7 + 1, n6 + 1, 57 + abs(nextRngInt(game) % 2), n3);
             break;
         case 3:
             for (n2 = n7; n2 < n7 + n5; ++n2)
                 for (int i = n6; i < n6 + n4; ++i)
-                    game_placeTrackTile(game, n2, i, 59 + abs(nextRngInt(game) % 3), n3);
+                    game->world.place_track_tile(n2, i, 59 + abs(nextRngInt(game) % 3), n3);
             break;
         case 4:
             if (n5 == 2 && n4 == 2) {
-                game_placeTrackTile(game, n7, n6, 62, n3); game_placeTrackTile(game, n7, n6 + 1, 62, n3);
-                game_placeTrackTile(game, n7 + 1, n6, 64, n3); game_placeTrackTile(game, n7 + 1, n6 + 1, 63, n3);
+                game->world.place_track_tile(n7, n6, 62, n3); game->world.place_track_tile(n7, n6 + 1, 62, n3);
+                game->world.place_track_tile(n7 + 1, n6, 64, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 63, n3);
             }
             if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game_placeTrackTile(game, n7, n6, 62, n3); game_placeTrackTile(game, n7, n6 + 1, 62, n3);
-                game_placeTrackTile(game, n7 + 1, n6, 64, n3); game_placeTrackTile(game, n7 + 2, n6, 64, n3);
-                game_placeTrackTile(game, n7 + 1, n6 + 1, 62, n3); game_placeTrackTile(game, n7 + 2, n6 + 1, 63, n3);
+                game->world.place_track_tile(n7, n6, 62, n3); game->world.place_track_tile(n7, n6 + 1, 62, n3);
+                game->world.place_track_tile(n7 + 1, n6, 64, n3); game->world.place_track_tile(n7 + 2, n6, 64, n3);
+                game->world.place_track_tile(n7 + 1, n6 + 1, 62, n3); game->world.place_track_tile(n7 + 2, n6 + 1, 63, n3);
             }
             if (n5 != 2 || n4 != 3) break;
-            game_placeTrackTile(game, n7, n6, 62, n3); game_placeTrackTile(game, n7 + 1, n6, 63, n3);
-            game_placeTrackTile(game, n7, n6 + 1, 62, n3); game_placeTrackTile(game, n7 + 1, n6 + 1, 64, n3);
-            game_placeTrackTile(game, n7, n6 + 2, 62, n3); game_placeTrackTile(game, n7 + 1, n6 + 2, 64, n3);
+            game->world.place_track_tile(n7, n6, 62, n3); game->world.place_track_tile(n7 + 1, n6, 63, n3);
+            game->world.place_track_tile(n7, n6 + 1, 62, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 64, n3);
+            game->world.place_track_tile(n7, n6 + 2, 62, n3); game->world.place_track_tile(n7 + 1, n6 + 2, 64, n3);
             break;
         case 5:
             if (n5 == 2 && n4 == 2) {
-                game_placeTrackTile(game, n7, n6, 65, n3); game_placeTrackTile(game, n7 + 1, n6, 66, n3);
-                game_placeTrackTile(game, n7, n6 + 1, 67, n3);
+                game->world.place_track_tile(n7, n6, 65, n3); game->world.place_track_tile(n7 + 1, n6, 66, n3);
+                game->world.place_track_tile(n7, n6 + 1, 67, n3);
             }
             if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game_placeTrackTile(game, n7, n6, 65, n3); game_placeTrackTile(game, n7 + 1, n6, 66, n3);
-                game_placeTrackTile(game, n7 + 2, n6, 67, n3); game_placeTrackTile(game, n7, n6 + 1, 68, n3);
+                game->world.place_track_tile(n7, n6, 65, n3); game->world.place_track_tile(n7 + 1, n6, 66, n3);
+                game->world.place_track_tile(n7 + 2, n6, 67, n3); game->world.place_track_tile(n7, n6 + 1, 68, n3);
             }
             if (n5 != 2 || n4 != 3) break;
-            game_placeTrackTile(game, n7, n6, 65, n3); game_placeTrackTile(game, n7, n6 + 1, 66, n3);
-            game_placeTrackTile(game, n7, n6 + 2, 67, n3); game_placeTrackTile(game, n7 + 1, n6, 68, n3);
+            game->world.place_track_tile(n7, n6, 65, n3); game->world.place_track_tile(n7, n6 + 1, 66, n3);
+            game->world.place_track_tile(n7, n6 + 2, 67, n3); game->world.place_track_tile(n7 + 1, n6, 68, n3);
             break;
     }
 }
