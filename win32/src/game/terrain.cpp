@@ -17,16 +17,6 @@ void World::place_track_tile(int32_t x, int32_t y, int32_t tile_code,
     trackMap[x][y] = (int8_t)(0xC0 | track_owner);
 }
 
-void game_clearBuildPathTile(Game *game, int32_t n, int32_t n2) {
-    if (n > 0 && n < game->world.terrain.mapWidth && n2 > 0 && n2 < game->world.terrain.mapHeight
-        && ((game->world.terrain.tileMap[n][n2] >= 7 && game->world.terrain.tileMap[n][n2] <= 10)
-            || (game->world.terrain.tileMap[n][n2] >= 21 && game->world.terrain.tileMap[n][n2] <= 24)
-            || game->world.terrain.tileMap[n][n2] == 70 || game->world.terrain.tileMap[n][n2] == 71)
-        && game->pathfinder.distanceGrid[n][n2] > 0) {
-        game->pathfinder.distanceGrid[n][n2] = 0;
-    }
-}
-
 bool game_isCurveTile(Game *game, int32_t n, int32_t n2) {
     int8_t by = game->world.terrain.tileMap[n][n2];
     if (by < 7 || by > 10) return false;

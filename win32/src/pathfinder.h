@@ -4,6 +4,8 @@
 #include "support/grid.h"
 #include <cstdint>
 
+struct World;
+
 // Pathfinder owns the breadth-first search scratch: a per-cell distance grid
 // filled from the goal, plus the back-walk cursor and tie-break counter. The
 // search result and tie-break order are unchanged from the legacy code.
@@ -23,6 +25,14 @@ struct Pathfinder {
     int32_t anchorY = 0;
     int32_t targetX = 0;
     int32_t targetY = 0;
+
+    int16_t distance_min(const World& world, int32_t x, int32_t y,
+                         int32_t current_min) const;
+    int32_t relax_cell(const World& world, int32_t x, int32_t y);
+    void flood_fill(const World& world);
+    bool find_step(const World& world, int32_t x, int32_t y,
+                   int32_t current_distance);
+    void clear_build_path_tile(const World& world, int32_t x, int32_t y);
 };
 
 #endif  // PATHFINDER_H

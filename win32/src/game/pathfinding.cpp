@@ -3,25 +3,25 @@
 
 #include <limits.h>
 
-int16_t game_pathDistanceMin(Game *game, int32_t x, int32_t y,
-                           int32_t current_min) {
+int16_t Pathfinder::distance_min(const World& world, int32_t x, int32_t y,
+                                 int32_t current_min) const {
     int16_t result = (int16_t)current_min;
-    if (x >= 0 && x < game->world.terrain.mapWidth && y >= 0 && y < game->world.terrain.mapHeight
-        && game->pathfinder.distanceGrid[x][y] >= 20
-        && game->pathfinder.distanceGrid[x][y] < result)
-        result = game->pathfinder.distanceGrid[x][y];
+    if (x >= 0 && x < world.terrain.mapWidth
+        && y >= 0 && y < world.terrain.mapHeight
+        && distanceGrid[x][y] >= 20 && distanceGrid[x][y] < result)
+        result = distanceGrid[x][y];
     return result;
 }
 
-int32_t game_relaxPathCell(Game *game, int32_t x, int32_t y) {
+int32_t Pathfinder::relax_cell(const World& world, int32_t x, int32_t y) {
     bool changed_or_blocked = false;
-    int16_t cell = game->pathfinder.distanceGrid[x][y];
+    int16_t cell = distanceGrid[x][y];
     if (cell > 0 && cell != 3 && cell != 7) {
         int previous = cell < 20 ? SHRT_MAX : cell;
-        int distance = game_pathDistanceMin(game, x - 1, y, previous);
-        distance = game_pathDistanceMin(game, x + 1, y, distance);
-        distance = game_pathDistanceMin(game, x, y - 1, distance);
-        distance = game_pathDistanceMin(game, x, y + 1, distance);
+        int distance = distance_min(world, x - 1, y, previous);
+        distance = distance_min(world, x + 1, y, distance);
+        distance = distance_min(world, x, y - 1, distance);
+        distance = distance_min(world, x, y + 1, distance);
         if (distance < previous) {
             distance = (int16_t)(distance + 1);
             if (cell == 2) {
@@ -29,61 +29,60 @@ int32_t game_relaxPathCell(Game *game, int32_t x, int32_t y) {
                 int step_y = 0;
                 int tunnel_x = x;
                 int tunnel_y = y;
-                if (game->world.terrain.tileMap[x][y] == 7) step_y = -1;
-                if (game->world.terrain.tileMap[x][y] == 8) step_x = -1;
-                if (game->world.terrain.tileMap[x][y] == 9) step_x = 1;
-                if (game->world.terrain.tileMap[x][y] == 10) step_y = 1;
+                if (world.terrain.tileMap[x][y] == 7) step_y = -1;
+                if (world.terrain.tileMap[x][y] == 8) step_x = -1;
+                if (world.terrain.tileMap[x][y] == 9) step_x = 1;
+                if (world.terrain.tileMap[x][y] == 10) step_y = 1;
                 if (step_x != 0 || step_y != 0) {
                     int tunnel_distance = distance;
                     do {
                         tunnel_distance = (int16_t)(tunnel_distance + 1);
                         tunnel_x += step_x;
                         tunnel_y += step_y;
-                    } while (game->pathfinder.distanceGrid[tunnel_x][tunnel_y] == 3);
-                    game->pathfinder.distanceGrid[tunnel_x][tunnel_y] =
-                        (int16_t)tunnel_distance;
+                    } while (distanceGrid[tunnel_x][tunnel_y] == 3);
+                    distanceGrid[tunnel_x][tunnel_y] = (int16_t)tunnel_distance;
                     changed_or_blocked = true;
                 }
             }
-            game->pathfinder.distanceGrid[x][y] = (int16_t)distance;
+            distanceGrid[x][y] = (int16_t)distance;
         }
     } else {
         changed_or_blocked = true;
     }
-    if (game->pathfinder.distanceGrid[game->pathfinder.targetX][game->pathfinder.targetY] >= 20) return 2;
+    if (distanceGrid[targetX][targetY] >= 20) return 2;
     return changed_or_blocked ? 0 : 1;
 }
 
-void game_floodFillPath(Game *game) {
+void Pathfinder::flood_fill(const World& world) {
     bool keep_searching = true;
     bool destination_found = false;
     for (int pass = 50;
          keep_searching && !destination_found && pass > 0; --pass) {
         keep_searching = false;
-        for (int x = game->pathfinder.anchorX; x >= 0; --x) {
-            for (int y = game->pathfinder.anchorY; y >= 0; --y) {
-                int result = game_relaxPathCell(game, x, y);
+        for (int x = anchorX; x >= 0; --x) {
+            for (int y = anchorY; y >= 0; --y) {
+                int result = relax_cell(world, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = game->pathfinder.anchorX; x < game->world.terrain.mapWidth; ++x) {
-            for (int y = game->pathfinder.anchorY; y < game->world.terrain.mapHeight; ++y) {
-                int result = game_relaxPathCell(game, x, y);
+        for (int x = anchorX; x < world.terrain.mapWidth; ++x) {
+            for (int y = anchorY; y < world.terrain.mapHeight; ++y) {
+                int result = relax_cell(world, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = game->pathfinder.anchorX; x >= 0; --x) {
-            for (int y = game->pathfinder.anchorY; y < game->world.terrain.mapHeight; ++y) {
-                int result = game_relaxPathCell(game, x, y);
+        for (int x = anchorX; x >= 0; --x) {
+            for (int y = anchorY; y < world.terrain.mapHeight; ++y) {
+                int result = relax_cell(world, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
         }
-        for (int x = game->pathfinder.anchorX; x < game->world.terrain.mapWidth; ++x) {
-            for (int y = game->pathfinder.anchorY; y >= 0; --y) {
-                int result = game_relaxPathCell(game, x, y);
+        for (int x = anchorX; x < world.terrain.mapWidth; ++x) {
+            for (int y = anchorY; y >= 0; --y) {
+                int result = relax_cell(world, x, y);
                 keep_searching |= result == 0;
                 destination_found |= result == 2;
             }
@@ -91,15 +90,29 @@ void game_floodFillPath(Game *game) {
     }
 }
 
-bool game_findPathStep(Game *game, int32_t x, int32_t y,
-                     int32_t current_distance) {
-    if (!game->world.in_bounds(x, y)
-        || game->pathfinder.distanceGrid[x][y] < 20
-        || game->pathfinder.distanceGrid[x][y] >= current_distance)
+bool Pathfinder::find_step(const World& world, int32_t x, int32_t y,
+                           int32_t current_distance) {
+    if (!world.in_bounds(x, y) || distanceGrid[x][y] < 20
+        || distanceGrid[x][y] >= current_distance)
         return false;
-    game->pathfinder.nextX = x;
-    game->pathfinder.nextY = y;
+    nextX = x;
+    nextY = y;
     return true;
+}
+
+void Pathfinder::clear_build_path_tile(const World& world, int32_t x,
+                                       int32_t y) {
+    if (x > 0 && x < world.terrain.mapWidth
+        && y > 0 && y < world.terrain.mapHeight
+        && ((world.terrain.tileMap[x][y] >= 7
+             && world.terrain.tileMap[x][y] <= 10)
+            || (world.terrain.tileMap[x][y] >= 21
+                && world.terrain.tileMap[x][y] <= 24)
+            || world.terrain.tileMap[x][y] == 70
+            || world.terrain.tileMap[x][y] == 71)
+        && distanceGrid[x][y] > 0) {
+        distanceGrid[x][y] = 0;
+    }
 }
 
 bool game_isTileMatchForPath(Game *game, bool connected,
@@ -135,12 +148,12 @@ void game_validatePathStep(Game *game) {
         game->pathfinder.nextY = y;
         int tile = game->world.terrain.tileMap[x][y];
         if (tile == 7 || tile == 10 || tile == 21 || tile == 23 || tile == 71) {
-            game_clearBuildPathTile(game, x - 1, y);
-            game_clearBuildPathTile(game, x + 1, y);
+            game->pathfinder.clear_build_path_tile(game->world, x - 1, y);
+            game->pathfinder.clear_build_path_tile(game->world, x + 1, y);
         }
         if (tile == 8 || tile == 9 || tile == 22 || tile == 24 || tile == 70) {
-            game_clearBuildPathTile(game, x, y - 1);
-            game_clearBuildPathTile(game, x, y + 1);
+            game->pathfinder.clear_build_path_tile(game->world, x, y - 1);
+            game->pathfinder.clear_build_path_tile(game->world, x, y + 1);
         }
         if (x == game->pathfinder.anchorX && y == game->pathfinder.anchorY) {
             walking = false;
@@ -148,15 +161,15 @@ void game_validatePathStep(Game *game) {
             int distance = game->pathfinder.distanceGrid[x][y];
             bool found;
             if (game->pathfinder.tieBreakCounter % 2 == 0) {
-                found = game_findPathStep(game, x + 1, y, distance)
-                        || game_findPathStep(game, x - 1, y, distance)
-                        || game_findPathStep(game, x, y + 1, distance)
-                        || game_findPathStep(game, x, y - 1, distance);
+                found = game->pathfinder.find_step(game->world, x + 1, y, distance)
+                        || game->pathfinder.find_step(game->world, x - 1, y, distance)
+                        || game->pathfinder.find_step(game->world, x, y + 1, distance)
+                        || game->pathfinder.find_step(game->world, x, y - 1, distance);
             } else {
-                found = game_findPathStep(game, x, y + 1, distance)
-                        || game_findPathStep(game, x, y - 1, distance)
-                        || game_findPathStep(game, x + 1, y, distance)
-                        || game_findPathStep(game, x - 1, y, distance);
+                found = game->pathfinder.find_step(game->world, x, y + 1, distance)
+                        || game->pathfinder.find_step(game->world, x, y - 1, distance)
+                        || game->pathfinder.find_step(game->world, x + 1, y, distance)
+                        || game->pathfinder.find_step(game->world, x - 1, y, distance);
             }
             if (!found) {
                 walking = false;
@@ -378,7 +391,7 @@ bool game_tryBuildPath(Game *game) {
     game->build.selectionCost = 0;
     game_clearPathDistanceGrid(game);
     game->pathfinder.distanceGrid[game->pathfinder.anchorX][game->pathfinder.anchorY] = 20;
-    game_floodFillPath(game);
+    game->pathfinder.flood_fill(game->world);
     if (game->pathfinder.distanceGrid[game->pathfinder.targetX][game->pathfinder.targetY] < 20) {
         game->pathfinder.distanceGrid.clear();
         return false;
