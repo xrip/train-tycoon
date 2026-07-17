@@ -382,6 +382,39 @@ TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
     delete game;
 }
 
+TEST_CASE("fast: fleet owns service resource collection and load checks") {
+    Fleet fleet;
+    ServiceSite& first = fleet.serviceSites[3];
+    first.flags = static_cast<int8_t>(0x82);
+    first.x = 10;
+    first.y = 10;
+    first.resourceStock[0] = 7;
+    first.loadFlags = 1;
+    ServiceSite& near = fleet.serviceSites[4];
+    near.flags = static_cast<int8_t>(0x82);
+    near.x = 12;
+    near.y = 11;
+    near.resourceStock[0] = 9;
+    ServiceSite& other_type = fleet.serviceSites[5];
+    other_type.flags = static_cast<int8_t>(0x83);
+    other_type.x = 11;
+    other_type.y = 10;
+    other_type.resourceStock[0] = 20;
+
+    CHECK(fleet.collect_nearby_service_resource(3, 0, 12) == 12);
+    CHECK(first.resourceStock[0] == 0);
+    CHECK(near.resourceStock[0] == 4);
+    CHECK(other_type.resourceStock[0] == 20);
+
+    fleet.trainCars[0].nextCar = 1;
+    fleet.trainCars[1].flags = static_cast<int8_t>(train_flag::USED_SLOT | 2);
+    fleet.trainCars[1].nextCar = -1;
+    fleet.trainCars[1].energyCargoOrRemovalTicks = 24;
+    CHECK(fleet.can_load_at_service_site(0, 3));
+    fleet.trainCars[1].energyCargoOrRemovalTicks = 25;
+    CHECK_FALSE(fleet.can_load_at_service_site(0, 3));
+}
+
 TEST_CASE("fast: city records keep defaults and save field positions") {
     Game* game = make_game();
     CHECK(game->world.cities[0].stationDirection == 0);
