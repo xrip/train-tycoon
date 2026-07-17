@@ -67,7 +67,7 @@ void game_chargeTrainRunningCosts(Game *game) {
         int n2 = unsignedByte(game->fleet.trainCars[i].x);
         int n = unsignedByte(game->fleet.trainCars[i].y);
         if (game->world.trackMap[n2][n] != 65) continue;
-        int n3 = game_countCarsInTrain(game, i) * 2;
+        int n3 = game->fleet.count_cars(i) * 2;
         if (train_flag::type(game->fleet.trainCars[i].flags) == 0) n3 += 3;
         else if (train_flag::type(game->fleet.trainCars[i].flags) == 1) n3 += 7;
         game->fleet.trainCars[i].revenue -= n3;
@@ -76,15 +76,8 @@ void game_chargeTrainRunningCosts(Game *game) {
     }
 }
 
-int32_t game_countCarsInTrain(Game *game, int32_t n) {
-    return n != -1 ? game_countCarsInTrain(game, game->fleet.trainCars[n].nextCar) + 1 : 0;
-}
-
-bool game_isTrainHeadCarAt(Game *game, int32_t n, int32_t n2, int32_t n3) {
-    if (n == -1) return false;
-    if (unsignedByte(game->fleet.trainCars[n].x) == n2 && unsignedByte(game->fleet.trainCars[n].y) == n3)
-        return true;
-    return game_isTrainHeadCarAt(game, game->fleet.trainCars[n].nextCar, n2, n3);
+int32_t Fleet::count_cars(int32_t car) const {
+    return car != -1 ? count_cars(trainCars[car].nextCar) + 1 : 0;
 }
 
 void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
@@ -106,7 +99,7 @@ void game_mergeTrainAt(Game *game, int32_t n) {
     for (int i = 0; i < 500; ++i) {
         if (n == i || !train_flag::isUsed(game->fleet.trainCars[i].flags)
             || !train_flag::isHead(game->fleet.trainCars[i].flags)
-            || !game_isTrainHeadCarAt(game, i, unsignedByte(game->fleet.trainCars[n].x),
+            || !game->fleet.has_car_at(i, unsignedByte(game->fleet.trainCars[n].x),
                                     unsignedByte(game->fleet.trainCars[n].y)))
             continue;
         game_removeTrainFromMap(game, i, true);

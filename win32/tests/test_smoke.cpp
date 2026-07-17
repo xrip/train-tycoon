@@ -498,6 +498,25 @@ TEST_CASE("fast: economy spending and money history are owned rules") {
     CHECK(economy.moneyHistory[2] == 5);
 }
 
+TEST_CASE("fast: fleet lookup and chain count use stable slots") {
+    Fleet fleet;
+    const int head = fleet.allocate_train_car(2, 3, 0, 1, 0, 7);
+    fleet.trainCars[1].flags = static_cast<int8_t>(train_flag::USED_SLOT | 3);
+    fleet.trainCars[1].x = 4;
+    fleet.trainCars[1].y = 3;
+    fleet.trainCars[1].nextCar = -1;
+    fleet.trainCars[head].nextCar = 1;
+    CHECK(fleet.count_cars(head) == 2);
+    CHECK(fleet.has_car_at(head, 4, 3));
+    CHECK(fleet.find_train_head_at(4, 3) == head);
+    CHECK(fleet.find_train_head_at(1, 1) == 5000);
+
+    const int site = fleet.allocate_service_site(1, 6, 7, true, true);
+    CHECK(fleet.find_service_site_at(6, 7) == site);
+    CHECK(fleet.find_service_site_at(5, 7) == site);
+    CHECK(fleet.find_service_site_at(6, 6) == 5000);
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);
@@ -548,9 +567,9 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
 
     // The freshly-bought engine must sit on the depot we selected, on player
     // track (65) so it can actually run -- not on the drifted screen-center tile.
-    int head = game_findTrainHeadAt(game, ax, ay);
+    int head = game->fleet.find_train_head_at(ax, ay);
     CHECK(head != 5000);
-    CHECK(game_findTrainHeadAt(game, bx, by) == 5000);
+    CHECK(game->fleet.find_train_head_at(bx, by) == 5000);
     if (head != 5000) {
         CHECK(static_cast<uint8_t>(game->world.trackMap[
             static_cast<uint8_t>(game->fleet.trainCars[head].x)][

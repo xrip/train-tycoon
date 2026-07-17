@@ -69,6 +69,10 @@ struct Fleet {
                                   bool horizontal, bool extended);
     int32_t allocate_train_car(int32_t x, int32_t y, int32_t engine_type,
                                int32_t era, int32_t direction, int32_t energy);
+    bool has_car_at(int32_t car, int32_t x, int32_t y) const;
+    int32_t find_train_head_at(int32_t x, int32_t y) const;
+    int32_t find_service_site_at(int32_t x, int32_t y) const;
+    int32_t count_cars(int32_t car) const;
 
     TrainCar trainCars[kTrainSlotCount]{};
 

@@ -13,19 +13,19 @@ void game_incrementRowValueType13(Game *game, int32_t amount) {
         if (game->offerBoard.offers[row].objectiveType == 13) game->offerBoard.offers[row].progress += amount;
 }
 
-bool game_isAnyTrainCarAt(Game *game, int32_t car, int32_t x, int32_t y) {
+bool Fleet::has_car_at(int32_t car, int32_t x, int32_t y) const {
     if (car == -1) return false;
-    if (unsignedByte(game->fleet.trainCars[car].x) == x
-        && unsignedByte(game->fleet.trainCars[car].y) == y)
+    if (unsignedByte(trainCars[car].x) == x
+        && unsignedByte(trainCars[car].y) == y)
         return true;
-    return game_isAnyTrainCarAt(game, game->fleet.trainCars[car].nextCar, x, y);
+    return has_car_at(trainCars[car].nextCar, x, y);
 }
 
-int32_t game_findTrainHeadAt(Game *game, int32_t x, int32_t y) {
+int32_t Fleet::find_train_head_at(int32_t x, int32_t y) const {
     for (int train = 0; train < 500; ++train) {
-        if (train_flag::isUsed(game->fleet.trainCars[train].flags)
-            && train_flag::isHead(game->fleet.trainCars[train].flags)
-            && game_isAnyTrainCarAt(game, train, x, y))
+        if (train_flag::isUsed(trainCars[train].flags)
+            && train_flag::isHead(trainCars[train].flags)
+            && has_car_at(train, x, y))
             return train;
     }
     return 5000;
@@ -166,7 +166,7 @@ void game_demolishAtCursor(Game *game) {
                 game_queueTileChange(game, cursor_x, y, true, false);
         }
     } else if (tile >= 87 && tile <= 90) {
-        int vehicle = game_findServiceVehicleAt(game, cursor_x, cursor_y);
+        int vehicle = game->fleet.find_service_site_at(cursor_x, cursor_y);
         if (vehicle != 5000) {
             int x = unsignedByte(game->fleet.serviceSites[vehicle].x);
             int y = unsignedByte(game->fleet.serviceSites[vehicle].y);
@@ -213,10 +213,10 @@ void game_pickTrainsAtCursor(Game *game) {
     if (track != 65) return;
 
     game->trainAtCursor =
-        game_findTrainHeadAt(game, game->ui.tileCursorX, game->ui.tileCursorY);
+        game->fleet.find_train_head_at(game->ui.tileCursorX, game->ui.tileCursorY);
     if (game->trainAtCursor == 5000) {
         game->serviceVehicleAtCursor =
-            game_findServiceVehicleAt(game, game->ui.tileCursorX, game->ui.tileCursorY);
+            game->fleet.find_service_site_at(game->ui.tileCursorX, game->ui.tileCursorY);
         if (game->serviceVehicleAtCursor != 5000) {
             game->ready = false;
             game->ui.transitionCode = 22;

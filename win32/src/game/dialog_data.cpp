@@ -140,7 +140,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                     game->fleet.trainCars[game->trainAtCursor].aiOverride == 0 ? 21 : 20]]);
             if (field <= 0 || field >= 6) break;
             int car = 0;
-            if (game_countCarsInTrain(game, game->trainAtCursor) > field) {
+            if (game->fleet.count_cars(game->trainAtCursor) > field) {
                 car = game->trainAtCursor;
                 for (int i = 0; i < field; ++i) car = game->fleet.trainCars[car].nextCar;
             }

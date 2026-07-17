@@ -46,13 +46,13 @@ bool game_isCityOrStationTile(Game *game, int32_t n, int32_t n2) {
         || ((game->world.terrain.tileMap[n][n2] == 87 || game->world.terrain.tileMap[n][n2] == 88
              || game->world.terrain.tileMap[n][n2] == 89 || game->world.terrain.tileMap[n][n2] == 90)
             && game->world.trackMap[n][n2] == 65)) {
-        int32_t n3 = game_findServiceVehicleAt(game, n, n2);
+        int32_t n3 = game->fleet.find_service_site_at(n, n2);
         for (int i = 0; i < 500; ++i) {
             if (!train_flag::isUsed(game->fleet.trainCars[i].flags)) continue;
             int32_t n4 = unsignedByte(game->fleet.trainCars[i].x);
             int32_t n5 = unsignedByte(game->fleet.trainCars[i].y);
             if (n == n4 && n2 == n5) return false;
-            if (n3 == 5000 || n3 != game_findServiceVehicleAt(game, n4, n5)) continue;
+            if (n3 == 5000 || n3 != game->fleet.find_service_site_at(n4, n5)) continue;
             return false;
         }
         return true;

@@ -84,7 +84,7 @@ Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
             }
         }
     }
-    if (contextCode == 26 && game_countCarsInTrain(game, game->trainAtCursor) > slotIndex) {
+    if (contextCode == 26 && game->fleet.count_cars(game->trainAtCursor) > slotIndex) {
         int carSlot = game->trainAtCursor;
         for (int i = 0; i < slotIndex; ++i) carSlot = game->fleet.trainCars[carSlot].nextCar;
         int carType = train_flag::type(game->fleet.trainCars[carSlot].flags);
