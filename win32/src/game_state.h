@@ -130,7 +130,6 @@ typedef struct Game {
     int32_t tile64AnimationFrame = 0;
     int32_t tile55AnimationPhase = 0;
     int32_t tile55AnimationFrame = 0;
-    int32_t graphColors[kGraphColorCount]{};  // 3 series x 3 colors for report graphs
     int32_t lastCanvasWidth = -1;   // last size passed to set_canvas_size
     int32_t lastCanvasHeight = -1;
     int32_t savedGameState = 0;  // game state stashed for return after an overlay

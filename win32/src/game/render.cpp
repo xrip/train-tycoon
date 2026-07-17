@@ -117,11 +117,11 @@ void game_drawTextBox(Game *game, Surface *surface, int32_t x, int32_t y,
     if ((alignment & 2) == 2) y -= 5;
     if ((alignment & 4) == 4) x -= textWidth + 6;
     if (alignment == 37) { x = 0; y = 15 + game->renderer.gameplayViewportHeight - 15; }
-    midp_set_color(surface, game->graphColors[3 * colorSet]);
+    midp_set_color(surface, game->renderer.graphColors[3 * colorSet]);
     midp_fill_rect(surface, x, y, textWidth + 5, 13);
-    midp_set_color(surface, game->graphColors[3 * colorSet + 1]);
+    midp_set_color(surface, game->renderer.graphColors[3 * colorSet + 1]);
     midp_draw_rect(surface, x, y, textWidth + 5, 13);
-    midp_set_color(surface, game->graphColors[3 * colorSet + 2]);
+    midp_set_color(surface, game->renderer.graphColors[3 * colorSet + 2]);
     midp_draw_rect(surface, x, y + 13, textWidth + 5, 0);
     midp_draw_rect(surface, x + textWidth + 5, y, 0, 13);
     game_renderFontString(game, surface, x + 4, y + 5, codes, false);

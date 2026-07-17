@@ -35,6 +35,7 @@ struct Renderer {
     int32_t canvasHeight = 1;
     int32_t gameplayViewportHeight = -29;
     int32_t bottomBarY = -14;
+    int32_t graphColors[kGraphColorCount]{};
     int32_t currentSpriteId = 0;
     int32_t lastRenderedSpriteId = -1;
     int32_t spriteJustChanged = 0;

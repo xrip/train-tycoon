@@ -82,7 +82,7 @@ Game::Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed) {
     rng.set_seed(random_seed);
     music.output = std::move(music_output);
     renderer.resize_canvas(1, 1);
-    memcpy(graphColors, kGraphColors, sizeof(kGraphColors));
+    memcpy(renderer.graphColors, kGraphColors, sizeof(kGraphColors));
     memcpy(assets.tileSpriteYOffsetByCode, kTileSpriteYOffsets,
            sizeof(kTileSpriteYOffsets));
 }

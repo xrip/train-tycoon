@@ -120,7 +120,7 @@ TEST_CASE("fast: game initialization restores all non-zero defaults") {
     CHECK(game->assets.trainSpriteDirectionTable[7][7] == 188);
     CHECK(game->scenario.offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
     CHECK(game->scenario.offerEffectSchedule[3][1] == -56);
-    CHECK(game->graphColors[8] == 51200);
+    CHECK(game->renderer.graphColors[8] == 51200);
     CHECK(game->assets.tileSpriteYOffsetByCode[24] == -4);
 
     delete game;
