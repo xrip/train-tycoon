@@ -195,7 +195,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     if (game->music.volumeLevel == 6) game->music.volumeLevel = 1;
                     game->set_music_volume(game->music.volumeLevel); goto hbms_end;
             }
-            game_persistSnapshotMode0(game);
+            game->persist_settings_snapshot();
             if (game->ready) { game->ui.transitionCode = 1; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 1; game->set_state(GameState::Playing); break;
         case 18:
@@ -319,7 +319,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 game->scenario.playerNameCodes[game->scenario.playerNameCursor] = game->assets.spriteCycleCursor;
             }
             if (n2 >= 0) break;
-            game_persistSnapshotMode0(game);
+            game->persist_settings_snapshot();
             if (game->ready) { game->ui.transitionCode = 28; game->reset_overlay_render_state(); break; }
             game->ui.pendingTransitionCode = 28; game->set_state(GameState::Playing); break;
     }

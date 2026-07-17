@@ -41,6 +41,6 @@ bool Economy::spend(int32_t amount) {
 
 void Game::update_ten_day_metric() {
     Game* game = this;
-    game->economy.yearCompanyValueHistory[0] = game_scanMapForMetric(game);
+    game->economy.yearCompanyValueHistory[0] = game->scan_map_metric();
     game->economy.altDecadeTotalCost[0] = game->economy.yearCompanyValueHistory[0];
 }
