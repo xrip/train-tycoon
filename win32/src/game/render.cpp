@@ -71,7 +71,8 @@ void Renderer::draw_font_string(Surface& surface_value, const Assets& assets,
 // slots = the offered wagon in wagonOptionSlots); contextCode 26 is the
 // slotIndex-th car of the train under the cursor. Returns NULL when the slot has
 // no sprite.
-Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
+Image *Game::wagon_car_sprite(int32_t contextCode, int32_t slotIndex) {
+    Game *game = this;
     if (contextCode == 23) {
         if (slotIndex == 0 && game->build.wagonType >= 0 && game->build.wagonType < 3)
             return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[136])].get();
@@ -171,34 +172,34 @@ namespace {
 
 class PackedDialogReader {
 public:
-    PackedDialogReader(Game *game, int offset)
-        : game_(game), offset_(offset) {}
+    PackedDialogReader(Assets& assets, int offset)
+        : assets_(assets), offset_(offset) {}
 
-    int byte() { return game_->assets.spriteData[offset_++]; }
+    int byte() { return assets_.spriteData[offset_++]; }
 
     int u16() {
-        const int low = unsignedByte(game_->assets.spriteData[offset_++]);
-        const int high = unsignedByte(game_->assets.spriteData[offset_++]);
+        const int low = unsignedByte(assets_.spriteData[offset_++]);
+        const int high = unsignedByte(assets_.spriteData[offset_++]);
         return low + 256 * high;
     }
 
     int rgb() {
-        const int red = unsignedByte(game_->assets.spriteData[offset_++]);
-        const int green = unsignedByte(game_->assets.spriteData[offset_++]);
-        const int blue = unsignedByte(game_->assets.spriteData[offset_++]);
+        const int red = unsignedByte(assets_.spriteData[offset_++]);
+        const int green = unsignedByte(assets_.spriteData[offset_++]);
+        const int blue = unsignedByte(assets_.spriteData[offset_++]);
         return 65536 * red + 256 * green + blue;
     }
 
     std::vector<int8_t> text() {
-        std::vector<int8_t> codes = game_->assets.read_packed_text_codes(offset_);
-        skip(1 + unsignedByte(game_->assets.spriteData[offset_]));
+        std::vector<int8_t> codes = assets_.read_packed_text_codes(offset_);
+        skip(1 + unsignedByte(assets_.spriteData[offset_]));
         return codes;
     }
 
     void skip(int count) { offset_ += count; }
 
 private:
-    Game *game_;
+    Assets& assets_;
     int offset_;
 };
 
@@ -244,7 +245,7 @@ struct PackedContentItem {
     std::optional<std::vector<int8_t>> textCodes;
 };
 
-PackedContentItem readContentItem(Game *game, PackedDialogReader& reader) {
+PackedContentItem readContentItem(Game& game, PackedDialogReader& reader) {
     PackedContentItem item{};
     item.flags = reader.byte();
     item.image = (item.flags & 0x80) != 0;
@@ -263,7 +264,7 @@ PackedContentItem readContentItem(Game *game, PackedDialogReader& reader) {
             item.selectionBottom = reader.byte();
         }
         item.textCodes = item.hasDynamicValue
-            ? game->resolve_dialog_value(game->renderer.currentSpriteId, item.valueId)
+            ? game.resolve_dialog_value(game.renderer.currentSpriteId, item.valueId)
             : std::optional<std::vector<int8_t>>(reader.text());
         return item;
     }
@@ -286,7 +287,7 @@ struct PackedDrawingCommand {
     int resourceId;
 };
 
-PackedDrawingCommand readDrawingCommand(Game *game, PackedDialogReader& reader) {
+PackedDrawingCommand readDrawingCommand(Game& game, PackedDialogReader& reader) {
     PackedDrawingCommand command{};
     command.flags = reader.byte();
     command.type = command.flags & 7;
@@ -296,17 +297,17 @@ PackedDrawingCommand readDrawingCommand(Game *game, PackedDialogReader& reader) 
     command.widthOrX2 = reader.u16();
     command.heightOrY2 = reader.u16();
     if ((command.flags & 8) != 0)
-        command.x = static_cast<int16_t>(game->ui.report_graph_value(
-            game->renderer.currentSpriteId, command.x));
+        command.x = static_cast<int16_t>(game.ui.report_graph_value(
+            game.renderer.currentSpriteId, command.x));
     if ((command.flags & 0x10) != 0)
-        command.y = static_cast<int16_t>(game->ui.report_graph_value(
-            game->renderer.currentSpriteId, command.y));
+        command.y = static_cast<int16_t>(game.ui.report_graph_value(
+            game.renderer.currentSpriteId, command.y));
     if ((command.flags & 0x20) != 0)
-        command.widthOrX2 = static_cast<int16_t>(game->ui.report_graph_value(
-            game->renderer.currentSpriteId, command.widthOrX2));
+        command.widthOrX2 = static_cast<int16_t>(game.ui.report_graph_value(
+            game.renderer.currentSpriteId, command.widthOrX2));
     if ((command.flags & 0x40) != 0)
-        command.heightOrY2 = static_cast<int16_t>(game->ui.report_graph_value(
-            game->renderer.currentSpriteId, command.heightOrY2));
+        command.heightOrY2 = static_cast<int16_t>(game.ui.report_graph_value(
+            game.renderer.currentSpriteId, command.heightOrY2));
     command.hasResourceCondition = (command.flags & 0x80) != 0;
     command.resourceId = command.hasResourceCondition ? reader.byte() : 0;
     return command;
@@ -314,9 +315,9 @@ PackedDrawingCommand readDrawingCommand(Game *game, PackedDialogReader& reader) 
 
 class PackedDialogRender {
 public:
-    PackedDialogRender(Game *gameValue, Surface *surfaceValue, int32_t spriteIdValue)
-        : game(gameValue), surface(surfaceValue), spriteId(spriteIdValue),
-          reader(gameValue, gameValue->assets.spriteOffsetTable[spriteIdValue]) {}
+    PackedDialogRender(Game& gameValue, Surface& surfaceValue, int32_t spriteIdValue)
+        : game(&gameValue), surface(&surfaceValue), spriteId(spriteIdValue),
+          reader(gameValue.assets, gameValue.assets.spriteOffsetTable[spriteIdValue]) {}
 
     void setupFrame();
     void renderContent();
@@ -432,7 +433,7 @@ void PackedDialogRender::renderContent() {
     const int contentItemCount = reader.byte();
     for (int itemIndex = 0; itemIndex < contentItemCount; ++itemIndex) {
         int itemY = dialogY + textContentY - game->ui.cursorScale;
-        const PackedContentItem item = readContentItem(game, reader);
+        const PackedContentItem item = readContentItem(*game, reader);
         const int itemFlags = item.flags;
         const int xOffset = item.xOffset;
         const int yOffset = item.yOffset;
@@ -509,7 +510,7 @@ void PackedDialogRender::renderContent() {
             textContentY += 11 + yOffset;
             continue;
         }
-        Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, item.slotIndex);
+        Image *image = game->wagon_car_sprite(game->renderer.currentSpriteId, item.slotIndex);
         if (image == NULL) continue;
         int imageHeight = image->height();
         if (hasResourceCondition
@@ -529,7 +530,7 @@ void PackedDialogRender::renderCommands() {
     const int drawingCommandCount = reader.byte();
     for (int commandIndex = 0; commandIndex < drawingCommandCount; ++commandIndex) {
         int commandBaseY = dialogY + drawingContentY - game->ui.cursorScale;
-        const PackedDrawingCommand command = readDrawingCommand(game, reader);
+        const PackedDrawingCommand command = readDrawingCommand(*game, reader);
         const int commandType = command.type;
         const int color = command.color;
         const int x = command.x;
@@ -587,7 +588,7 @@ void PackedDialogRender::finishFrame() {
 void Game::render_packed_sprite(Surface& surface_value, int32_t spriteId) {
     Game *game = this;
     Surface *surface = &surface_value;
-    PackedDialogRender render(game, surface, spriteId);
+    PackedDialogRender render(*game, *surface, spriteId);
     render.setupFrame();
     render.renderContent();
     render.renderCommands();

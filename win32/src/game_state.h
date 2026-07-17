@@ -172,6 +172,7 @@ typedef struct Game {
     void click_bottom_bar(int32_t x);
     void paint_map_overview(Surface& surface);
     void redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y);
+    Image* wagon_car_sprite(int32_t context_code, int32_t slot_index);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

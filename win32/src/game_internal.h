@@ -20,6 +20,5 @@ int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
 // passes the mouse position translated into map space.
 std::vector<int8_t> format_number_with_suffix(int32_t value, int32_t suffix);
 std::vector<int8_t> encode_display_text(const char* text);
-Image* game_wagonCarSprite(Game *game, int32_t n, int32_t n2);
 
 #endif  // GAME_INTERNAL_H
