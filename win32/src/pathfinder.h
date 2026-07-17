@@ -5,6 +5,8 @@
 #include <cstdint>
 
 struct World;
+struct BuildController;
+struct Economy;
 
 // Pathfinder owns the breadth-first search scratch: a per-cell distance grid
 // filled from the goal, plus the back-walk cursor and tie-break counter. The
@@ -33,6 +35,18 @@ struct Pathfinder {
     bool find_step(const World& world, int32_t x, int32_t y,
                    int32_t current_distance);
     void clear_build_path_tile(const World& world, int32_t x, int32_t y);
+    bool is_tile_match(const World& world, const BuildController& build,
+                       bool connected, int32_t x, int32_t y,
+                       int32_t tile_a, int32_t tile_b, int32_t tile_c,
+                       int32_t tile_d, int32_t tile_e, int32_t tile_f,
+                       int32_t tile_g, int32_t tile_h,
+                       bool high_owner) const;
+    void validate_step(World& world, BuildController& build,
+                       const Economy& economy);
+    void scan_track_tiles(const World& world, BuildController& build) const;
+    void clear_distance_grid(const World& world);
+    bool try_build_path(World& world, BuildController& build,
+                        const Economy& economy);
 };
 
 #endif  // PATHFINDER_H

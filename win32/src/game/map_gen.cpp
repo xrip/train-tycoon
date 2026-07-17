@@ -691,7 +691,8 @@ void Game::place_cities_and_industry() {
     game->pathfinder.anchorY = game->world.cityStationY;
     game->pathfinder.targetX = game->world.industryStationX;
     game->pathfinder.targetY = game->world.industryTileY;
-    if (!game_tryBuildPath(game)) return;
+    if (!game->pathfinder.try_build_path(game->world, game->build,
+                                         game->economy)) return;
     game->world.auto_extend_track_station(
         game->world.cityStationX, game->world.cityStationY,
         game->build.nextTrackPieceCode);

@@ -230,7 +230,8 @@ void updateMapOverview(Game *game) {
 void updateBuildingPath(Game *game) {
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
-    if (game_tryBuildPath(game)) {
+    if (game->pathfinder.try_build_path(game->world, game->build,
+                                        game->economy)) {
         game->set_state(GameState::Playing);
         game->ui.buildMenuItemIndex = 0;
         game->build.buildCancelled = true;

@@ -1005,7 +1005,8 @@ TEST_CASE("fast: small path search") {
     game->pathfinder.targetY = 2;
     game->economy.accel1 = 10;
 
-    CHECK(game_tryBuildPath(game));
+    CHECK(game->pathfinder.try_build_path(game->world, game->build,
+                                          game->economy));
     CHECK(game->build.trackTileCount > 0);
     CHECK(game->build.selectionCost > 0);
     delete game;
