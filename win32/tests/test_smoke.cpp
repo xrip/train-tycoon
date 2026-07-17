@@ -496,6 +496,17 @@ TEST_CASE("fast: world owns zone timers, population, and city growth") {
     CHECK(actual_random.next_int() == expected_random.next_int());
 }
 
+TEST_CASE("fast: world recounts unique city zone tiles") {
+    World world;
+    world.resize(8, 8);
+    world.trackMap[2][2] = static_cast<int8_t>(0xC0 | 3);
+    world.trackMap[3][2] = static_cast<int8_t>(0xC0 | 3);
+    world.terrain.tileMap[2][3] = 87;
+    world.terrain.tileMap[3][3] = 88;
+    world.recount_city_zone_tiles();
+    CHECK(world.cities[3].zoneTileCount == 2);
+}
+
 TEST_CASE("fast: offer records keep defaults and save field positions") {
     Game* game = make_game();
     CHECK(game->offerBoard.offers[0].objectiveType == 0);

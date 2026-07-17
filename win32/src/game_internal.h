@@ -72,7 +72,6 @@ int8_t game_registerTrain(Game *game, int8_t by, int32_t n, int32_t n2);
 void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3);
 bool game_pickValidForestTile(Game *game);
 int8_t game_addCityEntry(Game *game, int32_t n);
-void game_rebuildCityList(Game *game);
 std::vector<int8_t> game_formatCurrency(int32_t value);
 std::vector<int8_t> game_formatNumberWithSuffix(int32_t value, int32_t suffix);
 std::vector<int8_t> game_encodeDisplayText(const char* text);

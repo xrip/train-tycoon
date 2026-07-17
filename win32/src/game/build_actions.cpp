@@ -80,14 +80,14 @@ void BuildController::compute_train_cost(const Economy& economy,
     }
 }
 
-void game_rebuildCityList(Game *game) {
-    for (int city = 0; city < 48; ++city) game->world.cities[city].zoneTileCount = 0;
-    const int seen_count = 64 * game->world.terrain.mapWidth * game->world.terrain.mapHeight;
+void World::recount_city_zone_tiles() {
+    for (City& city : cities) city.zoneTileCount = 0;
+    const int seen_count = 64 * terrain.mapWidth * terrain.mapHeight;
     std::vector<uint8_t> seen_city_tiles(
         static_cast<std::size_t>(seen_count));
-    for (int station_x = 0; station_x < game->world.terrain.mapWidth; ++station_x) {
-        for (int station_y = 0; station_y < game->world.terrain.mapHeight; ++station_y) {
-            int track = game->world.trackMap[station_x][station_y];
+    for (int station_x = 0; station_x < terrain.mapWidth; ++station_x) {
+        for (int station_y = 0; station_y < terrain.mapHeight; ++station_y) {
+            int track = trackMap[station_x][station_y];
             if ((track & 0xC0) != 192) continue;
             int city = track & 0x3F;
             int min_x = station_x - 3;
@@ -96,16 +96,18 @@ void game_rebuildCityList(Game *game) {
             int max_y = station_y + 3;
             if (min_x < 0) min_x = 0;
             if (min_y < 0) min_y = 0;
-            if (max_x >= game->world.terrain.mapWidth) max_x = game->world.terrain.mapWidth - 1;
-            if (max_y >= game->world.terrain.mapHeight) max_y = game->world.terrain.mapHeight - 1;
+            if (max_x >= terrain.mapWidth) max_x = terrain.mapWidth - 1;
+            if (max_y >= terrain.mapHeight) max_y = terrain.mapHeight - 1;
             for (int x = min_x; x <= max_x; ++x) {
                 for (int y = min_y; y <= max_y; ++y) {
-                    if (game->world.terrain.tileMap[x][y] != 87 && game->world.terrain.tileMap[x][y] != 88)
+                    if (terrain.tileMap[x][y] != 87 && terrain.tileMap[x][y] != 88)
                         continue;
-                    int seen_index = (city * game->world.terrain.mapWidth + x) * game->world.terrain.mapHeight + y;
+                    int seen_index = (city * terrain.mapWidth + x)
+                                     * terrain.mapHeight + y;
                     if (seen_city_tiles[seen_index]) continue;
                     seen_city_tiles[seen_index] = 1;
-                    game->world.cities[city].zoneTileCount = (int8_t)(game->world.cities[city].zoneTileCount + 1);
+                    cities[city].zoneTileCount =
+                        (int8_t)(cities[city].zoneTileCount + 1);
                 }
             }
         }
@@ -317,7 +319,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             break;
     }
     game_tickInputOrAi(game, true);
-    game_rebuildCityList(game);
+    game->world.recount_city_zone_tiles();
 }
 
 void game_computeTrackBuild(Game *game, int32_t start_x,

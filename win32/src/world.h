@@ -88,6 +88,7 @@ struct World {
     void recount_zone_population();
     void update_city_population(JavaRandom& random);
     void roll_station_revenue_year();
+    void recount_city_zone_tiles();
 };
 
 #endif  // WORLD_H
