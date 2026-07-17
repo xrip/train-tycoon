@@ -32,14 +32,14 @@ int32_t game_findServiceVehicleAt(Game *game, int32_t x, int32_t y) {
 int32_t game_spawnTrainCar(Game *game, int32_t previous_car, int32_t car_type) {
     int new_car = 500;
     for (int car = 0; car < 500; ++car) {
-        if ((game->fleet.trainFlags[car] & 0x80) == 0) {
+        if (!train_flag::isUsed(game->fleet.trainFlags[car])) {
             new_car = car;
             break;
         }
     }
     if (new_car != 500) {
         game->fleet.nextCar[previous_car] = (int16_t)new_car;
-        game->fleet.trainFlags[new_car] = (int8_t)(0x80 | car_type);
+        game->fleet.trainFlags[new_car] = static_cast<int8_t>(train_flag::USED_SLOT | car_type);
         game->fleet.nextCar[new_car] = -1;
         game->fleet.trainX[new_car] = game->fleet.trainX[previous_car];
         game->fleet.trainY[new_car] = game->fleet.trainY[previous_car];
@@ -89,8 +89,8 @@ bool game_trainCanLoadAtServiceVehicle(Game *game, int32_t head,
                                      int32_t vehicle) {
     int car = game->fleet.nextCar[head];
     if (car == -1) return false;
-    if ((game->fleet.trainFlags[car] & 0x40) == 0) {
-        switch (game->fleet.trainFlags[car] & 0xF) {
+    if (!train_flag::isHead(game->fleet.trainFlags[car])) {
+        switch (train_flag::type(game->fleet.trainFlags[car])) {
             case 2:
                 if ((game->fleet.serviceLoadFlags[vehicle] & 1) == 1
                     && game->fleet.energyCargoOrRemovalTicks[car] < 25)
@@ -122,8 +122,8 @@ bool game_trainCanLoadAtServiceVehicle(Game *game, int32_t head,
 void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
                                   int32_t vehicle, bool construction_done) {
     if (car == -1) return;
-    if ((game->fleet.trainFlags[car] & 0x40) == 0) {
-        int car_type = game->fleet.trainFlags[car] & 0xF;
+    if (!train_flag::isHead(game->fleet.trainFlags[car])) {
+        int car_type = train_flag::type(game->fleet.trainFlags[car]);
         switch (car_type) {
             case 2:
                 game->fleet.energyCargoOrRemovalTicks[car] =
@@ -201,11 +201,11 @@ void game_recordTrainRevenue(Game *game, int32_t amount) {
 int32_t game_unloadTrainRevenue(Game *game, int32_t car, int32_t vehicle) {
     if (car == -1) return 0;
     int revenue = 0;
-    if ((game->fleet.trainFlags[car] & 0x40) == 0
+    if (!train_flag::isHead(game->fleet.trainFlags[car])
         && game->fleet.lastServiceVehicle[car] != vehicle
         && (game->fleet.energyCargoOrRemovalTicks[car] > 0 || game->fleet.secondaryCargoOrBaseEnergy[car] > 0)) {
         int age_scale = unsignedByte(game->fleet.cargoAge[car]) / 15 + 1;
-        switch (game->fleet.trainFlags[car] & 0xF) {
+        switch (train_flag::type(game->fleet.trainFlags[car])) {
             case 2:
                 if ((game->fleet.serviceUnloadFlags[vehicle] & 1) == 1) {
                     int value = game->fleet.energyCargoOrRemovalTicks[car] * 3 * age_scale;
@@ -267,10 +267,10 @@ static int normalize_track_variant(int variant) {
 
 void game_updateTrain(Game *game, int32_t head) {
     int stop_chain = 0;
-    if ((game->fleet.trainFlags[head] & 0x40) == 0
+    if (!train_flag::isHead(game->fleet.trainFlags[head])
         || unsignedByte(game->fleet.energyCargoOrRemovalTicks[head]) <= 0) {
         game->fleet.trainFlags[head] = (int8_t)(game->fleet.trainFlags[head] & 0xEF);
-        if ((game->fleet.trainFlags[head] & 0x40) == 64) {
+        if (train_flag::isHead(game->fleet.trainFlags[head])) {
             game->fleet.energyCargoOrRemovalTicks[head] =
                 (int8_t)(game->fleet.secondaryCargoOrBaseEnergy[head]
                          + game_accumulateTrainTurns(game, head) / 2
@@ -282,7 +282,7 @@ void game_updateTrain(Game *game, int32_t head) {
         int old_y = unsignedByte(game->fleet.trainY[head]);
         bool at_service_tile = (game->world.tileMap[old_x][old_y] == 87
                                 || game->world.tileMap[old_x][old_y] == 88);
-        if ((game->fleet.trainFlags[head] & 0x40) == 64 && game->fleet.trainPhase[head] == 4
+        if (train_flag::isHead(game->fleet.trainFlags[head]) && game->fleet.trainPhase[head] == 4
             && at_service_tile && game->world.trackMap[old_x][old_y] == 65) {
             int service_vehicle = game_findServiceVehicleAt(game, old_x, old_y);
             int revenue = 0;
@@ -291,7 +291,8 @@ void game_updateTrain(Game *game, int32_t head) {
 
             if (game->fleet.trainStateCode[head] != 7) {
                 int engine_type = game->fleet.trainStateCode[head] & 7;
-                game->fleet.trainFlags[head] = (int8_t)(0xC0 | (engine_type >= 3 ? 1 : 0));
+                game->fleet.trainFlags[head] = static_cast<int8_t>(
+                    train_flag::USED_SLOT | train_flag::HEAD | (engine_type >= 3 ? 1 : 0));
                 game->fleet.secondaryCargoOrBaseEnergy[head] = (int8_t)(8 - engine_type);
                 game->fleet.trainEra[head] = (int8_t)engine_type;
                 game->fleet.trainAgeYears[head] = 0;
@@ -332,7 +333,7 @@ void game_updateTrain(Game *game, int32_t head) {
             game->fleet.lastServiceVehicle[head] = (int8_t)service_vehicle;
             game->fleet.trainFlags[head] = (int8_t)(game->fleet.trainFlags[head] | 0x10);
         }
-        if ((game->fleet.trainFlags[head] & 0x40) == 64 && game->fleet.trainPhase[head] == 4
+        if (train_flag::isHead(game->fleet.trainFlags[head]) && game->fleet.trainPhase[head] == 4
             && at_service_tile && game->world.trackMap[old_x][old_y] != 65) {
             game->fleet.energyCargoOrRemovalTicks[head] =
                 (int8_t)(game_countCarsInTrain(game, head) * 40);
@@ -354,12 +355,14 @@ void game_updateTrain(Game *game, int32_t head) {
             int current_variant = game->world.tileMap[next_x][next_y] - 70;
             if (current_variant == 6 && (game->fleet.trainDir[head] == 0
                                          || game->fleet.trainDir[head] == 1)) {
-                current_track = 0x40 | (current_track & 7);
+                current_track = track::PRESENT | (current_track & track::DIR_OWNER_MASK);
                 current_variant = 0;
             }
             if (current_variant == 6 && (game->fleet.trainDir[head] == 2
                                          || game->fleet.trainDir[head] == 3)) {
-                current_track = 0x40 | ((current_track & 0x38) >> 3);
+                current_track = track::PRESENT
+                    | ((current_track & (track::DIR_OWNER_MASK << track::DIR_OWNER_SHIFT))
+                       >> track::DIR_OWNER_SHIFT);
                 current_variant = 1;
             }
             current_variant = normalize_track_variant(current_variant);
@@ -379,9 +382,11 @@ void game_updateTrain(Game *game, int32_t head) {
                     int next_dir = step[2 * pair + 1];
                     if (next_variant == 6) {
                         if (next_dir == 0 || next_dir == 1)
-                            next_track = 0x40 | (next_track & 7);
+                            next_track = track::PRESENT | (next_track & track::DIR_OWNER_MASK);
                         if (next_dir == 2 || next_dir == 3)
-                            next_track = 0x40 | ((next_track & 0x38) >> 3);
+                            next_track = track::PRESENT
+                                | ((next_track & (track::DIR_OWNER_MASK << track::DIR_OWNER_SHIFT))
+                                   >> track::DIR_OWNER_SHIFT);
                     }
                     if (current_track != next_track) break;
                     game->fleet.trainX[head] = (int8_t)next_x;
@@ -393,11 +398,11 @@ void game_updateTrain(Game *game, int32_t head) {
                     game->fleet.trainDir[head] = step[1];
                     game_resetTrailingCars(game, head, game->fleet.nextCar[head], 0);
                 }
-                if (moved && (game->fleet.trainFlags[head] & 0x40) == 64
+                if (moved && train_flag::isHead(game->fleet.trainFlags[head])
                     && next_variant == 6) {
                     bool occupied = false;
                     for (int other = 0; other < 500; ++other) {
-                        if ((game->fleet.trainFlags[other] & 0x80) == 128 && other != head
+                        if (train_flag::isUsed(game->fleet.trainFlags[other]) && other != head
                             && game->fleet.trainX[other] == game->fleet.trainX[head]
                             && game->fleet.trainY[other] == game->fleet.trainY[head]) {
                             occupied = true;
@@ -423,7 +428,7 @@ void game_updateTrain(Game *game, int32_t head) {
         if (stop_chain == 0 && collision == 0 && game->fleet.nextCar[head] != -1)
             game_updateTrain(game, game->fleet.nextCar[head]);
     }
-    if ((game->fleet.trainFlags[head] & 0x40) == 64) {
+    if (train_flag::isHead(game->fleet.trainFlags[head])) {
         int energy = unsignedByte(game->fleet.energyCargoOrRemovalTicks[head]) - 3;
         if (energy < 0) energy = 0;
         game->fleet.energyCargoOrRemovalTicks[head] = (int8_t)energy;

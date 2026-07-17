@@ -87,7 +87,7 @@ Image *game_wagonCarSprite(Game *game, int32_t contextCode, int32_t slotIndex) {
     if (contextCode == 26 && game_countCarsInTrain(game, game->trainAtCursor) > slotIndex) {
         int carSlot = game->trainAtCursor;
         for (int i = 0; i < slotIndex; ++i) carSlot = game->fleet.nextCar[carSlot];
-        int carType = game->fleet.trainFlags[carSlot] & 0xF;
+        int carType = train_flag::type(game->fleet.trainFlags[carSlot]);
         switch (carType) {
             case -1: return NULL;
             case 0: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[136])].get();
@@ -159,7 +159,178 @@ void game_drawSelectedTrainLabel(Game *game, Surface *surface, int32_t x, int32_
     game_renderFontString(game, surface, x + 4, y + 3, train_codes, true);
 }
 
-void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
+namespace {
+
+class PackedDialogReader {
+public:
+    PackedDialogReader(Game *game, int offset)
+        : game_(game), offset_(offset) {}
+
+    int byte() { return game_->assets.spriteData[offset_++]; }
+
+    int u16() {
+        const int low = unsignedByte(game_->assets.spriteData[offset_++]);
+        const int high = unsignedByte(game_->assets.spriteData[offset_++]);
+        return low + 256 * high;
+    }
+
+    int rgb() {
+        const int red = unsignedByte(game_->assets.spriteData[offset_++]);
+        const int green = unsignedByte(game_->assets.spriteData[offset_++]);
+        const int blue = unsignedByte(game_->assets.spriteData[offset_++]);
+        return 65536 * red + 256 * green + blue;
+    }
+
+    std::vector<int8_t> text() {
+        std::vector<int8_t> codes = game_readPackedTextCodes(game_, offset_);
+        skip(1 + unsignedByte(game_->assets.spriteData[offset_]));
+        return codes;
+    }
+
+    void skip(int count) { offset_ += count; }
+
+private:
+    Game *game_;
+    int offset_;
+};
+
+struct PackedDialogHeader {
+    int flags;
+    int backgroundColor;
+    int edgeColor;
+    int borderColor;
+    int selectionColor;
+    int width;
+    int height;
+    int spriteId;
+};
+
+PackedDialogHeader readDialogHeader(PackedDialogReader& reader) {
+    PackedDialogHeader header{};
+    header.flags = reader.byte();
+    header.backgroundColor = reader.rgb();
+    header.edgeColor = reader.rgb();
+    header.borderColor = reader.rgb();
+    header.selectionColor = reader.rgb();
+    header.width = static_cast<uint8_t>(reader.byte());
+    header.height = static_cast<uint8_t>(reader.byte());
+    header.spriteId = reader.byte();
+    return header;
+}
+
+struct PackedContentItem {
+    int flags = 0;
+    bool image = false;
+    int xOffset = 0;
+    int yOffset = 0;
+    bool hasResourceCondition = false;
+    bool hasDynamicValue = false;
+    int resourceId = 0;
+    int valueId = 0;
+    int actionCode = 0;
+    int selectionLeft = 0;
+    int selectionTop = 0;
+    int selectionRight = 0;
+    int selectionBottom = 0;
+    int slotIndex = 0;
+    std::optional<std::vector<int8_t>> textCodes;
+};
+
+PackedContentItem readContentItem(Game *game, PackedDialogReader& reader) {
+    PackedContentItem item{};
+    item.flags = reader.byte();
+    item.image = (item.flags & 0x80) != 0;
+    item.hasResourceCondition = (item.flags & 0x40) != 0;
+    if (!item.image) {
+        item.xOffset = (item.flags & 4) != 0 ? 0 : reader.byte();
+        item.yOffset = (item.flags & 2) != 0 ? 0 : reader.byte();
+        item.hasDynamicValue = (item.flags & 0x20) != 0;
+        item.resourceId = item.hasResourceCondition ? reader.byte() : 0;
+        item.valueId = item.hasDynamicValue ? reader.byte() : 0;
+        if ((item.flags & 0x10) != 0) {
+            item.actionCode = reader.byte();
+            item.selectionLeft = reader.byte();
+            item.selectionTop = reader.byte();
+            item.selectionRight = reader.byte();
+            item.selectionBottom = reader.byte();
+        }
+        item.textCodes = item.hasDynamicValue
+            ? game_resolveDialogValue(game, game->renderer.currentSpriteId, item.valueId)
+            : std::optional<std::vector<int8_t>>(reader.text());
+        return item;
+    }
+    item.slotIndex = reader.byte();
+    item.xOffset = (item.flags & 0x20) != 0 ? 0 : reader.byte();
+    item.yOffset = (item.flags & 0x10) != 0 ? 0 : reader.byte();
+    item.resourceId = item.hasResourceCondition ? reader.byte() : 0;
+    return item;
+}
+
+struct PackedDrawingCommand {
+    int flags;
+    int type;
+    int color;
+    int x;
+    int y;
+    int widthOrX2;
+    int heightOrY2;
+    bool hasResourceCondition;
+    int resourceId;
+};
+
+PackedDrawingCommand readDrawingCommand(Game *game, PackedDialogReader& reader) {
+    PackedDrawingCommand command{};
+    command.flags = reader.byte();
+    command.type = command.flags & 7;
+    command.color = reader.rgb();
+    command.x = reader.u16();
+    command.y = reader.u16();
+    command.widthOrX2 = reader.u16();
+    command.heightOrY2 = reader.u16();
+    if ((command.flags & 8) != 0)
+        command.x = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.x));
+    if ((command.flags & 0x10) != 0)
+        command.y = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.y));
+    if ((command.flags & 0x20) != 0)
+        command.widthOrX2 = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.widthOrX2));
+    if ((command.flags & 0x40) != 0)
+        command.heightOrY2 = static_cast<int16_t>(game_neighboursMask(game, game->renderer.currentSpriteId, command.heightOrY2));
+    command.hasResourceCondition = (command.flags & 0x80) != 0;
+    command.resourceId = command.hasResourceCondition ? reader.byte() : 0;
+    return command;
+}
+
+class PackedDialogRender {
+public:
+    PackedDialogRender(Game *gameValue, Surface *surfaceValue, int32_t spriteIdValue)
+        : game(gameValue), surface(surfaceValue), spriteId(spriteIdValue),
+          reader(gameValue, gameValue->assets.spriteOffsetTable[spriteIdValue]) {}
+
+    void setupFrame();
+    void renderContent();
+    void renderCommands();
+    void finishFrame();
+
+private:
+    Game *game;
+    Surface *surface;
+    int32_t spriteId;
+    PackedDialogReader reader;
+    int backgroundColor = 0;
+    int edgeColor = 0;
+    int borderColor = 0;
+    int selectionColor = 0;
+    int dialogWidth = 0;
+    int dialogHeight = 0;
+    int dialogX = 0;
+    int dialogY = 0;
+    int textContentY = 6;
+    int drawingContentY = 6;
+    int scrollButtonY = 6;
+    int contentX = 0;
+};
+
+void PackedDialogRender::setupFrame() {
     if (game->renderer.lastRenderedSpriteId != spriteId) {
         game->renderer.spriteJustChanged = 1;
         game->renderer.lastRenderedSpriteId = spriteId;
@@ -170,20 +341,19 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
         game_renderMap(game, surface);
         game->renderer.mapRedrawPending = false;
     }
-    int16_t spriteOffset = game->assets.spriteOffsetTable[spriteId];
-    int backgroundColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 1]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 2]) + unsignedByte(game->assets.spriteData[spriteOffset + 3]);
-    int edgeColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 4]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 5]) + unsignedByte(game->assets.spriteData[spriteOffset + 6]);
-    int borderColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 7]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 8]) + unsignedByte(game->assets.spriteData[spriteOffset + 9]);
-    int selectionColor = 65536 * unsignedByte(game->assets.spriteData[spriteOffset + 10]) + 256 * unsignedByte(game->assets.spriteData[spriteOffset + 11]) + unsignedByte(game->assets.spriteData[spriteOffset + 12]);
-    int dialogWidth = unsignedByte(game->assets.spriteData[spriteOffset + 13]);
-    int dialogHeight = unsignedByte(game->assets.spriteData[spriteOffset + 14]);
+    const PackedDialogHeader header = readDialogHeader(reader);
+    backgroundColor = header.backgroundColor;
+    edgeColor = header.edgeColor;
+    borderColor = header.borderColor;
+    selectionColor = header.selectionColor;
+    dialogWidth = header.width;
+    dialogHeight = header.height;
     if (game->renderer.dialogContentHeight < dialogHeight) game->renderer.dialogContentHeight = dialogHeight;
     else dialogHeight = game->renderer.dialogContentHeight;
     if (game->ui.cursorOverUI || game->ui.cursorAllowZoomOut) dialogWidth += 6;
-    game->renderer.currentSpriteId = game->assets.spriteData[spriteOffset + 15];
-    int dialogX = (canvasWidth - dialogWidth) / 2;
-    int dialogY = (canvasHeight - dialogHeight) / 2;
-    int textContentY = 6, drawingContentY = 6, scrollButtonY = 6;
+    game->renderer.currentSpriteId = header.spriteId;
+    dialogX = (canvasWidth - dialogWidth) / 2;
+    dialogY = (canvasHeight - dialogHeight) / 2;
     if (game->renderer.needsRepaint) {
         midp_set_color(surface, backgroundColor); midp_fill_rect(surface, dialogX, dialogY, dialogWidth, dialogHeight);
         midp_set_color(surface, borderColor); midp_draw_rect(surface, dialogX, dialogY, dialogWidth, dialogHeight);
@@ -191,7 +361,7 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
         midp_draw_rect(surface, dialogX, dialogY, dialogWidth, 0);
     }
     game->ui.pauseMenuOpen = false;
-    if ((game->assets.spriteData[spriteOffset] & 1) == 1) {
+    if ((header.flags & 1) == 1) {
         if (game->renderer.needsRepaint && game->ui.cursorDragY == -1) {
             midp_set_color(surface, selectionColor);
             midp_fill_rect(surface, dialogX + dialogWidth - 10, dialogY + 3, 7, 7);
@@ -210,18 +380,18 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
     } else if (game->ui.cursorDragY == -1) {
         game->ui.cursorDragY = -3;
     }
-    int dataOffset = spriteOffset + 16;
-    if ((game->assets.spriteData[spriteOffset] & 2) == 2) {
+    if ((header.flags & 2) == 2) {
         if (game->renderer.needsRepaint) midp_set_color(surface, borderColor);
         if (game->renderer.needsRepaint) midp_draw_rect(surface, dialogX + 2, dialogY + 13, dialogWidth - 4, 0);
         game->renderer.clipX = dialogX; game->renderer.clipY = dialogY; game->renderer.clipWidth = dialogWidth; game->renderer.clipHeight = dialogHeight;
         if (game->renderer.needsRepaint)
             game_renderFontString(game, surface, dialogX + 3, dialogY + 5,
-                                game_readPackedTextCodes(game, spriteOffset + 16), true);
-        dataOffset += 1 + game->assets.spriteData[spriteOffset + 16];
+                                  reader.text(), true);
+        else
+            reader.text();
         textContentY = 19; drawingContentY = 19; scrollButtonY = 19;
     }
-    int contentX = dialogX + 4;
+    contentX = dialogX + 4;
     game->renderer.clipX = dialogX + 1;
     game->renderer.clipY = dialogY + textContentY - 4;
     game->renderer.clipWidth = dialogWidth - 2;
@@ -244,33 +414,31 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
     game->ui.cursorOverUI = false;
     game->ui.cursorAllowZoomOut = false;
     game->ui.cursorDragX = -1;
-    int contentItemCount = game->assets.spriteData[dataOffset++];
+}
+
+void PackedDialogRender::renderContent() {
+    const int contentItemCount = reader.byte();
     for (int itemIndex = 0; itemIndex < contentItemCount; ++itemIndex) {
         int itemY = dialogY + textContentY - game->ui.cursorScale;
-        int8_t itemFlags = game->assets.spriteData[dataOffset++];
-        if ((itemFlags & 0x80) == 0) {
-            int xOffset = (itemFlags & 4) == 4 ? 0 : game->assets.spriteData[dataOffset++];
-            int yOffset = (itemFlags & 2) == 2 ? 0 : game->assets.spriteData[dataOffset++];
-            bool hasResourceCondition = (itemFlags & 0x40) == 0x40;
-            bool hasDynamicValue = (itemFlags & 0x20) == 0x20;
-            int resourceId = hasResourceCondition ? game->assets.spriteData[dataOffset++] : 0;
-            int valueId = hasDynamicValue ? game->assets.spriteData[dataOffset++] : 0;
-            int actionCode = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
-            int selectionLeft = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
-            int selectionTop = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
-            int selectionRight = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : 0;
-            int8_t selectionBottom = (itemFlags & 0x10) == 0x10 ? game->assets.spriteData[dataOffset++] : (int8_t)0;
-            std::optional<std::vector<int8_t>> textCodes = hasDynamicValue
-                ? game_resolveDialogValue(game, game->renderer.currentSpriteId, valueId)
-                : std::optional<std::vector<int8_t>>(
-                    game_readPackedTextCodes(game, dataOffset));
+        const PackedContentItem item = readContentItem(game, reader);
+        const int itemFlags = item.flags;
+        const int xOffset = item.xOffset;
+        const int yOffset = item.yOffset;
+        const bool hasResourceCondition = item.hasResourceCondition;
+        const int resourceId = item.resourceId;
+        if (!item.image) {
+            const int actionCode = item.actionCode;
+            const int selectionLeft = item.selectionLeft;
+            const int selectionTop = item.selectionTop;
+            const int selectionRight = item.selectionRight;
+            const int selectionBottom = item.selectionBottom;
+            const auto& textCodes = item.textCodes;
             int visibleCharacterCount = 0;
             if (!textCodes) continue;
             for (const int8_t code : *textCodes) {
                 if (code >= 32 && code <= 39) continue;
                 ++visibleCharacterCount;
             }
-            if (!hasDynamicValue) dataOffset = dataOffset + game->assets.spriteData[dataOffset] + 1;
             if (itemY + yOffset + 6 + selectionBottom >= game->renderer.clipY + game->renderer.clipHeight) {
                 int neededHeight = dialogHeight + (itemY + yOffset + 6 + selectionBottom + selectionTop + 3
                     - (game->renderer.clipHeight + game->renderer.clipY));
@@ -326,12 +494,7 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
             textContentY += 11 + yOffset;
             continue;
         }
-        bool hasResourceCondition = (itemFlags & 0x40) == 0x40;
-        int slotIndex = game->assets.spriteData[dataOffset++];
-        int xOffset = (itemFlags & 0x20) == 0x20 ? 0 : game->assets.spriteData[dataOffset++];
-        int yOffset = (itemFlags & 0x10) == 0x10 ? 0 : game->assets.spriteData[dataOffset++];
-        int resourceId = hasResourceCondition ? game->assets.spriteData[dataOffset++] : 0;
-        Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, slotIndex);
+        Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, item.slotIndex);
         if (image == NULL) continue;
         int imageHeight = image->height();
         if (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)) continue;
@@ -342,28 +505,21 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
             game->ui.cursorAllowZoomOut = true;
         textContentY += imageHeight + yOffset;
     }
-    int drawingCommandCount = game->assets.spriteData[dataOffset++];
+}
+
+void PackedDialogRender::renderCommands() {
+    const int drawingCommandCount = reader.byte();
     for (int commandIndex = 0; commandIndex < drawingCommandCount; ++commandIndex) {
         int commandBaseY = dialogY + drawingContentY - game->ui.cursorScale;
-        int8_t commandFlags = game->assets.spriteData[dataOffset++];
-        int commandType = commandFlags & 7;
-        int color = 65536 * unsignedByte(game->assets.spriteData[dataOffset++])
-            + 256 * unsignedByte(game->assets.spriteData[dataOffset++])
-            + unsignedByte(game->assets.spriteData[dataOffset++]);
-        int x = unsignedByte(game->assets.spriteData[dataOffset++])
-            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
-        int y = unsignedByte(game->assets.spriteData[dataOffset++])
-            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
-        int widthOrX2 = unsignedByte(game->assets.spriteData[dataOffset++])
-            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
-        int heightOrY2 = unsignedByte(game->assets.spriteData[dataOffset++])
-            + 256 * unsignedByte(game->assets.spriteData[dataOffset++]);
-        if ((commandFlags & 8) == 8) x = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, x);
-        if ((commandFlags & 0x10) == 0x10) y = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, y);
-        if ((commandFlags & 0x20) == 0x20) widthOrX2 = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, widthOrX2);
-        if ((commandFlags & 0x40) == 0x40) heightOrY2 = (int16_t)game_neighboursMask(game, game->renderer.currentSpriteId, heightOrY2);
-        bool hasResourceCondition = (commandFlags & 0x80) == 0x80;
-        int resourceId = hasResourceCondition ? game->assets.spriteData[dataOffset++] : 0;
+        const PackedDrawingCommand command = readDrawingCommand(game, reader);
+        const int commandType = command.type;
+        const int color = command.color;
+        const int x = command.x;
+        const int y = command.y;
+        const int widthOrX2 = command.widthOrX2;
+        const int heightOrY2 = command.heightOrY2;
+        const bool hasResourceCondition = command.hasResourceCondition;
+        const int resourceId = command.resourceId;
         int lowestY = commandBaseY + y + heightOrY2;
         if (!game->renderer.needsRepaint
             || (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)))
@@ -395,10 +551,23 @@ void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
         if (lowestY < game->renderer.clipY + game->renderer.clipHeight) continue;
         game->ui.cursorAllowZoomOut = true;
     }
+}
+
+void PackedDialogRender::finishFrame() {
     if (game->renderer.needsRepaint) {
         if (game->ui.cursorScale == 0 && game->ui.cursorSelectY == -2) game->ui.cursorSelectY = -1;
         if (game->ui.cursorScale > 0) game->ui.cursorOverUI = true;
     }
     game->renderer.needsRepaint = true;
     if (game->renderer.spriteJustChanged > 0) --game->renderer.spriteJustChanged;
+}
+
+} // namespace
+
+void game_renderPackedSprite(Game *game, Surface *surface, int32_t spriteId) {
+    PackedDialogRender render(game, surface, spriteId);
+    render.setupFrame();
+    render.renderContent();
+    render.renderCommands();
+    render.finishFrame();
 }

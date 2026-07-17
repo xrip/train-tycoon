@@ -4,6 +4,31 @@
 #include "game_constants.h"
 #include <cstdint>
 
+namespace train_flag {
+// Bit 0x10 is used by movement code, but its exact meaning is still open.
+// Service-vehicle flags are a separate encoding and stay unnamed.
+inline constexpr uint8_t USED_SLOT = 0x80;
+inline constexpr uint8_t HEAD = 0x40;
+inline constexpr uint8_t REMOVAL_PENDING = 0x20;
+inline constexpr uint8_t TYPE_MASK = 0x0F;
+
+constexpr bool isUsed(int8_t flags) {
+    return (static_cast<uint8_t>(flags) & USED_SLOT) != 0;
+}
+
+constexpr bool isHead(int8_t flags) {
+    return (static_cast<uint8_t>(flags) & HEAD) != 0;
+}
+
+constexpr bool isRemovalPending(int8_t flags) {
+    return (static_cast<uint8_t>(flags) & REMOVAL_PENDING) != 0;
+}
+
+constexpr int type(int8_t flags) {
+    return static_cast<uint8_t>(flags) & TYPE_MASK;
+}
+} // namespace train_flag
+
 // Fleet owns the per-train-slot records. Each slot id is one train/car; a train
 // is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.

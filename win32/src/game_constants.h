@@ -9,7 +9,6 @@ inline constexpr int kServiceVehicleSlotCount = 250;
 inline constexpr int kCitySlotCount = 48;
 inline constexpr int kZoneCount = 64;
 inline constexpr int kTileQueueCount = 50;
-inline constexpr int kTileQueueFieldCount = 3;
 inline constexpr int kResourceTypeCount = 5;
 inline constexpr int kMenuRowCount = 6;
 inline constexpr int kEnabledMenuRowCount = 5;

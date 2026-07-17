@@ -144,7 +144,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 car = game->trainAtCursor;
                 for (int i = 0; i < field; ++i) car = game->fleet.nextCar[car];
             }
-            int type = game->fleet.trainFlags[car] & 0x0f;
+            int type = train_flag::type(game->fleet.trainFlags[car]);
             char text[32];
             if (type == 2)
                 snprintf(text, sizeof(text), "%d/%d", game->fleet.energyCargoOrRemovalTicks[car],

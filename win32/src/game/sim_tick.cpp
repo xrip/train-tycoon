@@ -62,14 +62,14 @@ void game_ageTrainsOneYear(Game *game) {
 void game_chargeTrainRunningCosts(Game *game) {
     if (game->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
-        if ((game->fleet.trainFlags[i] & 0x80) != 128 || (game->fleet.trainFlags[i] & 0x40) != 64)
+        if (!train_flag::isUsed(game->fleet.trainFlags[i]) || !train_flag::isHead(game->fleet.trainFlags[i]))
             continue;
         int n2 = unsignedByte(game->fleet.trainX[i]);
         int n = unsignedByte(game->fleet.trainY[i]);
         if (game->world.trackMap[n2][n] != 65) continue;
         int n3 = game_countCarsInTrain(game, i) * 2;
-        if ((game->fleet.trainFlags[i] & 0xF) == 0) n3 += 3;
-        else if ((game->fleet.trainFlags[i] & 0xF) == 1) n3 += 7;
+        if (train_flag::type(game->fleet.trainFlags[i]) == 0) n3 += 3;
+        else if (train_flag::type(game->fleet.trainFlags[i]) == 1) n3 += 7;
         game->fleet.trainRevenue[i] -= n3;
         game->economy.money -= n3;
         game->economy.fuelCostAccrued += n3;
@@ -104,8 +104,8 @@ void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
 
 void game_mergeTrainAt(Game *game, int32_t n) {
     for (int i = 0; i < 500; ++i) {
-        if (n == i || (game->fleet.trainFlags[i] & 0x80) != 128
-            || (game->fleet.trainFlags[i] & 0x40) != 64
+        if (n == i || !train_flag::isUsed(game->fleet.trainFlags[i])
+            || !train_flag::isHead(game->fleet.trainFlags[i])
             || !game_isTrainHeadCarAt(game, i, unsignedByte(game->fleet.trainX[n]),
                                     unsignedByte(game->fleet.trainY[n])))
             continue;
@@ -122,7 +122,7 @@ void game_maybeAiTakeTurn(Game *game) {
 
 void game_upgradeOneAiTrainForEra(Game *game) {
     for (int i = 0; i < 500; ++i) {
-        if ((game->fleet.trainFlags[i] & 0x80) != 128 || (game->fleet.trainFlags[i] & 0x40) != 64)
+        if (!train_flag::isUsed(game->fleet.trainFlags[i]) || !train_flag::isHead(game->fleet.trainFlags[i]))
             continue;
         int n2 = unsignedByte(game->fleet.trainX[i]);
         int n = unsignedByte(game->fleet.trainY[i]);
@@ -131,7 +131,8 @@ void game_upgradeOneAiTrainForEra(Game *game) {
             || game->fleet.trainEra[i] >= game->era)
             continue;
         game->fleet.trainEra[i] = (int8_t)game->era;
-        game->fleet.trainFlags[i] = (int8_t)(0xC0 | game->era / 3);
+        game->fleet.trainFlags[i] = static_cast<int8_t>(
+            train_flag::USED_SLOT | train_flag::HEAD | game->era / 3);
         game->fleet.secondaryCargoOrBaseEnergy[i] = (int8_t)(8 - game->era);
         break;
     }
@@ -139,7 +140,7 @@ void game_upgradeOneAiTrainForEra(Game *game) {
 
 void game_resetAiDepotTrainAges(Game *game) {
     for (int i = 0; i < 500; ++i) {
-        if ((game->fleet.trainFlags[i] & 0x80) != 128) continue;
+        if (!train_flag::isUsed(game->fleet.trainFlags[i])) continue;
         int n2 = unsignedByte(game->fleet.trainX[i]);
         int n = unsignedByte(game->fleet.trainY[i]);
         if (game->world.trackMap[n2][n] == 66 || game->world.trackMap[n2][n] == 67
@@ -187,9 +188,9 @@ void game_queueTileChange(Game *game, int32_t n, int32_t n2,
         }
     }
     for (n3 = 49; n3 >= 0; --n3) {
-        if (game->world.tileQueue[n3][0] != 0
-            && unsignedByte(game->world.tileQueue[n3][1]) == n
-            && unsignedByte(game->world.tileQueue[n3][2]) == n2)
+        if (game->world.tileQueue[n3].countdown != 0
+            && unsignedByte(game->world.tileQueue[n3].x) == n
+            && unsignedByte(game->world.tileQueue[n3].y) == n2)
             bl3 = false;
     }
     if (!bl3) return;
@@ -197,15 +198,15 @@ void game_queueTileChange(Game *game, int32_t n, int32_t n2,
         game->world.tileMap[n][n2] = (int8_t)(game->world.tileMap[n][n2] + 128);
     n3 = 0;
     for (int i = 49; i >= 0; --i) {
-        if (game->world.tileQueue[i][0] == 0) {
+        if (game->world.tileQueue[i].countdown == 0) {
             n3 = i;
             break;
         }
     }
-    game->world.tileQueue[n3][0] = 14;
+    game->world.tileQueue[n3].countdown = 14;
     game->world.tileQueueVisualOnly[n3] = bl2;
-    game->world.tileQueue[n3][1] = (int8_t)n;
-    game->world.tileQueue[n3][2] = (int8_t)n2;
+    game->world.tileQueue[n3].x = static_cast<int8_t>(n);
+    game->world.tileQueue[n3].y = static_cast<int8_t>(n2);
 }
 
 void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3) {
@@ -319,10 +320,10 @@ int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
             if (game->world.trackMap[i][j] != 65) continue;
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
-                if ((game->fleet.trainFlags[k] & 0x80) != 128
+                if (!train_flag::isUsed(game->fleet.trainFlags[k])
                     || unsignedByte(game->fleet.trainX[k]) != i || unsignedByte(game->fleet.trainY[k]) != j)
                     continue;
-                n2 += (game->fleet.trainFlags[k] & 0x40) == 64 ? 400 : 55;
+                n2 += train_flag::isHead(game->fleet.trainFlags[k]) ? 400 : 55;
             }
         }
     }
@@ -405,11 +406,11 @@ int32_t game_scanMapForMetric(Game *game) {
         }
     }
     for (int n3 = 0; n3 < 500; ++n3) {
-        if ((game->fleet.trainFlags[n3] & 0x80) != 128) continue;
+        if (!train_flag::isUsed(game->fleet.trainFlags[n3])) continue;
         int n2 = unsignedByte(game->fleet.trainX[n3]);
         int n = unsignedByte(game->fleet.trainY[n3]);
         if (game->world.trackMap[n2][n] != 65) continue;
-        if ((game->fleet.trainFlags[n3] & 0x40) == 64) {
+        if (train_flag::isHead(game->fleet.trainFlags[n3])) {
             switch (game->fleet.trainEra[n3]) {
                 case 0: n4 += game->economy.gWagonCost; break;
                 case 1: n4 += game->economy.gWagonCost2; break;
@@ -645,14 +646,15 @@ void advanceTileAnimationFrames(Game *game) {
 
 void applyQueuedTileChanges(Game *game) {
     for (int queueIndex = 0; queueIndex < kTileQueueCount; ++queueIndex) {
-        if (game->world.tileQueue[queueIndex][0] <= 0) continue;
-        --game->world.tileQueue[queueIndex][0];
-        int tileX = unsignedByte(game->world.tileQueue[queueIndex][1]);
-        int tileY = unsignedByte(game->world.tileQueue[queueIndex][2]);
-        if (game->world.tileQueue[queueIndex][0] == 0 && tileX >= 0 && tileY >= 0
+        TileChange& change = game->world.tileQueue[queueIndex];
+        if (change.countdown <= 0) continue;
+        --change.countdown;
+        int tileX = unsignedByte(change.x);
+        int tileY = unsignedByte(change.y);
+        if (change.countdown == 0 && tileX >= 0 && tileY >= 0
             && tileX < game->world.mapWidth && tileY < game->world.mapHeight)
             game->world.tileMap[tileX][tileY] = (int8_t)(unsignedByte(game->world.tileMap[tileX][tileY]) - 128);
-        if (game->world.tileQueue[queueIndex][0] != 7 || tileX < 0 || tileY < 0
+        if (change.countdown != 7 || tileX < 0 || tileY < 0
             || tileX >= game->world.mapWidth || tileY >= game->world.mapHeight)
             continue;
         int tileCode = unsignedByte(game->world.tileMap[tileX][tileY]) - 128;
@@ -686,10 +688,12 @@ void applyQueuedTileChanges(Game *game) {
                 game->world.trackMap[tileX][tileY] = 0;
             } else if (firstTrackOwner == 1) {
                 game->world.tileMap[tileX][tileY] = -57;
-                game->world.trackMap[tileX][tileY] = (int8_t)(0x40 | secondTrackOwner);
+                game->world.trackMap[tileX][tileY] = static_cast<int8_t>(
+                    track::PRESENT | secondTrackOwner);
             } else if (secondTrackOwner == 1) {
                 game->world.tileMap[tileX][tileY] = -58;
-                game->world.trackMap[tileX][tileY] = (int8_t)(0x40 | firstTrackOwner);
+                game->world.trackMap[tileX][tileY] = static_cast<int8_t>(
+                    track::PRESENT | firstTrackOwner);
             }
             game->renderer.lastViewportCenterX = -1;
         }
@@ -698,10 +702,10 @@ void applyQueuedTileChanges(Game *game) {
 
 void updateActiveTrains(Game *game) {
     for (int trainIndex = 0; trainIndex < kTrainSlotCount; ++trainIndex) {
-        if ((game->fleet.trainFlags[trainIndex] & 0x80) != 128
-            || (game->fleet.trainFlags[trainIndex] & 0x40) != 64)
+        if (!train_flag::isUsed(game->fleet.trainFlags[trainIndex])
+            || !train_flag::isHead(game->fleet.trainFlags[trainIndex]))
             continue;
-        if ((game->fleet.trainFlags[trainIndex] & 0x20) == 32) {
+        if (train_flag::isRemovalPending(game->fleet.trainFlags[trainIndex])) {
             if (game->fleet.energyCargoOrRemovalTicks[trainIndex] > 0) {
                 --game->fleet.energyCargoOrRemovalTicks[trainIndex];
                 continue;

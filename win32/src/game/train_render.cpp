@@ -12,12 +12,12 @@ static void draw_train_image(Game *game, Surface *graphics,
 void game_drawSpriteSingle(Game *game, Surface *graphics,
                          int32_t train) {
     int16_t sprites[8];
-    memcpy(sprites, game->assets.trainSpriteDirectionTable[game->fleet.trainFlags[train] & 0x0f],
+    memcpy(sprites, game->assets.trainSpriteDirectionTable[train_flag::type(game->fleet.trainFlags[train])],
            sizeof(sprites));
 
     int tile_x = unsignedByte(game->fleet.trainX[train]);
     int tile_y = unsignedByte(game->fleet.trainY[train]);
-    if ((game->fleet.trainFlags[train] & 0x40) != 0) {
+    if (train_flag::isHead(game->fleet.trainFlags[train])) {
         int tile = game->world.tileMap[tile_x][tile_y];
         int track = unsignedByte(game->world.trackMap[tile_x][tile_y]);
         bool lower_sprite = tile != tile::CROSSING && track > 65;

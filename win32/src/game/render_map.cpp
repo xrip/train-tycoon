@@ -101,7 +101,7 @@ void game_renderMap(Game *game, Surface *g) {
         static_cast<std::size_t>(visible_width * visible_height));
     game->renderer.visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
-        if ((game->fleet.trainFlags[n6] & 0x80) != 128) continue;
+        if (!train_flag::isUsed(game->fleet.trainFlags[n6])) continue;
         n5 = unsignedByte(game->fleet.trainX[n6]);
         n4 = unsignedByte(game->fleet.trainY[n6]);
         if (n5 < game->renderer.viewportX0 || n4 < game->renderer.viewportY0 || n5 > game->renderer.viewportX1 || n4 > game->renderer.viewportY1) continue;
@@ -140,7 +140,7 @@ void game_renderMap(Game *game, Surface *g) {
                                 n4 - game->renderer.viewportY0]) {
             for (n = 0; n < game->renderer.visibleTrainCount; ++n) {
                 n12 = game->renderer.visibleTrains[n];
-                if ((game->fleet.trainFlags[n12] & 0x80) != 128 || n5 != unsignedByte(game->fleet.trainX[n12]) || n4 != unsignedByte(game->fleet.trainY[n12])) continue;
+                if (!train_flag::isUsed(game->fleet.trainFlags[n12]) || n5 != unsignedByte(game->fleet.trainX[n12]) || n4 != unsignedByte(game->fleet.trainY[n12])) continue;
                 game_drawSpriteSingle(game, g, n12);
             }
         }
@@ -149,8 +149,8 @@ void game_renderMap(Game *game, Surface *g) {
         n12 = game->world.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.viewportCenterY - 4 * game->world.tileElevation[n5][n4] + 15;
         int n14 = -1;
         for (int i = 0; i < 50; ++i) {
-            if (unsignedByte(game->world.tileQueue[i][1]) != n5 || unsignedByte(game->world.tileQueue[i][2]) != n4) continue;
-            n14 = game->world.tileQueue[i][0];
+            if (unsignedByte(game->world.tileQueue[i].x) != n5 || unsignedByte(game->world.tileQueue[i].y) != n4) continue;
+            n14 = game->world.tileQueue[i].countdown;
         }
         if (n14 <= 0) continue;
         midp_draw_image(g, game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);

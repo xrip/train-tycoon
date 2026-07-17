@@ -23,8 +23,8 @@ bool game_isAnyTrainCarAt(Game *game, int32_t car, int32_t x, int32_t y) {
 
 int32_t game_findTrainHeadAt(Game *game, int32_t x, int32_t y) {
     for (int train = 0; train < 500; ++train) {
-        if ((game->fleet.trainFlags[train] & 0x80) == 128
-            && (game->fleet.trainFlags[train] & 0x40) == 64
+        if (train_flag::isUsed(game->fleet.trainFlags[train])
+            && train_flag::isHead(game->fleet.trainFlags[train])
             && game_isAnyTrainCarAt(game, train, x, y))
             return train;
     }
@@ -230,7 +230,7 @@ void game_pickTrainsAtCursor(Game *game) {
     for (int option = 0; option < 5; ++option) game->build.wagonOptionSlots[option] = -1;
     int car = game->fleet.nextCar[game->trainAtCursor];
     for (int option = 0; option < 5 && car != -1; ++option) {
-        switch (game->fleet.trainFlags[car] & 0xF) {
+        switch (train_flag::type(game->fleet.trainFlags[car])) {
             case 2: game->build.wagonOptionSlots[option] = 0; break;
             case 3: game->build.wagonOptionSlots[option] = 1; break;
             case 4: case 5: game->build.wagonOptionSlots[option] = 2; break;
@@ -421,7 +421,7 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
 void game_normalizeTrackBits(Game *game) {
     for (int x = 0; x < game->world.mapWidth; ++x) {
         for (int y = 0; y < game->world.mapHeight; ++y) {
-            if (game->world.trackMap[x][y] == 64) {
+            if (game->world.trackMap[x][y] == track::PRESENT) {
                 int tile = game->world.tileMap[x][y];
                 game->world.tileMap[x][y] =
                     tile == 78 ? 22 : tile == 80 ? 24 : tile == 85 ? 9
@@ -437,10 +437,10 @@ void game_normalizeTrackBits(Game *game) {
                 game->world.trackMap[x][y] = 0;
             } else if (low_owner == 0) {
                 game->world.tileMap[x][y] = 71;
-                game->world.trackMap[x][y] = (int8_t)(0x40 | high_owner);
+                game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | high_owner);
             } else if (high_owner == 0) {
                 game->world.tileMap[x][y] = 70;
-                game->world.trackMap[x][y] = (int8_t)(0x40 | low_owner);
+                game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | low_owner);
             }
         }
     }
@@ -449,9 +449,9 @@ void game_normalizeTrackBits(Game *game) {
 void game_setTrackOwnerCode(Game *game, int32_t owner) {
     for (int x = 0; x < game->world.mapWidth; ++x) {
         for (int y = 0; y < game->world.mapHeight; ++y) {
-            if (game->world.trackMap[x][y] == 64) {
+            if (game->world.trackMap[x][y] == track::PRESENT) {
                 if (owner == 1) game_advanceConstructionTimers(game, x, y, -4);
-                game->world.trackMap[x][y] = (int8_t)(0x40 | owner);
+                game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | owner);
             }
             if (game->world.tileMap[x][y] != 76) continue;
             int low_owner = game->world.trackMap[x][y] & 7;
@@ -459,7 +459,7 @@ void game_setTrackOwnerCode(Game *game, int32_t owner) {
             if (low_owner == 0) low_owner = owner;
             if (high_owner == 0) high_owner = owner;
             game->world.trackMap[x][y] =
-                (int8_t)(0x40 | low_owner | high_owner << 3);
+                static_cast<int8_t>(track::PRESENT | low_owner | high_owner << track::DIR_OWNER_SHIFT);
         }
     }
 }
@@ -469,6 +469,24 @@ void game_rebuildMenuTypeIndexes(Game *game) {
     for (int row = 0; row < 5; ++row) {
         if (game->ui.menuRowType[row] == 0) continue;
         game->ui.enabledMenuRowIndexes[game->ui.menuRowEnabledCount++] = (int8_t)row;
+    }
+}
+
+// Build-menu items that act on the tile under the cursor (place a depot/track/
+// terrain tile, demolish, smooth, or set an auto-route end). A bottom-bar click
+// carries no map tile -- the cursor re-anchors to the screen centre every tick
+// -- so these must only arm from the bar; the player then clicks the map to act
+// on the tile they point at. Mirrors the place-at-cursor branches of
+// game_openBuildMenu below; keep the two in sync.
+bool game_buildToolActsOnCursorTile(int32_t mode, int32_t item) {
+    switch (mode) {
+        case 0: return item == 0;                                 // select/inspect at cursor
+        case 1: return item == 0 || item == 2                     // route anchor, bridge/tunnel
+                     || item == 4 || item == 5 || item == 6;      // demolish, smooth up/down
+        case 3: return item != 9;                                 // place depot (9 = back)
+        case 4: return item == 0;                                 // route target
+        case 5: return item != 9;                                 // place track piece (9 = back)
+        default: return false;                                    // navigation, confirm/cancel
     }
 }
 
@@ -671,13 +689,14 @@ int32_t game_allocateTrainSlot(Game *game, int32_t x, int32_t y,
                              int32_t direction, int32_t energy) {
     int train = 500;
     for (int slot = 0; slot < 500; ++slot) {
-        if ((game->fleet.trainFlags[slot] & 0x80) == 0) {
+        if (!train_flag::isUsed(game->fleet.trainFlags[slot])) {
             train = slot;
             break;
         }
     }
     if (train != 500) {
-        game->fleet.trainFlags[train] = (int8_t)(0xC0 | engine_type);
+        game->fleet.trainFlags[train] = static_cast<int8_t>(
+            train_flag::USED_SLOT | train_flag::HEAD | engine_type);
         game->fleet.nextCar[train] = -1;
         game->fleet.trainX[train] = (int8_t)x;
         game->fleet.trainY[train] = (int8_t)y;
@@ -739,8 +758,14 @@ bool game_buyTrainAtCursor(Game *game) {
     }
     int direction =
         (game->fleet.vehicleFlags[game->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
+    // Spawn on the depot that opened this dialog, taken from the captured
+    // serviceVehicleAtCursor. The live tile cursor re-anchors to the screen
+    // centre every Playing tick, so by the time "buy" fires it has drifted off
+    // the depot; using it here would strand the engine on an empty tile.
+    int station_x = unsignedByte(game->fleet.serviceVehicleX[game->serviceVehicleAtCursor]);
+    int station_y = unsignedByte(game->fleet.serviceVehicleY[game->serviceVehicleAtCursor]);
     int train = game_allocateTrainSlot(
-        game, game->ui.tileCursorX, game->ui.tileCursorY,
+        game, station_x, station_y,
         game->build.wagonType < 3 ? 0 : 1, game->build.wagonType,
         direction, 8 - game->build.wagonType);
     for (int option = 0; option < 5; ++option) {

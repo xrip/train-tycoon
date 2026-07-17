@@ -9,6 +9,12 @@
 // be padded (tileMap/trackMap/tileElevation to mapWidth+1/mapHeight+1, heightMap
 // to +2). Values and byte order match the legacy save. Map dimensions and the
 // map query/geometry helpers move onto World in later WORLD-01 leaves.
+struct TileChange {
+    int8_t countdown = 0;
+    int8_t x = 0;
+    int8_t y = 0;
+};
+
 struct World {
     Grid<int8_t> tileMap;        // terrain and structure tile id per cell
     Grid<int8_t> trackMap;       // track byte per cell (see namespace track)
@@ -34,7 +40,7 @@ struct World {
     // tileQueueVisualOnly marks the ones that are display-only. woodAgeTimer
     // ages forest tiles and phaseTimer cycles the tile animation phase. All
     // runtime-only (not saved). Values and tick order are unchanged.
-    int8_t tileQueue[kTileQueueCount][kTileQueueFieldCount]{};
+    TileChange tileQueue[kTileQueueCount]{};
     bool tileQueueVisualOnly[kTileQueueCount]{};
     int32_t woodAgeTimer = 0;
     int32_t phaseTimer = 0;

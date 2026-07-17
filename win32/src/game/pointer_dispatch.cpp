@@ -41,7 +41,13 @@ void pointer_click_bottom_bar(Game *game, int x) {
         if (x >= ix && x < ix + 14) {
             game->ui.buildMenuItemIndex = item;
             game->ui.menuDirty = true;
-            game_openBuildMenu(game);
+            // A bottom-bar click has no map-tile target. Tools that act on the
+            // tile under the cursor only arm here; the player then clicks the
+            // map to act on the tile they point at. Navigation/confirm items
+            // still fire immediately.
+            const int item_value = unsigned_byte(game->ui.buildMenuItems[mode][item]);
+            if (!game_buildToolActsOnCursorTile(mode, item_value))
+                game_openBuildMenu(game);
             return;
         }
     }

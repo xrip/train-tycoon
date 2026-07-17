@@ -3,6 +3,7 @@
 #include "game_internal.h"
 #include "click_map.h"
 #include "midp_input.h"
+#include "scenario_definition.h"
 #include "stable_digest.h"
 #include "support/input_queue.h"
 #include "support/resource_reader.h"
@@ -253,6 +254,173 @@ TEST_CASE("fast: resource reader reads plain bytes and reaches EOF") {
     }
     CHECK(byte_count == filesystem::file_size(path));
     CHECK(resource.read_byte() == -1);
+}
+
+TEST_CASE("fast: scenario definition reads one packed record") {
+    ResourceReader resource = resources::open("scenarios.bin");
+    REQUIRE(resource);
+    CHECK(resource.read_byte() == 15);
+
+    ScenarioDefinition definition;
+    REQUIRE(readScenarioDefinition(resource, definition));
+    CHECK(definition.scenarioIndex == 0);
+    CHECK(definition.mapSize == 80);
+    CHECK(definition.terrainRaiseSteps == 30);
+    CHECK(definition.terrainLowerSteps == 15);
+    CHECK(definition.obstacleCount == 1500);
+    CHECK(definition.terrainPatchSize == 7);
+    CHECK(definition.mapGenColumns == 4);
+    CHECK(definition.mapGenRows == 4);
+    CHECK(definition.startingMoney == 200000);
+    CHECK(definition.loanCeiling == 600000);
+    CHECK(definition.startingLoan == 0);
+    CHECK(definition.interestRate == 8);
+    CHECK(definition.eraNumber == 2);
+    CHECK(definition.noticeId == 0);
+    CHECK(definition.buildMenuScenario == 127);
+    CHECK(definition.scenarioFlags == 7);
+}
+
+TEST_CASE("fast: proven train flag queries") {
+    constexpr int8_t flags = static_cast<int8_t>(
+        train_flag::USED_SLOT | train_flag::HEAD |
+        train_flag::REMOVAL_PENDING | 7);
+    static_assert(train_flag::isUsed(flags));
+    static_assert(train_flag::isHead(flags));
+    static_assert(train_flag::isRemovalPending(flags));
+    static_assert(train_flag::type(flags) == 7);
+
+    CHECK_FALSE(train_flag::isUsed(0));
+    CHECK_FALSE(train_flag::isHead(0));
+    CHECK_FALSE(train_flag::isRemovalPending(0));
+    CHECK(train_flag::type(static_cast<int8_t>(0xF3)) == 3);
+}
+
+TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+
+    // Find a buildable, empty interior tile for a depot.
+    int ax = -1, ay = -1;
+    for (int y = 8; y < game->world.mapHeight - 8 && ay < 0; ++y) {
+        for (int x = 8; x < game->world.mapWidth - 8; ++x) {
+            if (game->world.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
+                && game->world.tileElevation[x][y] == 0
+                && game_isTileBuildable(game, x, y, 0)) {
+                ax = x; ay = y; break;
+            }
+        }
+    }
+    REQUIRE(ax >= 0);
+
+    // Place a 1-cell depot at the chosen tile via the real build action.
+    game->economy.money = 1000000;
+    game->ui.tileCursorX = ax;
+    game->ui.tileCursorY = ay;
+    game_buildPlaceTrackPiece(game, 0);
+    REQUIRE(static_cast<uint8_t>(game->world.trackMap[ax][ay]) == 65);  // depot on player track
+
+    // Open the buy dialog on the depot (captures serviceVehicleAtCursor).
+    game->ui.tileCursorX = ax;
+    game->ui.tileCursorY = ay;
+    game_pickTrainsAtCursor(game);
+    REQUIRE(game->serviceVehicleAtCursor != 5000);
+
+    // Choose an engine with two wood wagons, as the buy menu would.
+    game->build.wagonType = 0;
+    game->build.unitCost = 1;
+    game->economy.money = 1000000;
+    for (int i = 0; i < 5; ++i) game->build.wagonOptionSlots[i] = -1;
+    game->build.wagonOptionSlots[0] = 3;  // wood
+    game->build.wagonOptionSlots[1] = 3;  // wood
+
+    // The Playing loop re-anchors tileCursor to the screen-center tile every
+    // tick; by the time "buy" fires it has drifted off the depot. Simulate that
+    // drift with an empty, non-track tile.
+    int bx = ax + 3, by = ay;
+    REQUIRE(static_cast<uint8_t>(game->world.trackMap[bx][by]) != 65);
+    game->ui.tileCursorX = bx;
+    game->ui.tileCursorY = by;
+
+    REQUIRE(game_buyTrainAtCursor(game));
+
+    // The freshly-bought engine must sit on the depot we selected, on player
+    // track (65) so it can actually run -- not on the drifted screen-center tile.
+    int head = game_findTrainHeadAt(game, ax, ay);
+    CHECK(head != 5000);
+    CHECK(game_findTrainHeadAt(game, bx, by) == 5000);
+    if (head != 5000) {
+        CHECK(static_cast<uint8_t>(game->world.trackMap[
+            static_cast<uint8_t>(game->fleet.trainX[head])][
+            static_cast<uint8_t>(game->fleet.trainY[head])]) == 65);
+    }
+    delete game;
+}
+
+TEST_CASE("fast: build tools that act on the cursor tile are classified") {
+    // Place-at-cursor tools (must wait for a map click).
+    CHECK(game_buildToolActsOnCursorTile(0, 0));   // select/inspect
+    CHECK(game_buildToolActsOnCursorTile(1, 0));   // route anchor
+    CHECK(game_buildToolActsOnCursorTile(1, 4));   // demolish
+    CHECK(game_buildToolActsOnCursorTile(3, 0));   // place depot
+    CHECK(game_buildToolActsOnCursorTile(4, 0));   // route target
+    CHECK(game_buildToolActsOnCursorTile(5, 2));   // place track piece
+    // Navigation / confirm items (fire on a bar click).
+    CHECK_FALSE(game_buildToolActsOnCursorTile(0, 1));   // open build submenu
+    CHECK_FALSE(game_buildToolActsOnCursorTile(1, 3));   // open station submenu
+    CHECK_FALSE(game_buildToolActsOnCursorTile(3, 9));   // back
+    CHECK_FALSE(game_buildToolActsOnCursorTile(2, 0));   // confirm auto-route
+}
+
+TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+
+    auto buildable = [&](int x, int y) {
+        return game->world.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
+               && game->world.tileElevation[x][y] == 0
+               && game_isTileBuildable(game, x, y, 0);
+    };
+    int ax = -1, ay = -1, bx = -1, by = -1;
+    for (int y = 8; y < game->world.mapHeight - 8 && ay < 0; ++y)
+        for (int x = 8; x < game->world.mapWidth - 8; ++x)
+            if (buildable(x, y)) { ax = x; ay = y; break; }
+    for (int y = ay + 4; y < game->world.mapHeight - 8 && by < 0; ++y)
+        for (int x = 8; x < game->world.mapWidth - 8; ++x)
+            if (buildable(x, y)) { bx = x; by = y; break; }
+    REQUIRE(ax >= 0); REQUIRE(bx >= 0);
+
+    canvasWidth = 240;
+    bottomBarY = 300;
+    game->economy.money = 1000000;
+    game->ui.pauseFlag = false;
+    game->ui.inputPending = false;
+    game->ui.buildMenuMode = 3;          // station sub-menu
+    game->ui.buildMenuItemIndex = 0;     // vertical depot
+
+    // The cursor has drifted to the screen-center tile B.
+    game->ui.tileCursorX = bx;
+    game->ui.tileCursorY = by;
+
+    // Click the depot icon in the bottom bar (compute its x the way the handler
+    // does). This must ARM the tool, not place a depot at the drifted tile.
+    const int mode = 3;
+    const int selected_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]);
+    int scroll = selected_x + 15 - canvasWidth;
+    if (scroll < 0) scroll = 0;
+    const int icon_x = static_cast<uint8_t>(game->ui.menuItemCode[mode][0]) - scroll;
+    game_pointerPressed(game, icon_x, bottomBarY);
+
+    CHECK(static_cast<uint8_t>(game->world.trackMap[bx][by]) != 65);  // nothing placed at drift
+    CHECK(game->ui.buildMenuItemIndex == 0);                          // tool stays armed
+
+    // Now the player clicks the map on tile A: openBuildMenu runs with the tile
+    // cursor on the clicked tile, and the armed depot tool places there.
+    game->ui.tileCursorX = ax;
+    game->ui.tileCursorY = ay;
+    game_openBuildMenu(game);
+    CHECK(static_cast<uint8_t>(game->world.trackMap[ax][ay]) == 65);  // depot placed where clicked
+    delete game;
 }
 
 TEST_CASE("fast: images own pixels and expose only valid drawing targets") {
