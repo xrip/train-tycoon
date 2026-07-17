@@ -141,7 +141,8 @@ void game_renderMap(Game *game, Surface *g) {
             for (n = 0; n < game->renderer.visibleTrainCount; ++n) {
                 n12 = game->renderer.visibleTrains[n];
                 if (!train_flag::isUsed(game->fleet.trainCars[n12].flags) || n5 != unsignedByte(game->fleet.trainCars[n12].x) || n4 != unsignedByte(game->fleet.trainCars[n12].y)) continue;
-                game_drawSpriteSingle(game, g, n12);
+                game->renderer.draw_train(*g, game->assets, game->world,
+                                          game->fleet, n12);
             }
         }
         if (n3 < 128) continue;

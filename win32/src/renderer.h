@@ -11,6 +11,8 @@
 #include <memory>
 
 struct Assets;
+struct Fleet;
+struct World;
 
 // Renderer owns the backbuffer and the on-screen view bookkeeping. backbuffer is
 // the off-screen image and backbuffer_surface is a borrowed view into it. The
@@ -22,6 +24,9 @@ struct Renderer {
     void draw_sprite_quad(Surface& surface, const Assets& assets,
                           int32_t sprite, int32_t x, int32_t y,
                           int32_t anchor) const;
+    void draw_train(Surface& surface, const Assets& assets,
+                    const World& world, const Fleet& fleet,
+                    int32_t train) const;
 
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface = nullptr;

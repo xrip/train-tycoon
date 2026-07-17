@@ -75,7 +75,6 @@ bool game_buyTrainAtCursor(Game *game);
 void game_tickInputOrAi(Game *game, bool bl);
 void game_simulationTick(Game *game);
 void game_updateTrain(Game *game, int32_t n);
-void game_drawSpriteSingle(Game *game, Surface* graphics, int32_t n);
 int32_t game_unloadTrainRevenue(Game *game, int32_t n, int32_t n2);
 void game_loadTrainAtServiceVehicle(Game *game, int32_t n, int32_t n2, bool bl);
 void game_decrementTrainCargoOptionCounts(Game *game, int32_t n);
