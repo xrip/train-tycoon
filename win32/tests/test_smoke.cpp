@@ -602,6 +602,43 @@ TEST_CASE("fast: economy spending and money history are owned rules") {
     CHECK(economy.moneyHistory[2] == 5);
 }
 
+TEST_CASE("fast: economy computes period and year-end report values") {
+    Economy economy;
+    economy.loanBalance = 120000;
+    economy.interestRate = 5;
+    economy.totalRevenue = 100000;
+    economy.enterpriseTaxPct = 3;
+    economy.totalSpent = 20000;
+    economy.aiMoneySpent = 4000;
+    economy.fuelCostAccrued = 5000;
+    economy.subsidyCost = 6000;
+    economy.decadeProfitGraphTotal = 7000;
+    economy.revenueTotal = 8000;
+    economy.decadeCostTotal = 9000;
+    economy.decadeSpentTotal = 10000;
+    economy.decadeFuelCost = 11000;
+    economy.decadeSubsidyTotal = 12000;
+    economy.decadeRevenueTotal = 13000;
+    economy.decadeProfitTotal = 14000;
+    economy.decadeEnterpriseTotal = 15000;
+
+    economy.compute_year_end_metrics();
+    CHECK(economy.terrainTotal == 500);
+    CHECK(economy.decadeEnterpriseTax == 3000);
+    CHECK(economy.netProfit == 61500);
+    CHECK(economy.yearProfitHistory[0] == 61500);
+    CHECK(economy.yearRevenueHistory[0] == 100000);
+    CHECK(economy.decadeProfitHistory[0] == 68500);
+    CHECK(economy.altDecadeRevenueTotal[0] == 108000);
+    CHECK(economy.decadeSpentWithCurrent == 29000);
+    CHECK(economy.decadeAiSpentWithCurrent == 14000);
+    CHECK(economy.decadeFuelWithCurrent == 16000);
+    CHECK(economy.decadeSubsidyWithCurrent == 18000);
+    CHECK(economy.decadeRevenueWithCurrent == 113000);
+    CHECK(economy.decadeProfitWithCurrent == 75500);
+    CHECK(economy.decadeEnterpriseWithCurrent == 18000);
+}
+
 TEST_CASE("fast: fleet lookup and chain count use stable slots") {
     Fleet fleet;
     const int head = fleet.allocate_train_car(2, 3, 0, 1, 0, 7);

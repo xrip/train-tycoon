@@ -142,27 +142,26 @@ void game_resetAiDepotTrainAges(Game *game) {
     }
 }
 
-void game_calculatePeriodProfit(Game *game) {
-    game->economy.terrainTotal = game->economy.loanBalance * game->economy.interestRate / 1200;
-    game->economy.decadeEnterpriseTax = game->economy.totalRevenue * game->economy.enterpriseTaxPct / 100;
-    game->economy.netProfit = game->economy.totalRevenue - game->economy.terrainTotal - game->economy.totalSpent
-                     - game->economy.aiMoneySpent - game->economy.fuelCostAccrued - game->economy.subsidyCost
-                     - game->economy.decadeEnterpriseTax;
+void Economy::calculate_period_profit() {
+    terrainTotal = loanBalance * interestRate / 1200;
+    decadeEnterpriseTax = totalRevenue * enterpriseTaxPct / 100;
+    netProfit = totalRevenue - terrainTotal - totalSpent - aiMoneySpent
+                - fuelCostAccrued - subsidyCost - decadeEnterpriseTax;
 }
 
-void game_computeYearEndMetrics(Game *game) {
-    game_calculatePeriodProfit(game);
-    game->economy.yearProfitHistory[0] = game->economy.netProfit;
-    game->economy.yearRevenueHistory[0] = game->economy.totalRevenue;
-    game->economy.decadeProfitHistory[0] = game->economy.decadeProfitGraphTotal + game->economy.netProfit;
-    game->economy.altDecadeRevenueTotal[0] = game->economy.revenueTotal + game->economy.totalRevenue;
-    game->economy.decadeSpentWithCurrent = game->economy.decadeCostTotal + game->economy.totalSpent;
-    game->economy.decadeAiSpentWithCurrent = game->economy.decadeSpentTotal + game->economy.aiMoneySpent;
-    game->economy.decadeFuelWithCurrent = game->economy.decadeFuelCost + game->economy.fuelCostAccrued;
-    game->economy.decadeSubsidyWithCurrent = game->economy.decadeSubsidyTotal + game->economy.subsidyCost;
-    game->economy.decadeRevenueWithCurrent = game->economy.decadeRevenueTotal + game->economy.totalRevenue;
-    game->economy.decadeProfitWithCurrent = game->economy.decadeProfitTotal + game->economy.netProfit;
-    game->economy.decadeEnterpriseWithCurrent = game->economy.decadeEnterpriseTotal + game->economy.decadeEnterpriseTax;
+void Economy::compute_year_end_metrics() {
+    calculate_period_profit();
+    yearProfitHistory[0] = netProfit;
+    yearRevenueHistory[0] = totalRevenue;
+    decadeProfitHistory[0] = decadeProfitGraphTotal + netProfit;
+    altDecadeRevenueTotal[0] = revenueTotal + totalRevenue;
+    decadeSpentWithCurrent = decadeCostTotal + totalSpent;
+    decadeAiSpentWithCurrent = decadeSpentTotal + aiMoneySpent;
+    decadeFuelWithCurrent = decadeFuelCost + fuelCostAccrued;
+    decadeSubsidyWithCurrent = decadeSubsidyTotal + subsidyCost;
+    decadeRevenueWithCurrent = decadeRevenueTotal + totalRevenue;
+    decadeProfitWithCurrent = decadeProfitTotal + netProfit;
+    decadeEnterpriseWithCurrent = decadeEnterpriseTotal + decadeEnterpriseTax;
 }
 
 void game_queueTileChange(Game *game, int32_t n, int32_t n2,
@@ -434,7 +433,7 @@ void game_newYearNotify(Game *game) {
         game->world.cities[n].previousStationRevenue = game->world.cities[n].stationRevenue;
         game->world.cities[n].stationRevenue = 0;
     }
-    game_calculatePeriodProfit(game);
+    game->economy.calculate_period_profit();
     game->economy.prevTotalSpent = game->economy.totalSpent;
     game->economy.prevAiMoneySpent = game->economy.aiMoneySpent;
     game->economy.prevFuelCost = game->economy.fuelCostAccrued;
@@ -799,7 +798,7 @@ void advanceEraIfNeeded(Game *game) {
 }
 
 void advanceGameDay(Game *game) {
-    game_computeYearEndMetrics(game);
+    game->economy.compute_year_end_metrics();
     if (game->frameIndex > 0) --game->frameIndex;
     game->dayFrameCounter = 0;
     ++game->economy.dayOfMonth;

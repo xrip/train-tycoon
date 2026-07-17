@@ -231,7 +231,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
         case 31:
             game->monthRolloverFlag = false;
             switch (n2) {
-                case 0: game->compareToPrevious = false; game_calculatePeriodProfit(game); game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
+                case 0: game->compareToPrevious = false; game->economy.calculate_period_profit(); game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
                 case 1: game->compareToPrevious = true; game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
                 case 2: game_setYearGraphMode(game, 0, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
                 case 3: game_setYearGraphMode(game, 0, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
@@ -245,7 +245,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 11: game_setYearGraphMode(game, 1, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
                 case 12: game_setYearGraphMode(game, 2, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
                 case 13: game_setYearGraphMode(game, 2, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 14: game->compareToPrevious = false; game_calculatePeriodProfit(game); game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
+                case 14: game->compareToPrevious = false; game->economy.calculate_period_profit(); game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
                 case 15: game->compareToPrevious = true; game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
             }
             game_setState(game, GameState::Playing); game->ui.menuDirty = true;

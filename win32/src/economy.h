@@ -11,6 +11,8 @@
 struct Economy {
     bool spend(int32_t amount);
     void push_money_history(int32_t amount);
+    void calculate_period_profit();
+    void compute_year_end_metrics();
 
     int32_t money = 200000;
     int32_t loanBalance = 0;
