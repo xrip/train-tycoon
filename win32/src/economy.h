@@ -9,6 +9,9 @@
 // as-is from the prior Game layout. Revenue history, station revenue, and
 // report aggregates move into Economy in a later ECON-01 leaf.
 struct Economy {
+    bool spend(int32_t amount);
+    void push_money_history(int32_t amount);
+
     int32_t money = 200000;
     int32_t loanBalance = 0;
     int32_t loanCeiling = 600000;

@@ -479,6 +479,25 @@ TEST_CASE("fast: type two offer progress handles zero money") {
     delete game;
 }
 
+TEST_CASE("fast: economy spending and money history are owned rules") {
+    Economy economy;
+    economy.money = 100;
+    economy.totalSpent = 10;
+    CHECK(economy.spend(60));
+    CHECK(economy.money == 40);
+    CHECK(economy.totalSpent == 70);
+    CHECK_FALSE(economy.spend(41));
+    CHECK(economy.money == 40);
+    CHECK(economy.totalSpent == 70);
+
+    economy.push_money_history(5);
+    economy.push_money_history(-7);
+    economy.push_money_history(9);
+    CHECK(economy.moneyHistory[0] == 9);
+    CHECK(economy.moneyHistory[1] == -7);
+    CHECK(economy.moneyHistory[2] == 5);
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);

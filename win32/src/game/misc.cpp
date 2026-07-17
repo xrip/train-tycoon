@@ -12,15 +12,20 @@ void game_openSpriteStream(Game *game, const char *resource_name) {
 }
 
 bool game_spendMoney(Game *game, int32_t n) {
-    if (n <= game->economy.money) {
-        game->economy.money -= n;
+    if (game->economy.spend(n)) {
         game->renderer.lastViewportCenterX = -1;
-        game->economy.totalSpent += n;
         game_pushMoneyHistory(game, -n);
         return true;
     }
     game_enterOutOfMoneyState(game);
     return false;
+}
+
+bool Economy::spend(int32_t amount) {
+    if (amount > money) return false;
+    money -= amount;
+    totalSpent += amount;
+    return true;
 }
 
 void game_everyTenTick(Game *game) {

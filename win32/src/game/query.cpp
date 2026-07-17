@@ -9,12 +9,16 @@ int32_t game_computeKeyRepeatDelay(Game *game) {
 }
 
 void game_pushMoneyHistory(Game *game, int32_t n) {
-    game->economy.moneyHistory[2] = game->economy.moneyHistory[1];
-    game->economy.moneyHistory[1] = game->economy.moneyHistory[0];
-    game->economy.moneyHistory[0] = n;
+    game->economy.push_money_history(n);
     game->ui.moneyTickerFrames[2] = game->ui.moneyTickerFrames[1];
     game->ui.moneyTickerFrames[1] = game->ui.moneyTickerFrames[0];
     game->ui.moneyTickerFrames[0] = 80;
+}
+
+void Economy::push_money_history(int32_t amount) {
+    moneyHistory[2] = moneyHistory[1];
+    moneyHistory[1] = moneyHistory[0];
+    moneyHistory[0] = amount;
 }
 
 bool World::has_track_step(int32_t n, int32_t n2, int32_t n3,
