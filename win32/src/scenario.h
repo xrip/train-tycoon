@@ -16,6 +16,7 @@ struct Economy;
 // Values and save byte order are unchanged.
 struct Scenario {
     bool complete_milestone_if_met(const Economy& economy);
+    int32_t milestone_progress(const Economy& economy) const;
 
     int32_t currentEra = 1;
 

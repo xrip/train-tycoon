@@ -90,14 +90,11 @@ void game_persistSnapshotMode0(Game *game);
 void game_persistSnapshotMode1(Game *game);
 void game_newYearNotify(Game *game);
 int32_t game_scanMapForMetric(Game *game);
-void game_setYearGraphMode(Game *game, int32_t n, bool bl);
-int32_t game_computeMilestoneScore(Game *game);
 void game_checkScenarioMilestone(Game *game);
 void game_rebuildMenuTypeIndexes(Game *game);
 void game_incrementCargoOptionCount(Game *game, int32_t n);
 void game_decrementCargoOptionCount(Game *game, int32_t n);
 int32_t game_computeMapTrainMetric(Game *game, int32_t n);
-bool game_syncHighScores(Game *game, bool bl);
 void game_appendTileDrawOffset(ByteBuffer& x_offsets,
                              ByteBuffer& y_offsets, int32_t x, int32_t y);
 void game_buildTileDrawOrder(Game *game, int32_t n, int32_t n2);

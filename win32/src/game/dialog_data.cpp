@@ -96,7 +96,8 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             break;
 
         case 17:
-            return game_formatNumberWithSuffix(game_computeMilestoneScore(game), 29);
+            return game_formatNumberWithSuffix(
+                game->scenario.milestone_progress(game->economy), 29);
 
         case 10:
             switch (field) {

@@ -7,11 +7,15 @@
 #include "support/grid.h"
 #include <cstdint>
 
+struct Economy;
+
 // UiController owns interface selection and screen-flow state. Saved offer
 // records live in OfferBoard.
 struct UiController {
     int32_t advance_key_repeat();
     int32_t report_graph_value(int32_t sprite_id, int32_t index) const;
+    void set_year_graph_mode(const Economy& economy, int32_t mode,
+                             bool alternate);
 
     bool monthlyReportEnabled = true;
     bool annualReportEnabled = true;

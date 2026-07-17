@@ -279,7 +279,7 @@ void updateAiTurn(Game *game) {
 void updateHighScoreSync(Game *game) {
     if (game->stateWorkStep > 0) --game->stateWorkStep;
     if (game->stateWorkStep != 2) return;
-    game->ui.transitionCode = game_syncHighScores(game, game->scenario.highScoreUploadRequested)
+    game->ui.transitionCode = game->sync_high_scores(game->scenario.highScoreUploadRequested)
                               ? 19 : 18;
     game_setState(game, GameState::MenuOverlay);
 }

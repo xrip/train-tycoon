@@ -234,18 +234,18 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             switch (n2) {
                 case 0: game->compareToPrevious = false; game->economy.calculate_period_profit(); game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
                 case 1: game->compareToPrevious = true; game->ui.pendingTransitionCode = 32; game_setState(game, GameState::Playing); goto hbms_end;
-                case 2: game_setYearGraphMode(game, 0, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
-                case 3: game_setYearGraphMode(game, 0, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 4: game_setYearGraphMode(game, 1, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
-                case 5: game_setYearGraphMode(game, 1, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 6: game_setYearGraphMode(game, 2, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
-                case 7: game_setYearGraphMode(game, 2, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 8: game_setYearGraphMode(game, 0, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
-                case 9: game_setYearGraphMode(game, 0, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 10: game_setYearGraphMode(game, 1, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
-                case 11: game_setYearGraphMode(game, 1, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
-                case 12: game_setYearGraphMode(game, 2, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
-                case 13: game_setYearGraphMode(game, 2, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
+                case 2: game->ui.set_year_graph_mode(game->economy, 0, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
+                case 3: game->ui.set_year_graph_mode(game->economy, 0, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
+                case 4: game->ui.set_year_graph_mode(game->economy, 1, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
+                case 5: game->ui.set_year_graph_mode(game->economy, 1, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
+                case 6: game->ui.set_year_graph_mode(game->economy, 2, false); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
+                case 7: game->ui.set_year_graph_mode(game->economy, 2, false); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
+                case 8: game->ui.set_year_graph_mode(game->economy, 0, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
+                case 9: game->ui.set_year_graph_mode(game->economy, 0, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
+                case 10: game->ui.set_year_graph_mode(game->economy, 1, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
+                case 11: game->ui.set_year_graph_mode(game->economy, 1, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
+                case 12: game->ui.set_year_graph_mode(game->economy, 2, true); game->ui.pendingTransitionCode = 33; game_setState(game, GameState::Playing); goto hbms_end;
+                case 13: game->ui.set_year_graph_mode(game->economy, 2, true); game->ui.pendingTransitionCode = 34; game_setState(game, GameState::Playing); goto hbms_end;
                 case 14: game->compareToPrevious = false; game->economy.calculate_period_profit(); game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
                 case 15: game->compareToPrevious = true; game->ui.pendingTransitionCode = 35; game_setState(game, GameState::Playing); goto hbms_end;
             }

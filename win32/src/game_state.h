@@ -64,6 +64,7 @@ typedef struct Game {
     bool matches_resource_condition(int32_t group, int32_t value);
     bool spend_money(int32_t amount);
     void update_ten_day_metric();
+    bool sync_high_scores(bool upload);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

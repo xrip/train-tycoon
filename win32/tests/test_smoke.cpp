@@ -1320,7 +1320,7 @@ TEST_CASE("full: report and graph dialogs have fixed frame digests") {
     game->render(screen);
     CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
 
-    game_setYearGraphMode(game, 0, false);
+    game->ui.set_year_graph_mode(game->economy, 0, false);
     game->ui.transitionCode = 33;
     game_setState(game, GameState::MenuOverlay);
     game->render(screen);

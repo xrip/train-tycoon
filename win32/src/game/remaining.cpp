@@ -26,28 +26,28 @@ std::vector<int8_t> game_encodeDisplayText(const char *text) {
     return result;
 }
 
-void game_setYearGraphMode(Game *game, int32_t mode, bool alternate) {
-    game->ui.yearGraphMode = mode;
-    game->ui.yearGraphAlt = alternate;
+void UiController::set_year_graph_mode(const Economy& economy, int32_t mode, bool alternate) {
+    yearGraphMode = mode;
+    yearGraphAlt = alternate;
     int minimum = 0;
     int maximum = 0;
     for (int index = 0; index < 12; ++index) {
         int value;
         if (!alternate) {
-            game->ui.yearGraphOffsets[index] = (int8_t)(game->economy.year - 1940);
-            game->ui.altYearArray[index] = (int8_t)(game->economy.monthOfYear - index);
-            if (game->ui.altYearArray[index] < 1) {
-                game->ui.altYearArray[index] = (int8_t)(12 + game->ui.altYearArray[index]);
-                --game->ui.yearGraphOffsets[index];
+            yearGraphOffsets[index] = (int8_t)(economy.year - 1940);
+            altYearArray[index] = (int8_t)(economy.monthOfYear - index);
+            if (altYearArray[index] < 1) {
+                altYearArray[index] = (int8_t)(12 + altYearArray[index]);
+                --yearGraphOffsets[index];
             }
-            value = mode == 0 ? game->economy.yearProfitHistory[index]
-                    : mode == 1 ? game->economy.yearRevenueHistory[index]
-                    : game->economy.yearCompanyValueHistory[index];
+            value = mode == 0 ? economy.yearProfitHistory[index]
+                    : mode == 1 ? economy.yearRevenueHistory[index]
+                    : economy.yearCompanyValueHistory[index];
         } else {
-            game->ui.altYearArray[index] = (int8_t)(game->economy.year - index - 1940);
-            value = mode == 0 ? game->economy.decadeProfitHistory[index]
-                    : mode == 1 ? game->economy.altDecadeRevenueTotal[index]
-                    : game->economy.altDecadeTotalCost[index];
+            altYearArray[index] = (int8_t)(economy.year - index - 1940);
+            value = mode == 0 ? economy.decadeProfitHistory[index]
+                    : mode == 1 ? economy.altDecadeRevenueTotal[index]
+                    : economy.altDecadeTotalCost[index];
         }
         if (value > maximum) maximum = value;
         if (value < minimum) minimum = value;
@@ -55,74 +55,74 @@ void game_setYearGraphMode(Game *game, int32_t mode, bool alternate) {
     int scale = maximum > -minimum ? maximum : -minimum;
     for (int index = 0; index < 12; ++index) {
         if (!alternate && mode == 0) {
-            game->ui.yearGraphValues[index] =
-                game->economy.yearProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * game->economy.yearProfitHistory[index] / scale);
+            yearGraphValues[index] =
+                economy.yearProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * economy.yearProfitHistory[index] / scale);
         } else if (!alternate && mode == 1) {
-            game->ui.yearGraphValues[index] =
-                game->economy.yearRevenueHistory[index] == 0 ? 0
-                : (int8_t)(60 * game->economy.yearRevenueHistory[index] / scale);
+            yearGraphValues[index] =
+                economy.yearRevenueHistory[index] == 0 ? 0
+                : (int8_t)(60 * economy.yearRevenueHistory[index] / scale);
         } else if (!alternate && mode == 2) {
             // The original tests profit for zero before scaling company value.
-            game->ui.yearGraphValues[index] =
-                game->economy.yearProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * game->economy.yearCompanyValueHistory[index] / scale);
+            yearGraphValues[index] =
+                economy.yearProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * economy.yearCompanyValueHistory[index] / scale);
         } else if (alternate && mode == 0) {
-            game->ui.yearGraphValues[index] =
-                game->economy.decadeProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * game->economy.decadeProfitHistory[index] / scale);
+            yearGraphValues[index] =
+                economy.decadeProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * economy.decadeProfitHistory[index] / scale);
         } else if (alternate && mode == 1) {
-            game->ui.yearGraphValues[index] =
-                game->economy.altDecadeRevenueTotal[index] == 0 ? 0
-                : (int8_t)(60 * game->economy.altDecadeRevenueTotal[index] / scale);
+            yearGraphValues[index] =
+                economy.altDecadeRevenueTotal[index] == 0 ? 0
+                : (int8_t)(60 * economy.altDecadeRevenueTotal[index] / scale);
         } else if (alternate && mode == 2) {
             // The original tests the other-total array before scaling cost.
-            game->ui.yearGraphValues[index] =
-                game->economy.decadeProfitHistory[index] == 0 ? 0
-                : (int8_t)(30 * game->economy.altDecadeTotalCost[index] / scale);
+            yearGraphValues[index] =
+                economy.decadeProfitHistory[index] == 0 ? 0
+                : (int8_t)(30 * economy.altDecadeTotalCost[index] / scale);
         }
     }
 }
 
-int32_t game_computeMilestoneScore(Game *game) {
-    int target = game->scenario.currentMilestoneScore;
+int32_t Scenario::milestone_progress(const Economy& economy) const {
+    int target = currentMilestoneScore;
     int current = 0;
-    if (game->scenario.scenarioMilestoneIndex >= 6 && game->scenario.scenarioMilestoneIndex <= 11)
-        target += game->scenario.milestoneCoThreshold2;
-    switch (game->scenario.scenarioMilestoneIndex) {
-        case 1: current = game->scenario.milestoneThreshold1; break;
-        case 2: current = game->scenario.milestoneThreshold2; break;
-        case 3: current = game->scenario.milestoneThreshold3; break;
-        case 4: current = game->scenario.milestoneThreshold4; break;
-        case 5: current = game->scenario.milestoneThreshold5; break;
+    if (scenarioMilestoneIndex >= 6 && scenarioMilestoneIndex <= 11)
+        target += milestoneCoThreshold2;
+    switch (scenarioMilestoneIndex) {
+        case 1: current = milestoneThreshold1; break;
+        case 2: current = milestoneThreshold2; break;
+        case 3: current = milestoneThreshold3; break;
+        case 4: current = milestoneThreshold4; break;
+        case 5: current = milestoneThreshold5; break;
         case 6:
-            current = game->scenario.milestoneThreshold1 + game->scenario.milestoneThreshold2;
+            current = milestoneThreshold1 + milestoneThreshold2;
             break;
         case 7:
-            current = game->scenario.milestoneThreshold1 + game->scenario.milestoneThreshold3;
+            current = milestoneThreshold1 + milestoneThreshold3;
             break;
         case 8:
-            current = game->scenario.milestoneThreshold1 + game->scenario.milestoneThreshold4;
+            current = milestoneThreshold1 + milestoneThreshold4;
             break;
         case 9:
-            current = game->scenario.milestoneThreshold2 + game->scenario.milestoneThreshold3;
+            current = milestoneThreshold2 + milestoneThreshold3;
             break;
         case 10:
-            current = game->scenario.milestoneThreshold2 + game->scenario.milestoneThreshold4;
+            current = milestoneThreshold2 + milestoneThreshold4;
             break;
         case 11:
-            current = game->scenario.milestoneThreshold4 + game->scenario.milestoneThreshold5;
+            current = milestoneThreshold4 + milestoneThreshold5;
             break;
-        case 12: current = game->economy.lifetimeTrainRevenue; break;
+        case 12: current = economy.lifetimeTrainRevenue; break;
         case 13:
-            current = game->economy.loanCeiling - game->economy.loanBalance;
-            target = game->economy.loanCeiling;
+            current = economy.loanCeiling - economy.loanBalance;
+            target = economy.loanCeiling;
             break;
         case 14:
-            current = game->economy.year - 1950;
-            target = game->scenario.currentMilestoneScore - 1950;
+            current = economy.year - 1950;
+            target = currentMilestoneScore - 1950;
             break;
-        case 15: current = game->scenario.aiWagonsBought; break;
+        case 15: current = aiWagonsBought; break;
     }
     int score = 100 * current / target;
     if (score < 0) score = 0;
@@ -203,7 +203,7 @@ void Game::stop_music() {
     music.stop();
 }
 
-bool game_syncHighScores(Game *game, bool upload) {
-    (void)game; (void)upload;
+bool Game::sync_high_scores(bool upload) {
+    (void)upload;
     return false;
 }
