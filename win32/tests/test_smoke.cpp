@@ -22,8 +22,8 @@ namespace filesystem = std::filesystem;
 
 namespace {
 
-constexpr int kScreenWidth = 240;
-constexpr int kScreenHeight = 320;
+constexpr int kScreenWidth = MIDP_SCREEN_W;
+constexpr int kScreenHeight = MIDP_SCREEN_H;
 constexpr std::int64_t kFixedRandomSeed = 0x5eed1234;
 std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 
@@ -1372,7 +1372,7 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     game->render(screen);
     StableDigest first_frame;
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
-    CHECK(first_frame.value() == 13699798000239068498ULL);
+    CHECK(first_frame.value() == 17630569386893703870ULL);
 
     const int old_viewport_x = GameTestAccess::renderer(*game).camera.viewportCenterX;
     game->key_pressed(54);
@@ -1383,7 +1383,7 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX != old_viewport_x);
     StableDigest moved_frame;
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
-    CHECK(moved_frame.value() == 2749731419861486662ULL);
+    CHECK(moved_frame.value() == 2245004776403447213ULL);
 
     delete game;
 }
@@ -1424,13 +1424,13 @@ TEST_CASE("full: report and graph dialogs have fixed frame digests") {
     GameTestAccess::ui(*game).transitionCode = 32;
     GameTestAccess::set_state(*game, GameState::MenuOverlay);
     game->render(screen);
-    CHECK(paint_digest(game, &screen) == 3874743700717669836ULL);
+    CHECK(paint_digest(game, &screen) == 611837288114446412ULL);
 
     GameTestAccess::ui(*game).set_year_graph_mode(GameTestAccess::economy(*game), 0, false);
     GameTestAccess::ui(*game).transitionCode = 33;
     GameTestAccess::set_state(*game, GameState::MenuOverlay);
     game->render(screen);
-    CHECK(paint_digest(game, &screen) == 1138514185145564824ULL);
+    CHECK(paint_digest(game, &screen) == 5091032400029738936ULL);
     delete game;
 }
 

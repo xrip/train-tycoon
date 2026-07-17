@@ -20,9 +20,9 @@ extern "C" {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// Framebuffer geometry (the J2ME canvas was 240x320).
-#define MIDP_SCREEN_W 240
-#define MIDP_SCREEN_H 320
+// Fixed landscape framebuffer geometry for the native port.
+#define MIDP_SCREEN_W 640
+#define MIDP_SCREEN_H 480
 
 ///////////////////////////////////////////////////////////////////////////////
 // drawImage anchor flags (javax.microedition.lcdui.Graphics).
