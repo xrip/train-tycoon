@@ -87,7 +87,8 @@ bool BuildController::adjust_terrain_point(const Terrain& terrain,
     return bl2;
 }
 
-bool game_isResourceTile(Game *game, int32_t n, int32_t n2) {
+bool Game::matches_resource_condition(int32_t n, int32_t n2) {
+    Game* game = this;
     if (n != 1) game->ui.snapshotLoadedFlag = false;
     if (n == 1) {
         if (!game->ui.snapshotLoadedFlag) {

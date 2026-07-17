@@ -69,7 +69,6 @@ std::vector<int8_t> game_formatCurrency(int32_t value);
 std::vector<int8_t> game_formatNumberWithSuffix(int32_t value, int32_t suffix);
 std::vector<int8_t> game_encodeDisplayText(const char* text);
 Image* game_wagonCarSprite(Game *game, int32_t n, int32_t n2);
-bool game_isResourceTile(Game *game, int32_t n, int32_t n2);
 std::optional<std::vector<int8_t>> game_resolveDialogValue(Game *game, int32_t n, int32_t n2);
 void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2);
 bool game_tryBuildPath(Game *game);

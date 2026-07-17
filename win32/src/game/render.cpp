@@ -451,7 +451,10 @@ void PackedDialogRender::renderContent() {
             }
             if (game->renderer.needsRepaint && itemY + yOffset + 6 + selectionBottom >= game->renderer.clipY + game->renderer.clipHeight)
                 game->ui.cursorAllowZoomOut = true;
-            if (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)) continue;
+            if (hasResourceCondition
+                && !game->matches_resource_condition(
+                    game->renderer.currentSpriteId, resourceId))
+                continue;
             if (itemY + yOffset - selectionTop - 3 <= game->renderer.clipY + game->renderer.clipHeight
                 && itemY + yOffset + 8 + selectionBottom >= game->renderer.clipY) {
                 if ((itemFlags & 0x10) == 0x10) {
@@ -501,7 +504,10 @@ void PackedDialogRender::renderContent() {
         Image *image = game_wagonCarSprite(game, game->renderer.currentSpriteId, item.slotIndex);
         if (image == NULL) continue;
         int imageHeight = image->height();
-        if (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)) continue;
+        if (hasResourceCondition
+            && !game->matches_resource_condition(
+                game->renderer.currentSpriteId, resourceId))
+            continue;
         if (game->renderer.needsRepaint && itemY + yOffset <= game->renderer.clipY + game->renderer.clipHeight
             && itemY + yOffset + imageHeight >= game->renderer.clipY)
             midp_draw_image(surface, image, contentX + xOffset, itemY + yOffset, 20);
@@ -526,7 +532,9 @@ void PackedDialogRender::renderCommands() {
         const int resourceId = command.resourceId;
         int lowestY = commandBaseY + y + heightOrY2;
         if (!game->renderer.needsRepaint
-            || (hasResourceCondition && !game_isResourceTile(game, game->renderer.currentSpriteId, resourceId)))
+            || (hasResourceCondition
+                && !game->matches_resource_condition(
+                    game->renderer.currentSpriteId, resourceId)))
             continue;
         switch (commandType) {
             case 0:
