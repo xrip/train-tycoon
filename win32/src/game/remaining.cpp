@@ -130,20 +130,20 @@ int32_t game_computeMilestoneScore(Game *game) {
     return score;
 }
 
-int8_t game_computeMenuRowDisplayValue(Game *game, int32_t row) {
+int8_t OfferBoard::display_progress(int32_t row, const Economy& economy) const {
     int value;
-    if (game->offerBoard.offers[row].objectiveType == 1) {
-        value = 100 * game->offerBoard.offers[row].progress / game->offerBoard.offers[row].target;
-    } else if (game->offerBoard.offers[row].objectiveType == 2) {
-        if (game->economy.money == 0) {
+    if (offers[row].objectiveType == 1) {
+        value = 100 * offers[row].progress / offers[row].target;
+    } else if (offers[row].objectiveType == 2) {
+        if (economy.money == 0) {
             value = 0;
         } else {
-            value = game->economy.money > 0
-                    ? 100 * game->economy.money / game->offerBoard.offers[row].target
-                    : 100 * game->offerBoard.offers[row].target / game->economy.money;
+            value = economy.money > 0
+                    ? 100 * economy.money / offers[row].target
+                    : 100 * offers[row].target / economy.money;
         }
-    } else if (game->offerBoard.offers[row].objectiveType >= 4 && game->offerBoard.offers[row].objectiveType <= 14) {
-        value = 100 * game->offerBoard.offers[row].progress / game->offerBoard.offers[row].target;
+    } else if (offers[row].objectiveType >= 4 && offers[row].objectiveType <= 14) {
+        value = 100 * offers[row].progress / offers[row].target;
     } else {
         return 0;
     }

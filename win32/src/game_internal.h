@@ -145,7 +145,6 @@ void game_pickIndustrySite(Game *game);
 int32_t game_computeMilestoneScore(Game *game);
 void game_checkScenarioMilestone(Game *game);
 void game_rebuildMenuTypeIndexes(Game *game);
-int8_t game_computeMenuRowDisplayValue(Game *game, int32_t n);
 void game_placeTrainAt(Game *game, int32_t n, int32_t n2);
 void game_applyMenuRowEffect(Game *game, int32_t n);
 void game_duplicateMenuRow(Game *game, int32_t n);

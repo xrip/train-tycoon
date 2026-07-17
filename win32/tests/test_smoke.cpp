@@ -471,11 +471,11 @@ TEST_CASE("fast: type two offer progress handles zero money") {
     offer.target = 1000;
 
     game->economy.money = 500;
-    CHECK(game_computeMenuRowDisplayValue(game, 0) == 50);
+    CHECK(game->offerBoard.display_progress(0, game->economy) == 50);
     game->economy.money = -500;
-    CHECK(game_computeMenuRowDisplayValue(game, 0) == 0);
+    CHECK(game->offerBoard.display_progress(0, game->economy) == 0);
     game->economy.money = 0;
-    CHECK(game_computeMenuRowDisplayValue(game, 0) == 0);
+    CHECK(game->offerBoard.display_progress(0, game->economy) == 0);
     delete game;
 }
 

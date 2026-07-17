@@ -238,7 +238,9 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 return join_three_codes(day, month, year);
             }
             if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].target);
-            if (field == 3) return game_formatNumberWithSuffix(game_computeMenuRowDisplayValue(game, game->scenario.offerRowIndex), 29);
+            if (field == 3) return game_formatNumberWithSuffix(
+                game->offerBoard.display_progress(game->scenario.offerRowIndex,
+                                                  game->economy), 29);
             if (field == 4) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].target, 0);
             break;
 
@@ -251,7 +253,8 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             } else {
                 int index = (field - 1) / 2;
                 return game_formatNumberWithSuffix(
-                    game_computeMenuRowDisplayValue(game, game->ui.enabledMenuRowIndexes[index]), 29);
+                    game->offerBoard.display_progress(
+                        game->ui.enabledMenuRowIndexes[index], game->economy), 29);
             }
 
         case 61: case 62: case 63: case 64: case 65: case 66:
