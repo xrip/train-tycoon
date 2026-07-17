@@ -5,12 +5,12 @@ namespace {
 
 void applyScenarioDefinition(Game *game, const ScenarioDefinition& definition) {
     game->scenario.scenarioStep = definition.scenarioIndex;
-    game->world.mapWidth = game->world.mapHeight = definition.mapSize;
-    game->world.mapHalfWidth = (game->world.mapWidth - 1) * 8;
-    game->world.mapScreenWidth = (game->world.mapWidth + game->world.mapHeight) * 16;
-    game->world.mapScreenHeight = (game->world.mapWidth + game->world.mapHeight) * 8;
-    game->renderer.viewportHalfWidth = game->world.mapScreenWidth / 2;
-    game->renderer.viewportHalfHeight = game->world.mapScreenHeight / 2;
+    game->world.terrain.mapWidth = game->world.terrain.mapHeight = definition.mapSize;
+    game->world.terrain.mapHalfWidth = (game->world.terrain.mapWidth - 1) * 8;
+    game->world.terrain.mapScreenWidth = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 16;
+    game->world.terrain.mapScreenHeight = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 8;
+    game->renderer.viewportHalfWidth = game->world.terrain.mapScreenWidth / 2;
+    game->renderer.viewportHalfHeight = game->world.terrain.mapScreenHeight / 2;
     game->renderer.viewportCenterX = game->renderer.viewportHalfWidth;
     game->renderer.viewportCenterY = game->renderer.viewportHalfHeight;
     game->renderer.viewportBaseX = game->renderer.viewportCenterX;
@@ -151,11 +151,11 @@ void setMinimapColor(Game *game, int kind, int x, int y) {
     Surface *surface = game->renderer.backbuffer_surface;
     switch (kind) {
         case 1:
-            if (game->world.tileElevation[x][y] == -1) midp_set_color(surface, 3167360);
-            if (game->world.tileElevation[x][y] == 0) midp_set_color(surface, 5274640);
-            if (game->world.tileElevation[x][y] == 1) midp_set_color(surface, 6327328);
-            if (game->world.tileElevation[x][y] == 2) midp_set_color(surface, 7380016);
-            if (game->world.tileElevation[x][y] == 3) midp_set_color(surface, 8432704);
+            if (game->world.terrain.tileElevation[x][y] == -1) midp_set_color(surface, 3167360);
+            if (game->world.terrain.tileElevation[x][y] == 0) midp_set_color(surface, 5274640);
+            if (game->world.terrain.tileElevation[x][y] == 1) midp_set_color(surface, 6327328);
+            if (game->world.terrain.tileElevation[x][y] == 2) midp_set_color(surface, 7380016);
+            if (game->world.terrain.tileElevation[x][y] == 3) midp_set_color(surface, 8432704);
             break;
         case 2: midp_set_color(surface, 6327312); break;
         case 3: midp_set_color(surface, 0x909040); break;
@@ -175,18 +175,18 @@ void setMinimapColor(Game *game, int kind, int x, int y) {
 }
 
 void buildMinimapOverview(Game *game) {
-    const int size = game->world.mapHeight + game->world.mapWidth;
+    const int size = game->world.terrain.mapHeight + game->world.terrain.mapWidth;
     game->renderer.backbuffer = Image::create_blank(size, size);
     game->renderer.backbuffer_surface = game->renderer.backbuffer->drawing_surface();
     midp_set_color(game->renderer.backbuffer_surface, 0);
     midp_fill_rect(game->renderer.backbuffer_surface, 0, 0, size, size);
     int previousKind = -1;
     int kind = 0;
-    for (int x = 0; x < game->world.mapWidth; ++x) {
-        for (int y = 0; y < game->world.mapHeight; ++y) {
-            const int drawY = game->world.mapWidth - x + y;
+    for (int x = 0; x < game->world.terrain.mapWidth; ++x) {
+        for (int y = 0; y < game->world.terrain.mapHeight; ++y) {
+            const int drawY = game->world.terrain.mapWidth - x + y;
             const int drawX = x + y;
-            const int tileCode = game->world.tileMap[x][y];
+            const int tileCode = game->world.terrain.tileMap[x][y];
             const int trackCode = game->world.trackMap[x][y];
             if (tileCode == 0) kind = 1;
             if (tileCode >= 3 && tileCode <= 28) kind = 2;

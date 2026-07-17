@@ -13,7 +13,7 @@ void paintMapOverview(Game *game, Surface *g) {
     midp_fill_rect(g, 0, 15, canvasWidth, gameplayViewportHeight);
     int viewportMapX = game->renderer.viewportCenterX / 16;
     int viewportMapY = game->renderer.viewportCenterY / 8;
-    int overviewSize = game->world.mapWidth + game->world.mapHeight;
+    int overviewSize = game->world.terrain.mapWidth + game->world.terrain.mapHeight;
     int drawX = canvasWidth / 2 - viewportMapX - canvasWidth / 32;
     if (canvasWidth - drawX > overviewSize) drawX = canvasWidth - overviewSize;
     if (drawX > 0) drawX = 0;
@@ -23,9 +23,9 @@ void paintMapOverview(Game *game, Surface *g) {
     int centerX = overviewSize < canvasWidth ? (canvasWidth - overviewSize) / 2 : 0;
     int centerY = overviewSize < gameplayViewportHeight ? (gameplayViewportHeight - overviewSize) / 2 : 0;
     midp_draw_image(g, game->renderer.backbuffer.get(), drawX + centerX, 15 + drawY + centerY, 20);
-    int mapX = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.mapHalfWidth;
-    int mapY = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.mapHalfWidth;
-    int boxY = game->world.mapWidth - (mapX /= 32) + (mapY /= 32);
+    int mapX = game->renderer.viewportCenterX - 2 * game->renderer.viewportCenterY + 16 + 2 * game->world.terrain.mapHalfWidth;
+    int mapY = game->renderer.viewportCenterX + 2 * game->renderer.viewportCenterY - 16 - 2 * game->world.terrain.mapHalfWidth;
+    int boxY = game->world.terrain.mapWidth - (mapX /= 32) + (mapY /= 32);
     int boxX = mapX + mapY;
     midp_set_color(g, 0xFFFFFF);
     midp_draw_rect(g, boxX + drawX + centerX, 15 + boxY + drawY + centerY,

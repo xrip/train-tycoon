@@ -20,9 +20,9 @@ void game_pushMoneyHistory(Game *game, int32_t n) {
 bool game_isTrackStep(Game *game, int32_t n, int32_t n2, int32_t n3,
                           int32_t n4, int32_t n5) {
     bool bl = false;
-    while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < game->world.mapWidth && n2 < game->world.mapHeight) {
-        if (game->world.tileMap[n][n2] == n5) bl = true;
-        if (game->world.tileMap[n][n2] == 0 && game->world.trackMap[n][n2] == 0) continue;
+    while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < game->world.terrain.mapWidth && n2 < game->world.terrain.mapHeight) {
+        if (game->world.terrain.tileMap[n][n2] == n5) bl = true;
+        if (game->world.terrain.tileMap[n][n2] == 0 && game->world.trackMap[n][n2] == 0) continue;
         break;
     }
     return bl;
@@ -45,11 +45,11 @@ int32_t game_neighboursMask(Game *game, int32_t n, int32_t n2) {
 bool game_isAdjacentTileEmpty(Game *game, int32_t n, int32_t n2, int32_t n3, bool bl) {
     bool bl2 = true;
     if (n > 0) {
-        if (game->world.tileMap[n - 1][n2] >= tile::BUILT_FIRST) bl2 = false;
-        if (n2 > 0 && game->world.tileMap[n - 1][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
+        if (game->world.terrain.tileMap[n - 1][n2] >= tile::BUILT_FIRST) bl2 = false;
+        if (n2 > 0 && game->world.terrain.tileMap[n - 1][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
     }
-    if (n2 > 0 && game->world.tileMap[n][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
-    if (game->world.tileMap[n][n2] >= tile::BUILT_FIRST) bl2 = false;
+    if (n2 > 0 && game->world.terrain.tileMap[n][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
+    if (game->world.terrain.tileMap[n][n2] >= tile::BUILT_FIRST) bl2 = false;
     int32_t n4 = n - game->build.selectionStartX;
     int32_t n5 = n2 - game->build.selectionStartY;
     if (bl2) {

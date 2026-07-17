@@ -4,7 +4,7 @@
 
 int32_t game_accumulateTrainTurns(Game *game, int32_t car) {
     if (car == -1) return 0;
-    int tile = game->world.tileMap[unsignedByte(game->fleet.trainCars[car].x)][unsignedByte(game->fleet.trainCars[car].y)];
+    int tile = game->world.terrain.tileMap[unsignedByte(game->fleet.trainCars[car].x)][unsignedByte(game->fleet.trainCars[car].y)];
     int turn = 0;
     if (tile == 77) turn = game->fleet.trainCars[car].direction == 0 ? -1 : 1;
     if (tile == 79) turn = game->fleet.trainCars[car].direction == 0 ? 1 : -1;
@@ -280,8 +280,8 @@ void game_updateTrain(Game *game, int32_t head) {
 
         int old_x = unsignedByte(game->fleet.trainCars[head].x);
         int old_y = unsignedByte(game->fleet.trainCars[head].y);
-        bool at_service_tile = (game->world.tileMap[old_x][old_y] == 87
-                                || game->world.tileMap[old_x][old_y] == 88);
+        bool at_service_tile = (game->world.terrain.tileMap[old_x][old_y] == 87
+                                || game->world.terrain.tileMap[old_x][old_y] == 88);
         if (train_flag::isHead(game->fleet.trainCars[head].flags) && game->fleet.trainCars[head].phase == 4
             && at_service_tile && game->world.trackMap[old_x][old_y] == 65) {
             int service_vehicle = game_findServiceVehicleAt(game, old_x, old_y);
@@ -352,7 +352,7 @@ void game_updateTrain(Game *game, int32_t head) {
             int next_x = unsignedByte(game->fleet.trainCars[head].x);
             int next_y = unsignedByte(game->fleet.trainCars[head].y);
             int current_track = game->world.trackMap[next_x][next_y];
-            int current_variant = game->world.tileMap[next_x][next_y] - 70;
+            int current_variant = game->world.terrain.tileMap[next_x][next_y] - 70;
             if (current_variant == 6 && (game->fleet.trainCars[head].direction == 0
                                          || game->fleet.trainCars[head].direction == 1)) {
                 current_track = track::PRESENT | (current_track & track::DIR_OWNER_MASK);
@@ -373,10 +373,10 @@ void game_updateTrain(Game *game, int32_t head) {
             next_x += step[2];
             next_y += step[3];
             if (next_x >= 0 && next_y >= 0
-                && next_x < game->world.mapWidth && next_y < game->world.mapHeight) {
+                && next_x < game->world.terrain.mapWidth && next_y < game->world.terrain.mapHeight) {
                 bool moved = false;
                 int next_track = game->world.trackMap[next_x][next_y];
-                int next_variant = normalize_track_variant(game->world.tileMap[next_x][next_y] - 70);
+                int next_variant = normalize_track_variant(game->world.terrain.tileMap[next_x][next_y] - 70);
                 for (int pair = 2; pair < kTrackStepValueCount / 2; ++pair) {
                     if (step[2 * pair] != next_variant) continue;
                     int next_dir = step[2 * pair + 1];

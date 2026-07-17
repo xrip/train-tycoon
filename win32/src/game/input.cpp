@@ -53,10 +53,10 @@ void game_viewportPanKey(Game *game) {
     }
     if (game->renderer.viewportCenterX < 0) game->renderer.viewportCenterX = 0;
     if (game->renderer.viewportCenterY < 0) game->renderer.viewportCenterY = 0;
-    if (game->renderer.viewportCenterX > game->world.mapScreenWidth - canvasWidth)
-        game->renderer.viewportCenterX = game->world.mapScreenWidth - canvasWidth;
-    if (game->renderer.viewportCenterY > game->world.mapScreenHeight - gameplayViewportHeight)
-        game->renderer.viewportCenterY = game->world.mapScreenHeight - gameplayViewportHeight;
+    if (game->renderer.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth)
+        game->renderer.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
+    if (game->renderer.viewportCenterY > game->world.terrain.mapScreenHeight - gameplayViewportHeight)
+        game->renderer.viewportCenterY = game->world.terrain.mapScreenHeight - gameplayViewportHeight;
     game->renderer.viewportBaseX = game->renderer.viewportCenterX + canvasWidth / 2;
     game->renderer.viewportBaseY =
         game->renderer.viewportCenterY + gameplayViewportHeight / 2;
@@ -90,10 +90,10 @@ void game_viewportZoomKey(Game *game) {
 
     game->renderer.viewportBaseX = game->renderer.mapScaleX / 2;
     game->renderer.viewportBaseY = game->renderer.mapScaleY / 2;
-    if (game->renderer.viewportBaseX > game->world.mapScreenWidth - 8)
-        game->renderer.viewportBaseX = game->world.mapScreenWidth - 8;
-    if (game->renderer.viewportBaseY > game->world.mapScreenHeight - 4)
-        game->renderer.viewportBaseY = game->world.mapScreenHeight - 4;
+    if (game->renderer.viewportBaseX > game->world.terrain.mapScreenWidth - 8)
+        game->renderer.viewportBaseX = game->world.terrain.mapScreenWidth - 8;
+    if (game->renderer.viewportBaseY > game->world.terrain.mapScreenHeight - 4)
+        game->renderer.viewportBaseY = game->world.terrain.mapScreenHeight - 4;
 
     bool moved_view = false;
     if (game->renderer.viewportCenterX > 0
@@ -126,14 +126,14 @@ void game_viewportZoomKey(Game *game) {
         game->renderer.viewportCenterY = 0;
         moved_view = false;
     }
-    if (game->renderer.viewportCenterX > game->world.mapScreenWidth - canvasWidth) {
-        game->renderer.viewportCenterX = game->world.mapScreenWidth - canvasWidth;
+    if (game->renderer.viewportCenterX > game->world.terrain.mapScreenWidth - canvasWidth) {
+        game->renderer.viewportCenterX = game->world.terrain.mapScreenWidth - canvasWidth;
         moved_view = false;
     }
     if (game->renderer.viewportCenterY
-        > game->world.mapScreenHeight - gameplayViewportHeight) {
+        > game->world.terrain.mapScreenHeight - gameplayViewportHeight) {
         game->renderer.viewportCenterY =
-            game->world.mapScreenHeight - gameplayViewportHeight;
+            game->world.terrain.mapScreenHeight - gameplayViewportHeight;
         moved_view = false;
     }
     if (moved_view) game->ui.keySubState = 80;
@@ -146,9 +146,9 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
     int tile_center_x = 0;
     int tile_center_y = 0;
     int tile_x = anchorX - 2 * anchorY
-                 + 16 + 2 * game->world.mapHalfWidth;
+                 + 16 + 2 * game->world.terrain.mapHalfWidth;
     int tile_y = anchorX + 2 * anchorY
-                 - 16 - 2 * game->world.mapHalfWidth;
+                 - 16 - 2 * game->world.terrain.mapHalfWidth;
     tile_x /= 32;
     tile_y /= 32;
     game->ui.blockBuildMenu = true;
@@ -158,7 +158,7 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
             if (!game->world.in_bounds(x, y))
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
-            tile_center_y = game->world.mapHalfWidth - x * 8 + y * 8 + 8;
+            tile_center_y = game->world.terrain.mapHalfWidth - x * 8 + y * 8 + 8;
             game_computeIsoCorners(game, x, y, game->build.selectionTileX,
                                         game->build.selectionTileY, false);
             int opposite_edges =
@@ -213,7 +213,7 @@ void game_computeViewportBounds(Game *game, int32_t anchorX, int32_t anchorY) {
         ++game->build.swapMapY;
     }
     tile_center_y -= game->renderer.viewportCenterY
-                     + 4 * game->world.heightMap[game->build.swapMapX][game->build.swapMapY];
+                     + 4 * game->world.terrain.heightMap[game->build.swapMapX][game->build.swapMapY];
     game->ui.cursorScreenX = tile_center_x - game->renderer.viewportCenterX;
     game->ui.cursorScreenY = tile_center_y;
     for (int corner = 0; corner < 4; ++corner) {

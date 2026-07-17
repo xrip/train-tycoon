@@ -200,8 +200,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #define IO_OFFER_INT(member) \
     for (Offer& offer : game->offerBoard.offers) offer.member = io_int(offer.member)
 
-    IO_INT(world.mapWidth);
-    IO_INT(world.mapHeight);
+    IO_INT(world.terrain.mapWidth);
+    IO_INT(world.terrain.mapHeight);
     IO_INT(renderer.viewportCenterX);
     IO_INT(renderer.viewportCenterY);
     IO_INT(economy.money);
@@ -401,7 +401,7 @@ void SaveCodec::save_all(Game& game) {
     bytesCompressed = 0;
     walk(game, save::OP_SAVE_MAIN);
     load_slot(1, save::MODE_WRITE);
-    io_byte_grid(game.world.tileMap);
+    io_byte_grid(game.world.terrain.tileMap);
     compress();
     persist();
     load_slot(2, save::MODE_WRITE);
@@ -409,11 +409,11 @@ void SaveCodec::save_all(Game& game) {
     compress();
     persist();
     load_slot(3, save::MODE_WRITE);
-    io_byte_grid(game.world.tileElevation);
+    io_byte_grid(game.world.terrain.tileElevation);
     compress();
     persist();
     load_slot(4, save::MODE_WRITE);
-    io_byte_grid(game.world.heightMap);
+    io_byte_grid(game.world.terrain.heightMap);
     compress();
     persist();
 }
@@ -422,27 +422,21 @@ void SaveCodec::restore_all(Game& game) {
     bytesUncompressed = 0;
     bytesCompressed = 0;
     walk(game, save::OP_LOAD_MAIN);
-    game.world.tileMap.resize(game.world.mapWidth + 1, game.world.mapHeight + 1);
-    game.world.trackMap.resize(game.world.mapWidth + 1, game.world.mapHeight + 1);
-    game.world.tileElevation.resize(game.world.mapWidth + 1, game.world.mapHeight + 1);
-    game.world.heightMap.resize(game.world.mapWidth + 2, game.world.mapHeight + 2);
-    game.world.mapHalfWidth = (game.world.mapWidth - 1) * 8;
-    game.world.mapScreenWidth = (game.world.mapWidth + game.world.mapHeight) * 16;
-    game.world.mapScreenHeight = (game.world.mapWidth + game.world.mapHeight) * 8;
-    game.renderer.viewportHalfWidth = game.world.mapScreenWidth / 2;
-    game.renderer.viewportHalfHeight = game.world.mapScreenHeight / 2;
+    game.world.resize(game.world.terrain.mapWidth, game.world.terrain.mapHeight);
+    game.renderer.viewportHalfWidth = game.world.terrain.mapScreenWidth / 2;
+    game.renderer.viewportHalfHeight = game.world.terrain.mapScreenHeight / 2;
     game_initBuildMenuForScenario(&game, -1);
     load_slot(1, save::MODE_READ);
     decompress();
-    io_byte_grid(game.world.tileMap);
+    io_byte_grid(game.world.terrain.tileMap);
     load_slot(2, save::MODE_READ);
     decompress();
     io_byte_grid(game.world.trackMap);
     load_slot(3, save::MODE_READ);
     decompress();
-    io_byte_grid(game.world.tileElevation);
+    io_byte_grid(game.world.terrain.tileElevation);
     load_slot(4, save::MODE_READ);
     decompress();
-    io_byte_grid(game.world.heightMap);
+    io_byte_grid(game.world.terrain.heightMap);
     game.renderer.lastViewportCenterX = -1;
 }

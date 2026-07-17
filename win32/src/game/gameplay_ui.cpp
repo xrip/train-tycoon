@@ -170,15 +170,15 @@ void game_computeIsoCorners(Game *game, int32_t x, int32_t y,
                                  int32_t *screen_x, int32_t *screen_y,
                                  bool viewport_relative) {
     int center_x = x * 16 + y * 16 + 16;
-    int center_y = game->world.mapHalfWidth - x * 8 + y * 8 + 8;
+    int center_y = game->world.terrain.mapHalfWidth - x * 8 + y * 8 + 8;
     screen_x[0] = center_x - 16;
     screen_x[1] = center_x;
     screen_x[2] = center_x;
     screen_x[3] = center_x + 16;
-    screen_y[0] = center_y - 4 * game->world.heightMap[x][y];
-    screen_y[1] = center_y - 8 - 4 * game->world.heightMap[x + 1][y];
-    screen_y[2] = center_y + 8 - 4 * game->world.heightMap[x][y + 1];
-    screen_y[3] = center_y - 4 * game->world.heightMap[x + 1][y + 1];
+    screen_y[0] = center_y - 4 * game->world.terrain.heightMap[x][y];
+    screen_y[1] = center_y - 8 - 4 * game->world.terrain.heightMap[x + 1][y];
+    screen_y[2] = center_y + 8 - 4 * game->world.terrain.heightMap[x][y + 1];
+    screen_y[3] = center_y - 4 * game->world.terrain.heightMap[x + 1][y + 1];
     if (viewport_relative) {
         for (int corner = 0; corner < 4; ++corner) {
             screen_x[corner] -= game->renderer.viewportCenterX;
@@ -226,7 +226,7 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
                                             quad_x, quad_y, true);
                 game_drawSelectionQuad(game, graphics, quad_x, quad_y);
             }
-            if (game->ui.tileCursorY < game->world.mapWidth - 1) {
+            if (game->ui.tileCursorY < game->world.terrain.mapWidth - 1) {
                 game_computeIsoCorners(game, game->ui.tileCursorX, game->ui.tileCursorY + 1,
                                             quad_x, quad_y, true);
                 game_drawSelectionQuad(game, graphics, quad_x, quad_y);
@@ -237,7 +237,7 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
                                             quad_x, quad_y, true);
                 game_drawSelectionQuad(game, graphics, quad_x, quad_y);
             }
-            if (game->ui.tileCursorX < game->world.mapWidth - 1) {
+            if (game->ui.tileCursorX < game->world.terrain.mapWidth - 1) {
                 game_computeIsoCorners(game, game->ui.tileCursorX + 1, game->ui.tileCursorY,
                                             quad_x, quad_y, true);
                 game_drawSelectionQuad(game, graphics, quad_x, quad_y);
@@ -259,18 +259,18 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
             int y = game->ui.tileCursorY;
             int dx = 0;
             int dy = 0;
-            if (game->world.tileMap[x][y] == 7) dy = -1;
-            if (game->world.tileMap[x][y] == 10) dy = 1;
-            if (game->world.tileMap[x][y] == 8) dx = -1;
-            if (game->world.tileMap[x][y] == 9) dx = 1;
+            if (game->world.terrain.tileMap[x][y] == 7) dy = -1;
+            if (game->world.terrain.tileMap[x][y] == 10) dy = 1;
+            if (game->world.terrain.tileMap[x][y] == 8) dx = -1;
+            if (game->world.terrain.tileMap[x][y] == 9) dx = 1;
             midp_set_color(graphics, 0x00FF00);
             int32_t quad_x[4];
             int32_t quad_y[4];
             while ((x += dx) >= 0 && (y += dy) >= 0
-                   && x < game->world.mapWidth && y < game->world.mapHeight) {
+                   && x < game->world.terrain.mapWidth && y < game->world.terrain.mapHeight) {
                 game_computeIsoCorners(game, x, y, quad_x, quad_y, true);
                 game_drawSelectionQuad(game, graphics, quad_x, quad_y);
-                if (game->world.tileMap[x][y] != 0 || game->world.trackMap[x][y] != 0) break;
+                if (game->world.terrain.tileMap[x][y] != 0 || game->world.trackMap[x][y] != 0) break;
             }
         } else {
             midp_set_color(graphics, 0xFF0000);
@@ -324,15 +324,15 @@ void game_drawBuildMenuRow(Game *game, Surface *graphics) {
     int max_y = game->ui.tileCursorY + 3;
     if (min_x < 0) min_x = 0;
     if (min_y < 0) min_y = 0;
-    if (max_x >= game->world.mapWidth) max_x = game->world.mapWidth - 1;
-    if (max_y >= game->world.mapHeight) max_y = game->world.mapHeight - 1;
+    if (max_x >= game->world.terrain.mapWidth) max_x = game->world.terrain.mapWidth - 1;
+    if (max_y >= game->world.terrain.mapHeight) max_y = game->world.terrain.mapHeight - 1;
     int population_tiles = 0;
     bool has_type_50_55 = false;
     bool has_type_56_61 = false;
     bool has_type_62_68 = false;
     for (int x = min_x; x <= max_x; ++x) {
         for (int y = min_y; y <= max_y; ++y) {
-            int tile = game->world.tileMap[x][y];
+            int tile = game->world.terrain.tileMap[x][y];
             if (tile >= 50 && tile <= 55) has_type_50_55 = true;
             if (tile >= 56 && tile <= 61) has_type_56_61 = true;
             if (tile >= 62 && tile <= 68) has_type_62_68 = true;

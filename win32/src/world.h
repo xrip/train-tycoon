@@ -2,19 +2,12 @@
 #ifndef WORLD_H
 #define WORLD_H
 #include "game_constants.h"
+#include "terrain.h"
 #include "support/grid.h"
 #include <cstdint>
 
-// World owns the four map grids. Each is a Grid<int8_t> indexed [x][y]; rows may
-// be padded (tileMap/trackMap/tileElevation to mapWidth+1/mapHeight+1, heightMap
-// to +2). Values and byte order match the legacy save. Map dimensions and the
-// map query/geometry helpers move onto World in later WORLD-01 leaves.
-struct TileChange {
-    int8_t countdown = 0;
-    int8_t x = 0;
-    int8_t y = 0;
-};
-
+// World owns terrain, track, cities, growth, and map-generation state. resize
+// keeps the terrain and track grids at matching map dimensions.
 struct City {
     int8_t stationDirection = 0;
     int8_t population = 0;
@@ -24,16 +17,8 @@ struct City {
 };
 
 struct World {
-    Grid<int8_t> tileMap;        // terrain and structure tile id per cell
+    Terrain terrain;
     Grid<int8_t> trackMap;       // track byte per cell (see namespace track)
-    Grid<int8_t> tileElevation;  // elevation step per cell
-    Grid<int8_t> heightMap;      // height field, padded by two
-
-    int32_t mapWidth = 0;        // map cell columns
-    int32_t mapHeight = 0;       // map cell rows
-    int32_t mapHalfWidth = 0;    // (mapWidth - 1) * 8
-    int32_t mapScreenWidth = 0;  // (mapWidth + mapHeight) * 16
-    int32_t mapScreenHeight = 0; // (mapWidth + mapHeight) * 8
 
     // City/station records (48-slot): each slot is one city on the map, with its
     // station direction, population, zone-tile count, and revenue history.
@@ -44,10 +29,6 @@ struct World {
     // tileQueueVisualOnly marks the ones that are display-only. woodAgeTimer
     // ages forest tiles and phaseTimer cycles the tile animation phase. All
     // runtime-only (not saved). Values and tick order are unchanged.
-    TileChange tileQueue[kTileQueueCount]{};
-    bool tileQueueVisualOnly[kTileQueueCount]{};
-    int32_t woodAgeTimer = 0;
-    int32_t phaseTimer = 0;
 
     // Per-zone growth state (64-slot zone grid derived from the map). zonePopulation
     // is recomputed each growth pass by counting populated tiles; constructionTimers
@@ -85,8 +66,13 @@ struct World {
     bool initialIndustryPlaced = true;
 
     // True when (x, y) is a valid map cell.
+    void resize(int32_t width, int32_t height) {
+        terrain.resize(width, height);
+        trackMap.resize(width + 1, height + 1);
+    }
+
     bool in_bounds(int32_t x, int32_t y) const {
-        return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;
+        return terrain.in_bounds(x, y);
     }
 };
 

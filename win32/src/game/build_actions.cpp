@@ -82,11 +82,11 @@ void game_computeTrainCost(Game *game) {
 
 void game_rebuildCityList(Game *game) {
     for (int city = 0; city < 48; ++city) game->world.cities[city].zoneTileCount = 0;
-    const int seen_count = 64 * game->world.mapWidth * game->world.mapHeight;
+    const int seen_count = 64 * game->world.terrain.mapWidth * game->world.terrain.mapHeight;
     std::vector<uint8_t> seen_city_tiles(
         static_cast<std::size_t>(seen_count));
-    for (int station_x = 0; station_x < game->world.mapWidth; ++station_x) {
-        for (int station_y = 0; station_y < game->world.mapHeight; ++station_y) {
+    for (int station_x = 0; station_x < game->world.terrain.mapWidth; ++station_x) {
+        for (int station_y = 0; station_y < game->world.terrain.mapHeight; ++station_y) {
             int track = game->world.trackMap[station_x][station_y];
             if ((track & 0xC0) != 192) continue;
             int city = track & 0x3F;
@@ -96,13 +96,13 @@ void game_rebuildCityList(Game *game) {
             int max_y = station_y + 3;
             if (min_x < 0) min_x = 0;
             if (min_y < 0) min_y = 0;
-            if (max_x >= game->world.mapWidth) max_x = game->world.mapWidth - 1;
-            if (max_y >= game->world.mapHeight) max_y = game->world.mapHeight - 1;
+            if (max_x >= game->world.terrain.mapWidth) max_x = game->world.terrain.mapWidth - 1;
+            if (max_y >= game->world.terrain.mapHeight) max_y = game->world.terrain.mapHeight - 1;
             for (int x = min_x; x <= max_x; ++x) {
                 for (int y = min_y; y <= max_y; ++y) {
-                    if (game->world.tileMap[x][y] != 87 && game->world.tileMap[x][y] != 88)
+                    if (game->world.terrain.tileMap[x][y] != 87 && game->world.terrain.tileMap[x][y] != 88)
                         continue;
-                    int seen_index = (city * game->world.mapWidth + x) * game->world.mapHeight + y;
+                    int seen_index = (city * game->world.terrain.mapWidth + x) * game->world.terrain.mapHeight + y;
                     if (seen_city_tiles[seen_index]) continue;
                     seen_city_tiles[seen_index] = 1;
                     game->world.cities[city].zoneTileCount = (int8_t)(game->world.cities[city].zoneTileCount + 1);
@@ -129,40 +129,40 @@ void game_demolishAtCursor(Game *game) {
         return;
 
     game->build.backgroundCost = 0;
-    int tile = game->world.tileMap[cursor_x][cursor_y];
+    int tile = game->world.terrain.tileMap[cursor_x][cursor_y];
     if (tile >= 81 && tile <= 86) {
         game_advanceConstructionTimers(game, cursor_x, cursor_y, -3);
-        tile = game->world.tileMap[cursor_x][cursor_y];
+        tile = game->world.terrain.tileMap[cursor_x][cursor_y];
         if (tile == 81 || tile == 84 || tile == 85) {
             int x;
             for (x = cursor_x;
-                 x < game->world.mapWidth
-                 && (game->world.tileMap[x][cursor_y] == 81
-                     || game->world.tileMap[x][cursor_y] == 84
-                     || game->world.tileMap[x][cursor_y] == 85);
+                 x < game->world.terrain.mapWidth
+                 && (game->world.terrain.tileMap[x][cursor_y] == 81
+                     || game->world.terrain.tileMap[x][cursor_y] == 84
+                     || game->world.terrain.tileMap[x][cursor_y] == 85);
                  ++x)
                 game_queueTileChange(game, x, cursor_y, true, false);
             for (x = cursor_x - 1;
                  x >= 0
-                 && (game->world.tileMap[x][cursor_y] == 81
-                     || game->world.tileMap[x][cursor_y] == 84
-                     || game->world.tileMap[x][cursor_y] == 85);
+                 && (game->world.terrain.tileMap[x][cursor_y] == 81
+                     || game->world.terrain.tileMap[x][cursor_y] == 84
+                     || game->world.terrain.tileMap[x][cursor_y] == 85);
                  --x)
                 game_queueTileChange(game, x, cursor_y, true, false);
         } else {
             int y;
             for (y = cursor_y;
-                 y < game->world.mapHeight
-                 && (game->world.tileMap[cursor_x][y] == 82
-                     || game->world.tileMap[cursor_x][y] == 83
-                     || game->world.tileMap[cursor_x][y] == 86);
+                 y < game->world.terrain.mapHeight
+                 && (game->world.terrain.tileMap[cursor_x][y] == 82
+                     || game->world.terrain.tileMap[cursor_x][y] == 83
+                     || game->world.terrain.tileMap[cursor_x][y] == 86);
                  ++y)
                 game_queueTileChange(game, cursor_x, y, true, false);
             for (y = cursor_y - 1;
                  y >= 0
-                 && (game->world.tileMap[cursor_x][y] == 82
-                     || game->world.tileMap[cursor_x][y] == 83
-                     || game->world.tileMap[cursor_x][y] == 86);
+                 && (game->world.terrain.tileMap[cursor_x][y] == 82
+                     || game->world.terrain.tileMap[cursor_x][y] == 83
+                     || game->world.terrain.tileMap[cursor_x][y] == 86);
                  --y)
                 game_queueTileChange(game, cursor_x, y, true, false);
         }
@@ -262,7 +262,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                        == 5000
                 || !game_spendMoney(game, game->economy.costPower))
                 break;
-            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
+            game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -8);
             game_incrementRowValueType13(game, game->economy.costPower);
@@ -274,7 +274,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                        == 5000
                 || !game_spendMoney(game, game->economy.costPower))
                 break;
-            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
+            game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game_advanceConstructionTimers(game, game->ui.tileCursorX, game->ui.tileCursorY, -8);
             game_incrementRowValueType13(game, game->economy.costPower);
@@ -286,9 +286,9 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                        == 5000
                 || !game_spendMoney(game, game->economy.costStruct))
                 break;
-            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
-            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 89;
-            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 89;
+            game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 87;
+            game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 89;
+            game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 89;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY - 1] = 65;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 65;
@@ -302,9 +302,9 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
                        == 5000
                 || !game_spendMoney(game, game->economy.costStruct))
                 break;
-            game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
-            game->world.tileMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 90;
-            game->world.tileMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 90;
+            game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] = 88;
+            game->world.terrain.tileMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 90;
+            game->world.terrain.tileMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 90;
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game->world.trackMap[game->ui.tileCursorX - 1][game->ui.tileCursorY] = 65;
             game->world.trackMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 65;
@@ -330,10 +330,10 @@ void game_computeTrackBuild(Game *game, int32_t start_x,
     game->build.trackStepX = step_x;
     game->build.trackStepY = step_y;
     while ((end_x += step_x) >= 0 && (end_y += step_y) >= 0
-           && end_x < game->world.mapWidth && end_y < game->world.mapHeight) {
+           && end_x < game->world.terrain.mapWidth && end_y < game->world.terrain.mapHeight) {
         cost += game->economy.moneyBaseB;
-        if (game->world.tileMap[end_x][end_y] == target_tile) found_target = true;
-        if (game->world.tileMap[end_x][end_y] != 0 || game->world.trackMap[end_x][end_y] != 0)
+        if (game->world.terrain.tileMap[end_x][end_y] == target_tile) found_target = true;
+        if (game->world.terrain.tileMap[end_x][end_y] != 0 || game->world.trackMap[end_x][end_y] != 0)
             break;
     }
     if (!found_target) return;
@@ -343,12 +343,12 @@ void game_computeTrackBuild(Game *game, int32_t start_x,
     game->ui.menuDirty = true;
     game->ui.buildMenuItemIndex = 0;
     game->build.buildCancelled = false;
-    game->world.tileMap[end_x][end_y] = (int8_t)end_tile;
+    game->world.terrain.tileMap[end_x][end_y] = (int8_t)end_tile;
     game->world.trackMap[end_x][end_y] = 65;
-    game->world.tileMap[start_x][start_y] = (int8_t)start_tile;
+    game->world.terrain.tileMap[start_x][start_y] = (int8_t)start_tile;
     game->world.trackMap[start_x][start_y] = 65;
     while ((start_x += step_x) != end_x || (start_y += step_y) != end_y) {
-        game->world.tileMap[start_x][start_y] = (int8_t)middle_tile;
+        game->world.terrain.tileMap[start_x][start_y] = (int8_t)middle_tile;
         game_advanceConstructionTimers(game, start_x, start_y, -4);
         game->world.trackMap[start_x][start_y] = 65;
     }
@@ -359,13 +359,13 @@ void game_revertTrackTiles(Game *game) {
     int x = game->build.trackStartX;
     int y = game->build.trackStartY;
     for (;;) {
-        int tile = game->world.tileMap[x][y];
+        int tile = game->world.terrain.tileMap[x][y];
         if (tile < 81 || tile > 86) break;
-        if (tile == 83) game->world.tileMap[x][y] = 7;
-        if (tile == 86) game->world.tileMap[x][y] = 10;
-        if (tile == 84) game->world.tileMap[x][y] = 8;
-        if (tile == 85) game->world.tileMap[x][y] = 9;
-        if (tile == 81 || tile == 82) game->world.tileMap[x][y] = 0;
+        if (tile == 83) game->world.terrain.tileMap[x][y] = 7;
+        if (tile == 86) game->world.terrain.tileMap[x][y] = 10;
+        if (tile == 84) game->world.terrain.tileMap[x][y] = 8;
+        if (tile == 85) game->world.terrain.tileMap[x][y] = 9;
+        if (tile == 81 || tile == 82) game->world.terrain.tileMap[x][y] = 0;
         game->world.trackMap[x][y] = 0;
         x += game->build.trackStepX;
         y += game->build.trackStepY;
@@ -380,8 +380,8 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
                                   bool join_track, int32_t join_tile) {
     int x = game->ui.tileCursorX;
     int y = game->ui.tileCursorY;
-    int tile = game->world.tileMap[x][y];
-    if (game->ui.blockBuildMenu || game->world.tileElevation[x][y] < 0
+    int tile = game->world.terrain.tileMap[x][y];
+    if (game->ui.blockBuildMenu || game->world.terrain.tileElevation[x][y] < 0
         || (game->world.trackMap[x][y] != 0 && !(join_track && tile == join_tile))
         || !(tile == join_tile || tile == match_tile_a || tile == match_tile_b
              || tile == 0 || (tile >= tile::SCENERY_FIRST && tile <= tile::SCENERY_LAST)))
@@ -395,7 +395,7 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
             game_enterOutOfMoneyState(game);
             return;
         }
-        game->world.tileMap[x][y] = 76;
+        game->world.terrain.tileMap[x][y] = 76;
         int track = game->world.trackMap[x][y] & 0x3F;
         track = join_tile == 70 ? 0x48 | track : 0x41 | track << 3;
         game->world.trackMap[x][y] = (int8_t)track;
@@ -404,7 +404,7 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
             game_enterOutOfMoneyState(game);
             return;
         }
-        game->world.tileMap[x][y] =
+        game->world.terrain.tileMap[x][y] =
             tile == match_tile_a ? (int8_t)result_tile_a
             : tile == match_tile_b ? (int8_t)result_tile_b
             : (int8_t)(first_direction ? first_tile : second_tile);
@@ -419,27 +419,27 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
 }
 
 void game_normalizeTrackBits(Game *game) {
-    for (int x = 0; x < game->world.mapWidth; ++x) {
-        for (int y = 0; y < game->world.mapHeight; ++y) {
+    for (int x = 0; x < game->world.terrain.mapWidth; ++x) {
+        for (int y = 0; y < game->world.terrain.mapHeight; ++y) {
             if (game->world.trackMap[x][y] == track::PRESENT) {
-                int tile = game->world.tileMap[x][y];
-                game->world.tileMap[x][y] =
+                int tile = game->world.terrain.tileMap[x][y];
+                game->world.terrain.tileMap[x][y] =
                     tile == 78 ? 22 : tile == 80 ? 24 : tile == 85 ? 9
                     : tile == 84 ? 8 : tile == 77 ? 21 : tile == 79 ? 23
                     : tile == 83 ? 7 : tile == 86 ? 10 : 0;
                 game->world.trackMap[x][y] = 0;
             }
-            if (game->world.tileMap[x][y] != 76) continue;
+            if (game->world.terrain.tileMap[x][y] != 76) continue;
             int low_owner = game->world.trackMap[x][y] & 7;
             int high_owner = (game->world.trackMap[x][y] & 0x3F) >> 3;
             if (low_owner == 0 && high_owner == 0) {
-                game->world.tileMap[x][y] = 0;
+                game->world.terrain.tileMap[x][y] = 0;
                 game->world.trackMap[x][y] = 0;
             } else if (low_owner == 0) {
-                game->world.tileMap[x][y] = 71;
+                game->world.terrain.tileMap[x][y] = 71;
                 game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | high_owner);
             } else if (high_owner == 0) {
-                game->world.tileMap[x][y] = 70;
+                game->world.terrain.tileMap[x][y] = 70;
                 game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | low_owner);
             }
         }
@@ -447,13 +447,13 @@ void game_normalizeTrackBits(Game *game) {
 }
 
 void game_setTrackOwnerCode(Game *game, int32_t owner) {
-    for (int x = 0; x < game->world.mapWidth; ++x) {
-        for (int y = 0; y < game->world.mapHeight; ++y) {
+    for (int x = 0; x < game->world.terrain.mapWidth; ++x) {
+        for (int y = 0; y < game->world.terrain.mapHeight; ++y) {
             if (game->world.trackMap[x][y] == track::PRESENT) {
                 if (owner == 1) game_advanceConstructionTimers(game, x, y, -4);
                 game->world.trackMap[x][y] = static_cast<int8_t>(track::PRESENT | owner);
             }
-            if (game->world.tileMap[x][y] != 76) continue;
+            if (game->world.terrain.tileMap[x][y] != 76) continue;
             int low_owner = game->world.trackMap[x][y] & 7;
             int high_owner = (game->world.trackMap[x][y] & 0x3F) >> 3;
             if (low_owner == 0) low_owner = owner;
@@ -539,7 +539,7 @@ void game_openBuildMenu(Game *game) {
                         break;
                     game->pathfinder.anchorX = game->ui.tileCursorX;
                     game->pathfinder.anchorY = game->ui.tileCursorY;
-                    game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 127;
+                    game->world.terrain.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 127;
                     game->ui.buildMenuMode = 4;
                     game->ui.menuDirty = true;
                     game->ui.buildMenuItemIndex = 0;
@@ -551,19 +551,19 @@ void game_openBuildMenu(Game *game) {
                     break;
                 case 2:
                     if (game->ui.blockBuildMenu) break;
-                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 7)
+                    if (game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 7)
                         game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             0, -1, 10, 83, 86, 82);
-                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 10)
+                    if (game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 10)
                         game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             0, 1, 7, 86, 83, 82);
-                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 8)
+                    if (game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 8)
                         game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             -1, 0, 9, 84, 85, 81);
-                    if (game->world.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 9)
+                    if (game->world.terrain.tileMap[game->ui.tileCursorX][game->ui.tileCursorY] == 9)
                         game_computeTrackBuild(
                             game, game->ui.tileCursorX, game->ui.tileCursorY,
                             1, 0, 8, 85, 84, 81);
@@ -629,10 +629,10 @@ void game_openBuildMenu(Game *game) {
                     break;
                 game->pathfinder.targetX = game->ui.tileCursorX;
                 game->pathfinder.targetY = game->ui.tileCursorY;
-                game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
+                game->world.terrain.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
                 game_setState(game, GameState::BuildingPath);
             } else if (item == 9) {
-                game->world.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
+                game->world.terrain.tileMap[game->pathfinder.anchorX][game->pathfinder.anchorY] = 0;
                 game->ui.buildMenuMode = 1;
                 game->ui.menuDirty = true;
                 game->ui.buildMenuItemIndex = 0;

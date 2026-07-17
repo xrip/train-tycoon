@@ -69,11 +69,11 @@ void game_fields_init(Game *game) {
     selectionHidden = false;
     monthlyReportEnabled = true;
     annualReportEnabled = true;
-    game->world.mapHalfWidth = (game->world.mapWidth - 1) * 8;
-    game->world.mapScreenWidth = (game->world.mapWidth + game->world.mapHeight) * 16;
-    game->world.mapScreenHeight = (game->world.mapWidth + game->world.mapHeight) * 8;
-    game->renderer.viewportHalfWidth = game->world.mapScreenWidth / 2;
-    game->renderer.viewportHalfHeight = game->world.mapScreenHeight / 2;
+    game->world.terrain.mapHalfWidth = (game->world.terrain.mapWidth - 1) * 8;
+    game->world.terrain.mapScreenWidth = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 16;
+    game->world.terrain.mapScreenHeight = (game->world.terrain.mapWidth + game->world.terrain.mapHeight) * 8;
+    game->renderer.viewportHalfWidth = game->world.terrain.mapScreenWidth / 2;
+    game->renderer.viewportHalfHeight = game->world.terrain.mapScreenHeight / 2;
     game->renderer.viewportBaseX = game->renderer.viewportHalfWidth;
     game->renderer.viewportBaseY = game->renderer.viewportHalfHeight;
     game->renderer.mapScaleX = game->renderer.viewportHalfWidth * 2;

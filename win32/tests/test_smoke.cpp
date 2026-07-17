@@ -51,18 +51,18 @@ std::uint64_t paint_digest(Game* game, Surface* screen) {
 std::uint64_t map_digest(const Game* game) {
     StableDigest digest;
     digest.add_i32(game->scenario.activeScenario);
-    digest.add_i32(game->world.mapWidth);
-    digest.add_i32(game->world.mapHeight);
+    digest.add_i32(game->world.terrain.mapWidth);
+    digest.add_i32(game->world.terrain.mapHeight);
     digest.add_i32(game->economy.money);
     digest.add_i32(game->economy.loanCeiling);
     digest.add_i32(game->economy.loanBalance);
-    for (int x = 0; x < game->world.mapWidth; ++x) {
-        digest.add_bytes(game->world.tileMap[x].data(), static_cast<std::size_t>(game->world.mapHeight));
-        digest.add_bytes(game->world.trackMap[x].data(), static_cast<std::size_t>(game->world.mapHeight));
-        digest.add_bytes(game->world.tileElevation[x].data(), static_cast<std::size_t>(game->world.mapHeight));
+    for (int x = 0; x < game->world.terrain.mapWidth; ++x) {
+        digest.add_bytes(game->world.terrain.tileMap[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight));
+        digest.add_bytes(game->world.trackMap[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight));
+        digest.add_bytes(game->world.terrain.tileElevation[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight));
     }
-    for (int x = 0; x < game->world.mapWidth + 2; ++x) {
-        digest.add_bytes(game->world.heightMap[x].data(), static_cast<std::size_t>(game->world.mapHeight + 2));
+    for (int x = 0; x < game->world.terrain.mapWidth + 2; ++x) {
+        digest.add_bytes(game->world.terrain.heightMap[x].data(), static_cast<std::size_t>(game->world.terrain.mapHeight + 2));
     }
     return digest.value();
 }
@@ -74,7 +74,7 @@ void generate_scenario(Game* game, int scenario) {
         game_update(game);
     }
     REQUIRE(game->gameState == 30);
-    REQUIRE(!game->world.tileMap.empty());
+    REQUIRE(!game->world.terrain.tileMap.empty());
     REQUIRE(!game->world.trackMap.empty());
 }
 
@@ -485,10 +485,10 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
 
     // Find a buildable, empty interior tile for a depot.
     int ax = -1, ay = -1;
-    for (int y = 8; y < game->world.mapHeight - 8 && ay < 0; ++y) {
-        for (int x = 8; x < game->world.mapWidth - 8; ++x) {
-            if (game->world.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
-                && game->world.tileElevation[x][y] == 0
+    for (int y = 8; y < game->world.terrain.mapHeight - 8 && ay < 0; ++y) {
+        for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x) {
+            if (game->world.terrain.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
+                && game->world.terrain.tileElevation[x][y] == 0
                 && game_isTileBuildable(game, x, y, 0)) {
                 ax = x; ay = y; break;
             }
@@ -560,16 +560,16 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
     generate_scenario(game, 0);
 
     auto buildable = [&](int x, int y) {
-        return game->world.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
-               && game->world.tileElevation[x][y] == 0
+        return game->world.terrain.tileMap[x][y] == 0 && game->world.trackMap[x][y] == 0
+               && game->world.terrain.tileElevation[x][y] == 0
                && game_isTileBuildable(game, x, y, 0);
     };
     int ax = -1, ay = -1, bx = -1, by = -1;
-    for (int y = 8; y < game->world.mapHeight - 8 && ay < 0; ++y)
-        for (int x = 8; x < game->world.mapWidth - 8; ++x)
+    for (int y = 8; y < game->world.terrain.mapHeight - 8 && ay < 0; ++y)
+        for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x)
             if (buildable(x, y)) { ax = x; ay = y; break; }
-    for (int y = ay + 4; y < game->world.mapHeight - 8 && by < 0; ++y)
-        for (int x = 8; x < game->world.mapWidth - 8; ++x)
+    for (int y = ay + 4; y < game->world.terrain.mapHeight - 8 && by < 0; ++y)
+        for (int x = 8; x < game->world.terrain.mapWidth - 8; ++x)
             if (buildable(x, y)) { bx = x; by = y; break; }
     REQUIRE(ax >= 0); REQUIRE(bx >= 0);
 
@@ -679,11 +679,7 @@ TEST_CASE("fast: record store keeps record bytes and ids") {
 
 TEST_CASE("fast: small path search") {
     Game* game = make_game();
-    game->world.mapWidth = 5;
-    game->world.mapHeight = 5;
-    game->world.tileMap.resize(game->world.mapWidth, game->world.mapHeight);
-    game->world.trackMap.resize(game->world.mapWidth, game->world.mapHeight);
-    game->world.tileElevation.resize(game->world.mapWidth, game->world.mapHeight);
+    game->world.resize(5, 5);
     game->pathfinder.anchorX = 1;
     game->pathfinder.anchorY = 2;
     game->pathfinder.targetX = 3;
@@ -694,6 +690,21 @@ TEST_CASE("fast: small path search") {
     CHECK(game->build.trackTileCount > 0);
     CHECK(game->build.selectionCost > 0);
     delete game;
+}
+
+TEST_CASE("fast: world resize keeps terrain and track grids in step") {
+    World world;
+    world.resize(7, 9);
+    CHECK(world.terrain.mapWidth == 7);
+    CHECK(world.terrain.mapHeight == 9);
+    CHECK(world.terrain.tileMap.rows() == 8);
+    CHECK(world.terrain.tileMap[0].size() == 10);
+    CHECK(world.trackMap.rows() == 8);
+    CHECK(world.trackMap[0].size() == 10);
+    CHECK(world.terrain.tileElevation.rows() == 8);
+    CHECK(world.terrain.tileElevation[0].size() == 10);
+    CHECK(world.terrain.heightMap.rows() == 9);
+    CHECK(world.terrain.heightMap[0].size() == 11);
 }
 
 TEST_CASE("fast: save buffer bytes and round trip") {
@@ -948,16 +959,16 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     const int tx = game->ui.tileCursorX;
     const int ty = game->ui.tileCursorY;
     CHECK(tx >= 0);
-    CHECK(tx < game->world.mapWidth);
+    CHECK(tx < game->world.terrain.mapWidth);
     CHECK(ty >= 0);
-    CHECK(ty < game->world.mapHeight);
+    CHECK(ty < game->world.terrain.mapHeight);
 
     // Round-trip: the resolved tile's screen centre (the flat iso forward
     // transform the resolver mirrors) must sit within one tile of the hover.
     const int tile_screen_x =
         ty * 16 + tx * 16 + 16 - game->renderer.viewportCenterX;
     const int tile_screen_y =
-        game->world.mapHalfWidth - tx * 8 + ty * 8 + 8 - game->renderer.viewportCenterY;
+        game->world.terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - game->renderer.viewportCenterY;
     const int dx = tile_screen_x - hover_x;
     const int dy = tile_screen_y - hover_y;
     CHECK(dx >= -16);

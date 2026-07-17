@@ -18,7 +18,7 @@ void game_drawSpriteSingle(Game *game, Surface *graphics,
     int tile_x = unsignedByte(game->fleet.trainCars[train].x);
     int tile_y = unsignedByte(game->fleet.trainCars[train].y);
     if (train_flag::isHead(game->fleet.trainCars[train].flags)) {
-        int tile = game->world.tileMap[tile_x][tile_y];
+        int tile = game->world.terrain.tileMap[tile_x][tile_y];
         int track = unsignedByte(game->world.trackMap[tile_x][tile_y]);
         bool lower_sprite = tile != tile::CROSSING && track > 65;
         if (tile == 76) {
@@ -35,10 +35,10 @@ void game_drawSpriteSingle(Game *game, Surface *graphics,
             for (int i = 0; i < 8; ++i) sprites[i] = (int16_t)(sprites[i] - 30);
     }
 
-    int tile = unsignedByte(game->world.tileMap[tile_x][tile_y]);
+    int tile = unsignedByte(game->world.terrain.tileMap[tile_x][tile_y]);
     int x = tile_y * 16 + tile_x * 16 + 16 - game->renderer.viewportCenterX;
-    int y = game->world.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
-            game->renderer.viewportCenterY - 4 * game->world.tileElevation[tile_x][tile_y] + 15;
+    int y = game->world.terrain.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
+            game->renderer.viewportCenterY - 4 * game->world.terrain.tileElevation[tile_x][tile_y] + 15;
     int phase = game->fleet.trainCars[train].phase;
     if (phase < 0) return;
 
