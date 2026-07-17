@@ -1,5 +1,6 @@
 // Save-buffer reading, writing, and compression.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include "support/record_store.h"
 
 #include <stdlib.h>
@@ -140,7 +141,7 @@ void SaveCodec::decompress() {
     ByteBuffer output;
     for (int i = 0; i < snapshotSize; ++i) {
         if (saveBuffer[i] == -1) {
-            int count = unsignedByte(saveBuffer[i + 1]);
+            int count = unsigned_byte(saveBuffer[i + 1]);
             for (int j = 0; j < count; ++j)
                 output.write(saveBuffer[i + 2]);
             i += 2;

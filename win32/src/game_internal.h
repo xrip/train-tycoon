@@ -8,9 +8,6 @@
 #include <span>
 #include <vector>
 
-constexpr int32_t unsignedByte(int8_t value) {
-    return static_cast<uint8_t>(value);
-}
 int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
                          int32_t n4, int32_t n5, int32_t n6);
 // Resolve the tile under a map-screen-space point (anchorX/Y) and refresh the

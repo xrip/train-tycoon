@@ -1,11 +1,12 @@
 // Train movement, loading, and delivery.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <cstdlib>
 
 int32_t Fleet::accumulate_turns(const World& world, int32_t car) const {
     if (car == -1) return 0;
-    int tile = world.terrain.tileMap[unsignedByte(trainCars[car].x)]
-                                    [unsignedByte(trainCars[car].y)];
+    int tile = world.terrain.tileMap[unsigned_byte(trainCars[car].x)]
+                                    [unsigned_byte(trainCars[car].y)];
     int turn = 0;
     if (tile == 77) turn = trainCars[car].direction == 0 ? -1 : 1;
     if (tile == 79) turn = trainCars[car].direction == 0 ? 1 : -1;
@@ -17,8 +18,8 @@ int32_t Fleet::accumulate_turns(const World& world, int32_t car) const {
 int32_t Fleet::find_service_site_at(int32_t x, int32_t y) const {
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
         if ((serviceSites[vehicle].flags & 0x80) != 128) continue;
-        int vehicle_x = unsignedByte(serviceSites[vehicle].x);
-        int vehicle_y = unsignedByte(serviceSites[vehicle].y);
+        int vehicle_x = unsigned_byte(serviceSites[vehicle].x);
+        int vehicle_y = unsigned_byte(serviceSites[vehicle].y);
         if (vehicle_x == x && vehicle_y == y) return vehicle;
         if ((vehicle_x == x - 1 || vehicle_x == x + 1) && vehicle_y == y
             && (serviceSites[vehicle].flags & 0xE0) == 224)
@@ -136,8 +137,8 @@ void Fleet::load_at_service_site(World& world, int32_t car,
                 trainCars[car].cargoAge = 0;
                 if (vehicle != trainCars[car].lastServiceSite && !construction_done) {
                     world.advance_construction_timers(
-                        unsignedByte(trainCars[car].x),
-                        unsignedByte(trainCars[car].y), 4);
+                        unsigned_byte(trainCars[car].x),
+                        unsigned_byte(trainCars[car].y), 4);
                     construction_done = true;
                 }
                 break;
@@ -203,7 +204,7 @@ UnloadResult Fleet::unload_at_service_site(const Scenario& scenario,
     if (!train_flag::isHead(trainCars[car].flags)
         && trainCars[car].lastServiceSite != vehicle
         && (trainCars[car].energyCargoOrRemovalTicks > 0 || trainCars[car].secondaryCargoOrBaseEnergy > 0)) {
-        int age_scale = unsignedByte(trainCars[car].cargoAge) / 15 + 1;
+        int age_scale = unsigned_byte(trainCars[car].cargoAge) / 15 + 1;
         switch (train_flag::type(trainCars[car].flags)) {
             case 2:
                 if ((serviceSites[vehicle].unloadFlags & 1) == 1) {
@@ -283,7 +284,7 @@ void Game::update_train(int32_t head) {
     Game *game = this;
     int stop_chain = 0;
     if (!train_flag::isHead(game->fleet.trainCars[head].flags)
-        || unsignedByte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) <= 0) {
+        || unsigned_byte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) <= 0) {
         game->fleet.trainCars[head].flags = (int8_t)(game->fleet.trainCars[head].flags & 0xEF);
         if (train_flag::isHead(game->fleet.trainCars[head].flags)) {
             game->fleet.trainCars[head].energyCargoOrRemovalTicks =
@@ -293,8 +294,8 @@ void Game::update_train(int32_t head) {
                          + game->fleet.trainCars[head].ageYears / 3);
         }
 
-        int old_x = unsignedByte(game->fleet.trainCars[head].x);
-        int old_y = unsignedByte(game->fleet.trainCars[head].y);
+        int old_x = unsigned_byte(game->fleet.trainCars[head].x);
+        int old_y = unsigned_byte(game->fleet.trainCars[head].y);
         bool at_service_tile = (game->world.terrain.tileMap[old_x][old_y] == 87
                                 || game->world.terrain.tileMap[old_x][old_y] == 88);
         if (train_flag::isHead(game->fleet.trainCars[head].flags) && game->fleet.trainCars[head].phase == 4
@@ -360,14 +361,14 @@ void Game::update_train(int32_t head) {
         if (game->fleet.trainCars[head].phase < 8) {
             ++game->fleet.trainCars[head].phase;
         } else {
-            if (unsignedByte(game->fleet.trainCars[head].cargoAge) < 200) ++game->fleet.trainCars[head].cargoAge;
+            if (unsigned_byte(game->fleet.trainCars[head].cargoAge) < 200) ++game->fleet.trainCars[head].cargoAge;
             old_x = game->fleet.trainCars[head].x;
             old_y = game->fleet.trainCars[head].y;
             int old_dir = game->fleet.trainCars[head].direction;
             game->fleet.trainCars[head].phase = 0;
 
-            int next_x = unsignedByte(game->fleet.trainCars[head].x);
-            int next_y = unsignedByte(game->fleet.trainCars[head].y);
+            int next_x = unsigned_byte(game->fleet.trainCars[head].x);
+            int next_y = unsigned_byte(game->fleet.trainCars[head].y);
             int current_track = game->world.trackMap[next_x][next_y];
             int current_variant = game->world.terrain.tileMap[next_x][next_y] - 70;
             if (current_variant == 6 && (game->fleet.trainCars[head].direction == 0
@@ -448,7 +449,7 @@ void Game::update_train(int32_t head) {
             game->update_train(game->fleet.trainCars[head].nextCar);
     }
     if (train_flag::isHead(game->fleet.trainCars[head].flags)) {
-        int energy = unsignedByte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) - 3;
+        int energy = unsigned_byte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) - 3;
         if (energy < 0) energy = 0;
         game->fleet.trainCars[head].energyCargoOrRemovalTicks = (int8_t)energy;
     }

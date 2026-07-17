@@ -1,5 +1,6 @@
 // Save and load of game arrays and matrices.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <string.h>
 #include <vector>
 

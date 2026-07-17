@@ -1,5 +1,6 @@
 // Dynamic values used by data-driven dialogs.
 #include "game_internal.h"
+#include "support/numeric.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -248,7 +249,7 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
         case 60:
             if (field % 2 == 1) {
                 int index = field / 2;
-                return copy_codes(this->assets.spriteBitmapTable[unsignedByte(
+                return copy_codes(this->assets.spriteBitmapTable[unsigned_byte(
                     this->assets.spriteIndexTable[this->offerBoard.offers[
                         this->ui.enabledMenuRowIndexes[index]].objectiveType + 160])]);
             } else {

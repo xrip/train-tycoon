@@ -2,6 +2,7 @@
 // Draws terrain into the offscreen backbuffer (only when the viewport moved),
 // blits it, then overlays dynamic tiles, trains, selections and the build menu.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <vector>
 
 void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
@@ -23,7 +24,7 @@ void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
         int mapX = origin_x + game->assets.tileOffsetX[drawIndex];
         int mapY = origin_y + game->assets.tileOffsetY[drawIndex];
         if (mapX >= 0 && mapX < game->world.terrain.mapWidth && mapY >= 0 && mapY < game->world.terrain.mapHeight) {
-            int tileCode = unsignedByte(game->world.terrain.tileMap[mapX][mapY]);
+            int tileCode = unsigned_byte(game->world.terrain.tileMap[mapX][mapY]);
             if (tileCode >= 128) tileCode -= 128;
             int drawX = mapY * 16 + mapX * 16 + 16 - game->renderer.camera.viewportCenterX;
             int drawY = game->world.terrain.mapHalfWidth - mapX * 8 + mapY * 8 + 16
@@ -91,8 +92,8 @@ void Game::render_map(Surface& surface) {
     game->renderer.visibleTrainCount = 0;
     for (n6 = 0; n6 < 500; ++n6) {
         if (!train_flag::isUsed(game->fleet.trainCars[n6].flags)) continue;
-        n5 = unsignedByte(game->fleet.trainCars[n6].x);
-        n4 = unsignedByte(game->fleet.trainCars[n6].y);
+        n5 = unsigned_byte(game->fleet.trainCars[n6].x);
+        n4 = unsigned_byte(game->fleet.trainCars[n6].y);
         if (n5 < game->renderer.viewportX0 || n4 < game->renderer.viewportY0 || n5 > game->renderer.viewportX1 || n4 > game->renderer.viewportY1) continue;
         game->renderer.visibleTrains[game->renderer.visibleTrainCount++] = (int16_t)n6;
         visible_train_tiles[(n5 - game->renderer.viewportX0) * visible_height +
@@ -103,7 +104,7 @@ void Game::render_map(Surface& surface) {
         n5 = n9 + game->assets.tileOffsetX[n6];
         n4 = n10 + game->assets.tileOffsetY[n6];
         if (n5 < 0 || n5 >= game->world.terrain.mapWidth || n4 < 0 || n4 >= game->world.terrain.mapHeight) continue;
-        n3 = unsignedByte(game->world.terrain.tileMap[n5][n4]);
+        n3 = unsigned_byte(game->world.terrain.tileMap[n5][n4]);
         n2 = n3;
         if (n2 >= 128) n2 -= 128;
         if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
@@ -129,7 +130,7 @@ void Game::render_map(Surface& surface) {
                                 n4 - game->renderer.viewportY0]) {
             for (n = 0; n < game->renderer.visibleTrainCount; ++n) {
                 n12 = game->renderer.visibleTrains[n];
-                if (!train_flag::isUsed(game->fleet.trainCars[n12].flags) || n5 != unsignedByte(game->fleet.trainCars[n12].x) || n4 != unsignedByte(game->fleet.trainCars[n12].y)) continue;
+                if (!train_flag::isUsed(game->fleet.trainCars[n12].flags) || n5 != unsigned_byte(game->fleet.trainCars[n12].x) || n4 != unsigned_byte(game->fleet.trainCars[n12].y)) continue;
                 game->renderer.draw_train(*g, game->assets, game->world,
                                           game->fleet, n12);
             }
@@ -139,11 +140,11 @@ void Game::render_map(Surface& surface) {
         n12 = game->world.terrain.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[n5][n4] + 15;
         int n14 = -1;
         for (int i = 0; i < 50; ++i) {
-            if (unsignedByte(game->world.terrain.tileQueue[i].x) != n5 || unsignedByte(game->world.terrain.tileQueue[i].y) != n4) continue;
+            if (unsigned_byte(game->world.terrain.tileQueue[i].x) != n5 || unsigned_byte(game->world.terrain.tileQueue[i].y) != n4) continue;
             n14 = game->world.terrain.tileQueue[i].countdown;
         }
         if (n14 <= 0) continue;
-        midp_draw_image(g, game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
+        midp_draw_image(g, game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
     }
     if (!game->settings.selectionHidden) {
         for (n6 = 0; n6 < game->assets.numActiveTileAnimations; ++n6) {

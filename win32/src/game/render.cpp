@@ -2,6 +2,7 @@
 // renderPackedSprite draws the menu/dialog layouts (state 20). renderFontString
 // draws text from the `ca[]` font atlas. u() resolves per-slot sub-sprites.
 #include "game_internal.h"
+#include "support/numeric.h"
 
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 static int imax(int a, int b) { return a > b ? a : b; }
@@ -75,16 +76,16 @@ Image *Game::wagon_car_sprite(int32_t contextCode, int32_t slotIndex) {
     Game *game = this;
     if (contextCode == 23) {
         if (slotIndex == 0 && game->build.wagonType >= 0 && game->build.wagonType < 3)
-            return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[136])].get();
+            return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[136])].get();
         if (slotIndex == 0 && game->build.wagonType >= 3 && game->build.wagonType < 6)
-            return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[146])].get();
+            return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[146])].get();
         if (slotIndex > 0) {
             switch (game->build.wagonOptionSlots[slotIndex - 1]) {
                 case -1: return NULL;
-                case 0: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[162])].get();
-                case 1: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[167])].get();
-                case 2: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[172])].get();
-                case 3: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[182])].get();
+                case 0: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[162])].get();
+                case 1: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[167])].get();
+                case 2: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[172])].get();
+                case 3: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[182])].get();
             }
         }
     }
@@ -94,14 +95,14 @@ Image *Game::wagon_car_sprite(int32_t contextCode, int32_t slotIndex) {
         int carType = train_flag::type(game->fleet.trainCars[carSlot].flags);
         switch (carType) {
             case -1: return NULL;
-            case 0: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[136])].get();
-            case 1: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[146])].get();
-            case 2: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[162])].get();
-            case 3: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[167])].get();
-            case 4: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[172])].get();
-            case 5: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[177])].get();
-            case 6: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[182])].get();
-            case 7: return game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[187])].get();
+            case 0: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[136])].get();
+            case 1: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[146])].get();
+            case 2: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[162])].get();
+            case 3: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[167])].get();
+            case 4: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[172])].get();
+            case 5: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[177])].get();
+            case 6: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[182])].get();
+            case 7: return game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[187])].get();
         }
     }
     return NULL;
@@ -178,21 +179,21 @@ public:
     int byte() { return assets_.spriteData[offset_++]; }
 
     int u16() {
-        const int low = unsignedByte(assets_.spriteData[offset_++]);
-        const int high = unsignedByte(assets_.spriteData[offset_++]);
+        const int low = unsigned_byte(assets_.spriteData[offset_++]);
+        const int high = unsigned_byte(assets_.spriteData[offset_++]);
         return low + 256 * high;
     }
 
     int rgb() {
-        const int red = unsignedByte(assets_.spriteData[offset_++]);
-        const int green = unsignedByte(assets_.spriteData[offset_++]);
-        const int blue = unsignedByte(assets_.spriteData[offset_++]);
+        const int red = unsigned_byte(assets_.spriteData[offset_++]);
+        const int green = unsigned_byte(assets_.spriteData[offset_++]);
+        const int blue = unsigned_byte(assets_.spriteData[offset_++]);
         return 65536 * red + 256 * green + blue;
     }
 
     std::vector<int8_t> text() {
         std::vector<int8_t> codes = assets_.read_packed_text_codes(offset_);
-        skip(1 + unsignedByte(assets_.spriteData[offset_]));
+        skip(1 + unsigned_byte(assets_.spriteData[offset_]));
         return codes;
     }
 

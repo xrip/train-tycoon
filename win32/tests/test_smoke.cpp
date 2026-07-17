@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 
 #include "game_internal.h"
+#include "support/numeric.h"
 #include "click_map.h"
 #include "midp_input.h"
 #include "scenario_definition.h"
@@ -1146,7 +1147,7 @@ TEST_CASE("fast: terrain queue keeps slot order and rejects a duplicate") {
 
     CHECK(terrain.queue_change(2, 3, true));
     CHECK_FALSE(terrain.queue_change(2, 3, false));
-    CHECK(unsignedByte(terrain.tileMap[2][3]) == 138);
+    CHECK(unsigned_byte(terrain.tileMap[2][3]) == 138);
     CHECK(terrain.tileQueue[kTileQueueCount - 1].countdown == 14);
     CHECK(terrain.tileQueue[kTileQueueCount - 1].x == 2);
     CHECK(terrain.tileQueue[kTileQueueCount - 1].y == 3);

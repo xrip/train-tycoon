@@ -1,5 +1,6 @@
 // Small general game functions.
 #include "game_internal.h"
+#include "support/numeric.h"
 
 void Renderer::resize_canvas(int32_t width, int32_t height) {
     canvasWidth = width;
@@ -14,7 +15,7 @@ void Renderer::draw_sprite_quad(Surface& surface, const Assets& assets,
                                 int32_t n, int32_t n2, int32_t n3,
                                 int32_t n4) const {
     midp_draw_image(&surface,
-                    assets.tile_sprites[unsignedByte(assets.tileSpriteIndex[n])].get(), n2, n3, n4);
+                    assets.tile_sprites[unsigned_byte(assets.tileSpriteIndex[n])].get(), n2, n3, n4);
 }
 
 void Assets::open_sprite_stream(const char *resource_name) {

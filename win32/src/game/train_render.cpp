@@ -1,11 +1,12 @@
 // Moving train sprite placement.
 #include "game_internal.h"
+#include "support/numeric.h"
 
 #include <string.h>
 
 static void draw_train_image(const Assets& assets, Surface *graphics,
                              int sprite_code, int x, int y) {
-    int sprite_index = unsignedByte(assets.tileSpriteIndex[sprite_code]);
+    int sprite_index = unsigned_byte(assets.tileSpriteIndex[sprite_code]);
     midp_draw_image(graphics, assets.tile_sprites[sprite_index].get(), x, y, 33);
 }
 
@@ -17,11 +18,11 @@ void Renderer::draw_train(Surface& surface, const Assets& assets,
     memcpy(sprites, assets.trainSpriteDirectionTable[train_flag::type(fleet.trainCars[train].flags)],
            sizeof(sprites));
 
-    int tile_x = unsignedByte(fleet.trainCars[train].x);
-    int tile_y = unsignedByte(fleet.trainCars[train].y);
+    int tile_x = unsigned_byte(fleet.trainCars[train].x);
+    int tile_y = unsigned_byte(fleet.trainCars[train].y);
     if (train_flag::isHead(fleet.trainCars[train].flags)) {
         int tile = world.terrain.tileMap[tile_x][tile_y];
-        int track = unsignedByte(world.trackMap[tile_x][tile_y]);
+        int track = unsigned_byte(world.trackMap[tile_x][tile_y]);
         bool lower_sprite = tile != tile::CROSSING && track > 65;
         if (tile == 76) {
             int low_track = track & 7;
@@ -37,7 +38,7 @@ void Renderer::draw_train(Surface& surface, const Assets& assets,
             for (int i = 0; i < 8; ++i) sprites[i] = (int16_t)(sprites[i] - 30);
     }
 
-    int tile = unsignedByte(world.terrain.tileMap[tile_x][tile_y]);
+    int tile = unsigned_byte(world.terrain.tileMap[tile_x][tile_y]);
     int x = tile_y * 16 + tile_x * 16 + 16 - camera.viewportCenterX;
     int y = world.terrain.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16 -
             camera.viewportCenterY - 4 * world.terrain.tileElevation[tile_x][tile_y] + 15;

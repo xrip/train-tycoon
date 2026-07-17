@@ -1,5 +1,6 @@
 // Game-map header, bottom bar, and overlays.
 #include "game_internal.h"
+#include "support/numeric.h"
 
 #include <algorithm>
 #include <stdio.h>
@@ -104,14 +105,14 @@ void Game::paint_main(Surface& surface) {
     if (!game->ui.menuDirty) return;
     midp_set_color(game->renderer.backbuffer_surface, 0x606060);
     midp_fill_rect(game->renderer.backbuffer_surface, 0, game->renderer.bottomBarY, game->renderer.canvasWidth, 15);
-    int selected_x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode]
+    int selected_x = unsigned_byte(game->ui.menuItemCode[game->ui.buildMenuMode]
                                                [game->ui.buildMenuItemIndex]);
     int scroll = selected_x + 15 - game->renderer.canvasWidth;
     if (scroll < 0) scroll = 0;
     int item_count = static_cast<int>(game->ui.buildMenuItems[game->ui.buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
-        int x = unsignedByte(game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
-        int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
+        int x = unsigned_byte(game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
+        int sprite = unsigned_byte(game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
         game->renderer.draw_sprite_quad(*game->renderer.backbuffer_surface, game->assets, sprite, x, game->renderer.bottomBarY, 20);
         if (item != game->ui.buildMenuItemIndex) continue;
         midp_set_color(game->renderer.backbuffer_surface, 0xFFFFFF);
@@ -330,7 +331,7 @@ void Game::draw_build_menu_row(Surface& surface) {
                           game->ui.cursorScreenY + 13, 20);
     game->renderer.draw_sprite_quad(*graphics, game->assets, 200, menu_x, menu_y + 15, 20);
     if (game->ui.buildMenuMode != 0 || game->ui.buildMenuItemIndex != 0) {
-        int sprite = unsignedByte(game->ui.menuTextIndex[game->ui.buildMenuMode]
+        int sprite = unsigned_byte(game->ui.menuTextIndex[game->ui.buildMenuMode]
                                                [game->ui.buildMenuItemIndex]);
         game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, menu_x + 5, menu_y + 19, 20);
     }

@@ -12,15 +12,8 @@
 //   - game field:      the Playing map / MapOverview minimap (deferred: needs the
 //                      isometric screen->tile inverse; tracked as the next step)
 #include "game_internal.h"
+#include "support/numeric.h"
 #include "game_constants.h"
-
-namespace {
-
-int unsigned_byte(int8_t b) {
-    return static_cast<int>(static_cast<std::uint8_t>(b));
-}
-
-}  // namespace
 
 // Playing bottom bar: re-derive each item icon's x (the same math paint_main
 // uses to draw them) and activate the clicked one. Selecting + opening in one

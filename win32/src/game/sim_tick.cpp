@@ -1,5 +1,6 @@
 // Simulation tick functions.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <cstdlib>
 
 void World::decay_construction_timers_quarterly(int32_t month) {
@@ -79,8 +80,8 @@ void Game::charge_train_running_costs() {
     for (int i = 0; i < 500; ++i) {
         if (!train_flag::isUsed(game->fleet.trainCars[i].flags) || !train_flag::isHead(game->fleet.trainCars[i].flags))
             continue;
-        int n2 = unsignedByte(game->fleet.trainCars[i].x);
-        int n = unsignedByte(game->fleet.trainCars[i].y);
+        int n2 = unsigned_byte(game->fleet.trainCars[i].x);
+        int n = unsigned_byte(game->fleet.trainCars[i].y);
         if (game->world.trackMap[n2][n] != 65) continue;
         int n3 = game->fleet.count_cars(i) * 2;
         if (train_flag::type(game->fleet.trainCars[i].flags) == 0) n3 += 3;
@@ -103,8 +104,8 @@ void Game::remove_train_from_map(int32_t n, bool bl) {
     game->fleet.trainCars[n].nextCar = -1;
     game->fleet.trainCars[n].energyCargoOrRemovalTicks = 7;
     if (bl)
-        game->build.queue_tile_change(game->world.terrain, game->economy, unsignedByte(game->fleet.trainCars[n].x),
-                                    unsignedByte(game->fleet.trainCars[n].y), false, true);
+        game->build.queue_tile_change(game->world.terrain, game->economy, unsigned_byte(game->fleet.trainCars[n].x),
+                                    unsigned_byte(game->fleet.trainCars[n].y), false, true);
     game->renderer.lastViewportCenterX = -1;
     game->ready = false;
     game->ui.transitionCode = 16;
@@ -116,8 +117,8 @@ void Game::merge_train_at(int32_t n) {
     for (int i = 0; i < 500; ++i) {
         if (n == i || !train_flag::isUsed(game->fleet.trainCars[i].flags)
             || !train_flag::isHead(game->fleet.trainCars[i].flags)
-            || !game->fleet.has_car_at(i, unsignedByte(game->fleet.trainCars[n].x),
-                                    unsignedByte(game->fleet.trainCars[n].y)))
+            || !game->fleet.has_car_at(i, unsigned_byte(game->fleet.trainCars[n].x),
+                                    unsigned_byte(game->fleet.trainCars[n].y)))
             continue;
         remove_train_from_map(i, true);
         remove_train_from_map(n, true);
@@ -136,8 +137,8 @@ void Game::upgrade_one_ai_train_for_era() {
     for (int i = 0; i < 500; ++i) {
         if (!train_flag::isUsed(game->fleet.trainCars[i].flags) || !train_flag::isHead(game->fleet.trainCars[i].flags))
             continue;
-        int n2 = unsignedByte(game->fleet.trainCars[i].x);
-        int n = unsignedByte(game->fleet.trainCars[i].y);
+        int n2 = unsigned_byte(game->fleet.trainCars[i].x);
+        int n = unsigned_byte(game->fleet.trainCars[i].y);
         if ((game->world.trackMap[n2][n] != 66 && game->world.trackMap[n2][n] != 67
              && game->world.trackMap[n2][n] != 68)
             || game->fleet.trainCars[i].era >= game->scenario.currentEra)
@@ -156,8 +157,8 @@ void Game::reset_ai_depot_train_ages() {
     Game* game = this;
     for (int i = 0; i < 500; ++i) {
         if (!train_flag::isUsed(game->fleet.trainCars[i].flags)) continue;
-        int n2 = unsignedByte(game->fleet.trainCars[i].x);
-        int n = unsignedByte(game->fleet.trainCars[i].y);
+        int n2 = unsigned_byte(game->fleet.trainCars[i].x);
+        int n = unsigned_byte(game->fleet.trainCars[i].y);
         if (game->world.trackMap[n2][n] == 66 || game->world.trackMap[n2][n] == 67
             || game->world.trackMap[n2][n] == 68)
             game->fleet.trainCars[i].ageYears = 0;
@@ -210,11 +211,11 @@ void BuildController::queue_tile_change(Terrain& terrain,
 bool Terrain::queue_change(int32_t x, int32_t y, bool visual_only) {
     for (int index = kTileQueueCount - 1; index >= 0; --index) {
         if (tileQueue[index].countdown != 0
-            && unsignedByte(tileQueue[index].x) == x
-            && unsignedByte(tileQueue[index].y) == y)
+            && unsigned_byte(tileQueue[index].x) == x
+            && unsigned_byte(tileQueue[index].y) == y)
             return false;
     }
-    if (unsignedByte(tileMap[x][y]) < 128)
+    if (unsigned_byte(tileMap[x][y]) < 128)
         tileMap[x][y] = (int8_t)(tileMap[x][y] + 128);
     int slot = 0;
     for (int index = kTileQueueCount - 1; index >= 0; --index) {
@@ -346,7 +347,7 @@ int32_t Game::compute_map_train_metric(int32_t n) {
             n2 += 3;
             for (int k = 0; k < 500; ++k) {
                 if (!train_flag::isUsed(game->fleet.trainCars[k].flags)
-                    || unsignedByte(game->fleet.trainCars[k].x) != i || unsignedByte(game->fleet.trainCars[k].y) != j)
+                    || unsigned_byte(game->fleet.trainCars[k].x) != i || unsigned_byte(game->fleet.trainCars[k].y) != j)
                     continue;
                 n2 += train_flag::isHead(game->fleet.trainCars[k].flags) ? 400 : 55;
             }
@@ -438,8 +439,8 @@ int32_t Game::scan_map_metric() const {
     }
     for (int n3 = 0; n3 < 500; ++n3) {
         if (!train_flag::isUsed(game->fleet.trainCars[n3].flags)) continue;
-        int n2 = unsignedByte(game->fleet.trainCars[n3].x);
-        int n = unsignedByte(game->fleet.trainCars[n3].y);
+        int n2 = unsigned_byte(game->fleet.trainCars[n3].x);
+        int n = unsigned_byte(game->fleet.trainCars[n3].y);
         if (game->world.trackMap[n2][n] != 65) continue;
         if (train_flag::isHead(game->fleet.trainCars[n3].flags)) {
             switch (game->fleet.trainCars[n3].era) {
@@ -537,8 +538,8 @@ void Game::tick_input_or_ai(bool bl) {
     Game *game = this;
     for (int i = 0; i < 250; ++i) {
         if ((game->fleet.serviceSites[i].flags & 0x80) != 128) continue;
-        int n3 = unsignedByte(game->fleet.serviceSites[i].x);
-        int n4 = unsignedByte(game->fleet.serviceSites[i].y);
+        int n3 = unsigned_byte(game->fleet.serviceSites[i].x);
+        int n4 = unsigned_byte(game->fleet.serviceSites[i].y);
         int n5 = n3 - 3;
         int n6 = n4 - 3;
         int n7 = n3 + 3;
@@ -677,15 +678,15 @@ void Game::apply_queued_tile_changes() {
         TileChange& change = game->world.terrain.tileQueue[queueIndex];
         if (change.countdown <= 0) continue;
         --change.countdown;
-        int tileX = unsignedByte(change.x);
-        int tileY = unsignedByte(change.y);
+        int tileX = unsigned_byte(change.x);
+        int tileY = unsigned_byte(change.y);
         if (change.countdown == 0 && tileX >= 0 && tileY >= 0
             && tileX < game->world.terrain.mapWidth && tileY < game->world.terrain.mapHeight)
-            game->world.terrain.tileMap[tileX][tileY] = (int8_t)(unsignedByte(game->world.terrain.tileMap[tileX][tileY]) - 128);
+            game->world.terrain.tileMap[tileX][tileY] = (int8_t)(unsigned_byte(game->world.terrain.tileMap[tileX][tileY]) - 128);
         if (change.countdown != 7 || tileX < 0 || tileY < 0
             || tileX >= game->world.terrain.mapWidth || tileY >= game->world.terrain.mapHeight)
             continue;
-        int tileCode = unsignedByte(game->world.terrain.tileMap[tileX][tileY]) - 128;
+        int tileCode = unsigned_byte(game->world.terrain.tileMap[tileX][tileY]) - 128;
         if (game->world.terrain.tileQueueVisualOnly[queueIndex]) continue;
         if (tileCode >= 29 && tileCode <= 33) game->world.terrain.tileMap[tileX][tileY] = -128;
         if ((tileCode >= 70 && tileCode <= 75) || (tileCode >= 87 && tileCode <= 90)) {

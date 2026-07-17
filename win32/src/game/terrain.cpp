@@ -1,5 +1,6 @@
 // Terrain and tile queries and changes.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,8 +41,8 @@ bool World::is_city_or_station_tile(const Fleet& fleet, int32_t n,
         int32_t n3 = fleet.find_service_site_at(n, n2);
         for (int i = 0; i < 500; ++i) {
             if (!train_flag::isUsed(fleet.trainCars[i].flags)) continue;
-            int32_t n4 = unsignedByte(fleet.trainCars[i].x);
-            int32_t n5 = unsignedByte(fleet.trainCars[i].y);
+            int32_t n4 = unsigned_byte(fleet.trainCars[i].x);
+            int32_t n5 = unsigned_byte(fleet.trainCars[i].y);
             if (n == n4 && n2 == n5) return false;
             if (n3 == 5000 || n3 != fleet.find_service_site_at(n4, n5)) continue;
             return false;
@@ -56,13 +57,13 @@ bool World::is_city_or_station_tile(const Fleet& fleet, int32_t n,
                 for (n6 = n; n6 < terrain.mapWidth
                      && (terrain.tileMap[n6][n2] == 81 || terrain.tileMap[n6][n2] == 84
                          || terrain.tileMap[n6][n2] == 85); ++n6) {
-                    if (unsignedByte(fleet.trainCars[i].x) != n6 || unsignedByte(fleet.trainCars[i].y) != n2) continue;
+                    if (unsigned_byte(fleet.trainCars[i].x) != n6 || unsigned_byte(fleet.trainCars[i].y) != n2) continue;
                     return false;
                 }
                 for (n6 = n - 1; n6 >= 0
                      && (terrain.tileMap[n6][n2] == 81 || terrain.tileMap[n6][n2] == 84
                          || terrain.tileMap[n6][n2] == 85); --n6) {
-                    if (unsignedByte(fleet.trainCars[i].x) != n6 || unsignedByte(fleet.trainCars[i].y) != n2) continue;
+                    if (unsigned_byte(fleet.trainCars[i].x) != n6 || unsigned_byte(fleet.trainCars[i].y) != n2) continue;
                     return false;
                 }
                 continue;
@@ -70,13 +71,13 @@ bool World::is_city_or_station_tile(const Fleet& fleet, int32_t n,
             for (n6 = n2; n6 < terrain.mapHeight
                  && (terrain.tileMap[n][n6] == 82 || terrain.tileMap[n][n6] == 83
                      || terrain.tileMap[n][n6] == 86); ++n6) {
-                if (unsignedByte(fleet.trainCars[i].x) != n || unsignedByte(fleet.trainCars[i].y) != n6) continue;
+                if (unsigned_byte(fleet.trainCars[i].x) != n || unsigned_byte(fleet.trainCars[i].y) != n6) continue;
                 return false;
             }
             for (n6 = n2 - 1; n6 >= 0
                  && (terrain.tileMap[n][n6] == 82 || terrain.tileMap[n][n6] == 83
                      || terrain.tileMap[n][n6] == 86); --n6) {
-                if (unsignedByte(fleet.trainCars[i].x) != n || unsignedByte(fleet.trainCars[i].y) != n6) continue;
+                if (unsigned_byte(fleet.trainCars[i].x) != n || unsigned_byte(fleet.trainCars[i].y) != n6) continue;
                 return false;
             }
         }

@@ -1,5 +1,6 @@
 // Direct game-map build and selection actions.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <vector>
 
 void Game::enter_out_of_money_state() {
@@ -17,8 +18,8 @@ void OfferBoard::add_progress(int32_t objective_type, int32_t amount) {
 
 bool Fleet::has_car_at(int32_t car, int32_t x, int32_t y) const {
     if (car == -1) return false;
-    if (unsignedByte(trainCars[car].x) == x
-        && unsignedByte(trainCars[car].y) == y)
+    if (unsigned_byte(trainCars[car].x) == x
+        && unsigned_byte(trainCars[car].y) == y)
         return true;
     return has_car_at(trainCars[car].nextCar, x, y);
 }
@@ -177,8 +178,8 @@ void Game::demolish_at_cursor() {
     } else if (tile >= 87 && tile <= 90) {
         int vehicle = game->fleet.find_service_site_at(cursor_x, cursor_y);
         if (vehicle != 5000) {
-            int x = unsignedByte(game->fleet.serviceSites[vehicle].x);
-            int y = unsignedByte(game->fleet.serviceSites[vehicle].y);
+            int x = unsigned_byte(game->fleet.serviceSites[vehicle].x);
+            int y = unsigned_byte(game->fleet.serviceSites[vehicle].y);
             if ((game->fleet.serviceSites[vehicle].flags & 0x20) == 32) {
                 if ((game->fleet.serviceSites[vehicle].flags & 0x40) == 0) {
                     game->world.trackMap[x][y - 1] = 0;
@@ -784,8 +785,8 @@ bool Game::buy_train_at_cursor() {
     // serviceVehicleAtCursor. The live tile cursor re-anchors to the screen
     // centre every Playing tick, so by the time "buy" fires it has drifted off
     // the depot; using it here would strand the engine on an empty tile.
-    int station_x = unsignedByte(game->fleet.serviceSites[game->serviceVehicleAtCursor].x);
-    int station_y = unsignedByte(game->fleet.serviceSites[game->serviceVehicleAtCursor].y);
+    int station_x = unsigned_byte(game->fleet.serviceSites[game->serviceVehicleAtCursor].x);
+    int station_y = unsigned_byte(game->fleet.serviceSites[game->serviceVehicleAtCursor].y);
     int train = game->fleet.allocate_train_car(
         station_x, station_y,
         game->build.wagonType < 3 ? 0 : 1, game->build.wagonType,

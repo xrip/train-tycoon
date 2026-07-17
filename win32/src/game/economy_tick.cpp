@@ -1,5 +1,6 @@
 // Monthly economy and offer processing.
 #include "game_internal.h"
+#include "support/numeric.h"
 #include <cstdlib>
 
 void OfferBoard::schedule_due_date(int32_t row, int32_t duration_units,
@@ -139,8 +140,8 @@ void Game::monthly_offer_tick() {
         int type267_count = 0;
         for (int train = 0; train < 500; ++train) {
             if (!train_flag::isUsed(game->fleet.trainCars[train].flags)
-                || game->world.trackMap[unsignedByte(game->fleet.trainCars[train].x)]
-                               [unsignedByte(game->fleet.trainCars[train].y)] != 65)
+                || game->world.trackMap[unsigned_byte(game->fleet.trainCars[train].x)]
+                               [unsigned_byte(game->fleet.trainCars[train].y)] != 65)
                 continue;
             ++active_train_count;
             if (train_flag::isHead(game->fleet.trainCars[train].flags)) {
@@ -214,7 +215,7 @@ void Game::monthly_offer_tick() {
             int effect_index = effect_code - 1;
             game->scenario.offerEffectNextCount[effect_index] =
                 (int16_t)(game->scenario.offerEffectNextCount[effect_index]
-                          + unsignedByte(game->scenario.offerEffectSchedule[effect_index][1]));
+                          + unsigned_byte(game->scenario.offerEffectSchedule[effect_index][1]));
             if (effect_code == 1) {
                 game->offerBoard.offers[free_row].effectValue =
                     (int8_t)(30 + std::abs(game->rng.next_int() % 50));
