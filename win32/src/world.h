@@ -79,6 +79,8 @@ struct World {
     void place_track_tile(int32_t x, int32_t y, int32_t tile_code,
                           int32_t track_owner);
     bool is_tile_buildable(int32_t x, int32_t y, int32_t type) const;
+    bool has_track_step(int32_t x, int32_t y, int32_t step_x,
+                        int32_t step_y, int32_t tile_code) const;
 };
 
 #endif  // WORLD_H

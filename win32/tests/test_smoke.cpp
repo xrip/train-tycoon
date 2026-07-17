@@ -738,6 +738,15 @@ TEST_CASE("fast: world buildable query checks bounds and full footprint") {
     CHECK_FALSE(world.is_tile_buildable(2, 2, 5));
 }
 
+TEST_CASE("fast: world track-step query stops at the first occupied tile") {
+    World world;
+    world.resize(5, 5);
+    world.terrain.tileMap[3][2] = 9;
+    CHECK(world.has_track_step(1, 2, 1, 0, 9));
+    world.terrain.tileMap[2][2] = 4;
+    CHECK_FALSE(world.has_track_step(1, 2, 1, 0, 9));
+}
+
 TEST_CASE("fast: terrain commits the build edit buffer") {
     World world;
     world.resize(20, 20);

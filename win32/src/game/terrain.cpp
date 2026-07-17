@@ -31,10 +31,10 @@ bool game_isCurveTile(Game *game, int32_t n, int32_t n2) {
     int8_t by = game->world.terrain.tileMap[n][n2];
     if (by < 7 || by > 10) return false;
     bool bl = false;
-    if (by == 7)  bl |= game_isTrackStep(game, n, n2, 0, -1, 10);
-    if (by == 10) bl |= game_isTrackStep(game, n, n2, 0, 1, 7);
-    if (by == 8)  bl |= game_isTrackStep(game, n, n2, -1, 0, 9);
-    if (by == 9)  bl |= game_isTrackStep(game, n, n2, 1, 0, 8);
+    if (by == 7)  bl |= game->world.has_track_step(n, n2, 0, -1, 10);
+    if (by == 10) bl |= game->world.has_track_step(n, n2, 0, 1, 7);
+    if (by == 8)  bl |= game->world.has_track_step(n, n2, -1, 0, 9);
+    if (by == 9)  bl |= game->world.has_track_step(n, n2, 1, 0, 8);
     return bl;
 }
 

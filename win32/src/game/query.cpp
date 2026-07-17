@@ -17,12 +17,13 @@ void game_pushMoneyHistory(Game *game, int32_t n) {
     game->ui.moneyTickerFrames[0] = 80;
 }
 
-bool game_isTrackStep(Game *game, int32_t n, int32_t n2, int32_t n3,
-                          int32_t n4, int32_t n5) {
+bool World::has_track_step(int32_t n, int32_t n2, int32_t n3,
+                           int32_t n4, int32_t n5) const {
     bool bl = false;
-    while ((n += n3) >= 0 && (n2 += n4) >= 0 && n < game->world.terrain.mapWidth && n2 < game->world.terrain.mapHeight) {
-        if (game->world.terrain.tileMap[n][n2] == n5) bl = true;
-        if (game->world.terrain.tileMap[n][n2] == 0 && game->world.trackMap[n][n2] == 0) continue;
+    while ((n += n3) >= 0 && (n2 += n4) >= 0
+           && n < terrain.mapWidth && n2 < terrain.mapHeight) {
+        if (terrain.tileMap[n][n2] == n5) bl = true;
+        if (terrain.tileMap[n][n2] == 0 && trackMap[n][n2] == 0) continue;
         break;
     }
     return bl;
