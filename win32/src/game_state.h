@@ -6,6 +6,7 @@
 #include "pathfinder.h"
 #include "fleet.h"
 #include "economy.h"
+#include "offer_board.h"
 #include "scenario.h"
 #include "build_controller.h"
 #include "assets.h"
@@ -45,6 +46,7 @@ typedef struct Game {
     int32_t gameState;
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
     Economy economy;
+    OfferBoard offerBoard;
     Scenario scenario;
     BuildController build;
     Assets assets;

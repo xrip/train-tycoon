@@ -10,7 +10,7 @@ void game_enterOutOfMoneyState(Game *game) {
 
 void game_incrementRowValueType13(Game *game, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (game->ui.menuRowType[row] == 13) game->ui.menuRowValue[row] += amount;
+        if (game->offerBoard.offers[row].objectiveType == 13) game->offerBoard.offers[row].progress += amount;
 }
 
 bool game_isAnyTrainCarAt(Game *game, int32_t car, int32_t x, int32_t y) {
@@ -467,7 +467,7 @@ void game_setTrackOwnerCode(Game *game, int32_t owner) {
 void game_rebuildMenuTypeIndexes(Game *game) {
     game->ui.menuRowEnabledCount = 0;
     for (int row = 0; row < 5; ++row) {
-        if (game->ui.menuRowType[row] == 0) continue;
+        if (game->offerBoard.offers[row].objectiveType == 0) continue;
         game->ui.enabledMenuRowIndexes[game->ui.menuRowEnabledCount++] = (int8_t)row;
     }
 }
@@ -716,27 +716,27 @@ int32_t game_allocateTrainSlot(Game *game, int32_t x, int32_t y,
 
 void game_incrementCargoOptionCount(Game *game, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
-        if (car_type == 6 && game->ui.menuRowType[row] == 9)
-            ++game->ui.menuRowValue[row];
-        if (car_type == 4 && game->ui.menuRowType[row] == 10)
-            ++game->ui.menuRowValue[row];
-        if (car_type == 3 && game->ui.menuRowType[row] == 11)
-            ++game->ui.menuRowValue[row];
-        if (car_type == 2 && game->ui.menuRowType[row] == 12)
-            ++game->ui.menuRowValue[row];
+        if (car_type == 6 && game->offerBoard.offers[row].objectiveType == 9)
+            ++game->offerBoard.offers[row].progress;
+        if (car_type == 4 && game->offerBoard.offers[row].objectiveType == 10)
+            ++game->offerBoard.offers[row].progress;
+        if (car_type == 3 && game->offerBoard.offers[row].objectiveType == 11)
+            ++game->offerBoard.offers[row].progress;
+        if (car_type == 2 && game->offerBoard.offers[row].objectiveType == 12)
+            ++game->offerBoard.offers[row].progress;
     }
 }
 
 void game_decrementCargoOptionCount(Game *game, int32_t car_type) {
     for (int row = 0; row < 5; ++row) {
-        if ((car_type == 7 || car_type == 6) && game->ui.menuRowType[row] == 9)
-            --game->ui.menuRowValue[row];
-        if ((car_type == 5 || car_type == 4) && game->ui.menuRowType[row] == 10)
-            --game->ui.menuRowValue[row];
-        if (car_type == 3 && game->ui.menuRowType[row] == 11)
-            --game->ui.menuRowValue[row];
-        if (car_type == 2 && game->ui.menuRowType[row] == 12)
-            --game->ui.menuRowValue[row];
+        if ((car_type == 7 || car_type == 6) && game->offerBoard.offers[row].objectiveType == 9)
+            --game->offerBoard.offers[row].progress;
+        if ((car_type == 5 || car_type == 4) && game->offerBoard.offers[row].objectiveType == 10)
+            --game->offerBoard.offers[row].progress;
+        if (car_type == 3 && game->offerBoard.offers[row].objectiveType == 11)
+            --game->offerBoard.offers[row].progress;
+        if (car_type == 2 && game->offerBoard.offers[row].objectiveType == 12)
+            --game->offerBoard.offers[row].progress;
     }
 }
 
@@ -748,7 +748,7 @@ void game_decrementTrainCargoOptionCounts(Game *game, int32_t car) {
 
 void game_incrementRowValueType14(Game *game, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (game->ui.menuRowType[row] == 14) game->ui.menuRowValue[row] += amount;
+        if (game->offerBoard.offers[row].objectiveType == 14) game->offerBoard.offers[row].progress += amount;
 }
 
 bool game_buyTrainAtCursor(Game *game) {

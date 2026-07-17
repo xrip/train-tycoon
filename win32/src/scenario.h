@@ -38,8 +38,8 @@ struct Scenario {
 
     // Periodic contract/subsidy offer generation. offerEffectNextCount,
     // offerGenerationCount, and lastOfferDateCode are saved; the rest are
-    // runtime-only. The shared menu-row display arrays (menuRow*) that these
-    // offers populate stay on Game for UI-01. Save byte order is unchanged.
+    // runtime-only. Saved offer records live in OfferBoard. Save byte order is
+    // unchanged.
     int8_t offerRowIndex = 0;
     int8_t duplicateRowState = 0;
     int32_t offerTypeTransitionCode = 0;

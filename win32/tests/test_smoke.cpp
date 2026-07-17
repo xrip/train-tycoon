@@ -418,6 +418,52 @@ TEST_CASE("fast: city records keep defaults and save field positions") {
     delete game;
 }
 
+TEST_CASE("fast: offer records keep defaults and save field positions") {
+    Game* game = make_game();
+    CHECK(game->offerBoard.offers[0].objectiveType == 0);
+    CHECK(game->offerBoard.offers[kMenuRowCount - 1].effectAmount == 0);
+
+    Offer& first = game->offerBoard.offers[1];
+    first.objectiveType = 2;
+    first.issuedDay = 3;
+    first.dueDay = 4;
+    first.issuedMonth = 5;
+    first.dueMonth = 6;
+    first.issuedYear = 7;
+    first.dueYear = 8;
+    first.target = 123456;
+    first.progress = -234567;
+    first.effectType = 9;
+    first.effectValue = 10;
+    first.effectAmount = 345678;
+    Offer& last = game->offerBoard.offers[kMenuRowCount - 1];
+    last.objectiveType = 14;
+    last.target = -7654321;
+    last.effectAmount = 7654321;
+
+    game->saveCodec.walk(*game, 4);
+    first = Offer{};
+    last = Offer{};
+    game->saveCodec.walk(*game, 5);
+
+    CHECK(first.objectiveType == 2);
+    CHECK(first.issuedDay == 3);
+    CHECK(first.dueDay == 4);
+    CHECK(first.issuedMonth == 5);
+    CHECK(first.dueMonth == 6);
+    CHECK(first.issuedYear == 7);
+    CHECK(first.dueYear == 8);
+    CHECK(first.target == 123456);
+    CHECK(first.progress == -234567);
+    CHECK(first.effectType == 9);
+    CHECK(first.effectValue == 10);
+    CHECK(first.effectAmount == 345678);
+    CHECK(last.objectiveType == 14);
+    CHECK(last.target == -7654321);
+    CHECK(last.effectAmount == 7654321);
+    delete game;
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);

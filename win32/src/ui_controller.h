@@ -7,24 +7,9 @@
 #include "support/grid.h"
 #include <cstdint>
 
-// UiController owns the interface state. Menu-row leaf: the up-to-six rows of the
-// build/offer menu. Each row carries a type, three params, a cost/value/revenue,
-// an alt type, an era, and the placement date (placeTrain day/month/year). All
-// twelve arrays are saved; their exact save byte order is unchanged.
+// UiController owns interface selection and screen-flow state. Saved offer
+// records live in OfferBoard.
 struct UiController {
-    int8_t menuRowType[kMenuRowCount]{};
-    int8_t placeTrainDay[kMenuRowCount]{};
-    int8_t menuRowParamA[kMenuRowCount]{};
-    int8_t placeTrainMonth[kMenuRowCount]{};
-    int8_t menuRowParamB[kMenuRowCount]{};
-    int8_t placeTrainYear[kMenuRowCount]{};
-    int8_t menuRowParamC[kMenuRowCount]{};
-    int32_t menuRowCost[kMenuRowCount]{};
-    int32_t menuRowValue[kMenuRowCount]{};
-    int8_t menuRowAltType[kMenuRowCount]{};
-    int8_t menuRowEra[kMenuRowCount]{};
-    int32_t menuRowRevenue[kMenuRowCount]{};
-
     // Build-menu navigation and content state. The grids hold the current menu's
     // item ids, result codes, item/text/transition codes, and per-row enabled
     // flags; the scalar cursors and mode indices track the selection; the

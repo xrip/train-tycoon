@@ -85,8 +85,8 @@ inline constexpr int32_t CITY_ZONE_LAST = 40; // last city population zone tile
 // named with the UI controller in UI-01; only the arithmetic bases that build a
 // code from model data are named here. See DECISIONS "Recovered in MODEL-01".
 namespace transition {
-inline constexpr int32_t OFFER_TYPE_BASE = 40;      // menuRowType[row]    + this
-inline constexpr int32_t OFFER_ALT_BASE = 60;       // menuRowAltType[row] + this
+inline constexpr int32_t OFFER_TYPE_BASE = 40;      // objectiveType + this
+inline constexpr int32_t OFFER_ALT_BASE = 60;       // effectType + this
 inline constexpr int32_t SCENARIO_NOTICE_BASE = 80; // scenarioNotice id   + this
 }  // namespace transition
 

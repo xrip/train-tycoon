@@ -132,14 +132,14 @@ int32_t game_computeMilestoneScore(Game *game) {
 
 int8_t game_computeMenuRowDisplayValue(Game *game, int32_t row) {
     int value;
-    if (game->ui.menuRowType[row] == 1) {
-        value = 100 * game->ui.menuRowValue[row] / game->ui.menuRowCost[row];
-    } else if (game->ui.menuRowType[row] == 2) {
+    if (game->offerBoard.offers[row].objectiveType == 1) {
+        value = 100 * game->offerBoard.offers[row].progress / game->offerBoard.offers[row].target;
+    } else if (game->offerBoard.offers[row].objectiveType == 2) {
         value = game->economy.money > 0
-                ? 100 * game->economy.money / game->ui.menuRowCost[row]
-                : 100 * game->ui.menuRowCost[row] / game->economy.money;
-    } else if (game->ui.menuRowType[row] >= 4 && game->ui.menuRowType[row] <= 14) {
-        value = 100 * game->ui.menuRowValue[row] / game->ui.menuRowCost[row];
+                ? 100 * game->economy.money / game->offerBoard.offers[row].target
+                : 100 * game->offerBoard.offers[row].target / game->economy.money;
+    } else if (game->offerBoard.offers[row].objectiveType >= 4 && game->offerBoard.offers[row].objectiveType <= 14) {
+        value = 100 * game->offerBoard.offers[row].progress / game->offerBoard.offers[row].target;
     } else {
         return 0;
     }

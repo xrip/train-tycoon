@@ -195,6 +195,10 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     for (City& city : game->world.cities) city.member = io_byte(city.member)
 #define IO_CITY_SHORT(member) \
     for (City& city : game->world.cities) io_shorts(&city.member, 1)
+#define IO_OFFER_BYTE(member) \
+    for (Offer& offer : game->offerBoard.offers) offer.member = io_byte(offer.member)
+#define IO_OFFER_INT(member) \
+    for (Offer& offer : game->offerBoard.offers) offer.member = io_int(offer.member)
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
@@ -302,18 +306,18 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_BYTE(scenario.aiFrequency);
     IO_BYTE(scenario.aiThreshold);
     if (mode != save::OP_RESET_SKIP) IO_BYTE(scenario.difficultyCycle);
-    IO_BYTES(ui.menuRowType);
-    IO_BYTES(ui.placeTrainDay);
-    IO_BYTES(ui.menuRowParamA);
-    IO_BYTES(ui.placeTrainMonth);
-    IO_BYTES(ui.menuRowParamB);
-    IO_BYTES(ui.placeTrainYear);
-    IO_BYTES(ui.menuRowParamC);
-    IO_INTS(ui.menuRowCost);
-    IO_INTS(ui.menuRowValue);
-    IO_BYTES(ui.menuRowAltType);
-    IO_BYTES(ui.menuRowEra);
-    IO_INTS(ui.menuRowRevenue);
+    IO_OFFER_BYTE(objectiveType);
+    IO_OFFER_BYTE(issuedDay);
+    IO_OFFER_BYTE(dueDay);
+    IO_OFFER_BYTE(issuedMonth);
+    IO_OFFER_BYTE(dueMonth);
+    IO_OFFER_BYTE(issuedYear);
+    IO_OFFER_BYTE(dueYear);
+    IO_OFFER_INT(target);
+    IO_OFFER_INT(progress);
+    IO_OFFER_BYTE(effectType);
+    IO_OFFER_BYTE(effectValue);
+    IO_OFFER_INT(effectAmount);
     IO_SHORTS(scenario.offerEffectNextCount);
     IO_INT(scenario.offerGenerationCount);
     IO_INT(savedLegacyMetricBq);
@@ -369,6 +373,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #undef IO_SITE_BYTE
 #undef IO_CITY_BYTE
 #undef IO_CITY_SHORT
+#undef IO_OFFER_BYTE
+#undef IO_OFFER_INT
 #undef FIELD_COUNT
 
     if (mode == save::OP_SAVE_MAIN) {

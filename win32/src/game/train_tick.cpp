@@ -178,8 +178,8 @@ void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
 
 void game_recordDeliveredResource(Game *game, int32_t resource, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
-        if (game->ui.menuRowType[row] == 3 + resource)
-            game->ui.menuRowValue[row] += amount;
+        if (game->offerBoard.offers[row].objectiveType == 3 + resource)
+            game->offerBoard.offers[row].progress += amount;
     }
     switch (resource) {
         case 1: game->scenario.milestoneThreshold1 += amount; break;
@@ -192,7 +192,7 @@ void game_recordDeliveredResource(Game *game, int32_t resource, int32_t amount) 
 
 void game_recordTrainRevenue(Game *game, int32_t amount) {
     for (int row = 0; row < 5; ++row) {
-        if (game->ui.menuRowType[row] == 1) game->ui.menuRowValue[row] += amount;
+        if (game->offerBoard.offers[row].objectiveType == 1) game->offerBoard.offers[row].progress += amount;
     }
     game->economy.lifetimeTrainRevenue += amount;
     game->economy.trainRevenueScore += amount / 73;

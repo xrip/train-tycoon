@@ -260,10 +260,10 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
         case 40:
             switch (n2) {
                 case 1:
-                    game->ui.pendingTransitionCode = game->ui.menuRowType[game->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                    game->ui.pendingTransitionCode = game->offerBoard.offers[game->scenario.offerRowIndex].objectiveType + transition::OFFER_TYPE_BASE;
                     game->scenario.duplicateRowState = 2; break;
                 case 2:
-                    game->ui.pendingTransitionCode = game->ui.menuRowAltType[game->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                    game->ui.pendingTransitionCode = game->offerBoard.offers[game->scenario.offerRowIndex].effectType + transition::OFFER_ALT_BASE;
                     game->scenario.duplicateRowState = 2; break;
             }
             game_setState(game, GameState::Playing); break;
@@ -277,11 +277,11 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
         case 60:
             if (n2 % 2 == 1) {
                 game->scenario.offerRowIndex = game->ui.enabledMenuRowIndexes[n2 / 2];
-                game->ui.pendingTransitionCode = game->ui.menuRowType[game->scenario.offerRowIndex] + transition::OFFER_TYPE_BASE;
+                game->ui.pendingTransitionCode = game->offerBoard.offers[game->scenario.offerRowIndex].objectiveType + transition::OFFER_TYPE_BASE;
             }
             if (n2 % 2 == 0) {
                 game->scenario.offerRowIndex = game->ui.enabledMenuRowIndexes[(n2 - 1) / 2];
-                game->ui.pendingTransitionCode = game->ui.menuRowAltType[game->scenario.offerRowIndex] + transition::OFFER_ALT_BASE;
+                game->ui.pendingTransitionCode = game->offerBoard.offers[game->scenario.offerRowIndex].effectType + transition::OFFER_ALT_BASE;
             }
             game->scenario.duplicateRowState = 1;
             game_setState(game, GameState::Playing); break;

@@ -232,21 +232,22 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
         case 41: case 42: case 44: case 45: case 46: case 47: case 48:
         case 49: case 50: case 51: case 52: case 53: case 54:
             if (field == 1) {
-                const auto day = game_formatNumberWithSuffix(game->ui.menuRowParamA[game->scenario.offerRowIndex], 11);
-                const auto month = game_formatNumberWithSuffix(game->ui.menuRowParamB[game->scenario.offerRowIndex], 11);
-                const auto year = game_formatNumberWithSuffix(game->ui.menuRowParamC[game->scenario.offerRowIndex] + 1950, 0);
+                const auto day = game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueDay, 11);
+                const auto month = game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueMonth, 11);
+                const auto year = game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].dueYear + 1950, 0);
                 return join_three_codes(day, month, year);
             }
-            if (field == 2) return game_formatCurrency(game->ui.menuRowCost[game->scenario.offerRowIndex]);
+            if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].target);
             if (field == 3) return game_formatNumberWithSuffix(game_computeMenuRowDisplayValue(game, game->scenario.offerRowIndex), 29);
-            if (field == 4) return game_formatNumberWithSuffix(game->ui.menuRowCost[game->scenario.offerRowIndex], 0);
+            if (field == 4) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].target, 0);
             break;
 
         case 60:
             if (field % 2 == 1) {
                 int index = field / 2;
                 return copy_codes(game->assets.spriteBitmapTable[unsignedByte(
-                    game->assets.spriteIndexTable[game->ui.menuRowType[game->ui.enabledMenuRowIndexes[index]] + 160])]);
+                    game->assets.spriteIndexTable[game->offerBoard.offers[
+                        game->ui.enabledMenuRowIndexes[index]].objectiveType + 160])]);
             } else {
                 int index = (field - 1) / 2;
                 return game_formatNumberWithSuffix(
@@ -255,9 +256,9 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
 
         case 61: case 62: case 63: case 64: case 65: case 66:
         case 67: case 68: case 69: case 70: case 71: case 72:
-            if (field == 1) return game_formatNumberWithSuffix(game->ui.menuRowEra[game->scenario.offerRowIndex], 29);
-            if (field == 2) return game_formatCurrency(game->ui.menuRowRevenue[game->scenario.offerRowIndex]);
-            if (field == 3) return game_formatNumberWithSuffix(game->ui.menuRowEra[game->scenario.offerRowIndex], 0);
+            if (field == 1) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 29);
+            if (field == 2) return game_formatCurrency(game->offerBoard.offers[game->scenario.offerRowIndex].effectAmount);
+            if (field == 3) return game_formatNumberWithSuffix(game->offerBoard.offers[game->scenario.offerRowIndex].effectValue, 0);
             break;
 
         case 27:
