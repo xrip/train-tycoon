@@ -127,7 +127,9 @@ void Terrain::rebuild(BuildController& build, bool bl) {
 void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl) {
     if ((bl && game->world.terrain.heightMap[n][n2] < 3) || (!bl && game->world.terrain.heightMap[n][n2] > -1)) {
         game->build.set_terrain_selection(game->world.terrain, n, n2);
-        if (game_isAdjacentTileEmpty(game, n, n2, game->world.terrain.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
+        if (game->build.adjust_terrain_point(
+                game->world.terrain, game->economy, n, n2,
+                game->world.terrain.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
             if (game->world.initialIndustryPlaced) {
                 if (game->build.terrainSmoothCost <= game->economy.money) {
                     game->economy.money -= game->build.terrainSmoothCost;
@@ -150,11 +152,20 @@ void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
             game->build.set_terrain_selection(game->world.terrain, i, j);
-            game_isAdjacentTileEmpty(game, i, j, n5, true);
-            if (nextRngInt(game) % 2 < 0 && i > 0) game_isAdjacentTileEmpty(game, i - 1, j, n5, true);
-            if (nextRngInt(game) % 2 < 0 && j > 0) game_isAdjacentTileEmpty(game, i, j - 1, n5, true);
-            if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth) game_isAdjacentTileEmpty(game, i + 1, j, n5, true);
-            if (nextRngInt(game) % 2 < 0 && j < game->world.terrain.mapHeight) game_isAdjacentTileEmpty(game, i, j + 1, n5, true);
+            game->build.adjust_terrain_point(
+                game->world.terrain, game->economy, i, j, n5, true);
+            if (nextRngInt(game) % 2 < 0 && i > 0)
+                game->build.adjust_terrain_point(
+                    game->world.terrain, game->economy, i - 1, j, n5, true);
+            if (nextRngInt(game) % 2 < 0 && j > 0)
+                game->build.adjust_terrain_point(
+                    game->world.terrain, game->economy, i, j - 1, n5, true);
+            if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth)
+                game->build.adjust_terrain_point(
+                    game->world.terrain, game->economy, i + 1, j, n5, true);
+            if (nextRngInt(game) % 2 < 0 && j < game->world.terrain.mapHeight)
+                game->build.adjust_terrain_point(
+                    game->world.terrain, game->economy, i, j + 1, n5, true);
             game->world.terrain.commit_edit(game->build);
         }
     }

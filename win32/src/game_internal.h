@@ -23,7 +23,6 @@ void game_renderPackedSprite(Game *game, Surface* graphics, int32_t n);
 void game_renderFontString(Game *game, Surface* graphics, int32_t n, int32_t n2,
                          std::span<const int8_t> codes, bool bl);
 void game_registerCityEntry(Game *game, int8_t by);
-bool game_isAdjacentTileEmpty(Game *game, int32_t n, int32_t n2, int32_t n3, bool bl);
 void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl);
 void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);
 void game_lowerTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5);

@@ -20,6 +20,9 @@ struct BuildController {
     static bool tool_acts_on_cursor_tile(int32_t mode, int32_t item);
     void compute_train_cost(const Economy& economy, const Scenario& scenario);
     void set_terrain_selection(const Terrain& terrain, int32_t x, int32_t y);
+    bool adjust_terrain_point(const Terrain& terrain, const Economy& economy,
+                              int32_t x, int32_t y, int32_t height,
+                              bool raising);
 
     int32_t trackStartX = 0;
     int32_t trackStartY = 0;

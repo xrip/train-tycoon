@@ -1113,6 +1113,13 @@ TEST_CASE("fast: build controller takes a bounded terrain selection") {
     CHECK(build.selectionStartY == 11);
     CHECK(build.terrainEditBuffer[0][1] == 7);
     CHECK(build.terrainSmoothCost == 0);
+
+    Economy economy;
+    economy.costOverhead = 3;
+    economy.costCrew = 4;
+    CHECK(build.adjust_terrain_point(terrain, economy, 16, 17, 1, true));
+    CHECK(build.terrainEditBuffer[5][6] == 1);
+    CHECK(build.terrainSmoothCost == 7);
 }
 
 TEST_CASE("fast: terrain rebuild makes a flat tile from equal heights") {

@@ -48,34 +48,41 @@ int32_t UiController::report_graph_value(int32_t sprite_id,
     return 0;
 }
 
-bool game_isAdjacentTileEmpty(Game *game, int32_t n, int32_t n2, int32_t n3, bool bl) {
+bool BuildController::adjust_terrain_point(const Terrain& terrain,
+                                           const Economy& economy,
+                                           int32_t n, int32_t n2,
+                                           int32_t n3, bool bl) {
     bool bl2 = true;
     if (n > 0) {
-        if (game->world.terrain.tileMap[n - 1][n2] >= tile::BUILT_FIRST) bl2 = false;
-        if (n2 > 0 && game->world.terrain.tileMap[n - 1][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
+        if (terrain.tileMap[n - 1][n2] >= tile::BUILT_FIRST) bl2 = false;
+        if (n2 > 0 && terrain.tileMap[n - 1][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
     }
-    if (n2 > 0 && game->world.terrain.tileMap[n][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
-    if (game->world.terrain.tileMap[n][n2] >= tile::BUILT_FIRST) bl2 = false;
-    int32_t n4 = n - game->build.selectionStartX;
-    int32_t n5 = n2 - game->build.selectionStartY;
+    if (n2 > 0 && terrain.tileMap[n][n2 - 1] >= tile::BUILT_FIRST) bl2 = false;
+    if (terrain.tileMap[n][n2] >= tile::BUILT_FIRST) bl2 = false;
+    int32_t n4 = n - selectionStartX;
+    int32_t n5 = n2 - selectionStartY;
     if (bl2) {
-        game->build.terrainEditBuffer[n4][n5] = (int8_t)n3;
+        terrainEditBuffer[n4][n5] = (int8_t)n3;
         int step = bl ? 1 : -1;
-        if (n4 > 0 && (bl ? game->build.terrainEditBuffer[n4 - 1][n5] < n3 - 1
-                          : game->build.terrainEditBuffer[n4 - 1][n5] > n3 + 1)
-            && !game_isAdjacentTileEmpty(game, n - 1, n2, n3 - step, bl)) bl2 = false;
-        if (n5 > 0 && (bl ? game->build.terrainEditBuffer[n4][n5 - 1] < n3 - 1
-                          : game->build.terrainEditBuffer[n4][n5 - 1] > n3 + 1)
-            && !game_isAdjacentTileEmpty(game, n, n2 - 1, n3 - step, bl)) bl2 = false;
-        if (n4 < 9 && (bl ? game->build.terrainEditBuffer[n4 + 1][n5] < n3 - 1
-                          : game->build.terrainEditBuffer[n4 + 1][n5] > n3 + 1)
-            && !game_isAdjacentTileEmpty(game, n + 1, n2, n3 - step, bl)) bl2 = false;
-        if (n5 < 9 && (bl ? game->build.terrainEditBuffer[n4][n5 + 1] < n3 - 1
-                          : game->build.terrainEditBuffer[n4][n5 + 1] > n3 + 1)
-            && !game_isAdjacentTileEmpty(game, n, n2 + 1, n3 - step, bl)) bl2 = false;
+        if (n4 > 0 && (bl ? terrainEditBuffer[n4 - 1][n5] < n3 - 1
+                          : terrainEditBuffer[n4 - 1][n5] > n3 + 1)
+            && !adjust_terrain_point(terrain, economy, n - 1, n2,
+                                     n3 - step, bl)) bl2 = false;
+        if (n5 > 0 && (bl ? terrainEditBuffer[n4][n5 - 1] < n3 - 1
+                          : terrainEditBuffer[n4][n5 - 1] > n3 + 1)
+            && !adjust_terrain_point(terrain, economy, n, n2 - 1,
+                                     n3 - step, bl)) bl2 = false;
+        if (n4 < 9 && (bl ? terrainEditBuffer[n4 + 1][n5] < n3 - 1
+                          : terrainEditBuffer[n4 + 1][n5] > n3 + 1)
+            && !adjust_terrain_point(terrain, economy, n + 1, n2,
+                                     n3 - step, bl)) bl2 = false;
+        if (n5 < 9 && (bl ? terrainEditBuffer[n4][n5 + 1] < n3 - 1
+                          : terrainEditBuffer[n4][n5 + 1] > n3 + 1)
+            && !adjust_terrain_point(terrain, economy, n, n2 + 1,
+                                     n3 - step, bl)) bl2 = false;
     }
-    game->build.terrainSmoothCost += game->economy.costOverhead
-        + (n3 == -1 ? game->economy.costMaintenance : abs(n3) * game->economy.costCrew);
+    terrainSmoothCost += economy.costOverhead
+        + (n3 == -1 ? economy.costMaintenance : abs(n3) * economy.costCrew);
     return bl2;
 }
 
