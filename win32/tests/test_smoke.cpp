@@ -707,6 +707,19 @@ TEST_CASE("fast: world resize keeps terrain and track grids in step") {
     CHECK(world.terrain.heightMap[0].size() == 11);
 }
 
+TEST_CASE("fast: world place check reads terrain and track") {
+    World world;
+    world.resize(4, 4);
+    CHECK(world.is_placeable_terrain(1, 1));
+    world.terrain.tileElevation[1][1] = -1;
+    CHECK_FALSE(world.is_placeable_terrain(1, 1));
+    world.terrain.tileElevation[1][1] = 0;
+    world.terrain.tileMap[1][1] = tile::SCENERY_FIRST;
+    CHECK(world.is_placeable_terrain(1, 1));
+    world.trackMap[1][1] = 1;
+    CHECK_FALSE(world.is_placeable_terrain(1, 1));
+}
+
 TEST_CASE("fast: terrain commits the build edit buffer") {
     World world;
     world.resize(20, 20);

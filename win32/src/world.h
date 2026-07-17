@@ -74,6 +74,8 @@ struct World {
     bool in_bounds(int32_t x, int32_t y) const {
         return terrain.in_bounds(x, y);
     }
+
+    bool is_placeable_terrain(int32_t x, int32_t y) const;
 };
 
 #endif  // WORLD_H

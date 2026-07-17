@@ -534,7 +534,7 @@ void game_openBuildMenu(Game *game) {
             switch (item) {
                 case 0:
                     if (game->ui.blockBuildMenu
-                        || !game_isPlaceableTerrain(game, game->ui.tileCursorX,
+                        || !game->world.is_placeable_terrain(game->ui.tileCursorX,
                                                   game->ui.tileCursorY))
                         break;
                     game->pathfinder.anchorX = game->ui.tileCursorX;
@@ -624,7 +624,7 @@ void game_openBuildMenu(Game *game) {
         case 4:
             if (item == 0) {
                 if (game->ui.blockBuildMenu
-                    || !game_isPlaceableTerrain(game, game->ui.tileCursorX,
+                    || !game->world.is_placeable_terrain(game->ui.tileCursorX,
                                               game->ui.tileCursorY))
                     break;
                 game->pathfinder.targetX = game->ui.tileCursorX;

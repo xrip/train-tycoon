@@ -3,11 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool game_isPlaceableTerrain(Game *game, int32_t n, int32_t n2) {
-    return game->world.terrain.tileElevation[n][n2] >= 0
-           && (game->world.terrain.tileMap[n][n2] == 0
-               || (game->world.terrain.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.terrain.tileMap[n][n2] <= tile::SCENERY_LAST))
-           && game->world.trackMap[n][n2] == 0;
+bool World::is_placeable_terrain(int32_t x, int32_t y) const {
+    return terrain.tileElevation[x][y] >= 0
+           && (terrain.tileMap[x][y] == 0
+               || (terrain.tileMap[x][y] >= tile::SCENERY_FIRST
+                   && terrain.tileMap[x][y] <= tile::SCENERY_LAST))
+           && trackMap[x][y] == 0;
 }
 
 void game_placeTrackTile(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4) {

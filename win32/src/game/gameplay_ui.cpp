@@ -246,7 +246,7 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
     }
     if (action == 8)
         midp_set_color(graphics,
-                       game_isPlaceableTerrain(game, game->ui.tileCursorX, game->ui.tileCursorY)
+                       game->world.is_placeable_terrain(game->ui.tileCursorX, game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action == 9)
         midp_set_color(graphics,
