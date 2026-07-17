@@ -771,7 +771,8 @@ bool game_buyTrainAtCursor(Game *game) {
         if (game->build.wagonOptionSlots[option] < 0) continue;
         int car_type = 2 + game->build.wagonOptionSlots[option];
         if (car_type == 5) ++car_type;
-        train = game_spawnTrainCar(game, train, car_type);
+        train = game->fleet.append_car(train, car_type);
+        game->renderer.lastViewportCenterX = -1;
         game_incrementCargoOptionCount(game, car_type);
     }
     game->economy.money -= game->build.unitCost;

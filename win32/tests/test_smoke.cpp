@@ -501,11 +501,9 @@ TEST_CASE("fast: economy spending and money history are owned rules") {
 TEST_CASE("fast: fleet lookup and chain count use stable slots") {
     Fleet fleet;
     const int head = fleet.allocate_train_car(2, 3, 0, 1, 0, 7);
-    fleet.trainCars[1].flags = static_cast<int8_t>(train_flag::USED_SLOT | 3);
-    fleet.trainCars[1].x = 4;
-    fleet.trainCars[1].y = 3;
-    fleet.trainCars[1].nextCar = -1;
-    fleet.trainCars[head].nextCar = 1;
+    const int car = fleet.append_car(head, 3);
+    CHECK(car == 1);
+    fleet.trainCars[car].x = 4;
     CHECK(fleet.count_cars(head) == 2);
     CHECK(fleet.has_car_at(head, 4, 3));
     CHECK(fleet.find_train_head_at(4, 3) == head);

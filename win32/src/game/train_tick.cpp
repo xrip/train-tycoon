@@ -29,27 +29,26 @@ int32_t Fleet::find_service_site_at(int32_t x, int32_t y) const {
     return 5000;
 }
 
-int32_t game_spawnTrainCar(Game *game, int32_t previous_car, int32_t car_type) {
+int32_t Fleet::append_car(int32_t previous_car, int32_t car_type) {
     int new_car = 500;
     for (int car = 0; car < 500; ++car) {
-        if (!train_flag::isUsed(game->fleet.trainCars[car].flags)) {
+        if (!train_flag::isUsed(trainCars[car].flags)) {
             new_car = car;
             break;
         }
     }
     if (new_car != 500) {
-        game->fleet.trainCars[previous_car].nextCar = (int16_t)new_car;
-        game->fleet.trainCars[new_car].flags = static_cast<int8_t>(train_flag::USED_SLOT | car_type);
-        game->fleet.trainCars[new_car].nextCar = -1;
-        game->fleet.trainCars[new_car].x = game->fleet.trainCars[previous_car].x;
-        game->fleet.trainCars[new_car].y = game->fleet.trainCars[previous_car].y;
-        game->fleet.trainCars[new_car].direction = game->fleet.trainCars[previous_car].direction;
-        game->fleet.trainCars[new_car].phase = (int8_t)(game->fleet.trainCars[previous_car].phase - 8);
-        game->fleet.trainCars[new_car].energyCargoOrRemovalTicks = 0;
-        game->fleet.trainCars[new_car].secondaryCargoOrBaseEnergy = 0;
-        game->fleet.trainCars[new_car].lastServiceSite = -1;
+        trainCars[previous_car].nextCar = (int16_t)new_car;
+        trainCars[new_car].flags = static_cast<int8_t>(train_flag::USED_SLOT | car_type);
+        trainCars[new_car].nextCar = -1;
+        trainCars[new_car].x = trainCars[previous_car].x;
+        trainCars[new_car].y = trainCars[previous_car].y;
+        trainCars[new_car].direction = trainCars[previous_car].direction;
+        trainCars[new_car].phase = (int8_t)(trainCars[previous_car].phase - 8);
+        trainCars[new_car].energyCargoOrRemovalTicks = 0;
+        trainCars[new_car].secondaryCargoOrBaseEnergy = 0;
+        trainCars[new_car].lastServiceSite = -1;
     }
-    game->renderer.lastViewportCenterX = -1;
     return new_car;
 }
 
@@ -307,7 +306,8 @@ void game_updateTrain(Game *game, int32_t head) {
                     if (car_code >= 7) continue;
                     int car_type = 2 + car_code;
                     if (car_type == 5) ++car_type;
-                    previous_car = game_spawnTrainCar(game, previous_car, car_type);
+                    previous_car = game->fleet.append_car(previous_car, car_type);
+                    game->renderer.lastViewportCenterX = -1;
                 }
                 game->fleet.trainCars[head].stateCode = 7;
                 game->renderer.lastViewportCenterX = -1;

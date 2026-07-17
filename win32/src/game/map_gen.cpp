@@ -585,8 +585,10 @@ void game_spawnTrainAt(Game *game, int32_t x, int32_t y) {
         x, y, engine_type, game->era,
         game->world.terrain.tileMap[x][y] == 87 ? 0 : 2, 8 - game->era);
     game->renderer.lastViewportCenterX = -1;
-    for (int wagon = 0; wagon < wagon_count; ++wagon)
-        train = game_spawnTrainCar(game, train, cargo_type);
+    for (int wagon = 0; wagon < wagon_count; ++wagon) {
+        train = game->fleet.append_car(train, cargo_type);
+        game->renderer.lastViewportCenterX = -1;
+    }
 }
 
 static bool can_extend_station_over(Game *game, int x, int y) {

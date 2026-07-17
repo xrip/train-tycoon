@@ -112,7 +112,6 @@ void game_addSelectedOption(Game *game, int32_t n);
 void game_popSelectedOption(Game *game);
 bool game_buyTrainAtCursor(Game *game);
 void game_tickInputOrAi(Game *game, bool bl);
-int32_t game_spawnTrainCar(Game *game, int32_t n, int32_t n2);
 void game_ageTrainsOneYear(Game *game);
 void game_simulationTick(Game *game);
 void game_chargeTrainRunningCosts(Game *game);
