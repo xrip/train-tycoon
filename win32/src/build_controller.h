@@ -23,6 +23,9 @@ struct BuildController {
     bool adjust_terrain_point(const Terrain& terrain, const Economy& economy,
                               int32_t x, int32_t y, int32_t height,
                               bool raising);
+    void queue_tile_change(Terrain& terrain, const Economy& economy,
+                           int32_t x, int32_t y, bool charge,
+                           bool visual_only);
 
     int32_t trackStartX = 0;
     int32_t trackStartY = 0;

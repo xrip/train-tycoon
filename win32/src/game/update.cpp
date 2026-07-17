@@ -145,7 +145,7 @@ void updateGeneratingMap(Game *game) {
 }
 
 void updatePlaying(Game *game) {
-    game_simulationTick(game);
+    game->simulation_tick();
 }
 
 void setMinimapColor(Game *game, int kind, int x, int y) {

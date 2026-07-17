@@ -146,14 +146,14 @@ void game_demolishAtCursor(Game *game) {
                      || game->world.terrain.tileMap[x][cursor_y] == 84
                      || game->world.terrain.tileMap[x][cursor_y] == 85);
                  ++x)
-                game_queueTileChange(game, x, cursor_y, true, false);
+                game->build.queue_tile_change(game->world.terrain, game->economy, x, cursor_y, true, false);
             for (x = cursor_x - 1;
                  x >= 0
                  && (game->world.terrain.tileMap[x][cursor_y] == 81
                      || game->world.terrain.tileMap[x][cursor_y] == 84
                      || game->world.terrain.tileMap[x][cursor_y] == 85);
                  --x)
-                game_queueTileChange(game, x, cursor_y, true, false);
+                game->build.queue_tile_change(game->world.terrain, game->economy, x, cursor_y, true, false);
         } else {
             int y;
             for (y = cursor_y;
@@ -162,14 +162,14 @@ void game_demolishAtCursor(Game *game) {
                      || game->world.terrain.tileMap[cursor_x][y] == 83
                      || game->world.terrain.tileMap[cursor_x][y] == 86);
                  ++y)
-                game_queueTileChange(game, cursor_x, y, true, false);
+                game->build.queue_tile_change(game->world.terrain, game->economy, cursor_x, y, true, false);
             for (y = cursor_y - 1;
                  y >= 0
                  && (game->world.terrain.tileMap[cursor_x][y] == 82
                      || game->world.terrain.tileMap[cursor_x][y] == 83
                      || game->world.terrain.tileMap[cursor_x][y] == 86);
                  --y)
-                game_queueTileChange(game, cursor_x, y, true, false);
+                game->build.queue_tile_change(game->world.terrain, game->economy, cursor_x, y, true, false);
         }
     } else if (tile >= 87 && tile <= 90) {
         int vehicle = game->fleet.find_service_site_at(cursor_x, cursor_y);
@@ -180,22 +180,22 @@ void game_demolishAtCursor(Game *game) {
                 if ((game->fleet.serviceSites[vehicle].flags & 0x40) == 0) {
                     game->world.trackMap[x][y - 1] = 0;
                     game->world.trackMap[x][y + 1] = 0;
-                    game_queueTileChange(game, x, y - 1, true, false);
-                    game_queueTileChange(game, x, y + 1, true, false);
+                    game->build.queue_tile_change(game->world.terrain, game->economy, x, y - 1, true, false);
+                    game->build.queue_tile_change(game->world.terrain, game->economy, x, y + 1, true, false);
                 } else {
                     game->world.trackMap[x - 1][y] = 0;
                     game->world.trackMap[x + 1][y] = 0;
-                    game_queueTileChange(game, x - 1, y, true, false);
-                    game_queueTileChange(game, x + 1, y, true, false);
+                    game->build.queue_tile_change(game->world.terrain, game->economy, x - 1, y, true, false);
+                    game->build.queue_tile_change(game->world.terrain, game->economy, x + 1, y, true, false);
                 }
             }
-            game_queueTileChange(game, x, y, true, false);
+            game->build.queue_tile_change(game->world.terrain, game->economy, x, y, true, false);
             game->world.advance_construction_timers(x, y, -6);
             game->world.trackMap[x][y] = 0;
             game->fleet.serviceSites[vehicle].flags = 0;
         }
     } else {
-        game_queueTileChange(game, cursor_x, cursor_y, true, false);
+        game->build.queue_tile_change(game->world.terrain, game->economy, cursor_x, cursor_y, true, false);
         game->world.advance_construction_timers(cursor_x, cursor_y, -6);
     }
     game_applyBackgroundCost(game);
@@ -321,7 +321,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->offerBoard.add_progress(13, game->economy.costStruct);
             break;
     }
-    game_tickInputOrAi(game, true);
+    game->tick_input_or_ai(true);
     game->world.recount_city_zone_tiles();
 }
 
@@ -533,7 +533,7 @@ void game_openBuildMenu(Game *game) {
                     game->set_state(GameState::MenuOverlay); break;
                 case 8: game->ui.inputPending = true; break;
                 case 9:
-                    game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
+                    game->compute_map_train_metric(game->scenario.scenarioStep - 2);
                     game->ui.useDefaultOverlaySelection = false;
                     game->ready = false; game->ui.transitionCode = 1;
                     game->set_state(GameState::MenuOverlay); break;

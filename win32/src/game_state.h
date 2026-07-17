@@ -90,6 +90,13 @@ typedef struct Game {
     void render_packed_sprite(Surface& surface, int32_t sprite_id);
     int32_t unload_train_revenue(int32_t car, int32_t service_site);
     void update_train(int32_t head);
+    void persist_settings_snapshot();
+    int32_t compute_map_train_metric(int32_t score_slot);
+    void check_scenario_milestone();
+    int32_t scan_map_metric() const;
+    void new_year_notify();
+    void tick_input_or_ai(bool player_action);
+    void simulation_tick();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

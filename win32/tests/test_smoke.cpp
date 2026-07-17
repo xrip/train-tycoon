@@ -1294,7 +1294,7 @@ TEST_CASE("full: year rollover has a fixed saved-state digest") {
     game->economy.year = 1950;
     game->dayFrameCounter = game->dayTickThreshold;
 
-    game_simulationTick(game);
+    game->simulation_tick();
 
     CHECK(game->economy.dayOfMonth == 1);
     CHECK(game->economy.monthOfYear == 1);

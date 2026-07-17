@@ -103,7 +103,7 @@ void Game::remove_train_from_map(int32_t n, bool bl) {
     game->fleet.trainCars[n].nextCar = -1;
     game->fleet.trainCars[n].energyCargoOrRemovalTicks = 7;
     if (bl)
-        game_queueTileChange(game, unsignedByte(game->fleet.trainCars[n].x),
+        game->build.queue_tile_change(game->world.terrain, game->economy, unsignedByte(game->fleet.trainCars[n].x),
                                     unsignedByte(game->fleet.trainCars[n].y), false, true);
     game->renderer.lastViewportCenterX = -1;
     game->ready = false;
@@ -186,23 +186,25 @@ void Economy::compute_year_end_metrics() {
     decadeEnterpriseWithCurrent = decadeEnterpriseTotal + decadeEnterpriseTax;
 }
 
-void game_queueTileChange(Game *game, int32_t n, int32_t n2,
-                                 bool bl, bool bl2) {
+void BuildController::queue_tile_change(Terrain& terrain,
+                                        const Economy& economy,
+                                        int32_t n, int32_t n2,
+                                        bool bl, bool bl2) {
     bool bl3 = !bl;
     int n3;
     if (bl) {
-        n3 = game->world.terrain.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.terrain.tileMap[n][n2] <= tile::SCENERY_LAST
-             ? game->economy.baseTrainSpeed2 : -game->economy.accel2;
-        if (game->economy.money >= n3 || game->economy.money < 0) {
-            game->build.backgroundCost += n3;
+        n3 = terrain.tileMap[n][n2] >= tile::SCENERY_FIRST && terrain.tileMap[n][n2] <= tile::SCENERY_LAST
+             ? economy.baseTrainSpeed2 : -economy.accel2;
+        if (economy.money >= n3 || economy.money < 0) {
+            backgroundCost += n3;
             bl3 = true;
-            game->build.demolitionAffordable = true;
+            demolitionAffordable = true;
         } else {
-            game->build.demolitionAffordable = false;
+            demolitionAffordable = false;
         }
     }
     if (!bl3) return;
-    game->world.terrain.queue_change(n, n2, bl2);
+    terrain.queue_change(n, n2, bl2);
 }
 
 bool Terrain::queue_change(int32_t x, int32_t y, bool visual_only) {
@@ -228,26 +230,27 @@ bool Terrain::queue_change(int32_t x, int32_t y, bool visual_only) {
     return true;
 }
 
-void game_placeCityTile(Game *game, int32_t n, int32_t n2, int32_t n3) {
-    if (game->world.terrain.tileMap[n][n2] == 0
-        || (game->world.terrain.tileMap[n][n2] >= tile::SCENERY_FIRST && game->world.terrain.tileMap[n][n2] <= tile::SCENERY_LAST)) {
-        game->world.terrain.tileMap[n][n2] =
-            game->world.random_city_tile(game->rng);
-        game->world.trackMap[n][n2] = (int8_t)n3;
+void World::place_city_tile(JavaRandom& random, int32_t n, int32_t n2,
+                            int32_t n3) {
+    if (terrain.tileMap[n][n2] == 0
+        || (terrain.tileMap[n][n2] >= tile::SCENERY_FIRST && terrain.tileMap[n][n2] <= tile::SCENERY_LAST)) {
+        terrain.tileMap[n][n2] =
+            random_city_tile(random);
+        trackMap[n][n2] = (int8_t)n3;
     }
 }
 
-bool game_pickValidForestTile(Game *game) {
-    int n2 = std::abs(game->rng.next_int() % (game->world.terrain.mapWidth - 2)) + 1;
-    int n = std::abs(game->rng.next_int() % (game->world.terrain.mapHeight - 2)) + 1;
-    if (game->world.terrain.tileMap[n2][n] != 0
-        && (game->world.terrain.tileMap[n2][n] < tile::SCENERY_FIRST || game->world.terrain.tileMap[n2][n] > tile::SCENERY_LAST))
+bool World::pick_valid_forest_tile(JavaRandom& random) {
+    int n2 = std::abs(random.next_int() % (terrain.mapWidth - 2)) + 1;
+    int n = std::abs(random.next_int() % (terrain.mapHeight - 2)) + 1;
+    if (terrain.tileMap[n2][n] != 0
+        && (terrain.tileMap[n2][n] < tile::SCENERY_FIRST || terrain.tileMap[n2][n] > tile::SCENERY_LAST))
         return false;
 
-    int8_t by = game->world.terrain.tileMap[n2 - 1][n];
-    int8_t by2 = game->world.terrain.tileMap[n2 + 1][n];
-    int8_t by3 = game->world.terrain.tileMap[n2][n - 1];
-    int8_t by4 = game->world.terrain.tileMap[n2][n + 1];
+    int8_t by = terrain.tileMap[n2 - 1][n];
+    int8_t by2 = terrain.tileMap[n2 + 1][n];
+    int8_t by3 = terrain.tileMap[n2][n - 1];
+    int8_t by4 = terrain.tileMap[n2][n + 1];
     bool bl2 = by == 43 || by == 44 || by == 45 || by == 46;
     bool bl3 = by2 == 43 || by2 == 44 || by2 == 47 || by2 == 48;
     bool bl4 = by3 == 42 || by3 == 44 || by3 == 46 || by3 == 47;
@@ -255,85 +258,87 @@ bool game_pickValidForestTile(Game *game) {
     if (!bl2 && !bl3 && !bl4 && !bl) return false;
 
     int n3;
-    if (bl2) n3 = game->world.trackMap[n2 - 1][n];
-    else if (bl3) n3 = game->world.trackMap[n2 + 1][n];
-    else if (bl4) n3 = game->world.trackMap[n2][n - 1];
-    else n3 = game->world.trackMap[n2][n + 1];
+    if (bl2) n3 = trackMap[n2 - 1][n];
+    else if (bl3) n3 = trackMap[n2 + 1][n];
+    else if (bl4) n3 = trackMap[n2][n - 1];
+    else n3 = trackMap[n2][n + 1];
     int n4 = n3 & 0x3F;
     if (n4 <= -1) return false;
 
     if ((bl2 && bl3 && bl4) || (bl2 && bl3 && bl)
         || (bl2 && bl4 && bl) || (bl3 && bl4 && bl)) {
-        game->world.terrain.tileMap[n2][n] = 44;
+        terrain.tileMap[n2][n] = 44;
     } else if (bl2 && bl4) {
-        game->world.terrain.tileMap[n2][n] = 48;
+        terrain.tileMap[n2][n] = 48;
     } else if (bl2 && bl) {
-        game->world.terrain.tileMap[n2][n] = 47;
+        terrain.tileMap[n2][n] = 47;
     } else if (bl3 && bl4) {
-        game->world.terrain.tileMap[n2][n] = 45;
+        terrain.tileMap[n2][n] = 45;
     } else if (bl3 && bl) {
-        game->world.terrain.tileMap[n2][n] = 46;
+        terrain.tileMap[n2][n] = 46;
     } else {
-        int n5 = std::abs(game->rng.next_int() % 13);
+        int n5 = std::abs(random.next_int() % 13);
         if (n5 == 12) {
-            game->world.terrain.tileMap[n2][n] = 44;
+            terrain.tileMap[n2][n] = 44;
         } else if (n5 == 11) {
-            if (bl2) game->world.terrain.tileMap[n2][n] = 47;
-            if (bl3) game->world.terrain.tileMap[n2][n] = 46;
-            if (bl4) game->world.terrain.tileMap[n2][n] = 45;
-            if (bl) game->world.terrain.tileMap[n2][n] = 46;
+            if (bl2) terrain.tileMap[n2][n] = 47;
+            if (bl3) terrain.tileMap[n2][n] = 46;
+            if (bl4) terrain.tileMap[n2][n] = 45;
+            if (bl) terrain.tileMap[n2][n] = 46;
         } else if (n5 == 10) {
-            if (bl2) game->world.terrain.tileMap[n2][n] = 48;
-            if (bl3) game->world.terrain.tileMap[n2][n] = 45;
-            if (bl4) game->world.terrain.tileMap[n2][n] = 48;
-            if (bl) game->world.terrain.tileMap[n2][n] = 47;
+            if (bl2) terrain.tileMap[n2][n] = 48;
+            if (bl3) terrain.tileMap[n2][n] = 45;
+            if (bl4) terrain.tileMap[n2][n] = 48;
+            if (bl) terrain.tileMap[n2][n] = 47;
         } else {
-            if (bl2 || bl3) game->world.terrain.tileMap[n2][n] = 43;
-            if (bl4 || bl) game->world.terrain.tileMap[n2][n] = 42;
+            if (bl2 || bl3) terrain.tileMap[n2][n] = 43;
+            if (bl4 || bl) terrain.tileMap[n2][n] = 42;
         }
     }
 
-    switch (game->world.terrain.tileMap[n2][n]) {
+    switch (terrain.tileMap[n2][n]) {
         case 42:
-            game_placeCityTile(game, n2 - 1, n, n3);
-            game_placeCityTile(game, n2 + 1, n, n3);
+            place_city_tile(random, n2 - 1, n, n3);
+            place_city_tile(random, n2 + 1, n, n3);
             break;
         case 43:
-            game_placeCityTile(game, n2, n - 1, n3);
-            game_placeCityTile(game, n2, n + 1, n3);
+            place_city_tile(random, n2, n - 1, n3);
+            place_city_tile(random, n2, n + 1, n3);
             break;
         case 45:
-            game_placeCityTile(game, n2 - 1, n, n3);
-            game_placeCityTile(game, n2, n + 1, n3);
-            game_placeCityTile(game, n2 - 1, n + 1, n3);
+            place_city_tile(random, n2 - 1, n, n3);
+            place_city_tile(random, n2, n + 1, n3);
+            place_city_tile(random, n2 - 1, n + 1, n3);
             break;
         case 46:
-            game_placeCityTile(game, n2 - 1, n, n3);
-            game_placeCityTile(game, n2, n - 1, n3);
-            game_placeCityTile(game, n2 - 1, n - 1, n3);
+            place_city_tile(random, n2 - 1, n, n3);
+            place_city_tile(random, n2, n - 1, n3);
+            place_city_tile(random, n2 - 1, n - 1, n3);
             break;
         case 47:
-            game_placeCityTile(game, n2 + 1, n, n3);
-            game_placeCityTile(game, n2, n - 1, n3);
-            game_placeCityTile(game, n2 + 1, n - 1, n3);
+            place_city_tile(random, n2 + 1, n, n3);
+            place_city_tile(random, n2, n - 1, n3);
+            place_city_tile(random, n2 + 1, n - 1, n3);
             break;
         case 48:
-            game_placeCityTile(game, n2 + 1, n, n3);
-            game_placeCityTile(game, n2, n + 1, n3);
-            game_placeCityTile(game, n2 + 1, n + 1, n3);
+            place_city_tile(random, n2 + 1, n, n3);
+            place_city_tile(random, n2, n + 1, n3);
+            place_city_tile(random, n2 + 1, n + 1, n3);
             break;
     }
-    game->world.trackMap[n2][n] = (int8_t)n3;
+    trackMap[n2][n] = (int8_t)n3;
     return true;
 }
 
-void game_persistSnapshotMode0(Game *game) {
+void Game::persist_settings_snapshot() {
+    Game *game = this;
     game->saveCodec.load_slot(5, save::MODE_WRITE);
     game->saveCodec.walk_settings(*game);
     game->saveCodec.persist();
 }
 
-int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
+int32_t Game::compute_map_train_metric(int32_t n) {
+    Game *game = this;
     int n2 = game->economy.trainRevenueScore;
     for (int i = 0; i < game->world.terrain.mapWidth; ++i) {
         for (int j = 0; j < game->world.terrain.mapHeight; ++j) {
@@ -353,7 +358,7 @@ int32_t game_computeMapTrainMetric(Game *game, int32_t n) {
     } else {
         game->scenario.scenarioScores[n] = n2;
     }
-    game_persistSnapshotMode0(game);
+    game->persist_settings_snapshot();
     return n2;
 }
 
@@ -400,20 +405,22 @@ bool Scenario::complete_milestone_if_met(const Economy& economy) {
     return bl;
 }
 
-void game_checkScenarioMilestone(Game *game) {
+void Game::check_scenario_milestone() {
+    Game *game = this;
     if (!game->scenario.complete_milestone_if_met(game->economy)) return;
     game->ready = false;
     game->ui.transitionCode = 6;
     if (game->scenario.scenarioStep >= 2) {
         if (game->scenario.scenarioStepCompare < game->scenario.scenarioStep)
             game->scenario.scenarioStepCompare = game->scenario.scenarioStep;
-        game_persistSnapshotMode0(game);
-        game->scenario.currentScenarioScore = game_computeMapTrainMetric(game, game->scenario.scenarioStep - 2);
+        game->persist_settings_snapshot();
+        game->scenario.currentScenarioScore = game->compute_map_train_metric(game->scenario.scenarioStep - 2);
     }
     game->set_state(GameState::MenuOverlay);
 }
 
-int32_t game_scanMapForMetric(Game *game) {
+int32_t Game::scan_map_metric() const {
+    const Game *game = this;
     int n4 = 0;
     for (int n3 = 0; n3 < game->world.terrain.mapWidth; ++n3) {
         for (int n2 = 0; n2 < game->world.terrain.mapHeight; ++n2) {
@@ -451,7 +458,8 @@ int32_t game_scanMapForMetric(Game *game) {
     return n4 - game->economy.loanBalance;
 }
 
-void game_newYearNotify(Game *game) {
+void Game::new_year_notify() {
+    Game *game = this;
     game->fleet.roll_revenue_year();
     game->world.roll_station_revenue_year();
     game->economy.calculate_period_profit();
@@ -499,7 +507,7 @@ void game_newYearNotify(Game *game) {
         game->economy.decadeProfitHistory[0] = game->economy.altDecadeRevenueTotal[0] = 0;
         game->economy.altDecadeTotalCost[0] = 0;
     }
-    game->economy.altDecadeTotalCost[0] = game_scanMapForMetric(game);
+    game->economy.altDecadeTotalCost[0] = game->scan_map_metric();
     game->economy.money -= game->economy.terrainTotal;
     if (game->economy.terrainTotal > 0)
         game->record_money_change(-game->economy.terrainTotal);
@@ -525,7 +533,8 @@ void game_newYearNotify(Game *game) {
     }
 }
 
-void game_tickInputOrAi(Game *game, bool bl) {
+void Game::tick_input_or_ai(bool bl) {
+    Game *game = this;
     for (int i = 0; i < 250; ++i) {
         if ((game->fleet.serviceSites[i].flags & 0x80) != 128) continue;
         int n3 = unsignedByte(game->fleet.serviceSites[i].x);
@@ -758,7 +767,7 @@ void advanceMonthIfDayEnded(Game *game) {
 
 void applyNewMonthChanges(Game *game) {
     game->economy.dayOfMonth = 1;
-    game_newYearNotify(game);
+    game->new_year_notify();
     game->world.decay_construction_timers_quarterly(game->economy.monthOfYear);
     game->world.update_city_population(game->rng);
     game->upgrade_one_ai_train_for_era();
@@ -835,14 +844,14 @@ void advanceGameDay(Game *game) {
         if (game->economy.dayOfMonth % 10 == 0)
             game->update_ten_day_metric();
         game->charge_train_running_costs();
-        game_checkScenarioMilestone(game);
+        game->check_scenario_milestone();
         if (game->scenario.aiExpansionEnabled) {
             int forestFound = 0;
             for (int attempt = 0; attempt < 30; ++attempt)
-                forestFound = forestFound || game_pickValidForestTile(game);
+                forestFound = forestFound || game->world.pick_valid_forest_tile(game->rng);
             if (forestFound) game->world.recount_zone_population();
         }
-        game_tickInputOrAi(game, false);
+        game->tick_input_or_ai(false);
     }
 
     int previousMonth = game->economy.monthOfYear;
@@ -855,7 +864,8 @@ void advanceGameDay(Game *game) {
 } // namespace
 
 // Advance frame animation, queued map work, trains, and the calendar in that order.
-void game_simulationTick(Game *game) {
+void Game::simulation_tick() {
+    Game *game = this;
     advanceTileAnimationFrames(game);
     applyQueuedTileChanges(game);
     updateActiveTrains(game);
