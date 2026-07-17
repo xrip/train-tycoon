@@ -166,7 +166,7 @@ void Game::render_map(Surface& surface) {
                 if (game->ui.trainSelectionY[n3] != n5 || game->ui.trainSelectionX[n3] != n4) continue;
                 n2 = n4 * 16 + n5 * 16 + 16 - game->renderer.camera.viewportCenterX;
                 n = game->world.terrain.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[n5][n4] + 15;
-                game_drawSelectedTrainLabel(game, g, n2, n - 16, (int8_t)n3);
+                game->renderer.draw_selected_train_label(*g, game->assets, game->ui, n2, n - 16, (int8_t)n3);
             }
         }
     }

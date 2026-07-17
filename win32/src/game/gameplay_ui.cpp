@@ -60,7 +60,7 @@ void game_drawHeaderBar(Game *game, Surface *graphics) {
     char money_text[32];
     format_money(game->economy.money, money_text, sizeof(money_text));
     const auto money_bytes = make_font_bytes(money_text, true);
-    game_renderFontString(game, graphics, 1, 5, money_bytes, false);
+    game->renderer.draw_font_string(*graphics, game->assets, 1, 5, money_bytes, false);
 
     char date_text[24];
     if (game->renderer.canvasWidth < 140)
@@ -70,7 +70,7 @@ void game_drawHeaderBar(Game *game, Surface *graphics) {
         snprintf(date_text, sizeof(date_text), "%02d.%02d.%d",
                  game->economy.dayOfMonth, game->economy.monthOfYear, game->economy.year);
     const auto date_bytes = make_font_bytes(date_text, false);
-    game_renderFontString(game, graphics, game->renderer.canvasWidth - (game->renderer.canvasWidth < 140 ? 49 : 61),
+    game->renderer.draw_font_string(*graphics, game->assets, game->renderer.canvasWidth - (game->renderer.canvasWidth < 140 ? 49 : 61),
                         5, date_bytes, false);
 
     game->cachedHeaderMoney = game->economy.money;
@@ -124,7 +124,7 @@ void game_paintMain(Game *game, Surface *graphics) {
         for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
         std::copy(currency_codes.begin(), currency_codes.end(),
                   bytes.begin() + text_len + 1);
-        game_renderFontString(game, game->renderer.backbuffer_surface, 35, game->renderer.bottomBarY + 5, bytes, false);
+        game->renderer.draw_font_string(*game->renderer.backbuffer_surface, game->assets, 35, game->renderer.bottomBarY + 5, bytes, false);
     }
     game->ui.menuDirty = false;
 }
@@ -135,7 +135,7 @@ int32_t game_drawNumber(Game *game, Surface *graphics,
     char text[24];
     snprintf(text, sizeof(text), "%lld", (long long)magnitude);
     const auto bytes = make_font_bytes(text, true);
-    game_drawTextBox(game, graphics, game->renderer.canvasWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
+    game->renderer.draw_text_box(*graphics, game->assets, game->renderer.canvasWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
     return y + 15;
 }
 
@@ -159,7 +159,7 @@ void game_drawMoneyTicker(Game *game, Surface *graphics) {
 void game_drawConfirmDialog(Game *game, Surface *graphics) {
     if (game->ui.confirmCounter <= 0) return;
     if (game->ui.confirmTargetState >= 0) {
-        game_drawTextBox(game, graphics, 10, 10, 0, 37,
+        game->renderer.draw_text_box(*graphics, game->assets, 10, 10, 0, 37,
                        std::span<const int8_t>(game->assets.spriteBitmapTable[
                            game->assets.spriteIndexTable[120 + game->ui.confirmTargetState]]));
     }

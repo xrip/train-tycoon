@@ -11,9 +11,6 @@
 constexpr int32_t unsignedByte(int8_t value) {
     return static_cast<uint8_t>(value);
 }
-void game_renderPackedSprite(Game *game, Surface* graphics, int32_t n);
-void game_renderFontString(Game *game, Surface* graphics, int32_t n, int32_t n2,
-                         std::span<const int8_t> codes, bool bl);
 int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
                          int32_t n4, int32_t n5, int32_t n6);
 void game_computeIsoCorners(Game *game, int32_t n, int32_t n2, int32_t* nArray, int32_t* nArray2, bool bl);
@@ -67,9 +64,6 @@ void game_rebuildMenuTypeIndexes(Game *game);
 void game_incrementCargoOptionCount(Game *game, int32_t n);
 void game_decrementCargoOptionCount(Game *game, int32_t n);
 int32_t game_computeMapTrainMetric(Game *game, int32_t n);
-void game_drawTextBox(Game *game, Surface* graphics, int32_t n, int32_t n2,
-                    int32_t n3, int32_t n4, std::span<const int8_t> codes);
 void game_enterOutOfMoneyState(Game *game);
-void game_drawSelectedTrainLabel(Game *game, Surface* graphics, int32_t x, int32_t y, int8_t selectionIndex);
 
 #endif  // GAME_INTERNAL_H

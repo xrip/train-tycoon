@@ -43,7 +43,7 @@ void paintMapOverview(Game *game, Surface *g) {
     game->ui.transitionCode = game->ui.pendingTransitionCode;
     game->reset_overlay_render_state();
     game->ui.pendingTransitionCode = -1;
-    game_renderPackedSprite(game, g, game->ui.transitionCode);
+    game->render_packed_sprite(*g, game->ui.transitionCode);
     game->set_state(GameState::MenuOverlay);
 }
 
@@ -110,13 +110,13 @@ void Game::render(Surface& surface) {
                 game->render(*g);
                 game->gameState = GameState::MenuOverlay;
             }
-            game_renderPackedSprite(game, g, game->ui.transitionCode);
+            game->render_packed_sprite(*g, game->ui.transitionCode);
             break;
         }
         case GameState::GeneratingMap: {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[0]]));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, game->renderer.canvasHeight - 23, game->renderer.canvasWidth - 21, 9);
@@ -147,7 +147,7 @@ void Game::render(Surface& surface) {
                 game->ui.transitionCode = game->ui.pendingTransitionCode;
                 game->reset_overlay_render_state();
                 game->ui.pendingTransitionCode = -1;
-                game_renderPackedSprite(game, g, game->ui.transitionCode);
+                game->render_packed_sprite(*g, game->ui.transitionCode);
                 game->set_state(GameState::MenuOverlay);
             }
             if (game->ui.transitionDebounce <= 0) break;
@@ -156,35 +156,35 @@ void Game::render(Surface& surface) {
             game->ui.transitionCode = transition::SCENARIO_NOTICE_BASE + game->scenario.scenarioNoticeCode;
             game->reset_overlay_render_state();
             game->ready = false;
-            game_renderPackedSprite(game, g, game->ui.transitionCode);
+            game->render_packed_sprite(*g, game->ui.transitionCode);
             game->set_state(GameState::MenuOverlay);
             break;
         }
         case GameState::BuildingMinimap:
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
             break;
         case GameState::MapOverview:
             paintMapOverview(game, g);
             break;
         case GameState::BuildingPath:
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
             break;
         case GameState::SavingGame:
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[52]]));
             break;
         case GameState::LoadingGame:
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[53]]));
             break;
         case GameState::AiTurn:
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[49]]));
             break;
         case GameState::HighScoreSync:
-            game_drawTextBox(game, g, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
+            game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
                            std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[66]]));
             break;
     }

@@ -9,10 +9,12 @@
 #include "midp.h"  // Image, Surface
 #include <cstdint>
 #include <memory>
+#include <span>
 
 struct Assets;
 struct Fleet;
 struct World;
+struct UiController;
 
 // Renderer owns the backbuffer and the on-screen view bookkeeping. backbuffer is
 // the off-screen image and backbuffer_surface is a borrowed view into it. The
@@ -28,6 +30,17 @@ struct Renderer {
     void draw_train(Surface& surface, const Assets& assets,
                     const World& world, const Fleet& fleet,
                     int32_t train) const;
+    void draw_font_string(Surface& surface, const Assets& assets,
+                          int32_t x, int32_t baseline_y,
+                          std::span<const int8_t> codes,
+                          bool preserve_clip) const;
+    void draw_text_box(Surface& surface, const Assets& assets,
+                       int32_t x, int32_t y, int32_t color_set,
+                       int32_t alignment,
+                       std::span<const int8_t> codes) const;
+    void draw_selected_train_label(Surface& surface, const Assets& assets,
+                                   const UiController& ui, int32_t x,
+                                   int32_t y, int8_t selection_index);
 
     std::unique_ptr<Image> backbuffer;
     Surface* backbuffer_surface = nullptr;

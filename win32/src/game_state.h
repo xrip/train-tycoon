@@ -87,6 +87,7 @@ typedef struct Game {
     void reset_overlay_render_state();
     void load_settings_snapshot();
     void set_canvas_size(int32_t width, int32_t height);
+    void render_packed_sprite(Surface& surface, int32_t sprite_id);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
