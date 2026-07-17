@@ -46,7 +46,7 @@ void pointer_click_bottom_bar(Game *game, int x) {
             // map to act on the tile they point at. Navigation/confirm items
             // still fire immediately.
             const int item_value = unsigned_byte(game->ui.buildMenuItems[mode][item]);
-            if (!game_buildToolActsOnCursorTile(mode, item_value))
+            if (!BuildController::tool_acts_on_cursor_tile(mode, item_value))
                 game_openBuildMenu(game);
             return;
         }

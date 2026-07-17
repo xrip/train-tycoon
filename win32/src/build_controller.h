@@ -13,6 +13,8 @@
 // cancel flag, and the running selection cost. nextTrackPieceCode is saved; the
 // rest are runtime-only. Save byte order is unchanged.
 struct BuildController {
+    static bool tool_acts_on_cursor_tile(int32_t mode, int32_t item);
+
     int32_t trackStartX = 0;
     int32_t trackStartY = 0;
     int32_t trackStepX = 0;

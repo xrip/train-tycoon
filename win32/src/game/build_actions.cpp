@@ -482,7 +482,7 @@ void game_rebuildMenuTypeIndexes(Game *game) {
 // -- so these must only arm from the bar; the player then clicks the map to act
 // on the tile they point at. Mirrors the place-at-cursor branches of
 // game_openBuildMenu below; keep the two in sync.
-bool game_buildToolActsOnCursorTile(int32_t mode, int32_t item) {
+bool BuildController::tool_acts_on_cursor_tile(int32_t mode, int32_t item) {
     switch (mode) {
         case 0: return item == 0;                                 // select/inspect at cursor
         case 1: return item == 0 || item == 2                     // route anchor, bridge/tunnel

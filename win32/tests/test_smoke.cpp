@@ -817,17 +817,17 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
 
 TEST_CASE("fast: build tools that act on the cursor tile are classified") {
     // Place-at-cursor tools (must wait for a map click).
-    CHECK(game_buildToolActsOnCursorTile(0, 0));   // select/inspect
-    CHECK(game_buildToolActsOnCursorTile(1, 0));   // route anchor
-    CHECK(game_buildToolActsOnCursorTile(1, 4));   // demolish
-    CHECK(game_buildToolActsOnCursorTile(3, 0));   // place depot
-    CHECK(game_buildToolActsOnCursorTile(4, 0));   // route target
-    CHECK(game_buildToolActsOnCursorTile(5, 2));   // place track piece
+    CHECK(BuildController::tool_acts_on_cursor_tile(0, 0));   // select/inspect
+    CHECK(BuildController::tool_acts_on_cursor_tile(1, 0));   // route anchor
+    CHECK(BuildController::tool_acts_on_cursor_tile(1, 4));   // demolish
+    CHECK(BuildController::tool_acts_on_cursor_tile(3, 0));   // place depot
+    CHECK(BuildController::tool_acts_on_cursor_tile(4, 0));   // route target
+    CHECK(BuildController::tool_acts_on_cursor_tile(5, 2));   // place track piece
     // Navigation / confirm items (fire on a bar click).
-    CHECK_FALSE(game_buildToolActsOnCursorTile(0, 1));   // open build submenu
-    CHECK_FALSE(game_buildToolActsOnCursorTile(1, 3));   // open station submenu
-    CHECK_FALSE(game_buildToolActsOnCursorTile(3, 9));   // back
-    CHECK_FALSE(game_buildToolActsOnCursorTile(2, 0));   // confirm auto-route
+    CHECK_FALSE(BuildController::tool_acts_on_cursor_tile(0, 1));   // open build submenu
+    CHECK_FALSE(BuildController::tool_acts_on_cursor_tile(1, 3));   // open station submenu
+    CHECK_FALSE(BuildController::tool_acts_on_cursor_tile(3, 9));   // back
+    CHECK_FALSE(BuildController::tool_acts_on_cursor_tile(2, 0));   // confirm auto-route
 }
 
 TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it") {

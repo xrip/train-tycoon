@@ -50,7 +50,6 @@ void game_demolishAtCursor(Game *game);
 void game_pickTrainsAtCursor(Game *game);
 void game_buildPlaceTrackPiece(Game *game, int32_t n);
 void game_openBuildMenu(Game *game);
-bool game_buildToolActsOnCursorTile(int32_t mode, int32_t item);
 bool game_spendMoney(Game *game, int32_t n);
 void game_computeTrackBuild(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6, int32_t n7, int32_t n8);
 void game_revertTrackTiles(Game *game);
