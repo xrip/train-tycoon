@@ -5,6 +5,8 @@
 #include "support/grid.h"
 #include <cstdint>
 
+struct BuildController;
+
 struct TileChange {
     int8_t countdown = 0;
     int8_t x = 0;
@@ -38,6 +40,8 @@ public:
         tileElevation.resize(width + 1, height + 1);
         heightMap.resize(width + 2, height + 2);
     }
+
+    void commit_edit(const BuildController& build);
 
     bool in_bounds(int32_t x, int32_t y) const {
         return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;

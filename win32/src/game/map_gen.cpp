@@ -68,7 +68,7 @@ int8_t game_registerTrain(Game *game, int8_t by, int32_t n, int32_t n2) {
 void game_rebuildTerrainTiles(Game *game, bool bl) {
     int n, n2, n3, n4;
     if (bl) {
-        game_commitTerrainEdit(game);
+        game->world.terrain.commit_edit(game->build);
         game->build.terrainEditBuffer.clear();
         n4 = game->build.selectionStartX; n3 = game->build.selectionStartY;
         n2 = game->build.selectionStartX + 10; n = game->build.selectionStartY + 10;
@@ -153,7 +153,7 @@ void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
             if (nextRngInt(game) % 2 < 0 && j > 0) game_isAdjacentTileEmpty(game, i, j - 1, n5, true);
             if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth) game_isAdjacentTileEmpty(game, i + 1, j, n5, true);
             if (nextRngInt(game) % 2 < 0 && j < game->world.terrain.mapHeight) game_isAdjacentTileEmpty(game, i, j + 1, n5, true);
-            game_commitTerrainEdit(game);
+            game->world.terrain.commit_edit(game->build);
         }
     }
 }

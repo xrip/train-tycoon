@@ -707,6 +707,24 @@ TEST_CASE("fast: world resize keeps terrain and track grids in step") {
     CHECK(world.terrain.heightMap[0].size() == 11);
 }
 
+TEST_CASE("fast: terrain commits the build edit buffer") {
+    World world;
+    world.resize(20, 20);
+    BuildController build;
+    build.selectionStartX = 3;
+    build.selectionStartY = 4;
+    build.terrainEditBuffer.resize(10, 10);
+    build.terrainEditBuffer[0][0] = 11;
+    build.terrainEditBuffer[5][6] = -7;
+    build.terrainEditBuffer[9][9] = 23;
+
+    world.terrain.commit_edit(build);
+
+    CHECK(world.terrain.heightMap[3][4] == 11);
+    CHECK(world.terrain.heightMap[8][10] == -7);
+    CHECK(world.terrain.heightMap[12][13] == 23);
+}
+
 TEST_CASE("fast: save buffer bytes and round trip") {
     Game* game = make_game();
     game->economy.money = 123456;

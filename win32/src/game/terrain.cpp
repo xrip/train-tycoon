@@ -112,10 +112,10 @@ bool game_isTileBuildable(Game *game, int32_t x, int32_t y, int32_t type) {
 }
 
 // void commitTerrainEdit() -- copy the 10x10 edit buffer back into heightMap
-void game_commitTerrainEdit(Game *game) {
+void Terrain::commit_edit(const BuildController& build) {
     for (int i = 0; i < 10; ++i) {
-        memcpy(game->world.terrain.heightMap[game->build.selectionStartX + i].data() + game->build.selectionStartY,
-               game->build.terrainEditBuffer[i].data(), 10);
+        memcpy(heightMap[build.selectionStartX + i].data() + build.selectionStartY,
+               build.terrainEditBuffer[i].data(), 10);
     }
 }
 
