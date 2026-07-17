@@ -37,7 +37,7 @@ void applyScenarioDefinition(Game *game, const ScenarioDefinition& definition) {
     game->scenario.scenarioMilestoneIndex = static_cast<int8_t>(definition.milestoneIndex);
     game->scenario.currentMilestoneScore = definition.milestoneScore;
     game->scenario.milestoneCoThreshold2 = definition.milestoneThreshold;
-    game_initBuildMenuForScenario(game, definition.buildMenuScenario);
+    game->ui.init_build_menu(game->scenario, definition.buildMenuScenario);
     game->scenario.aiExpansionEnabled = (definition.scenarioFlags & 2) == 2;
     game->scenario.monthlyOffersEnabled = (definition.scenarioFlags & 4) == 4;
     if ((definition.scenarioFlags & 1) != 1) {

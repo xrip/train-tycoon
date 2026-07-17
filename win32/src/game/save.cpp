@@ -425,7 +425,7 @@ void SaveCodec::restore_all(Game& game) {
     game.world.resize(game.world.terrain.mapWidth, game.world.terrain.mapHeight);
     game.renderer.camera.viewportHalfWidth = game.world.terrain.mapScreenWidth / 2;
     game.renderer.camera.viewportHalfHeight = game.world.terrain.mapScreenHeight / 2;
-    game_initBuildMenuForScenario(&game, -1);
+    game.ui.init_build_menu(game.scenario, -1);
     load_slot(1, save::MODE_READ);
     decompress();
     io_byte_grid(game.world.terrain.tileMap);

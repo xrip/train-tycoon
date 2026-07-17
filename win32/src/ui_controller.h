@@ -8,6 +8,7 @@
 #include <cstdint>
 
 struct Economy;
+struct Scenario;
 
 // UiController owns interface selection and screen-flow state. Saved offer
 // records live in OfferBoard.
@@ -18,6 +19,10 @@ struct UiController {
                              bool alternate);
     void reset_key_state(int32_t key);
     void cycle_build_menu_index(bool forward);
+    void init_build_menu_row(int32_t row, int32_t count);
+    void add_build_menu_item(int32_t text, int32_t item, int32_t result,
+                             bool wide, bool enabled, int32_t transition);
+    void init_build_menu(Scenario& scenario, int32_t scenario_bits);
 
     bool monthlyReportEnabled = true;
     bool annualReportEnabled = true;
