@@ -2,11 +2,12 @@
 #include "game_internal.h"
 #include <cstdlib>
 
-void game_placeTrainAt(Game *game, int32_t duration_units, int32_t row) {
-    int delay_days = duration_units * 60 + 20 + game->rng.next_int() % 20;
-    int due_day = game->offerBoard.offers[row].issuedDay + delay_days;
-    int due_month = game->offerBoard.offers[row].issuedMonth;
-    int due_year = game->offerBoard.offers[row].issuedYear;
+void OfferBoard::schedule_due_date(int32_t row, int32_t duration_units,
+                                   JavaRandom& random) {
+    int delay_days = duration_units * 60 + 20 + random.next_int() % 20;
+    int due_day = offers[row].issuedDay + delay_days;
+    int due_month = offers[row].issuedMonth;
+    int due_year = offers[row].issuedYear;
     while (due_day > 28) {
         due_day -= 28;
         ++due_month;
@@ -16,9 +17,9 @@ void game_placeTrainAt(Game *game, int32_t duration_units, int32_t row) {
         ++due_year;
     }
     if (due_day == 1) ++due_day;
-    game->offerBoard.offers[row].dueDay = (int8_t)due_day;
-    game->offerBoard.offers[row].dueMonth = (int8_t)due_month;
-    game->offerBoard.offers[row].dueYear = (int8_t)due_year;
+    offers[row].dueDay = (int8_t)due_day;
+    offers[row].dueMonth = (int8_t)due_month;
+    offers[row].dueYear = (int8_t)due_year;
 }
 
 static void copy_menu_row_to_slot5(Game *game, int row) {
@@ -117,7 +118,7 @@ void game_everyMonthlyTick(Game *game) {
         game->offerBoard.offers[free_row].issuedMonth = (int8_t)game->economy.monthOfYear;
         game->offerBoard.offers[free_row].issuedYear = (int8_t)(game->economy.year - 1950);
         int offer_scale = 4 + std::abs(game->rng.next_int() % 12);
-        game_placeTrainAt(game, offer_scale, free_row);
+        game->offerBoard.schedule_due_date(free_row, offer_scale, game->rng);
         int offer_type = std::abs(game->rng.next_int() % 16);
         int engine_count = 0;
         int active_train_count = 0;

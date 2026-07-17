@@ -512,6 +512,37 @@ TEST_CASE("fast: type two offer progress handles zero money") {
     delete game;
 }
 
+TEST_CASE("fast: offer board schedules due dates with fixed random order") {
+    OfferBoard board;
+    Offer& offer = board.offers[2];
+    offer.issuedDay = 27;
+    offer.issuedMonth = 12;
+    offer.issuedYear = 4;
+    JavaRandom actual_random{};
+    JavaRandom expected_random{};
+    actual_random.set_seed(12345);
+    expected_random.set_seed(12345);
+    int due_day = offer.issuedDay + 2 * 60 + 20
+                  + expected_random.next_int() % 20;
+    int due_month = offer.issuedMonth;
+    int due_year = offer.issuedYear;
+    while (due_day > 28) {
+        due_day -= 28;
+        ++due_month;
+    }
+    while (due_month > 12) {
+        due_month -= 12;
+        ++due_year;
+    }
+    if (due_day == 1) ++due_day;
+
+    board.schedule_due_date(2, 2, actual_random);
+    CHECK(offer.dueDay == due_day);
+    CHECK(offer.dueMonth == due_month);
+    CHECK(offer.dueYear == due_year);
+    CHECK(actual_random.next_int() == expected_random.next_int());
+}
+
 TEST_CASE("fast: economy spending and money history are owned rules") {
     Economy economy;
     economy.money = 100;

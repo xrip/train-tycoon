@@ -5,6 +5,7 @@
 #include <cstdint>
 
 struct Economy;
+class JavaRandom;
 
 struct Offer {
     int8_t objectiveType = 0;
@@ -24,6 +25,8 @@ struct Offer {
 class OfferBoard {
 public:
     int8_t display_progress(int32_t row, const Economy& economy) const;
+    void schedule_due_date(int32_t row, int32_t duration_units,
+                           JavaRandom& random);
 
     Offer offers[kMenuRowCount]{};
 };
