@@ -120,7 +120,7 @@ void game_renderMap(Game *game, Surface *g) {
         if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
             n = n4 * 16 + n5 * 16 + 16 - game->renderer.camera.viewportCenterX;
             n12 = game->world.terrain.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[n5][n4] + 15;
-            if (!animationsDisabled) {
+            if (!game->settings.animationsDisabled) {
                 if (n2 == 54 || n2 == 55)
                     midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[53]].get(), n, n12, 33);
                 if (game->world.terrain.phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
@@ -156,7 +156,7 @@ void game_renderMap(Game *game, Surface *g) {
         if (n14 <= 0) continue;
         midp_draw_image(g, game->assets.tile_sprites[unsignedByte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
     }
-    if (!selectionHidden) {
+    if (!game->settings.selectionHidden) {
         for (n6 = 0; n6 < game->assets.numActiveTileAnimations; ++n6) {
             n5 = n9 + game->assets.tileOffsetX[n6];
             n4 = n10 + game->assets.tileOffsetY[n6];

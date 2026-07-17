@@ -182,8 +182,8 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             game_setState(game, GameState::Playing); break;
         case 10:
             switch (n2) {
-                case 1: animationsDisabled = !animationsDisabled; goto hbms_end;
-                case 2: selectionHidden = !selectionHidden; goto hbms_end;
+                case 1: game->settings.animationsDisabled = !game->settings.animationsDisabled; goto hbms_end;
+                case 2: game->settings.selectionHidden = !game->settings.selectionHidden; goto hbms_end;
                 case 3: game->ui.monthlyReportEnabled = !game->ui.monthlyReportEnabled; goto hbms_end;
                 case 4: game->ui.annualReportEnabled = !game->ui.annualReportEnabled; goto hbms_end;
                 case 5:

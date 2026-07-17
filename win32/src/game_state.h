@@ -15,6 +15,7 @@
 #include "save_codec.h"
 #include "music_controller.h"
 #include "click_map.h"
+#include "game_settings.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -96,6 +97,7 @@ typedef struct Game {
     UiController ui;
     SaveCodec saveCodec;
     ClickMap clickMap;  // captured overlay menu-row hit-rects, filled in game_paint
+    GameSettings settings;
     int32_t cachedHeaderMoney = 0;
     int32_t cachedHeaderDay = 0;
     int32_t cachedHeaderMonth = 0;
@@ -124,7 +126,4 @@ extern int32_t canvasWidth;
 extern int32_t canvasHeight;
 extern int32_t gameplayViewportHeight;
 extern int32_t bottomBarY;
-extern bool animationsDisabled;
-extern bool selectionHidden;
-
 #endif

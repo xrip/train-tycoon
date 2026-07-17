@@ -384,8 +384,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 }
 
 void SaveCodec::walk_settings(Game& game) {
-    animationsDisabled = io_bool(animationsDisabled);
-    selectionHidden = io_bool(selectionHidden);
+    game.settings.animationsDisabled = io_bool(game.settings.animationsDisabled);
+    game.settings.selectionHidden = io_bool(game.settings.selectionHidden);
     game.ui.monthlyReportEnabled = io_bool(game.ui.monthlyReportEnabled);
     game.ui.annualReportEnabled = io_bool(game.ui.annualReportEnabled);
     game.scenario.scenarioStepCompare = io_int(game.scenario.scenarioStepCompare);

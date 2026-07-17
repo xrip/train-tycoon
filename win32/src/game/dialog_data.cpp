@@ -101,8 +101,8 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
 
         case 10:
             switch (field) {
-                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[animationsDisabled ? 21 : 20]]);
-                case 2: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[selectionHidden ? 21 : 20]]);
+                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->settings.animationsDisabled ? 21 : 20]]);
+                case 2: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->settings.selectionHidden ? 21 : 20]]);
                 case 3: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->ui.monthlyReportEnabled ? 20 : 21]]);
                 case 4: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->ui.annualReportEnabled ? 20 : 21]]);
                 case 5: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->music.enabled ? 20 : 21]]);

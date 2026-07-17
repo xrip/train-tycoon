@@ -7,8 +7,6 @@ int32_t canvasWidth;
 int32_t canvasHeight;
 int32_t gameplayViewportHeight;
 int32_t bottomBarY;
-bool animationsDisabled;
-bool selectionHidden;
 
 namespace {
 
@@ -63,8 +61,6 @@ Game::Game(std::unique_ptr<MusicOutput> music_output, int64_t random_seed) {
     canvasHeight = 1;
     gameplayViewportHeight = canvasHeight - 30;
     bottomBarY = canvasHeight - 15;
-    animationsDisabled = false;
-    selectionHidden = false;
     world.terrain.mapHalfWidth = (world.terrain.mapWidth - 1) * 8;
     world.terrain.mapScreenWidth = (world.terrain.mapWidth + world.terrain.mapHeight) * 16;
     world.terrain.mapScreenHeight = (world.terrain.mapWidth + world.terrain.mapHeight) * 8;
