@@ -7,6 +7,7 @@
 #include <cstdint>
 
 class JavaRandom;
+struct Fleet;
 
 // World owns terrain, track, cities, growth, and map-generation state. resize
 // keeps the terrain and track grids at matching map dimensions.
@@ -89,6 +90,9 @@ struct World {
     void update_city_population(JavaRandom& random);
     void roll_station_revenue_year();
     void recount_city_zone_tiles();
+    bool is_curve_tile(int32_t x, int32_t y) const;
+    bool is_city_or_station_tile(const Fleet& fleet, int32_t x,
+                                 int32_t y) const;
 };
 
 #endif  // WORLD_H

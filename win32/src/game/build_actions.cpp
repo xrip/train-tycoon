@@ -128,7 +128,9 @@ void game_applyBackgroundCost(Game *game) {
 void game_demolishAtCursor(Game *game) {
     int cursor_x = game->ui.tileCursorX;
     int cursor_y = game->ui.tileCursorY;
-    if (game->ui.blockBuildMenu || !game_isCityOrStationTile(game, cursor_x, cursor_y))
+    if (game->ui.blockBuildMenu
+        || !game->world.is_city_or_station_tile(game->fleet, cursor_x,
+                                                cursor_y))
         return;
 
     game->build.backgroundCost = 0;

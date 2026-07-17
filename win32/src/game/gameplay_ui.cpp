@@ -250,11 +250,14 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
                        ? 0x00FF00 : 0xFF0000);
     if (action == 9)
         midp_set_color(graphics,
-                       game_isCityOrStationTile(game, game->ui.tileCursorX, game->ui.tileCursorY)
+                       game->world.is_city_or_station_tile(
+                           game->fleet, game->ui.tileCursorX,
+                           game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action == 10) midp_set_color(graphics, 0xFFFFFF);
     if (action == 11) {
-        if (game_isCurveTile(game, game->ui.tileCursorX, game->ui.tileCursorY)) {
+        if (game->world.is_curve_tile(game->ui.tileCursorX,
+                                      game->ui.tileCursorY)) {
             int x = game->ui.tileCursorX;
             int y = game->ui.tileCursorY;
             int dx = 0;

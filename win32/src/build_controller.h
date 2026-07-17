@@ -9,6 +9,7 @@
 
 struct Economy;
 struct Scenario;
+class Terrain;
 
 // BuildController owns the transient state of a build action. Track-laying leaf:
 // the walk start/step, the in-progress flag and tile count, the preview/existing
@@ -18,6 +19,7 @@ struct Scenario;
 struct BuildController {
     static bool tool_acts_on_cursor_tile(int32_t mode, int32_t item);
     void compute_train_cost(const Economy& economy, const Scenario& scenario);
+    void set_terrain_selection(const Terrain& terrain, int32_t x, int32_t y);
 
     int32_t trackStartX = 0;
     int32_t trackStartY = 0;

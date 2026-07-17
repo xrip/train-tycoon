@@ -1064,6 +1064,24 @@ TEST_CASE("fast: world track-step query stops at the first occupied tile") {
     CHECK(world.has_track_step(1, 2, 1, 0, 9));
     world.terrain.tileMap[2][2] = 4;
     CHECK_FALSE(world.has_track_step(1, 2, 1, 0, 9));
+
+    world.terrain.tileMap[1][2] = 9;
+    world.terrain.tileMap[2][2] = 0;
+    world.terrain.tileMap[3][2] = 8;
+    CHECK(world.is_curve_tile(1, 2));
+}
+
+TEST_CASE("fast: world station tile query uses fleet occupancy") {
+    World world;
+    Fleet fleet;
+    world.resize(6, 6);
+    world.terrain.tileMap[2][2] = 70;
+    world.trackMap[2][2] = 65;
+    CHECK(world.is_city_or_station_tile(fleet, 2, 2));
+    fleet.trainCars[0].flags = static_cast<int8_t>(train_flag::USED_SLOT);
+    fleet.trainCars[0].x = 2;
+    fleet.trainCars[0].y = 2;
+    CHECK_FALSE(world.is_city_or_station_tile(fleet, 2, 2));
 }
 
 TEST_CASE("fast: terrain commits the build edit buffer") {
@@ -1082,6 +1100,19 @@ TEST_CASE("fast: terrain commits the build edit buffer") {
     CHECK(world.terrain.heightMap[3][4] == 11);
     CHECK(world.terrain.heightMap[8][10] == -7);
     CHECK(world.terrain.heightMap[12][13] == 23);
+}
+
+TEST_CASE("fast: build controller takes a bounded terrain selection") {
+    Terrain terrain;
+    terrain.resize(20, 20);
+    terrain.heightMap[11][12] = 7;
+    BuildController build;
+    build.terrainSmoothCost = 99;
+    build.set_terrain_selection(terrain, 16, 17);
+    CHECK(build.selectionStartX == 11);
+    CHECK(build.selectionStartY == 11);
+    CHECK(build.terrainEditBuffer[0][1] == 7);
+    CHECK(build.terrainSmoothCost == 0);
 }
 
 TEST_CASE("fast: terrain rebuild makes a flat tile from equal heights") {

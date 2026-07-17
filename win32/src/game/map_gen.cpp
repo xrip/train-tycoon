@@ -124,7 +124,7 @@ void Terrain::rebuild(BuildController& build, bool bl) {
 
 void game_smoothTileAt(Game *game, int32_t n, int32_t n2, bool bl) {
     if ((bl && game->world.terrain.heightMap[n][n2] < 3) || (!bl && game->world.terrain.heightMap[n][n2] > -1)) {
-        game_setSelectionStart(game, n, n2);
+        game->build.set_terrain_selection(game->world.terrain, n, n2);
         if (game_isAdjacentTileEmpty(game, n, n2, game->world.terrain.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
             if (game->world.initialIndustryPlaced) {
                 if (game->build.terrainSmoothCost <= game->economy.money) {
@@ -147,7 +147,7 @@ void game_raiseTerrainArea(Game *game, int32_t n, int32_t n2, int32_t n3, int32_
     for (int i = n; i < n + n3; ++i) {
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
-            game_setSelectionStart(game, i, j);
+            game->build.set_terrain_selection(game->world.terrain, i, j);
             game_isAdjacentTileEmpty(game, i, j, n5, true);
             if (nextRngInt(game) % 2 < 0 && i > 0) game_isAdjacentTileEmpty(game, i - 1, j, n5, true);
             if (nextRngInt(game) % 2 < 0 && j > 0) game_isAdjacentTileEmpty(game, i, j - 1, n5, true);
