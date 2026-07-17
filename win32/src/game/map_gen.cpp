@@ -5,8 +5,6 @@
 #include <stdlib.h> // abs
 #include <vector>
 
-static int nextRngInt(Game *game) { return game->rng.next_int(); }
-
 // Game::mapGenStage steps through the incremental generator in
 // game_runMapGenerationStep: init, raise then lower terrain, place patches, six
 // terrain-feature passes, then scatter starting obstacles.
@@ -39,7 +37,7 @@ int8_t World::random_city_tile(JavaRandom& random) const {
 int8_t Game::add_city_entry(int32_t n) {
     Game* game = this;
     game->world.cities[game->ui.cityListIndex].stationDirection = (int8_t)n;
-    game->world.cities[game->ui.cityListIndex].population = (int8_t)(50 + nextRngInt(game) % 20);
+    game->world.cities[game->ui.cityListIndex].population = (int8_t)(50 + game->rng.next_int() % 20);
     game->world.cities[game->ui.cityListIndex].zoneTileCount = 0;
     game->ui.cityListIndex = (int8_t)(game->ui.cityListIndex + 1);
     return (int8_t)(game->ui.cityListIndex - 1);
@@ -54,8 +52,8 @@ int8_t Game::register_map_train(int8_t by, int32_t n, int32_t n2) {
     int16_t s = 0;
     bool bl;
     do {
-        int8_t by2 = (int8_t)abs(nextRngInt(game) % 6);
-        int8_t by3 = (int8_t)abs(nextRngInt(game) % 14);
+        int8_t by2 = (int8_t)abs(game->rng.next_int() % 6);
+        int8_t by3 = (int8_t)abs(game->rng.next_int() % 14);
         s = (int16_t)(256 * by2 + by3);
         bl = true;
         for (int i = 0; i < game->ui.numSelectedTrains; ++i)
@@ -157,16 +155,16 @@ void Game::raise_terrain_area(int32_t n, int32_t n2, int32_t n3,
             game->build.set_terrain_selection(game->world.terrain, i, j);
             game->build.adjust_terrain_point(
                 game->world.terrain, game->economy, i, j, n5, true);
-            if (nextRngInt(game) % 2 < 0 && i > 0)
+            if (game->rng.next_int() % 2 < 0 && i > 0)
                 game->build.adjust_terrain_point(
                     game->world.terrain, game->economy, i - 1, j, n5, true);
-            if (nextRngInt(game) % 2 < 0 && j > 0)
+            if (game->rng.next_int() % 2 < 0 && j > 0)
                 game->build.adjust_terrain_point(
                     game->world.terrain, game->economy, i, j - 1, n5, true);
-            if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth)
+            if (game->rng.next_int() % 2 < 0 && i < game->world.terrain.mapWidth)
                 game->build.adjust_terrain_point(
                     game->world.terrain, game->economy, i + 1, j, n5, true);
-            if (nextRngInt(game) % 2 < 0 && j < game->world.terrain.mapHeight)
+            if (game->rng.next_int() % 2 < 0 && j < game->world.terrain.mapHeight)
                 game->build.adjust_terrain_point(
                     game->world.terrain, game->economy, i, j + 1, n5, true);
             game->world.terrain.commit_edit(game->build);
@@ -182,10 +180,10 @@ void Game::lower_terrain_area(int32_t n, int32_t n2, int32_t n3,
         for (int j = n2; j < n2 + n4; ++j) {
             if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
             for (int k = 0; k < 3; ++k) game->smooth_tile_at(i, j, false);
-            if (nextRngInt(game) % 2 < 0 && i > 0) game->smooth_tile_at(i - 1, j, false);
-            if (nextRngInt(game) % 2 < 0 && j > 0) game->smooth_tile_at(i, j - 1, false);
-            if (nextRngInt(game) % 2 < 0 && i < game->world.terrain.mapWidth) game->smooth_tile_at(i + 1, j, false);
-            if (nextRngInt(game) % 2 >= 0 || j >= game->world.terrain.mapHeight) continue;
+            if (game->rng.next_int() % 2 < 0 && i > 0) game->smooth_tile_at(i - 1, j, false);
+            if (game->rng.next_int() % 2 < 0 && j > 0) game->smooth_tile_at(i, j - 1, false);
+            if (game->rng.next_int() % 2 < 0 && i < game->world.terrain.mapWidth) game->smooth_tile_at(i + 1, j, false);
+            if (game->rng.next_int() % 2 >= 0 || j >= game->world.terrain.mapHeight) continue;
             game->smooth_tile_at(i, j + 1, false);
         }
     }
@@ -211,28 +209,28 @@ void Game::place_terrain_patch(int32_t n, int32_t n2) {
     Game *game = this;
     int n3, n4, n5, n6;
     int8_t by, by2, by3, by4;
-    int n7 = abs(nextRngInt(game) % 5) + game->world.terrainPatchBaseSize;
-    int8_t by5 = (int8_t)(abs(nextRngInt(game) % 5) + game->world.terrainPatchBaseSize);
+    int n7 = abs(game->rng.next_int() % 5) + game->world.terrainPatchBaseSize;
+    int8_t by5 = (int8_t)(abs(game->rng.next_int() % 5) + game->world.terrainPatchBaseSize);
     std::vector<std::vector<int8_t>> patch_tiles(
         static_cast<size_t>(n7),
         std::vector<int8_t>(static_cast<size_t>(by5)));
     bool bl = false;
-    int n8 = abs(nextRngInt(game) % (n7 - 2)) + 1;
-    for (n6 = abs(nextRngInt(game) % 3); n6 < by5 - abs(nextRngInt(game) % 3); ++n6) patch_tiles[n8][n6] = 1;
+    int n8 = abs(game->rng.next_int() % (n7 - 2)) + 1;
+    for (n6 = abs(game->rng.next_int() % 3); n6 < by5 - abs(game->rng.next_int() % 3); ++n6) patch_tiles[n8][n6] = 1;
     if (n7 >= 7) {
         do {
-            n8 = abs(nextRngInt(game) % (n7 - 2)) + 1;
+            n8 = abs(game->rng.next_int() % (n7 - 2)) + 1;
             bl = false;
             for (n6 = 0; n6 < by5; ++n6)
                 if (patch_tiles[n8 - 1][n6] == 1 || patch_tiles[n8 + 1][n6] == 1) bl = true;
         } while (bl);
-        for (n6 = abs(nextRngInt(game) % 3); n6 < by5 - abs(nextRngInt(game) % 3); ++n6) patch_tiles[n8][n6] = 1;
+        for (n6 = abs(game->rng.next_int() % 3); n6 < by5 - abs(game->rng.next_int() % 3); ++n6) patch_tiles[n8][n6] = 1;
     }
-    n6 = abs(nextRngInt(game) % (by5 - 2)) + 1;
-    for (n5 = abs(nextRngInt(game) % 3); n5 < n7 - abs(nextRngInt(game) % 3); ++n5) patch_tiles[n5][n6] = 2;
+    n6 = abs(game->rng.next_int() % (by5 - 2)) + 1;
+    for (n5 = abs(game->rng.next_int() % 3); n5 < n7 - abs(game->rng.next_int() % 3); ++n5) patch_tiles[n5][n6] = 2;
     if (by5 >= 7) {
         do {
-            n6 = abs(nextRngInt(game) % (by5 - 2)) + 1;
+            n6 = abs(game->rng.next_int() % (by5 - 2)) + 1;
             bl = false;
             for (n5 = 0; n5 < n7; ++n5)
                 if (patch_tiles[n5][n6 - 1] == 2 || patch_tiles[n5][n6 + 1] == 2) bl = true;
@@ -282,7 +280,7 @@ void Game::place_terrain_patch(int32_t n, int32_t n2) {
     for (by4 = 0; by4 < n7; ++by4) {
         for (by3 = 0; by3 < by5; ++by3) {
             if (n + by4 >= game->world.terrain.mapWidth || n2 + by3 >= game->world.terrain.mapHeight
-                || (patch_tiles[by4][by3] == 0 && (patch_tiles[by4][by3] != 0 || nextRngInt(game) % 3 >= 0))) continue;
+                || (patch_tiles[by4][by3] == 0 && (patch_tiles[by4][by3] != 0 || game->rng.next_int() % 3 >= 0))) continue;
             if (n5 == -2 && (n5 = game->world.terrain.heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
             int64_t l = midp_current_time_millis();
             while (n5 != game->world.terrain.heightMap[n + by4][n2 + by3]) {
@@ -332,10 +330,10 @@ void Game::place_terrain_feature(int32_t n) {
     int64_t l = midp_current_time_millis();
     do {
         bl = true;
-        n7 = abs(nextRngInt(game) % (game->world.terrain.mapWidth - 8)) + 4;
-        n6 = abs(nextRngInt(game) % (game->world.terrain.mapHeight - 8)) + 4;
-        n5 = nextRngInt(game) % 2 <= 0 ? 3 : 2;
-        n4 = nextRngInt(game) % 2 <= 0 ? 3 : 2;
+        n7 = abs(game->rng.next_int() % (game->world.terrain.mapWidth - 8)) + 4;
+        n6 = abs(game->rng.next_int() % (game->world.terrain.mapHeight - 8)) + 4;
+        n5 = game->rng.next_int() % 2 <= 0 ? 3 : 2;
+        n4 = game->rng.next_int() % 2 <= 0 ? 3 : 2;
         if (n == 2) { n5 = 2; n4 = 2; }
         for (n3 = n7 - 3; n3 < n7 + n5 + 3; ++n3) {
             for (n2 = n6 - 3; n2 < n6 + n4 + 3; ++n2) {
@@ -384,15 +382,15 @@ void Game::place_terrain_feature(int32_t n) {
             break;
         case 2:
             if (n5 != 2 || n4 != 2) break;
-            game->world.place_track_tile(n7, n6, 57 + abs(nextRngInt(game) % 2), n3);
+            game->world.place_track_tile(n7, n6, 57 + abs(game->rng.next_int() % 2), n3);
             game->world.place_track_tile(n7, n6 + 1, 56, n3);
-            game->world.place_track_tile(n7 + 1, n6, 57 + abs(nextRngInt(game) % 2), n3);
-            game->world.place_track_tile(n7 + 1, n6 + 1, 57 + abs(nextRngInt(game) % 2), n3);
+            game->world.place_track_tile(n7 + 1, n6, 57 + abs(game->rng.next_int() % 2), n3);
+            game->world.place_track_tile(n7 + 1, n6 + 1, 57 + abs(game->rng.next_int() % 2), n3);
             break;
         case 3:
             for (n2 = n7; n2 < n7 + n5; ++n2)
                 for (int i = n6; i < n6 + n4; ++i)
-                    game->world.place_track_tile(n2, i, 59 + abs(nextRngInt(game) % 3), n3);
+                    game->world.place_track_tile(n2, i, 59 + abs(game->rng.next_int() % 3), n3);
             break;
         case 4:
             if (n5 == 2 && n4 == 2) {
@@ -425,9 +423,8 @@ void Game::place_terrain_feature(int32_t n) {
     }
 }
 
-namespace {
-
-void beginMapGeneration(Game *game) {
+void Game::initialize_map_generator() {
+        Game* game = this;
         game->world.resize(game->world.terrain.mapWidth, game->world.terrain.mapHeight);
         game->world.initialIndustryPlaced = false;
         game->world.mapGenStage = mapgen::STAGE_INIT;
@@ -438,7 +435,8 @@ void beginMapGeneration(Game *game) {
         game->world.mapGenTilesDone = 0;
 }
 
-void advanceMapGenerationStage(Game *game) {
+void Game::advance_map_generation_stage() {
+        Game* game = this;
         if (game->world.mapGenStage == mapgen::STAGE_INIT) { game->world.mapGenStage = mapgen::STAGE_RAISE_TERRAIN; game->world.tilesGeneratedInStage = 0; }
         if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainRaiseStepCount) { game->world.mapGenStage = mapgen::STAGE_LOWER_TERRAIN; game->world.tilesGeneratedInStage = 0; game->world.terrain.rebuild(game->build, false); }
         if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainLowerStepCount) { game->world.mapGenStage = mapgen::STAGE_PLACE_PATCHES; game->world.tilesGeneratedInStage = 0; game->world.terrain.rebuild(game->build, false); }
@@ -451,26 +449,28 @@ void advanceMapGenerationStage(Game *game) {
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5 && game->world.tilesGeneratedInStage == game->world.weightAccel3) { game->world.mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; game->world.tilesGeneratedInStage = 0; }
 }
 
-void generateTerrainHeightStep(Game *game) {
+void Game::generate_terrain_height_step() {
+        Game* game = this;
         if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN) {
-            int center_x = abs(nextRngInt(game) % game->world.terrain.mapWidth);
-            int center_y = abs(nextRngInt(game) % game->world.terrain.mapHeight);
-            int width = abs(nextRngInt(game) % 20) + 1;
-            int height = abs(nextRngInt(game) % 20) + 1;
-            int elevation_step = abs(nextRngInt(game) % 2) + 1;
+            int center_x = abs(game->rng.next_int() % game->world.terrain.mapWidth);
+            int center_y = abs(game->rng.next_int() % game->world.terrain.mapHeight);
+            int width = abs(game->rng.next_int() % 20) + 1;
+            int height = abs(game->rng.next_int() % 20) + 1;
+            int elevation_step = abs(game->rng.next_int() % 2) + 1;
             game->raise_terrain_area(center_x, center_y, width, height,
                                 elevation_step);
         }
         if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN) {
-            int center_x = abs(nextRngInt(game) % game->world.terrain.mapWidth);
-            int center_y = abs(nextRngInt(game) % game->world.terrain.mapHeight);
-            int width = abs(nextRngInt(game) % 20) + 1;
-            int height = abs(nextRngInt(game) % 20) + 1;
+            int center_x = abs(game->rng.next_int() % game->world.terrain.mapWidth);
+            int center_y = abs(game->rng.next_int() % game->world.terrain.mapHeight);
+            int width = abs(game->rng.next_int() % 20) + 1;
+            int height = abs(game->rng.next_int() % 20) + 1;
             game->lower_terrain_area(center_x, center_y, width, height, -1);
         }
 }
 
-void generateTerrainPatchStep(Game *game) {
+void Game::generate_terrain_patch_step() {
+        Game* game = this;
         game->build.trackBuildInProgress = false;
         if (game->world.mapGenStage == mapgen::STAGE_PLACE_PATCHES) {
             for (int column = 0; column < game->world.mapGenColumns; ++column) {
@@ -479,8 +479,8 @@ void generateTerrainPatchStep(Game *game) {
                     if (game->world.tilesGeneratedInStage != game->world.mapGenColumns * column + row) continue;
                     int cellWidth = game->world.terrain.mapWidth / game->world.mapGenColumns;
                     int cellHeight = game->world.terrain.mapHeight / game->world.mapGenRows;
-                    int patchX = column * cellWidth + abs(nextRngInt(game) % (cellWidth / 2));
-                    int patchY = row * cellHeight + abs(nextRngInt(game) % (cellHeight / 2));
+                    int patchX = column * cellWidth + abs(game->rng.next_int() % (cellWidth / 2));
+                    int patchY = row * cellHeight + abs(game->rng.next_int() % (cellHeight / 2));
                     game->place_terrain_patch(patchX, patchY);
                     done = true;
                 }
@@ -489,7 +489,8 @@ void generateTerrainPatchStep(Game *game) {
         }
 }
 
-void generateTerrainFeatureStep(Game *game) {
+void Game::generate_terrain_feature_step() {
+        Game* game = this;
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0) game->place_terrain_feature(0);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1) game->place_terrain_feature(1);
         if (game->world.mapGenStage == mapgen::STAGE_FEATURE_2) game->place_terrain_feature(2);
@@ -499,35 +500,35 @@ void generateTerrainFeatureStep(Game *game) {
         if (game->build.trackBuildInProgress) game->stateWorkStep = 0;
 }
 
-void scatterInitialObstacles(Game *game) {
+void Game::scatter_initial_obstacles() {
+        Game* game = this;
         if (game->world.mapGenStage == mapgen::STAGE_SCATTER_OBSTACLES) {
             for (int obstacle = 0; obstacle < game->world.initialObstacleCount; ++obstacle) {
-                int mapX = abs(nextRngInt(game) % game->world.terrain.mapWidth);
-                int mapY = abs(nextRngInt(game) % game->world.terrain.mapHeight);
+                int mapX = abs(game->rng.next_int() % game->world.terrain.mapWidth);
+                int mapY = abs(game->rng.next_int() % game->world.terrain.mapHeight);
                 if (game->world.terrain.tileMap[mapX][mapY] != 0 || game->world.terrain.tileElevation[mapX][mapY] < 0) continue;
-                game->world.terrain.tileMap[mapX][mapY] = (int8_t)(tile::SCENERY_FIRST + abs(nextRngInt(game) % 5));
+                game->world.terrain.tileMap[mapX][mapY] = (int8_t)(tile::SCENERY_FIRST + abs(game->rng.next_int() % 5));
             }
             game->world.initialIndustryPlaced = true;
         }
 }
 
-void generateOneMapStep(Game *game) {
-        advanceMapGenerationStage(game);
-        generateTerrainHeightStep(game);
-        generateTerrainPatchStep(game);
-        generateTerrainFeatureStep(game);
-        scatterInitialObstacles(game);
+void Game::generate_one_map_step() {
+        Game* game = this;
+        game->advance_map_generation_stage();
+        game->generate_terrain_height_step();
+        game->generate_terrain_patch_step();
+        game->generate_terrain_feature_step();
+        game->scatter_initial_obstacles();
         ++game->world.tilesGeneratedInStage;
         ++game->world.mapGenTilesDone;
 }
 
-} // namespace
-
 // Set up the map generator (mode 0), or run one ordered generation step (mode 1).
 void Game::run_map_generation_step(int32_t mode) {
     Game* game = this;
-    if (mode == 0) beginMapGeneration(game);
-    if (mode == 1) generateOneMapStep(game);
+    if (mode == 0) game->initialize_map_generator();
+    if (mode == 1) game->generate_one_map_step();
 }
 
 void World::pick_city_site(JavaRandom& random) {

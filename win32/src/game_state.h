@@ -60,6 +60,13 @@ typedef struct Game {
     void record_delivered_resource(int32_t resource, int32_t amount);
     void record_train_revenue(int32_t amount);
     void run_map_generation_step(int32_t mode);
+    void initialize_map_generator();
+    void advance_map_generation_stage();
+    void generate_terrain_height_step();
+    void generate_terrain_patch_step();
+    void generate_terrain_feature_step();
+    void scatter_initial_obstacles();
+    void generate_one_map_step();
     void spawn_train_at(int32_t x, int32_t y);
     void place_cities_and_industry();
     int8_t add_city_entry(int32_t direction);
