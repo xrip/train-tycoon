@@ -2,10 +2,10 @@
 #include "game_internal.h"
 #include <stdlib.h> // abs
 
-int32_t game_computeKeyRepeatDelay(Game *game) {
-    if (game->ui.keySubState < 30) game->ui.keySubState += game->ui.keyRepeatStep;
-    game->ui.keySubState = (int8_t)game->ui.keySubState;
-    return game->ui.keySubState / 3;
+int32_t UiController::advance_key_repeat() {
+    if (keySubState < 30) keySubState += keyRepeatStep;
+    keySubState = (int8_t)keySubState;
+    return keySubState / 3;
 }
 
 void game_pushMoneyHistory(Game *game, int32_t n) {

@@ -39,7 +39,6 @@ int8_t game_randomCityTile(Game *game);
 void game_placeTerrainPatch(Game *game, int32_t n, int32_t n2);
 void game_trackBuildStep(Game *game, int32_t n, int32_t n2, int32_t n3, int32_t n4);
 void game_placeTerrainFeature(Game *game, int32_t n);
-int32_t game_computeKeyRepeatDelay(Game *game);
 void game_viewportPanKey(Game *game);
 void game_viewportZoomKey(Game *game);
 int32_t game_crossProduct2D(int32_t n, int32_t n2, int32_t n3, int32_t n4, int32_t n5, int32_t n6);

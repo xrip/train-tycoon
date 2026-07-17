@@ -65,7 +65,7 @@ void game_viewportPanKey(Game *game) {
 }
 
 void game_viewportZoomKey(Game *game) {
-    int step = game_computeKeyRepeatDelay(game);
+    int step = game->ui.advance_key_repeat();
     int key = game->ui.lastKeyCode;
     if (key == 56 || key == 6) game->renderer.mapScaleY += step * 2;
     if (key == 50 || key == 1) game->renderer.mapScaleY -= step * 2;

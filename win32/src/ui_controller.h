@@ -10,6 +10,8 @@
 // UiController owns interface selection and screen-flow state. Saved offer
 // records live in OfferBoard.
 struct UiController {
+    int32_t advance_key_repeat();
+
     // Build-menu navigation and content state. The grids hold the current menu's
     // item ids, result codes, item/text/transition codes, and per-row enabled
     // flags; the scalar cursors and mode indices track the selection; the

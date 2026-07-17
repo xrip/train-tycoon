@@ -637,6 +637,16 @@ TEST_CASE("fast: economy spending and money history are owned rules") {
     CHECK(economy.moneyHistory[2] == 5);
 }
 
+TEST_CASE("fast: UI controller owns key repeat timing") {
+    UiController ui;
+    ui.keyRepeatStep = 3;
+    CHECK(ui.advance_key_repeat() == 1);
+    CHECK(ui.keySubState == 3);
+    ui.keySubState = 30;
+    CHECK(ui.advance_key_repeat() == 10);
+    CHECK(ui.keySubState == 30);
+}
+
 TEST_CASE("fast: economy computes period and year-end report values") {
     Economy economy;
     economy.loanBalance = 120000;
