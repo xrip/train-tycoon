@@ -191,6 +191,10 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     for (TrainCar& car : game->fleet.trainCars) car.member = io_int(car.member)
 #define IO_SITE_BYTE(member) \
     for (ServiceSite& site : game->fleet.serviceSites) site.member = io_byte(site.member)
+#define IO_CITY_BYTE(member) \
+    for (City& city : game->world.cities) city.member = io_byte(city.member)
+#define IO_CITY_SHORT(member) \
+    for (City& city : game->world.cities) io_shorts(&city.member, 1)
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
@@ -223,8 +227,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_INTS(economy.altDecadeTotalCost);
     IO_CAR_INT(revenue);
     IO_CAR_INT(previousRevenue);
-    IO_SHORTS(economy.stationRevenue);
-    IO_SHORTS(economy.prevStationRevenue);
+    IO_CITY_SHORT(stationRevenue);
+    IO_CITY_SHORT(previousStationRevenue);
     IO_INT(economy.revenueTotal);
     IO_INT(economy.decadeProfitGraphTotal);
     IO_INT(economy.totalSpent);
@@ -260,9 +264,9 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_INT(economy.decadeEnterpriseTotal);
     IO_INT(economy.decadeProfitTotal);
     IO_BYTE(ui.cityListIndex);
-    IO_BYTES(world.stationDirectionCode);
-    IO_BYTES(world.cityPopulation);
-    IO_BYTES(world.cityIndex);
+    IO_CITY_BYTE(stationDirection);
+    IO_CITY_BYTE(population);
+    IO_CITY_BYTE(zoneTileCount);
     IO_SITE_BYTE(flags);
     IO_SITE_BYTE(x);
     IO_SITE_BYTE(y);
@@ -363,6 +367,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #undef IO_CAR_SHORT
 #undef IO_CAR_INT
 #undef IO_SITE_BYTE
+#undef IO_CITY_BYTE
+#undef IO_CITY_SHORT
 #undef FIELD_COUNT
 
     if (mode == save::OP_SAVE_MAIN) {

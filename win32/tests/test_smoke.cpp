@@ -382,6 +382,42 @@ TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
     delete game;
 }
 
+TEST_CASE("fast: city records keep defaults and save field positions") {
+    Game* game = make_game();
+    CHECK(game->world.cities[0].stationDirection == 0);
+    CHECK(game->world.cities[kCitySlotCount - 1].stationRevenue == 0);
+
+    City& first = game->world.cities[4];
+    first.stationDirection = 5;
+    first.population = 71;
+    first.zoneTileCount = 12;
+    first.stationRevenue = 12345;
+    first.previousStationRevenue = -23456;
+    City& last = game->world.cities[kCitySlotCount - 1];
+    last.stationDirection = 2;
+    last.population = 44;
+    last.zoneTileCount = 8;
+    last.stationRevenue = -30000;
+    last.previousStationRevenue = 30000;
+
+    game->saveCodec.walk(*game, 4);
+    first = City{};
+    last = City{};
+    game->saveCodec.walk(*game, 5);
+
+    CHECK(first.stationDirection == 5);
+    CHECK(first.population == 71);
+    CHECK(first.zoneTileCount == 12);
+    CHECK(first.stationRevenue == 12345);
+    CHECK(first.previousStationRevenue == -23456);
+    CHECK(last.stationDirection == 2);
+    CHECK(last.population == 44);
+    CHECK(last.zoneTileCount == 8);
+    CHECK(last.stationRevenue == -30000);
+    CHECK(last.previousStationRevenue == 30000);
+    delete game;
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);

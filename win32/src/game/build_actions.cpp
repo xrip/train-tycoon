@@ -81,7 +81,7 @@ void game_computeTrainCost(Game *game) {
 }
 
 void game_rebuildCityList(Game *game) {
-    for (int city = 0; city < 48; ++city) game->world.cityIndex[city] = 0;
+    for (int city = 0; city < 48; ++city) game->world.cities[city].zoneTileCount = 0;
     const int seen_count = 64 * game->world.mapWidth * game->world.mapHeight;
     std::vector<uint8_t> seen_city_tiles(
         static_cast<std::size_t>(seen_count));
@@ -105,7 +105,7 @@ void game_rebuildCityList(Game *game) {
                     int seen_index = (city * game->world.mapWidth + x) * game->world.mapHeight + y;
                     if (seen_city_tiles[seen_index]) continue;
                     seen_city_tiles[seen_index] = 1;
-                    game->world.cityIndex[city] = (int8_t)(game->world.cityIndex[city] + 1);
+                    game->world.cities[city].zoneTileCount = (int8_t)(game->world.cities[city].zoneTileCount + 1);
                 }
             }
         }

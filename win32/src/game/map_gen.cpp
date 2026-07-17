@@ -37,9 +37,9 @@ int8_t game_randomCityTile(Game *game) {
 }
 
 int8_t game_addCityEntry(Game *game, int32_t n) {
-    game->world.stationDirectionCode[game->ui.cityListIndex] = (int8_t)n;
-    game->world.cityPopulation[game->ui.cityListIndex] = (int8_t)(50 + nextRngInt(game) % 20);
-    game->world.cityIndex[game->ui.cityListIndex] = 0;
+    game->world.cities[game->ui.cityListIndex].stationDirection = (int8_t)n;
+    game->world.cities[game->ui.cityListIndex].population = (int8_t)(50 + nextRngInt(game) % 20);
+    game->world.cities[game->ui.cityListIndex].zoneTileCount = 0;
     game->ui.cityListIndex = (int8_t)(game->ui.cityListIndex + 1);
     return (int8_t)(game->ui.cityListIndex - 1);
 }

@@ -89,9 +89,9 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
 
         case 21:
             switch (field) {
-                case 0: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[100 + game->world.stationDirectionCode[game->build.stationDirCursor]]]);
-                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[106 + game->world.stationDirectionCode[game->build.stationDirCursor] / 2]]);
-                case 2: return game_formatNumberWithSuffix(game->economy.prevStationRevenue[game->build.stationDirCursor], 0);
+                case 0: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[100 + game->world.cities[game->build.stationDirCursor].stationDirection]]);
+                case 1: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[106 + game->world.cities[game->build.stationDirCursor].stationDirection / 2]]);
+                case 2: return game_formatNumberWithSuffix(game->world.cities[game->build.stationDirCursor].previousStationRevenue, 0);
             }
             break;
 

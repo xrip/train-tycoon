@@ -15,6 +15,14 @@ struct TileChange {
     int8_t y = 0;
 };
 
+struct City {
+    int8_t stationDirection = 0;
+    int8_t population = 0;
+    int8_t zoneTileCount = 0;
+    int16_t stationRevenue = 0;
+    int16_t previousStationRevenue = 0;
+};
+
 struct World {
     Grid<int8_t> tileMap;        // terrain and structure tile id per cell
     Grid<int8_t> trackMap;       // track byte per cell (see namespace track)
@@ -27,13 +35,9 @@ struct World {
     int32_t mapScreenWidth = 0;  // (mapWidth + mapHeight) * 16
     int32_t mapScreenHeight = 0; // (mapWidth + mapHeight) * 8
 
-    // City/station records (48-slot): each slot is one city on the map.
-    // stationDirectionCode is the track approach direction; cityPopulation and
-    // cityIndex describe the city. Per-station revenue history
-    // (stationRevenue/prevStationRevenue) is economy state and lives elsewhere.
-    int8_t stationDirectionCode[kCitySlotCount]{};
-    int8_t cityPopulation[kCitySlotCount]{};
-    int8_t cityIndex[kCitySlotCount]{};
+    // City/station records (48-slot): each slot is one city on the map, with its
+    // station direction, population, zone-tile count, and revenue history.
+    City cities[kCitySlotCount]{};
 
     // Tile-map animation state. tileQueue holds up to 50 pending tile changes
     // (each: countdown, x, y) applied to tileMap during the tick;

@@ -49,9 +49,9 @@ void game_recountZonePopulation(Game *game) {
 
 void game_updateCityPopulation(Game *game) {
     for (int i = 0; i < 48; ++i) {
-        game->world.cityPopulation[i] += (int8_t)(game->rng.next_int() % 8);
-        if (game->world.cityPopulation[i] < 10) game->world.cityPopulation[i] = 10;
-        if (game->world.cityPopulation[i] > 90) game->world.cityPopulation[i] = 90;
+        game->world.cities[i].population += (int8_t)(game->rng.next_int() % 8);
+        if (game->world.cities[i].population < 10) game->world.cities[i].population = 10;
+        if (game->world.cities[i].population > 90) game->world.cities[i].population = 90;
     }
 }
 
@@ -433,8 +433,8 @@ void game_newYearNotify(Game *game) {
         game->fleet.trainCars[n].revenue = 0;
     }
     for (int n = 0; n < 48; ++n) {
-        game->economy.prevStationRevenue[n] = game->economy.stationRevenue[n];
-        game->economy.stationRevenue[n] = 0;
+        game->world.cities[n].previousStationRevenue = game->world.cities[n].stationRevenue;
+        game->world.cities[n].stationRevenue = 0;
     }
     game_calculatePeriodProfit(game);
     game->economy.prevTotalSpent = game->economy.totalSpent;
@@ -558,33 +558,33 @@ void game_tickInputOrAi(Game *game, bool bl) {
                     && (game->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry1[n11]) {
                     seenIndustry1[n11] = true;
-                    int n10 = game->world.cityPopulation[n11] * 4 / 30 / game->world.cityIndex[n11];
+                    int n10 = game->world.cities[n11].population * 4 / 30 / game->world.cities[n11].zoneTileCount;
                     if (n10 == 0) n10 = 1;
                     game->fleet.serviceSites[i].resourceStock[1] =
                         (int16_t)(game->fleet.serviceSites[i].resourceStock[1] + n10);
-                    game->economy.stationRevenue[n11] = (int16_t)(game->economy.stationRevenue[n11] + n10);
+                    game->world.cities[n11].stationRevenue = (int16_t)(game->world.cities[n11].stationRevenue + n10);
                     game->fleet.serviceSites[i].loadFlags = (int8_t)(game->fleet.serviceSites[i].loadFlags | 4);
                 }
                 if (tile >= 53 && tile <= 55 && !bl
                     && (game->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry2[n11]) {
                     seenIndustry2[n11] = true;
-                    int n10 = game->world.cityPopulation[n11] * 4 / 30 / game->world.cityIndex[n11];
+                    int n10 = game->world.cities[n11].population * 4 / 30 / game->world.cities[n11].zoneTileCount;
                     if (n10 == 0) n10 = 1;
                     game->fleet.serviceSites[i].resourceStock[2] =
                         (int16_t)(game->fleet.serviceSites[i].resourceStock[2] + n10);
-                    game->economy.stationRevenue[n11] = (int16_t)(game->economy.stationRevenue[n11] + n10);
+                    game->world.cities[n11].stationRevenue = (int16_t)(game->world.cities[n11].stationRevenue + n10);
                     game->fleet.serviceSites[i].loadFlags = (int8_t)(game->fleet.serviceSites[i].loadFlags | 8);
                 }
                 if (tile >= 59 && tile <= 61 && !bl
                     && (game->world.trackMap[n2][n] & 0xC0) == 192
                     && !seenIndustry3[n11]) {
                     seenIndustry3[n11] = true;
-                    int n10 = game->world.cityPopulation[n11] * 4 / 30 / game->world.cityIndex[n11];
+                    int n10 = game->world.cities[n11].population * 4 / 30 / game->world.cities[n11].zoneTileCount;
                     if (n10 == 0) n10 = 1;
                     game->fleet.serviceSites[i].resourceStock[3] =
                         (int16_t)(game->fleet.serviceSites[i].resourceStock[3] + n10);
-                    game->economy.stationRevenue[n11] = (int16_t)(game->economy.stationRevenue[n11] + n10);
+                    game->world.cities[n11].stationRevenue = (int16_t)(game->world.cities[n11].stationRevenue + n10);
                     game->fleet.serviceSites[i].loadFlags = (int8_t)(game->fleet.serviceSites[i].loadFlags | 2);
                 }
                 if (tile >= 50 && tile <= 52)

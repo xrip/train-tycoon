@@ -86,9 +86,9 @@ bool game_isResourceTile(Game *game, int32_t n, int32_t n2) {
     }
     if (n == 5 && game->scenario.scenarioStepCompare > n2) return true;
     if (n == 21) {
-        if (n2 == 0 && game->world.stationDirectionCode[game->build.stationDirCursor] % 2 == 0) return true;
-        if (n2 == 1 && game->world.stationDirectionCode[game->build.stationDirCursor] % 2 == 1) return true;
-        if (n2 == 2 && game->world.stationDirectionCode[game->build.stationDirCursor] % 2 == 1) return true;
+        if (n2 == 0 && game->world.cities[game->build.stationDirCursor].stationDirection % 2 == 0) return true;
+        if (n2 == 1 && game->world.cities[game->build.stationDirCursor].stationDirection % 2 == 1) return true;
+        if (n2 == 2 && game->world.cities[game->build.stationDirCursor].stationDirection % 2 == 1) return true;
     }
     if (n == 22) {
         int slot = game->serviceVehicleAtCursor;

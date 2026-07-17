@@ -28,11 +28,9 @@ struct Economy {
     int32_t lifetimeTrainRevenue = 0;
     int32_t trainRevenueScore = 0;
 
-    // Per-station revenue history and the yearly/decade report series used by
-    // the graphs. moneyHistory and decadeRevenueWithCurrent are runtime-only
-    // (not saved). Values and save byte order are unchanged.
-    int16_t stationRevenue[kCitySlotCount]{};
-    int16_t prevStationRevenue[kCitySlotCount]{};
+    // The yearly/decade report series used by the graphs. moneyHistory and
+    // decadeRevenueWithCurrent are runtime-only (not saved). Per-station
+    // revenue lives with each City. Values and save byte order are unchanged.
     int32_t decadeRevenueWithCurrent = 0;
     int32_t previousYearProfit = 0;
     int32_t prevDecadeRevenue = 0;
