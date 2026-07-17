@@ -3,6 +3,15 @@
 
 #include <stdlib.h>
 
+namespace {
+
+int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
+                         int32_t n4, int32_t n5, int32_t n6) {
+    return (n3 - n) * (n2 - n6) - (n4 - n2) * (n - n5);
+}
+
+}  // namespace
+
 void Game::key_released(int32_t n) {
     Game* game = this;
     (void)n;

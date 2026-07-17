@@ -8,8 +8,6 @@
 #include <span>
 #include <vector>
 
-int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
-                         int32_t n4, int32_t n5, int32_t n6);
 // Resolve the tile under a map-screen-space point (anchorX/Y) and refresh the
 // tile cursor, its screen position, and the selection diamond. anchorX/Y are in
 // the same space as viewportBaseX/Y (absolute map-pixel coords, not view-relative).

@@ -1,8 +1,0 @@
-// Small geometry and input functions.
-#include "game_internal.h"
-
-// int crossProduct2D(int,int,int,int,int,int) -- 2D cross product for iso picking
-int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
-                         int32_t n4, int32_t n5, int32_t n6) {
-    return (n3 - n) * (n2 - n6) - (n4 - n2) * (n - n5);
-}
