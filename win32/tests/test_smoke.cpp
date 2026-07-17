@@ -415,6 +415,22 @@ TEST_CASE("fast: fleet owns service resource collection and load checks") {
     CHECK_FALSE(fleet.can_load_at_service_site(0, 3));
 }
 
+TEST_CASE("fast: fleet and world roll yearly revenue under their records") {
+    Fleet fleet;
+    fleet.trainCars[2].revenue = 123;
+    fleet.trainCars[2].previousRevenue = 9;
+    fleet.roll_revenue_year();
+    CHECK(fleet.trainCars[2].revenue == 0);
+    CHECK(fleet.trainCars[2].previousRevenue == 123);
+
+    World world;
+    world.cities[3].stationRevenue = 456;
+    world.cities[3].previousStationRevenue = 8;
+    world.roll_station_revenue_year();
+    CHECK(world.cities[3].stationRevenue == 0);
+    CHECK(world.cities[3].previousStationRevenue == 456);
+}
+
 TEST_CASE("fast: city records keep defaults and save field positions") {
     Game* game = make_game();
     CHECK(game->world.cities[0].stationDirection == 0);

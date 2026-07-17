@@ -87,6 +87,7 @@ struct World {
     void advance_construction_timers(int32_t x, int32_t y, int32_t amount);
     void recount_zone_population();
     void update_city_population(JavaRandom& random);
+    void roll_station_revenue_year();
 };
 
 #endif  // WORLD_H

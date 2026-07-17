@@ -59,6 +59,20 @@ void Fleet::age_one_year() {
     for (TrainCar& car : trainCars) ++car.ageYears;
 }
 
+void Fleet::roll_revenue_year() {
+    for (TrainCar& car : trainCars) {
+        car.previousRevenue = car.revenue;
+        car.revenue = 0;
+    }
+}
+
+void World::roll_station_revenue_year() {
+    for (City& city : cities) {
+        city.previousStationRevenue = city.stationRevenue;
+        city.stationRevenue = 0;
+    }
+}
+
 void game_chargeTrainRunningCosts(Game *game) {
     if (game->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
@@ -431,14 +445,8 @@ int32_t game_scanMapForMetric(Game *game) {
 }
 
 void game_newYearNotify(Game *game) {
-    for (int n = 0; n < 500; ++n) {
-        game->fleet.trainCars[n].previousRevenue = game->fleet.trainCars[n].revenue;
-        game->fleet.trainCars[n].revenue = 0;
-    }
-    for (int n = 0; n < 48; ++n) {
-        game->world.cities[n].previousStationRevenue = game->world.cities[n].stationRevenue;
-        game->world.cities[n].stationRevenue = 0;
-    }
+    game->fleet.roll_revenue_year();
+    game->world.roll_station_revenue_year();
     game->economy.calculate_period_profit();
     game->economy.prevTotalSpent = game->economy.totalSpent;
     game->economy.prevAiMoneySpent = game->economy.aiMoneySpent;
