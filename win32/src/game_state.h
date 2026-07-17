@@ -47,6 +47,12 @@ typedef struct Game {
     void duplicate_offer(int32_t row);
     void monthly_offer_tick();
     void copy_offer_to_summary(int32_t row);
+    void charge_train_running_costs();
+    void remove_train_from_map(int32_t car, bool queue_tile);
+    void merge_train_at(int32_t car);
+    void maybe_take_ai_turn();
+    void upgrade_one_ai_train_for_era();
+    void reset_ai_depot_train_ages();
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

@@ -73,7 +73,8 @@ void World::roll_station_revenue_year() {
     }
 }
 
-void game_chargeTrainRunningCosts(Game *game) {
+void Game::charge_train_running_costs() {
+    Game* game = this;
     if (game->scenario.routeResourceFlags[0] != 0) return;
     for (int i = 0; i < 500; ++i) {
         if (!train_flag::isUsed(game->fleet.trainCars[i].flags) || !train_flag::isHead(game->fleet.trainCars[i].flags))
@@ -94,9 +95,10 @@ int32_t Fleet::count_cars(int32_t car) const {
     return car != -1 ? count_cars(trainCars[car].nextCar) + 1 : 0;
 }
 
-void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
+void Game::remove_train_from_map(int32_t n, bool bl) {
+    Game* game = this;
     if (n == -1) return;
-    game_removeTrainFromMap(game, game->fleet.trainCars[n].nextCar, bl);
+    remove_train_from_map(game->fleet.trainCars[n].nextCar, bl);
     game->fleet.trainCars[n].flags = (int8_t)(game->fleet.trainCars[n].flags | 0xE0);
     game->fleet.trainCars[n].nextCar = -1;
     game->fleet.trainCars[n].energyCargoOrRemovalTicks = 7;
@@ -109,25 +111,28 @@ void game_removeTrainFromMap(Game *game, int32_t n, bool bl) {
     game_setState(game, GameState::MenuOverlay);
 }
 
-void game_mergeTrainAt(Game *game, int32_t n) {
+void Game::merge_train_at(int32_t n) {
+    Game* game = this;
     for (int i = 0; i < 500; ++i) {
         if (n == i || !train_flag::isUsed(game->fleet.trainCars[i].flags)
             || !train_flag::isHead(game->fleet.trainCars[i].flags)
             || !game->fleet.has_car_at(i, unsignedByte(game->fleet.trainCars[n].x),
                                     unsignedByte(game->fleet.trainCars[n].y)))
             continue;
-        game_removeTrainFromMap(game, i, true);
-        game_removeTrainFromMap(game, n, true);
+        remove_train_from_map(i, true);
+        remove_train_from_map(n, true);
     }
 }
 
-void game_maybeAiTakeTurn(Game *game) {
+void Game::maybe_take_ai_turn() {
+    Game* game = this;
     if (game->ui.buildMenuMode != 2 && game->ui.buildMenuMode != 4
         && game->rng.next_int() % game->scenario.aiFrequency > game->scenario.aiThreshold)
         game_setState(game, GameState::AiTurn);
 }
 
-void game_upgradeOneAiTrainForEra(Game *game) {
+void Game::upgrade_one_ai_train_for_era() {
+    Game* game = this;
     for (int i = 0; i < 500; ++i) {
         if (!train_flag::isUsed(game->fleet.trainCars[i].flags) || !train_flag::isHead(game->fleet.trainCars[i].flags))
             continue;
@@ -147,7 +152,8 @@ void game_upgradeOneAiTrainForEra(Game *game) {
     }
 }
 
-void game_resetAiDepotTrainAges(Game *game) {
+void Game::reset_ai_depot_train_ages() {
+    Game* game = this;
     for (int i = 0; i < 500; ++i) {
         if (!train_flag::isUsed(game->fleet.trainCars[i].flags)) continue;
         int n2 = unsignedByte(game->fleet.trainCars[i].x);
@@ -727,7 +733,8 @@ void updateActiveTrains(Game *game) {
         }
         game_updateTrain(game, trainIndex);
         game_updateTrain(game, trainIndex);
-        if (game->fleet.trainCars[trainIndex].phase == 0) game_mergeTrainAt(game, trainIndex);
+        if (game->fleet.trainCars[trainIndex].phase == 0)
+            game->merge_train_at(trainIndex);
     }
 }
 
@@ -752,7 +759,7 @@ void applyNewMonthChanges(Game *game) {
     game_newYearNotify(game);
     game->world.decay_construction_timers_quarterly(game->economy.monthOfYear);
     game->world.update_city_population(game->rng);
-    game_upgradeOneAiTrainForEra(game);
+    game->upgrade_one_ai_train_for_era();
     switch (std::abs(game->rng.next_int() % 7)) {
         case 0: game->economy.moneyBaseA += 9; game->economy.moneyBaseB += 9; break;
         case 1: ++game->economy.baseTrainSpeed; game->economy.accel1 += 3; game->economy.brake1 += 3; break;
@@ -783,7 +790,7 @@ void applyNewMonthChanges(Game *game) {
 void advanceYearIfNeeded(Game *game) {
     if (game->economy.monthOfYear == 13) {
         game->fleet.age_one_year();
-        game_resetAiDepotTrainAges(game);
+        game->reset_ai_depot_train_ages();
         game->economy.monthOfYear = 1;
         ++game->economy.year;
         if (game->economy.money < 0) {
@@ -821,10 +828,10 @@ void advanceGameDay(Game *game) {
     game->dayFrameCounter = 0;
     ++game->economy.dayOfMonth;
     game->monthly_offer_tick();
-    if (game->economy.dayOfMonth % 4 == 0) game_maybeAiTakeTurn(game);
+    if (game->economy.dayOfMonth % 4 == 0) game->maybe_take_ai_turn();
     if (game->economy.dayOfMonth % 2 == 0) {
         if (game->economy.dayOfMonth % 10 == 0) game_everyTenTick(game);
-        game_chargeTrainRunningCosts(game);
+        game->charge_train_running_costs();
         game_checkScenarioMilestone(game);
         if (game->scenario.aiExpansionEnabled) {
             int forestFound = 0;
