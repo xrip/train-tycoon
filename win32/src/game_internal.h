@@ -118,8 +118,6 @@ void game_recordTrainRevenue(Game *game, int32_t n);
 void game_recordDeliveredResource(Game *game, int32_t n, int32_t n2);
 void game_incrementCargoOptionCount(Game *game, int32_t n);
 void game_decrementCargoOptionCount(Game *game, int32_t n);
-void game_incrementRowValueType13(Game *game, int32_t n);
-void game_incrementRowValueType14(Game *game, int32_t n);
 int32_t game_computeMapTrainMetric(Game *game, int32_t n);
 bool game_syncHighScores(Game *game, bool bl);
 void game_appendTileDrawOffset(ByteBuffer& x_offsets,

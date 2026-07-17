@@ -639,6 +639,20 @@ TEST_CASE("fast: offer board copies the summary slot and clears active data") {
     CHECK(active.dueDay == 9);
 }
 
+TEST_CASE("fast: offer board adds progress only to matching active rows") {
+    OfferBoard board;
+    board.offers[0].objectiveType = 13;
+    board.offers[0].progress = 10;
+    board.offers[1].objectiveType = 14;
+    board.offers[1].progress = 20;
+    board.offers[5].objectiveType = 13;
+    board.offers[5].progress = 30;
+    board.add_progress(13, 7);
+    CHECK(board.offers[0].progress == 17);
+    CHECK(board.offers[1].progress == 20);
+    CHECK(board.offers[5].progress == 30);
+}
+
 TEST_CASE("fast: economy spending and money history are owned rules") {
     Economy economy;
     economy.money = 100;

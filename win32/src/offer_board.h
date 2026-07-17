@@ -28,6 +28,7 @@ public:
     void schedule_due_date(int32_t row, int32_t duration_units,
                            JavaRandom& random);
     void copy_to_summary_and_clear(int32_t row);
+    void add_progress(int32_t objective_type, int32_t amount);
 
     Offer offers[kMenuRowCount]{};
 };

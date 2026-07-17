@@ -216,12 +216,12 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 1:
                     if (game->economy.loanCeiling - 20000 < game->economy.loanBalance) break;
                     game->economy.loanBalance += 20000; game->economy.money += 20000;
-                    game_incrementRowValueType14(game, -20000);
+                    game->offerBoard.add_progress(14, -20000);
                     break;
                 case 2:
                     if (game->economy.loanBalance < 20000 || game->economy.money < 20000) break;
                     game->economy.loanBalance -= 20000; game->economy.money -= 20000;
-                    game_incrementRowValueType14(game, 20000);
+                    game->offerBoard.add_progress(14, 20000);
                     break;
                 default:
                     game_setState(game, GameState::Playing); game->ui.menuDirty = true;

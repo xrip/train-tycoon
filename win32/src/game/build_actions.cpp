@@ -8,9 +8,10 @@ void game_enterOutOfMoneyState(Game *game) {
     game_setState(game, GameState::MenuOverlay);
 }
 
-void game_incrementRowValueType13(Game *game, int32_t amount) {
+void OfferBoard::add_progress(int32_t objective_type, int32_t amount) {
     for (int row = 0; row < 5; ++row)
-        if (game->offerBoard.offers[row].objectiveType == 13) game->offerBoard.offers[row].progress += amount;
+        if (offers[row].objectiveType == objective_type)
+            offers[row].progress += amount;
 }
 
 bool Fleet::has_car_at(int32_t car, int32_t x, int32_t y) const {
@@ -268,7 +269,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game->world.advance_construction_timers(
                 game->ui.tileCursorX, game->ui.tileCursorY, -8);
-            game_incrementRowValueType13(game, game->economy.costPower);
+            game->offerBoard.add_progress(13, game->economy.costPower);
             break;
         case 1:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 0)
@@ -281,7 +282,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY] = 65;
             game->world.advance_construction_timers(
                 game->ui.tileCursorX, game->ui.tileCursorY, -8);
-            game_incrementRowValueType13(game, game->economy.costPower);
+            game->offerBoard.add_progress(13, game->economy.costPower);
             break;
         case 2:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 5)
@@ -298,7 +299,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->world.trackMap[game->ui.tileCursorX][game->ui.tileCursorY + 1] = 65;
             game->world.advance_construction_timers(
                 game->ui.tileCursorX, game->ui.tileCursorY, -11);
-            game_incrementRowValueType13(game, game->economy.costStruct);
+            game->offerBoard.add_progress(13, game->economy.costStruct);
             break;
         case 3:
             if (!game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY, 6)
@@ -315,7 +316,7 @@ void game_buildPlaceTrackPiece(Game *game, int32_t piece) {
             game->world.trackMap[game->ui.tileCursorX + 1][game->ui.tileCursorY] = 65;
             game->world.advance_construction_timers(
                 game->ui.tileCursorX, game->ui.tileCursorY, -11);
-            game_incrementRowValueType13(game, game->economy.costStruct);
+            game->offerBoard.add_progress(13, game->economy.costStruct);
             break;
     }
     game_tickInputOrAi(game, true);
@@ -420,7 +421,7 @@ void game_placeTrackAtCursor(Game *game, bool first_direction,
     game->economy.totalSpent += cost;
     game->renderer.lastViewportCenterX = -1;
     game_pushMoneyHistory(game, -cost);
-    game_incrementRowValueType13(game, cost);
+    game->offerBoard.add_progress(13, cost);
     game->world.advance_construction_timers(x, y, -4);
 }
 
@@ -605,7 +606,7 @@ void game_openBuildMenu(Game *game) {
                     game->economy.money -= game->build.selectionCost;
                     game->economy.totalSpent += game->build.selectionCost;
                     game_pushMoneyHistory(game, -game->build.selectionCost);
-                    game_incrementRowValueType13(game, game->build.selectionCost);
+                    game->offerBoard.add_progress(13, game->build.selectionCost);
                 } else {
                     game_normalizeTrackBits(game);
                     game_enterOutOfMoneyState(game);
@@ -750,11 +751,6 @@ void game_decrementTrainCargoOptionCounts(Game *game, int32_t car) {
     if (car == -1) return;
     game_decrementCargoOptionCount(game, game->fleet.trainCars[car].flags & 7);
     game_decrementTrainCargoOptionCounts(game, game->fleet.trainCars[car].nextCar);
-}
-
-void game_incrementRowValueType14(Game *game, int32_t amount) {
-    for (int row = 0; row < 5; ++row)
-        if (game->offerBoard.offers[row].objectiveType == 14) game->offerBoard.offers[row].progress += amount;
 }
 
 bool game_buyTrainAtCursor(Game *game) {
