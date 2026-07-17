@@ -25,7 +25,7 @@ void pointer_advance_loader(Game *game) {
     game->loadingTimeout = true;
 }
 
-// Playing bottom bar: re-derive each item icon's x (the same math game_paintMain
+// Playing bottom bar: re-derive each item icon's x (the same math paint_main
 // uses to draw them) and activate the clicked one. Selecting + opening in one
 // click mirrors "cycle to item, then press 5/fire" -- open_build_menu reads
 // buildMenuItemIndex and dispatches the item's action.
@@ -126,7 +126,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             if (game->clickMap.hit_close(hx, hy)) {
                 game->ui.cursorDragY = -3;
                 game->ui.cursorDragX = -1;
-                game_handleBuildMenuState(game, game->renderer.currentSpriteId, -1);
+                game->handle_build_menu_state(game->renderer.currentSpriteId, -1);
                 return;
             }
             // Menu element: a captured overlay row. Set the cursor to it and fire
@@ -134,7 +134,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             int row_index = 0, option_code = 0;
             if (game->clickMap.hit_menu_row(hx, hy, &row_index, &option_code)) {
                 game->ui.cursorDragY = row_index;
-                game_handleBuildMenuState(game, game->renderer.currentSpriteId, option_code);
+                game->handle_build_menu_state(game->renderer.currentSpriteId, option_code);
             }
             return;
         }

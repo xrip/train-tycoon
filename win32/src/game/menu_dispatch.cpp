@@ -3,7 +3,8 @@
 // Some actions use `goto hbms_end` to reach the common tail.
 #include "game_internal.h"
 
-void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
+void Game::handle_build_menu_state(int32_t n, int32_t n2) {
+    Game *game = this;
     switch (n) {
         case 1:
             switch (n2) {

@@ -123,6 +123,19 @@ typedef struct Game {
     bool buy_train_at_cursor();
     bool apply_train_upgrade(int32_t train, int32_t engine_type,
                              int32_t* wagon_types);
+    int32_t draw_menu_row(Surface& surface, int32_t sprite,
+                          int32_t item_index, int32_t x, bool spaced);
+    void draw_header_bar(Surface& surface);
+    void draw_confirm_bar(Surface& surface);
+    void paint_main(Surface& surface);
+    int32_t draw_number(Surface& surface, int32_t value, int32_t y);
+    void draw_money_ticker(Surface& surface);
+    void draw_confirm_dialog(Surface& surface);
+    void compute_iso_corners(int32_t x, int32_t y, int32_t* screen_x,
+                             int32_t* screen_y, bool viewport_relative);
+    void draw_build_menu_cursor(Surface& surface);
+    void draw_build_menu_row(Surface& surface);
+    void handle_build_menu_state(int32_t screen, int32_t option);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

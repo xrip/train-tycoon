@@ -91,10 +91,10 @@ void Game::render_map(Surface& surface) {
     int n9 = origin.x;
     int n10 = origin.y;
     redrawStaticMapIfNeeded(game, origin);
-    game_paintMain(game, g);
+    game->paint_main(*g);
     midp_draw_image(g, game->renderer.backbuffer.get(), 0, 0, 20);
     midp_set_clip(g, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
-    game_drawBuildMenuCursor(game, g);
+    game->draw_build_menu_cursor(*g);
     int visible_width = game->renderer.viewportX1 - game->renderer.viewportX0 + 1;
     int visible_height = game->renderer.viewportY1 - game->renderer.viewportY0 + 1;
     if (visible_width < 1) visible_width = 1;
@@ -170,7 +170,7 @@ void Game::render_map(Surface& surface) {
             }
         }
     }
-    game_drawBuildMenuRow(game, g);
+    game->draw_build_menu_row(*g);
     midp_set_clip(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
-    game_drawConfirmDialog(game, g);
+    game->draw_confirm_dialog(*g);
 }

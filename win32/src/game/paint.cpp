@@ -31,8 +31,8 @@ void paintMapOverview(Game *game, Surface *g) {
     midp_draw_rect(g, boxX + drawX + centerX, 15 + boxY + drawY + centerY,
                    game->renderer.canvasWidth / 16, game->renderer.gameplayViewportHeight / 8);
     midp_set_clip(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
-    game_drawConfirmBar(game, g);
-    game_drawConfirmDialog(game, g);
+    game->draw_confirm_bar(*g);
+    game->draw_confirm_dialog(*g);
     if (game->confirmCloseRequested) {
         game->ready = false;
         game->ui.transitionCode = 36;
@@ -141,7 +141,7 @@ void Game::render(Surface& surface) {
                 midp_set_clip(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
                 game->renderer.draw_sprite_quad(*g, game->assets, 234, 0, 15, 20);
             }
-            game_drawMoneyTicker(game, g);
+            game->draw_money_ticker(*g);
             if (game->ui.pauseFlag) game->renderer.draw_sprite_quad(*g, game->assets, 236, 0, 15, 0);
             if (game->ui.pendingTransitionCode > -1) {
                 game->ui.transitionCode = game->ui.pendingTransitionCode;

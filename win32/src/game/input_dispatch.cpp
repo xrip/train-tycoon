@@ -20,7 +20,7 @@ void Game::handle_dialog_input(int8_t by) {
             game->ui.cursorScale = 0;
             break;
         case 3:
-            game_handleBuildMenuState(game, game->renderer.currentSpriteId, game->ui.cursorDragX);
+            game->handle_build_menu_state(game->renderer.currentSpriteId, game->ui.cursorDragX);
             break;
     }
 }

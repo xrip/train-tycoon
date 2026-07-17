@@ -35,14 +35,18 @@ static void format_money(int32_t value, char *out, int out_size) {
     out[pos] = '\0';
 }
 
-int32_t game_drawMenuRow(Game *game, Surface *graphics, int32_t sprite,
-                       int32_t item_index, int32_t x, bool spaced) {
+int32_t Game::draw_menu_row(Surface& surface, int32_t sprite,
+                            int32_t item_index, int32_t x, bool spaced) {
+    Game *game = this;
+    Surface *graphics = &surface;
     game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, x, game->renderer.bottomBarY, 20);
     if (game->ui.buildMenuItemIndex == item_index) game->ui.selectedMenuRowX = x;
     return x + 15 + (spaced ? 3 : 0);
 }
 
-void game_drawHeaderBar(Game *game, Surface *graphics) {
+void Game::draw_header_bar(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
     if (game->cachedHeaderDay == game->economy.dayOfMonth
         && game->cachedHeaderMonth == game->economy.monthOfYear
         && game->cachedHeaderYear == game->economy.year
@@ -79,20 +83,24 @@ void game_drawHeaderBar(Game *game, Surface *graphics) {
     game->cachedHeaderYear = game->economy.year;
 }
 
-void game_drawConfirmBar(Game *game, Surface *graphics) {
-    game_drawHeaderBar(game, graphics);
+void Game::draw_confirm_bar(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
+    game->draw_header_bar(*graphics);
     midp_set_color(graphics, 0x606060);
     midp_fill_rect(graphics, 0, game->renderer.bottomBarY, game->renderer.canvasWidth, 15);
-    game_drawMenuRow(game, graphics, 201, 10, 0, false);
-    game_drawMenuRow(game, graphics, 235, 10, 18, false);
+    game->draw_menu_row(*graphics, 201, 10, 0, false);
+    game->draw_menu_row(*graphics, 235, 10, 18, false);
     midp_set_color(graphics, 0xFFFFFF);
     midp_draw_rect(graphics, 18 * game->ui.confirmToggle, game->renderer.bottomBarY, 14, 14);
     midp_draw_rect(graphics, 18 * game->ui.confirmToggle + 1, game->renderer.bottomBarY + 1, 12, 12);
 }
 
-void game_paintMain(Game *game, Surface *graphics) {
+void Game::paint_main(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
     (void)graphics;
-    game_drawHeaderBar(game, game->renderer.backbuffer_surface);
+    game->draw_header_bar(*game->renderer.backbuffer_surface);
     if (!game->ui.menuDirty) return;
     midp_set_color(game->renderer.backbuffer_surface, 0x606060);
     midp_fill_rect(game->renderer.backbuffer_surface, 0, game->renderer.bottomBarY, game->renderer.canvasWidth, 15);
@@ -129,8 +137,9 @@ void game_paintMain(Game *game, Surface *graphics) {
     game->ui.menuDirty = false;
 }
 
-int32_t game_drawNumber(Game *game, Surface *graphics,
-                      int32_t value, int32_t y) {
+int32_t Game::draw_number(Surface& surface, int32_t value, int32_t y) {
+    Game *game = this;
+    Surface *graphics = &surface;
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
     char text[24];
     snprintf(text, sizeof(text), "%lld", (long long)magnitude);
@@ -139,24 +148,28 @@ int32_t game_drawNumber(Game *game, Surface *graphics,
     return y + 15;
 }
 
-void game_drawMoneyTicker(Game *game, Surface *graphics) {
+void Game::draw_money_ticker(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
     midp_set_color(graphics, 0xFF0000);
     int y = 0;
     if (game->ui.moneyTickerFrames[2] > 0) {
         --game->ui.moneyTickerFrames[2];
-        y = game_drawNumber(game, graphics, game->economy.moneyHistory[2], y);
+        y = game->draw_number(*graphics, game->economy.moneyHistory[2], y);
     }
     if (game->ui.moneyTickerFrames[1] > 0) {
         --game->ui.moneyTickerFrames[1];
-        y = game_drawNumber(game, graphics, game->economy.moneyHistory[1], y);
+        y = game->draw_number(*graphics, game->economy.moneyHistory[1], y);
     }
     if (game->ui.moneyTickerFrames[0] > 0) {
         --game->ui.moneyTickerFrames[0];
-        game_drawNumber(game, graphics, game->economy.moneyHistory[0], y);
+        game->draw_number(*graphics, game->economy.moneyHistory[0], y);
     }
 }
 
-void game_drawConfirmDialog(Game *game, Surface *graphics) {
+void Game::draw_confirm_dialog(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
     if (game->ui.confirmCounter <= 0) return;
     if (game->ui.confirmTargetState >= 0) {
         game->renderer.draw_text_box(*graphics, game->assets, 10, 10, 0, 37,
@@ -166,9 +179,10 @@ void game_drawConfirmDialog(Game *game, Surface *graphics) {
     --game->ui.confirmCounter;
 }
 
-void game_computeIsoCorners(Game *game, int32_t x, int32_t y,
+void Game::compute_iso_corners(int32_t x, int32_t y,
                                  int32_t *screen_x, int32_t *screen_y,
                                  bool viewport_relative) {
+    Game *game = this;
     int center_x = x * 16 + y * 16 + 16;
     int center_y = game->world.terrain.mapHalfWidth - x * 8 + y * 8 + 8;
     screen_x[0] = center_x - 16;
@@ -187,9 +201,8 @@ void game_computeIsoCorners(Game *game, int32_t x, int32_t y,
     }
 }
 
-void game_drawSelectionQuad(Game *game, Surface *graphics,
-                          int32_t *screen_x, int32_t *screen_y) {
-    (void)game;
+static void draw_selection_quad(Surface *graphics, int32_t *screen_x,
+                                int32_t *screen_y) {
     midp_draw_line(graphics, screen_x[0], screen_y[0] + 15,
                    screen_x[1], screen_y[1] + 15);
     midp_draw_line(graphics, screen_x[0] + 1, screen_y[0] + 15,
@@ -208,7 +221,9 @@ void game_drawSelectionQuad(Game *game, Surface *graphics,
                    screen_x[3] + 1, screen_y[3] + 15);
 }
 
-void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
+void Game::draw_build_menu_cursor(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
     if (game->ui.blockBuildMenu) return;
     int action = game->ui.menuTransitionCode[game->ui.buildMenuMode][game->ui.buildMenuItemIndex];
     if (action == 0) return;
@@ -222,25 +237,25 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
         int32_t quad_y[4];
         if (action == 6) {
             if (game->ui.tileCursorY > 0) {
-                game_computeIsoCorners(game, game->ui.tileCursorX, game->ui.tileCursorY - 1,
+                game->compute_iso_corners(game->ui.tileCursorX, game->ui.tileCursorY - 1,
                                             quad_x, quad_y, true);
-                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
+                draw_selection_quad(graphics, quad_x, quad_y);
             }
             if (game->ui.tileCursorY < game->world.terrain.mapWidth - 1) {
-                game_computeIsoCorners(game, game->ui.tileCursorX, game->ui.tileCursorY + 1,
+                game->compute_iso_corners(game->ui.tileCursorX, game->ui.tileCursorY + 1,
                                             quad_x, quad_y, true);
-                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
+                draw_selection_quad(graphics, quad_x, quad_y);
             }
         } else {
             if (game->ui.tileCursorX > 0) {
-                game_computeIsoCorners(game, game->ui.tileCursorX - 1, game->ui.tileCursorY,
+                game->compute_iso_corners(game->ui.tileCursorX - 1, game->ui.tileCursorY,
                                             quad_x, quad_y, true);
-                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
+                draw_selection_quad(graphics, quad_x, quad_y);
             }
             if (game->ui.tileCursorX < game->world.terrain.mapWidth - 1) {
-                game_computeIsoCorners(game, game->ui.tileCursorX + 1, game->ui.tileCursorY,
+                game->compute_iso_corners(game->ui.tileCursorX + 1, game->ui.tileCursorY,
                                             quad_x, quad_y, true);
-                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
+                draw_selection_quad(graphics, quad_x, quad_y);
             }
         }
     }
@@ -271,19 +286,21 @@ void game_drawBuildMenuCursor(Game *game, Surface *graphics) {
             int32_t quad_y[4];
             while ((x += dx) >= 0 && (y += dy) >= 0
                    && x < game->world.terrain.mapWidth && y < game->world.terrain.mapHeight) {
-                game_computeIsoCorners(game, x, y, quad_x, quad_y, true);
-                game_drawSelectionQuad(game, graphics, quad_x, quad_y);
+                game->compute_iso_corners(x, y, quad_x, quad_y, true);
+                draw_selection_quad(graphics, quad_x, quad_y);
                 if (game->world.terrain.tileMap[x][y] != 0 || game->world.trackMap[x][y] != 0) break;
             }
         } else {
             midp_set_color(graphics, 0xFF0000);
         }
     }
-    game_drawSelectionQuad(game, graphics, game->build.selectionTileX,
+    draw_selection_quad(graphics, game->build.selectionTileX,
                          game->build.selectionTileY);
 }
 
-void game_drawBuildMenuRow(Game *game, Surface *graphics) {
+void Game::draw_build_menu_row(Surface& surface) {
+    Game *game = this;
+    Surface *graphics = &surface;
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
     int menu_x = game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX;
     int menu_y = game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY;

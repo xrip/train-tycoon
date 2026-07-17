@@ -163,7 +163,7 @@ void Game::compute_viewport_bounds(int32_t anchorX, int32_t anchorY) {
                 continue;
             tile_center_x = y * 16 + x * 16 + 16;
             tile_center_y = game->world.terrain.mapHalfWidth - x * 8 + y * 8 + 8;
-            game_computeIsoCorners(game, x, y, game->build.selectionTileX,
+            game->compute_iso_corners(x, y, game->build.selectionTileX,
                                         game->build.selectionTileY, false);
             int opposite_edges =
                 cross_product_2d(anchorX, anchorY,
