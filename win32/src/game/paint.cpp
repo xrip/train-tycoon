@@ -1,5 +1,5 @@
 // Game paint state machine.
-#include "game_internal.h"
+#include "game.h"
 
 #define RGB3(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 #define WIDTH  MIDP_SCREEN_W   // this.getWidth()

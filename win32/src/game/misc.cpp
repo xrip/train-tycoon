@@ -1,5 +1,5 @@
 // Small general game functions.
-#include "game_internal.h"
+#include "game.h"
 #include "support/numeric.h"
 
 void Renderer::resize_canvas(int32_t width, int32_t height) {

@@ -1,5 +1,5 @@
 // Map and game-state queries.
-#include "game_internal.h"
+#include "game.h"
 #include <stdlib.h> // abs
 
 int32_t UiController::advance_key_repeat() {

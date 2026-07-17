@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 
-#include "game_internal.h"
+#include "game.h"
+#include "support/byte_buffer.h"
 #include "support/numeric.h"
 #include "click_map.h"
 #include "midp_input.h"

@@ -1,5 +1,5 @@
 // Simulation tick functions.
-#include "game_internal.h"
+#include "game.h"
 #include "support/numeric.h"
 #include <cstdlib>
 

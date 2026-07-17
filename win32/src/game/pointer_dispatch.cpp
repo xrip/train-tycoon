@@ -11,7 +11,7 @@
 //   - menu element:    MenuOverlay selectable rows (geometry captured in render)
 //   - game field:      the Playing map / MapOverview minimap (deferred: needs the
 //                      isometric screen->tile inverse; tracked as the next step)
-#include "game_internal.h"
+#include "game.h"
 #include "support/numeric.h"
 #include "game_constants.h"
 

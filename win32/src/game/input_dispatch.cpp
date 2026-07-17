@@ -1,6 +1,6 @@
 // Per-state key dispatch and
 // Menu cursor movement and selection.
-#include "game_internal.h"
+#include "game.h"
 #include "midp_input.h"
 
 // Direction: 1=down/right, 2=up/left, 3=select.

@@ -1,5 +1,5 @@
 // Score, graph, text, and life-cycle functions.
-#include "game_internal.h"
+#include "game.h"
 
 void UiController::set_year_graph_mode(const Economy& economy, int32_t mode, bool alternate) {
     yearGraphMode = mode;

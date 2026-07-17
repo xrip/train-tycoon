@@ -1,7 +1,7 @@
 // Build-menu action dispatch.
 // Routes a (menu id, option) selection to state transitions / economy actions.
 // Some actions use `goto hbms_end` to reach the common tail.
-#include "game_internal.h"
+#include "game.h"
 
 void Game::handle_build_menu_state(int32_t n, int32_t n2) {
     Game *game = this;

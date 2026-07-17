@@ -1,4 +1,4 @@
-#include "game_internal.h"
+#include "game.h"
 #include "scenario_definition.h"
 
 void Game::apply_scenario_definition(const ScenarioDefinition& definition) {

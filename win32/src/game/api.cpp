@@ -1,4 +1,4 @@
-#include "game_internal.h"
+#include "game.h"
 
 bool Game::music_available() const { return music.available; }
 bool Game::music_playing() const { return music.playing; }

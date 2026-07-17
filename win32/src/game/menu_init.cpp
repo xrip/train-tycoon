@@ -1,5 +1,5 @@
 // Build-menu tables for a scenario.
-#include "game_internal.h"
+#include "game.h"
 
 void UiController::init_build_menu_row(int32_t n, int32_t n2) {
     const auto row_len = static_cast<std::size_t>(n2);

@@ -1,5 +1,6 @@
 // Game start, resources, sprites, state changes, and save start.
-#include "game_internal.h"
+#include "game.h"
+#include "support/byte_buffer.h"
 #include <stdlib.h>
 #include <string.h>
 #include <vector>

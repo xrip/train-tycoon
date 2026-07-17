@@ -1,5 +1,6 @@
 // Save-buffer reading, writing, and compression.
-#include "game_internal.h"
+#include "game.h"
+#include "support/byte_buffer.h"
 #include "support/numeric.h"
 #include "support/record_store.h"
 
