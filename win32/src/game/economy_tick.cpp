@@ -22,7 +22,8 @@ void OfferBoard::schedule_due_date(int32_t row, int32_t duration_units,
     offers[row].dueYear = (int8_t)due_year;
 }
 
-static void copy_menu_row_to_slot5(Game *game, int row) {
+void Game::copy_offer_to_summary(int32_t row) {
+    Game* game = this;
     game->scenario.offerTypeTransitionCode = game->offerBoard.offers[row].objectiveType + 40;
     game->scenario.offerEffectTransitionCode = game->offerBoard.offers[row].effectType + 60;
     game->scenario.offerRowIndex = 5;
@@ -51,7 +52,8 @@ void OfferBoard::copy_to_summary_and_clear(int32_t row) {
     offers[row].effectAmount = 0;
 }
 
-void game_applyMenuRowEffect(Game *game, int32_t row) {
+void Game::apply_offer_effect(int32_t row) {
+    Game* game = this;
     if (game->offerBoard.offers[row].effectType == 1 || game->offerBoard.offers[row].effectType == 2) {
         game->economy.money += game->offerBoard.offers[row].effectAmount;
         game_pushMoneyHistory(game, game->offerBoard.offers[row].effectAmount);
@@ -77,20 +79,22 @@ void game_applyMenuRowEffect(Game *game, int32_t row) {
     }
     if (game->offerBoard.offers[row].effectType == 12 && game->economy.interestRate > 1)
         --game->economy.interestRate;
-    copy_menu_row_to_slot5(game, row);
+    copy_offer_to_summary(row);
     game->scenario.duplicateRowState = 3;
     game->ui.transitionCode = 9;
     game_setState(game, GameState::MenuOverlay);
 }
 
-void game_duplicateMenuRow(Game *game, int32_t row) {
-    copy_menu_row_to_slot5(game, row);
+void Game::duplicate_offer(int32_t row) {
+    Game* game = this;
+    copy_offer_to_summary(row);
     game->scenario.duplicateRowState = 4;
     game->ui.transitionCode = 8;
     game_setState(game, GameState::MenuOverlay);
 }
 
-void game_everyMonthlyTick(Game *game) {
+void Game::monthly_offer_tick() {
+    Game* game = this;
     if (!game->scenario.monthlyOffersEnabled) return;
     for (int resource = 0; resource < 6; ++resource) {
         if (game->scenario.routeResourceFlags[resource] > 0) --game->scenario.routeResourceFlags[resource];
@@ -99,14 +103,15 @@ void game_everyMonthlyTick(Game *game) {
         if ((game->offerBoard.offers[row].objectiveType == 1
              || (game->offerBoard.offers[row].objectiveType >= 4 && game->offerBoard.offers[row].objectiveType <= 14))
             && game->offerBoard.offers[row].target <= game->offerBoard.offers[row].progress)
-            game_applyMenuRowEffect(game, row);
+            apply_offer_effect(row);
         if (game->offerBoard.offers[row].dueDay != game->economy.dayOfMonth
             || game->offerBoard.offers[row].dueMonth != game->economy.monthOfYear
             || game->offerBoard.offers[row].dueYear != game->economy.year - 1950)
             continue;
         if (game->offerBoard.offers[row].objectiveType == 2 && game->offerBoard.offers[row].target <= game->economy.money)
-            game_applyMenuRowEffect(game, row);
-        if (game->offerBoard.offers[row].objectiveType != 0) game_duplicateMenuRow(game, row);
+            apply_offer_effect(row);
+        if (game->offerBoard.offers[row].objectiveType != 0)
+            duplicate_offer(row);
     }
 
     int date = game->economy.dayOfMonth + 32 * game->economy.monthOfYear + 370 * (game->economy.year - 1950);

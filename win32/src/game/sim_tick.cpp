@@ -820,7 +820,7 @@ void advanceGameDay(Game *game) {
     if (game->frameIndex > 0) --game->frameIndex;
     game->dayFrameCounter = 0;
     ++game->economy.dayOfMonth;
-    game_everyMonthlyTick(game);
+    game->monthly_offer_tick();
     if (game->economy.dayOfMonth % 4 == 0) game_maybeAiTakeTurn(game);
     if (game->economy.dayOfMonth % 2 == 0) {
         if (game->economy.dayOfMonth % 10 == 0) game_everyTenTick(game);

@@ -43,6 +43,10 @@ typedef struct Game {
     bool music_playing() const;
     std::string_view music_error() const;
     void update_state_machine();
+    void apply_offer_effect(int32_t row);
+    void duplicate_offer(int32_t row);
+    void monthly_offer_tick();
+    void copy_offer_to_summary(int32_t row);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
