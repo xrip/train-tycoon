@@ -32,6 +32,7 @@ add_library(train_tycoon_legacy STATIC
     src/support/record_store.cpp
     src/support/image.cpp
     src/support/surface.cpp
+    src/text/text_catalog.cpp
     src/game_state.cpp
     ${GAME_SOURCES}
     $<TARGET_OBJECTS:train_tycoon_vendor>
@@ -85,6 +86,7 @@ enable_testing()
 add_executable(train_tycoon_tests
     tests/test_main.cpp
     tests/test_smoke.cpp
+    tests/test_text_catalog.cpp
 )
 target_link_libraries(train_tycoon_tests PRIVATE train_tycoon_legacy)
 enable_strict_warnings(train_tycoon_tests)

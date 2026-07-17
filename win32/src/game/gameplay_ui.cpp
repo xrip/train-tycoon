@@ -125,8 +125,7 @@ void Game::paint_main(Surface& surface) {
                             ? -(int64_t)game->build.selectionCost : game->build.selectionCost;
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
         int text_len = (int)strlen(cost_text);
-        const auto currency_codes = std::span<const int8_t>(
-            game->assets.spriteBitmapTable[game->assets.spriteIndexTable[10]]);
+        const std::vector<int8_t> currency_codes = game->assets.index_text_codes(10);
         std::vector<int8_t> bytes(
             static_cast<size_t>(text_len + 1) + currency_codes.size());
         bytes[0] = 24;
@@ -174,8 +173,7 @@ void Game::draw_confirm_dialog(Surface& surface) {
     if (game->ui.confirmCounter <= 0) return;
     if (game->ui.confirmTargetState >= 0) {
         game->renderer.draw_text_box(*graphics, game->assets, 10, 10, 0, 37,
-                       std::span<const int8_t>(game->assets.spriteBitmapTable[
-                           game->assets.spriteIndexTable[120 + game->ui.confirmTargetState]]));
+                       game->assets.index_text_codes(120 + game->ui.confirmTargetState));
     }
     --game->ui.confirmCounter;
 }

@@ -1,6 +1,7 @@
 // Game start, resources, sprites, state changes, and save start.
 #include "game.h"
 #include "support/byte_buffer.h"
+#include "text/text_catalog.h"
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
@@ -29,25 +30,6 @@ void Game::reset_overlay_render_state() {
     game->renderer.needsRepaint = false;
 }
 
-void Assets::load_packed_sprite_data(const char *resource_name) {
-    ResourceReader in = resources::open(resource_name);
-    if (!in) return;
-    int n = in.read_byte();
-    int n2 = in.read_byte();
-    int n3 = read_u16_be(in);
-    int n4 = 0;
-    spriteOffsetTable.assign(static_cast<std::size_t>(n2 + 1), 0);
-    spriteData.assign(static_cast<std::size_t>(n3), 0);
-    for (int i = 0; i < n; ++i) {
-        int n5 = in.read_byte();
-        int n6 = read_u16_be(in);
-        spriteOffsetTable[n5] = (int16_t)n4;
-        for (int j = 0; j < n6; ++j) {
-            spriteData[n4] = (int8_t)in.read_byte();
-            ++n4;
-        }
-    }
-}
 
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
 std::unique_ptr<Image> Assets::decode_png_from_sprite_stream() {
@@ -117,10 +99,20 @@ std::unique_ptr<Image> Assets::decode_png_from_sprite_stream() {
         reinterpret_cast<const uint8_t*>(png_bytes.data()), png_bytes.size()));
 }
 
-std::vector<int8_t> Assets::read_packed_text_codes(int32_t offset) const {
-    const int code_count = spriteData[offset];
-    return {spriteData.data() + offset + 1,
-            spriteData.data() + offset + 1 + code_count};
+std::vector<int8_t> Assets::index_text_codes(int32_t semantic_index) const {
+    const Text key = key_for_index(semantic_index);
+    if (key != Text::none) {
+        const std::vector<int8_t>& codes = catalog_codes(key);
+        return {codes.begin(), codes.end()};
+    }
+    // Unbound index: fall back to the original sprite_image_map row.
+    if (semantic_index >= 0
+        && semantic_index < static_cast<int32_t>(spriteIndexTable.size())) {
+        const std::vector<int8_t>& row =
+            spriteBitmapTable[spriteIndexTable[semantic_index]];
+        return {row.begin(), row.end()};
+    }
+    return {};
 }
 
 void Game::load_settings_snapshot() {
@@ -206,7 +198,8 @@ void Game::set_state(int32_t n) {
     switch (n) {
         case GameState::BootSplash0:
             game->assets.open_sprite_stream("sprite_images.bin");
-            game->assets.load_packed_sprite_data("packed_sprites.bin");
+            // Dialog layout now lives in code (game/dialog_table.cpp); the old
+            // packed_sprites.bin load is gone.
             game->loadingAnimationFrame = 0;
             /* fall through */
         case GameState::BootSplash1:

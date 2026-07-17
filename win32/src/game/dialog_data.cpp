@@ -28,10 +28,6 @@ static std::vector<int8_t> encode_display_text(const char *text) {
     return result;
 }
 
-static std::vector<int8_t> copy_codes(const std::vector<int8_t> &codes) {
-    return codes;
-}
-
 // Owned code arrays carry their own length, so copy the whole array.
 static std::vector<int8_t> copy_codes(const int8_t* codes, int count) {
     return {codes, codes + count};
@@ -81,17 +77,16 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
     switch (screen) {
         case 14:
             if (this->ui.screenParam >= 0 && this->ui.screenParam <= 4)
-                return copy_codes(this->assets.spriteBitmapTable[
-                    this->assets.spriteIndexTable[11 + this->ui.screenParam]]);
+                return this->assets.index_text_codes(11 + this->ui.screenParam);
             break;
 
         case 4:
             switch (field) {
-                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[25 + this->scenario.scenarioMilestone]]);
-                case 2: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[30 + this->scenario.difficultyA]]);
-                case 3: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[35 + this->scenario.difficultySlot]]);
-                case 4: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[40 + this->scenario.difficultyB]]);
-                case 5: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[40 + this->scenario.difficultyC]]);
+                case 1: return this->assets.index_text_codes(25 + this->scenario.scenarioMilestone);
+                case 2: return this->assets.index_text_codes(30 + this->scenario.difficultyA);
+                case 3: return this->assets.index_text_codes(35 + this->scenario.difficultySlot);
+                case 4: return this->assets.index_text_codes(40 + this->scenario.difficultyB);
+                case 5: return this->assets.index_text_codes(40 + this->scenario.difficultyC);
                 case 6: return format_number_with_suffix(this->scenario.difficultyCycle, 0);
             }
             break;
@@ -100,10 +95,10 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
             switch (field) {
                 case 0: {
                     int selection = this->ui.trainSelectionIndex[this->build.junctionDirCursor];
-                    const std::vector<int8_t> &engine = this->assets.spriteBitmapTable[
-                        this->assets.spriteIndexTable[80 + ((selection >> 8) & 0xff)]];
-                    const std::vector<int8_t> &wagon = this->assets.spriteBitmapTable[
-                        this->assets.spriteIndexTable[86 + (selection & 0xff)]];
+                    const std::vector<int8_t> engine =
+                        this->assets.index_text_codes(80 + ((selection >> 8) & 0xff));
+                    const std::vector<int8_t> wagon =
+                        this->assets.index_text_codes(86 + (selection & 0xff));
                     return join_codes(wagon, engine);
                 }
                 case 1: return format_number_with_suffix(this->world.zonePopulation[this->build.junctionDirCursor] * 13, 0);
@@ -113,8 +108,8 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
 
         case 21:
             switch (field) {
-                case 0: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[100 + this->world.cities[this->build.stationDirCursor].stationDirection]]);
-                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[106 + this->world.cities[this->build.stationDirCursor].stationDirection / 2]]);
+                case 0: return this->assets.index_text_codes(100 + this->world.cities[this->build.stationDirCursor].stationDirection);
+                case 1: return this->assets.index_text_codes(106 + this->world.cities[this->build.stationDirCursor].stationDirection / 2);
                 case 2: return format_number_with_suffix(this->world.cities[this->build.stationDirCursor].previousStationRevenue, 0);
             }
             break;
@@ -125,11 +120,11 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
 
         case 10:
             switch (field) {
-                case 1: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->settings.animationsDisabled ? 21 : 20]]);
-                case 2: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->settings.selectionHidden ? 21 : 20]]);
-                case 3: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->ui.monthlyReportEnabled ? 20 : 21]]);
-                case 4: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->ui.annualReportEnabled ? 20 : 21]]);
-                case 5: return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[this->music.enabled ? 20 : 21]]);
+                case 1: return this->assets.index_text_codes(this->settings.animationsDisabled ? 21 : 20);
+                case 2: return this->assets.index_text_codes(this->settings.selectionHidden ? 21 : 20);
+                case 3: return this->assets.index_text_codes(this->ui.monthlyReportEnabled ? 20 : 21);
+                case 4: return this->assets.index_text_codes(this->ui.annualReportEnabled ? 20 : 21);
+                case 5: return this->assets.index_text_codes(this->music.enabled ? 20 : 21);
                 case 6: return format_number_with_suffix(this->music.volumeLevel, 0);
             }
             break;
@@ -154,15 +149,15 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
 
         case 26: {
             if (field == 0)
-                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[60 + this->fleet.trainCars[this->trainAtCursor].era]]);
+                return this->assets.index_text_codes(60 + this->fleet.trainCars[this->trainAtCursor].era);
             if (field == 6) return format_currency(this->fleet.trainCars[this->trainAtCursor].revenue);
             if (field == 7) return format_currency(this->fleet.trainCars[this->trainAtCursor].previousRevenue);
             if (field == 8) return format_number_with_suffix(this->fleet.trainCars[this->trainAtCursor].ageYears, 0);
             if (field == 9) return format_currency(this->build.currentTrainCostSnapshot * 70 / 100);
             if (field == 10) return format_currency(this->build.baseTrainCostSnapshot - this->build.currentTrainCostSnapshot);
             if (field == 20)
-                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[
-                    this->fleet.trainCars[this->trainAtCursor].aiOverride == 0 ? 21 : 20]]);
+                return this->assets.index_text_codes(
+                    this->fleet.trainCars[this->trainAtCursor].aiOverride == 0 ? 21 : 20);
             if (field <= 0 || field >= 6) break;
             int car = 0;
             if (this->fleet.count_cars(this->trainAtCursor) > field) {
@@ -219,7 +214,7 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
 
         case 33:
             if (field == 65)
-                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[57 + this->ui.yearGraphMode]]);
+                return this->assets.index_text_codes(57 + this->ui.yearGraphMode);
             if (field >= 40) {
                 int index = field - 40;
                 if (!this->ui.yearGraphAlt) {
@@ -244,7 +239,7 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
             // The original falls through when the graph mode is invalid.
         case 34:
             if (field == 65)
-                return copy_codes(this->assets.spriteBitmapTable[this->assets.spriteIndexTable[54 + this->ui.yearGraphMode]]);
+                return this->assets.index_text_codes(54 + this->ui.yearGraphMode);
             if (field >= 20) {
                 if (!this->ui.yearGraphAlt)
                     return format_number_with_suffix(this->ui.altYearArray[field - 20], 0);
@@ -272,9 +267,9 @@ std::optional<std::vector<int8_t>> Game::resolve_dialog_value(
         case 60:
             if (field % 2 == 1) {
                 int index = field / 2;
-                return copy_codes(this->assets.spriteBitmapTable[unsigned_byte(
-                    this->assets.spriteIndexTable[this->offerBoard.offers[
-                        this->ui.enabledMenuRowIndexes[index]].objectiveType + 160])]);
+                return this->assets.index_text_codes(
+                    this->offerBoard.offers[
+                        this->ui.enabledMenuRowIndexes[index]].objectiveType + 160);
             } else {
                 int index = (field - 1) / 2;
                 return format_number_with_suffix(

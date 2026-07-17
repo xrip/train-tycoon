@@ -115,7 +115,7 @@ void Game::render(Surface& surface) {
             midp_set_color(g, 0);
             midp_fill_rect(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[0]]));
+                           game->assets.index_text_codes(0));
             midp_set_color(g, RGB3(215, 222, 238));
             midp_fill_rect(g, 10, game->renderer.canvasHeight - 23, game->renderer.canvasWidth - 21, 9);
             int n11 = game->world.totalTilesToGenerate < 2 ? 2 : game->world.totalTilesToGenerate;
@@ -160,30 +160,30 @@ void Game::render(Surface& surface) {
         }
         case GameState::BuildingMinimap:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[50]]));
+                           game->assets.index_text_codes(50));
             break;
         case GameState::MapOverview:
             game->paint_map_overview(*g);
             break;
         case GameState::BuildingPath:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[51]]));
+                           game->assets.index_text_codes(51));
             break;
         case GameState::SavingGame:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[52]]));
+                           game->assets.index_text_codes(52));
             break;
         case GameState::LoadingGame:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[53]]));
+                           game->assets.index_text_codes(53));
             break;
         case GameState::AiTurn:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[49]]));
+                           game->assets.index_text_codes(49));
             break;
         case GameState::HighScoreSync:
             game->renderer.draw_text_box(*g, game->assets, game->renderer.canvasWidth / 2, game->renderer.canvasHeight / 2, 0, 3,
-                           std::span<const int8_t>(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[66]]));
+                           game->assets.index_text_codes(66));
             break;
     }
 }

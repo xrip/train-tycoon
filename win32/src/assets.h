@@ -18,13 +18,13 @@
 // resource read order are unchanged.
 struct Assets {
     void open_sprite_stream(const char* resource_name);
-    void load_packed_sprite_data(const char* resource_name);
     std::unique_ptr<Image> decode_png_from_sprite_stream();
-    std::vector<int8_t> read_packed_text_codes(int32_t offset) const;
     void build_tile_draw_order(int32_t width, int32_t height);
 
-    std::vector<int16_t> spriteOffsetTable;
-    std::vector<int8_t> spriteData;
+    // Glyph codes for a sprite_image_map semantic index, from the text catalog
+    // (falls back to the loaded sprite_image_map row if the index is unbound).
+    std::vector<int8_t> index_text_codes(int32_t semantic_index) const;
+
     std::vector<int8_t> spriteIndexTable;
     Grid<int8_t> spriteBitmapTable;
     int8_t tileSpriteIndex[kTileSpriteCodeCount]{};
