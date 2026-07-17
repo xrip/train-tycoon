@@ -412,6 +412,56 @@ TEST_CASE("fast: fleet owns service resource collection and load checks") {
     CHECK_FALSE(fleet.can_load_at_service_site(0, 3));
 }
 
+TEST_CASE("fast: fleet loading and unloading keeps fixed cargo values") {
+    Fleet fleet;
+    World world;
+    world.resize(8, 8);
+    const int head = fleet.allocate_train_car(3, 3, 0, 0, 0, 8);
+    const int wagon = fleet.append_car(head, 3);
+    const int source = fleet.allocate_service_site(2, 3, 3, false, false);
+    fleet.serviceSites[source].resourceStock[1] = 17;
+    fleet.serviceSites[source].loadFlags = 4;
+
+    fleet.load_at_service_site(world, head, source, false);
+    CHECK(fleet.trainCars[wagon].energyCargoOrRemovalTicks == 17);
+    CHECK(fleet.trainCars[wagon].cargoAge == 0);
+    CHECK(fleet.trainCars[wagon].lastServiceSite == source);
+    CHECK(fleet.serviceSites[source].resourceStock[1] == 0);
+
+    const int destination = fleet.allocate_service_site(2, 5, 5, false, false);
+    fleet.serviceSites[destination].unloadFlags = 2;
+    fleet.trainCars[wagon].cargoAge = 30;
+    Scenario scenario;
+    scenario.routeResourceFlags[3] = 1;
+    const UnloadResult result = fleet.unload_at_service_site(
+        scenario, head, destination);
+    CHECK(result.revenue == 1020);
+    CHECK(result.delivered[3] == 17);
+    CHECK(fleet.trainCars[wagon].energyCargoOrRemovalTicks == 0);
+}
+
+TEST_CASE("fast: train movement follows the fixed straight-track step") {
+    Game game(std::make_unique<SilentMusicOutput>(), kFixedRandomSeed);
+    World& world = GameTestAccess::world(game);
+    Fleet& fleet = GameTestAccess::fleet(game);
+    world.resize(8, 8);
+    world.terrain.tileMap[2][2] = 70;
+    world.terrain.tileMap[2][3] = 70;
+    world.trackMap[2][2] = 65;
+    world.trackMap[2][3] = 65;
+    const int head = fleet.allocate_train_car(2, 2, 0, 0, 0, 8);
+    fleet.trainCars[head].phase = 8;
+    fleet.trainCars[head].energyCargoOrRemovalTicks = 0;
+
+    GameTestAccess::update_train(game, head);
+    CHECK(fleet.trainCars[head].x == 2);
+    CHECK(fleet.trainCars[head].y == 3);
+    CHECK(fleet.trainCars[head].direction == 0);
+    CHECK(fleet.trainCars[head].phase == 0);
+    CHECK(fleet.trainCars[head].energyCargoOrRemovalTicks == 5);
+    CHECK(fleet.trainCars[head].cargoAge == 1);
+}
+
 TEST_CASE("fast: fleet and world roll yearly revenue under their records") {
     Fleet fleet;
     fleet.trainCars[2].revenue = 123;

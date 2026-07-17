@@ -46,6 +46,9 @@ struct GameTestAccess {
     static void update_state_machine(Game& game) { game.update_state_machine(); }
     static void set_state(Game& game, int32_t state) { game.set_state(state); }
     static void simulation_tick(Game& game) { game.simulation_tick(); }
+    static void update_train(Game& game, int32_t head) {
+        game.update_train(head);
+    }
     static void pick_trains_at_cursor(Game& game) { game.pick_trains_at_cursor(); }
     static void open_build_menu(Game& game) { game.open_build_menu(); }
     static bool buy_train_at_cursor(Game& game) {
