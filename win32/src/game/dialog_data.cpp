@@ -104,8 +104,8 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
                 case 2: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[selectionHidden ? 21 : 20]]);
                 case 3: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[monthlyReportEnabled ? 20 : 21]]);
                 case 4: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[annualReportEnabled ? 20 : 21]]);
-                case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->music_enabled ? 20 : 21]]);
-                case 6: return game_formatNumberWithSuffix(game->music_volume_level, 0);
+                case 5: return copy_codes(game->assets.spriteBitmapTable[game->assets.spriteIndexTable[game->music.enabled ? 20 : 21]]);
+                case 6: return game_formatNumberWithSuffix(game->music.volumeLevel, 0);
             }
             break;
 

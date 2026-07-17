@@ -390,7 +390,7 @@ void SaveCodec::walk_settings(Game& game) {
     annualReportEnabled = io_bool(annualReportEnabled);
     game.scenario.scenarioStepCompare = io_int(game.scenario.scenarioStepCompare);
     game.scenario.bestScenarioScore = io_int(game.scenario.bestScenarioScore);
-    game.music_volume_level = io_int(game.music_volume_level);
+    game.music.volumeLevel = io_int(game.music.volumeLevel);
     io_ints(game.scenario.scenarioScores, kScenarioCount);
     io_ints(game.scenario.leaderboardScores, kLeaderboardScoreCount);
     io_bytes(game.scenario.playerNameCodes, kPlayerNameCodeCount);

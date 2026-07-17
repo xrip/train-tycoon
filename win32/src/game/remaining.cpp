@@ -152,33 +152,51 @@ int8_t OfferBoard::display_progress(int32_t row, const Economy& economy) const {
     return (int8_t)value;
 }
 
-void game_loadMusic(Game *game) {
-    game->music_available = game->music_output &&
-        game->music_output->load(resources::path_for("music.mid"));
-    if (game->music_available) {
-        game->music_output->set_volume(20 * game->music_volume_level);
+void MusicController::load(const std::filesystem::path& path) {
+    available = output && output->load(path);
+    if (available) {
+        output->set_volume(20 * volumeLevel);
     }
-    game->music_playing = false;
+    playing = false;
+}
+
+void MusicController::play() {
+    if (available && !playing && enabled && output->play()) {
+        playing = true;
+    }
+}
+
+void MusicController::set_volume(int32_t level) {
+    if (available) {
+        output->set_volume(level * 20);
+    }
+}
+
+void MusicController::stop() {
+    if (available && playing) {
+        output->stop();
+    }
+    playing = false;
+}
+
+void MusicController::update() {
+    if (output) output->update();
+}
+
+void game_loadMusic(Game *game) {
+    game->music.load(resources::path_for("music.mid"));
 }
 
 void game_playMusic(Game *game) {
-    if (game->music_available && !game->music_playing && game->music_enabled &&
-        game->music_output->play()) {
-        game->music_playing = true;
-    }
+    game->music.play();
 }
 
 void game_setMusicVolume(Game *game, int32_t level) {
-    if (game->music_available) {
-        game->music_output->set_volume(level * 20);
-    }
+    game->music.set_volume(level);
 }
 
 void game_stopMusic(Game *game) {
-    if (game->music_available && game->music_playing) {
-        game->music_output->stop();
-    }
-    game->music_playing = false;
+    game->music.stop();
 }
 
 bool game_syncHighScores(Game *game, bool upload) {

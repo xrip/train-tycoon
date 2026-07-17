@@ -52,7 +52,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 0: game_setState(game, GameState::SavingGame); break;
                 case 1: game_setState(game, GameState::LoadingGame); break;
                 case 2: game->stopRequested = true; break;
-                case 3: game->music_auto_start = true; game->music_enabled = true; game_setState(game, GameState::LoadingResources); break;
+                case 3: game->music.autoStart = true; game->music.enabled = true; game_setState(game, GameState::LoadingResources); break;
                 case 4: {
                     game->economy.money += game->build.currentTrainCostSnapshot * 70 / 100;
                     game->economy.aiMoneySpent -= game->build.currentTrainCostSnapshot * 70 / 100;
@@ -186,13 +186,13 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                 case 3: monthlyReportEnabled = !monthlyReportEnabled; goto hbms_end;
                 case 4: annualReportEnabled = !annualReportEnabled; goto hbms_end;
                 case 5:
-                    game->music_enabled = !game->music_enabled;
-                    if (game->music_enabled) { game_playMusic(game); goto hbms_end; }
+                    game->music.enabled = !game->music.enabled;
+                    if (game->music.enabled) { game_playMusic(game); goto hbms_end; }
                     game_stopMusic(game); goto hbms_end;
                 case 6:
-                    ++game->music_volume_level;
-                    if (game->music_volume_level == 6) game->music_volume_level = 1;
-                    game_setMusicVolume(game, game->music_volume_level); goto hbms_end;
+                    ++game->music.volumeLevel;
+                    if (game->music.volumeLevel == 6) game->music.volumeLevel = 1;
+                    game_setMusicVolume(game, game->music.volumeLevel); goto hbms_end;
             }
             game_persistSnapshotMode0(game);
             if (game->ready) { game->ui.transitionCode = 1; game_resetOverlayRenderState(game); break; }
@@ -209,7 +209,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
         case 11: case 12: case 13: case 16:
             game_setState(game, GameState::Playing); break;
         case 15:
-            if (n2 == 1) game->music_auto_start = true;
+            if (n2 == 1) game->music.autoStart = true;
             game_setState(game, GameState::LoadingResources); break;
         case 30:
             switch (n2) {

@@ -51,12 +51,12 @@ static bool run_midi_device_test(int total_millis) {
     if (total_millis < 200) total_millis = 200;
     Game *test = new Game{};
     game_fields_init(test);
-    test->music_output = std::make_unique<WinMmMusicPlayer>();
-    MusicOutput* output = test->music_output.get();
-    test->music_enabled = true;
-    test->music_volume_level = 1;
+    test->music.output = std::make_unique<WinMmMusicPlayer>();
+    MusicOutput* output = test->music.output.get();
+    test->music.enabled = true;
+    test->music.volumeLevel = 1;
     game_loadMusic(test);
-    if (!test->music_available || !output->is_loaded()) {
+    if (!test->music.available || !output->is_loaded()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI load failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
@@ -64,7 +64,7 @@ static bool run_midi_device_test(int total_millis) {
         return false;
     }
     game_playMusic(test);
-    if (!test->music_playing || !output->is_playing()) {
+    if (!test->music.playing || !output->is_playing()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI first play failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
@@ -78,14 +78,14 @@ static bool run_midi_device_test(int total_millis) {
         midp_sleep(10);
     }
     game_stopMusic(test);
-    if (test->music_playing || output->is_playing()) {
+    if (test->music.playing || output->is_playing()) {
         fprintf(stderr, "MIDI stop state failed\n");
         delete test;
         return false;
     }
     game_setMusicVolume(test, 3);
     game_playMusic(test);
-    if (!test->music_playing || !output->is_playing()) {
+    if (!test->music.playing || !output->is_playing()) {
         const std::string_view error = output->last_error();
         fprintf(stderr, "MIDI second play failed: %.*s\n",
                 static_cast<int>(error.size()), error.data());
@@ -113,14 +113,14 @@ int main(void) {
 
     Game *game = new Game{};
     game_fields_init(game);
-    game->music_output = std::make_unique<WinMmMusicPlayer>();
+    game->music.output = std::make_unique<WinMmMusicPlayer>();
     game_start(game); // resource load + initial state (no thread spawn)
 
     Surface screen;
     midp_gfx_init_screen(&screen, g_framebuffer, MIDP_SCREEN_W, MIDP_SCREEN_H);
 
     for (;;) {
-        game->music_output->update();
+        game->music.update();
         int keycode; bool pressed;
         while (midp_input_poll(&keycode, &pressed)) {
             if (pressed) game_keyPressed(game, keycode);

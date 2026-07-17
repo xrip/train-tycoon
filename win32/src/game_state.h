@@ -13,11 +13,11 @@
 #include "renderer.h"
 #include "ui_controller.h"
 #include "save_codec.h"
+#include "music_controller.h"
 #include "click_map.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
-#include "support/music_output.h"
 #include "support/resource_reader.h"
 #include <memory>
 #include <vector>
@@ -37,12 +37,7 @@ typedef struct Game {
     bool compareToPrevious;
     bool monthRolloverFlag;
     int32_t savedLegacyMetricBq;
-    bool music_playing;
-    bool music_available;
-    bool music_auto_start;
-    bool music_enabled;
-    int32_t music_volume_level = 2;
-    std::unique_ptr<MusicOutput> music_output;
+    MusicController music;
     int32_t gameState;
     World world;  // owns tileMap, trackMap, tileElevation, heightMap
     Economy economy;

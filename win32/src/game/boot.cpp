@@ -123,7 +123,7 @@ std::vector<int8_t> game_readPackedTextCodes(Game *game, int32_t offset) {
 void game_persistSnapshotMode1(Game *game) {
     game->saveCodec.load_slot(5, save::MODE_READ);
     game->saveCodec.walk_settings(*game);
-    game_setMusicVolume(game, game->music_volume_level);
+    game_setMusicVolume(game, game->music.volumeLevel);
 }
 
 // Add one isometric tile-draw offset pair.

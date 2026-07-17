@@ -27,7 +27,7 @@ std::uint32_t framebuffer[kScreenWidth * kScreenHeight];
 Game* make_game() {
     auto* game = new Game{};
     game_fields_init(game);
-    game->music_output = std::make_unique<SilentMusicOutput>();
+    game->music.output = std::make_unique<SilentMusicOutput>();
     game->rng.set_seed(kFixedRandomSeed);
     return game;
 }
@@ -1090,18 +1090,18 @@ TEST_CASE("fast: MIDI resource is valid") {
 
 TEST_CASE("fast: game music rules use a silent output") {
     Game* game = make_game();
-    auto* output = static_cast<SilentMusicOutput*>(game->music_output.get());
+    auto* output = static_cast<SilentMusicOutput*>(game->music.output.get());
 
     game_loadMusic(game);
-    CHECK(game->music_available);
-    CHECK_FALSE(game->music_playing);
+    CHECK(game->music.available);
+    CHECK_FALSE(game->music.playing);
     CHECK(output->volume() == 40);
 
     game_playMusic(game);
     CHECK(output->play_count() == 0);
-    game->music_enabled = true;
+    game->music.enabled = true;
     game_playMusic(game);
-    CHECK(game->music_playing);
+    CHECK(game->music.playing);
     CHECK(output->play_count() == 1);
     game_playMusic(game);
     CHECK(output->play_count() == 1);
@@ -1109,7 +1109,7 @@ TEST_CASE("fast: game music rules use a silent output") {
     game_setMusicVolume(game, 5);
     CHECK(output->volume() == 100);
     game_stopMusic(game);
-    CHECK_FALSE(game->music_playing);
+    CHECK_FALSE(game->music.playing);
     CHECK(output->stop_count() == 1);
 
     delete game;

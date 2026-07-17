@@ -119,8 +119,8 @@ void updateLoadingResources(Game *game) {
     ++game->assets.spriteLoadCounter;
     if (game->assets.spriteLoadCounter == game->scenario.scenarioResourceCount / 2) {
         game_loadMusic(game);
-        if (game->music_auto_start) { game_playMusic(game); game->music_enabled = true; }
-        else game->music_enabled = false;
+        if (game->music.autoStart) { game_playMusic(game); game->music.enabled = true; }
+        else game->music.enabled = false;
     }
     if (game->assets.spriteLoadCounter != game->scenario.scenarioResourceCount) return;
     game->ready = true;
