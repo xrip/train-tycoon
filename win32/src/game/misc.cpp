@@ -28,7 +28,7 @@ bool Game::spend_money(int32_t n) {
         game->record_money_change(-n);
         return true;
     }
-    game_enterOutOfMoneyState(game);
+    game->enter_out_of_money_state();
     return false;
 }
 

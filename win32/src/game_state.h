@@ -97,6 +97,32 @@ typedef struct Game {
     void new_year_notify();
     void tick_input_or_ai(bool player_action);
     void simulation_tick();
+    void enter_out_of_money_state();
+    void apply_background_cost();
+    void demolish_at_cursor();
+    void pick_trains_at_cursor();
+    void build_place_track_piece(int32_t piece);
+    void compute_track_build(int32_t start_x, int32_t start_y,
+                             int32_t step_x, int32_t step_y,
+                             int32_t end_x, int32_t end_y,
+                             int32_t tile_code, int32_t cost);
+    void revert_track_tiles();
+    void place_track_at_cursor(bool first_direction, int32_t x,
+                               int32_t y, int32_t step_x, int32_t step_y,
+                               int32_t tile_code, int32_t owner,
+                               bool charge, int32_t cost);
+    void normalize_track_bits();
+    void set_track_owner_code(int32_t owner);
+    void rebuild_menu_type_indexes();
+    void open_build_menu();
+    void add_selected_option(int32_t option);
+    void pop_selected_option();
+    void increment_cargo_option_count(int32_t car_type);
+    void decrement_cargo_option_count(int32_t car_type);
+    void decrement_train_cargo_option_counts(int32_t car);
+    bool buy_train_at_cursor();
+    bool apply_train_upgrade(int32_t train, int32_t engine_type,
+                             int32_t* wagon_types);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

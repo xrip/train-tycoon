@@ -75,7 +75,7 @@ void Game::handle_key(int32_t n) {
             if (game->ui.inputSubState == 0) {
                 if (n == 42) { game->ui.cycle_build_menu_index(false); game->ui.inputSubState = 7; game->ui.currentKey = n; }
                 if (n == 35) { game->ui.cycle_build_menu_index(true); game->ui.inputSubState = 7; game->ui.currentKey = n; }
-                if (n == 53) game_openBuildMenu(game);
+                if (n == 53) game->open_build_menu();
                 if (n != 48 || game->gameState != GameState::Playing) break;
                 game->set_state(GameState::BuildingMinimap);
                 break;

@@ -27,7 +27,7 @@ void pointer_advance_loader(Game *game) {
 
 // Playing bottom bar: re-derive each item icon's x (the same math game_paintMain
 // uses to draw them) and activate the clicked one. Selecting + opening in one
-// click mirrors "cycle to item, then press 5/fire" -- game_openBuildMenu reads
+// click mirrors "cycle to item, then press 5/fire" -- open_build_menu reads
 // buildMenuItemIndex and dispatches the item's action.
 void pointer_click_bottom_bar(Game *game, int x) {
     const int mode = game->ui.buildMenuMode;
@@ -47,7 +47,7 @@ void pointer_click_bottom_bar(Game *game, int x) {
             // still fire immediately.
             const int item_value = unsigned_byte(game->ui.buildMenuItems[mode][item]);
             if (!BuildController::tool_acts_on_cursor_tile(mode, item_value))
-                game_openBuildMenu(game);
+                game->open_build_menu();
             return;
         }
     }
@@ -152,7 +152,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
                 int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
                 int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
                 game->compute_viewport_bounds(anchor_x, anchor_y);
-                if (!game->ui.blockBuildMenu) game_openBuildMenu(game);
+                if (!game->ui.blockBuildMenu) game->open_build_menu();
             }
             return;
         case GameState::MapOverview:

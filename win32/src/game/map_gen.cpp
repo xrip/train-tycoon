@@ -138,7 +138,7 @@ void Game::smooth_tile_at(int32_t n, int32_t n2, bool bl) {
                     game->economy.subsidyCost += game->build.terrainSmoothCost;
                     game->world.terrain.rebuild(game->build, true);
                 } else {
-                    game_enterOutOfMoneyState(game);
+                    game->enter_out_of_money_state();
                 }
             } else {
                 game->world.terrain.rebuild(game->build, true);
@@ -700,7 +700,7 @@ void Game::place_cities_and_industry() {
         game->world.industryStationX, game->world.industryTileY,
         game->build.nextTrackPieceCode);
     spawn_train_at(game->world.cityStationX, game->world.cityStationY);
-    game_setTrackOwnerCode(game, game->build.nextTrackPieceCode - track::PRESENT);
+    game->set_track_owner_code(game->build.nextTrackPieceCode - track::PRESENT);
     ++game->build.nextTrackPieceCode;
     if (game->build.nextTrackPieceCode == track::AI_PIECE_WRAP) game->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
 }

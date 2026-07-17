@@ -60,7 +60,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                         game->record_money_change(
                             game->build.currentTrainCostSnapshot * 70 / 100);
                     int16_t s = game->fleet.trainCars[game->trainAtCursor].nextCar;
-                    game_decrementTrainCargoOptionCounts(game, s);
+                    game->decrement_train_cargo_option_counts(s);
                     game->fleet.trainCars[game->trainAtCursor].flags = 0;
                     while (s != -1) { game->fleet.trainCars[s].flags = 0; s = game->fleet.trainCars[s].nextCar; }
                     game->set_state(GameState::Playing);
@@ -134,10 +134,10 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             if (n2 == 1) { game->ui.pendingTransitionCode = 25; game->set_state(GameState::Playing); break; }
             if (n2 == 2) {
                 if (!game->build.discountApplied) {
-                    if (!game_buyTrainAtCursor(game)) break;
+                    if (!game->buy_train_at_cursor()) break;
                     game->set_state(GameState::Playing); break;
                 }
-                if (!game_applyTrainUpgrade(game, game->trainAtCursor, game->build.wagonType, game->build.wagonOptionSlots)) break;
+                if (!game->apply_train_upgrade(game->trainAtCursor, game->build.wagonType, game->build.wagonOptionSlots)) break;
                 game->ui.pendingTransitionCode = 26; game->set_state(GameState::Playing); break;
             }
             game->ui.pendingTransitionCode = !game->build.discountApplied ? 22 : 26;
@@ -146,11 +146,11 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             if (n2 >= 0 && n2 < 6) { game->build.wagonType = n2; game->build.compute_train_cost(game->economy, game->scenario); }
             game->ui.pendingTransitionCode = 23; game->set_state(GameState::Playing); break;
         case 25:
-            if (n2 == 3) game_addSelectedOption(game, 0);
-            else if (n2 == 1) game_addSelectedOption(game, 1);
-            else if (n2 == 0) game_addSelectedOption(game, 2);
-            else if (n2 == 2) game_addSelectedOption(game, 3);
-            else if (n2 == 9) game_popSelectedOption(game);
+            if (n2 == 3) game->add_selected_option(0);
+            else if (n2 == 1) game->add_selected_option(1);
+            else if (n2 == 0) game->add_selected_option(2);
+            else if (n2 == 2) game->add_selected_option(3);
+            else if (n2 == 9) game->pop_selected_option();
             game->build.compute_train_cost(game->economy, game->scenario);
             game->ui.pendingTransitionCode = 23; game->set_state(GameState::Playing); break;
         case 26:
@@ -169,7 +169,7 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
                     game->build.currentTrainCostSnapshot = game->build.unitCost;
                     game->ui.pendingTransitionCode = 26; game->set_state(GameState::Playing);
                 } else {
-                    game_enterOutOfMoneyState(game);
+                    game->enter_out_of_money_state();
                 }
             } else if (n2 == 3) {
                 game->ui.screenParam = 4;

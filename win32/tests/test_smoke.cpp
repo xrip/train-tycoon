@@ -800,13 +800,13 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
     game->economy.money = 1000000;
     game->ui.tileCursorX = ax;
     game->ui.tileCursorY = ay;
-    game_buildPlaceTrackPiece(game, 0);
+    game->build_place_track_piece(0);
     REQUIRE(static_cast<uint8_t>(game->world.trackMap[ax][ay]) == 65);  // depot on player track
 
     // Open the buy dialog on the depot (captures serviceVehicleAtCursor).
     game->ui.tileCursorX = ax;
     game->ui.tileCursorY = ay;
-    game_pickTrainsAtCursor(game);
+    game->pick_trains_at_cursor();
     REQUIRE(game->serviceVehicleAtCursor != 5000);
 
     // Choose an engine with two wood wagons, as the buy menu would.
@@ -825,7 +825,7 @@ TEST_CASE("full: buying a train places it on the selected depot, not the drifted
     game->ui.tileCursorX = bx;
     game->ui.tileCursorY = by;
 
-    REQUIRE(game_buyTrainAtCursor(game));
+    REQUIRE(game->buy_train_at_cursor());
 
     // The freshly-bought engine must sit on the depot we selected, on player
     // track (65) so it can actually run -- not on the drifted screen-center tile.
@@ -920,7 +920,7 @@ TEST_CASE("full: a bottom-bar depot click arms the tool; the map click places it
     // cursor on the clicked tile, and the armed depot tool places there.
     game->ui.tileCursorX = ax;
     game->ui.tileCursorY = ay;
-    game_openBuildMenu(game);
+    game->open_build_menu();
     CHECK(static_cast<uint8_t>(game->world.trackMap[ax][ay]) == 65);  // depot placed where clicked
     delete game;
 }
