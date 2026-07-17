@@ -85,6 +85,8 @@ struct Fleet {
                                              int32_t wanted);
     bool can_load_at_service_site(int32_t head, int32_t site) const;
     int32_t accumulate_turns(const World& world, int32_t car) const;
+    void load_at_service_site(World& world, int32_t car, int32_t site,
+                              bool construction_done);
 
     TrainCar trainCars[kTrainSlotCount]{};
 

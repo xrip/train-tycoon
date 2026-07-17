@@ -118,62 +118,63 @@ bool Fleet::can_load_at_service_site(int32_t head, int32_t site) const {
     return can_load_at_service_site(car, site);
 }
 
-void game_loadTrainAtServiceVehicle(Game *game, int32_t car,
-                                  int32_t vehicle, bool construction_done) {
+void Fleet::load_at_service_site(World& world, int32_t car,
+                                 int32_t vehicle, bool construction_done) {
     if (car == -1) return;
-    if (!train_flag::isHead(game->fleet.trainCars[car].flags)) {
-        int car_type = train_flag::type(game->fleet.trainCars[car].flags);
+    if (!train_flag::isHead(trainCars[car].flags)) {
+        int car_type = train_flag::type(trainCars[car].flags);
         switch (car_type) {
             case 2:
-                game->fleet.trainCars[car].energyCargoOrRemovalTicks =
-                    (int8_t)(game->fleet.trainCars[car].energyCargoOrRemovalTicks
-                             + game->fleet.collect_nearby_service_resource(
-                                 vehicle, 0, 25 - game->fleet.trainCars[car].energyCargoOrRemovalTicks));
-                game->fleet.trainCars[car].secondaryCargoOrBaseEnergy =
-                    (int8_t)(game->fleet.trainCars[car].secondaryCargoOrBaseEnergy
-                             + game->fleet.collect_nearby_service_resource(
-                                 vehicle, 4, 15 - game->fleet.trainCars[car].secondaryCargoOrBaseEnergy));
-                game->fleet.trainCars[car].cargoAge = 0;
-                if (vehicle != game->fleet.trainCars[car].lastServiceSite && !construction_done) {
-                    game->world.advance_construction_timers(
-                        unsignedByte(game->fleet.trainCars[car].x),
-                        unsignedByte(game->fleet.trainCars[car].y), 4);
+                trainCars[car].energyCargoOrRemovalTicks =
+                    (int8_t)(trainCars[car].energyCargoOrRemovalTicks
+                             + collect_nearby_service_resource(
+                                 vehicle, 0, 25 - trainCars[car].energyCargoOrRemovalTicks));
+                trainCars[car].secondaryCargoOrBaseEnergy =
+                    (int8_t)(trainCars[car].secondaryCargoOrBaseEnergy
+                             + collect_nearby_service_resource(
+                                 vehicle, 4, 15 - trainCars[car].secondaryCargoOrBaseEnergy));
+                trainCars[car].cargoAge = 0;
+                if (vehicle != trainCars[car].lastServiceSite && !construction_done) {
+                    world.advance_construction_timers(
+                        unsignedByte(trainCars[car].x),
+                        unsignedByte(trainCars[car].y), 4);
                     construction_done = true;
                 }
                 break;
             case 3:
-                game->fleet.trainCars[car].energyCargoOrRemovalTicks =
-                    (int8_t)(game->fleet.trainCars[car].energyCargoOrRemovalTicks
-                             + game->fleet.collect_nearby_service_resource(
-                                 vehicle, 1, 25 - game->fleet.trainCars[car].energyCargoOrRemovalTicks));
-                game->fleet.trainCars[car].cargoAge = 0;
+                trainCars[car].energyCargoOrRemovalTicks =
+                    (int8_t)(trainCars[car].energyCargoOrRemovalTicks
+                             + collect_nearby_service_resource(
+                                 vehicle, 1, 25 - trainCars[car].energyCargoOrRemovalTicks));
+                trainCars[car].cargoAge = 0;
                 break;
             case 4: case 5:
-                game->fleet.trainCars[car].energyCargoOrRemovalTicks =
-                    (int8_t)(game->fleet.trainCars[car].energyCargoOrRemovalTicks
-                             + game->fleet.collect_nearby_service_resource(
-                                 vehicle, 2, 30 - game->fleet.trainCars[car].energyCargoOrRemovalTicks));
-                game->fleet.trainCars[car].cargoAge = 0;
+                trainCars[car].energyCargoOrRemovalTicks =
+                    (int8_t)(trainCars[car].energyCargoOrRemovalTicks
+                             + collect_nearby_service_resource(
+                                 vehicle, 2, 30 - trainCars[car].energyCargoOrRemovalTicks));
+                trainCars[car].cargoAge = 0;
                 break;
             case 6: case 7:
-                game->fleet.trainCars[car].energyCargoOrRemovalTicks =
-                    (int8_t)(game->fleet.trainCars[car].energyCargoOrRemovalTicks
-                             + game->fleet.collect_nearby_service_resource(
-                                 vehicle, 3, 30 - game->fleet.trainCars[car].energyCargoOrRemovalTicks));
-                game->fleet.trainCars[car].cargoAge = 0;
+                trainCars[car].energyCargoOrRemovalTicks =
+                    (int8_t)(trainCars[car].energyCargoOrRemovalTicks
+                             + collect_nearby_service_resource(
+                                 vehicle, 3, 30 - trainCars[car].energyCargoOrRemovalTicks));
+                trainCars[car].cargoAge = 0;
                 break;
         }
         if (car_type == 4 || car_type == 5)
-            game->fleet.trainCars[car].flags = (int8_t)((game->fleet.trainCars[car].flags & 0xF0)
-                                  | (game->fleet.trainCars[car].energyCargoOrRemovalTicks >= 10 ? 5 : 4));
+            trainCars[car].flags = (int8_t)((trainCars[car].flags & 0xF0)
+                                  | (trainCars[car].energyCargoOrRemovalTicks >= 10 ? 5 : 4));
         if (car_type == 6 || car_type == 7)
-            game->fleet.trainCars[car].flags = (int8_t)((game->fleet.trainCars[car].flags & 0xF0)
-                                  | (game->fleet.trainCars[car].energyCargoOrRemovalTicks >= 10 ? 7 : 6));
-        game->fleet.trainCars[car].lastServiceSite = (int8_t)vehicle;
+            trainCars[car].flags = (int8_t)((trainCars[car].flags & 0xF0)
+                                  | (trainCars[car].energyCargoOrRemovalTicks >= 10 ? 7 : 6));
+        trainCars[car].lastServiceSite = (int8_t)vehicle;
     } else {
-        game->fleet.trainCars[car].cargoAge = 0;
+        trainCars[car].cargoAge = 0;
     }
-    game_loadTrainAtServiceVehicle(game, game->fleet.trainCars[car].nextCar, vehicle, construction_done);
+    load_at_service_site(world, trainCars[car].nextCar, vehicle,
+                         construction_done);
 }
 
 void Game::record_delivered_resource(int32_t resource, int32_t amount) {
@@ -316,7 +317,8 @@ void game_updateTrain(Game *game, int32_t head) {
                 game->renderer.lastViewportCenterX = -1;
             }
 
-            game_loadTrainAtServiceVehicle(game, head, service_vehicle, false);
+            game->fleet.load_at_service_site(game->world, head,
+                                             service_vehicle, false);
             if (game->fleet.trainCars[head].aiOverride == 1
                 && game->fleet.can_load_at_service_site(head, service_vehicle)) {
                 game->fleet.trainCars[head].phase = 3;
