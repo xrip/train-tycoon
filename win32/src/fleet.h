@@ -50,6 +50,17 @@ struct TrainCar {
     int32_t previousRevenue = 0;
 };
 
+// One fixed depot or station slot. loadFlags is rebuilt after load and is not
+// saved; every member keeps the old zero-filled default.
+struct ServiceSite {
+    int8_t flags = 0;
+    int8_t x = 0;
+    int8_t y = 0;
+    int16_t resourceStock[kResourceTypeCount]{};
+    int8_t unloadFlags = 0;
+    int8_t loadFlags = 0;
+};
+
 // Fleet owns the per-train-slot records. Each slot id is one train/car; a train
 // is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.
@@ -60,12 +71,7 @@ struct Fleet {
     // and unload. serviceResourceStock[site][5] is the per-resource stock;
     // serviceLoad/UnloadFlags are bitmasks of which resources to load/unload
     // (serviceLoadFlags is runtime-only, recomputed on load, so not saved).
-    int8_t vehicleFlags[kServiceVehicleSlotCount]{};
-    int8_t serviceVehicleX[kServiceVehicleSlotCount]{};
-    int8_t serviceVehicleY[kServiceVehicleSlotCount]{};
-    int16_t serviceResourceStock[kServiceVehicleSlotCount][kResourceTypeCount]{};
-    int8_t serviceUnloadFlags[kServiceVehicleSlotCount]{};
-    int8_t serviceLoadFlags[kServiceVehicleSlotCount]{};
+    ServiceSite serviceSites[kServiceVehicleSlotCount]{};
 
     // Movement-rule lookup tables: for each track-shape variant, the [0] entry is
     // the entering train direction and [1] the exiting direction (forward/reverse

@@ -92,19 +92,19 @@ bool game_isResourceTile(Game *game, int32_t n, int32_t n2) {
     }
     if (n == 22) {
         int slot = game->serviceVehicleAtCursor;
-        if (n2 == 0 && game->fleet.serviceResourceStock[slot][0] == 0 && game->fleet.serviceResourceStock[slot][1] == 0
-            && game->fleet.serviceResourceStock[slot][2] == 0 && game->fleet.serviceResourceStock[slot][3] == 0) return true;
-        if (n2 == 1 && game->fleet.serviceResourceStock[slot][0] > 0) return true;
-        if (n2 == 2 && game->fleet.serviceResourceStock[slot][1] > 0) return true;
-        if (n2 == 3 && game->fleet.serviceResourceStock[slot][2] > 0) return true;
-        if (n2 == 4 && game->fleet.serviceResourceStock[slot][3] > 0) return true;
-        if (n2 == 5 && game->fleet.serviceResourceStock[slot][4] > 0) return true;
-        if (n2 == 6 && game->fleet.serviceUnloadFlags[slot] == 0) return true;
-        if (n2 == 7 && (game->fleet.serviceUnloadFlags[slot] & 1) == 1) return true;
-        if (n2 == 8 && (game->fleet.serviceUnloadFlags[slot] & 2) == 2) return true;
-        if (n2 == 9 && (game->fleet.serviceUnloadFlags[slot] & 4) == 4) return true;
-        if (n2 == 10 && (game->fleet.serviceUnloadFlags[slot] & 8) == 8) return true;
-        if (n2 == 11 && (game->fleet.serviceUnloadFlags[slot] & 0x10) == 16) return true;
+        if (n2 == 0 && game->fleet.serviceSites[slot].resourceStock[0] == 0 && game->fleet.serviceSites[slot].resourceStock[1] == 0
+            && game->fleet.serviceSites[slot].resourceStock[2] == 0 && game->fleet.serviceSites[slot].resourceStock[3] == 0) return true;
+        if (n2 == 1 && game->fleet.serviceSites[slot].resourceStock[0] > 0) return true;
+        if (n2 == 2 && game->fleet.serviceSites[slot].resourceStock[1] > 0) return true;
+        if (n2 == 3 && game->fleet.serviceSites[slot].resourceStock[2] > 0) return true;
+        if (n2 == 4 && game->fleet.serviceSites[slot].resourceStock[3] > 0) return true;
+        if (n2 == 5 && game->fleet.serviceSites[slot].resourceStock[4] > 0) return true;
+        if (n2 == 6 && game->fleet.serviceSites[slot].unloadFlags == 0) return true;
+        if (n2 == 7 && (game->fleet.serviceSites[slot].unloadFlags & 1) == 1) return true;
+        if (n2 == 8 && (game->fleet.serviceSites[slot].unloadFlags & 2) == 2) return true;
+        if (n2 == 9 && (game->fleet.serviceSites[slot].unloadFlags & 4) == 4) return true;
+        if (n2 == 10 && (game->fleet.serviceSites[slot].unloadFlags & 8) == 8) return true;
+        if (n2 == 11 && (game->fleet.serviceSites[slot].unloadFlags & 0x10) == 16) return true;
     }
     if (n == 24 && n2 <= game->era) return true;
     if (n == 26) {

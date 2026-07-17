@@ -189,6 +189,8 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     for (TrainCar& car : game->fleet.trainCars) io_shorts(&car.member, 1)
 #define IO_CAR_INT(member) \
     for (TrainCar& car : game->fleet.trainCars) car.member = io_int(car.member)
+#define IO_SITE_BYTE(member) \
+    for (ServiceSite& site : game->fleet.serviceSites) site.member = io_byte(site.member)
 
     IO_INT(world.mapWidth);
     IO_INT(world.mapHeight);
@@ -261,12 +263,12 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_BYTES(world.stationDirectionCode);
     IO_BYTES(world.cityPopulation);
     IO_BYTES(world.cityIndex);
-    IO_BYTES(fleet.vehicleFlags);
-    IO_BYTES(fleet.serviceVehicleX);
-    IO_BYTES(fleet.serviceVehicleY);
-    IO_BYTES(fleet.serviceUnloadFlags);
-    io_shorts(&game->fleet.serviceResourceStock[0][0],
-              kServiceVehicleSlotCount * kResourceTypeCount);
+    IO_SITE_BYTE(flags);
+    IO_SITE_BYTE(x);
+    IO_SITE_BYTE(y);
+    IO_SITE_BYTE(unloadFlags);
+    for (ServiceSite& site : game->fleet.serviceSites)
+        io_shorts(site.resourceStock, kResourceTypeCount);
     IO_BYTE(ui.numSelectedTrains);
     IO_BOOL(scenario.aiExpansionEnabled);
     IO_BYTES(world.constructionTimers);
@@ -360,6 +362,7 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #undef IO_CAR_BYTE
 #undef IO_CAR_SHORT
 #undef IO_CAR_INT
+#undef IO_SITE_BYTE
 #undef FIELD_COUNT
 
     if (mode == save::OP_SAVE_MAIN) {

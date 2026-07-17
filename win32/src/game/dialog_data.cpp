@@ -125,7 +125,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
 
         case 22:
             return game_formatNumberWithSuffix(
-                game->fleet.serviceResourceStock[game->serviceVehicleAtCursor][field], 0);
+                game->fleet.serviceSites[game->serviceVehicleAtCursor].resourceStock[field], 0);
 
         case 26: {
             if (field == 0)

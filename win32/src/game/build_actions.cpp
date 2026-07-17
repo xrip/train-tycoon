@@ -36,20 +36,20 @@ int32_t game_allocateServiceVehicleSlot(Game *game, int32_t type,
                                       bool horizontal, bool extended) {
     int slot = 5000;
     for (int vehicle = 0; vehicle < 250; ++vehicle) {
-        if ((game->fleet.vehicleFlags[vehicle] & 0x80) == 0) {
+        if ((game->fleet.serviceSites[vehicle].flags & 0x80) == 0) {
             slot = vehicle;
             break;
         }
     }
     if (slot == 5000) return slot;
 
-    game->fleet.vehicleFlags[slot] = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
+    game->fleet.serviceSites[slot].flags = (int8_t)(0x80 | (horizontal ? 0x40 : 0)
                                       | (extended ? 0x20 : 0) | type);
-    game->fleet.serviceVehicleX[slot] = (int8_t)x;
-    game->fleet.serviceVehicleY[slot] = (int8_t)y;
-    game->fleet.serviceUnloadFlags[slot] = 0;
+    game->fleet.serviceSites[slot].x = (int8_t)x;
+    game->fleet.serviceSites[slot].y = (int8_t)y;
+    game->fleet.serviceSites[slot].unloadFlags = 0;
     for (int resource = 0; resource < 5; ++resource)
-        game->fleet.serviceResourceStock[slot][resource] = 0;
+        game->fleet.serviceSites[slot].resourceStock[resource] = 0;
     return slot;
 }
 
@@ -169,10 +169,10 @@ void game_demolishAtCursor(Game *game) {
     } else if (tile >= 87 && tile <= 90) {
         int vehicle = game_findServiceVehicleAt(game, cursor_x, cursor_y);
         if (vehicle != 5000) {
-            int x = unsignedByte(game->fleet.serviceVehicleX[vehicle]);
-            int y = unsignedByte(game->fleet.serviceVehicleY[vehicle]);
-            if ((game->fleet.vehicleFlags[vehicle] & 0x20) == 32) {
-                if ((game->fleet.vehicleFlags[vehicle] & 0x40) == 0) {
+            int x = unsignedByte(game->fleet.serviceSites[vehicle].x);
+            int y = unsignedByte(game->fleet.serviceSites[vehicle].y);
+            if ((game->fleet.serviceSites[vehicle].flags & 0x20) == 32) {
+                if ((game->fleet.serviceSites[vehicle].flags & 0x40) == 0) {
                     game->world.trackMap[x][y - 1] = 0;
                     game->world.trackMap[x][y + 1] = 0;
                     game_queueTileChange(game, x, y - 1, true, false);
@@ -187,7 +187,7 @@ void game_demolishAtCursor(Game *game) {
             game_queueTileChange(game, x, y, true, false);
             game_advanceConstructionTimers(game, x, y, -6);
             game->world.trackMap[x][y] = 0;
-            game->fleet.vehicleFlags[vehicle] = 0;
+            game->fleet.serviceSites[vehicle].flags = 0;
         }
     } else {
         game_queueTileChange(game, cursor_x, cursor_y, true, false);
@@ -757,13 +757,13 @@ bool game_buyTrainAtCursor(Game *game) {
         return false;
     }
     int direction =
-        (game->fleet.vehicleFlags[game->serviceVehicleAtCursor] & 0x40) == 64 ? 2 : 0;
+        (game->fleet.serviceSites[game->serviceVehicleAtCursor].flags & 0x40) == 64 ? 2 : 0;
     // Spawn on the depot that opened this dialog, taken from the captured
     // serviceVehicleAtCursor. The live tile cursor re-anchors to the screen
     // centre every Playing tick, so by the time "buy" fires it has drifted off
     // the depot; using it here would strand the engine on an empty tile.
-    int station_x = unsignedByte(game->fleet.serviceVehicleX[game->serviceVehicleAtCursor]);
-    int station_y = unsignedByte(game->fleet.serviceVehicleY[game->serviceVehicleAtCursor]);
+    int station_x = unsignedByte(game->fleet.serviceSites[game->serviceVehicleAtCursor].x);
+    int station_y = unsignedByte(game->fleet.serviceSites[game->serviceVehicleAtCursor].y);
     int train = game_allocateTrainSlot(
         game, station_x, station_y,
         game->build.wagonType < 3 ? 0 : 1, game->build.wagonType,

@@ -342,6 +342,46 @@ TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
     delete game;
 }
 
+TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
+    Game* game = make_game();
+    CHECK(game->fleet.serviceSites[0].flags == 0);
+    CHECK(game->fleet.serviceSites[kServiceVehicleSlotCount - 1].resourceStock[4] == 0);
+
+    ServiceSite& first = game->fleet.serviceSites[3];
+    first.flags = static_cast<int8_t>(0x83);
+    first.x = 14;
+    first.unloadFlags = 9;
+    first.resourceStock[0] = 1234;
+    first.resourceStock[4] = -2345;
+    first.loadFlags = 7;
+    ServiceSite& last = game->fleet.serviceSites[kServiceVehicleSlotCount - 1];
+    last.y = 27;
+    last.resourceStock[2] = 30000;
+
+    game->saveCodec.walk(*game, 4);
+    first = ServiceSite{};
+    last = ServiceSite{};
+    game->saveCodec.walk(*game, 5);
+
+    CHECK(static_cast<uint8_t>(first.flags) == 0x83);
+    CHECK(first.x == 14);
+    CHECK(first.unloadFlags == 9);
+    CHECK(first.resourceStock[0] == 1234);
+    CHECK(first.resourceStock[4] == -2345);
+    CHECK(first.loadFlags == 0);
+    CHECK(last.y == 27);
+    CHECK(last.resourceStock[2] == 30000);
+
+    const int slot = game_allocateServiceVehicleSlot(game, 2, 4, 5, true, false);
+    CHECK(slot == 0);
+    CHECK(game->fleet.serviceSites[slot].x == 4);
+    CHECK(game->fleet.serviceSites[slot].y == 5);
+    for (ServiceSite& site : game->fleet.serviceSites)
+        site.flags = static_cast<int8_t>(0x80);
+    CHECK(game_allocateServiceVehicleSlot(game, 2, 4, 5, true, false) == 5000);
+    delete game;
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);
