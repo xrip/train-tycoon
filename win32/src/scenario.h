@@ -46,7 +46,7 @@ struct Scenario {
     int8_t duplicateRowState = 0;
     int32_t offerTypeTransitionCode = 0;
     int32_t offerEffectTransitionCode = 0;
-    int8_t routeSlotIndex = 0;
+    int8_t playerNameCursor = 0;
     int8_t routeResourceFlags[kMenuRowCount]{};
     std::vector<int8_t> offerTypesByEffect[kOfferEffectCount]{};
     int8_t offerEffectSchedule[kOfferEffectCount][kOfferScheduleFieldCount]{};

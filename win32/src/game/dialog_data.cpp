@@ -270,7 +270,7 @@ std::optional<std::vector<int8_t>> game_resolveDialogValue(
             if (field == 0) {
                 memset(game->scenario.playerNameCursorMarker, 0,
                        sizeof(game->scenario.playerNameCursorMarker));
-                game->scenario.playerNameCursorMarker[game->scenario.routeSlotIndex] = 28;
+                game->scenario.playerNameCursorMarker[game->scenario.playerNameCursor] = 28;
                 return copy_codes(game->scenario.playerNameCursorMarker, kPlayerNameCodeCount);
             }
             break;

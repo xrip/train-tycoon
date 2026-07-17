@@ -298,24 +298,24 @@ void game_handleBuildMenuState(Game *game, int32_t n, int32_t n2) {
             game->ui.pendingTransitionCode = n2 == 40 ? 27 : 1; game_setState(game, GameState::Playing); break;
         case 27:
             if (n2 == 40) { game->scenario.highScoreUploadRequested = true; game_setState(game, GameState::HighScoreSync); break; }
-            if (n2 == 0) game->scenario.routeSlotIndex = (int8_t)(game->scenario.routeSlotIndex - 1);
-            if (n2 == 1) game->scenario.routeSlotIndex = (int8_t)(game->scenario.routeSlotIndex + 1);
-            if (game->scenario.routeSlotIndex < 0) game->scenario.routeSlotIndex = 9;
-            if (game->scenario.routeSlotIndex == 10) game->scenario.routeSlotIndex = 0;
-            game->assets.spriteCycleCursor = game->scenario.playerNameCodes[game->scenario.routeSlotIndex];
+            if (n2 == 0) game->scenario.playerNameCursor = (int8_t)(game->scenario.playerNameCursor - 1);
+            if (n2 == 1) game->scenario.playerNameCursor = (int8_t)(game->scenario.playerNameCursor + 1);
+            if (game->scenario.playerNameCursor < 0) game->scenario.playerNameCursor = 9;
+            if (game->scenario.playerNameCursor == 10) game->scenario.playerNameCursor = 0;
+            game->assets.spriteCycleCursor = game->scenario.playerNameCodes[game->scenario.playerNameCursor];
             if (n2 == 2) {
                 game->assets.spriteCycleCursor = (int8_t)(game->assets.spriteCycleCursor - 1);
                 if (game->assets.spriteCycleCursor < 0) game->assets.spriteCycleCursor = 95;
                 if (game->assets.spriteCycleCursor == 69) game->assets.spriteCycleCursor = 65;
                 if (game->assets.spriteCycleCursor == 39) game->assets.spriteCycleCursor = 17;
-                game->scenario.playerNameCodes[game->scenario.routeSlotIndex] = game->assets.spriteCycleCursor;
+                game->scenario.playerNameCodes[game->scenario.playerNameCursor] = game->assets.spriteCycleCursor;
             }
             if (n2 == 3) {
                 game->assets.spriteCycleCursor = (int8_t)(game->assets.spriteCycleCursor + 1);
                 if (game->assets.spriteCycleCursor == 18) game->assets.spriteCycleCursor = 40;
                 if (game->assets.spriteCycleCursor == 66) game->assets.spriteCycleCursor = 70;
                 if (game->assets.spriteCycleCursor == 96) game->assets.spriteCycleCursor = 0;
-                game->scenario.playerNameCodes[game->scenario.routeSlotIndex] = game->assets.spriteCycleCursor;
+                game->scenario.playerNameCodes[game->scenario.playerNameCursor] = game->assets.spriteCycleCursor;
             }
             if (n2 >= 0) break;
             game_persistSnapshotMode0(game);
