@@ -2,15 +2,16 @@
 #include "game_internal.h"
 #include <cstdlib>
 
-int32_t game_accumulateTrainTurns(Game *game, int32_t car) {
+int32_t Fleet::accumulate_turns(const World& world, int32_t car) const {
     if (car == -1) return 0;
-    int tile = game->world.terrain.tileMap[unsignedByte(game->fleet.trainCars[car].x)][unsignedByte(game->fleet.trainCars[car].y)];
+    int tile = world.terrain.tileMap[unsignedByte(trainCars[car].x)]
+                                    [unsignedByte(trainCars[car].y)];
     int turn = 0;
-    if (tile == 77) turn = game->fleet.trainCars[car].direction == 0 ? -1 : 1;
-    if (tile == 79) turn = game->fleet.trainCars[car].direction == 0 ? 1 : -1;
-    if (tile == 78) turn = game->fleet.trainCars[car].direction == 2 ? 1 : -1;
-    if (tile == 80) turn = game->fleet.trainCars[car].direction == 2 ? -1 : 1;
-    return game_accumulateTrainTurns(game, game->fleet.trainCars[car].nextCar) + turn;
+    if (tile == 77) turn = trainCars[car].direction == 0 ? -1 : 1;
+    if (tile == 79) turn = trainCars[car].direction == 0 ? 1 : -1;
+    if (tile == 78) turn = trainCars[car].direction == 2 ? 1 : -1;
+    if (tile == 80) turn = trainCars[car].direction == 2 ? -1 : 1;
+    return accumulate_turns(world, trainCars[car].nextCar) + turn;
 }
 
 int32_t Fleet::find_service_site_at(int32_t x, int32_t y) const {
@@ -274,7 +275,7 @@ void game_updateTrain(Game *game, int32_t head) {
         if (train_flag::isHead(game->fleet.trainCars[head].flags)) {
             game->fleet.trainCars[head].energyCargoOrRemovalTicks =
                 (int8_t)(game->fleet.trainCars[head].secondaryCargoOrBaseEnergy
-                         + game_accumulateTrainTurns(game, head) / 2
+                         + game->fleet.accumulate_turns(game->world, head) / 2
                          + game->fleet.count_cars(head) / 2
                          + game->fleet.trainCars[head].ageYears / 3);
         }

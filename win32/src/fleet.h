@@ -4,6 +4,8 @@
 #include "game_constants.h"
 #include <cstdint>
 
+struct World;
+
 namespace train_flag {
 // Bit 0x10 is used by movement code, but its exact meaning is still open.
 // Service-vehicle flags are a separate encoding and stay unnamed.
@@ -82,6 +84,7 @@ struct Fleet {
     int32_t collect_nearby_service_resource(int32_t site, int32_t resource,
                                              int32_t wanted);
     bool can_load_at_service_site(int32_t head, int32_t site) const;
+    int32_t accumulate_turns(const World& world, int32_t car) const;
 
     TrainCar trainCars[kTrainSlotCount]{};
 
