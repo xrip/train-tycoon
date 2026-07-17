@@ -464,6 +464,21 @@ TEST_CASE("fast: offer records keep defaults and save field positions") {
     delete game;
 }
 
+TEST_CASE("fast: type two offer progress handles zero money") {
+    Game* game = make_game();
+    Offer& offer = game->offerBoard.offers[0];
+    offer.objectiveType = 2;
+    offer.target = 1000;
+
+    game->economy.money = 500;
+    CHECK(game_computeMenuRowDisplayValue(game, 0) == 50);
+    game->economy.money = -500;
+    CHECK(game_computeMenuRowDisplayValue(game, 0) == 0);
+    game->economy.money = 0;
+    CHECK(game_computeMenuRowDisplayValue(game, 0) == 0);
+    delete game;
+}
+
 TEST_CASE("full: buying a train places it on the selected depot, not the drifted cursor") {
     Game* game = make_game();
     generate_scenario(game, 0);

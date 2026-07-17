@@ -135,9 +135,13 @@ int8_t game_computeMenuRowDisplayValue(Game *game, int32_t row) {
     if (game->offerBoard.offers[row].objectiveType == 1) {
         value = 100 * game->offerBoard.offers[row].progress / game->offerBoard.offers[row].target;
     } else if (game->offerBoard.offers[row].objectiveType == 2) {
-        value = game->economy.money > 0
-                ? 100 * game->economy.money / game->offerBoard.offers[row].target
-                : 100 * game->offerBoard.offers[row].target / game->economy.money;
+        if (game->economy.money == 0) {
+            value = 0;
+        } else {
+            value = game->economy.money > 0
+                    ? 100 * game->economy.money / game->offerBoard.offers[row].target
+                    : 100 * game->offerBoard.offers[row].target / game->economy.money;
+        }
     } else if (game->offerBoard.offers[row].objectiveType >= 4 && game->offerBoard.offers[row].objectiveType <= 14) {
         value = 100 * game->offerBoard.offers[row].progress / game->offerBoard.offers[row].target;
     } else {
