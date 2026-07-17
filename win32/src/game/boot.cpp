@@ -288,7 +288,8 @@ void Game::advance_frame() {
     } else {
         --game->ui.keyRepeatDelay;
     }
-    if (game->ui.currentKey != 0 && game->ui.currentKey != -999) game_handleKey(game, game->ui.currentKey);
+    if (game->ui.currentKey != 0 && game->ui.currentKey != -999)
+        game->handle_key(game->ui.currentKey);
     if (game->ui.currentKey == -999)
         game->ui.reset_key_state(game->ui.currentKey);
     if (game->ui.inputSubState > 0) --game->ui.inputSubState;

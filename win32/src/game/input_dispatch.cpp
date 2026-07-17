@@ -4,7 +4,8 @@
 #include "midp_input.h"
 
 // Direction: 1=down/right, 2=up/left, 3=select.
-void game_registerCityEntry(Game *game, int8_t by) {
+void Game::handle_dialog_input(int8_t by) {
+    Game *game = this;
     switch (by) {
         case 1:
             if (game->ui.cursorSelectX != -2) { game->ui.cursorDragY = game->ui.cursorSelectX; break; }
@@ -24,7 +25,8 @@ void game_registerCityEntry(Game *game, int8_t by) {
     }
 }
 
-void game_handleKey(Game *game, int32_t n) {
+void Game::handle_key(int32_t n) {
+    Game *game = this;
     int n2;
     if (n == 65 || n == 97) n = 48;
     if (n == 89 || n == 121) n = 42;
@@ -52,20 +54,20 @@ void game_handleKey(Game *game, int32_t n) {
             break;
         case GameState::MenuOverlay:
             if (n == 56 || n == 54) {
-                game_registerCityEntry(game, 1);
+                game->handle_dialog_input(1);
                 game->ui.keyRepeatDelay = 4;
                 game->ui.heldKey = n;
             }
             if (n == 50 || n == 52) {
-                game_registerCityEntry(game, 2);
+                game->handle_dialog_input(2);
                 game->ui.keyRepeatDelay = 4;
                 game->ui.heldKey = n;
             }
-            if (n == 53) game_registerCityEntry(game, 3);
+            if (n == 53) game->handle_dialog_input(3);
             if (!game->ui.pauseMenuOpen || n != 42) break;
             game->ui.cursorDragY = -3;
             game->ui.cursorDragX = -1;
-            game_registerCityEntry(game, 3);
+            game->handle_dialog_input(3);
             break;
         case GameState::Playing:
             game->ui.lastKeyCode = n;

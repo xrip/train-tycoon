@@ -72,6 +72,8 @@ typedef struct Game {
     std::optional<std::vector<int8_t>> resolve_dialog_value(int32_t screen,
                                                             int32_t field);
     void render_map(Surface& surface);
+    void handle_key(int32_t key_code);
+    void handle_dialog_input(int8_t direction);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
