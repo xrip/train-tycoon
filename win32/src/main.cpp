@@ -105,6 +105,9 @@ int main(void) {
         return 1;
 
     Game game(std::make_unique<WinMmMusicPlayer>(), midp_current_time_millis());
+    // Opt-in road-transport proof of concept (see road.h). Off unless the env
+    // var is set, so normal play is byte-for-byte unchanged.
+    if (getenv("TRAIN_TYCOON_ROAD_POC")) game.set_road_poc_enabled(true);
     game.start(); // resource load + initial state (no thread spawn)
 
     Surface screen;
@@ -131,12 +134,25 @@ int main(void) {
         if (mfb_poll_lclick(&click_x, &click_y))
             game.pointer_pressed(click_x, click_y);
 
-        // Edge-scroll: pan the map when the mouse sits near a viewport edge.
-        // Applied before game_run so game_viewportZoomKey (inside run) clamps
-        // the advance to the map and keeps viewportBase in lockstep with the
-        // camera (see game_pointerEdgeScroll).
-        if (mouse_inside)
-            game.pointer_edge_scroll(mouse_x, mouse_y);
+        // Right-drag map panning (Transport Tycoon style): while the right button
+        // is held, feed the per-frame mouse motion to the camera. Applied before
+        // game_run so game_viewportZoomKey (inside run) clamps the advance to the
+        // map and keeps viewportBase in lockstep with the camera (see
+        // game_pointerDragPan). The window captures the mouse on right-press, so
+        // mouse_x/mouse_y keep updating even if the drag leaves the client area.
+        {
+            static int drag_prev_x = 0, drag_prev_y = 0;
+            static bool dragging = false;
+            if (mfb_mouse_right_down()) {
+                if (dragging)
+                    game.pointer_drag_pan(mouse_x - drag_prev_x, mouse_y - drag_prev_y);
+                dragging = true;
+                drag_prev_x = mouse_x;
+                drag_prev_y = mouse_y;
+            } else {
+                dragging = false;
+            }
+        }
 
         game.advance_frame();      // one iteration of the original run() loop
 
@@ -151,6 +167,10 @@ int main(void) {
             game.pointer_moved(mouse_x, mouse_y);
         else
             game.pointer_moved(-1, -1);
+
+        // While hovering a field tile in Playing, the game draws its own arrow at
+        // that tile -- hide the OS cursor so the game arrow becomes the pointer.
+        mfb_set_hide_cursor(game.should_hide_os_cursor());
 
         game.render(screen);
 

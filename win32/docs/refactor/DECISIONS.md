@@ -167,9 +167,11 @@ Track and tile codes (second MODEL-01 leaf), in `game_constants.h`:
     (scenery/obstacle/water); exact meaning not yet proven.
   - Owner code `1` / `trackMap == 65` (station/service track) and the crossing
     station masks `& 0x47`, `& 0x78` in `gc_isCityOrStationTile`.
-  - The individual tile shape ids: straight/turn/bridge codes 70..90, city and
-    terrain ranges (0, 3..28, 29..33, 34..41, 42..48, 50..68) whose minimap
-    colour grouping is in `gc_update` state `BuildingMinimap`. These need a
+  - The individual tile shape ids: straight/turn/bridge codes 70..90; road shape
+    codes 42..48 (straights/corners/crossing, laid as city streets by
+    `place_terrain_patch` -- see D-013); and the remaining city and terrain
+    ranges (0, 3..28, 29..33, 34..41, 50..68) whose minimap colour grouping is in
+    `gc_update` state `BuildingMinimap`. The non-road ranges still need a
     per-range evidence pass before naming.
 
 Menu transition codes (third MODEL-01 leaf), in `game_constants.h`
@@ -248,8 +250,19 @@ Evidence gathered for the map tile ids, recorded before any rename (per the
   computed from height-corner comparisons in `gc_toggleFlagInlined` (16+ distinct
   configurations); `29..33` = passable scenery/obstacle tiles scattered in
   generation stage `STAGE_SCATTER_OBSTACLES` (`29 + rng%5`); `34..40` = city
-  zone tiles (`gc_randomCityTile`); `41..68` = structures, resources, and
-  water/coast; `70..90` = track, bridge, and station shapes; `76` = `tile::CROSSING`.
+  zone tiles (`gc_randomCityTile`); `42..48` = road/street shapes (the two
+  straights, the four corners, and the crossing), laid as a connected street grid
+  between city zone tiles by `place_terrain_patch`; `41` and `50..68` = other
+  structures, resources, and water/coast; `70..90` = track, bridge, and station
+  shapes; `76` = `tile::CROSSING`.
+- Correction (road-transport PoC): `42..48` were first recorded above as part of
+  "structures"; they are in fact the road tileset. Evidence: `place_terrain_patch`
+  (`map_gen.cpp`) writes them as a connected street grid running between city zone
+  tiles (34..40), and a rendered city shows pavement strips there. The
+  neighbour-based orientation rule is at `map_gen.cpp:241..274` -- 42/43 are the
+  two straights, 44 the crossing (3+ neighbours), 45..48 the four corners. Their
+  sprites are grass diamonds with a thin grey paved stripe, so a mean-colour scan
+  misreads them as "greenish". Rail is the separate set 70..76.
 - The catch: the same numeric bound means different things in different
   predicates. `>= 29 && <= 33` tests "is scenery", but `> 33` in
   `gc_placeTerrainPatch` tests "is a structure tile (>= 34)", i.e. 33 is the top

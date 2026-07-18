@@ -53,48 +53,69 @@ void Game::click_bottom_bar(int32_t x) {
 void Game::pointer_moved(int32_t x, int32_t y) {
     Game* game = this;
     game->ui.mouseOverField = false;
+    // Overlay menus (start menu, dialogs): make the row highlight follow the
+    // mouse so it is clear which row/button a click will hit. This mirrors
+    // keyboard navigation -- cursorDragY is the selected row and the overlay
+    // redraws its highlight from it every frame. We only move the cursor; the
+    // action still fires on click (pointer_pressed). Not applied to the Playing
+    // bottom bar or the MapOverview confirm bar, where "selecting" arms a tool
+    // or toggles a mode rather than merely highlighting.
+    if (game->gameState == GameState::MenuOverlay) {
+        const int hx = static_cast<int>(x), hy = static_cast<int>(y);
+        int row_index = 0, option_code = 0;
+        if (game->clickMap.hit_menu_row(hx, hy, &row_index, &option_code))
+            game->ui.cursorDragY = row_index;
+        else if (game->clickMap.hit_close(hx, hy))
+            game->ui.cursorDragY = -1;  // -1 selects the top-right close (X)
+        return;
+    }
     if (game->gameState != GameState::Playing) return;
     if (y < 15 || y >= game->renderer.bottomBarY) return;  // top status strip / bottom bar = UI chrome
+    // render_map draws the map shifted down by the 15px top status strip
+    // (drawY = ... - viewportCenterY + 15). Undo that here so the resolved tile
+    // sits under the cursor instead of 15px below it.
     int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
-    int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
+    int32_t anchor_y = y - 15 + game->renderer.camera.viewportCenterY;
     game->compute_viewport_bounds(anchor_x, anchor_y);
     game->ui.mouseOverField = !game->ui.blockBuildMenu;
 }
 
-// Edge-scroll: with the mouse held near a gameplay-viewport edge, pan the map
-// the same way holding an arrow key does. We advance the camera (viewportCenter)
-// and the cursor anchor (mapScale; viewportBase = mapScale/2) together so they
-// stay in lockstep. game_viewportZoomKey -- run next, inside game_run --
-// re-derives viewportBase from mapScale and clamps to the map; with
-// viewportBase - viewportCenter unchanged its camera-follow does not fight us,
-// and the logical cursor doesn't drift off to a map edge. The visible cursor
-// stays on the mouse (game_pointerMoved runs after run), so the world scrolls
-// under it. Gated to match the arrow path: Playing only, and only while a
+// Right-drag map panning, Transport Tycoon style: while the right mouse button
+// is held, moving the mouse drags the world under the cursor. (dx, dy) is the
+// mouse motion since the last frame, in screen pixels. We grab the map -- the
+// camera moves opposite the drag, so the point under the cursor follows the
+// mouse (like Google Maps / a touchscreen). To keep the keyboard cursor's screen
+// position steady we advance the camera (viewportCenter) and the cursor anchor
+// (mapScale; viewportBase = mapScale/2) together. game_viewportZoomKey -- run
+// next, inside game_run -- re-derives viewportBase from mapScale and clamps to
+// the map; with viewportBase - viewportCenter unchanged its camera-follow does
+// not fight us. Gated to match the arrow path: Playing only, and only while a
 // build-menu row is enabled (game_viewportZoomKey is skipped otherwise, so the
-// advance would never be clamped/processed). margin/step are tuning knobs.
-void Game::pointer_edge_scroll(int32_t x, int32_t y) {
+// advance would never be clamped/processed).
+void Game::pointer_drag_pan(int32_t dx, int32_t dy) {
     Game* game = this;
     if (game->gameState != GameState::Playing) return;
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
-    if (y < 15 || y >= game->renderer.bottomBarY) return;  // only inside the gameplay viewport
-
-    constexpr int32_t margin = 12;  // px from the edge that arms a pan
-    constexpr int32_t step = 8;     // px/frame the camera moves (screen units)
-
-    int32_t dx = 0;
-    if (x <= margin) dx = -step;
-    else if (x >= game->renderer.canvasWidth - 1 - margin) dx = step;
-    int32_t dy = 0;
-    const int32_t top = 15 + margin;
-    const int32_t bottom = game->renderer.bottomBarY - 1 - margin;
-    if (y <= top) dy = -step;
-    else if (y >= bottom) dy = step;
     if (dx == 0 && dy == 0) return;
 
-    game->renderer.camera.viewportCenterX += dx;
-    game->renderer.camera.viewportCenterY += dy;
-    game->renderer.camera.mapScaleX += dx * 2;  // keep viewportBase (= mapScale/2) locked to the camera
-    game->renderer.camera.mapScaleY += dy * 2;
+    const int32_t camDx = -dx;  // grab-the-map: camera moves against the drag
+    const int32_t camDy = -dy;
+    game->renderer.camera.viewportCenterX += camDx;
+    game->renderer.camera.viewportCenterY += camDy;
+    game->renderer.camera.mapScaleX += camDx * 2;  // keep viewportBase (= mapScale/2) locked to the camera
+    game->renderer.camera.mapScaleY += camDy * 2;
+}
+
+// Hide the OS cursor only where the game draws its own arrow at the mouse: in
+// Playing, over a valid field tile (mouseOverField), and with a build row enabled
+// (draw_build_menu_row draws sprite 200 at cursorScreenX/Y only then). Over UI
+// chrome, water/out-of-bounds, or menus the OS arrow stays, so the pointer is
+// never invisible.
+bool Game::should_hide_os_cursor() const {
+    const Game* game = this;
+    if (game->gameState != GameState::Playing) return false;
+    if (!game->ui.mouseOverField) return false;
+    return game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex];
 }
 
 void Game::pointer_pressed(int32_t x, int32_t y) {
@@ -139,7 +160,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             // so a click without a prior hover still lands on the right tile.)
             if (y >= 15) {
                 int32_t anchor_x = x + game->renderer.camera.viewportCenterX;
-                int32_t anchor_y = y + game->renderer.camera.viewportCenterY;
+                int32_t anchor_y = y - 15 + game->renderer.camera.viewportCenterY;  // undo the 15px top-strip draw shift
                 game->compute_viewport_bounds(anchor_x, anchor_y);
                 if (!game->ui.blockBuildMenu) game->open_build_menu();
             }

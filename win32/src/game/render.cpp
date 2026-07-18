@@ -440,12 +440,17 @@ void Game::PackedDialogRender::renderContent() {
                 && itemY + yOffset + 8 + selectionBottom >= game->renderer.clipY) {
                 if ((itemFlags & 0x10) == 0x10) {
                     if (game->ui.cursorDragY == -3) game->ui.cursorDragY = itemIndex;
-                    // Capture every visible text row as a full-width hit band, including
-                    // the topmost row whose band starts above the clip and so fails the
-                    // fully-in-clip test below. Without this the default-selected first
-                    // menu item is drawn and keyboard-selectable but not mouse-clickable.
-                    game->clickMap.add_menu_row(game->renderer.clipX, itemY + yOffset - selectionTop - 3,
-                                                game->renderer.clipWidth, 10 + selectionTop + selectionBottom,
+                    // Capture the row's exact selection rectangle -- the same rect the
+                    // highlight fill below draws -- so the hit region matches the visible
+                    // highlight. Some dialogs lay two options out side by side on one line
+                    // (same y, different x, e.g. Yes/No); a full clip-width band would make
+                    // both options overlap and only the last-drawn one hittable. Captured
+                    // here (outside the fully-in-clip test below) so the topmost, partly
+                    // clipped default row is mouse-selectable too.
+                    game->clickMap.add_menu_row(contentX + xOffset - selectionLeft,
+                                                itemY + yOffset - selectionTop - 3,
+                                                6 * visibleCharacterCount + selectionLeft + selectionRight - 1,
+                                                10 + selectionTop + selectionBottom,
                                                 itemIndex, actionCode);
                     if (itemY + yOffset + 8 + selectionBottom <= game->renderer.clipY + game->renderer.clipHeight
                         && itemY + yOffset - 3 - selectionTop >= game->renderer.clipY) {

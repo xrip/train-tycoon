@@ -64,6 +64,11 @@ unsigned mfb_double_click_ms(void);
 // is inside the window's client area, false when it has left.
 bool mfb_mousepos(int *x, int *y);
 
+// True while the right mouse button is held down. Used for Transport Tycoon
+// style right-drag map panning. The window captures the mouse on right-press so
+// the held state (and motion) keep reporting even if the drag leaves the client.
+bool mfb_mouse_right_down(void);
+
 // Capture/release the mouse for first-person controls. While captured, the
 // cursor is hidden and constrained to the client area, and raw relative motion
 // is accumulated for mfb_poll_mouse_delta().
@@ -129,6 +134,7 @@ typedef struct {
     int mouse_x;          // framebuffer-pixel cursor position
     int mouse_y;
     int mouse_inside;     // cursor currently within the client area
+    int mouse_right_down; // right button held (for right-drag map panning)
     int hide_cursor;      // hide the OS cursor over the client area
     int mouse_captured;   // first-person raw-input mode
     LONG mouse_delta_x;   // accumulated raw relative motion
@@ -245,6 +251,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, const UINT message, const WPARAM wPar
 
         case WM_KILLFOCUS:
             mfb_set_mouse_capture(0);
+            mfb_state->mouse_right_down = 0;  // capture is lost with focus
             for (size_t i = 0; i < sizeof(mfb_state->keys); ++i)
                 mfb_state->keys[i] = 0;
             break;
@@ -293,8 +300,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, const UINT message, const WPARAM wPar
             mfb_state->rclick_x = fx;
             mfb_state->rclick_y = fy;
             mfb_state->rclick_pending = 1;
+            mfb_state->mouse_right_down = 1;
+            SetCapture(hWnd);  // keep the drag alive if it leaves the client
             break;
         }
+
+        case WM_RBUTTONUP:
+            mfb_state->mouse_right_down = 0;
+            ReleaseCapture();
+            break;
 
         case WM_LBUTTONDOWN: {
             const int cx = (int) (short) LOWORD(lParam);
@@ -533,6 +547,10 @@ bool mfb_mousepos(int *x, int *y) {
     if (x) *x = mfb_state->mouse_x;
     if (y) *y = mfb_state->mouse_y;
     return mfb_state->mouse_inside != 0;
+}
+
+bool mfb_mouse_right_down(void) {
+    return mfb_state && mfb_state->mouse_right_down != 0;
 }
 
 void mfb_set_mouse_capture(const int capture) {

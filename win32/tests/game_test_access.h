@@ -57,6 +57,9 @@ struct GameTestAccess {
     static void build_place_track_piece(Game& game, int32_t piece) {
         game.build_place_track_piece(piece);
     }
+
+    static std::vector<RoadVehicle>& road_cars(Game& game) { return game.roadCars; }
+    static void road_poc_tick(Game& game) { game.road_poc_tick(); }
 };
 
 #endif  // GAME_TEST_ACCESS_H

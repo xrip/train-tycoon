@@ -87,6 +87,7 @@ add_executable(train_tycoon_tests
     tests/test_main.cpp
     tests/test_smoke.cpp
     tests/test_text_catalog.cpp
+    tests/test_road.cpp
 )
 target_link_libraries(train_tycoon_tests PRIVATE train_tycoon_legacy)
 enable_strict_warnings(train_tycoon_tests)

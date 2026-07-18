@@ -159,6 +159,7 @@ void Game::render_map(Surface& surface) {
         }
     }
     game->draw_build_menu_row(*g);
+    if (game->roadPocEnabled) game->road_poc_render(*g);
     midp_set_clip(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
     game->draw_confirm_dialog(*g);
 }

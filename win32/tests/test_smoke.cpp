@@ -1515,12 +1515,13 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     CHECK(ty >= 0);
     CHECK(ty < GameTestAccess::world(*game).terrain.mapHeight);
 
-    // Round-trip: the resolved tile's screen centre (the flat iso forward
-    // transform the resolver mirrors) must sit within one tile of the hover.
+    // Round-trip: the resolved tile's drawn screen centre (the flat iso forward
+    // transform the resolver mirrors, including the +15 top-strip draw shift)
+    // must sit within one tile of the hover.
     const int tile_screen_x =
         ty * 16 + tx * 16 + 16 - GameTestAccess::renderer(*game).camera.viewportCenterX;
     const int tile_screen_y =
-        GameTestAccess::world(*game).terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - GameTestAccess::renderer(*game).camera.viewportCenterY;
+        GameTestAccess::world(*game).terrain.mapHalfWidth - tx * 8 + ty * 8 + 8 - GameTestAccess::renderer(*game).camera.viewportCenterY + 15;
     const int dx = tile_screen_x - hover_x;
     const int dy = tile_screen_y - hover_y;
     CHECK(dx >= -16);
@@ -1534,7 +1535,7 @@ TEST_CASE("full: pointer hover resolves the tile under the mouse") {
     delete game;
 }
 
-TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
+TEST_CASE("full: pointer right-drag pans the viewport (grab-the-map)") {
     Game* game = make_game();
     generate_scenario(game, 0);
     REQUIRE(GameTestAccess::state(*game) == 30);
@@ -1545,34 +1546,59 @@ TEST_CASE("full: pointer edge-scroll pans the viewport toward the edge") {
     GameTestAccess::renderer(*game).canvasHeight = kScreenHeight;
     GameTestAccess::renderer(*game).bottomBarY = GameTestAccess::renderer(*game).canvasHeight - 15;
 
-    const int mid_x = kScreenWidth / 2;
-    const int mid_y = (15 + GameTestAccess::renderer(*game).bottomBarY) / 2;
     const int cx0 = GameTestAccess::renderer(*game).camera.viewportCenterX;
     const int cy0 = GameTestAccess::renderer(*game).camera.viewportCenterY;
     const int msx0 = GameTestAccess::renderer(*game).camera.mapScaleX;
     const int msy0 = GameTestAccess::renderer(*game).camera.mapScaleY;
 
-    // Middle of the viewport never arms a pan.
-    game->pointer_edge_scroll(mid_x, mid_y);
+    // A zero motion delta never moves the camera.
+    game->pointer_drag_pan(0, 0);
     CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX == cx0);
     CHECK(GameTestAccess::renderer(*game).camera.viewportCenterY == cy0);
 
-    // Right edge pans right; mapScale (= 2*viewportBase) moves 2x the camera
-    // delta so the run loop's camera-follow sees an unchanged cursor offset and
-    // doesn't fight the pan. A cardinal edge only moves one axis.
-    game->pointer_edge_scroll(kScreenWidth - 1, mid_y);
-    const int right_dx = GameTestAccess::renderer(*game).camera.viewportCenterX - cx0;
-    CHECK(right_dx > 0);
-    CHECK(GameTestAccess::renderer(*game).camera.mapScaleX - msx0 == 2 * right_dx);
+    // Grab-the-map: dragging right (dx > 0) moves the camera left -- opposite the
+    // drag -- so the point under the cursor follows the mouse. mapScale
+    // (= 2*viewportBase) moves 2x the camera delta so the run loop's
+    // camera-follow sees an unchanged cursor offset and doesn't fight the pan. A
+    // single-axis drag moves only that axis.
+    const int drag = 20;
+    game->pointer_drag_pan(drag, 0);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX - cx0 == -drag);
+    CHECK(GameTestAccess::renderer(*game).camera.mapScaleX - msx0 == 2 * -drag);
     CHECK(GameTestAccess::renderer(*game).camera.viewportCenterY == cy0);
 
-    // Top-right corner pans along both axes (right + up).
-    game->pointer_edge_scroll(kScreenWidth - 1, 15);
-    const int dx = GameTestAccess::renderer(*game).camera.viewportCenterX - (cx0 + right_dx);
-    const int dy = GameTestAccess::renderer(*game).camera.viewportCenterY - cy0;
-    CHECK(dx > 0);
-    CHECK(dy < 0);
-    CHECK(GameTestAccess::renderer(*game).camera.mapScaleY - msy0 == 2 * dy);
+    // A downward drag moves only the Y axis, also opposite the drag.
+    game->pointer_drag_pan(0, drag);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterY - cy0 == -drag);
+    CHECK(GameTestAccess::renderer(*game).camera.mapScaleY - msy0 == 2 * -drag);
+    CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX - cx0 == -drag);
+
+    delete game;
+}
+
+TEST_CASE("full: road PoC lays a route and drives a car on a generated map") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    REQUIRE(GameTestAccess::state(*game) == 30);
+
+    game->set_road_poc_enabled(true);
+    GameTestAccess::road_poc_tick(*game);  // first tick lazily lays the demo road
+
+    std::vector<RoadVehicle>& cars = GameTestAccess::road_cars(*game);
+    REQUIRE(cars.size() == 1);
+    REQUIRE(cars[0].active());
+    REQUIRE(cars[0].route.size() >= 3);  // real maps yield a long drivable route
+
+    // The current segment connects two 4-connected tiles (squared step == 1).
+    const RoadPoint a = cars[0].from_tile();
+    const RoadPoint b = cars[0].to_tile();
+    CHECK((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) == 1);
+
+    // Driving one full tile advances the car to the next segment of the road.
+    const int segment0 = cars[0].segment;
+    for (int i = 0; i < RoadVehicle::kStepsPerTile; ++i)
+        GameTestAccess::road_poc_tick(*game);
+    CHECK(cars[0].segment == segment0 + 1);
 
     delete game;
 }

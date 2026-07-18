@@ -311,6 +311,7 @@ void Game::advance_frame() {
             if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) continue;
             game->viewport_zoom_key();
         }
+        if (game->roadPocEnabled) game->road_poc_tick();
     } else {
         game->update_state_machine();
     }

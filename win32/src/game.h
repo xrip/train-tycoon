@@ -16,6 +16,7 @@
 #include "music_controller.h"
 #include "click_map.h"
 #include "game_settings.h"
+#include "road.h"
 #include "midp.h"
 #include "support/grid.h"
 #include "support/java_random.h"
@@ -39,7 +40,10 @@ public:
     void key_released(int32_t key_code);
     void pointer_pressed(int32_t x, int32_t y);
     void pointer_moved(int32_t x, int32_t y);
-    void pointer_edge_scroll(int32_t x, int32_t y);
+    void pointer_drag_pan(int32_t dx, int32_t dy);
+    // True when the game draws its own cursor arrow at the hovered field tile, so
+    // the host can hide the OS cursor and let the game arrow be the pointer.
+    bool should_hide_os_cursor() const;
     void update_audio();
     void load_music();
     void play_music();
@@ -48,6 +52,8 @@ public:
     bool music_available() const;
     bool music_playing() const;
     std::string_view music_error() const;
+    // Turn on the opt-in road-transport proof of concept (see road.h).
+    void set_road_poc_enabled(bool on) { roadPocEnabled = on; }
 private:
     friend class SaveCodec;
     friend struct GameTestAccess;
@@ -180,6 +186,16 @@ private:
     void paint_map_overview(Surface& surface);
     void redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y);
     Image* wagon_car_sprite(int32_t context_code, int32_t slot_index);
+
+    // Road-transport proof of concept (opt-in via TRAIN_TYCOON_ROAD_POC). See
+    // road.h/road.cpp. All three are no-ops unless roadPocEnabled is set.
+    void road_poc_init();
+    void road_poc_tick();
+    void road_poc_render(Surface& surface);
+    bool roadPocEnabled = false;
+    bool roadPocInitDone = false;
+    RoadNetwork roadNet;
+    std::vector<RoadVehicle> roadCars;
 
     bool stopRequested = false;
     int32_t simSpeed = 1;
