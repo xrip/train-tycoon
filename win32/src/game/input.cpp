@@ -5,26 +5,43 @@
 
 namespace {
 
-int32_t cross_product_2d(int32_t n, int32_t n2, int32_t n3,
-                         int32_t n4, int32_t n5, int32_t n6) {
-    return (n3 - n) * (n2 - n6) - (n4 - n2) * (n - n5);
+namespace camera_motion {
+constexpr int32_t kPanVerticalPixels = 30;
+constexpr int32_t kPanHorizontalPixels = 60;
+constexpr int32_t kZoomEdgeDistance = 10;
+constexpr int32_t kTopViewportMargin = 8;
+constexpr int32_t kSideViewportMargin = 4;
+constexpr int32_t kViewportEdgeMargin = 20;
+constexpr int32_t kViewportCorrection = 11;
+constexpr int32_t kViewportCorrectionWithCanvas = 21;
+}  // namespace camera_motion
+
+namespace ui_timing {
+constexpr int32_t kConfirmCounterStart = 20;
+}  // namespace ui_timing
+
+int32_t cross_product_2d(int32_t origin_x, int32_t origin_y,
+                         int32_t point_a_x, int32_t point_a_y,
+                         int32_t point_b_x, int32_t point_b_y) {
+    return (point_a_x - origin_x) * (origin_y - point_b_y)
+         - (point_a_y - origin_y) * (origin_x - point_b_x);
 }
 
 }  // namespace
 
-void Game::key_released(int32_t n) {
+void Game::key_released(int32_t key_code) {
     Game* game = this;
-    (void)n;
-    game->ui.currentKey = -999;
+    (void)key_code;
+    game->ui.currentKey = input_key::Released;
 }
 
-void UiController::reset_key_state(int32_t n) {
-    (void)n;
-    currentKey = 0;
-    lastKeyCode = 0;
+void UiController::reset_key_state(int32_t key_code) {
+    (void)key_code;
+    currentKey = input_key::NoKey;
+    lastKeyCode = input_key::NoKey;
     keySubState = 0;
     keyRepeatDelay = 0;
-    heldKey = 0;
+    heldKey = input_key::NoKey;
     inputSubState = 0;
 }
 
@@ -36,31 +53,35 @@ void UiController::cycle_build_menu_index(bool forward) {
     confirmTargetState =
         buildMenuResultCodes[buildMenuMode][buildMenuItemIndex];
     menuDirty = true;
-    confirmCounter = 20;
+    confirmCounter = ui_timing::kConfirmCounterStart;
 }
 
-void Camera::pan(int32_t key, int32_t map_screen_width,
+void Camera::pan(int32_t input_key, int32_t map_screen_width,
                  int32_t map_screen_height, int32_t canvas_width,
                  int32_t viewport_height) {
-    if (key == 56 || key == 6) viewportCenterY += 30;
-    if (key == 50 || key == 1) viewportCenterY -= 30;
-    if (key == 54 || key == 5) viewportCenterX += 60;
-    if (key == 52 || key == 2) viewportCenterX -= 60;
-    if (key == 49) {
-        viewportCenterY -= 30;
-        viewportCenterX -= 60;
+    if (input_key == keypad_key::kDown || input_key == game_action::kDown)
+        viewportCenterY += camera_motion::kPanVerticalPixels;
+    if (input_key == keypad_key::kUp || input_key == game_action::kUp)
+        viewportCenterY -= camera_motion::kPanVerticalPixels;
+    if (input_key == keypad_key::kRight || input_key == game_action::kRight)
+        viewportCenterX += camera_motion::kPanHorizontalPixels;
+    if (input_key == keypad_key::kLeft || input_key == game_action::kLeft)
+        viewportCenterX -= camera_motion::kPanHorizontalPixels;
+    if (input_key == keypad_key::kUpLeft) {
+        viewportCenterY -= camera_motion::kPanVerticalPixels;
+        viewportCenterX -= camera_motion::kPanHorizontalPixels;
     }
-    if (key == 51) {
-        viewportCenterY -= 30;
-        viewportCenterX += 60;
+    if (input_key == keypad_key::kUpRight) {
+        viewportCenterY -= camera_motion::kPanVerticalPixels;
+        viewportCenterX += camera_motion::kPanHorizontalPixels;
     }
-    if (key == 55) {
-        viewportCenterY += 30;
-        viewportCenterX -= 60;
+    if (input_key == keypad_key::kDownLeft) {
+        viewportCenterY += camera_motion::kPanVerticalPixels;
+        viewportCenterX -= camera_motion::kPanHorizontalPixels;
     }
-    if (key == 57) {
-        viewportCenterY += 30;
-        viewportCenterX += 60;
+    if (input_key == keypad_key::kDownRight) {
+        viewportCenterY += camera_motion::kPanVerticalPixels;
+        viewportCenterX += camera_motion::kPanHorizontalPixels;
     }
     if (viewportCenterX < 0) viewportCenterX = 0;
     if (viewportCenterY < 0) viewportCenterY = 0;
@@ -76,56 +97,73 @@ void Camera::pan(int32_t key, int32_t map_screen_width,
 
 void Game::viewport_zoom_key() {
     Game* game = this;
-    int step = game->ui.advance_key_repeat();
-    int key = game->ui.lastKeyCode;
-    if (key == 56 || key == 6) game->renderer.camera.mapScaleY += step * 2;
-    if (key == 50 || key == 1) game->renderer.camera.mapScaleY -= step * 2;
-    if (key == 54 || key == 5) game->renderer.camera.mapScaleX += step * 2;
-    if (key == 52 || key == 2) game->renderer.camera.mapScaleX -= step * 2;
-    if (key == 49) {
-        game->renderer.camera.mapScaleY -= step;
-        game->renderer.camera.mapScaleX -= step * 2;
+    const int zoom_step = game->ui.advance_key_repeat();
+    const int input_key = game->ui.lastKeyCode;
+    if (input_key == keypad_key::kDown || input_key == game_action::kDown)
+        game->renderer.camera.mapScaleY += zoom_step * 2;
+    if (input_key == keypad_key::kUp || input_key == game_action::kUp)
+        game->renderer.camera.mapScaleY -= zoom_step * 2;
+    if (input_key == keypad_key::kRight || input_key == game_action::kRight)
+        game->renderer.camera.mapScaleX += zoom_step * 2;
+    if (input_key == keypad_key::kLeft || input_key == game_action::kLeft)
+        game->renderer.camera.mapScaleX -= zoom_step * 2;
+    if (input_key == keypad_key::kUpLeft) {
+        game->renderer.camera.mapScaleY -= zoom_step;
+        game->renderer.camera.mapScaleX -= zoom_step * 2;
     }
-    if (key == 51) {
-        game->renderer.camera.mapScaleY -= step;
-        game->renderer.camera.mapScaleX += step * 2;
+    if (input_key == keypad_key::kUpRight) {
+        game->renderer.camera.mapScaleY -= zoom_step;
+        game->renderer.camera.mapScaleX += zoom_step * 2;
     }
-    if (key == 55) {
-        game->renderer.camera.mapScaleY += step;
-        game->renderer.camera.mapScaleX -= step * 2;
+    if (input_key == keypad_key::kDownLeft) {
+        game->renderer.camera.mapScaleY += zoom_step;
+        game->renderer.camera.mapScaleX -= zoom_step * 2;
     }
-    if (key == 57) {
-        game->renderer.camera.mapScaleY += step;
-        game->renderer.camera.mapScaleX += step * 2;
+    if (input_key == keypad_key::kDownRight) {
+        game->renderer.camera.mapScaleY += zoom_step;
+        game->renderer.camera.mapScaleX += zoom_step * 2;
     }
 
     game->renderer.camera.viewportBaseX = game->renderer.camera.mapScaleX / 2;
     game->renderer.camera.viewportBaseY = game->renderer.camera.mapScaleY / 2;
-    if (game->renderer.camera.viewportBaseX > game->world.terrain.mapScreenWidth - 8)
-        game->renderer.camera.viewportBaseX = game->world.terrain.mapScreenWidth - 8;
-    if (game->renderer.camera.viewportBaseY > game->world.terrain.mapScreenHeight - 4)
-        game->renderer.camera.viewportBaseY = game->world.terrain.mapScreenHeight - 4;
+    if (game->renderer.camera.viewportBaseX
+        > game->world.terrain.mapScreenWidth - camera_motion::kTopViewportMargin)
+        game->renderer.camera.viewportBaseX =
+            game->world.terrain.mapScreenWidth - camera_motion::kTopViewportMargin;
+    if (game->renderer.camera.viewportBaseY
+        > game->world.terrain.mapScreenHeight - camera_motion::kSideViewportMargin)
+        game->renderer.camera.viewportBaseY =
+            game->world.terrain.mapScreenHeight - camera_motion::kSideViewportMargin;
 
     bool moved_view = false;
     if (game->renderer.camera.viewportCenterX > 0
-        && game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX <= 10) {
+        && game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX
+               <= camera_motion::kZoomEdgeDistance) {
         moved_view = true;
-        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX - 11;
+        game->renderer.camera.viewportCenterX =
+            game->renderer.camera.viewportBaseX - camera_motion::kViewportCorrection;
     }
     if (game->renderer.camera.viewportCenterY > 0
-        && game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY <= 10) {
-        moved_view = true;
-        game->renderer.camera.viewportCenterY = game->renderer.camera.viewportBaseY - 11;
-    }
-    if (game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX >= game->renderer.canvasWidth - 20) {
-        moved_view = true;
-        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX - game->renderer.canvasWidth + 21;
-    }
-    if (game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY
-        >= game->renderer.gameplayViewportHeight - 20) {
+        && game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY
+               <= camera_motion::kZoomEdgeDistance) {
         moved_view = true;
         game->renderer.camera.viewportCenterY =
-            game->renderer.camera.viewportBaseY - game->renderer.gameplayViewportHeight + 21;
+            game->renderer.camera.viewportBaseY - camera_motion::kViewportCorrection;
+    }
+    if (game->renderer.camera.viewportBaseX - game->renderer.camera.viewportCenterX
+        >= game->renderer.canvasWidth - camera_motion::kViewportEdgeMargin) {
+        moved_view = true;
+        game->renderer.camera.viewportCenterX = game->renderer.camera.viewportBaseX
+            - game->renderer.canvasWidth
+            + camera_motion::kViewportCorrectionWithCanvas;
+    }
+    if (game->renderer.camera.viewportBaseY - game->renderer.camera.viewportCenterY
+        >= game->renderer.gameplayViewportHeight - camera_motion::kViewportEdgeMargin) {
+        moved_view = true;
+        game->renderer.camera.viewportCenterY =
+            game->renderer.camera.viewportBaseY
+            - game->renderer.gameplayViewportHeight
+            + camera_motion::kViewportCorrectionWithCanvas;
     }
     if (game->renderer.camera.viewportBaseX < 0) game->renderer.camera.viewportBaseX = 0;
     if (game->renderer.camera.viewportBaseY < 0) game->renderer.camera.viewportBaseY = 0;
@@ -203,9 +241,10 @@ void Game::compute_viewport_bounds(int32_t anchorX, int32_t anchorY) {
     game->ui.tileCursorY = tile_y;
     int corner_distance[4];
     for (int corner = 0; corner < 4; ++corner) {
-        int dx = anchorX - game->build.selectionTileX[corner];
-        int dy = anchorY - game->build.selectionTileY[corner];
-        corner_distance[corner] = abs(dx * dx + dy * dy);
+        const int distance_x = anchorX - game->build.selectionTileX[corner];
+        const int distance_y = anchorY - game->build.selectionTileY[corner];
+        corner_distance[corner] = abs(distance_x * distance_x
+                                      + distance_y * distance_y);
     }
     int nearest = corner_distance[0];
     for (int corner = 1; corner < 4; ++corner)

@@ -4,59 +4,61 @@
 #include <string.h>
 #include <vector>
 
-void SaveCodec::ensure_capacity(int32_t n) {
-    // Grow by n, preserving existing bytes and zeroing the new tail.
-    saveBuffer.resize(static_cast<std::size_t>(snapshotSize + n));
-    snapshotSize += n;
+void SaveCodec::ensure_capacity(int32_t additional_bytes) {
+    // Grow by additional_bytes, preserving existing bytes and zeroing the new tail.
+    saveBuffer.resize(static_cast<std::size_t>(snapshotSize + additional_bytes));
+    snapshotSize += additional_bytes;
 }
 
-void SaveCodec::io_bytes(int8_t *byArray, int len) {
+void SaveCodec::io_bytes(int8_t *values, int count) {
     if (savePendingMode == save::MODE_SKIP) {
-        for (int i = 0; i < len; ++i) byArray[i] = 0;
+        for (int index = 0; index < count; ++index) values[index] = 0;
     } else if (savePendingMode == save::MODE_WRITE) {
-        ensure_capacity(len);
-        memcpy(saveBuffer.data() + saveReadOffset, byArray, (size_t)len);
-        saveReadOffset += len;
+        ensure_capacity(count);
+        memcpy(saveBuffer.data() + saveReadOffset, values,
+               static_cast<std::size_t>(count));
+        saveReadOffset += count;
     } else if (snapshotLoaded) {
-        memcpy(byArray, saveBuffer.data() + saveReadOffset, (size_t)len);
-        saveReadOffset += len;
+        memcpy(values, saveBuffer.data() + saveReadOffset,
+               static_cast<std::size_t>(count));
+        saveReadOffset += count;
     }
 }
 
 // Short array save/load over an explicit length.
-void SaveCodec::io_shorts(int16_t *sArray, int len) {
+void SaveCodec::io_shorts(int16_t *values, int count) {
     if (savePendingMode == save::MODE_SKIP) {
-        for (int i = 0; i < len; ++i) sArray[i] = 0;
+        for (int index = 0; index < count; ++index) values[index] = 0;
     } else if (savePendingMode == save::MODE_WRITE) {
-        ensure_capacity(2 * len);
-        for (int i = 0; i < len; ++i) {
-            saveBuffer[saveReadOffset++] = (int8_t)(sArray[i] & 0xFF);
-            saveBuffer[saveReadOffset++] = (int8_t)(sArray[i] >> 8 & 0xFF);
+        ensure_capacity(2 * count);
+        for (int index = 0; index < count; ++index) {
+            saveBuffer[saveReadOffset++] = static_cast<int8_t>(values[index] & 0xFF);
+            saveBuffer[saveReadOffset++] = static_cast<int8_t>(values[index] >> 8 & 0xFF);
         }
     } else if (snapshotLoaded) {
-        for (int i = 0; i < len; ++i) {
+        for (int index = 0; index < count; ++index) {
             uint16_t bits = (uint16_t)read_unsigned_byte();
             const uint16_t high = (uint16_t)read_unsigned_byte();
             bits |= (uint16_t)(high << 8);
-            memcpy(&sArray[i], &bits, sizeof(sArray[i]));
+            memcpy(&values[index], &bits, sizeof(values[index]));
         }
     }
 }
 
 // Int array save/load over an explicit length.
-void SaveCodec::io_ints(int32_t *nArray, int len) {
+void SaveCodec::io_ints(int32_t *values, int count) {
     if (savePendingMode == save::MODE_SKIP) {
-        for (int i = 0; i < len; ++i) nArray[i] = 0;
+        for (int index = 0; index < count; ++index) values[index] = 0;
     } else if (savePendingMode == save::MODE_WRITE) {
-        ensure_capacity(4 * len);
-        for (int i = 0; i < len; ++i) {
-            saveBuffer[saveReadOffset++] = (int8_t)(nArray[i] & 0xFF);
-            saveBuffer[saveReadOffset++] = (int8_t)(nArray[i] >> 8 & 0xFF);
-            saveBuffer[saveReadOffset++] = (int8_t)(nArray[i] >> 16 & 0xFF);
-            saveBuffer[saveReadOffset++] = (int8_t)(nArray[i] >> 24 & 0xFF);
+        ensure_capacity(4 * count);
+        for (int index = 0; index < count; ++index) {
+            saveBuffer[saveReadOffset++] = static_cast<int8_t>(values[index] & 0xFF);
+            saveBuffer[saveReadOffset++] = static_cast<int8_t>(values[index] >> 8 & 0xFF);
+            saveBuffer[saveReadOffset++] = static_cast<int8_t>(values[index] >> 16 & 0xFF);
+            saveBuffer[saveReadOffset++] = static_cast<int8_t>(values[index] >> 24 & 0xFF);
         }
     } else if (snapshotLoaded) {
-        for (int i = 0; i < len; ++i) {
+        for (int index = 0; index < count; ++index) {
             uint32_t bits = (uint32_t)read_unsigned_byte();
             const uint32_t byte1 = (uint32_t)read_unsigned_byte();
             const uint32_t byte2 = (uint32_t)read_unsigned_byte();
@@ -64,7 +66,7 @@ void SaveCodec::io_ints(int32_t *nArray, int len) {
             bits |= byte1 << 8;
             bits |= byte2 << 16;
             bits |= byte3 << 24;
-            memcpy(&nArray[i], &bits, sizeof(nArray[i]));
+            memcpy(&values[index], &bits, sizeof(values[index]));
         }
     }
 }
@@ -76,6 +78,6 @@ void SaveCodec::io_byte_grid(Grid<int8_t>& grid) {
 }
 
 bool SaveCodec::load_main_snapshot() {
-    load_slot(0, save::MODE_READ);
+    load_slot(save::slot::Main, save::MODE_READ);
     return snapshotLoaded;
 }

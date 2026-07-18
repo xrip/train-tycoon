@@ -4,6 +4,7 @@
 #include "support/numeric.h"
 #include "support/record_store.h"
 
+#include <algorithm>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,27 +19,27 @@ bool SaveCodec::io_bool(bool value) {
     return io_byte((int8_t)(value ? 1 : 0)) == 1;
 }
 
-int8_t SaveCodec::io_byte(int8_t by) {
+int8_t SaveCodec::io_byte(int8_t value) {
     if (savePendingMode == save::MODE_SKIP) return 0;
-    int8_t by2 = by;
+    int8_t result = value;
     if (savePendingMode == save::MODE_WRITE) {
         ensure_capacity(1);
-        saveBuffer[saveReadOffset++] = by;
+        saveBuffer[saveReadOffset++] = value;
     } else if (snapshotLoaded) {
-        by2 = saveBuffer[saveReadOffset++];
+        result = saveBuffer[saveReadOffset++];
     }
-    return by2;
+    return result;
 }
 
-int32_t SaveCodec::io_int(int32_t n) {
+int32_t SaveCodec::io_int(int32_t value) {
     if (savePendingMode == save::MODE_SKIP) return 0;
-    int32_t n2 = n;
+    int32_t result = value;
     if (savePendingMode == save::MODE_WRITE) {
         ensure_capacity(4);
-        saveBuffer[saveReadOffset++] = (int8_t)(n & 0xFF);
-        saveBuffer[saveReadOffset++] = (int8_t)(n >> 8 & 0xFF);
-        saveBuffer[saveReadOffset++] = (int8_t)(n >> 16 & 0xFF);
-        saveBuffer[saveReadOffset++] = (int8_t)(n >> 24 & 0xFF);
+        saveBuffer[saveReadOffset++] = static_cast<int8_t>(value & 0xFF);
+        saveBuffer[saveReadOffset++] = static_cast<int8_t>(value >> 8 & 0xFF);
+        saveBuffer[saveReadOffset++] = static_cast<int8_t>(value >> 16 & 0xFF);
+        saveBuffer[saveReadOffset++] = static_cast<int8_t>(value >> 24 & 0xFF);
     } else if (snapshotLoaded) {
         uint32_t bits = (uint32_t)read_unsigned_byte();
         const uint32_t byte1 = (uint32_t)read_unsigned_byte();
@@ -47,31 +48,33 @@ int32_t SaveCodec::io_int(int32_t n) {
         bits |= byte1 << 8;
         bits |= byte2 << 16;
         bits |= byte3 << 24;
-        memcpy(&n2, &bits, sizeof(n2));
+        memcpy(&result, &bits, sizeof(result));
     }
-    return n2;
+    return result;
 }
 
-void SaveCodec::load_slot(int32_t slot, int32_t mode) {
+void SaveCodec::load_slot(int32_t slot, int32_t pending_mode) {
     saveSlot = slot;
-    savePendingMode = mode;
+    savePendingMode = pending_mode;
     saveReadOffset = 0;
     snapshotSize = 0;
     snapshotLoaded = false;
     if (savePendingMode == save::MODE_READ) {
         std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
         if (store) {
-            const int count = store->record_count();
-            for (int i = 0; i < count; ++i) {
-                const int id = store->record_id_at(i);
-                const auto record = store->record(id);
+            const int record_count = store->record_count();
+            for (int record_index = 0; record_index < record_count;
+                 ++record_index) {
+                const int record_id = store->record_id_at(record_index);
+                const auto record = store->record(record_id);
                 if (!record) continue;
-                const int length = static_cast<int>(record->size());
-                if (length > 0 && (int8_t)(*record)[0] == slot) {
-                    saveBuffer.assign(static_cast<std::size_t>(length - 1), 0);
+                const int record_length = static_cast<int>(record->size());
+                if (record_length > 0 && (int8_t)(*record)[0] == slot) {
+                    saveBuffer.assign(
+                        static_cast<std::size_t>(record_length - 1), 0);
                     memcpy(saveBuffer.data(), record->data() + 1,
-                           (size_t)(length - 1));
-                    snapshotSize = length - 1;
+                           static_cast<std::size_t>(record_length - 1));
+                    snapshotSize = record_length - 1;
                     snapshotLoaded = true;
                 }
             }
@@ -82,15 +85,16 @@ void SaveCodec::load_slot(int32_t slot, int32_t mode) {
 }
 
 void SaveCodec::persist() const {
-    if (savePendingMode != 0) return;
+    if (savePendingMode != save::MODE_WRITE) return;
     std::unique_ptr<RecordStore> store = RecordStore::open("TTStore", true);
     if (!store) return;
-    for (int index = store->record_count() - 1; index >= 0; --index) {
-        int id = store->record_id_at(index);
-        const auto record = store->record(id);
+    for (int record_index = store->record_count() - 1;
+         record_index >= 0; --record_index) {
+        const int record_id = store->record_id_at(record_index);
+        const auto record = store->record(record_id);
         if (!record) continue;
         bool same_slot = !record->empty() && (int8_t)(*record)[0] == saveSlot;
-        if (same_slot) store->delete_record(id);
+        if (same_slot) store->delete_record(record_id);
     }
     std::vector<uint8_t> record(static_cast<std::size_t>(snapshotSize) + 1);
     record[0] = (uint8_t)saveSlot;
@@ -100,17 +104,34 @@ void SaveCodec::persist() const {
 
 namespace {
 
-void write_rle_run(ByteBuffer& output, int32_t value, int32_t count) {
-    if (count == 1) {
-        if (value == -1) {
-            output.write(255);
-            output.write(1);
+namespace save_compression {
+constexpr int32_t kEscapeByte = 255;
+constexpr int32_t kEscapeMarker = -1;
+constexpr int32_t kSingleValueRunLength = 1;
+constexpr int32_t kMaximumRunLength = 254;
+}  // namespace save_compression
+
+namespace road_vehicle_save {
+constexpr int32_t kMagic = 0x52565431;  // "RVT1"
+constexpr int32_t kLegacyVersion = 1;
+constexpr int32_t kVersion = 2;  // mixed cargo counters
+constexpr int32_t kHeaderBytes = 12;
+constexpr int32_t kLegacyMinimumVehicleBytes = 34;
+constexpr int32_t kMinimumVehicleBytes = 50;
+}  // namespace road_vehicle_save
+
+void write_rle_run(ByteBuffer& output, int32_t byte_value,
+                   int32_t run_length) {
+    if (run_length == save_compression::kSingleValueRunLength) {
+        if (byte_value == save_compression::kEscapeMarker) {
+            output.write(save_compression::kEscapeByte);
+            output.write(save_compression::kSingleValueRunLength);
         }
-        output.write(value);
+        output.write(byte_value);
     } else {
-        output.write(255);
-        output.write(count);
-        output.write(value);
+        output.write(save_compression::kEscapeByte);
+        output.write(run_length);
+        output.write(byte_value);
     }
 }
 
@@ -118,18 +139,20 @@ void write_rle_run(ByteBuffer& output, int32_t value, int32_t count) {
 
 void SaveCodec::compress() {
     ByteBuffer output;
-    int value = saveBuffer[0];
-    int count = 1;
-    for (int i = 1; i < snapshotSize; ++i) {
-        if (value != saveBuffer[i] || count == 254) {
-            write_rle_run(output, value, count);
-            value = saveBuffer[i];
-            count = 1;
+    int byte_value = saveBuffer[0];
+    int run_length = save_compression::kSingleValueRunLength;
+    for (int buffer_index = save_compression::kSingleValueRunLength;
+         buffer_index < snapshotSize; ++buffer_index) {
+        if (byte_value != saveBuffer[buffer_index]
+            || run_length == save_compression::kMaximumRunLength) {
+            write_rle_run(output, byte_value, run_length);
+            byte_value = saveBuffer[buffer_index];
+            run_length = save_compression::kSingleValueRunLength;
         } else {
-            ++count;
+            ++run_length;
         }
     }
-    write_rle_run(output, value, count);
+    write_rle_run(output, byte_value, run_length);
     bytesUncompressed += snapshotSize;
     const auto compressed = output.bytes();
     snapshotSize = static_cast<int>(compressed.size());
@@ -140,14 +163,16 @@ void SaveCodec::compress() {
 
 void SaveCodec::decompress() {
     ByteBuffer output;
-    for (int i = 0; i < snapshotSize; ++i) {
-        if (saveBuffer[i] == -1) {
-            int count = unsigned_byte(saveBuffer[i + 1]);
-            for (int j = 0; j < count; ++j)
-                output.write(saveBuffer[i + 2]);
-            i += 2;
+    for (int buffer_index = 0; buffer_index < snapshotSize; ++buffer_index) {
+        if (saveBuffer[buffer_index] == save_compression::kEscapeMarker) {
+            const int run_length =
+                unsigned_byte(saveBuffer[buffer_index + 1]);
+            for (int repeat_index = 0; repeat_index < run_length;
+                 ++repeat_index)
+                output.write(saveBuffer[buffer_index + 2]);
+            buffer_index += 2;
         } else {
-            output.write(saveBuffer[i]);
+            output.write(saveBuffer[buffer_index]);
         }
     }
     bytesCompressed += snapshotSize;
@@ -158,22 +183,24 @@ void SaveCodec::decompress() {
     bytesUncompressed += snapshotSize;
 }
 
-void SaveCodec::walk(Game& game_value, int32_t mode) {
+void SaveCodec::walk(Game& game_value, int32_t operation) {
     Game* game = &game_value;
-    if (mode == save::OP_SAVE_MAIN) load_slot(0, save::MODE_WRITE);
-    if (mode == save::OP_LOAD_MAIN) load_slot(0, save::MODE_READ);
-    if (mode == save::OP_RESET_SKIP) savePendingMode = save::MODE_SKIP;
-    if (mode == 4) {
+    if (operation == save::OP_SAVE_MAIN)
+        load_slot(save::slot::Main, save::MODE_WRITE);
+    if (operation == save::OP_LOAD_MAIN)
+        load_slot(save::slot::Main, save::MODE_READ);
+    if (operation == save::OP_RESET_SKIP) savePendingMode = save::MODE_SKIP;
+    if (operation == save::OP_MEMORY_WRITE) {
         snapshotSize = 0;
         saveBuffer.clear();
         savePendingMode = save::MODE_WRITE;
     }
-    if (mode == 5) {
+    if (operation == save::OP_MEMORY_READ) {
         saveReadOffset = 0;
         savePendingMode = save::MODE_READ;
         snapshotLoaded = true;
     }
-    if (mode == save::OP_LOAD_MAIN) decompress();
+    if (operation == save::OP_LOAD_MAIN) decompress();
 
 #define IO_INT(field) \
     (game->field = io_int(game->field))
@@ -304,10 +331,11 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_INT(world.industryCategory);
     IO_BOOL(world.industrySiteFound);
     IO_INT(build.nextTrackPieceCode);
-    if (game->build.nextTrackPieceCode == 0) game->build.nextTrackPieceCode = 66;
+    if (game->build.nextTrackPieceCode == 0)
+        game->build.nextTrackPieceCode = track::AI_PIECE_FIRST;
     IO_BYTE(scenario.aiFrequency);
     IO_BYTE(scenario.aiThreshold);
-    if (mode != save::OP_RESET_SKIP) IO_BYTE(scenario.difficultyCycle);
+    if (operation != save::OP_RESET_SKIP) IO_BYTE(scenario.difficultyCycle);
     IO_OFFER_BYTE(objectiveType);
     IO_OFFER_BYTE(issuedDay);
     IO_OFFER_BYTE(dueDay);
@@ -340,28 +368,28 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
     IO_INT(economy.trainRevenueScore);
     IO_INT(scenario.scenarioStep);
     IO_INT(scenario.scenarioNoticeId);
-    IO_INT(economy.moneyBaseA);
-    IO_INT(economy.moneyBaseB);
-    IO_INT(economy.baseTrainSpeed);
-    IO_INT(economy.accel1);
-    IO_INT(economy.brake1);
-    IO_INT(economy.baseTrainSpeed2);
-    IO_INT(economy.accel2);
-    IO_INT(economy.costPower);
-    IO_INT(economy.costStruct);
-    IO_INT(economy.costOverhead);
-    IO_INT(economy.costMaintenance);
-    IO_INT(economy.costCrew);
-    IO_INT(economy.gWagonCost);
-    IO_INT(economy.gWagonCost2);
-    IO_INT(economy.gWagonCost3);
-    IO_INT(economy.gWagonCost4);
-    IO_INT(economy.gWagonCost5);
-    IO_INT(economy.gWagonCost6);
-    IO_INT(economy.costGroupC1);
-    IO_INT(economy.costGroupC2);
-    IO_INT(economy.costGroupC3);
-    IO_INT(economy.costGroupC4);
+    IO_INT(economy.moneyBasePrimary);
+    IO_INT(economy.moneyBaseSecondary);
+    IO_INT(economy.baseTrainSpeedEarly);
+    IO_INT(economy.accelerationEarly);
+    IO_INT(economy.brakingEarly);
+    IO_INT(economy.baseTrainSpeedLate);
+    IO_INT(economy.accelerationLate);
+    IO_INT(economy.powerCost);
+    IO_INT(economy.structureCost);
+    IO_INT(economy.overheadCost);
+    IO_INT(economy.maintenanceCost);
+    IO_INT(economy.crewCost);
+    IO_INT(economy.trainCostFirstEra);
+    IO_INT(economy.trainCostSecondEra);
+    IO_INT(economy.trainCostThirdEra);
+    IO_INT(economy.trainCostFourthEra);
+    IO_INT(economy.trainCostFifthEra);
+    IO_INT(economy.trainCostSixthEra);
+    IO_INT(economy.wagonOptionCostPassengerMail);
+    IO_INT(economy.wagonOptionCostIndustryGroup1);
+    IO_INT(economy.wagonOptionCostIndustryGroup2);
+    IO_INT(economy.wagonOptionCostIndustryGroup3);
 
 #undef IO_INT
 #undef IO_BYTE
@@ -379,13 +407,19 @@ void SaveCodec::walk(Game& game_value, int32_t mode) {
 #undef IO_OFFER_INT
 #undef FIELD_COUNT
 
-    if (mode == save::OP_SAVE_MAIN) {
+    if (operation == save::OP_SAVE_MAIN) {
         compress();
         persist();
     }
 }
 
 void SaveCodec::walk_settings(Game& game) {
+    constexpr int kExpectedBytes = 4 + 3 * 4
+        + kScenarioCount * 4 + kLeaderboardScoreCount * 4
+        + kPlayerNameCodeCount;
+    if (savePendingMode == save::MODE_READ
+        && (!snapshotLoaded || snapshotSize != kExpectedBytes))
+        return;
     game.settings.animationsDisabled = io_bool(game.settings.animationsDisabled);
     game.settings.selectionHidden = io_bool(game.settings.selectionHidden);
     game.ui.monthlyReportEnabled = io_bool(game.ui.monthlyReportEnabled);
@@ -398,24 +432,179 @@ void SaveCodec::walk_settings(Game& game) {
     io_bytes(game.scenario.playerNameCodes, kPlayerNameCodeCount);
 }
 
+void SaveCodec::walk_road_vehicles(Game& game) {
+    // Roads and stops already persist (tiles in slot 1, sites via walk()); only
+    // the vehicles and their route definition need saving. The tile path is a
+    // derived cache, so we save just the ordered stop-site list and rebuild the
+    // route with expand_road_route on load.
+    if (savePendingMode == save::MODE_READ
+        && (!snapshotLoaded
+            || snapshotSize < road_vehicle_save::kHeaderBytes)) {
+        game.roadVehicles.clear();
+        return;
+    }
+
+    const int magic = io_int(road_vehicle_save::kMagic);
+    const int version = io_int(road_vehicle_save::kVersion);
+    if (savePendingMode == save::MODE_READ
+        && (magic != road_vehicle_save::kMagic
+            || (version != road_vehicle_save::kLegacyVersion
+                && version != road_vehicle_save::kVersion))) {
+        game.roadVehicles.clear();
+        return;
+    }
+    const int minimum_vehicle_bytes =
+        version == road_vehicle_save::kLegacyVersion
+            ? road_vehicle_save::kLegacyMinimumVehicleBytes
+            : road_vehicle_save::kMinimumVehicleBytes;
+
+    int vehicle_count = static_cast<int>(game.roadVehicles.size());
+    vehicle_count = io_int(vehicle_count);
+    if (savePendingMode == save::MODE_READ) {
+        const int remaining_bytes = snapshotSize - saveReadOffset;
+        if (vehicle_count < 0
+            || vehicle_count > remaining_bytes / minimum_vehicle_bytes) {
+            game.roadVehicles.clear();
+            return;
+        }
+        game.roadVehicles.assign(static_cast<std::size_t>(vehicle_count),
+                                 RoadVehicle{});
+    }
+    const int available_vehicle_count =
+        static_cast<int>(game.roadVehicles.size());
+    for (int vehicle_index = 0;
+         vehicle_index < vehicle_count
+         && vehicle_index < available_vehicle_count; ++vehicle_index) {
+        if (savePendingMode == save::MODE_READ
+            && snapshotSize - saveReadOffset
+                   < minimum_vehicle_bytes) {
+            game.roadVehicles.clear();
+            return;
+        }
+        RoadVehicle& vehicle =
+            game.roadVehicles[static_cast<std::size_t>(vehicle_index)];
+        vehicle.carType = io_int(vehicle.carType);
+        vehicle.capacity = io_int(vehicle.capacity);
+        if (version == road_vehicle_save::kLegacyVersion) {
+            const int legacy_cargo = io_int(0);
+            int legacy_resource = -1;
+            if (vehicle.carType == road_vehicle_type::Bus) {
+                legacy_resource = service_resource::Passengers;
+            } else if (vehicle.carType == wagon::IndustryGroup1Car) {
+                legacy_resource = service_resource::IndustryGroup1;
+                vehicle.carType = road_vehicle_type::Truck;
+            } else if (vehicle.carType == wagon::IndustryGroup2CarA) {
+                legacy_resource = service_resource::IndustryGroup2;
+                vehicle.carType = road_vehicle_type::Truck;
+            } else if (vehicle.carType == wagon::IndustryGroup3CarA) {
+                legacy_resource = service_resource::IndustryGroup3;
+                vehicle.carType = road_vehicle_type::Truck;
+            }
+            vehicle.cargo.fill(0);
+            if (legacy_resource >= 0)
+                vehicle.cargo[legacy_resource] = legacy_cargo;
+        } else {
+            for (int resource = 0; resource < kResourceTypeCount; ++resource)
+                vehicle.cargo[resource] = io_int(vehicle.cargo[resource]);
+        }
+        vehicle.revenue = io_int(vehicle.revenue);
+        vehicle.segment = io_int(vehicle.segment);
+        vehicle.phase = io_int(vehicle.phase);
+        vehicle.direction = io_int(vehicle.direction);
+        vehicle.forward = io_bool(vehicle.forward);
+        vehicle.loop = io_bool(vehicle.loop);
+        int stop_count = static_cast<int>(vehicle.stopSites.size());
+        stop_count = io_int(stop_count);
+        if (savePendingMode == save::MODE_READ) {
+            if (stop_count < 0 || stop_count > kServiceVehicleSlotCount
+                || stop_count > (snapshotSize - saveReadOffset) / 4) {
+                game.roadVehicles.clear();
+                return;
+            }
+            vehicle.stopSites.assign(static_cast<std::size_t>(stop_count), 0);
+        }
+        const int available_stop_count =
+            static_cast<int>(vehicle.stopSites.size());
+        for (int stop_index = 0;
+             stop_index < stop_count && stop_index < available_stop_count;
+             ++stop_index) {
+            vehicle.stopSites[static_cast<std::size_t>(stop_index)] =
+                io_int(vehicle.stopSites[static_cast<std::size_t>(stop_index)]);
+        }
+    }
+    if (savePendingMode == save::MODE_READ) {
+        for (RoadVehicle& vehicle : game.roadVehicles) {
+            const bool is_bus = vehicle.carType == road_vehicle_type::Bus;
+            const bool is_truck = vehicle.carType == road_vehicle_type::Truck;
+            bool valid = (is_bus || is_truck)
+                && vehicle.capacity == (is_bus ? kBusCapacity : kTruckCapacity)
+                && vehicle.phase >= 0
+                && vehicle.phase < RoadVehicle::kStepsPerTile
+                && vehicle.direction >= road_direction::PositiveX
+                && vehicle.direction <= road_direction::NegativeY
+                && vehicle.stopSites.size() >= 2;
+            int cargo_total = 0;
+            if (valid) {
+                for (int resource = 0; resource < kResourceTypeCount; ++resource) {
+                    const int amount = vehicle.cargo[resource];
+                    if (amount < 0 || amount > vehicle.capacity
+                        || (!vehicle.accepts_resource(resource) && amount != 0)
+                        || cargo_total > vehicle.capacity - amount) {
+                        valid = false;
+                        break;
+                    }
+                    cargo_total += amount;
+                }
+            }
+            for (int stop_slot : vehicle.stopSites) {
+                if (stop_slot < 0 || stop_slot >= kServiceVehicleSlotCount) {
+                    valid = false;
+                    break;
+                }
+                const ServiceSite& site = game.fleet.serviceSites[stop_slot];
+                if ((site.flags & service_site::USED_SLOT) == 0
+                    || (site.flags & service_site::TYPE_MASK)
+                           != kRoadStopSiteType) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid)
+                vehicle.route =
+                    game.expand_road_route(vehicle.stopSites, vehicle.loop);
+            if (!valid || !vehicle.active()) vehicle.route.clear();
+        }
+        game.roadVehicles.erase(
+            std::remove_if(game.roadVehicles.begin(), game.roadVehicles.end(),
+                           [](const RoadVehicle& vehicle) {
+                               return !vehicle.active();
+                           }),
+            game.roadVehicles.end());
+    }
+}
+
 void SaveCodec::save_all(Game& game) {
     bytesUncompressed = 0;
     bytesCompressed = 0;
     walk(game, save::OP_SAVE_MAIN);
-    load_slot(1, save::MODE_WRITE);
+    load_slot(save::slot::TileMap, save::MODE_WRITE);
     io_byte_grid(game.world.terrain.tileMap);
     compress();
     persist();
-    load_slot(2, save::MODE_WRITE);
+    load_slot(save::slot::TrackMap, save::MODE_WRITE);
     io_byte_grid(game.world.trackMap);
     compress();
     persist();
-    load_slot(3, save::MODE_WRITE);
+    load_slot(save::slot::TileElevation, save::MODE_WRITE);
     io_byte_grid(game.world.terrain.tileElevation);
     compress();
     persist();
-    load_slot(4, save::MODE_WRITE);
+    load_slot(save::slot::HeightMap, save::MODE_WRITE);
     io_byte_grid(game.world.terrain.heightMap);
+    compress();
+    persist();
+    load_slot(save::slot::RoadVehicles, save::MODE_WRITE);
+    walk_road_vehicles(game);
     compress();
     persist();
 }
@@ -427,18 +616,26 @@ void SaveCodec::restore_all(Game& game) {
     game.world.resize(game.world.terrain.mapWidth, game.world.terrain.mapHeight);
     game.renderer.camera.viewportHalfWidth = game.world.terrain.mapScreenWidth / 2;
     game.renderer.camera.viewportHalfHeight = game.world.terrain.mapScreenHeight / 2;
-    game.ui.init_build_menu(game.scenario, -1);
-    load_slot(1, save::MODE_READ);
+    game.ui.init_build_menu(game.scenario, build_menu::kNoScenarioOverride);
+    load_slot(save::slot::TileMap, save::MODE_READ);
     decompress();
     io_byte_grid(game.world.terrain.tileMap);
-    load_slot(2, save::MODE_READ);
+    load_slot(save::slot::TrackMap, save::MODE_READ);
     decompress();
     io_byte_grid(game.world.trackMap);
-    load_slot(3, save::MODE_READ);
+    load_slot(save::slot::TileElevation, save::MODE_READ);
     decompress();
     io_byte_grid(game.world.terrain.tileElevation);
-    load_slot(4, save::MODE_READ);
+    load_slot(save::slot::HeightMap, save::MODE_READ);
     decompress();
     io_byte_grid(game.world.terrain.heightMap);
+    // Roads live in tileMap (codes 42..48, restored above), so rebuild the
+    // derived road layer + components after the tiles are back.
+    game.roadNet.rebuild_from_tiles(game.world.terrain);
+    // Road vehicles restore last: their routes are rebuilt from the stop list
+    // over the now-current road layer and service sites.
+    load_slot(save::slot::RoadVehicles, save::MODE_READ);
+    decompress();
+    walk_road_vehicles(game);
     game.renderer.lastViewportCenterX = -1;
 }

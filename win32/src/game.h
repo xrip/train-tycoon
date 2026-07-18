@@ -40,7 +40,7 @@ public:
     void key_released(int32_t key_code);
     void pointer_pressed(int32_t x, int32_t y);
     void pointer_moved(int32_t x, int32_t y);
-    void pointer_drag_pan(int32_t dx, int32_t dy);
+    void pointer_drag_pan(int32_t delta_x, int32_t delta_y);
     // True when the game draws its own cursor arrow at the hovered field tile, so
     // the host can hide the OS cursor and let the game arrow be the pointer.
     bool should_hide_os_cursor() const;
@@ -52,8 +52,6 @@ public:
     bool music_available() const;
     bool music_playing() const;
     std::string_view music_error() const;
-    // Turn on the opt-in road-transport proof of concept (see road.h).
-    void set_road_poc_enabled(bool on) { roadPocEnabled = on; }
 private:
     friend class SaveCodec;
     friend struct GameTestAccess;
@@ -61,9 +59,9 @@ private:
 
     void update_state_machine();
     void apply_offer_effect(int32_t row);
-    void duplicate_offer(int32_t row);
+    void show_due_offer(int32_t row);
     void monthly_offer_tick();
-    void copy_offer_to_summary(int32_t row);
+    void move_offer_to_summary(int32_t row);
     void charge_train_running_costs();
     void remove_train_from_map(int32_t car, bool queue_tile);
     void merge_train_at(int32_t car);
@@ -83,16 +81,16 @@ private:
     void spawn_train_at(int32_t x, int32_t y);
     void place_cities_and_industry();
     int8_t add_city_entry(int32_t direction);
-    int8_t register_map_train(int8_t zone_population, int32_t y, int32_t x);
+    int8_t register_map_train(int32_t zone_population, int32_t y, int32_t x);
     void record_money_change(int32_t amount);
-    bool matches_resource_condition(int32_t group, int32_t value);
+    bool matches_resource_condition(int32_t sprite_id, int32_t condition_id);
     bool spend_money(int32_t amount);
     void update_ten_day_metric();
     bool sync_high_scores(bool upload);
     void viewport_zoom_key();
     void compute_viewport_bounds(int32_t anchor_x, int32_t anchor_y);
-    std::optional<std::vector<int8_t>> resolve_dialog_value(int32_t screen,
-                                                            int32_t field);
+    std::optional<std::vector<int8_t>> resolve_dialog_value(int32_t dialog_screen,
+                                                            int32_t field_id);
     void render_map(Surface& surface);
     void handle_key(int32_t key_code);
     void handle_dialog_input(int8_t direction);
@@ -117,7 +115,11 @@ private:
     void check_scenario_milestone();
     int32_t scan_map_metric() const;
     void new_year_notify();
-    void tick_input_or_ai(bool player_action);
+    // Per-site pass over all used service sites: refreshes load/unload flags
+    // from nearby tiles and clamps stock to capacity. When player_action is
+    // false (the periodic tick) it also generates cargo stock and grows zone
+    // population; a player build action only refreshes flags.
+    void tick_service_sites(bool player_action);
     void simulation_tick();
     void enter_out_of_money_state();
     void apply_background_cost();
@@ -129,10 +131,8 @@ private:
                              int32_t end_x, int32_t end_y,
                              int32_t tile_code, int32_t cost);
     void revert_track_tiles();
-    void place_track_at_cursor(bool first_direction, int32_t x,
-                               int32_t y, int32_t step_x, int32_t step_y,
-                               int32_t tile_code, int32_t owner,
-                               bool charge, int32_t cost);
+    void place_track_at_cursor(bool first_direction,
+                               const TrackPlacementSpec& placement);
     void normalize_track_bits();
     void set_track_owner_code(int32_t owner);
     void rebuild_menu_type_indexes();
@@ -145,12 +145,12 @@ private:
     bool buy_train_at_cursor();
     bool apply_train_upgrade(int32_t train, int32_t engine_type,
                              int32_t* wagon_types);
-    int32_t draw_menu_row(Surface& surface, int32_t sprite,
-                          int32_t item_index, int32_t x, bool spaced);
+    int32_t draw_menu_row(Surface& surface, int32_t sprite_code,
+                          int32_t item_index, int32_t left_x, bool spaced);
     void draw_header_bar(Surface& surface);
     void draw_confirm_bar(Surface& surface);
     void paint_main(Surface& surface);
-    int32_t draw_number(Surface& surface, int32_t value, int32_t y);
+    int32_t draw_number(Surface& surface, int32_t value, int32_t top_y);
     void draw_money_ticker(Surface& surface);
     void draw_confirm_dialog(Surface& surface);
     void compute_iso_corners(int32_t x, int32_t y, int32_t* screen_x,
@@ -187,15 +187,40 @@ private:
     void redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y);
     Image* wagon_car_sprite(int32_t context_code, int32_t slot_index);
 
-    // Road-transport proof of concept (opt-in via TRAIN_TYCOON_ROAD_POC). See
-    // road.h/road.cpp. All three are no-ops unless roadPocEnabled is set.
-    void road_poc_init();
-    void road_poc_tick();
-    void road_poc_render(Surface& surface);
-    bool roadPocEnabled = false;
-    bool roadPocInitDone = false;
+    // The derived road layer: roadMap/roadComponent are rebuilt from tileMap
+    // (see road.h/road.cpp). Roads are tileMap codes 42..48, so they persist and
+    // render through the normal map path; this cache only drives routing.
     RoadNetwork roadNet;
-    std::vector<RoadVehicle> roadCars;
+
+    // Road building (see road.cpp). A road tile is a street shape code (42..48)
+    // in tileMap, so it persists and renders through the normal map path; these
+    // helpers keep the oriented codes and the derived roadNet caches in sync.
+    bool is_road_tile(int32_t x, int32_t y) const;      // tileMap code in 42..48
+    bool road_buildable(int32_t x, int32_t y) const;    // empty drivable ground a new road may sit on
+    int32_t road_shape_code(int32_t x, int32_t y) const;  // oriented 42..48 from road neighbours
+    void renormalize_road_cells(const std::vector<RoadPoint>& touched);
+    bool place_road_tile_at_cursor();                   // manual: one tile under the cursor
+    bool auto_route_road(int32_t anchor_x, int32_t anchor_y,
+                         int32_t target_x, int32_t target_y);  // auto: shortest drivable road
+    RoadPoint road_access_cell(int32_t x, int32_t y) const;  // adjacent road cell a stop binds to, {-1,-1} if none
+    int32_t road_stop_at(int32_t x, int32_t y) const;         // exact road-stop slot, or kNoFleetSlot
+    bool road_stop_placeable(int32_t x, int32_t y) const;     // clear ground, unique access cell
+    bool place_road_stop_at_cursor();                   // drop a bus/truck stop on ground beside a road
+    void remove_road_stop(int32_t stop_slot);            // remove stop and rebuild affected routes
+
+    // Road vehicles (buses/trucks). See road.cpp. roadVehicles is the bus/truck
+    // fleet; routes are closed loops through the road-stop sites of one town
+    // (city bus) or several road-connected towns (intercity), expanded to a tile
+    // path via roadNet.plan_route.
+    std::vector<RoadVehicle> roadVehicles;
+    std::vector<int32_t> road_stops_in_component(int32_t component,
+                                                  int32_t first_stop) const;
+    std::vector<RoadPoint> expand_road_route(const std::vector<int32_t>& stop_sites,
+                                             bool loop) const;
+    bool buy_road_vehicle(int32_t car_type, int32_t first_stop);
+    void road_load_unload(RoadVehicle& vehicle, int32_t site);
+    void update_road_vehicles();
+    void render_road_vehicles(Surface& surface);
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

@@ -10,6 +10,8 @@ struct GameTestAccess {
     static const Fleet& fleet(const Game& game) { return game.fleet; }
     static Economy& economy(Game& game) { return game.economy; }
     static const Economy& economy(const Game& game) { return game.economy; }
+    static GameSettings& settings(Game& game) { return game.settings; }
+    static const GameSettings& settings(const Game& game) { return game.settings; }
     static OfferBoard& offer_board(Game& game) { return game.offerBoard; }
     static const OfferBoard& offer_board(const Game& game) { return game.offerBoard; }
     static Scenario& scenario(Game& game) { return game.scenario; }
@@ -44,6 +46,7 @@ struct GameTestAccess {
     static bool& ready(Game& game) { return game.ready; }
 
     static void update_state_machine(Game& game) { game.update_state_machine(); }
+    static void begin_map_generation(Game& game) { game.begin_map_generation(); }
     static void set_state(Game& game, int32_t state) { game.set_state(state); }
     static void simulation_tick(Game& game) { game.simulation_tick(); }
     static void update_train(Game& game, int32_t head) {
@@ -51,15 +54,58 @@ struct GameTestAccess {
     }
     static void pick_trains_at_cursor(Game& game) { game.pick_trains_at_cursor(); }
     static void open_build_menu(Game& game) { game.open_build_menu(); }
+    static void handle_build_menu_state(Game& game, int32_t screen, int32_t option) {
+        game.handle_build_menu_state(screen, option);
+    }
+    static std::optional<std::vector<int8_t>> resolve_dialog_value(
+        Game& game, int32_t screen, int32_t field) {
+        return game.resolve_dialog_value(screen, field);
+    }
     static bool buy_train_at_cursor(Game& game) {
         return game.buy_train_at_cursor();
     }
     static void build_place_track_piece(Game& game, int32_t piece) {
         game.build_place_track_piece(piece);
     }
+    static void demolish_at_cursor(Game& game) { game.demolish_at_cursor(); }
 
-    static std::vector<RoadVehicle>& road_cars(Game& game) { return game.roadCars; }
-    static void road_poc_tick(Game& game) { game.road_poc_tick(); }
+    static RoadNetwork& road_net(Game& game) { return game.roadNet; }
+    static const RoadNetwork& road_net(const Game& game) { return game.roadNet; }
+    static bool is_road_tile(const Game& game, int x, int y) {
+        return game.is_road_tile(x, y);
+    }
+    static bool road_buildable(const Game& game, int x, int y) {
+        return game.road_buildable(x, y);
+    }
+    static bool place_road_tile_at_cursor(Game& game) {
+        return game.place_road_tile_at_cursor();
+    }
+    static bool auto_route_road(Game& game, int ax, int ay, int tx, int ty) {
+        return game.auto_route_road(ax, ay, tx, ty);
+    }
+    static bool place_road_stop_at_cursor(Game& game) {
+        return game.place_road_stop_at_cursor();
+    }
+    static RoadPoint road_access_cell(const Game& game, int x, int y) {
+        return game.road_access_cell(x, y);
+    }
+    static int road_stop_at(const Game& game, int x, int y) {
+        return game.road_stop_at(x, y);
+    }
+    static bool road_stop_placeable(const Game& game, int x, int y) {
+        return game.road_stop_placeable(x, y);
+    }
+    static void generate_site_cargo(Game& game) { game.tick_service_sites(false); }
+    static bool buy_road_vehicle(Game& game, int car_type, int first_stop) {
+        return game.buy_road_vehicle(car_type, first_stop);
+    }
+    static void road_load_unload(Game& game, RoadVehicle& vehicle, int site) {
+        game.road_load_unload(vehicle, site);
+    }
+    static std::vector<RoadVehicle>& road_vehicles(Game& game) {
+        return game.roadVehicles;
+    }
+    static void update_road_vehicles(Game& game) { game.update_road_vehicles(); }
 };
 
 #endif  // GAME_TEST_ACCESS_H

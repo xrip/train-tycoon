@@ -31,9 +31,10 @@ of scope.
 
 BUILD-01 gave `BuildController` the transient *action* state (track-lay,
 train-buy dialog, terrain-edit selection). The per-scenario economic/physics
-constants (`moneyBaseA/B`, `baseTrainSpeed`, `accel1/2`, `brake1`,
-`baseTrainSpeed2`, `costPower/Struct/Overhead/Maintenance/Crew`,
-`gWagonCost1..6`, `costGroupC1..4`) are **not** build-action state: they are
+constants (`moneyBasePrimary/Secondary`, `baseTrainSpeedEarly/Late`, `accelerationEarly/Late`,
+`brakingEarly`, `powerCost/structureCost/overheadCost/maintenanceCost/crewCost`, the six
+`trainCost*` fields, and the four `wagonOptionCost*` fields) are **not**
+build-action state: they are
 loaded together in `GeneratingMap` and inflated together by the yearly random
 event, and they feed train-buy cost, train physics, and the economy alike. They
 form one cross-cutting parameter block, so forcing them into `BuildController`
@@ -50,7 +51,7 @@ The stage-3 exit ("core rules no longer use `GameCanvas`") cannot be a pure
 signature refactor yet: the rule functions in `sim_tick.cpp` / `economy_tick.cpp`
 read shared state that has no owner (`rng` in ~30 call sites, `era`, the frame
 timers, and the D-012 cost constants). A function cannot take `World&`/`Economy&`
-instead of `GameCanvas*` while it still reads `gc->rng` or `gc->gWagonCost`.
+instead of `GameCanvas*` while it still reads `gc->rng` or the era cost block.
 
 Plan: keep homing the owned shared state first (tile-animation and zone-growth
 state moved onto `World`; the UI/render/asset fields move onto `UiController`,
@@ -162,17 +163,73 @@ Track and tile codes (second MODEL-01 leaf), in `game_constants.h`:
   76, and the join code that sets tile 76 while OR-ing a second owner into the
   high sub-field.
 - Left unnamed (uncertain, recorded for later leaves):
-  - Track overlay bits `0x80` and `0xC0` (`map_gen` sets `0x80 | n`, `terrain`
-    sets `0xC0 | n`, `sim_tick` tests `& 0xC0`). They mark non-track overlays
-    (scenery/obstacle/water); exact meaning not yet proven.
-  - Owner code `1` / `trackMap == 65` (station/service track) and the crossing
-    station masks `& 0x47`, `& 0x78` in `gc_isCityOrStationTile`.
+  - Tile-map pending-change markers use the high bit (`0x80`) while a queued
+    edit is in flight. This is separate from the track-map overlay encoding;
+    the pending marker's interaction with every tile shape is still not fully
+    recovered.
+  - Owner code `1` and the crossing station masks `& 0x47`, `& 0x78` in
+    `gc_isCityOrStationTile`.
   - The individual tile shape ids: straight/turn/bridge codes 70..90; road shape
     codes 42..48 (straights/corners/crossing, laid as city streets by
     `place_terrain_patch` -- see D-013); and the remaining city and terrain
     ranges (0, 3..28, 29..33, 34..41, 50..68) whose minimap colour grouping is in
     `gc_update` state `BuildingMinimap`. The non-road ranges still need a
     per-range evidence pass before naming.
+  - Train renderer direction cases `0..11` use neutral ordinal slot names.
+    Movement tables prove their transitions, but not a complete
+    screen-orientation map.
+
+- Service tiles are now named because their use is direct and repeated:
+  `tile::SERVICE_TRACK` (track owner code 65), `VERTICAL_STATION` (87),
+  `HORIZONTAL_STATION` (88), `VERTICAL_TERMINAL` (89), and
+  `HORIZONTAL_TERMINAL` (90). The train movement normalizer keeps the other
+  legacy shape ids in a neutral source-to-normalized alias table; no visual
+  names are inferred from those ids.
+
+Path search and queued data (MODEL-02):
+
+- Path search distance states and relaxation results now have names in
+  `pathfinding.cpp`/`pathfinder.h`. The old tile-code lists are held in named
+  tables, but their visual shape names remain open because the source only
+  proves their movement behavior.
+- Dialog value decoding names the catalog bases, graph field offsets, and
+  report fields. The generated dialog table itself stays unchanged; its raw
+  color and layout bytes need asset-level proof before further naming.
+- The PNG resource decoder names its signature, chunk types, byte offsets, and
+  size rules. It still writes the same legacy byte stream; the fixed CRC bytes
+  are compatibility data, not a new image model.
+- Queued tile edits name their pending marker, countdown points, clear/restore
+  ranges, and crossing replacement codes in `sim_tick.cpp`. The range names
+  describe queue behavior only; they do not claim visual names for the tile
+  sprites.
+- Train linked-list code uses `train_chain::kEnd` for the saved `nextCar`
+  terminator. Tile animation periods and forest-age cycling rules are named in
+  the same simulation unit.
+
+- The four track-piece menu ids are named from their menu text/result rows:
+  `build_menu::track_piece_item::VerticalTrack`, `HorizontalTrack`, and the
+  two neutral `DiagonalTrackA/B` variants. The underlying tile-shape bytes are
+  still not given visual names.
+
+- Road cargo conversion now uses the proven `service_resource` stock indexes and
+  flag constants. The legacy rail cross-map between the three industry car
+  groups and unload flags is kept exactly; fares are named local values.
+- Wagon preview sprite selection is centralized in one helper for the build menu
+  and train-info dialog. Car and option ids are named; the sprite numbers stay
+  neutral asset codes because the bundle does not prove richer art names.
+- The minimap builder names its tile ranges, rail overlays, colors, and draw
+  locals. Its city color range still ends at legacy code 41; the narrower native
+  city-zone range (34..40) is used by model predicates. This split is deliberate
+  until the full map taxonomy is recovered.
+- Query conditions name the screen/condition families and preserve the legacy
+  unload-flag order in an explicit table. No resource meaning is inferred from
+  the odd source ordering.
+
+- Offer generation keeps objective ids 1..15 neutral: their text/resource
+  meaning is not proved by native call sites. The random ranges, loan limits,
+  and effect-value formulas are named in `offer_generation`; the legacy
+  Group2A objective counter remains explicitly zero until its source data is
+  decoded.
 
 Menu transition codes (third MODEL-01 leaf), in `game_constants.h`
 `namespace transition`:
@@ -182,13 +239,12 @@ Menu transition codes (third MODEL-01 leaf), in `game_constants.h`
   `SCENARIO_NOTICE_BASE` (80) builds a notice code from the scenario notice id.
   Evidence: the `+40`/`+60`/`80 +` construction sites in `gc_handleBuildMenuState`
   and the `BuildingMinimap`/notice path in `gc_paint`.
-- Deferred (decision): the ~40 per-screen menu ids (1, 2, 3, 4, 5, 10, 14, 23..28,
-  31..36, and the 41..54 / 61..72 offer screens) are UI navigation. They select
-  the `renderPackedSprite` layout and the `gc_handleBuildMenuState` branch, so
-  their meaning is only clear once the menu builder and dispatcher become a
-  `UiController` in UI-01. Naming them now would be guesswork against the "no
-  guess renames" rule, so per-screen naming is scheduled for UI-01. The literals
-  stay unchanged until then.
+- The per-screen ids are now named in the shared `menu_screen::Id` enum.
+  Names cover proven branches such as `MainMenu`, `TrainPurchase`,
+  `MonthlyReport`, and `HighScoreEntry`; offer response ids whose data still
+  gives no narrower meaning keep neutral `OfferResponseNN` names. The numeric
+  protocol values and branch order are unchanged. The enum is a protocol group,
+  not game-model state; the generic names record that proof is still limited.
 - "Resource kinds" from the original handoff list are already plain-named: the
   numbered resource files became named resources in RT-02 (see D-006). No numeric
   resource-kind group remains in the model to name.
@@ -358,9 +414,21 @@ The movement/cargo/merge/load/unload functions in `train_tick.cpp`
 `gc_spawnTrainCar`, `gc_resetTrailingCars`, etc.) were already clear behavioral
 names, so FLEET-02 had no rename work. Its clean increment was data: the
 movement-rule lookup tables `forwardTrackSteps[6][12]` / `reverseTrackSteps[6][12]`
-(for each track-shape variant, the entering `[0]` and exiting `[1]` train
-direction for forward/reverse travel) moved into `Fleet`. They are constant,
-populated in `game_state.cpp` at init, and not saved.
+now use `Fleet::TrackStepEntry` rows. Each row names the entering and fallback
+directions, the tile step, and four `TrackStepTransition` pairs. The struct has
+the same 12-byte runtime layout as one old row, is populated in `game_state.cpp`,
+and is not saved. Direction ids remain numeric because the full render-orientation
+map is still not proved (see the MODEL-01 proof limit above).
+
+The build-menu track-piece switch now passes a `TrackPlacementSpec` instead of
+nine positional values. Four local rules in `build_actions.cpp` keep the old
+tile bytes and join behavior, while making the match/result roles visible. The
+individual asset tile names remain deferred.
+
+Small UI data groups were also named without changing their values: the money
+ticker has named oldest/middle/newest slots and a frame duration, and legacy
+keyboard aliases are named in `input_dispatch.cpp`. The aliases include ASCII,
+soft-key, and signed game-action forms that all map to the same menu action.
 
 The rule functions themselves stay as free functions taking `GameCanvas*`.
 Converting them to `Fleet` methods is deferred to the stage-3 exit ("core rules
@@ -441,3 +509,133 @@ headers were removed.
 The native project keeps plain resource data. Old files `1` to `5` were changed
 once with their 1-to-127 XOR key and given names based on their use. Run-time
 XOR code and numeric resource paths are not part of the native design.
+
+## D-021: Menu dispatch protocol names and saved economy names
+
+The menu dispatcher no longer uses raw transition ids for its normal navigation
+branches. `menu_screen::Id` names the packed-sprite screens, and small local
+option groups name train purchase, upgrade, high-score editor, scenario, and
+toggle values. The high-score editor also names the proven glyph ranges: punctuation
+codes end at 17, lowercase codes are 40..65, and uppercase codes are 70..95;
+the skipped gaps are preserved exactly. This is a naming-only change; the
+legacy close sentinel remains `-1` and all state changes keep their old order.
+
+The six saved train-price fields now use `trainCostFirstEra` through
+`trainCostSixthEra`, and the four saved wagon-option prices use
+`wagonOptionCostPassengerMail` and `wagonOptionCostIndustryGroup1..3`.
+`Economy::train_cost_for_era` is the single named lookup used by build cost and
+map metrics, while save-field order and bytes remain unchanged.
+
+The remaining paired money bases are `moneyBasePrimary` and
+`moneyBaseSecondary`; the names remove the obfuscator-like A/B suffix while
+staying neutral about their deeper fare rule.
+
+The large offer-objective pools in the game-state constructor now use the
+neutral `offer_objective::Objective1..Objective15` enum and named stable ranges
+instead of bare ids. Their meaning remains intentionally undecoded. The shared
+offer entry screens use `offer_screen::{ObjectiveChoice, EffectChoice,
+Summary, Selection}` so the economy tick no longer carries raw transition ids.
+
+Map-generation counters formerly named `weightAccel*` and
+`terrainFeatureStage*` are now `featureStage0Count` through
+`featureStage5Count` in both the scenario record and `World`. Their resource
+read order, stage mapping, difficulty halving, and generated map bytes are
+unchanged; the names follow the six explicit `STAGE_FEATURE_0..5` branches.
+
+Scenario setup toggles formerly named `difficultyA/B/C` and `difficultySlot`
+now say what their proven rules change: `financialDifficulty`, `aiDifficulty`,
+`mapSizeDifficulty`, and `featureDensityDifficulty`. Their menu ids and 0/1
+values are unchanged.
+
+## D-022: Control-flow tails, percentage base, and neutral data names
+
+The large build-menu dispatcher keeps its branch order and state changes, but
+no longer jumps to a shared `goto` tail. The tail rule is now a local helper
+over the proven half-open response-screen range 81..99. The range stays
+neutral because those screens have no decoded asset names.
+
+The repeated whole-percent divisor is `percentage::kBase`; this replaces local
+copies in economy, dialogs, offers, train prices, scenario defaults, and the
+enterprise-tax rule. It is a representation constant, not a new game rule.
+
+Surface raster code now names its framebuffer, clipping, line, ellipse, and
+alpha-blend values. Font and text-box geometry uses named layout constants,
+while glyph and sprite ids keep neutral names where the atlas meaning is not
+proved. Road routing and click-map reverse scans now name neighbor cells,
+queue indexes, and captured targets. These are behavior-preserving names only.
+
+Curve-step ids and construction-overlay ids are also centralized in
+`game_constants.h`. Construction groups use neutral A/B/C names because their
+asset art is not decoded; the four turn variants use the same ordinal rule.
+
+The map generator now names its population seed/range, construction timer,
+terrain-area ranges, and city/industry retry limit. These are still the exact
+legacy values; the names only say where each value is used. The constructor's
+offer objective data is one static `OfferTypePool` table, with an explicit
+count for each row, so the vector contents and effect order are visible in one
+place.
+
+Input release/no-key sentinels, packed train state-code fields, service-site
+types, and track-owner masks now use shared names. Minimap elevation and empty
+kind sentinels are named as stored-byte states. The renderer's twelve train
+direction cases use ordinal slot names because the source still does not prove
+their compass mapping.
+
+The build-menu constructor now uses named sprite-slot constants, result-code
+roles, and shared cursor-action codes. The sprite names describe only the menu
+slot that uses each resource index; they do not infer an atlas name. Its helper
+arguments now say text sprite, menu item, confirmation result, width, enabled
+state, and cursor action. The map renderer likewise names its repeated
+isometric factors, image-anchor flags, industry animation bases, fallback
+sprite index, and construction-progress frames; the numeric resource ids and
+draw order are unchanged.
+
+Track and path code now share `track_build_tile::Id` for the proven open-ground,
+straight, and corner tile roles. `terrain_build_type` names the five build
+protocol values passed to `World::is_tile_buildable`; the values and branch
+order are unchanged. The temporary path-menu marker is named
+`tile::PATH_ANCHOR_MARKER`, but it remains a protocol marker, not a decoded
+tile type. The road train-sprite lookup also names its four direction slots;
+the slot-to-art mapping stays neutral.
+
+## D-023: Deferred smells and proof limits
+
+`Game::update_active_trains` still calls `update_train` twice for each active
+head. This is a visible duplicate call, but its timing effect is not proved;
+it remains unchanged for a separate simulation audit. The generated dialog
+table's packed `w`/`h` fields stay neutral until their source data is decoded.
+The menu dispatcher is now structured without a jump tail, but its remaining
+size is a separate decomposition task rather than a naming-only edit.
+The path reconstruction neighbor flags are now named
+`has_left_neighbor`/`has_right_neighbor`/`has_upper_neighbor`/
+`has_lower_neighbor`; they are local readability fixes only. Conventional
+coordinate names (`x`, `y`) and the many `Game* game = this` aliases remain
+deferred because their wider signature impact is not yet justified.
+
+The monthly-report option switch is now one `MonthlyReportAction` table. Each
+row names its graph series, decade flag, comparison update, calculation, and
+next screen; invalid options still use the old Playing/menu-dirty fallback.
+This removes repeated control-flow text without changing action order.
+
+The graph controller fields now say `graphSeries`, `graphUsesDecadeData`,
+`graphYearLabels`, `graphPeriodLabels`, and `graphBarHeights`. The old
+`altYearArray` and `yearGraphValues` names did not say what the arrays held.
+The train-upgrade array `matchingWagonOptions` likewise records prior options
+for discount matching; it is not a count table.
+
+The rail unload result now has a separate `kDeliveredResourceCount` because
+its legacy progress slots are numbered 1..5 with slot 0 reserved, while service
+stock arrays are numbered 0..4. `delivery_progress_slot` names that mapping and
+the mail path is covered by a focused test. The saved `ServiceSite` stock array
+and its byte order are unchanged.
+
+PNG chunk tables in `boot.cpp` now use their ASCII letters instead of decimal
+byte values. Graph palette tables use names such as `ProfitFill` and
+`CompanyValueLowerOutline`; the color values and resource bytes stay unchanged.
+
+The input path now shares `keypad_key` names for the ASCII numeric-keypad
+codes and `game_action` names for the MIDP action values. The host-side MIDP
+keypad mapping in `midp_input.cpp` remains local because it is computed from
+the platform's `MIDP_KEY_NUM0` base; these are two distinct input protocols.
+Navigation aliases and map-overview codes remain local because their values
+are separate from the directional keypad protocol.

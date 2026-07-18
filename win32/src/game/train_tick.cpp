@@ -1,52 +1,106 @@
 // Train movement, loading, and delivery.
 #include "game.h"
 #include "support/numeric.h"
+#include <array>
 #include <cstdlib>
 
+namespace {
+
+namespace train_service {
+constexpr int32_t kPassengerCapacity = 25;
+constexpr int32_t kIndustryGroup1Capacity = kPassengerCapacity;
+constexpr int32_t kMailCapacity = 15;
+constexpr int32_t kIndustryCapacity = 30;
+constexpr int32_t kRefitThreshold = 10;
+constexpr int32_t kNearbySiteRadius = 3;
+}  // namespace train_service
+
+namespace train_movement {
+constexpr int32_t kPhaseStep = 8;
+constexpr int32_t kServiceCheckPhase = 4;
+constexpr int32_t kServiceLoadPhase = 3;
+constexpr int32_t kCargoAgeScaleDivisor = 15;
+constexpr int32_t kCargoAgeMaximum = 200;
+constexpr int32_t kEnergyPerCar = 40;
+constexpr int32_t kEnergyDecayPerUpdate = 3;
+constexpr int32_t kBaseEngineEnergy = 8;
+}  // namespace train_movement
+
+namespace train_revenue {
+constexpr int32_t kCargoAgeUnitValue = 3;
+constexpr int32_t kMailUnitValue = 8;
+constexpr int32_t kIndustryGroup1UnitValue = 10;
+constexpr int32_t kIndustryGroup2UnitValue = 12;
+constexpr int32_t kIndustryGroup3UnitValue = 13;
+constexpr int32_t kScenarioBonusMultiplier = 2;
+}  // namespace train_revenue
+
+struct TrackVariantAlias {
+    int sourceVariant;
+    int normalizedVariant;
+};
+
+// These are legacy tile-shape aliases. Their exact visual names are not yet
+// proven, so the table records only the normalization relation used by train
+// movement.
+constexpr std::array<TrackVariantAlias, 14> kTrackVariantAliases = {{
+    {7, 0}, {9, 0}, {12, 0}, {13, 0}, {16, 0}, {17, 0}, {19, 0},
+    {8, 1}, {10, 1}, {11, 1}, {14, 1}, {15, 1}, {18, 1}, {20, 1},
+}};
+
+}  // namespace
+
 int32_t Fleet::accumulate_turns(const World& world, int32_t car) const {
-    if (car == -1) return 0;
-    int tile = world.terrain.tileMap[unsigned_byte(trainCars[car].x)]
-                                    [unsigned_byte(trainCars[car].y)];
-    int turn = 0;
-    if (tile == 77) turn = trainCars[car].direction == 0 ? -1 : 1;
-    if (tile == 79) turn = trainCars[car].direction == 0 ? 1 : -1;
-    if (tile == 78) turn = trainCars[car].direction == 2 ? 1 : -1;
-    if (tile == 80) turn = trainCars[car].direction == 2 ? -1 : 1;
-    return accumulate_turns(world, trainCars[car].nextCar) + turn;
+    if (car == train_chain::kEnd) return 0;
+    const int tile_code = world.terrain.tileMap[unsigned_byte(trainCars[car].x)]
+                                               [unsigned_byte(trainCars[car].y)];
+    int turn_offset = 0;
+    if (tile_code == track_turn_tile::VariantA)
+        turn_offset = trainCars[car].direction == 0 ? -1 : 1;
+    if (tile_code == track_turn_tile::VariantC)
+        turn_offset = trainCars[car].direction == 0 ? 1 : -1;
+    if (tile_code == track_turn_tile::VariantB)
+        turn_offset = trainCars[car].direction == 2 ? 1 : -1;
+    if (tile_code == track_turn_tile::VariantD)
+        turn_offset = trainCars[car].direction == 2 ? -1 : 1;
+    return accumulate_turns(world, trainCars[car].nextCar) + turn_offset;
 }
 
 int32_t Fleet::find_service_site_at(int32_t x, int32_t y) const {
-    for (int vehicle = 0; vehicle < 250; ++vehicle) {
-        if ((serviceSites[vehicle].flags & 0x80) != 128) continue;
-        int vehicle_x = unsigned_byte(serviceSites[vehicle].x);
-        int vehicle_y = unsigned_byte(serviceSites[vehicle].y);
-        if (vehicle_x == x && vehicle_y == y) return vehicle;
-        if ((vehicle_x == x - 1 || vehicle_x == x + 1) && vehicle_y == y
-            && (serviceSites[vehicle].flags & 0xE0) == 224)
-            return vehicle;
-        if ((vehicle_y == y - 1 || vehicle_y == y + 1) && vehicle_x == x
-            && (serviceSites[vehicle].flags & 0xE0) == 160)
-            return vehicle;
+    for (int site_slot = 0; site_slot < kServiceVehicleSlotCount; ++site_slot) {
+        if ((serviceSites[site_slot].flags & service_site::USED_SLOT) == 0) continue;
+        const int site_x = unsigned_byte(serviceSites[site_slot].x);
+        const int site_y = unsigned_byte(serviceSites[site_slot].y);
+        if (site_x == x && site_y == y) return site_slot;
+        if ((site_x == x - 1 || site_x == x + 1) && site_y == y
+            && (serviceSites[site_slot].flags & (service_site::USED_SLOT | service_site::HORIZONTAL | service_site::EXTENDED))
+                   == (service_site::USED_SLOT | service_site::HORIZONTAL | service_site::EXTENDED))
+            return site_slot;
+        if ((site_y == y - 1 || site_y == y + 1) && site_x == x
+            && (serviceSites[site_slot].flags & (service_site::USED_SLOT | service_site::HORIZONTAL | service_site::EXTENDED))
+                   == (service_site::USED_SLOT | service_site::EXTENDED))
+            return site_slot;
     }
-    return 5000;
+    return kNoFleetSlot;
 }
 
 int32_t Fleet::append_car(int32_t previous_car, int32_t car_type) {
-    int new_car = 500;
-    for (int car = 0; car < 500; ++car) {
-        if (!train_flag::isUsed(trainCars[car].flags)) {
-            new_car = car;
+    int new_car = kTrainSlotCount;
+    for (int car_slot = 0; car_slot < kTrainSlotCount; ++car_slot) {
+        if (!train_flag::isUsed(trainCars[car_slot].flags)) {
+            new_car = car_slot;
             break;
         }
     }
-    if (new_car != 500) {
+    if (new_car != kTrainSlotCount) {
         trainCars[previous_car].nextCar = (int16_t)new_car;
         trainCars[new_car].flags = static_cast<int8_t>(train_flag::USED_SLOT | car_type);
-        trainCars[new_car].nextCar = -1;
+        trainCars[new_car].nextCar = train_chain::kEnd;
         trainCars[new_car].x = trainCars[previous_car].x;
         trainCars[new_car].y = trainCars[previous_car].y;
         trainCars[new_car].direction = trainCars[previous_car].direction;
-        trainCars[new_car].phase = (int8_t)(trainCars[previous_car].phase - 8);
+        trainCars[new_car].phase =
+            (int8_t)(trainCars[previous_car].phase - train_movement::kPhaseStep);
         trainCars[new_car].energyCargoOrRemovalTicks = 0;
         trainCars[new_car].secondaryCargoOrBaseEnergy = 0;
         trainCars[new_car].lastServiceSite = -1;
@@ -55,12 +109,13 @@ int32_t Fleet::append_car(int32_t previous_car, int32_t car_type) {
 }
 
 void Fleet::reset_trailing_cars(int32_t head, int32_t car, int32_t phase) {
-    if (car == -1) return;
-    reset_trailing_cars(head, trainCars[car].nextCar, phase - 8);
+    if (car == train_chain::kEnd) return;
+    reset_trailing_cars(head, trainCars[car].nextCar,
+                        phase - train_movement::kPhaseStep);
     trainCars[car].x = trainCars[head].x;
     trainCars[car].y = trainCars[head].y;
     trainCars[car].direction = trainCars[head].direction;
-    trainCars[car].phase = (int8_t)(phase - 8);
+    trainCars[car].phase = (int8_t)(phase - train_movement::kPhaseStep);
 }
 
 int32_t Fleet::take_service_resource(int32_t site, int32_t resource,
@@ -75,43 +130,44 @@ int32_t Fleet::take_service_resource(int32_t site, int32_t resource,
 int32_t Fleet::collect_nearby_service_resource(int32_t site, int32_t resource,
                                                 int32_t wanted) {
     int total = take_service_resource(site, resource, wanted);
-    for (int other = 0; other < 250; ++other) {
-        if (site == other || (serviceSites[other].flags & 0x80) != 128
-            || (serviceSites[other].flags & 7) != (serviceSites[site].flags & 7)
-            || std::abs(serviceSites[site].x - serviceSites[other].x) >= 3
-            || std::abs(serviceSites[site].y - serviceSites[other].y) >= 3)
+    for (int other_site = 0; other_site < kServiceVehicleSlotCount; ++other_site) {
+        if (site == other_site || (serviceSites[other_site].flags & service_site::USED_SLOT) == 0
+            || (serviceSites[other_site].flags & service_site::TYPE_MASK)
+                   != (serviceSites[site].flags & service_site::TYPE_MASK)
+            || std::abs(serviceSites[site].x - serviceSites[other_site].x) >= train_service::kNearbySiteRadius
+            || std::abs(serviceSites[site].y - serviceSites[other_site].y) >= train_service::kNearbySiteRadius)
             continue;
-        total += take_service_resource(other, resource, wanted - total);
+        total += take_service_resource(other_site, resource, wanted - total);
     }
     return total;
 }
 
 bool Fleet::can_load_at_service_site(int32_t head, int32_t site) const {
     int car = trainCars[head].nextCar;
-    if (car == -1) return false;
+    if (car == train_chain::kEnd) return false;
     if (!train_flag::isHead(trainCars[car].flags)) {
         switch (train_flag::type(trainCars[car].flags)) {
-            case 2:
-                if ((serviceSites[site].loadFlags & 1) == 1
-                    && trainCars[car].energyCargoOrRemovalTicks < 25)
+            case wagon::PassengerMailCar:
+                if ((serviceSites[site].loadFlags & service_resource::PASSENGER_FLAG) != 0
+                    && trainCars[car].energyCargoOrRemovalTicks < train_service::kPassengerCapacity)
                     return true;
-                if ((serviceSites[site].loadFlags & 0x10) == 0x10
-                    && trainCars[car].secondaryCargoOrBaseEnergy < 15)
-                    return true;
-                break;
-            case 3:
-                if ((serviceSites[site].loadFlags & 4) == 4
-                    && trainCars[car].energyCargoOrRemovalTicks < 25)
+                if ((serviceSites[site].loadFlags & service_resource::MAIL_FLAG) != 0
+                    && trainCars[car].secondaryCargoOrBaseEnergy < train_service::kMailCapacity)
                     return true;
                 break;
-            case 4: case 5:
-                if ((serviceSites[site].loadFlags & 8) == 8
-                    && trainCars[car].energyCargoOrRemovalTicks < 30)
+            case wagon::IndustryGroup1Car:
+                if ((serviceSites[site].loadFlags & service_resource::INDUSTRY_GROUP1_FLAG) != 0
+                    && trainCars[car].energyCargoOrRemovalTicks < train_service::kIndustryGroup1Capacity)
                     return true;
                 break;
-            case 6: case 7:
-                if ((serviceSites[site].loadFlags & 2) == 2
-                    && trainCars[car].energyCargoOrRemovalTicks < 30)
+            case wagon::IndustryGroup2CarA: case wagon::IndustryGroup2CarB:
+                if ((serviceSites[site].loadFlags & service_resource::INDUSTRY_GROUP2_FLAG) != 0
+                    && trainCars[car].energyCargoOrRemovalTicks < train_service::kIndustryCapacity)
+                    return true;
+                break;
+            case wagon::IndustryGroup3CarA: case wagon::IndustryGroup3CarB:
+                if ((serviceSites[site].loadFlags & service_resource::INDUSTRY_GROUP3_FLAG) != 0
+                    && trainCars[car].energyCargoOrRemovalTicks < train_service::kIndustryCapacity)
                     return true;
                 break;
         }
@@ -121,19 +177,23 @@ bool Fleet::can_load_at_service_site(int32_t head, int32_t site) const {
 
 void Fleet::load_at_service_site(World& world, int32_t car,
                                  int32_t vehicle, bool construction_done) {
-    if (car == -1) return;
+    if (car == train_chain::kEnd) return;
     if (!train_flag::isHead(trainCars[car].flags)) {
-        int car_type = train_flag::type(trainCars[car].flags);
+        const int car_type = train_flag::type(trainCars[car].flags);
         switch (car_type) {
-            case 2:
+            case wagon::PassengerMailCar:
                 trainCars[car].energyCargoOrRemovalTicks =
                     (int8_t)(trainCars[car].energyCargoOrRemovalTicks
                              + collect_nearby_service_resource(
-                                 vehicle, 0, 25 - trainCars[car].energyCargoOrRemovalTicks));
+                                 vehicle, service_resource::Passengers,
+                                 train_service::kPassengerCapacity
+                                     - trainCars[car].energyCargoOrRemovalTicks));
                 trainCars[car].secondaryCargoOrBaseEnergy =
                     (int8_t)(trainCars[car].secondaryCargoOrBaseEnergy
                              + collect_nearby_service_resource(
-                                 vehicle, 4, 15 - trainCars[car].secondaryCargoOrBaseEnergy));
+                                 vehicle, service_resource::Mail,
+                                 train_service::kMailCapacity
+                                     - trainCars[car].secondaryCargoOrBaseEnergy));
                 trainCars[car].cargoAge = 0;
                 if (vehicle != trainCars[car].lastServiceSite && !construction_done) {
                     world.advance_construction_timers(
@@ -142,34 +202,42 @@ void Fleet::load_at_service_site(World& world, int32_t car,
                     construction_done = true;
                 }
                 break;
-            case 3:
+            case wagon::IndustryGroup1Car:
                 trainCars[car].energyCargoOrRemovalTicks =
                     (int8_t)(trainCars[car].energyCargoOrRemovalTicks
                              + collect_nearby_service_resource(
-                                 vehicle, 1, 25 - trainCars[car].energyCargoOrRemovalTicks));
+                                 vehicle, service_resource::IndustryGroup1,
+                                 train_service::kIndustryGroup1Capacity
+                                     - trainCars[car].energyCargoOrRemovalTicks));
                 trainCars[car].cargoAge = 0;
                 break;
-            case 4: case 5:
+            case wagon::IndustryGroup2CarA: case wagon::IndustryGroup2CarB:
                 trainCars[car].energyCargoOrRemovalTicks =
                     (int8_t)(trainCars[car].energyCargoOrRemovalTicks
                              + collect_nearby_service_resource(
-                                 vehicle, 2, 30 - trainCars[car].energyCargoOrRemovalTicks));
+                                 vehicle, service_resource::IndustryGroup2,
+                                 train_service::kIndustryCapacity
+                                     - trainCars[car].energyCargoOrRemovalTicks));
                 trainCars[car].cargoAge = 0;
                 break;
-            case 6: case 7:
+            case wagon::IndustryGroup3CarA: case wagon::IndustryGroup3CarB:
                 trainCars[car].energyCargoOrRemovalTicks =
                     (int8_t)(trainCars[car].energyCargoOrRemovalTicks
                              + collect_nearby_service_resource(
-                                 vehicle, 3, 30 - trainCars[car].energyCargoOrRemovalTicks));
+                                 vehicle, service_resource::IndustryGroup3,
+                                 train_service::kIndustryCapacity
+                                     - trainCars[car].energyCargoOrRemovalTicks));
                 trainCars[car].cargoAge = 0;
                 break;
         }
-        if (car_type == 4 || car_type == 5)
-            trainCars[car].flags = (int8_t)((trainCars[car].flags & 0xF0)
-                                  | (trainCars[car].energyCargoOrRemovalTicks >= 10 ? 5 : 4));
-        if (car_type == 6 || car_type == 7)
-            trainCars[car].flags = (int8_t)((trainCars[car].flags & 0xF0)
-                                  | (trainCars[car].energyCargoOrRemovalTicks >= 10 ? 7 : 6));
+        if (car_type == wagon::IndustryGroup2CarA || car_type == wagon::IndustryGroup2CarB)
+            trainCars[car].flags = (int8_t)((trainCars[car].flags & train_flag::NON_TYPE_MASK)
+                                  | (trainCars[car].energyCargoOrRemovalTicks >= train_service::kRefitThreshold
+                                         ? wagon::IndustryGroup2CarB : wagon::IndustryGroup2CarA));
+        if (car_type == wagon::IndustryGroup3CarA || car_type == wagon::IndustryGroup3CarB)
+            trainCars[car].flags = (int8_t)((trainCars[car].flags & train_flag::NON_TYPE_MASK)
+                                  | (trainCars[car].energyCargoOrRemovalTicks >= train_service::kRefitThreshold
+                                         ? wagon::IndustryGroup3CarB : wagon::IndustryGroup3CarA));
         trainCars[car].lastServiceSite = (int8_t)vehicle;
     } else {
         trainCars[car].cargoAge = 0;
@@ -180,72 +248,88 @@ void Fleet::load_at_service_site(World& world, int32_t car,
 
 void Game::record_delivered_resource(int32_t resource, int32_t amount) {
     Game* game = this;
-    game->offerBoard.add_progress(3 + resource, amount);
+    game->offerBoard.add_progress(offer_objective::Objective3 + resource, amount);
     switch (resource) {
-        case 1: game->scenario.milestoneThreshold1 += amount; break;
-        case 2: game->scenario.milestoneThreshold2 += amount; break;
-        case 3: game->scenario.milestoneThreshold3 += amount; break;
-        case 4: game->scenario.milestoneThreshold4 += amount; break;
-        case 5: game->scenario.milestoneThreshold5 += amount; break;
+        case delivery_progress_slot::IndustryGroup3: game->scenario.milestoneThreshold1 += amount; break;
+        case delivery_progress_slot::IndustryGroup2: game->scenario.milestoneThreshold2 += amount; break;
+        case delivery_progress_slot::IndustryGroup1: game->scenario.milestoneThreshold3 += amount; break;
+        case delivery_progress_slot::Passengers: game->scenario.milestoneThreshold4 += amount; break;
+        case delivery_progress_slot::Mail: game->scenario.milestoneThreshold5 += amount; break;
     }
 }
 
 void Game::record_train_revenue(int32_t amount) {
     Game* game = this;
-    game->offerBoard.add_progress(1, amount);
+    game->offerBoard.add_progress(offer_objective::Objective1, amount);
     game->economy.lifetimeTrainRevenue += amount;
     game->economy.trainRevenueScore += amount / 73;
 }
 
 UnloadResult Fleet::unload_at_service_site(const Scenario& scenario,
                                            int32_t car, int32_t vehicle) {
-    if (car == -1) return {};
+    if (car == train_chain::kEnd) return {};
     UnloadResult result;
     if (!train_flag::isHead(trainCars[car].flags)
         && trainCars[car].lastServiceSite != vehicle
         && (trainCars[car].energyCargoOrRemovalTicks > 0 || trainCars[car].secondaryCargoOrBaseEnergy > 0)) {
-        int age_scale = unsigned_byte(trainCars[car].cargoAge) / 15 + 1;
+        const int age_scale = unsigned_byte(trainCars[car].cargoAge)
+                            / train_movement::kCargoAgeScaleDivisor + 1;
         switch (train_flag::type(trainCars[car].flags)) {
-            case 2:
-                if ((serviceSites[vehicle].unloadFlags & 1) == 1) {
-                    int value = trainCars[car].energyCargoOrRemovalTicks * 3 * age_scale;
-                    if (scenario.routeResourceFlags[4] > 0) value *= 2;
-                    result.revenue += value;
-                    result.delivered[4] += trainCars[car].energyCargoOrRemovalTicks;
+            case wagon::PassengerMailCar:
+                if ((serviceSites[vehicle].unloadFlags & service_resource::PASSENGER_FLAG) != 0) {
+                    int revenue_value = trainCars[car].energyCargoOrRemovalTicks
+                                      * train_revenue::kCargoAgeUnitValue * age_scale;
+                    if (scenario.routeResourceFlags[delivery_progress_slot::Passengers] > 0)
+                        revenue_value *= train_revenue::kScenarioBonusMultiplier;
+                    result.revenue += revenue_value;
+                    result.delivered[delivery_progress_slot::Passengers] +=
+                        trainCars[car].energyCargoOrRemovalTicks;
                     trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
-                if ((serviceSites[vehicle].unloadFlags & 0x10) == 0x10) {
-                    int value = trainCars[car].secondaryCargoOrBaseEnergy * 8 * age_scale;
-                    if (scenario.routeResourceFlags[5] > 0) value *= 2;
-                    result.revenue += value;
-                    result.delivered[5] += trainCars[car].secondaryCargoOrBaseEnergy;
+                if ((serviceSites[vehicle].unloadFlags & service_resource::MAIL_FLAG) != 0) {
+                    int revenue_value = trainCars[car].secondaryCargoOrBaseEnergy
+                                      * train_revenue::kMailUnitValue * age_scale;
+                    if (scenario.routeResourceFlags[delivery_progress_slot::Mail] > 0)
+                        revenue_value *= train_revenue::kScenarioBonusMultiplier;
+                    result.revenue += revenue_value;
+                    result.delivered[delivery_progress_slot::Mail] +=
+                        trainCars[car].secondaryCargoOrBaseEnergy;
                     trainCars[car].secondaryCargoOrBaseEnergy = 0;
                 }
                 break;
-            case 3:
-                if ((serviceSites[vehicle].unloadFlags & 2) == 2) {
-                    int value = trainCars[car].energyCargoOrRemovalTicks * 10 * age_scale;
-                    if (scenario.routeResourceFlags[3] > 0) value *= 2;
-                    result.revenue += value;
-                    result.delivered[3] += trainCars[car].energyCargoOrRemovalTicks;
+            case wagon::IndustryGroup1Car:
+                if ((serviceSites[vehicle].unloadFlags & service_resource::INDUSTRY_GROUP3_FLAG) != 0) {
+                    int revenue_value = trainCars[car].energyCargoOrRemovalTicks
+                                      * train_revenue::kIndustryGroup1UnitValue * age_scale;
+                    if (scenario.routeResourceFlags[delivery_progress_slot::IndustryGroup1] > 0)
+                        revenue_value *= train_revenue::kScenarioBonusMultiplier;
+                    result.revenue += revenue_value;
+                    result.delivered[delivery_progress_slot::IndustryGroup1] +=
+                        trainCars[car].energyCargoOrRemovalTicks;
                     trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 break;
-            case 4: case 5:
-                if ((serviceSites[vehicle].unloadFlags & 4) == 4) {
-                    int value = trainCars[car].energyCargoOrRemovalTicks * 12 * age_scale;
-                    if (scenario.routeResourceFlags[2] > 0) value *= 2;
-                    result.revenue += value;
-                    result.delivered[2] += trainCars[car].energyCargoOrRemovalTicks;
+            case wagon::IndustryGroup2CarA: case wagon::IndustryGroup2CarB:
+                if ((serviceSites[vehicle].unloadFlags & service_resource::INDUSTRY_GROUP1_FLAG) != 0) {
+                    int revenue_value = trainCars[car].energyCargoOrRemovalTicks
+                                      * train_revenue::kIndustryGroup2UnitValue * age_scale;
+                    if (scenario.routeResourceFlags[delivery_progress_slot::IndustryGroup2] > 0)
+                        revenue_value *= train_revenue::kScenarioBonusMultiplier;
+                    result.revenue += revenue_value;
+                    result.delivered[delivery_progress_slot::IndustryGroup2] +=
+                        trainCars[car].energyCargoOrRemovalTicks;
                     trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 break;
-            case 6: case 7:
-                if ((serviceSites[vehicle].unloadFlags & 8) == 8) {
-                    int value = trainCars[car].energyCargoOrRemovalTicks * 13 * age_scale;
-                    if (scenario.routeResourceFlags[1] > 0) value *= 2;
-                    result.revenue += value;
-                    result.delivered[1] += trainCars[car].energyCargoOrRemovalTicks;
+            case wagon::IndustryGroup3CarA: case wagon::IndustryGroup3CarB:
+                if ((serviceSites[vehicle].unloadFlags & service_resource::INDUSTRY_GROUP2_FLAG) != 0) {
+                    int revenue_value = trainCars[car].energyCargoOrRemovalTicks
+                                      * train_revenue::kIndustryGroup3UnitValue * age_scale;
+                    if (scenario.routeResourceFlags[delivery_progress_slot::IndustryGroup3] > 0)
+                        revenue_value *= train_revenue::kScenarioBonusMultiplier;
+                    result.revenue += revenue_value;
+                    result.delivered[delivery_progress_slot::IndustryGroup3] +=
+                        trainCars[car].energyCargoOrRemovalTicks;
                     trainCars[car].energyCargoOrRemovalTicks = 0;
                 }
                 break;
@@ -254,7 +338,8 @@ UnloadResult Fleet::unload_at_service_site(const Scenario& scenario,
     UnloadResult tail = unload_at_service_site(scenario, trainCars[car].nextCar,
                                                vehicle);
     tail.revenue += result.revenue;
-    for (int resource = 1; resource < kResourceTypeCount; ++resource)
+    for (int resource = delivery_progress_slot::First;
+         resource < delivery_progress_slot::AfterLast; ++resource)
         tail.delivered[resource] += result.delivered[resource];
     return tail;
 }
@@ -262,7 +347,8 @@ UnloadResult Fleet::unload_at_service_site(const Scenario& scenario,
 int32_t Game::unload_train_revenue(int32_t car, int32_t service_site) {
     UnloadResult result = fleet.unload_at_service_site(
         scenario, car, service_site);
-    for (int resource = 1; resource < kResourceTypeCount; ++resource) {
+    for (int resource = delivery_progress_slot::First;
+         resource < delivery_progress_slot::AfterLast; ++resource) {
         if (result.delivered[resource] != 0)
             record_delivered_resource(resource, result.delivered[resource]);
     }
@@ -270,22 +356,18 @@ int32_t Game::unload_train_revenue(int32_t car, int32_t service_site) {
 }
 
 static int normalize_track_variant(int variant) {
-    switch (variant) {
-        case 7: case 9: case 12: case 13: case 16: case 17: case 19:
-            return 0;
-        case 8: case 10: case 11: case 14: case 15: case 18: case 20:
-            return 1;
-        default:
-            return variant;
-    }
+    for (const TrackVariantAlias& alias : kTrackVariantAliases)
+        if (alias.sourceVariant == variant) return alias.normalizedVariant;
+    return variant;
 }
 
 void Game::update_train(int32_t head) {
     Game *game = this;
-    int stop_chain = 0;
+    bool stop_chain_update = false;
     if (!train_flag::isHead(game->fleet.trainCars[head].flags)
         || unsigned_byte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) <= 0) {
-        game->fleet.trainCars[head].flags = (int8_t)(game->fleet.trainCars[head].flags & 0xEF);
+        game->fleet.trainCars[head].flags = static_cast<int8_t>(
+            game->fleet.trainCars[head].flags & train_flag::CLEAR_MOVEMENT_STATE_MASK);
         if (train_flag::isHead(game->fleet.trainCars[head].flags)) {
             game->fleet.trainCars[head].energyCargoOrRemovalTicks =
                 (int8_t)(game->fleet.trainCars[head].secondaryCargoOrBaseEnergy
@@ -296,37 +378,46 @@ void Game::update_train(int32_t head) {
 
         int old_x = unsigned_byte(game->fleet.trainCars[head].x);
         int old_y = unsigned_byte(game->fleet.trainCars[head].y);
-        bool at_service_tile = (game->world.terrain.tileMap[old_x][old_y] == 87
-                                || game->world.terrain.tileMap[old_x][old_y] == 88);
-        if (train_flag::isHead(game->fleet.trainCars[head].flags) && game->fleet.trainCars[head].phase == 4
-            && at_service_tile && game->world.trackMap[old_x][old_y] == 65) {
+        const bool at_service_tile =
+            (game->world.terrain.tileMap[old_x][old_y] == tile::VERTICAL_STATION
+             || game->world.terrain.tileMap[old_x][old_y] == tile::HORIZONTAL_STATION);
+        if (train_flag::isHead(game->fleet.trainCars[head].flags)
+            && game->fleet.trainCars[head].phase == train_movement::kServiceCheckPhase
+            && at_service_tile
+            && game->world.trackMap[old_x][old_y] == tile::SERVICE_TRACK) {
             int service_vehicle = game->fleet.find_service_site_at(old_x, old_y);
             int revenue = 0;
             if (service_vehicle != game->fleet.trainCars[head].lastServiceSite)
                 revenue = game->unload_train_revenue(head, service_vehicle);
 
-            if (game->fleet.trainCars[head].stateCode != 7) {
-                int engine_type = game->fleet.trainCars[head].stateCode & 7;
+            if (game->fleet.trainCars[head].stateCode != train_state_code::EmptyWagonCode) {
+                int engine_type = game->fleet.trainCars[head].stateCode
+                                & train_state_code::PackedFieldMask;
                 game->fleet.trainCars[head].flags = static_cast<int8_t>(
                     train_flag::USED_SLOT | train_flag::HEAD | (engine_type >= 3 ? 1 : 0));
-                game->fleet.trainCars[head].secondaryCargoOrBaseEnergy = (int8_t)(8 - engine_type);
+                game->fleet.trainCars[head].secondaryCargoOrBaseEnergy =
+                    (int8_t)(train_movement::kBaseEngineEnergy - engine_type);
                 game->fleet.trainCars[head].era = (int8_t)engine_type;
                 game->fleet.trainCars[head].ageYears = 0;
-                int car = game->fleet.trainCars[head].nextCar;
-                while (car != -1) {
-                    game->fleet.trainCars[car].flags = 0;
-                    car = game->fleet.trainCars[car].nextCar;
+                int car_slot = game->fleet.trainCars[head].nextCar;
+                while (car_slot != train_chain::kEnd) {
+                    game->fleet.trainCars[car_slot].flags = 0;
+                    car_slot = game->fleet.trainCars[car_slot].nextCar;
                 }
                 int previous_car = head;
-                for (int slot = 0; slot < 5; ++slot) {
-                    int car_code = (game->fleet.trainCars[head].stateCode >> (3 + 3 * slot)) & 7;
-                    if (car_code >= 7) continue;
-                    int car_type = 2 + car_code;
-                    if (car_type == 5) ++car_type;
+                for (int slot = 0; slot < kWagonOptionCount; ++slot) {
+                    const int car_code =
+                        (game->fleet.trainCars[head].stateCode
+                         >> (train_state_code::FirstWagonFieldShift
+                             + train_state_code::PackedFieldWidth * slot))
+                        & train_state_code::PackedFieldMask;
+                    if (car_code >= train_state_code::EmptyWagonCode) continue;
+                    int car_type = train_state_code::WagonTypeBase + car_code;
+                    if (car_type == train_state_code::SkippedCarType) ++car_type;
                     previous_car = game->fleet.append_car(previous_car, car_type);
                     game->renderer.lastViewportCenterX = -1;
                 }
-                game->fleet.trainCars[head].stateCode = 7;
+                game->fleet.trainCars[head].stateCode = train_state_code::EmptyWagonCode;
                 game->renderer.lastViewportCenterX = -1;
             }
 
@@ -334,8 +425,8 @@ void Game::update_train(int32_t head) {
                                              service_vehicle, false);
             if (game->fleet.trainCars[head].aiOverride == 1
                 && game->fleet.can_load_at_service_site(head, service_vehicle)) {
-                game->fleet.trainCars[head].phase = 3;
-                stop_chain = 1;
+                game->fleet.trainCars[head].phase = train_movement::kServiceLoadPhase;
+                stop_chain_update = true;
             }
             if (service_vehicle != game->fleet.trainCars[head].lastServiceSite) {
                 if (revenue > 0) {
@@ -346,22 +437,27 @@ void Game::update_train(int32_t head) {
                     game->record_train_revenue(revenue);
                 }
                 game->fleet.trainCars[head].energyCargoOrRemovalTicks =
-                    (int8_t)(game->fleet.count_cars(head) * 40);
+                    (int8_t)(game->fleet.count_cars(head) * train_movement::kEnergyPerCar);
             }
             game->fleet.trainCars[head].lastServiceSite = (int8_t)service_vehicle;
-            game->fleet.trainCars[head].flags = (int8_t)(game->fleet.trainCars[head].flags | 0x10);
+            game->fleet.trainCars[head].flags = static_cast<int8_t>(
+                game->fleet.trainCars[head].flags | train_flag::MOVEMENT_STATE);
         }
-        if (train_flag::isHead(game->fleet.trainCars[head].flags) && game->fleet.trainCars[head].phase == 4
-            && at_service_tile && game->world.trackMap[old_x][old_y] != 65) {
+        if (train_flag::isHead(game->fleet.trainCars[head].flags)
+            && game->fleet.trainCars[head].phase == train_movement::kServiceCheckPhase
+            && at_service_tile
+            && game->world.trackMap[old_x][old_y] != tile::SERVICE_TRACK) {
             game->fleet.trainCars[head].energyCargoOrRemovalTicks =
-                (int8_t)(game->fleet.count_cars(head) * 40);
+                (int8_t)(game->fleet.count_cars(head) * train_movement::kEnergyPerCar);
         }
 
-        int collision = 0;
-        if (game->fleet.trainCars[head].phase < 8) {
+        bool collision_detected = false;
+        if (game->fleet.trainCars[head].phase < train_movement::kPhaseStep) {
             ++game->fleet.trainCars[head].phase;
         } else {
-            if (unsigned_byte(game->fleet.trainCars[head].cargoAge) < 200) ++game->fleet.trainCars[head].cargoAge;
+            if (unsigned_byte(game->fleet.trainCars[head].cargoAge)
+                < train_movement::kCargoAgeMaximum)
+                ++game->fleet.trainCars[head].cargoAge;
             old_x = game->fleet.trainCars[head].x;
             old_y = game->fleet.trainCars[head].y;
             int old_dir = game->fleet.trainCars[head].direction;
@@ -370,13 +466,16 @@ void Game::update_train(int32_t head) {
             int next_x = unsigned_byte(game->fleet.trainCars[head].x);
             int next_y = unsigned_byte(game->fleet.trainCars[head].y);
             int current_track = game->world.trackMap[next_x][next_y];
-            int current_variant = game->world.terrain.tileMap[next_x][next_y] - 70;
-            if (current_variant == 6 && (game->fleet.trainCars[head].direction == 0
+            int current_variant = game->world.terrain.tileMap[next_x][next_y]
+                                 - tile::TRACK_FIRST;
+            if (current_variant == tile::CROSSING_VARIANT
+                && (game->fleet.trainCars[head].direction == 0
                                          || game->fleet.trainCars[head].direction == 1)) {
                 current_track = track::PRESENT | (current_track & track::DIR_OWNER_MASK);
                 current_variant = 0;
             }
-            if (current_variant == 6 && (game->fleet.trainCars[head].direction == 2
+            if (current_variant == tile::CROSSING_VARIANT
+                && (game->fleet.trainCars[head].direction == 2
                                          || game->fleet.trainCars[head].direction == 3)) {
                 current_track = track::PRESENT
                     | ((current_track & (track::DIR_OWNER_MASK << track::DIR_OWNER_SHIFT))
@@ -384,21 +483,27 @@ void Game::update_train(int32_t head) {
                 current_variant = 1;
             }
             current_variant = normalize_track_variant(current_variant);
-            const int8_t* step =
-                game->fleet.forwardTrackSteps[current_variant][0] == game->fleet.trainCars[head].direction
+            const TrackStepEntry& step =
+                game->fleet.forwardTrackSteps[current_variant]
+                    .enteringDirection == game->fleet.trainCars[head].direction
                 ? game->fleet.forwardTrackSteps[current_variant]
                 : game->fleet.reverseTrackSteps[current_variant];
-            next_x += step[2];
-            next_y += step[3];
+            next_x += step.stepX;
+            next_y += step.stepY;
             if (next_x >= 0 && next_y >= 0
                 && next_x < game->world.terrain.mapWidth && next_y < game->world.terrain.mapHeight) {
                 bool moved = false;
                 int next_track = game->world.trackMap[next_x][next_y];
-                int next_variant = normalize_track_variant(game->world.terrain.tileMap[next_x][next_y] - 70);
-                for (int pair = 2; pair < kTrackStepValueCount / 2; ++pair) {
-                    if (step[2 * pair] != next_variant) continue;
-                    int next_dir = step[2 * pair + 1];
-                    if (next_variant == 6) {
+                int next_variant = normalize_track_variant(
+                    game->world.terrain.tileMap[next_x][next_y] - tile::TRACK_FIRST);
+                for (int transition_index = 0;
+                     transition_index < kTrackTransitionCount;
+                     ++transition_index) {
+                    const TrackStepTransition& transition =
+                        step.transitions[transition_index];
+                    if (transition.nextTileVariant != next_variant) continue;
+                    const int next_dir = transition.nextDirection;
+                    if (next_variant == tile::CROSSING_VARIANT) {
                         if (next_dir == 0 || next_dir == 1)
                             next_track = track::PRESENT | (next_track & track::DIR_OWNER_MASK);
                         if (next_dir == 2 || next_dir == 3)
@@ -413,14 +518,14 @@ void Game::update_train(int32_t head) {
                     moved = true;
                 }
                 if (!moved) {
-                    game->fleet.trainCars[head].direction = step[1];
+                    game->fleet.trainCars[head].direction = step.fallbackDirection;
                     game->fleet.reset_trailing_cars(
                         head, game->fleet.trainCars[head].nextCar, 0);
                 }
                 if (moved && train_flag::isHead(game->fleet.trainCars[head].flags)
-                    && next_variant == 6) {
+                    && next_variant == tile::CROSSING_VARIANT) {
                     bool occupied = false;
-                    for (int other = 0; other < 500; ++other) {
+                    for (int other = 0; other < kTrainSlotCount; ++other) {
                         if (train_flag::isUsed(game->fleet.trainCars[other].flags) && other != head
                             && game->fleet.trainCars[other].x == game->fleet.trainCars[head].x
                             && game->fleet.trainCars[other].y == game->fleet.trainCars[head].y) {
@@ -432,24 +537,34 @@ void Game::update_train(int32_t head) {
                         game->fleet.trainCars[head].x = (int8_t)old_x;
                         game->fleet.trainCars[head].y = (int8_t)old_y;
                         game->fleet.trainCars[head].direction = (int8_t)old_dir;
-                        game->fleet.trainCars[head].phase = 8;
-                        collision = 1;
+                        game->fleet.trainCars[head].phase = train_movement::kPhaseStep;
+                        collision_detected = true;
                     }
                 }
             } else {
-                if (game->fleet.forwardTrackSteps[current_variant][0] == game->fleet.trainCars[head].direction)
-                    game->fleet.trainCars[head].direction = game->fleet.forwardTrackSteps[current_variant][1];
-                else if (game->fleet.reverseTrackSteps[current_variant][0] == game->fleet.trainCars[head].direction)
-                    game->fleet.trainCars[head].direction = game->fleet.reverseTrackSteps[current_variant][1];
+                if (game->fleet.forwardTrackSteps[current_variant]
+                        .enteringDirection
+                    == game->fleet.trainCars[head].direction)
+                    game->fleet.trainCars[head].direction =
+                        game->fleet.forwardTrackSteps[current_variant]
+                            .fallbackDirection;
+                else if (game->fleet.reverseTrackSteps[current_variant]
+                             .enteringDirection
+                         == game->fleet.trainCars[head].direction)
+                    game->fleet.trainCars[head].direction =
+                        game->fleet.reverseTrackSteps[current_variant]
+                            .fallbackDirection;
                 game->fleet.reset_trailing_cars(
                     head, game->fleet.trainCars[head].nextCar, 0);
             }
         }
-        if (stop_chain == 0 && collision == 0 && game->fleet.trainCars[head].nextCar != -1)
+        if (!stop_chain_update && !collision_detected
+            && game->fleet.trainCars[head].nextCar != train_chain::kEnd)
             game->update_train(game->fleet.trainCars[head].nextCar);
     }
     if (train_flag::isHead(game->fleet.trainCars[head].flags)) {
-        int energy = unsigned_byte(game->fleet.trainCars[head].energyCargoOrRemovalTicks) - 3;
+        int energy = unsigned_byte(game->fleet.trainCars[head].energyCargoOrRemovalTicks)
+                   - train_movement::kEnergyDecayPerUpdate;
         if (energy < 0) energy = 0;
         game->fleet.trainCars[head].energyCargoOrRemovalTicks = (int8_t)energy;
     }

@@ -1705,6 +1705,18 @@ const PackedDialog kDialogs[] = {
     },
     .commands = {
     } },
+  { /* sprite 100 -- road stop: buy a bus or truck for this stop's road network */
+    .sprite_id = 100, .flags = 0x03,
+    .background_color = 0xFFB062, .edge_color = 0xFFD280,
+    .border_color = 0xC08000, .selection_color = 0xFF8200,
+    .width = 100, .height = 100, .nested_sprite_id = 100,
+    .title = Text::road_stop,
+    .items = {
+      { .flags = 0x18, .image = false, .x_offset = 9, .y_offset = 6, .action_code = 1, .sel_left = 3, .sel_top = 2, .sel_right = 2, .sel_bottom = 2, .text = Text::buy_bus },
+      { .flags = 0x18, .image = false, .x_offset = 9, .y_offset = 6, .action_code = 2, .sel_left = 3, .sel_top = 2, .sel_right = 2, .sel_bottom = 2, .text = Text::buy_truck },
+    },
+    .commands = {
+    } },
 };
 
 }  // namespace

@@ -1,90 +1,224 @@
 // Build-path search, validation, and preview tiles.
 #include "game.h"
 
+#include <algorithm>
+#include <array>
 #include <limits.h>
+
+namespace {
+
+namespace path_distance {
+constexpr int16_t kUnvisited = 0;
+constexpr int16_t kPassable = 1;
+constexpr int16_t kTunnelEndpoint = 2;
+constexpr int16_t kTunnelInterior = 3;
+constexpr int16_t kReserved = 7;
+constexpr int16_t kVisited = 9;
+constexpr int16_t kSearchSeed = 20;
+constexpr int32_t kFloodFillPassCount = 50;
+constexpr int32_t kSearchLimit = 10;
+}  // namespace path_distance
+
+namespace path_tile {
+// These names describe the step used by path search, not a visual tile type.
+constexpr int32_t kStepUp = tile::CURVE_UP;
+constexpr int32_t kStepLeft = tile::CURVE_LEFT;
+constexpr int32_t kStepRight = tile::CURVE_RIGHT;
+constexpr int32_t kStepDown = tile::CURVE_DOWN;
+// The source proves these stable path/build bytes, but not richer sprite names.
+constexpr int32_t kOpenGroundVariantA = track_build_tile::OpenGroundVariantA;
+constexpr int32_t kOpenGroundVariantB = track_build_tile::OpenGroundVariantB;
+constexpr int32_t kOpenGroundVariantC = track_build_tile::OpenGroundVariantC;
+constexpr int32_t kOpenGroundVariantD = track_build_tile::OpenGroundVariantD;
+constexpr int32_t kAlongY = track_build_tile::AlongY;
+constexpr int32_t kAlongX = track_build_tile::AlongX;
+constexpr int32_t kTrackCornerVariantA = track_build_tile::CornerVariantA;
+constexpr int32_t kTrackCornerVariantB = track_build_tile::CornerVariantB;
+constexpr int32_t kTrackCornerVariantC = track_build_tile::CornerVariantC;
+constexpr int32_t kTrackCornerVariantD = track_build_tile::CornerVariantD;
+}  // namespace path_tile
+
+struct GridStep {
+    int32_t x;
+    int32_t y;
+};
+
+constexpr GridStep path_step_for_tile(int32_t tile_code) {
+    switch (tile_code) {
+        case path_tile::kStepUp: return {0, -1};
+        case path_tile::kStepLeft: return {-1, 0};
+        case path_tile::kStepRight: return {1, 0};
+        case path_tile::kStepDown: return {0, 1};
+        default: return {0, 0};
+    }
+}
+
+constexpr std::array<int32_t, 10> kBuildPathTileCodes = {
+    path_tile::kStepUp, path_tile::kStepLeft, path_tile::kStepRight,
+    path_tile::kStepDown, path_tile::kOpenGroundVariantA,
+    path_tile::kOpenGroundVariantB, path_tile::kOpenGroundVariantC,
+    path_tile::kOpenGroundVariantD,
+    path_tile::kAlongY, path_tile::kAlongX,
+};
+
+constexpr std::array<int32_t, 5> kHorizontalPathNeighborCodes = {
+    path_tile::kStepUp, path_tile::kStepDown,
+    path_tile::kOpenGroundVariantA, path_tile::kOpenGroundVariantC,
+    path_tile::kAlongX,
+};
+
+constexpr std::array<int32_t, 5> kVerticalPathNeighborCodes = {
+    path_tile::kStepLeft, path_tile::kStepRight,
+    path_tile::kOpenGroundVariantB, path_tile::kOpenGroundVariantD,
+    path_tile::kAlongY,
+};
+
+constexpr std::array<int32_t, 8> kLeftNeighborTrackCodes = {
+    path_tile::kAlongX, path_tile::kTrackCornerVariantA,
+    path_tile::kTrackCornerVariantC, track_turn_tile::VariantB,
+    track_turn_tile::VariantD, construction_tile::HorizontalB,
+    tile::HORIZONTAL_STATION, tile::HORIZONTAL_TERMINAL,
+};
+
+constexpr std::array<int32_t, 8> kRightNeighborTrackCodes = {
+    path_tile::kAlongX, path_tile::kTrackCornerVariantB,
+    path_tile::kTrackCornerVariantD, track_turn_tile::VariantB,
+    track_turn_tile::VariantD, construction_tile::HorizontalC,
+    tile::HORIZONTAL_STATION, tile::HORIZONTAL_TERMINAL,
+};
+
+constexpr std::array<int32_t, 8> kUpNeighborTrackCodes = {
+    path_tile::kAlongY, path_tile::kTrackCornerVariantB,
+    path_tile::kTrackCornerVariantC, track_turn_tile::VariantA,
+    track_turn_tile::VariantC, construction_tile::VerticalB,
+    tile::VERTICAL_STATION, tile::VERTICAL_TERMINAL,
+};
+
+constexpr std::array<int32_t, 8> kDownNeighborTrackCodes = {
+    path_tile::kAlongY, path_tile::kTrackCornerVariantA,
+    path_tile::kTrackCornerVariantD, track_turn_tile::VariantA,
+    track_turn_tile::VariantC, construction_tile::VerticalC,
+    tile::VERTICAL_STATION, tile::VERTICAL_TERMINAL,
+};
+
+template <typename T, std::size_t N>
+constexpr bool contains_code(const std::array<T, N>& codes, T code) {
+    return std::find(codes.begin(), codes.end(), code) != codes.end();
+}
+
+bool contains_code(std::span<const int32_t> codes, int32_t code) {
+    return std::find(codes.begin(), codes.end(), code) != codes.end();
+}
+
+bool is_open_ground_tile(int32_t tile_code) {
+    return tile_code == 0
+        || (tile_code >= path_tile::kOpenGroundVariantA
+            && tile_code <= path_tile::kOpenGroundVariantD)
+        || (tile_code >= tile::SCENERY_FIRST && tile_code <= tile::SCENERY_LAST);
+}
+
+}  // namespace
 
 int16_t Pathfinder::distance_min(const World& world, int32_t x, int32_t y,
                                  int32_t current_min) const {
     int16_t result = (int16_t)current_min;
     if (x >= 0 && x < world.terrain.mapWidth
         && y >= 0 && y < world.terrain.mapHeight
-        && distanceGrid[x][y] >= 20 && distanceGrid[x][y] < result)
+        && distanceGrid[x][y] >= path_distance::kSearchSeed
+        && distanceGrid[x][y] < result)
         result = distanceGrid[x][y];
     return result;
 }
 
-int32_t Pathfinder::relax_cell(const World& world, int32_t x, int32_t y) {
+Pathfinder::RelaxationResult Pathfinder::relax_cell(const World& world,
+                                                    int32_t x, int32_t y) {
     bool changed_or_blocked = false;
-    int16_t cell = distanceGrid[x][y];
-    if (cell > 0 && cell != 3 && cell != 7) {
-        int previous = cell < 20 ? SHRT_MAX : cell;
-        int distance = distance_min(world, x - 1, y, previous);
-        distance = distance_min(world, x + 1, y, distance);
-        distance = distance_min(world, x, y - 1, distance);
-        distance = distance_min(world, x, y + 1, distance);
-        if (distance < previous) {
-            distance = (int16_t)(distance + 1);
-            if (cell == 2) {
-                int step_x = 0;
-                int step_y = 0;
+    const int16_t distance_cell = distanceGrid[x][y];
+    if (distance_cell > path_distance::kUnvisited
+        && distance_cell != path_distance::kTunnelInterior
+        && distance_cell != path_distance::kReserved) {
+        const int previous_distance = distance_cell < path_distance::kSearchSeed
+            ? SHRT_MAX
+            : distance_cell;
+        int candidate_distance = distance_min(world, x - 1, y, previous_distance);
+        candidate_distance = distance_min(world, x + 1, y, candidate_distance);
+        candidate_distance = distance_min(world, x, y - 1, candidate_distance);
+        candidate_distance = distance_min(world, x, y + 1, candidate_distance);
+        if (candidate_distance < previous_distance) {
+            candidate_distance =
+                static_cast<int16_t>(candidate_distance + 1);
+            if (distance_cell == path_distance::kTunnelEndpoint) {
                 int tunnel_x = x;
                 int tunnel_y = y;
-                if (world.terrain.tileMap[x][y] == 7) step_y = -1;
-                if (world.terrain.tileMap[x][y] == 8) step_x = -1;
-                if (world.terrain.tileMap[x][y] == 9) step_x = 1;
-                if (world.terrain.tileMap[x][y] == 10) step_y = 1;
-                if (step_x != 0 || step_y != 0) {
-                    int tunnel_distance = distance;
+                const GridStep tunnel_step = path_step_for_tile(
+                    world.terrain.tileMap[x][y]);
+                if (tunnel_step.x != 0 || tunnel_step.y != 0) {
+                    int tunnel_distance = candidate_distance;
                     do {
                         tunnel_distance = (int16_t)(tunnel_distance + 1);
-                        tunnel_x += step_x;
-                        tunnel_y += step_y;
-                    } while (distanceGrid[tunnel_x][tunnel_y] == 3);
+                        tunnel_x += tunnel_step.x;
+                        tunnel_y += tunnel_step.y;
+                    } while (distanceGrid[tunnel_x][tunnel_y]
+                             == path_distance::kTunnelInterior);
                     distanceGrid[tunnel_x][tunnel_y] = (int16_t)tunnel_distance;
                     changed_or_blocked = true;
                 }
             }
-            distanceGrid[x][y] = (int16_t)distance;
+            distanceGrid[x][y] = (int16_t)candidate_distance;
         }
     } else {
         changed_or_blocked = true;
     }
-    if (distanceGrid[targetX][targetY] >= 20) return 2;
-    return changed_or_blocked ? 0 : 1;
+    if (distanceGrid[targetX][targetY] >= path_distance::kSearchSeed)
+        return RelaxationResult::DestinationFound;
+    return changed_or_blocked ? RelaxationResult::ChangedOrBlocked
+                              : RelaxationResult::Stable;
 }
 
 void Pathfinder::flood_fill(const World& world) {
     bool keep_searching = true;
     bool destination_found = false;
-    for (int pass = 50;
+    for (int pass = path_distance::kFloodFillPassCount;
          keep_searching && !destination_found && pass > 0; --pass) {
         keep_searching = false;
         for (int x = anchorX; x >= 0; --x) {
             for (int y = anchorY; y >= 0; --y) {
-                int result = relax_cell(world, x, y);
-                keep_searching |= result == 0;
-                destination_found |= result == 2;
+                const RelaxationResult relaxation_result =
+                    relax_cell(world, x, y);
+                keep_searching |= relaxation_result
+                                  == RelaxationResult::ChangedOrBlocked;
+                destination_found |= relaxation_result
+                                     == RelaxationResult::DestinationFound;
             }
         }
         for (int x = anchorX; x < world.terrain.mapWidth; ++x) {
             for (int y = anchorY; y < world.terrain.mapHeight; ++y) {
-                int result = relax_cell(world, x, y);
-                keep_searching |= result == 0;
-                destination_found |= result == 2;
+                const RelaxationResult relaxation_result =
+                    relax_cell(world, x, y);
+                keep_searching |= relaxation_result
+                                  == RelaxationResult::ChangedOrBlocked;
+                destination_found |= relaxation_result
+                                     == RelaxationResult::DestinationFound;
             }
         }
         for (int x = anchorX; x >= 0; --x) {
             for (int y = anchorY; y < world.terrain.mapHeight; ++y) {
-                int result = relax_cell(world, x, y);
-                keep_searching |= result == 0;
-                destination_found |= result == 2;
+                const RelaxationResult relaxation_result =
+                    relax_cell(world, x, y);
+                keep_searching |= relaxation_result
+                                  == RelaxationResult::ChangedOrBlocked;
+                destination_found |= relaxation_result
+                                     == RelaxationResult::DestinationFound;
             }
         }
         for (int x = anchorX; x < world.terrain.mapWidth; ++x) {
             for (int y = anchorY; y >= 0; --y) {
-                int result = relax_cell(world, x, y);
-                keep_searching |= result == 0;
-                destination_found |= result == 2;
+                const RelaxationResult relaxation_result =
+                    relax_cell(world, x, y);
+                keep_searching |= relaxation_result
+                                  == RelaxationResult::ChangedOrBlocked;
+                destination_found |= relaxation_result
+                                     == RelaxationResult::DestinationFound;
             }
         }
     }
@@ -92,7 +226,8 @@ void Pathfinder::flood_fill(const World& world) {
 
 bool Pathfinder::find_step(const World& world, int32_t x, int32_t y,
                            int32_t current_distance) {
-    if (!world.in_bounds(x, y) || distanceGrid[x][y] < 20
+    if (!world.in_bounds(x, y)
+        || distanceGrid[x][y] < path_distance::kSearchSeed
         || distanceGrid[x][y] >= current_distance)
         return false;
     nextX = x;
@@ -104,14 +239,9 @@ void Pathfinder::clear_build_path_tile(const World& world, int32_t x,
                                        int32_t y) {
     if (x > 0 && x < world.terrain.mapWidth
         && y > 0 && y < world.terrain.mapHeight
-        && ((world.terrain.tileMap[x][y] >= 7
-             && world.terrain.tileMap[x][y] <= 10)
-            || (world.terrain.tileMap[x][y] >= 21
-                && world.terrain.tileMap[x][y] <= 24)
-            || world.terrain.tileMap[x][y] == 70
-            || world.terrain.tileMap[x][y] == 71)
-        && distanceGrid[x][y] > 0) {
-        distanceGrid[x][y] = 0;
+        && contains_code(kBuildPathTileCodes, world.terrain.tileMap[x][y])
+        && distanceGrid[x][y] > path_distance::kUnvisited) {
+        distanceGrid[x][y] = path_distance::kUnvisited;
     }
 }
 
@@ -119,22 +249,18 @@ bool Pathfinder::is_tile_match(const World& world,
                                   const BuildController& build,
                                   bool connected,
                                   int32_t x, int32_t y,
-                                  int32_t tile_a, int32_t tile_b,
-                                  int32_t tile_c, int32_t tile_d,
-                                  int32_t tile_e, int32_t tile_f,
-                                  int32_t tile_g, int32_t tile_h,
+                                  std::span<const int32_t> allowed_tile_codes,
                                   bool high_owner) const {
     if (connected || !world.in_bounds(x, y))
         return connected;
-    int tile = world.terrain.tileMap[x][y];
-    int owner = world.trackMap[x][y] & track::OWNER_MASK;
-    owner = tile == tile::CROSSING && high_owner
-                ? owner >> track::DIR_OWNER_SHIFT
-                : owner & track::DIR_OWNER_MASK;
-    if (owner == build.existingTrackOwnerCode
-        && (tile == tile_a || tile == tile_b || tile == tile_c
-            || tile == tile_d || tile == tile_e || tile == tile_f
-            || tile == tile_g || tile == tile_h || tile == 76))
+    const int tile_code = world.terrain.tileMap[x][y];
+    int owner_code = world.trackMap[x][y] & track::OWNER_MASK;
+    owner_code = tile_code == tile::CROSSING && high_owner
+        ? owner_code >> track::DIR_OWNER_SHIFT
+        : owner_code & track::DIR_OWNER_MASK;
+    if (owner_code == build.existingTrackOwnerCode
+        && (contains_code(allowed_tile_codes, tile_code)
+            || tile_code == tile::CROSSING))
         return true;
     return false;
 }
@@ -149,150 +275,163 @@ void Pathfinder::validate_step(World& world, BuildController& build,
         walking = true;
         nextX = x;
         nextY = y;
-        int tile = world.terrain.tileMap[x][y];
-        if (tile == 7 || tile == 10 || tile == 21 || tile == 23 || tile == 71) {
+        const int tile_code = world.terrain.tileMap[x][y];
+        if (contains_code(kHorizontalPathNeighborCodes, tile_code)) {
             clear_build_path_tile(world, x - 1, y);
             clear_build_path_tile(world, x + 1, y);
         }
-        if (tile == 8 || tile == 9 || tile == 22 || tile == 24 || tile == 70) {
+        if (contains_code(kVerticalPathNeighborCodes, tile_code)) {
             clear_build_path_tile(world, x, y - 1);
             clear_build_path_tile(world, x, y + 1);
         }
         if (x == anchorX && y == anchorY) {
             walking = false;
         } else {
-            int distance = distanceGrid[x][y];
-            bool found;
+            const int current_distance = distanceGrid[x][y];
+            bool step_found;
             if (tieBreakCounter % 2 == 0) {
-                found = find_step(world, x + 1, y, distance)
-                        || find_step(world, x - 1, y, distance)
-                        || find_step(world, x, y + 1, distance)
-                        || find_step(world, x, y - 1, distance);
+                step_found = find_step(world, x + 1, y, current_distance)
+                        || find_step(world, x - 1, y, current_distance)
+                        || find_step(world, x, y + 1, current_distance)
+                        || find_step(world, x, y - 1, current_distance);
             } else {
-                found = find_step(world, x, y + 1, distance)
-                        || find_step(world, x, y - 1, distance)
-                        || find_step(world, x + 1, y, distance)
-                        || find_step(world, x - 1, y, distance);
+                step_found = find_step(world, x, y + 1, current_distance)
+                        || find_step(world, x, y - 1, current_distance)
+                        || find_step(world, x + 1, y, current_distance)
+                        || find_step(world, x - 1, y, current_distance);
             }
-            if (!found) {
+            if (!step_found) {
                 walking = false;
                 path_complete = false;
             }
         }
         ++tieBreakCounter;
-        distanceGrid[x][y] = 9;
+        distanceGrid[x][y] = path_distance::kVisited;
         x = nextX;
         y = nextY;
 
-        int step_x = 0;
-        int step_y = 0;
-        if (world.terrain.tileMap[x][y] == 7) step_y = -1;
-        if (world.terrain.tileMap[x][y] == 8) step_x = -1;
-        if (world.terrain.tileMap[x][y] == 9) step_x = 1;
-        if (world.terrain.tileMap[x][y] == 10) step_y = 1;
-        if (step_x != 0 || step_y != 0) {
+        const GridStep tunnel_step = path_step_for_tile(
+            world.terrain.tileMap[x][y]);
+        if (tunnel_step.x != 0 || tunnel_step.y != 0) {
             do {
-                distanceGrid[x][y] = 9;
-                x += step_x;
-                y += step_y;
-            } while (distanceGrid[x][y] == 3);
+                distanceGrid[x][y] = path_distance::kVisited;
+                x += tunnel_step.x;
+                y += tunnel_step.y;
+            } while (distanceGrid[x][y] == path_distance::kTunnelInterior);
         }
     } while (walking);
 
     for (int map_x = 0; map_x < world.terrain.mapWidth; ++map_x)
         for (int map_y = 0; map_y < world.terrain.mapHeight; ++map_y)
-            if (distanceGrid[map_x][map_y] != 9)
-                distanceGrid[map_x][map_y] = 0;
+            if (distanceGrid[map_x][map_y] != path_distance::kVisited)
+                distanceGrid[map_x][map_y] = path_distance::kUnvisited;
     if (!path_complete) return;
 
     for (int map_x = 0; map_x < world.terrain.mapWidth; ++map_x) {
         for (int map_y = 0; map_y < world.terrain.mapHeight; ++map_y) {
-            if (distanceGrid[map_x][map_y] != 9) continue;
-            bool left = map_x > 0
-                        && distanceGrid[map_x - 1][map_y] == 9;
-            bool right = map_x < world.terrain.mapWidth - 1
-                         && distanceGrid[map_x + 1][map_y] == 9;
-            bool up = map_y > 0
-                      && distanceGrid[map_x][map_y - 1] == 9;
-            bool down = map_y < world.terrain.mapHeight - 1
-                        && distanceGrid[map_x][map_y + 1] == 9;
-            if ((left ? 1 : 0) + (right ? 1 : 0)
-                + (up ? 1 : 0) + (down ? 1 : 0) == 1) {
-                left = is_tile_match(
-                    world, build, left, map_x - 1, map_y,
-                    71, 72, 74, 78, 80, 84, 88, 90, true);
-                right = is_tile_match(
-                    world, build, right, map_x + 1, map_y,
-                    71, 73, 75, 78, 80, 85, 88, 90, true);
-                up = is_tile_match(
-                    world, build, up, map_x, map_y - 1,
-                    70, 73, 74, 77, 79, 83, 87, 89, false);
-                down = is_tile_match(
-                    world, build, down, map_x, map_y + 1,
-                    70, 72, 75, 77, 79, 86, 87, 89, false);
+            if (distanceGrid[map_x][map_y] != path_distance::kVisited)
+                continue;
+            bool has_left_neighbor = map_x > 0
+                                     && distanceGrid[map_x - 1][map_y]
+                                        == path_distance::kVisited;
+            bool has_right_neighbor = map_x < world.terrain.mapWidth - 1
+                                      && distanceGrid[map_x + 1][map_y]
+                                         == path_distance::kVisited;
+            bool has_upper_neighbor = map_y > 0
+                                      && distanceGrid[map_x][map_y - 1]
+                                         == path_distance::kVisited;
+            bool has_lower_neighbor = map_y < world.terrain.mapHeight - 1
+                                      && distanceGrid[map_x][map_y + 1]
+                                         == path_distance::kVisited;
+            if ((has_left_neighbor ? 1 : 0) + (has_right_neighbor ? 1 : 0)
+                + (has_upper_neighbor ? 1 : 0)
+                + (has_lower_neighbor ? 1 : 0) == 1) {
+                has_left_neighbor = is_tile_match(
+                    world, build, has_left_neighbor, map_x - 1, map_y,
+                    kLeftNeighborTrackCodes, true);
+                has_right_neighbor = is_tile_match(
+                    world, build, has_right_neighbor, map_x + 1, map_y,
+                    kRightNeighborTrackCodes, true);
+                has_upper_neighbor = is_tile_match(
+                    world, build, has_upper_neighbor, map_x, map_y - 1,
+                    kUpNeighborTrackCodes, false);
+                has_lower_neighbor = is_tile_match(
+                    world, build, has_lower_neighbor, map_x, map_y + 1,
+                    kDownNeighborTrackCodes, false);
             }
 
-            int old_tile = world.terrain.tileMap[map_x][map_y];
+            const int previous_tile_code =
+                world.terrain.tileMap[map_x][map_y];
             bool joined_track = false;
-            if (old_tile != 0 && old_tile > 28)
-                build.selectionCost += economy.baseTrainSpeed;
-            int cost_before_shape = build.selectionCost;
-            if (left && right) {
-                if (old_tile == 22) world.terrain.tileMap[map_x][map_y] = 78;
-                else if (old_tile == 24) world.terrain.tileMap[map_x][map_y] = 80;
-                else if (old_tile == 9) {
-                    world.terrain.tileMap[map_x][map_y] = 85;
-                    build.selectionCost += economy.moneyBaseA;
-                } else if (old_tile == 8) {
-                    world.terrain.tileMap[map_x][map_y] = 84;
-                    build.selectionCost += economy.moneyBaseA;
-                } else if (old_tile == 70) {
+            if (previous_tile_code != 0 && previous_tile_code > 28)
+                build.selectionCost += economy.baseTrainSpeedEarly;
+            const int cost_before_shape = build.selectionCost;
+            if (has_left_neighbor && has_right_neighbor) {
+                if (previous_tile_code == path_tile::kOpenGroundVariantB)
+                    world.terrain.tileMap[map_x][map_y] = track_turn_tile::VariantB;
+                else if (previous_tile_code == path_tile::kOpenGroundVariantD)
+                    world.terrain.tileMap[map_x][map_y] = track_turn_tile::VariantD;
+                else if (previous_tile_code == path_tile::kStepRight) {
+                    world.terrain.tileMap[map_x][map_y] = construction_tile::HorizontalC;
+                    build.selectionCost += economy.moneyBasePrimary;
+                } else if (previous_tile_code == path_tile::kStepLeft) {
+                    world.terrain.tileMap[map_x][map_y] = construction_tile::HorizontalB;
+                    build.selectionCost += economy.moneyBasePrimary;
+                } else if (previous_tile_code == path_tile::kAlongY) {
                     world.terrain.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
                     world.trackMap[map_x][map_y] = (int8_t)(
                         track::PRESENT | (world.trackMap[map_x][map_y] & track::OWNER_MASK)
                         | build.previewTrackOwnerCode << track::DIR_OWNER_SHIFT);
                 } else if (world.terrain.tileElevation[map_x][map_y] == -1) {
-                    world.terrain.tileMap[map_x][map_y] = 81;
-                    build.selectionCost += economy.moneyBaseB;
+                    world.terrain.tileMap[map_x][map_y] = construction_tile::HorizontalA;
+                    build.selectionCost += economy.moneyBaseSecondary;
                 } else {
-                    world.terrain.tileMap[map_x][map_y] = 71;
+                    world.terrain.tileMap[map_x][map_y] = path_tile::kAlongX;
                 }
-            } else if (up && down) {
-                if (old_tile == 21) world.terrain.tileMap[map_x][map_y] = 77;
-                else if (old_tile == 23) world.terrain.tileMap[map_x][map_y] = 79;
-                else if (old_tile == 7) {
-                    world.terrain.tileMap[map_x][map_y] = 83;
-                    build.selectionCost += economy.moneyBaseA;
-                } else if (old_tile == 10) {
-                    world.terrain.tileMap[map_x][map_y] = 86;
-                    build.selectionCost += economy.moneyBaseA;
-                } else if (old_tile == 71) {
+            } else if (has_upper_neighbor && has_lower_neighbor) {
+                if (previous_tile_code == path_tile::kOpenGroundVariantA)
+                    world.terrain.tileMap[map_x][map_y] = track_turn_tile::VariantA;
+                else if (previous_tile_code == path_tile::kOpenGroundVariantC)
+                    world.terrain.tileMap[map_x][map_y] = track_turn_tile::VariantC;
+                else if (previous_tile_code == path_tile::kStepUp) {
+                    world.terrain.tileMap[map_x][map_y] = construction_tile::VerticalB;
+                    build.selectionCost += economy.moneyBasePrimary;
+                } else if (previous_tile_code == path_tile::kStepDown) {
+                    world.terrain.tileMap[map_x][map_y] = construction_tile::VerticalC;
+                    build.selectionCost += economy.moneyBasePrimary;
+                } else if (previous_tile_code == path_tile::kAlongX) {
                     world.terrain.tileMap[map_x][map_y] = tile::CROSSING;
                     joined_track = true;
                     world.trackMap[map_x][map_y] = (int8_t)(
                         track::PRESENT | (world.trackMap[map_x][map_y] & track::OWNER_MASK) << track::DIR_OWNER_SHIFT
                         | build.previewTrackOwnerCode);
                 } else if (world.terrain.tileElevation[map_x][map_y] == -1) {
-                    world.terrain.tileMap[map_x][map_y] = 82;
-                    build.selectionCost += economy.moneyBaseB;
+                    world.terrain.tileMap[map_x][map_y] = construction_tile::VerticalA;
+                    build.selectionCost += economy.moneyBaseSecondary;
                 } else {
-                    world.terrain.tileMap[map_x][map_y] = 70;
+                    world.terrain.tileMap[map_x][map_y] = path_tile::kAlongY;
                 }
-            } else if (left && up) world.terrain.tileMap[map_x][map_y] = 75;
-            else if (right && up) world.terrain.tileMap[map_x][map_y] = 72;
-            else if (left && down) world.terrain.tileMap[map_x][map_y] = 73;
-            else if (right && down) world.terrain.tileMap[map_x][map_y] = 74;
+            } else if (has_left_neighbor && has_upper_neighbor)
+                world.terrain.tileMap[map_x][map_y] = path_tile::kTrackCornerVariantD;
+            else if (has_right_neighbor && has_upper_neighbor)
+                world.terrain.tileMap[map_x][map_y] = path_tile::kTrackCornerVariantA;
+            else if (has_left_neighbor && has_lower_neighbor)
+                world.terrain.tileMap[map_x][map_y] = path_tile::kTrackCornerVariantB;
+            else if (has_right_neighbor && has_lower_neighbor)
+                world.terrain.tileMap[map_x][map_y] = path_tile::kTrackCornerVariantC;
 
-            if (!joined_track && old_tile != world.terrain.tileMap[map_x][map_y]) {
+            if (!joined_track
+                && previous_tile_code != world.terrain.tileMap[map_x][map_y]) {
                 world.trackMap[map_x][map_y] =
                     (int8_t)(track::PRESENT | build.previewTrackOwnerCode);
                 if (cost_before_shape == build.selectionCost)
-                    build.selectionCost += economy.accel1;
+                    build.selectionCost += economy.accelerationEarly;
             }
             if (joined_track)
                 build.selectionCost +=
-                    economy.brake1 + economy.accel1 + economy.baseTrainSpeed;
+                    economy.brakingEarly + economy.accelerationEarly
+                    + economy.baseTrainSpeedEarly;
         }
     }
 }
@@ -315,31 +454,35 @@ void Pathfinder::scan_track_tiles(const World& world,
 void Pathfinder::clear_distance_grid(const World& world) {
     for (int x = 0; x < world.terrain.mapWidth; ++x)
         for (int y = 0; y < world.terrain.mapHeight; ++y)
-            distanceGrid[x][y] = 0;
+            distanceGrid[x][y] = path_distance::kUnvisited;
 
     for (int x = 0; x < world.terrain.mapWidth; ++x) {
         for (int y = 0; y < world.terrain.mapHeight; ++y) {
-            if (distanceGrid[x][y] != 0) continue;
-            int16_t passable = world.trackMap[x][y] == 0 ? 1 : 0;
-            int tile = world.terrain.tileMap[x][y];
-            if (passable == 1) {
-                if (world.terrain.tileElevation[x][y] == -1) passable = 0;
-                if (tile != 0 && tile != 21 && tile != 22
-                    && tile != 23 && tile != 24
-                    && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST))
-                    passable = 0;
+            if (distanceGrid[x][y] != path_distance::kUnvisited)
+                continue;
+            int16_t passable = world.trackMap[x][y] == 0
+                ? path_distance::kPassable
+                : path_distance::kUnvisited;
+            const int tile_code = world.terrain.tileMap[x][y];
+            if (passable == path_distance::kPassable) {
+                if (world.terrain.tileElevation[x][y] == -1)
+                    passable = path_distance::kUnvisited;
+                if (!is_open_ground_tile(tile_code))
+                    passable = path_distance::kUnvisited;
             }
-            if (tile == 71 && x > 0 && x < world.terrain.mapWidth - 1
+            if (tile_code == path_tile::kAlongX
+                && x > 0 && x < world.terrain.mapWidth - 1
                 && world.trackMap[x][y] == world.trackMap[x - 1][y]
                 && world.trackMap[x][y] == world.trackMap[x + 1][y])
-                passable = 1;
-            if (tile == 70 && y > 0 && y < world.terrain.mapHeight - 1
+                passable = path_distance::kPassable;
+            if (tile_code == path_tile::kAlongY
+                && y > 0 && y < world.terrain.mapHeight - 1
                 && world.trackMap[x][y] == world.trackMap[x][y - 1]
                 && world.trackMap[x][y] == world.trackMap[x][y + 1])
-                passable = 1;
+                passable = path_distance::kPassable;
             distanceGrid[x][y] = passable;
 
-            if (tile == 7) {
+            if (tile_code == path_tile::kStepUp) {
                 int other_y = y;
                 bool found_exit = false;
                 bool stop;
@@ -351,19 +494,19 @@ void Pathfinder::clear_distance_grid(const World& world) {
                         || world.trackMap[x][other_y] != 0)
                         stop = true;
                     if (other_y == 0) stop = true;
-                    if (world.terrain.tileMap[x][other_y] == 10) {
+                    if (world.terrain.tileMap[x][other_y] == tile::CURVE_DOWN) {
                         stop = true;
                         found_exit = true;
                     }
                 } while (!stop);
                 if (found_exit) {
                     for (int tunnel_y = other_y; tunnel_y <= y; ++tunnel_y)
-                        distanceGrid[x][tunnel_y] = 3;
-                    distanceGrid[x][other_y] = 2;
-                    distanceGrid[x][y] = 2;
+                        distanceGrid[x][tunnel_y] = path_distance::kTunnelInterior;
+                    distanceGrid[x][other_y] = path_distance::kTunnelEndpoint;
+                    distanceGrid[x][y] = path_distance::kTunnelEndpoint;
                 }
             }
-            if (tile != 8) continue;
+            if (tile_code != path_tile::kStepLeft) continue;
             int other_x = x;
             bool found_exit = false;
             bool stop;
@@ -375,16 +518,16 @@ void Pathfinder::clear_distance_grid(const World& world) {
                     || world.trackMap[other_x][y] != 0)
                     stop = true;
                 if (other_x == 0) stop = true;
-                if (world.terrain.tileMap[other_x][y] == 9) {
+                if (world.terrain.tileMap[other_x][y] == tile::CURVE_RIGHT) {
                     stop = true;
                     found_exit = true;
                 }
             } while (!stop);
             if (!found_exit) continue;
             for (int tunnel_x = other_x; tunnel_x <= x; ++tunnel_x)
-                distanceGrid[tunnel_x][y] = 3;
-            distanceGrid[other_x][y] = 2;
-            distanceGrid[x][y] = 2;
+                distanceGrid[tunnel_x][y] = path_distance::kTunnelInterior;
+            distanceGrid[other_x][y] = path_distance::kTunnelEndpoint;
+            distanceGrid[x][y] = path_distance::kTunnelEndpoint;
         }
     }
 }
@@ -392,12 +535,12 @@ void Pathfinder::clear_distance_grid(const World& world) {
 bool Pathfinder::try_build_path(World& world, BuildController& build,
                                 const Economy& economy) {
     distanceGrid.resize(world.terrain.mapWidth, world.terrain.mapHeight);
-    searchLimit = 10;
+    searchLimit = path_distance::kSearchLimit;
     build.selectionCost = 0;
     clear_distance_grid(world);
-    distanceGrid[anchorX][anchorY] = 20;
+    distanceGrid[anchorX][anchorY] = path_distance::kSearchSeed;
     flood_fill(world);
-    if (distanceGrid[targetX][targetY] < 20) {
+    if (distanceGrid[targetX][targetY] < path_distance::kSearchSeed) {
         distanceGrid.clear();
         return false;
     }

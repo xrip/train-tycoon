@@ -8,12 +8,15 @@ struct World;
 struct Scenario;
 
 namespace train_flag {
-// Bit 0x10 is used by movement code, but its exact meaning is still open.
+// MOVEMENT_STATE is used by movement code, but its exact meaning is still open.
 // Service-vehicle flags are a separate encoding and stay unnamed.
 inline constexpr uint8_t USED_SLOT = 0x80;
 inline constexpr uint8_t HEAD = 0x40;
 inline constexpr uint8_t REMOVAL_PENDING = 0x20;
+inline constexpr uint8_t MOVEMENT_STATE = 0x10;
 inline constexpr uint8_t TYPE_MASK = 0x0F;
+inline constexpr uint8_t NON_TYPE_MASK = 0xF0;
+inline constexpr uint8_t CLEAR_MOVEMENT_STATE_MASK = 0xEF;
 
 constexpr bool isUsed(int8_t flags) {
     return (static_cast<uint8_t>(flags) & USED_SLOT) != 0;
@@ -32,8 +35,15 @@ constexpr int type(int8_t flags) {
 }
 } // namespace train_flag
 
+namespace train_chain {
+// A train is a linked list of car slots. This sentinel is stored in nextCar
+// and is not a valid slot id.
+inline constexpr int32_t kEnd = -1;
+} // namespace train_chain
+
 // One stable train/car slot. Zero-filled defaults match the old arrays; in
-// particular, nextCar stays 0 until allocation sets the -1 chain terminator.
+// particular, nextCar stays 0 until allocation sets the train_chain::kEnd
+// terminator.
 struct TrainCar {
     int8_t x = 0;
     int8_t y = 0;
@@ -66,11 +76,30 @@ struct ServiceSite {
 
 struct UnloadResult {
     int32_t revenue = 0;
-    int32_t delivered[kResourceTypeCount]{};
+    int32_t delivered[kDeliveredResourceCount]{};
 };
 
+struct TrackStepTransition {
+    int8_t nextTileVariant = 0;
+    int8_t nextDirection = 0;
+};
+
+// One movement row for a normalized track variant. The first two values are
+// the entering and fallback directions, followed by the tile step and four
+// possible next-variant transitions. This is runtime data, not save data.
+struct TrackStepEntry {
+    int8_t enteringDirection = 0;
+    int8_t fallbackDirection = 0;
+    int8_t stepX = 0;
+    int8_t stepY = 0;
+    TrackStepTransition transitions[kTrackTransitionCount]{};
+};
+
+static_assert(sizeof(TrackStepEntry)
+              == sizeof(int8_t) * kTrackStepValueCount);
+
 // Fleet owns the per-train-slot records. Each slot id is one train/car; a train
-// is a linked list of cars via nextCar (-1 terminator). Slot ids are stable
+// is a linked list of cars via nextCar (train_chain::kEnd terminator). Slot ids are stable
 // across the save and the simulation, and the save byte order is unchanged.
 struct Fleet {
     int32_t allocate_service_site(int32_t type, int32_t x, int32_t y,
@@ -104,12 +133,10 @@ struct Fleet {
     // (serviceLoadFlags is runtime-only, recomputed on load, so not saved).
     ServiceSite serviceSites[kServiceVehicleSlotCount]{};
 
-    // Movement-rule lookup tables: for each track-shape variant, the [0] entry is
-    // the entering train direction and [1] the exiting direction (forward/reverse
-    // travel). Used by Game::update_train to step trains along track. Constant,
+    // Movement-rule lookup tables for forward/reverse travel. Constant,
     // populated at init, not saved.
-    int8_t forwardTrackSteps[kTrackDirectionCount][kTrackStepValueCount]{};
-    int8_t reverseTrackSteps[kTrackDirectionCount][kTrackStepValueCount]{};
+    TrackStepEntry forwardTrackSteps[kTrackDirectionCount]{};
+    TrackStepEntry reverseTrackSteps[kTrackDirectionCount]{};
 };
 
 #endif  // FLEET_H

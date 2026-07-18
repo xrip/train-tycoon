@@ -20,8 +20,9 @@ struct UiController {
     void reset_key_state(int32_t key);
     void cycle_build_menu_index(bool forward);
     void init_build_menu_row(int32_t row, int32_t count);
-    void add_build_menu_item(int32_t text, int32_t item, int32_t result,
-                             bool wide, bool enabled, int32_t transition);
+    void add_build_menu_item(int32_t text_sprite_code, int32_t menu_item_id,
+                             int32_t confirm_result_code, bool wide_item,
+                             bool item_enabled, int32_t cursor_action_code);
     void init_build_menu(Scenario& scenario, int32_t scenario_bits);
 
     bool monthlyReportEnabled = true;
@@ -57,24 +58,25 @@ struct UiController {
     int32_t confirmToggle = 0;
     int32_t confirmCounter = 0;
     int32_t confirmTargetState = -1;
-    int32_t pendingTransitionCode = -1;
-    int32_t transitionCode = 0;
+    int32_t pendingTransitionCode = menu_transition::NoPending;
+    int32_t transitionCode = menu_transition::Initial;
     int8_t transitionDebounce = 0;
     int32_t screenParam = 0;
     bool pauseMenuOpen = false;
     bool useDefaultOverlaySelection = true;
     bool snapshotLoadedFlag = false;
 
-    // Report-graph display state and the money ticker. yearGraphMode/Alt pick the
-    // graph series; yearGraphOffsets/altYearArray/yearGraphValues are the plotted
-    // bar geometry; moneyTickerFrames animates the header money change. All
-    // runtime-only (not saved).
-    int32_t yearGraphMode = 0;
-    bool yearGraphAlt = false;
-    int8_t yearGraphOffsets[kHistoryCount]{};
-    int8_t altYearArray[kHistoryCount]{};
-    int8_t yearGraphValues[kHistoryCount]{};
-    int8_t moneyTickerFrames[3]{};
+    // Report-graph display state and the money ticker. graphSeries and
+    // graphUsesDecadeData pick the data set; graphYearLabels and
+    // graphPeriodLabels hold the axis labels; graphBarHeights holds the plotted
+    // bars; moneyTickerFrames animates the header money change. All runtime-only
+    // (not saved).
+    int32_t graphSeries = 0;
+    bool graphUsesDecadeData = false;
+    int8_t graphYearLabels[kHistoryCount]{};
+    int8_t graphPeriodLabels[kHistoryCount]{};
+    int8_t graphBarHeights[kHistoryCount]{};
+    int8_t moneyTickerFrames[money_ticker::kSlotCount]{};
 
     // On-map train/vehicle/city selection state. numSelectedTrains and the
     // trainSelection screen-position lists track the trains picked under the
@@ -114,11 +116,11 @@ struct UiController {
     bool inputPending = false;
     bool pauseFlag = false;
     int32_t keyRepeatDelay = 0;
-    int32_t heldKey = 0;
+    int32_t heldKey = input_key::NoKey;
     int32_t inputSubState = 0;
-    int32_t currentKey = 0;
+    int32_t currentKey = input_key::NoKey;
     int32_t keySubState = 0;
-    int32_t lastKeyCode = 0;
+    int32_t lastKeyCode = input_key::NoKey;
     int32_t keyRepeatStep = 3;
 };
 

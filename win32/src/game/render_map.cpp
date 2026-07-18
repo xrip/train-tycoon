@@ -5,6 +5,60 @@
 #include "support/numeric.h"
 #include <vector>
 
+namespace {
+namespace construction_tile_sprite {
+constexpr int32_t kFirstCode = track_turn_tile::VariantA;
+constexpr int32_t kLastYOffsetCode = track_turn_tile::VariantD;
+constexpr int32_t kLastCode = construction_tile::kLast;
+constexpr int32_t kExtraYOffsetVariantA = construction_tile::HorizontalB;
+constexpr int32_t kExtraYOffsetVariantB = construction_tile::VerticalC;
+constexpr int32_t kExtraYOffset = 4;
+}  // namespace construction_tile_sprite
+
+namespace resource_animation_tile {
+constexpr int32_t kFirstCode = 65;
+constexpr int32_t kLastCode = 68;
+constexpr int32_t kWrapCode = 69;
+}  // namespace resource_animation_tile
+
+namespace industry_animation_tile {
+constexpr int32_t kGroup2ProductionFrameFirst =
+    industry_tile::Group2ProductionFirst + 1;
+constexpr int32_t kGroup2ProductionFrameLast =
+    industry_tile::Group2ProductionLast;
+constexpr int32_t kGroup1DestinationMarker =
+    industry_tile::Group1DestinationFirst;
+constexpr int32_t kGroup3DestinationMarker =
+    industry_tile::Group3DestinationLast;
+constexpr int32_t kGroup2ProductionSpriteIndex = 53;
+constexpr int32_t kGroup2ProductionFrameSpriteBase = 243;
+constexpr int32_t kGroup1DestinationFrameSpriteBase = 240;
+constexpr int32_t kGroup3DestinationFrameSpriteBase = 246;
+constexpr int32_t kStaticFallbackSpriteIndex = 41;
+}  // namespace industry_animation_tile
+
+namespace map_render_geometry {
+constexpr int32_t kTopStripHeight = 15;
+constexpr int32_t kTileWidth = map_geometry::kTileWidthPixels;
+constexpr int32_t kTileHalfWidth = map_geometry::kTileHalfWidthPixels;
+constexpr int32_t kElevationScale = map_geometry::kElevationPixelScale;
+constexpr int32_t kMapOriginTileSpan = 2 * kTileWidth;
+constexpr int32_t kTileImageAnchorFlags = 33;
+constexpr int32_t kGroundSpriteIndex = 1;
+constexpr int32_t kRaisedTerrainSpriteIndex = 2;
+constexpr int32_t kConstructionProgressSpriteBase = 250;
+constexpr int32_t kGroup1DestinationOffsetX = 12;
+constexpr int32_t kGroup1DestinationOffsetY = -28;
+constexpr int32_t kGroup3DestinationOffsetX = 3;
+constexpr int32_t kGroup3DestinationOffsetY = -39;
+constexpr int32_t kConstructionOverlayOffsetY = -3;
+}  // namespace map_render_geometry
+
+constexpr int32_t kTileOverlayFlag = 0x80;
+constexpr int32_t kVisibleTrainMarker = 1;
+constexpr int32_t kNoConstructionCountdown = -1;
+}  // namespace
+
 void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
     Game *game = this;
     if (game->renderer.camera.viewportCenterX == game->renderer.lastViewportCenterX
@@ -12,52 +66,89 @@ void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
         return;
 
     Surface *backbuffer = game->renderer.backbuffer_surface;
-    midp_set_clip(backbuffer, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
+    midp_set_clip(backbuffer, 0, map_render_geometry::kTopStripHeight,
+                  game->renderer.canvasWidth,
+                  game->renderer.gameplayViewportHeight);
     midp_set_color(backbuffer, 0);
-    midp_fill_rect(backbuffer, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
+    midp_fill_rect(backbuffer, 0, map_render_geometry::kTopStripHeight,
+                   game->renderer.canvasWidth,
+                   game->renderer.gameplayViewportHeight);
     game->renderer.visibleTrainCount = 0;
     game->renderer.viewportX0 = 2 * game->world.terrain.mapWidth;
     game->renderer.viewportY0 = 2 * game->world.terrain.mapHeight;
     game->renderer.viewportX1 = -game->world.terrain.mapWidth;
     game->renderer.viewportY1 = -game->world.terrain.mapWidth;
-    for (int drawIndex = 0; drawIndex < game->assets.numActiveTileAnimations; ++drawIndex) {
-        int mapX = origin_x + game->assets.tileOffsetX[drawIndex];
-        int mapY = origin_y + game->assets.tileOffsetY[drawIndex];
-        if (mapX >= 0 && mapX < game->world.terrain.mapWidth && mapY >= 0 && mapY < game->world.terrain.mapHeight) {
-            int tileCode = unsigned_byte(game->world.terrain.tileMap[mapX][mapY]);
-            if (tileCode >= 128) tileCode -= 128;
-            int drawX = mapY * 16 + mapX * 16 + 16 - game->renderer.camera.viewportCenterX;
-            int drawY = game->world.terrain.mapHalfWidth - mapX * 8 + mapY * 8 + 16
-                - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[mapX][mapY] + 15;
-            if (!((tileCode != 0 && tileCode <= 28) || (tileCode >= 77 && tileCode <= 86))) {
-                if (game->world.terrain.tileElevation[mapX][mapY] > -1) {
-                    if ((tileCode >= 42 && tileCode <= 48) || (tileCode >= 70 && tileCode <= 76))
-                        midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(), drawX, drawY, 33);
+    for (int draw_index = 0;
+         draw_index < game->assets.numActiveTileAnimations; ++draw_index) {
+        int map_x = origin_x + game->assets.tileOffsetX[draw_index];
+        int map_y = origin_y + game->assets.tileOffsetY[draw_index];
+        if (map_x >= 0 && map_x < game->world.terrain.mapWidth
+            && map_y >= 0 && map_y < game->world.terrain.mapHeight) {
+            int tile_code =
+                unsigned_byte(game->world.terrain.tileMap[map_x][map_y]);
+            if (tile_code >= kTileOverlayFlag)
+                tile_code -= kTileOverlayFlag;
+            int draw_x = map_y * map_render_geometry::kTileWidth
+                         + map_x * map_render_geometry::kTileWidth
+                         + map_render_geometry::kTileWidth
+                         - game->renderer.camera.viewportCenterX;
+            int draw_y = game->world.terrain.mapHalfWidth
+                         - map_x * map_render_geometry::kTileHalfWidth
+                         + map_y * map_render_geometry::kTileHalfWidth
+                         + map_render_geometry::kTileWidth
+                         - game->renderer.camera.viewportCenterY
+                         - map_render_geometry::kElevationScale
+                           * game->world.terrain.tileElevation[map_x][map_y]
+                         + map_render_geometry::kTopStripHeight;
+            if (!((tile_code != 0 && tile_code <= tile::SLOPE_LAST)
+                  || (tile_code >= construction_tile_sprite::kFirstCode
+                      && tile_code <= construction_tile_sprite::kLastCode))) {
+                if (game->world.terrain.tileElevation[map_x][map_y] > -1) {
+                    if ((tile_code >= road_tile::kFirstShape
+                         && tile_code <= road_tile::kLastShape)
+                        || (tile_code >= tile::TRACK_FIRST
+                            && tile_code <= tile::CROSSING))
+                        midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tile_code]].get(), draw_x, draw_y,
+                                        map_render_geometry::kTileImageAnchorFlags);
                     else
-                        midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[1]].get(), drawX, drawY, 33);
+                        midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[map_render_geometry::kGroundSpriteIndex]].get(),
+                                        draw_x, draw_y,
+                                        map_render_geometry::kTileImageAnchorFlags);
                 } else {
-                    midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[2]].get(), drawX, drawY, 33);
+                    midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[map_render_geometry::kRaisedTerrainSpriteIndex]].get(),
+                                    draw_x, draw_y,
+                                    map_render_geometry::kTileImageAnchorFlags);
                 }
             }
-            if (tileCode >= 3 && tileCode <= 28) {
-                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(),
-                                drawX, drawY + game->assets.tileSpriteYOffsetByCode[tileCode - 3], 33);
+            if (tile_code >= tile::SLOPE_FIRST
+                && tile_code <= tile::SLOPE_LAST) {
+                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tile_code]].get(),
+                                draw_x, draw_y + game->assets.tileSpriteYOffsetByCode[tile_code - tile::SLOPE_FIRST],
+                                map_render_geometry::kTileImageAnchorFlags);
             }
-            if (tileCode >= 77 && tileCode <= 80) {
-                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(),
-                                drawX, drawY + game->assets.tileSpriteYOffsetByCode[tileCode - 56 - 3], 33);
+            if (tile_code >= construction_tile_sprite::kFirstCode
+                && tile_code <= construction_tile_sprite::kLastYOffsetCode) {
+                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tile_code]].get(),
+                                draw_x, draw_y + game->assets.tileSpriteYOffsetByCode[
+                                    tile_code - construction_tile_sprite::kFirstCode
+                                    - tile::SLOPE_FIRST],
+                                map_render_geometry::kTileImageAnchorFlags);
             }
-            if (tileCode >= 80 && tileCode <= 86) {
-                int yOffset = 0;
-                switch (tileCode) { case 84: yOffset = 4; break; case 86: yOffset = 4; break; }
-                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tileCode]].get(),
-                                drawX, drawY + yOffset, 33);
+            if (tile_code >= construction_tile_sprite::kLastYOffsetCode
+                && tile_code <= construction_tile_sprite::kLastCode) {
+                int y_offset = 0;
+                if (tile_code == construction_tile_sprite::kExtraYOffsetVariantA
+                    || tile_code == construction_tile_sprite::kExtraYOffsetVariantB)
+                    y_offset = construction_tile_sprite::kExtraYOffset;
+                midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tile_code]].get(),
+                                draw_x, draw_y + y_offset,
+                                map_render_geometry::kTileImageAnchorFlags);
             }
         }
-        if (mapX > game->renderer.viewportX1) game->renderer.viewportX1 = mapX;
-        if (mapY > game->renderer.viewportY1) game->renderer.viewportY1 = mapY;
-        if (mapX < game->renderer.viewportX0) game->renderer.viewportX0 = mapX;
-        if (mapY < game->renderer.viewportY0) game->renderer.viewportY0 = mapY;
+        if (map_x > game->renderer.viewportX1) game->renderer.viewportX1 = map_x;
+        if (map_y > game->renderer.viewportY1) game->renderer.viewportY1 = map_y;
+        if (map_x < game->renderer.viewportX0) game->renderer.viewportX0 = map_x;
+        if (map_y < game->renderer.viewportY0) game->renderer.viewportY0 = map_y;
     }
     if (game->renderer.viewportX0 < 0) game->renderer.viewportX0 = 0;
     if (game->renderer.viewportY0 < 0) game->renderer.viewportY0 = 0;
@@ -69,97 +160,221 @@ void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
 }
 
 void Game::render_map(Surface& surface) {
-    Game *game = this;
-    Surface *g = &surface;
-    int n, n2, n3, n4, n5, n6;
-    int origin_x = game->renderer.camera.viewportCenterX - 2 * game->renderer.camera.viewportCenterY
-        + 16 + 2 * game->world.terrain.mapHalfWidth;
-    int origin_y = game->renderer.camera.viewportCenterX + 2 * game->renderer.camera.viewportCenterY
-        - 16 - 2 * game->world.terrain.mapHalfWidth;
-    int n9 = origin_x / 32;
-    int n10 = origin_y / 32;
-    game->redraw_static_map_if_needed(n9, n10);
-    game->paint_main(*g);
-    midp_draw_image(g, game->renderer.backbuffer.get(), 0, 0, 20);
-    midp_set_clip(g, 0, 15, game->renderer.canvasWidth, game->renderer.gameplayViewportHeight);
-    game->draw_build_menu_cursor(*g);
-    int visible_width = game->renderer.viewportX1 - game->renderer.viewportX0 + 1;
-    int visible_height = game->renderer.viewportY1 - game->renderer.viewportY0 + 1;
+    Game* game = this;
+    Surface* graphics = &surface;
+    const int origin_x = game->renderer.camera.viewportCenterX
+        - 2 * game->renderer.camera.viewportCenterY
+        + map_render_geometry::kTileWidth
+        + 2 * game->world.terrain.mapHalfWidth;
+    const int origin_y = game->renderer.camera.viewportCenterX
+        + 2 * game->renderer.camera.viewportCenterY
+        - map_render_geometry::kTileWidth
+        - 2 * game->world.terrain.mapHalfWidth;
+    const int origin_tile_x = origin_x / map_render_geometry::kMapOriginTileSpan;
+    const int origin_tile_y = origin_y / map_render_geometry::kMapOriginTileSpan;
+    game->redraw_static_map_if_needed(origin_tile_x, origin_tile_y);
+    game->paint_main(*graphics);
+    midp_draw_image(graphics, game->renderer.backbuffer.get(), 0, 0, 20);
+    midp_set_clip(graphics, 0, map_render_geometry::kTopStripHeight,
+                  game->renderer.canvasWidth,
+                  game->renderer.gameplayViewportHeight);
+    game->draw_build_menu_cursor(*graphics);
+    int visible_width = game->renderer.viewportX1
+                      - game->renderer.viewportX0 + 1;
+    int visible_height = game->renderer.viewportY1
+                       - game->renderer.viewportY0 + 1;
     if (visible_width < 1) visible_width = 1;
     if (visible_height < 1) visible_height = 1;
     std::vector<uint8_t> visible_train_tiles(
         static_cast<std::size_t>(visible_width * visible_height));
     game->renderer.visibleTrainCount = 0;
-    for (n6 = 0; n6 < 500; ++n6) {
-        if (!train_flag::isUsed(game->fleet.trainCars[n6].flags)) continue;
-        n5 = unsigned_byte(game->fleet.trainCars[n6].x);
-        n4 = unsigned_byte(game->fleet.trainCars[n6].y);
-        if (n5 < game->renderer.viewportX0 || n4 < game->renderer.viewportY0 || n5 > game->renderer.viewportX1 || n4 > game->renderer.viewportY1) continue;
-        game->renderer.visibleTrains[game->renderer.visibleTrainCount++] = (int16_t)n6;
-        visible_train_tiles[(n5 - game->renderer.viewportX0) * visible_height +
-                            n4 - game->renderer.viewportY0] = 1;
+    for (int train_slot = 0; train_slot < kTrainSlotCount; ++train_slot) {
+        if (!train_flag::isUsed(game->fleet.trainCars[train_slot].flags))
+            continue;
+        const int train_x = unsigned_byte(game->fleet.trainCars[train_slot].x);
+        const int train_y = unsigned_byte(game->fleet.trainCars[train_slot].y);
+        if (train_x < game->renderer.viewportX0
+            || train_y < game->renderer.viewportY0
+            || train_x > game->renderer.viewportX1
+            || train_y > game->renderer.viewportY1)
+            continue;
+        game->renderer.visibleTrains[game->renderer.visibleTrainCount++] =
+            static_cast<int16_t>(train_slot);
+        visible_train_tiles[(train_x - game->renderer.viewportX0) * visible_height
+                            + train_y - game->renderer.viewportY0] =
+            kVisibleTrainMarker;
     }
-    for (n6 = 0; n6 < game->assets.numActiveTileAnimations; ++n6) {
-        int n12;
-        n5 = n9 + game->assets.tileOffsetX[n6];
-        n4 = n10 + game->assets.tileOffsetY[n6];
-        if (n5 < 0 || n5 >= game->world.terrain.mapWidth || n4 < 0 || n4 >= game->world.terrain.mapHeight) continue;
-        n3 = unsigned_byte(game->world.terrain.tileMap[n5][n4]);
-        n2 = n3;
-        if (n2 >= 128) n2 -= 128;
-        if (n2 > 28 && n2 < 128 && (((n2 < 42 || n2 > 48) && n2 < 70) || n2 > 86)) {
-            n = n4 * 16 + n5 * 16 + 16 - game->renderer.camera.viewportCenterX;
-            n12 = game->world.terrain.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[n5][n4] + 15;
+    for (int draw_index = 0;
+         draw_index < game->assets.numActiveTileAnimations; ++draw_index) {
+        const int map_x = origin_tile_x + game->assets.tileOffsetX[draw_index];
+        const int map_y = origin_tile_y + game->assets.tileOffsetY[draw_index];
+        if (map_x < 0 || map_x >= game->world.terrain.mapWidth
+            || map_y < 0 || map_y >= game->world.terrain.mapHeight)
+            continue;
+        const int raw_tile_code =
+            unsigned_byte(game->world.terrain.tileMap[map_x][map_y]);
+        int tile_code = raw_tile_code;
+        if (tile_code >= kTileOverlayFlag) tile_code -= kTileOverlayFlag;
+        if (tile_code > tile::SLOPE_LAST && tile_code < kTileOverlayFlag
+            && (((tile_code < road_tile::kFirstShape
+                  || tile_code > road_tile::kLastShape)
+                 && tile_code < tile::TRACK_FIRST)
+                || tile_code > construction_tile_sprite::kLastCode)) {
+            const int draw_x = map_y * map_render_geometry::kTileWidth
+                + map_x * map_render_geometry::kTileWidth
+                + map_render_geometry::kTileWidth
+                - game->renderer.camera.viewportCenterX;
+            const int draw_y = game->world.terrain.mapHalfWidth
+                - map_x * map_render_geometry::kTileHalfWidth
+                + map_y * map_render_geometry::kTileHalfWidth
+                + map_render_geometry::kTileWidth
+                - game->renderer.camera.viewportCenterY
+                - map_render_geometry::kElevationScale
+                  * game->world.terrain.tileElevation[map_x][map_y]
+                + map_render_geometry::kTopStripHeight;
             if (!game->settings.animationsDisabled) {
-                if (n2 == 54 || n2 == 55)
-                    midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[53]].get(), n, n12, 33);
-                if (game->world.terrain.phaseTimer == 1 && n2 >= 65 && n2 <= 68) {
-                    int8_t *row = game->world.terrain.tileMap[n5].data();
-                    row[n4] = (int8_t)(row[n4] + 1);
-                    if (game->world.terrain.tileMap[n5][n4] == 69) game->world.terrain.tileMap[n5][n4] = 65;
+                if (tile_code == industry_animation_tile::kGroup2ProductionFrameFirst
+                    || tile_code == industry_animation_tile::kGroup2ProductionFrameLast)
+                    midp_draw_image(graphics,
+                        game->assets.tile_sprites[
+                            game->assets.tileSpriteIndex[
+                                industry_animation_tile::kGroup2ProductionSpriteIndex]].get(),
+                        draw_x, draw_y,
+                        map_render_geometry::kTileImageAnchorFlags);
+                if (game->world.terrain.phaseTimer == 1
+                    && tile_code >= resource_animation_tile::kFirstCode
+                    && tile_code <= resource_animation_tile::kLastCode) {
+                    int8_t* tile_row =
+                        game->world.terrain.tileMap[map_x].data();
+                    tile_row[map_y] = static_cast<int8_t>(tile_row[map_y] + 1);
+                    if (game->world.terrain.tileMap[map_x][map_y]
+                        == resource_animation_tile::kWrapCode)
+                        game->world.terrain.tileMap[map_x][map_y] =
+                            resource_animation_tile::kFirstCode;
                 }
-                if (n2 != 55) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[n2]].get(), n, n12, 33);
-                else midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[243 + game->tile55AnimationFrame]].get(), n, n12, 33);
-                if (n2 == 50) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[240 + game->tile50AnimationFrame]].get(), n + 12, n12 - 28, 33);
-                if (n2 == 64) midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[246 + game->tile64AnimationFrame]].get(), n + 3, n12 - 39, 33);
+                if (tile_code != industry_animation_tile::kGroup2ProductionFrameLast)
+                    midp_draw_image(graphics,
+                        game->assets.tile_sprites[
+                            game->assets.tileSpriteIndex[tile_code]].get(),
+                        draw_x, draw_y,
+                        map_render_geometry::kTileImageAnchorFlags);
+                else
+                    midp_draw_image(graphics,
+                        game->assets.tile_sprites[game->assets.tileSpriteIndex[
+                            industry_animation_tile::kGroup2ProductionFrameSpriteBase
+                            + game->tile55AnimationFrame]].get(),
+                        draw_x, draw_y,
+                        map_render_geometry::kTileImageAnchorFlags);
+                if (tile_code == industry_animation_tile::kGroup1DestinationMarker)
+                    midp_draw_image(graphics,
+                        game->assets.tile_sprites[game->assets.tileSpriteIndex[
+                            industry_animation_tile::kGroup1DestinationFrameSpriteBase
+                            + game->tile50AnimationFrame]].get(),
+                        draw_x + map_render_geometry::kGroup1DestinationOffsetX,
+                        draw_y + map_render_geometry::kGroup1DestinationOffsetY,
+                        map_render_geometry::kTileImageAnchorFlags);
+                if (tile_code == industry_animation_tile::kGroup3DestinationMarker)
+                    midp_draw_image(graphics,
+                        game->assets.tile_sprites[game->assets.tileSpriteIndex[
+                            industry_animation_tile::kGroup3DestinationFrameSpriteBase
+                            + game->tile64AnimationFrame]].get(),
+                        draw_x + map_render_geometry::kGroup3DestinationOffsetX,
+                        draw_y + map_render_geometry::kGroup3DestinationOffsetY,
+                        map_render_geometry::kTileImageAnchorFlags);
             } else {
-                midp_draw_image(g, game->assets.tile_sprites[game->assets.tileSpriteIndex[41]].get(), n, n12, 33);
+                midp_draw_image(graphics,
+                    game->assets.tile_sprites[game->assets.tileSpriteIndex[
+                        industry_animation_tile::kStaticFallbackSpriteIndex]].get(),
+                    draw_x, draw_y,
+                    map_render_geometry::kTileImageAnchorFlags);
             }
         }
-        if (visible_train_tiles[(n5 - game->renderer.viewportX0) * visible_height +
-                                n4 - game->renderer.viewportY0]) {
-            for (n = 0; n < game->renderer.visibleTrainCount; ++n) {
-                n12 = game->renderer.visibleTrains[n];
-                if (!train_flag::isUsed(game->fleet.trainCars[n12].flags) || n5 != unsigned_byte(game->fleet.trainCars[n12].x) || n4 != unsigned_byte(game->fleet.trainCars[n12].y)) continue;
-                game->renderer.draw_train(*g, game->assets, game->world,
-                                          game->fleet, n12);
+        if (visible_train_tiles[(map_x - game->renderer.viewportX0) * visible_height
+                                + map_y - game->renderer.viewportY0]) {
+            for (int visible_index = 0;
+                 visible_index < game->renderer.visibleTrainCount;
+                 ++visible_index) {
+                const int visible_train_slot =
+                    game->renderer.visibleTrains[visible_index];
+                if (!train_flag::isUsed(
+                        game->fleet.trainCars[visible_train_slot].flags)
+                    || map_x != unsigned_byte(
+                        game->fleet.trainCars[visible_train_slot].x)
+                    || map_y != unsigned_byte(
+                        game->fleet.trainCars[visible_train_slot].y))
+                    continue;
+                game->renderer.draw_train(*graphics, game->assets, game->world,
+                                          game->fleet, visible_train_slot);
             }
         }
-        if (n3 < 128) continue;
-        n = n4 * 16 + n5 * 16 + 16 - game->renderer.camera.viewportCenterX;
-        n12 = game->world.terrain.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[n5][n4] + 15;
-        int n14 = -1;
-        for (int i = 0; i < 50; ++i) {
-            if (unsigned_byte(game->world.terrain.tileQueue[i].x) != n5 || unsigned_byte(game->world.terrain.tileQueue[i].y) != n4) continue;
-            n14 = game->world.terrain.tileQueue[i].countdown;
+        if (raw_tile_code < kTileOverlayFlag) continue;
+        const int overlay_draw_x = map_y * map_render_geometry::kTileWidth
+            + map_x * map_render_geometry::kTileWidth
+            + map_render_geometry::kTileWidth
+            - game->renderer.camera.viewportCenterX;
+        const int overlay_draw_y = game->world.terrain.mapHalfWidth
+            - map_x * map_render_geometry::kTileHalfWidth
+            + map_y * map_render_geometry::kTileHalfWidth
+            + map_render_geometry::kTileWidth
+            - game->renderer.camera.viewportCenterY
+            - map_render_geometry::kElevationScale
+              * game->world.terrain.tileElevation[map_x][map_y]
+            + map_render_geometry::kTopStripHeight;
+        int construction_countdown = kNoConstructionCountdown;
+        for (int queue_slot = 0; queue_slot < kTileQueueCount; ++queue_slot) {
+            if (unsigned_byte(game->world.terrain.tileQueue[queue_slot].x)
+                    != map_x
+                || unsigned_byte(game->world.terrain.tileQueue[queue_slot].y)
+                    != map_y)
+                continue;
+            construction_countdown =
+                game->world.terrain.tileQueue[queue_slot].countdown;
         }
-        if (n14 <= 0) continue;
-        midp_draw_image(g, game->assets.tile_sprites[unsigned_byte(game->assets.tileSpriteIndex[250 + n14 / 3])].get(), n, n12 - 3, 33);
+        if (construction_countdown <= 0) continue;
+        midp_draw_image(graphics,
+            game->assets.tile_sprites[unsigned_byte(
+                game->assets.tileSpriteIndex[
+                    map_render_geometry::kConstructionProgressSpriteBase
+                    + construction_countdown / 3])].get(),
+            overlay_draw_x,
+            overlay_draw_y + map_render_geometry::kConstructionOverlayOffsetY,
+            map_render_geometry::kTileImageAnchorFlags);
     }
     if (!game->settings.selectionHidden) {
-        for (n6 = 0; n6 < game->assets.numActiveTileAnimations; ++n6) {
-            n5 = n9 + game->assets.tileOffsetX[n6];
-            n4 = n10 + game->assets.tileOffsetY[n6];
-            for (n3 = 0; n3 < game->ui.numSelectedTrains; ++n3) {
-                if (game->ui.trainSelectionY[n3] != n5 || game->ui.trainSelectionX[n3] != n4) continue;
-                n2 = n4 * 16 + n5 * 16 + 16 - game->renderer.camera.viewportCenterX;
-                n = game->world.terrain.mapHalfWidth - n5 * 8 + n4 * 8 + 16 - game->renderer.camera.viewportCenterY - 4 * game->world.terrain.tileElevation[n5][n4] + 15;
-                game->renderer.draw_selected_train_label(*g, game->assets, game->ui, n2, n - 16, (int8_t)n3);
+        for (int draw_index = 0;
+             draw_index < game->assets.numActiveTileAnimations; ++draw_index) {
+            const int map_x = origin_tile_x
+                + game->assets.tileOffsetX[draw_index];
+            const int map_y = origin_tile_y
+                + game->assets.tileOffsetY[draw_index];
+            for (int selection_index = 0;
+                 selection_index < game->ui.numSelectedTrains;
+                 ++selection_index) {
+                if (game->ui.trainSelectionY[selection_index] != map_x
+                    || game->ui.trainSelectionX[selection_index] != map_y)
+                    continue;
+                const int label_x = map_y * map_render_geometry::kTileWidth
+                    + map_x * map_render_geometry::kTileWidth
+                    + map_render_geometry::kTileWidth
+                    - game->renderer.camera.viewportCenterX;
+                const int label_y = game->world.terrain.mapHalfWidth
+                    - map_x * map_render_geometry::kTileHalfWidth
+                    + map_y * map_render_geometry::kTileHalfWidth
+                    + map_render_geometry::kTileWidth
+                    - game->renderer.camera.viewportCenterY
+                    - map_render_geometry::kElevationScale
+                      * game->world.terrain.tileElevation[map_x][map_y]
+                    + map_render_geometry::kTopStripHeight;
+                game->renderer.draw_selected_train_label(
+                    *graphics, game->assets, game->ui, label_x,
+                    label_y - map_render_geometry::kTileWidth,
+                    static_cast<int8_t>(selection_index));
             }
         }
     }
-    game->draw_build_menu_row(*g);
-    if (game->roadPocEnabled) game->road_poc_render(*g);
-    midp_set_clip(g, 0, 0, game->renderer.canvasWidth, game->renderer.canvasHeight);
-    game->draw_confirm_dialog(*g);
+    game->draw_build_menu_row(*graphics);
+    game->render_road_vehicles(*graphics);
+    midp_set_clip(graphics, 0, 0, game->renderer.canvasWidth,
+                  game->renderer.canvasHeight);
+    game->draw_confirm_dialog(*graphics);
 }

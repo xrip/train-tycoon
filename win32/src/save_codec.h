@@ -30,6 +30,10 @@ public:
     void decompress();
     void walk(Game& game, int32_t operation);
     void walk_settings(Game& game);
+    // Serialize the road-vehicle fleet in the current pending mode. Kept out of
+    // walk() (whose byte layout has fixed golden digests) and given its own save
+    // slot, so the road feature adds no bytes to the legacy snapshot.
+    void walk_road_vehicles(Game& game);
     void save_all(Game& game);
     void restore_all(Game& game);
     bool load_main_snapshot();

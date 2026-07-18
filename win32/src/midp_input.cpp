@@ -7,27 +7,39 @@
 #include "support/input_queue.h"
 
 // Nokia-style navigation key codes.
-#define NK_UP    (-1)
-#define NK_DOWN  (-2)
-#define NK_LEFT  (-3)
-#define NK_RIGHT (-4)
-#define NK_FIRE  (-5)
+namespace nokia_key {
+constexpr int Up = -1;
+constexpr int Down = -2;
+constexpr int Left = -3;
+constexpr int Right = -4;
+constexpr int Fire = -5;
+}  // namespace nokia_key
+
+// Number-row keys that act as the phone D-pad. The source proves the keypad
+// positions, but they are still host key codes rather than game directions.
+namespace keypad_key {
+constexpr int Up = MIDP_KEY_NUM0 + 2;
+constexpr int Down = MIDP_KEY_NUM0 + 8;
+constexpr int Left = MIDP_KEY_NUM0 + 4;
+constexpr int Right = MIDP_KEY_NUM0 + 6;
+constexpr int Fire = MIDP_KEY_NUM0 + 5;
+}  // namespace keypad_key
 
 int midp_get_game_action(int keycode) {
     switch (keycode) {
-        case NK_UP:    case MIDP_KEY_NUM0 + 2: return MIDP_UP;
-        case NK_DOWN:  case MIDP_KEY_NUM0 + 8: return MIDP_DOWN;
-        case NK_LEFT:  case MIDP_KEY_NUM0 + 4: return MIDP_LEFT_ACTION;
-        case NK_RIGHT: case MIDP_KEY_NUM0 + 6: return MIDP_RIGHT_ACTION;
-        case NK_FIRE:  case MIDP_KEY_NUM0 + 5: return MIDP_FIRE;
+        case nokia_key::Up:    case keypad_key::Up: return MIDP_UP;
+        case nokia_key::Down:  case keypad_key::Down: return MIDP_DOWN;
+        case nokia_key::Left:  case keypad_key::Left: return MIDP_LEFT_ACTION;
+        case nokia_key::Right: case keypad_key::Right: return MIDP_RIGHT_ACTION;
+        case nokia_key::Fire:  case keypad_key::Fire: return MIDP_FIRE;
         default: return 0;
     }
 }
 
 static InputQueue input_queue;
 
-void midp_input_on_key(int vk, bool down) {
-    input_queue.on_virtual_key(vk, down);
+void midp_input_on_key(int virtual_key, bool is_down) {
+    input_queue.on_virtual_key(virtual_key, is_down);
 }
 
 bool midp_input_poll(int *keycode, bool *pressed) {

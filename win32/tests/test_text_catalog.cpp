@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <map>
+#include <set>
 #include <vector>
 
 namespace {
@@ -157,13 +158,20 @@ TEST_CASE("fast:catalog matches sprite_image_map.bin") {
 TEST_CASE("fast:dialog table re-serializes to packed_sprites.bin") {
     set_language(Lang::english);
     const std::map<int, std::vector<std::uint8_t>> original = load_dialog_bytes();
+    // Sprite ids added after the binary recovery are new game dialogs with no
+    // packed_sprites.bin counterpart; only the recovered dialogs must round-trip.
+    // List them explicitly so a typo'd recovered id still fails instead of being
+    // silently skipped.
+    const std::set<int> added_after_recovery = {100};  // road-stop buy dialog
     int checked = 0;
     for (const PackedDialog& dialog : all_dialogs()) {
         CAPTURE(dialog.sprite_id);
+        if (added_after_recovery.count(dialog.sprite_id)) continue;
         const auto it = original.find(dialog.sprite_id);
         REQUIRE(it != original.end());
         CHECK(serialize(dialog) == it->second);
         ++checked;
     }
-    CHECK(checked == static_cast<int>(all_dialogs().size()));
+    CHECK(checked + static_cast<int>(added_after_recovery.size())
+          == static_cast<int>(all_dialogs().size()));
 }

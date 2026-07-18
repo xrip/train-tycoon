@@ -28,8 +28,8 @@ void Game::click_bottom_bar(int32_t x) {
     int scroll = selected_x + 15 - game->renderer.canvasWidth;
     if (scroll < 0) scroll = 0;
     for (int item = 0; item < item_count; ++item) {
-        const int ix = unsigned_byte(game->ui.menuItemCode[mode][item]) - scroll;
-        if (x >= ix && x < ix + 14) {
+        const int item_x = unsigned_byte(game->ui.menuItemCode[mode][item]) - scroll;
+        if (x >= item_x && x < item_x + 14) {
             game->ui.buildMenuItemIndex = item;
             game->ui.menuDirty = true;
             // A bottom-bar click has no map-tile target. Tools that act on the
@@ -61,11 +61,11 @@ void Game::pointer_moved(int32_t x, int32_t y) {
     // bottom bar or the MapOverview confirm bar, where "selecting" arms a tool
     // or toggles a mode rather than merely highlighting.
     if (game->gameState == GameState::MenuOverlay) {
-        const int hx = static_cast<int>(x), hy = static_cast<int>(y);
+        const int hit_x = static_cast<int>(x), hit_y = static_cast<int>(y);
         int row_index = 0, option_code = 0;
-        if (game->clickMap.hit_menu_row(hx, hy, &row_index, &option_code))
+        if (game->clickMap.hit_menu_row(hit_x, hit_y, &row_index, &option_code))
             game->ui.cursorDragY = row_index;
-        else if (game->clickMap.hit_close(hx, hy))
+        else if (game->clickMap.hit_close(hit_x, hit_y))
             game->ui.cursorDragY = -1;  // -1 selects the top-right close (X)
         return;
     }
@@ -81,7 +81,7 @@ void Game::pointer_moved(int32_t x, int32_t y) {
 }
 
 // Right-drag map panning, Transport Tycoon style: while the right mouse button
-// is held, moving the mouse drags the world under the cursor. (dx, dy) is the
+// is held, moving the mouse drags the world under the cursor. (delta_x, delta_y) is the
 // mouse motion since the last frame, in screen pixels. We grab the map -- the
 // camera moves opposite the drag, so the point under the cursor follows the
 // mouse (like Google Maps / a touchscreen). To keep the keyboard cursor's screen
@@ -92,18 +92,18 @@ void Game::pointer_moved(int32_t x, int32_t y) {
 // not fight us. Gated to match the arrow path: Playing only, and only while a
 // build-menu row is enabled (game_viewportZoomKey is skipped otherwise, so the
 // advance would never be clamped/processed).
-void Game::pointer_drag_pan(int32_t dx, int32_t dy) {
+void Game::pointer_drag_pan(int32_t delta_x, int32_t delta_y) {
     Game* game = this;
     if (game->gameState != GameState::Playing) return;
     if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) return;
-    if (dx == 0 && dy == 0) return;
+    if (delta_x == 0 && delta_y == 0) return;
 
-    const int32_t camDx = -dx;  // grab-the-map: camera moves against the drag
-    const int32_t camDy = -dy;
-    game->renderer.camera.viewportCenterX += camDx;
-    game->renderer.camera.viewportCenterY += camDy;
-    game->renderer.camera.mapScaleX += camDx * 2;  // keep viewportBase (= mapScale/2) locked to the camera
-    game->renderer.camera.mapScaleY += camDy * 2;
+    const int32_t camera_delta_x = -delta_x;  // grab-the-map: camera moves against the drag
+    const int32_t camera_delta_y = -delta_y;
+    game->renderer.camera.viewportCenterX += camera_delta_x;
+    game->renderer.camera.viewportCenterY += camera_delta_y;
+    game->renderer.camera.mapScaleX += camera_delta_x * 2;  // keep viewportBase (= mapScale/2) locked to the camera
+    game->renderer.camera.mapScaleY += camera_delta_y * 2;
 }
 
 // Hide the OS cursor only where the game draws its own arrow at the mouse: in
@@ -129,11 +129,11 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             game->loadingTimeout = true;
             return;
         case GameState::MenuOverlay: {
-            const int hx = static_cast<int>(x);
-            const int hy = static_cast<int>(y);
+            const int hit_x = static_cast<int>(x);
+            const int hit_y = static_cast<int>(y);
             // Control element: the top-right X closes the overlay. Same as the
             // soft-left key (*): clear the row cursor, then back out.
-            if (game->clickMap.hit_close(hx, hy)) {
+            if (game->clickMap.hit_close(hit_x, hit_y)) {
                 game->ui.cursorDragY = -3;
                 game->ui.cursorDragX = -1;
                 game->handle_build_menu_state(game->renderer.currentSpriteId, -1);
@@ -142,7 +142,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
             // Menu element: a captured overlay row. Set the cursor to it and fire
             // its action -- identical to navigating there and pressing 5/fire.
             int row_index = 0, option_code = 0;
-            if (game->clickMap.hit_menu_row(hx, hy, &row_index, &option_code)) {
+            if (game->clickMap.hit_menu_row(hit_x, hit_y, &row_index, &option_code)) {
                 game->ui.cursorDragY = row_index;
                 game->handle_build_menu_state(game->renderer.currentSpriteId, option_code);
             }
@@ -178,7 +178,7 @@ void Game::pointer_pressed(int32_t x, int32_t y) {
                     game->ui.menuDirty = true;
                 } else {
                     game->ready = false;
-                    game->ui.transitionCode = 36;
+                    game->ui.transitionCode = menu_screen::MapOverview;
                     game->set_state(GameState::MenuOverlay);
                 }
             }

@@ -4,18 +4,97 @@
 #include "text/text_catalog.h"
 #include <stdlib.h>
 #include <string.h>
+#include <array>
+#include <utility>
 #include <vector>
 
+namespace {
+
+namespace resource_format {
+constexpr int32_t kIndexedImage = 1;
+constexpr int32_t kPngStream = 2;
+}  // namespace resource_format
+
+namespace png_format {
+constexpr int32_t kPaletteBytesPerColor = 3;
+constexpr int32_t kIndexedImageFixedByteCount = 69;
+constexpr int32_t kTransparencyChunkByteCount = 13;
+constexpr int32_t kSingleTransparencyEntry = 1;
+constexpr int32_t kIndexedColorType = 3;
+constexpr int32_t kByteMask = 0xFF;
+
+constexpr std::array<int8_t, 4> kSignaturePrefix = {
+    static_cast<int8_t>(0x89), 'P', 'N', 'G',
+};
+constexpr std::array<int8_t, 8> kSignature = {
+    static_cast<int8_t>(0x89), 'P', 'N', 'G', '\r', '\n', '\x1A', '\n',
+};
+constexpr std::array<int8_t, 4> kIhdrChunkType = {'I', 'H', 'D', 'R'};
+constexpr std::array<int8_t, 4> kPlteChunkType = {'P', 'L', 'T', 'E'};
+constexpr std::array<int8_t, 4> kTrnsChunkType = {'t', 'R', 'N', 'S'};
+constexpr std::array<int8_t, 4> kIdatChunkType = {'I', 'D', 'A', 'T'};
+constexpr std::array<int8_t, 4> kIendChunkType = {'I', 'E', 'N', 'D'};
+constexpr std::array<int8_t, 4> kIendCrc = {-82, 66, 96, -126};
+
+namespace indexed_offset {
+constexpr std::size_t kIhdrLengthLastByte = 11;
+constexpr std::size_t kIhdrType = 12;
+constexpr std::size_t kIhdrWidthLowByte = 18;
+constexpr std::size_t kIhdrHeightLowByte = 22;
+constexpr std::size_t kIhdrBitDepth = 24;
+constexpr std::size_t kIhdrColorType = 25;
+constexpr std::size_t kIhdrCrc = 29;
+constexpr std::size_t kPlteLengthHighByte = 35;
+constexpr std::size_t kPlteLengthLowByte = 36;
+constexpr std::size_t kPlteType = 37;
+constexpr std::size_t kPlteData = 41;
+}  // namespace indexed_offset
+
+template <std::size_t N>
+void write_bytes(std::vector<int8_t>& output,
+                 std::size_t offset,
+                 const std::array<int8_t, N>& bytes) {
+    for (std::size_t byte_index = 0; byte_index < bytes.size(); ++byte_index)
+        output[offset + byte_index] = bytes[byte_index];
+}
+}  // namespace png_format
+
+namespace state_work {
+constexpr int32_t kMapGenerationStart = 0;
+constexpr int32_t kDeferredOperationStart = 4;
+}  // namespace state_work
+
+namespace tile_sprite_alias {
+// These ids are a compatibility alias in tile_sprite_ids.bin. Their visual
+// meaning is not proven, so the names describe the operation only.
+constexpr int32_t kAliasCode = 68;
+constexpr int32_t kAliasSourceCode = 66;
+constexpr int32_t kScenarioResourceHeaderOffset = 8;
+}  // namespace tile_sprite_alias
+
+namespace tile_draw_order {
+constexpr int32_t kHeightAlignment = 8;
+constexpr int32_t kTopStripHeight = 30;
+constexpr int32_t kRowsAfterViewport = 6;
+constexpr int32_t kWidthDivisor = 32;
+constexpr int32_t kColumnsAfterViewport = 2;
+constexpr int32_t kFirstColumn = -1;
+constexpr int32_t kRowHalf = 2;
+constexpr int32_t kOddRowOffset = -1;
+}  // namespace tile_draw_order
+
+}  // namespace
+
 static int read_u16_be(ResourceReader& resource) {
-    int high = resource.read_byte();
-    int low = resource.read_byte();
-    return high * 256 + low;
+    const int high_byte = resource.read_byte();
+    const int low_byte = resource.read_byte();
+    return high_byte * 256 + low_byte;
 }
 
-void Game::key_pressed(int32_t n) {
+void Game::key_pressed(int32_t key_code) {
     Game* game = this;
     if (game->ui.inputPending) { game->ui.inputPending = false; return; }
-    game->ui.currentKey = n;
+    game->ui.currentKey = key_code;
 }
 
 void Game::reset_overlay_render_state() {
@@ -34,65 +113,95 @@ void Game::reset_overlay_render_state() {
 // public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
 std::unique_ptr<Image> Assets::decode_png_from_sprite_stream() {
     std::vector<int8_t> png_bytes;
-    int png_size = 0;
-    int image_format = sprite_stream.read_byte();
-    if (image_format == 2) {
-        png_size = read_u16_be(sprite_stream);
-        png_bytes.resize(static_cast<std::size_t>(png_size));
-        png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
-        for (int index = 4; index < png_size; ++index)
-            png_bytes[index] = (int8_t)sprite_stream.read_byte();
+    int png_byte_count = 0;
+    const int resource_format_code = sprite_stream.read_byte();
+    if (resource_format_code == resource_format::kPngStream) {
+        png_byte_count = read_u16_be(sprite_stream);
+        png_bytes.resize(static_cast<std::size_t>(png_byte_count));
+        png_format::write_bytes(png_bytes, 0, png_format::kSignaturePrefix);
+        for (int png_byte_index =
+                 static_cast<int>(png_format::kSignaturePrefix.size());
+             png_byte_index < png_byte_count; ++png_byte_index)
+            png_bytes[png_byte_index] =
+                (int8_t)sprite_stream.read_byte();
     }
-    if (image_format == 1) {
-        int image_data_size = read_u16_be(sprite_stream);
-        int palette_byte_count = sprite_stream.read_byte() * 3;
-        int transparency_count = sprite_stream.read_byte();
-        png_size = image_data_size + palette_byte_count + 69 +
-                   transparency_count * 13;
-        png_bytes.resize(static_cast<std::size_t>(png_size));
-        png_bytes[0] = -119; png_bytes[1] = 80; png_bytes[2] = 78; png_bytes[3] = 71;
-        png_bytes[4] = 13; png_bytes[5] = 10; png_bytes[6] = 26; png_bytes[7] = 10;
-        png_bytes[11] = 13; png_bytes[12] = 73; png_bytes[13] = 72; png_bytes[14] = 68; png_bytes[15] = 82;
-        png_bytes[18] = (int8_t)sprite_stream.read_byte();
-        png_bytes[19] = (int8_t)sprite_stream.read_byte();
-        png_bytes[22] = (int8_t)sprite_stream.read_byte();
-        png_bytes[23] = (int8_t)sprite_stream.read_byte();
-        png_bytes[24] = (int8_t)sprite_stream.read_byte();
-        png_bytes[25] = 3;
-        png_bytes[29] = (int8_t)sprite_stream.read_byte();
-        png_bytes[30] = (int8_t)sprite_stream.read_byte();
-        png_bytes[31] = (int8_t)sprite_stream.read_byte();
-        png_bytes[32] = (int8_t)sprite_stream.read_byte();
-        png_bytes[35] = (int8_t)(palette_byte_count >> 8 & 0xFF);
-        png_bytes[36] = (int8_t)(palette_byte_count & 0xFF);
-        png_bytes[37] = 80; png_bytes[38] = 76; png_bytes[39] = 84; png_bytes[40] = 69;
-        int output_index;
-        for (output_index = 0; output_index < palette_byte_count + 4;
-             ++output_index) {
-            png_bytes[41 + output_index] =
+    if (resource_format_code == resource_format::kIndexedImage) {
+        const int image_data_byte_count = read_u16_be(sprite_stream);
+        const int palette_byte_count = sprite_stream.read_byte()
+            * png_format::kPaletteBytesPerColor;
+        const int transparency_entry_count = sprite_stream.read_byte();
+        png_byte_count = image_data_byte_count + palette_byte_count
+            + png_format::kIndexedImageFixedByteCount
+            + transparency_entry_count * png_format::kTransparencyChunkByteCount;
+        png_bytes.resize(static_cast<std::size_t>(png_byte_count));
+        png_format::write_bytes(png_bytes, 0, png_format::kSignature);
+        png_format::write_bytes(
+            png_bytes, png_format::indexed_offset::kIhdrType,
+            png_format::kIhdrChunkType);
+        png_bytes[png_format::indexed_offset::kIhdrLengthLastByte] = 13;
+        png_bytes[png_format::indexed_offset::kIhdrWidthLowByte] =
+            (int8_t)sprite_stream.read_byte();
+        png_bytes[png_format::indexed_offset::kIhdrWidthLowByte + 1] =
+            (int8_t)sprite_stream.read_byte();
+        png_bytes[png_format::indexed_offset::kIhdrHeightLowByte] =
+            (int8_t)sprite_stream.read_byte();
+        png_bytes[png_format::indexed_offset::kIhdrHeightLowByte + 1] =
+            (int8_t)sprite_stream.read_byte();
+        png_bytes[png_format::indexed_offset::kIhdrBitDepth] =
+            (int8_t)sprite_stream.read_byte();
+        png_bytes[png_format::indexed_offset::kIhdrColorType] =
+            png_format::kIndexedColorType;
+        for (std::size_t crc_byte_offset = 0; crc_byte_offset < 4;
+             ++crc_byte_offset)
+            png_bytes[png_format::indexed_offset::kIhdrCrc + crc_byte_offset] =
+                (int8_t)sprite_stream.read_byte();
+        png_bytes[png_format::indexed_offset::kPlteLengthHighByte] =
+            (int8_t)(palette_byte_count >> 8 & png_format::kByteMask);
+        png_bytes[png_format::indexed_offset::kPlteLengthLowByte] =
+            (int8_t)(palette_byte_count & png_format::kByteMask);
+        png_format::write_bytes(
+            png_bytes, png_format::indexed_offset::kPlteType,
+            png_format::kPlteChunkType);
+        int write_index;
+        for (write_index = 0;
+             write_index < palette_byte_count + 4; ++write_index) {
+            png_bytes[png_format::indexed_offset::kPlteData + write_index] =
                 (int8_t)sprite_stream.read_byte();
         }
-        output_index = 41 + palette_byte_count + 4;
-        if (transparency_count == 1) {
-            output_index += 3;
-            png_bytes[output_index++] = 1;
-            png_bytes[output_index++] = 116; png_bytes[output_index++] = 82; png_bytes[output_index++] = 78; png_bytes[output_index++] = 83;
-            png_bytes[++output_index] = 64;
-            png_bytes[++output_index] = -26;
-            png_bytes[++output_index] = -40;
-            int transparency_crc_index = ++output_index;
-            ++output_index;
-            png_bytes[transparency_crc_index] = 102;
+        write_index = static_cast<int>(
+            png_format::indexed_offset::kPlteData + palette_byte_count + 4);
+        if (transparency_entry_count == png_format::kSingleTransparencyEntry) {
+            write_index += 3;
+            png_bytes[write_index++] = 1;
+            png_format::write_bytes(
+                png_bytes, write_index, png_format::kTrnsChunkType);
+            write_index += static_cast<int>(png_format::kTrnsChunkType.size());
+            png_bytes[++write_index] = 64;
+            png_bytes[++write_index] = -26;
+            png_bytes[++write_index] = -40;
+            const int transparency_crc_offset = ++write_index;
+            ++write_index;
+            png_bytes[transparency_crc_offset] = 102;
         }
-        output_index += 2;
-        png_bytes[output_index++] = (int8_t)(image_data_size >> 8 & 0xFF);
-        png_bytes[output_index++] = (int8_t)(image_data_size & 0xFF);
-        png_bytes[output_index++] = 73; png_bytes[output_index++] = 68; png_bytes[output_index++] = 65; png_bytes[output_index++] = 84;
-        for (int index = 0; index < image_data_size + 4; ++index)
-            png_bytes[output_index++] = (int8_t)sprite_stream.read_byte();
-        output_index += 4;
-        png_bytes[output_index++] = 73; png_bytes[output_index++] = 69; png_bytes[output_index++] = 78; png_bytes[output_index++] = 68;
-        png_bytes[output_index++] = -82; png_bytes[output_index++] = 66; png_bytes[output_index++] = 96; png_bytes[output_index++] = -126;
+        write_index += 2;
+        png_bytes[write_index++] =
+            (int8_t)(image_data_byte_count >> 8 & png_format::kByteMask);
+        png_bytes[write_index++] =
+            (int8_t)(image_data_byte_count & png_format::kByteMask);
+        png_format::write_bytes(png_bytes, write_index,
+                                png_format::kIdatChunkType);
+        write_index += static_cast<int>(png_format::kIdatChunkType.size());
+        for (int image_data_index = 0;
+             image_data_index < image_data_byte_count + 4;
+             ++image_data_index)
+            png_bytes[write_index++] =
+                (int8_t)sprite_stream.read_byte();
+        write_index += 4;
+        png_format::write_bytes(png_bytes, write_index,
+                                png_format::kIendChunkType);
+        write_index += static_cast<int>(png_format::kIendChunkType.size());
+        png_format::write_bytes(png_bytes, write_index,
+                                png_format::kIendCrc);
     }
     if (png_bytes.empty()) return nullptr;
     return Image::decode_png(std::span<const uint8_t>(
@@ -117,7 +226,7 @@ std::vector<int8_t> Assets::index_text_codes(int32_t semantic_index) const {
 
 void Game::load_settings_snapshot() {
     Game *game = this;
-    game->saveCodec.load_slot(5, save::MODE_READ);
+    game->saveCodec.load_slot(save::slot::Auxiliary, save::MODE_READ);
     game->saveCodec.walk_settings(*game);
     game->set_music_volume(game->music.volumeLevel);
 }
@@ -130,56 +239,74 @@ static void append_tile_draw_offset(ByteBuffer& x_offsets,
     y_offsets.write(y);
 }
 
-// public void k(int n, int n2) -- build+sort the iso tile-draw order tables
-void Assets::build_tile_draw_order(int32_t n, int32_t n2) {
+// Build and sort the isometric tile-draw order tables.
+void Assets::build_tile_draw_order(int32_t canvas_width, int32_t canvas_height) {
     ByteBuffer x_offsets;
     ByteBuffer y_offsets;
-    int n3, n4, n5;
-    n2 += n2 % 8;
-    int n6 = (n2 -= 30) / 8 + 6;
-    int n7 = n / 32 + 2;
-    for (n5 = 0; n5 < n6; ++n5) {
-        for (n4 = -1; n4 < n7; ++n4) {
-            n3 = n4 - n5 / 2;
-            int n8 = n5 % 2 == 0 ? 0 + n4 + n5 / 2 : -1 + n4 + n5 / 2;
-            append_tile_draw_offset(x_offsets, y_offsets, n3, n8);
+    const int32_t aligned_height = canvas_height
+        + canvas_height % tile_draw_order::kHeightAlignment;
+    const int32_t draw_row_count =
+        (aligned_height - tile_draw_order::kTopStripHeight)
+            / tile_draw_order::kHeightAlignment
+        + tile_draw_order::kRowsAfterViewport;
+    const int32_t draw_column_count = canvas_width
+        / tile_draw_order::kWidthDivisor
+        + tile_draw_order::kColumnsAfterViewport;
+    for (int32_t row = 0; row < draw_row_count; ++row) {
+        for (int32_t column = tile_draw_order::kFirstColumn;
+             column < draw_column_count; ++column) {
+            const int32_t x_offset = column - row / tile_draw_order::kRowHalf;
+            const int32_t y_offset = row % 2 == 0
+                ? column + row / tile_draw_order::kRowHalf
+                : tile_draw_order::kOddRowOffset
+                    + column + row / tile_draw_order::kRowHalf;
+            append_tile_draw_offset(x_offsets, y_offsets, x_offset, y_offset);
         }
     }
     const auto x_offset_bytes = x_offsets.bytes();
     const auto y_offset_bytes = y_offsets.bytes();
-    int sz = static_cast<int>(x_offset_bytes.size());
-    tileOffsetX.resize(static_cast<std::size_t>(sz));
-    memcpy(tileOffsetX.data(), x_offset_bytes.data(), (size_t)sz);
-    tileOffsetY.resize(static_cast<std::size_t>(sz));
-    memcpy(tileOffsetY.data(), y_offset_bytes.data(), (size_t)sz);
-    numActiveTileAnimations = sz;
+    const int active_offset_count = static_cast<int>(x_offset_bytes.size());
+    tileOffsetX.resize(static_cast<std::size_t>(active_offset_count));
+    memcpy(tileOffsetX.data(), x_offset_bytes.data(),
+           static_cast<std::size_t>(active_offset_count));
+    tileOffsetY.resize(static_cast<std::size_t>(active_offset_count));
+    memcpy(tileOffsetY.data(), y_offset_bytes.data(),
+           static_cast<std::size_t>(active_offset_count));
+    numActiveTileAnimations = active_offset_count;
+    bool reordered;
     do {
-        n5 = 0;
-        for (n4 = 0; n4 < numActiveTileAnimations - 1; ++n4) {
-            if (tileOffsetY[n4] <= tileOffsetY[n4 + 1]) continue;
-            n3 = tileOffsetY[n4]; tileOffsetY[n4] = tileOffsetY[n4 + 1]; tileOffsetY[n4 + 1] = (int8_t)n3;
-            n3 = tileOffsetX[n4]; tileOffsetX[n4] = tileOffsetX[n4 + 1]; tileOffsetX[n4 + 1] = (int8_t)n3;
-            n5 = 1;
+        reordered = false;
+        for (int offset_index = 0;
+             offset_index < numActiveTileAnimations - 1; ++offset_index) {
+            if (tileOffsetY[offset_index] <= tileOffsetY[offset_index + 1])
+                continue;
+            std::swap(tileOffsetY[offset_index], tileOffsetY[offset_index + 1]);
+            std::swap(tileOffsetX[offset_index], tileOffsetX[offset_index + 1]);
+            reordered = true;
         }
-    } while (n5 != 0);
+    } while (reordered);
     do {
-        n5 = 0;
-        for (n4 = 1; n4 < numActiveTileAnimations; ++n4) {
-            if (tileOffsetX[n4] <= tileOffsetX[n4 - 1] || tileOffsetY[n4] != tileOffsetY[n4 - 1]) continue;
-            n3 = tileOffsetY[n4]; tileOffsetY[n4] = tileOffsetY[n4 - 1]; tileOffsetY[n4 - 1] = (int8_t)n3;
-            n3 = tileOffsetX[n4]; tileOffsetX[n4] = tileOffsetX[n4 - 1]; tileOffsetX[n4 - 1] = (int8_t)n3;
-            n5 = 1;
+        reordered = false;
+        for (int offset_index = 1;
+             offset_index < numActiveTileAnimations; ++offset_index) {
+            if (tileOffsetX[offset_index] <= tileOffsetX[offset_index - 1]
+                || tileOffsetY[offset_index] != tileOffsetY[offset_index - 1])
+                continue;
+            std::swap(tileOffsetY[offset_index], tileOffsetY[offset_index - 1]);
+            std::swap(tileOffsetX[offset_index], tileOffsetX[offset_index - 1]);
+            reordered = true;
         }
-    } while (n5 != 0);
+    } while (reordered);
 }
 
-void Game::set_canvas_size(int32_t n, int32_t n2) {
+void Game::set_canvas_size(int32_t canvas_width, int32_t canvas_height) {
     Game *game = this;
-    if (game->lastCanvasWidth != n || game->lastCanvasHeight != n2) {
-        game->renderer.resize_canvas(n, n2);
-        game->assets.build_tile_draw_order(n, n2);
-        game->lastCanvasWidth = n;
-        game->lastCanvasHeight = n2;
+    if (game->lastCanvasWidth != canvas_width
+        || game->lastCanvasHeight != canvas_height) {
+        game->renderer.resize_canvas(canvas_width, canvas_height);
+        game->assets.build_tile_draw_order(canvas_width, canvas_height);
+        game->lastCanvasWidth = canvas_width;
+        game->lastCanvasHeight = canvas_height;
         game->ui.menuDirty = true;
         game->renderer.lastViewportCenterX = -1;
         if (game->gameState == GameState::MenuOverlay && !game->ready) {
@@ -189,13 +316,13 @@ void Game::set_canvas_size(int32_t n, int32_t n2) {
     }
 }
 
-void Game::set_state(int32_t n) {
+void Game::set_state(int32_t state) {
     Game *game = this;
     game->savedGameState = game->gameState;
     if (!game->ready) game->assets.cycle_flag = NULL;
     game->ui.snapshotLoadedFlag = false;
     game->ui.menuDirty = true;
-    switch (n) {
+    switch (state) {
         case GameState::BootSplash0:
             game->assets.open_sprite_stream("sprite_images.bin");
             // Dialog layout now lives in code (game/dialog_table.cpp); the old
@@ -212,17 +339,23 @@ void Game::set_state(int32_t n) {
         case GameState::IntroReady: {
             ResourceReader in = resources::open("sprite_image_map.bin");
             if (in) {
-                int n2 = in.read_byte();
-                int n3 = in.read_byte();
-                game->assets.spriteBitmapTable.resize(n2, 0);
-                game->assets.spriteIndexTable.assign(static_cast<std::size_t>(n3 + 1), 0);
-                for (int i = 0; i < n2; ++i) {
-                    int n4 = in.read_byte();
-                    int n5 = in.read_byte();
-                    game->assets.spriteBitmapTable[i].assign(static_cast<std::size_t>(n5), 0);
-                    game->assets.spriteIndexTable[n4] = (int8_t)i;
-                    for (int j = 0; j < n5; ++j)
-                        game->assets.spriteBitmapTable[i][j] = (int8_t)in.read_byte();
+                const int sprite_bitmap_count = in.read_byte();
+                const int highest_sprite_index = in.read_byte();
+                game->assets.spriteBitmapTable.resize(sprite_bitmap_count, 0);
+                game->assets.spriteIndexTable.assign(
+                    static_cast<std::size_t>(highest_sprite_index + 1), 0);
+                for (int bitmap_index = 0;
+                     bitmap_index < sprite_bitmap_count; ++bitmap_index) {
+                    const int sprite_index = in.read_byte();
+                    const int bitmap_byte_count = in.read_byte();
+                    game->assets.spriteBitmapTable[bitmap_index].assign(
+                        static_cast<std::size_t>(bitmap_byte_count), 0);
+                    game->assets.spriteIndexTable[sprite_index] =
+                        static_cast<int8_t>(bitmap_index);
+                    for (int byte_index = 0;
+                         byte_index < bitmap_byte_count; ++byte_index)
+                        game->assets.spriteBitmapTable[bitmap_index][byte_index] =
+                            static_cast<int8_t>(in.read_byte());
                 }
             }
             break;
@@ -232,16 +365,22 @@ void Game::set_state(int32_t n) {
             ResourceReader in = resources::open("tile_sprite_ids.bin");
             if (in) {
                 game->scenario.scenarioResourceCount = in.read_byte();
-                for (int i = 0; i < game->scenario.scenarioResourceCount; ++i) {
-                    int n6 = in.read_byte();
-                    game->assets.tileSpriteIndex[n6] = (int8_t)(i - 8);
+                for (int resource_index = 0;
+                     resource_index < game->scenario.scenarioResourceCount;
+                     ++resource_index) {
+                    const int tile_sprite_code = in.read_byte();
+                    game->assets.tileSpriteIndex[tile_sprite_code] =
+                        static_cast<int8_t>(resource_index
+                                            - tile_sprite_alias::kScenarioResourceHeaderOffset);
                 }
             }
-            game->scenario.scenarioResourceCount -= 8;
+            game->scenario.scenarioResourceCount -=
+                tile_sprite_alias::kScenarioResourceHeaderOffset;
             game->assets.tile_sprites.clear();
             game->assets.tile_sprites.resize(
                 static_cast<std::size_t>(game->scenario.scenarioResourceCount));
-            game->assets.tileSpriteIndex[68] = game->assets.tileSpriteIndex[66];
+            game->assets.tileSpriteIndex[tile_sprite_alias::kAliasCode] =
+                game->assets.tileSpriteIndex[tile_sprite_alias::kAliasSourceCode];
             break;
         }
         case GameState::MenuOverlay:
@@ -250,7 +389,7 @@ void Game::set_state(int32_t n) {
             game->ui.useDefaultOverlaySelection = true;
             break;
         case GameState::GeneratingMap:
-            game->stateWorkStep = 0;
+            game->stateWorkStep = state_work::kMapGenerationStart;
             break;
         case GameState::Playing:
             game->renderer.backbuffer = NULL;
@@ -259,14 +398,27 @@ void Game::set_state(int32_t n) {
             game->renderer.lastViewportCenterX = -1;
             game->ui.menuDirty = true;
             break;
-        case GameState::BuildingMinimap: game->stateWorkStep = 4; game->ui.confirmToggle = 0; break;
-        case GameState::BuildingPath: game->stateWorkStep = 4; break;
-        case GameState::SavingGame: game->stateWorkStep = 4; break;
-        case GameState::LoadingGame: game->stateWorkStep = 4; break;
-        case GameState::AiTurn: game->stateWorkStep = 4; break;
-        case GameState::HighScoreSync: game->stateWorkStep = 4; break;
+        case GameState::BuildingMinimap:
+            game->stateWorkStep = state_work::kDeferredOperationStart;
+            game->ui.confirmToggle = 0;
+            break;
+        case GameState::BuildingPath:
+            game->stateWorkStep = state_work::kDeferredOperationStart;
+            break;
+        case GameState::SavingGame:
+            game->stateWorkStep = state_work::kDeferredOperationStart;
+            break;
+        case GameState::LoadingGame:
+            game->stateWorkStep = state_work::kDeferredOperationStart;
+            break;
+        case GameState::AiTurn:
+            game->stateWorkStep = state_work::kDeferredOperationStart;
+            break;
+        case GameState::HighScoreSync:
+            game->stateWorkStep = state_work::kDeferredOperationStart;
+            break;
     }
-    game->gameState = n;
+    game->gameState = state;
 }
 
 // The host owns the loop; start only loads saved settings and enters boot.
@@ -283,13 +435,15 @@ void Game::advance_frame() {
     Game* game = this;
     if (game->stopRequested) return;
     if (game->ui.keyRepeatDelay == 0) {
-        if (game->ui.heldKey != 0) game->ui.currentKey = game->ui.heldKey;
+        if (game->ui.heldKey != input_key::NoKey)
+            game->ui.currentKey = game->ui.heldKey;
     } else {
         --game->ui.keyRepeatDelay;
     }
-    if (game->ui.currentKey != 0 && game->ui.currentKey != -999)
+    if (game->ui.currentKey != input_key::NoKey
+        && game->ui.currentKey != input_key::Released)
         game->handle_key(game->ui.currentKey);
-    if (game->ui.currentKey == -999)
+    if (game->ui.currentKey == input_key::Released)
         game->ui.reset_key_state(game->ui.currentKey);
     if (game->ui.inputSubState > 0) --game->ui.inputSubState;
     if (game->ui.inputPending) {
@@ -303,15 +457,16 @@ void Game::advance_frame() {
         game->frameIndex = 0;
     }
     if (game->gameState == GameState::LoadingResources) {
-        for (int n = 0; n < 5; ++n) game->update_state_machine();
+        for (int loading_step = 0; loading_step < 5; ++loading_step)
+            game->update_state_machine();
     }
     if (game->gameState == GameState::Playing) {
-        for (int n = 0; n < game->simSpeed; ++n) {
+        for (int simulation_step = 0;
+             simulation_step < game->simSpeed; ++simulation_step) {
             if (!game->ui.pauseFlag) game->update_state_machine();
             if (!game->ui.menuRowEnabled[game->ui.buildMenuMode][game->ui.buildMenuItemIndex]) continue;
             game->viewport_zoom_key();
         }
-        if (game->roadPocEnabled) game->road_poc_tick();
     } else {
         game->update_state_machine();
     }

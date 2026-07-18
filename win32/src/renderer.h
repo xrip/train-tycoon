@@ -25,8 +25,8 @@ struct UiController;
 struct Renderer {
     void resize_canvas(int32_t width, int32_t height);
     void draw_sprite_quad(Surface& surface, const Assets& assets,
-                          int32_t sprite, int32_t x, int32_t y,
-                          int32_t anchor) const;
+                          int32_t sprite_code, int32_t x, int32_t y,
+                          int32_t alignment) const;
     void draw_train(Surface& surface, const Assets& assets,
                     const World& world, const Fleet& fleet,
                     int32_t train) const;

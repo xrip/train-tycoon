@@ -8,7 +8,7 @@ struct Economy;
 class JavaRandom;
 
 struct Offer {
-    int8_t objectiveType = 0;
+    int8_t objectiveType = offer_objective::None;
     int8_t issuedDay = 0;
     int8_t dueDay = 0;
     int8_t issuedMonth = 0;
@@ -27,7 +27,7 @@ public:
     int8_t display_progress(int32_t row, const Economy& economy) const;
     void schedule_due_date(int32_t row, int32_t duration_units,
                            JavaRandom& random);
-    void copy_to_summary_and_clear(int32_t row);
+    void move_to_summary(int32_t row);
     void add_progress(int32_t objective_type, int32_t amount);
 
     Offer offers[kMenuRowCount]{};

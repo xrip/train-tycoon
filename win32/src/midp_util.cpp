@@ -6,38 +6,41 @@
 // java.util.Vector (pointer elements; the vector owns its backing array only).
 
 MidpVector *midp_vector_new(void) {
-    MidpVector *v = (MidpVector *)calloc(1, sizeof(MidpVector));
-    return v;
+    MidpVector *vector = (MidpVector *)calloc(1, sizeof(MidpVector));
+    return vector;
 }
 
-void midp_vector_add(MidpVector *v, void *element) {
-    if (v->size == v->cap) {
-        int nc = v->cap ? v->cap * 2 : 8;
-        void **nd = (void **)realloc(v->data, (size_t)nc * sizeof(void *));
-        if (!nd) return;
-        v->data = nd;
-        v->cap = nc;
+void midp_vector_add(MidpVector *vector, void *element) {
+    if (vector->size == vector->capacity) {
+        int new_capacity = vector->capacity ? vector->capacity * 2 : 8;
+        void **new_data = (void **)realloc(
+            vector->data, (size_t)new_capacity * sizeof(void *));
+        if (!new_data) return;
+        vector->data = new_data;
+        vector->capacity = new_capacity;
     }
-    v->data[v->size++] = element;
+    vector->data[vector->size++] = element;
 }
 
-void *midp_vector_get(const MidpVector *v, int index) {
-    if (index < 0 || index >= v->size) return NULL;
-    return v->data[index];
+void *midp_vector_get(const MidpVector *vector, int index) {
+    if (index < 0 || index >= vector->size) return NULL;
+    return vector->data[index];
 }
 
-int midp_vector_size(const MidpVector *v) { return v->size; }
+int midp_vector_size(const MidpVector *vector) { return vector->size; }
 
-void midp_vector_remove_at(MidpVector *v, int index) {
-    if (index < 0 || index >= v->size) return;
-    for (int i = index; i < v->size - 1; ++i) v->data[i] = v->data[i + 1];
-    v->size--;
+void midp_vector_remove_at(MidpVector *vector, int index) {
+    if (index < 0 || index >= vector->size) return;
+    for (int element_index = index;
+         element_index < vector->size - 1; ++element_index)
+        vector->data[element_index] = vector->data[element_index + 1];
+    vector->size--;
 }
 
-void midp_vector_free(MidpVector *v) {
-    if (!v) return;
-    free(v->data);
-    free(v);
+void midp_vector_free(MidpVector *vector) {
+    if (!vector) return;
+    free(vector->data);
+    free(vector);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

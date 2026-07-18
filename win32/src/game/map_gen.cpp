@@ -22,113 +22,333 @@ inline constexpr int32_t STAGE_FEATURE_5 = 9;
 inline constexpr int32_t STAGE_SCATTER_OBSTACLES = 10;
 }  // namespace mapgen
 
+namespace {
+
+// The generator stores six feature families in the tile map.  The group
+// labels are stable, but the source does not prove real commodity names.
+namespace terrain_feature {
+enum Id : int32_t {
+    IndustryGroup1Destination = 0,
+    IndustryGroup2Production = 1,
+    IndustryGroup2Destination = 2,
+    IndustryGroup3Production = 3,
+    IndustryGroup3Destination = 4,
+    IndustryGroup1Production = 5,
+};
+}  // namespace terrain_feature
+
+namespace terrain_feature_tile {
+enum Id : int32_t {
+    IndustryGroup1DestinationA = 50,
+    IndustryGroup1DestinationB = 51,
+    IndustryGroup1DestinationC = 52,
+    IndustryGroup2ProductionA = 53,
+    IndustryGroup2ProductionB = 54,
+    IndustryGroup2ProductionC = 55,
+    IndustryGroup2DestinationA = 56,
+    IndustryGroup2DestinationB = 57,
+    IndustryGroup2DestinationC = 58,
+    IndustryGroup3ProductionA = 59,
+    IndustryGroup3ProductionB = 60,
+    IndustryGroup3ProductionC = 61,
+    IndustryGroup3DestinationA = 62,
+    IndustryGroup3DestinationB = 63,
+    IndustryGroup3DestinationC = 64,
+    IndustryGroup1ProductionA = 65,
+    IndustryGroup1ProductionB = 66,
+    IndustryGroup1ProductionC = 67,
+    IndustryGroup1ProductionD = 68,
+};
+}  // namespace terrain_feature_tile
+
+namespace feature_placement {
+constexpr int32_t kMapMargin = 8;
+constexpr int32_t kMapOffset = 4;
+constexpr int32_t kClearanceRadius = 3;
+constexpr int32_t kSmallSize = 2;
+constexpr int32_t kLargeSize = 3;
+constexpr int32_t kMaxPlacementAttempts = 50;
+constexpr int64_t kTimeoutMillis = 1500;
+}  // namespace feature_placement
+
+namespace city_generation {
+constexpr int32_t kInitialPopulation = 50;
+constexpr int32_t kPopulationRandomRange = 20;
+}  // namespace city_generation
+
+namespace terrain_height_generation {
+constexpr int32_t kAreaSizeRandomRange = 20;
+constexpr int32_t kMinimumAreaSize = 1;
+constexpr int32_t kElevationStepRandomRange = 2;
+constexpr int32_t kFirstElevationStep = 1;
+constexpr int32_t kLoweringDelta = -1;
+}  // namespace terrain_height_generation
+
+namespace city_tile_distribution {
+constexpr int32_t kRandomRange = 22;
+constexpr int32_t kVariant1Limit = 6;
+constexpr int32_t kVariant2Limit = 11;
+constexpr int32_t kVariant3Limit = 15;
+constexpr int32_t kVariant4Limit = 18;
+constexpr int32_t kVariant5Limit = 20;
+constexpr int32_t kVariant6Limit = 21;
+constexpr int32_t kVariant7Limit = 22;
+}  // namespace city_tile_distribution
+
+namespace map_train_selection {
+constexpr int32_t kEngineVariantCount = 6;
+constexpr int32_t kWagonVariantCount = 14;
+constexpr int32_t kEngineVariantShift = 8;
+constexpr int32_t kMaxStoredZonePopulation = 32767;
+constexpr int8_t kInitialConstructionTimer = 50;
+}  // namespace map_train_selection
+
+namespace terrain_edit {
+constexpr int32_t kSelectionRadius = 5;
+constexpr int32_t kSelectionSize = 10;
+constexpr int32_t kMaximumElevation = 3;
+constexpr int32_t kMinimumElevation = -1;
+constexpr int32_t kRandomNeighborRange = 2;
+constexpr int32_t kLoweringRepeats = 3;
+constexpr int8_t kUninitializedElevation = -2;
+}  // namespace terrain_edit
+
+namespace terrain_patch {
+enum SeedType : int8_t {
+    FirstSeed = 1,
+    SecondSeed = 2,
+};
+constexpr int32_t kPatchSizeRandomRange = 5;
+constexpr int32_t kSeedMargin = 2;
+constexpr int32_t kSeedOffset = 1;
+constexpr int32_t kShapeRandomRange = 3;
+constexpr int32_t kLargePatchThreshold = 7;
+constexpr int32_t kSmoothingTimeoutMillis = 1000;
+constexpr int32_t kCityOverlayFlag = 0x80;
+}  // namespace terrain_patch
+
+}  // namespace
+
 int8_t World::random_city_tile(JavaRandom& random) const {
-    int n = abs(random.next_int() % 22);
-    if (n < 6) return 34;
-    if (n < 11) return 35;
-    if (n < 15) return 36;
-    if (n < 18) return 37;
-    if (n < 20) return 38;
-    if (n < 21) return 39;
-    if (n < 22) return 40;
+    const int city_tile_roll =
+        abs(random.next_int() % city_tile_distribution::kRandomRange);
+    if (city_tile_roll < city_tile_distribution::kVariant1Limit)
+        return city_zone_tile::VariantA;
+    if (city_tile_roll < city_tile_distribution::kVariant2Limit)
+        return city_zone_tile::VariantB;
+    if (city_tile_roll < city_tile_distribution::kVariant3Limit)
+        return city_zone_tile::VariantC;
+    if (city_tile_roll < city_tile_distribution::kVariant4Limit)
+        return city_zone_tile::VariantD;
+    if (city_tile_roll < city_tile_distribution::kVariant5Limit)
+        return city_zone_tile::VariantE;
+    if (city_tile_roll < city_tile_distribution::kVariant6Limit)
+        return city_zone_tile::VariantF;
+    if (city_tile_roll < city_tile_distribution::kVariant7Limit)
+        return city_zone_tile::VariantG;
     return 0;
 }
 
-int8_t Game::add_city_entry(int32_t n) {
+int8_t Game::add_city_entry(int32_t station_direction) {
     Game* game = this;
-    game->world.cities[game->ui.cityListIndex].stationDirection = (int8_t)n;
-    game->world.cities[game->ui.cityListIndex].population = (int8_t)(50 + game->rng.next_int() % 20);
+    game->world.cities[game->ui.cityListIndex].stationDirection =
+        static_cast<int8_t>(station_direction);
+    game->world.cities[game->ui.cityListIndex].population = static_cast<int8_t>(
+        city_generation::kInitialPopulation
+        + game->rng.next_int() % city_generation::kPopulationRandomRange);
     game->world.cities[game->ui.cityListIndex].zoneTileCount = 0;
     game->ui.cityListIndex = (int8_t)(game->ui.cityListIndex + 1);
     return (int8_t)(game->ui.cityListIndex - 1);
 }
 
-int8_t Game::register_map_train(int8_t by, int32_t n, int32_t n2) {
+int8_t Game::register_map_train(int32_t zone_population,
+                                int32_t selection_y,
+                                int32_t selection_x) {
     Game* game = this;
-    game->world.constructionTimers[game->ui.numSelectedTrains] = 50;
-    game->world.zonePopulation[game->ui.numSelectedTrains] = by;
-    game->ui.trainSelectionY[game->ui.numSelectedTrains] = (int16_t)n;
-    game->ui.trainSelectionX[game->ui.numSelectedTrains] = (int16_t)n2;
-    int16_t s = 0;
-    bool bl;
+    game->world.constructionTimers[game->ui.numSelectedTrains] =
+        map_train_selection::kInitialConstructionTimer;
+    game->world.zonePopulation[game->ui.numSelectedTrains] =
+        static_cast<int16_t>(
+            zone_population > map_train_selection::kMaxStoredZonePopulation
+                ? map_train_selection::kMaxStoredZonePopulation
+                : zone_population);
+    game->ui.trainSelectionY[game->ui.numSelectedTrains] =
+        static_cast<int16_t>(selection_y);
+    game->ui.trainSelectionX[game->ui.numSelectedTrains] =
+        static_cast<int16_t>(selection_x);
+    int16_t selection_index = 0;
+    bool selection_is_unique;
     do {
-        int8_t by2 = (int8_t)abs(game->rng.next_int() % 6);
-        int8_t by3 = (int8_t)abs(game->rng.next_int() % 14);
-        s = (int16_t)(256 * by2 + by3);
-        bl = true;
-        for (int i = 0; i < game->ui.numSelectedTrains; ++i)
-            if (s == game->ui.trainSelectionIndex[i]) bl = false;
-    } while (!bl);
-    game->ui.trainSelectionIndex[game->ui.numSelectedTrains] = s;
+        const int8_t engine_variant = static_cast<int8_t>(
+            abs(game->rng.next_int() % map_train_selection::kEngineVariantCount));
+        const int8_t wagon_variant = static_cast<int8_t>(
+            abs(game->rng.next_int() % map_train_selection::kWagonVariantCount));
+        selection_index = static_cast<int16_t>(
+            (engine_variant << map_train_selection::kEngineVariantShift)
+            + wagon_variant);
+        selection_is_unique = true;
+        for (int selection_slot = 0;
+             selection_slot < game->ui.numSelectedTrains; ++selection_slot)
+            if (selection_index == game->ui.trainSelectionIndex[selection_slot])
+                selection_is_unique = false;
+    } while (!selection_is_unique);
+    game->ui.trainSelectionIndex[game->ui.numSelectedTrains] = selection_index;
     game->ui.numSelectedTrains = (int8_t)(game->ui.numSelectedTrains + 1);
     return (int8_t)(game->ui.numSelectedTrains - 1);
 }
 
 // Rebuild slope tiles from the height map.
-void Terrain::rebuild(BuildController& build, bool bl) {
-    int n, n2, n3, n4;
-    if (bl) {
+void Terrain::rebuild(BuildController& build, bool rebuild_selection) {
+    int min_x, max_x, min_y, max_y;
+    if (rebuild_selection) {
         commit_edit(build);
         build.terrainEditBuffer.clear();
-        n4 = build.selectionStartX; n3 = build.selectionStartY;
-        n2 = build.selectionStartX + 10; n = build.selectionStartY + 10;
+        min_x = build.selectionStartX;
+        min_y = build.selectionStartY;
+        max_x = build.selectionStartX + terrain_edit::kSelectionSize;
+        max_y = build.selectionStartY + terrain_edit::kSelectionSize;
     } else {
-        n4 = 0; n3 = 0; n2 = mapWidth; n = mapHeight;
+        min_x = 0;
+        min_y = 0;
+        max_x = mapWidth;
+        max_y = mapHeight;
     }
-    for (int i = n4; i < n2; ++i) {
-        for (int j = n3; j < n; ++j) {
-            int8_t by = heightMap[i][j];
-            int8_t by2 = heightMap[i][j + 1];
-            int8_t by3 = heightMap[i + 1][j];
-            int8_t by4 = heightMap[i + 1][j + 1];
-            if (tileMap[i][j] >= tile::BUILT_FIRST) continue;
-            if (by == by2 && by == by3 && by == by4) {
-                tileElevation[i][j] = by;
-                if (tileMap[i][j] <= 28) tileMap[i][j] = 0;
-            } else if (by == by2 && by == by3 && by4 < by) {
-                tileElevation[i][j] = by; tileMap[i][j] = 11;
+    for (int tile_x = min_x; tile_x < max_x; ++tile_x) {
+        for (int tile_y = min_y; tile_y < max_y; ++tile_y) {
+            int8_t height_00 = heightMap[tile_x][tile_y];
+            int8_t height_01 = heightMap[tile_x][tile_y + 1];
+            int8_t height_10 = heightMap[tile_x + 1][tile_y];
+            int8_t height_11 = heightMap[tile_x + 1][tile_y + 1];
+            if (tileMap[tile_x][tile_y] >= tile::BUILT_FIRST) continue;
+            if (height_00 == height_01 && height_00 == height_10
+                && height_00 == height_11) {
+                tileElevation[tile_x][tile_y] = height_00;
+                if (tileMap[tile_x][tile_y] <= 28)
+                    tileMap[tile_x][tile_y] = 0;
+            } else if (height_00 == height_01 && height_00 == height_10
+                       && height_11 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = 11;
             }
-            if (by == by3 && by == by4 && by2 < by) { tileElevation[i][j] = by; tileMap[i][j] = 13; }
-            if (by == by2 && by == by4 && by3 < by) { tileElevation[i][j] = by; tileMap[i][j] = 14; }
-            if (by2 == by3 && by2 == by4 && by < by2) { tileElevation[i][j] = by2; tileMap[i][j] = 12; }
-            if (by == by4 && by2 == by3 && by2 < by) { tileElevation[i][j] = by; tileMap[i][j] = 16; }
-            if (by == by4 && by2 == by3 && by < by2) { tileElevation[i][j] = by2; tileMap[i][j] = 15; }
-            if (by == by2 && by3 == by4 && by3 < by) {
-                tileElevation[i][j] = by;
-                tileMap[i][j] = (int8_t)(by3 == -1 && i + 2 <= mapWidth && (heightMap[i + 2][j] == -1 || heightMap[i + 2][j + 1] == -1) ? 9 : 24);
+            if (height_00 == height_10 && height_00 == height_11
+                && height_01 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = 13;
             }
-            if (by == by2 && by3 == by4 && by < by3) {
-                tileElevation[i][j] = by3;
-                tileMap[i][j] = (int8_t)(by == -1 && i - 1 >= 0 && (heightMap[i - 1][j] == -1 || heightMap[i - 1][j + 1] == -1) ? 8 : 22);
+            if (height_00 == height_01 && height_00 == height_11
+                && height_10 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = 14;
             }
-            if (by == by3 && by2 == by4 && by2 < by) {
-                tileElevation[i][j] = by;
-                tileMap[i][j] = (int8_t)(by2 == -1 && j + 2 <= mapHeight && (heightMap[i][j + 2] == -1 || heightMap[i + 1][j + 2] == -1) ? 10 : 21);
+            if (height_01 == height_10 && height_01 == height_11
+                && height_00 < height_01) {
+                tileElevation[tile_x][tile_y] = height_01;
+                tileMap[tile_x][tile_y] = 12;
             }
-            if (by == by3 && by2 == by4 && by < by2) {
-                tileElevation[i][j] = by2;
-                tileMap[i][j] = (int8_t)(by == -1 && j - 1 >= 0 && (heightMap[i][j - 1] == -1 || heightMap[i + 1][j - 1] == -1) ? 7 : 23);
+            if (height_00 == height_11 && height_01 == height_10
+                && height_01 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = 16;
             }
-            if (by == by2 && by == by3 && by < by4) { tileElevation[i][j] = by; tileMap[i][j] = (int8_t)(by == -1 ? 3 : 19); }
-            if (by == by2 && by == by4 && by < by3) { tileElevation[i][j] = by; tileMap[i][j] = (int8_t)(by == -1 ? 6 : 18); }
-            if (by == by3 && by == by4 && by < by2) { tileElevation[i][j] = by; tileMap[i][j] = (int8_t)(by == -1 ? 5 : 20); }
-            if (by2 == by3 && by2 == by4 && by4 < by) { tileElevation[i][j] = by4; tileMap[i][j] = (int8_t)(by4 == -1 ? 4 : 17); }
-            if (by == by4 && by2 < by && by3 > by) { tileElevation[i][j] = by; tileMap[i][j] = 25; }
-            if (by3 == by2 && by < by3 && by4 > by3) { tileElevation[i][j] = by3; tileMap[i][j] = 26; }
-            if (by == by4 && by2 > by && by3 < by) { tileElevation[i][j] = by; tileMap[i][j] = 27; }
-            if (by3 != by2 || by <= by3 || by4 >= by3) continue;
-            tileElevation[i][j] = by3; tileMap[i][j] = 28;
+            if (height_00 == height_11 && height_01 == height_10
+                && height_00 < height_01) {
+                tileElevation[tile_x][tile_y] = height_01;
+                tileMap[tile_x][tile_y] = 15;
+            }
+            if (height_00 == height_01 && height_10 == height_11
+                && height_10 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_10 == -1 && tile_x + 2 <= mapWidth
+                        && (heightMap[tile_x + 2][tile_y] == -1
+                            || heightMap[tile_x + 2][tile_y + 1] == -1)
+                        ? 9 : 24);
+            }
+            if (height_00 == height_01 && height_10 == height_11
+                && height_00 < height_10) {
+                tileElevation[tile_x][tile_y] = height_10;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_00 == -1 && tile_x - 1 >= 0
+                        && (heightMap[tile_x - 1][tile_y] == -1
+                            || heightMap[tile_x - 1][tile_y + 1] == -1)
+                        ? 8 : 22);
+            }
+            if (height_00 == height_10 && height_01 == height_11
+                && height_01 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_01 == -1 && tile_y + 2 <= mapHeight
+                        && (heightMap[tile_x][tile_y + 2] == -1
+                            || heightMap[tile_x + 1][tile_y + 2] == -1)
+                        ? 10 : 21);
+            }
+            if (height_00 == height_10 && height_01 == height_11
+                && height_00 < height_01) {
+                tileElevation[tile_x][tile_y] = height_01;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_00 == -1 && tile_y - 1 >= 0
+                        && (heightMap[tile_x][tile_y - 1] == -1
+                            || heightMap[tile_x + 1][tile_y - 1] == -1)
+                        ? 7 : 23);
+            }
+            if (height_00 == height_01 && height_00 == height_10
+                && height_00 < height_11) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_00 == -1 ? 3 : 19);
+            }
+            if (height_00 == height_01 && height_00 == height_11
+                && height_00 < height_10) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_00 == -1 ? 6 : 18);
+            }
+            if (height_00 == height_10 && height_00 == height_11
+                && height_00 < height_01) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_00 == -1 ? 5 : 20);
+            }
+            if (height_01 == height_10 && height_01 == height_11
+                && height_11 < height_00) {
+                tileElevation[tile_x][tile_y] = height_11;
+                tileMap[tile_x][tile_y] = static_cast<int8_t>(
+                    height_11 == -1 ? 4 : 17);
+            }
+            if (height_00 == height_11 && height_01 < height_00
+                && height_10 > height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = 25;
+            }
+            if (height_10 == height_01 && height_00 < height_10
+                && height_11 > height_10) {
+                tileElevation[tile_x][tile_y] = height_10;
+                tileMap[tile_x][tile_y] = 26;
+            }
+            if (height_00 == height_11 && height_01 > height_00
+                && height_10 < height_00) {
+                tileElevation[tile_x][tile_y] = height_00;
+                tileMap[tile_x][tile_y] = 27;
+            }
+            if (height_10 != height_01 || height_00 <= height_10
+                || height_11 >= height_10)
+                continue;
+            tileElevation[tile_x][tile_y] = height_10;
+            tileMap[tile_x][tile_y] = 28;
         }
     }
 }
 
-void Game::smooth_tile_at(int32_t n, int32_t n2, bool bl) {
+void Game::smooth_tile_at(int32_t tile_x, int32_t tile_y, bool raise) {
     Game *game = this;
-    if ((bl && game->world.terrain.heightMap[n][n2] < 3) || (!bl && game->world.terrain.heightMap[n][n2] > -1)) {
-        game->build.set_terrain_selection(game->world.terrain, n, n2);
+    const int current_elevation =
+        game->world.terrain.heightMap[tile_x][tile_y];
+    if ((raise && current_elevation < terrain_edit::kMaximumElevation)
+        || (!raise && current_elevation > terrain_edit::kMinimumElevation)) {
+        game->build.set_terrain_selection(game->world.terrain, tile_x, tile_y);
         if (game->build.adjust_terrain_point(
-                game->world.terrain, game->economy, n, n2,
-                game->world.terrain.heightMap[n][n2] + (bl ? 1 : -1), bl)) {
+                game->world.terrain, game->economy, tile_x, tile_y,
+                current_elevation + (raise ? 1 : -1), raise)) {
             if (game->world.initialIndustryPlaced) {
                 if (game->build.terrainSmoothCost <= game->economy.money) {
                     game->economy.money -= game->build.terrainSmoothCost;
@@ -146,279 +366,620 @@ void Game::smooth_tile_at(int32_t n, int32_t n2, bool bl) {
     game->renderer.lastViewportCenterX = -1;
 }
 
-void Game::raise_terrain_area(int32_t n, int32_t n2, int32_t n3,
-                              int32_t n4, int32_t n5) {
+void Game::raise_terrain_area(int32_t start_x, int32_t start_y,
+                              int32_t width, int32_t height,
+                              int32_t elevation_step) {
     Game *game = this;
-    for (int i = n; i < n + n3; ++i) {
-        for (int j = n2; j < n2 + n4; ++j) {
-            if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
-            game->build.set_terrain_selection(game->world.terrain, i, j);
+    for (int tile_x = start_x; tile_x < start_x + width; ++tile_x) {
+        for (int tile_y = start_y; tile_y < start_y + height; ++tile_y) {
+            if (tile_x <= 0 || tile_y <= 0
+                || tile_x > game->world.terrain.mapWidth
+                || tile_y > game->world.terrain.mapHeight)
+                continue;
+            game->build.set_terrain_selection(game->world.terrain,
+                                               tile_x, tile_y);
             game->build.adjust_terrain_point(
-                game->world.terrain, game->economy, i, j, n5, true);
-            if (game->rng.next_int() % 2 < 0 && i > 0)
+                game->world.terrain, game->economy, tile_x, tile_y,
+                elevation_step, true);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_x > 0)
                 game->build.adjust_terrain_point(
-                    game->world.terrain, game->economy, i - 1, j, n5, true);
-            if (game->rng.next_int() % 2 < 0 && j > 0)
+                    game->world.terrain, game->economy, tile_x - 1, tile_y,
+                    elevation_step, true);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_y > 0)
                 game->build.adjust_terrain_point(
-                    game->world.terrain, game->economy, i, j - 1, n5, true);
-            if (game->rng.next_int() % 2 < 0 && i < game->world.terrain.mapWidth)
+                    game->world.terrain, game->economy, tile_x, tile_y - 1,
+                    elevation_step, true);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_x < game->world.terrain.mapWidth)
                 game->build.adjust_terrain_point(
-                    game->world.terrain, game->economy, i + 1, j, n5, true);
-            if (game->rng.next_int() % 2 < 0 && j < game->world.terrain.mapHeight)
+                    game->world.terrain, game->economy, tile_x + 1, tile_y,
+                    elevation_step, true);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_y < game->world.terrain.mapHeight)
                 game->build.adjust_terrain_point(
-                    game->world.terrain, game->economy, i, j + 1, n5, true);
+                    game->world.terrain, game->economy, tile_x, tile_y + 1,
+                    elevation_step, true);
             game->world.terrain.commit_edit(game->build);
         }
     }
 }
 
-void Game::lower_terrain_area(int32_t n, int32_t n2, int32_t n3,
-                              int32_t n4, int32_t n5) {
+void Game::lower_terrain_area(int32_t start_x, int32_t start_y,
+                              int32_t width, int32_t height,
+                              int32_t elevation_step) {
     Game *game = this;
-    (void)n5;
-    for (int i = n; i < n + n3; ++i) {
-        for (int j = n2; j < n2 + n4; ++j) {
-            if (i <= 0 || j <= 0 || i > game->world.terrain.mapWidth || j > game->world.terrain.mapHeight) continue;
-            for (int k = 0; k < 3; ++k) game->smooth_tile_at(i, j, false);
-            if (game->rng.next_int() % 2 < 0 && i > 0) game->smooth_tile_at(i - 1, j, false);
-            if (game->rng.next_int() % 2 < 0 && j > 0) game->smooth_tile_at(i, j - 1, false);
-            if (game->rng.next_int() % 2 < 0 && i < game->world.terrain.mapWidth) game->smooth_tile_at(i + 1, j, false);
-            if (game->rng.next_int() % 2 >= 0 || j >= game->world.terrain.mapHeight) continue;
-            game->smooth_tile_at(i, j + 1, false);
+    (void)elevation_step;
+    for (int tile_x = start_x; tile_x < start_x + width; ++tile_x) {
+        for (int tile_y = start_y; tile_y < start_y + height; ++tile_y) {
+            if (tile_x <= 0 || tile_y <= 0
+                || tile_x > game->world.terrain.mapWidth
+                || tile_y > game->world.terrain.mapHeight)
+                continue;
+            for (int repeat = 0; repeat < terrain_edit::kLoweringRepeats;
+                 ++repeat)
+                game->smooth_tile_at(tile_x, tile_y, false);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_x > 0)
+                game->smooth_tile_at(tile_x - 1, tile_y, false);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_y > 0)
+                game->smooth_tile_at(tile_x, tile_y - 1, false);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange < 0
+                && tile_x < game->world.terrain.mapWidth)
+                game->smooth_tile_at(tile_x + 1, tile_y, false);
+            if (game->rng.next_int() % terrain_edit::kRandomNeighborRange >= 0
+                || tile_y >= game->world.terrain.mapHeight)
+                continue;
+            game->smooth_tile_at(tile_x, tile_y + 1, false);
         }
     }
 }
 
-void Game::track_build_step(int32_t n, int32_t n2, int32_t n3,
-                            int32_t n4) {
+void Game::track_build_step(int32_t start_x, int32_t start_y,
+                            int32_t width, int32_t height) {
     Game *game = this;
-    int8_t by = -2;
-    for (int i = n; i < n + n3; ++i) {
-        for (int j = n2; j < n2 + n4; ++j) {
-            if (i >= game->world.terrain.mapWidth || j >= game->world.terrain.mapHeight) continue;
-            if (by == -2 && (by = game->world.terrain.heightMap[i][j]) < 0) by = 0;
-            while (by != game->world.terrain.heightMap[i][j]) game->smooth_tile_at(i, j, by > game->world.terrain.heightMap[i][j]);
-            while (by != game->world.terrain.heightMap[i + 1][j]) game->smooth_tile_at(i + 1, j, by > game->world.terrain.heightMap[i + 1][j]);
-            while (by != game->world.terrain.heightMap[i][j + 1]) game->smooth_tile_at(i, j + 1, by > game->world.terrain.heightMap[i][j + 1]);
-            while (by != game->world.terrain.heightMap[i + 1][j + 1]) game->smooth_tile_at(i + 1, j + 1, by > game->world.terrain.heightMap[i + 1][j + 1]);
+    int8_t target_elevation = terrain_edit::kUninitializedElevation;
+    for (int tile_x = start_x; tile_x < start_x + width; ++tile_x) {
+        for (int tile_y = start_y; tile_y < start_y + height; ++tile_y) {
+            if (tile_x >= game->world.terrain.mapWidth
+                || tile_y >= game->world.terrain.mapHeight)
+                continue;
+            if (target_elevation == terrain_edit::kUninitializedElevation
+                && (target_elevation =
+                        game->world.terrain.heightMap[tile_x][tile_y]) < 0)
+                target_elevation = 0;
+            while (target_elevation
+                   != game->world.terrain.heightMap[tile_x][tile_y])
+                game->smooth_tile_at(
+                    tile_x, tile_y,
+                    target_elevation
+                        > game->world.terrain.heightMap[tile_x][tile_y]);
+            while (target_elevation
+                   != game->world.terrain.heightMap[tile_x + 1][tile_y])
+                game->smooth_tile_at(
+                    tile_x + 1, tile_y,
+                    target_elevation
+                        > game->world.terrain.heightMap[tile_x + 1][tile_y]);
+            while (target_elevation
+                   != game->world.terrain.heightMap[tile_x][tile_y + 1])
+                game->smooth_tile_at(
+                    tile_x, tile_y + 1,
+                    target_elevation
+                        > game->world.terrain.heightMap[tile_x][tile_y + 1]);
+            while (target_elevation
+                   != game->world.terrain.heightMap[tile_x + 1][tile_y + 1])
+                game->smooth_tile_at(
+                    tile_x + 1, tile_y + 1,
+                    target_elevation
+                        > game->world.terrain.heightMap[tile_x + 1][tile_y + 1]);
         }
     }
 }
 
-void Game::place_terrain_patch(int32_t n, int32_t n2) {
-    Game *game = this;
-    int n3, n4, n5, n6;
-    int8_t by, by2, by3, by4;
-    int n7 = abs(game->rng.next_int() % 5) + game->world.terrainPatchBaseSize;
-    int8_t by5 = (int8_t)(abs(game->rng.next_int() % 5) + game->world.terrainPatchBaseSize);
+void Game::place_terrain_patch(int32_t origin_x, int32_t origin_y) {
+    Game* game = this;
+    const int patch_width = abs(game->rng.next_int()
+                                % terrain_patch::kPatchSizeRandomRange)
+                          + game->world.terrainPatchBaseSize;
+    const int patch_height = abs(game->rng.next_int()
+                                 % terrain_patch::kPatchSizeRandomRange)
+                           + game->world.terrainPatchBaseSize;
     std::vector<std::vector<int8_t>> patch_tiles(
-        static_cast<size_t>(n7),
-        std::vector<int8_t>(static_cast<size_t>(by5)));
-    bool bl = false;
-    int n8 = abs(game->rng.next_int() % (n7 - 2)) + 1;
-    for (n6 = abs(game->rng.next_int() % 3); n6 < by5 - abs(game->rng.next_int() % 3); ++n6) patch_tiles[n8][n6] = 1;
-    if (n7 >= 7) {
+        static_cast<size_t>(patch_width),
+        std::vector<int8_t>(static_cast<size_t>(patch_height)));
+    bool seed_conflict;
+    int seed_line;
+    int seed_position;
+    seed_line = abs(game->rng.next_int() % (patch_width - terrain_patch::kSeedMargin))
+              + terrain_patch::kSeedOffset;
+    for (seed_position = abs(game->rng.next_int()
+                             % terrain_patch::kShapeRandomRange);
+         seed_position < patch_height
+             - abs(game->rng.next_int() % terrain_patch::kShapeRandomRange);
+         ++seed_position)
+        patch_tiles[seed_line][seed_position] = terrain_patch::FirstSeed;
+    if (patch_width >= terrain_patch::kLargePatchThreshold) {
         do {
-            n8 = abs(game->rng.next_int() % (n7 - 2)) + 1;
-            bl = false;
-            for (n6 = 0; n6 < by5; ++n6)
-                if (patch_tiles[n8 - 1][n6] == 1 || patch_tiles[n8 + 1][n6] == 1) bl = true;
-        } while (bl);
-        for (n6 = abs(game->rng.next_int() % 3); n6 < by5 - abs(game->rng.next_int() % 3); ++n6) patch_tiles[n8][n6] = 1;
+            seed_line = abs(game->rng.next_int()
+                            % (patch_width - terrain_patch::kSeedMargin))
+                      + terrain_patch::kSeedOffset;
+            seed_conflict = false;
+            for (seed_position = 0; seed_position < patch_height; ++seed_position)
+                if (patch_tiles[seed_line - 1][seed_position]
+                        == terrain_patch::FirstSeed
+                    || patch_tiles[seed_line + 1][seed_position]
+                        == terrain_patch::FirstSeed)
+                    seed_conflict = true;
+        } while (seed_conflict);
+        for (seed_position = abs(game->rng.next_int()
+                                 % terrain_patch::kShapeRandomRange);
+             seed_position < patch_height
+                 - abs(game->rng.next_int() % terrain_patch::kShapeRandomRange);
+             ++seed_position)
+            patch_tiles[seed_line][seed_position] = terrain_patch::FirstSeed;
     }
-    n6 = abs(game->rng.next_int() % (by5 - 2)) + 1;
-    for (n5 = abs(game->rng.next_int() % 3); n5 < n7 - abs(game->rng.next_int() % 3); ++n5) patch_tiles[n5][n6] = 2;
-    if (by5 >= 7) {
+    seed_line = abs(game->rng.next_int()
+                    % (patch_height - terrain_patch::kSeedMargin))
+              + terrain_patch::kSeedOffset;
+    for (int seed_row = abs(game->rng.next_int()
+                            % terrain_patch::kShapeRandomRange);
+         seed_row < patch_width
+             - abs(game->rng.next_int() % terrain_patch::kShapeRandomRange);
+         ++seed_row)
+        patch_tiles[seed_row][seed_line] = terrain_patch::SecondSeed;
+    if (patch_height >= terrain_patch::kLargePatchThreshold) {
         do {
-            n6 = abs(game->rng.next_int() % (by5 - 2)) + 1;
-            bl = false;
-            for (n5 = 0; n5 < n7; ++n5)
-                if (patch_tiles[n5][n6 - 1] == 2 || patch_tiles[n5][n6 + 1] == 2) bl = true;
-        } while (bl);
+            seed_line = abs(game->rng.next_int()
+                            % (patch_height - terrain_patch::kSeedMargin))
+                      + terrain_patch::kSeedOffset;
+            seed_conflict = false;
+            for (int seed_row = 0; seed_row < patch_width; ++seed_row)
+                if (patch_tiles[seed_row][seed_line - 1]
+                        == terrain_patch::SecondSeed
+                    || patch_tiles[seed_row][seed_line + 1]
+                        == terrain_patch::SecondSeed)
+                    seed_conflict = true;
+        } while (seed_conflict);
     }
-    for (n5 = 0; n5 < n7; ++n5) {
-        for (by4 = 0; by4 < by5; ++by4) {
-            if (patch_tiles[n5][by4] != 1 && patch_tiles[n5][by4] != 2) continue;
-            by3 = (int8_t)(n5 > 0 && patch_tiles[n5 - 1][by4] > 0 ? 1 : 0);
-            by2 = (int8_t)(n5 < n7 - 1 && patch_tiles[n5 + 1][by4] > 0 ? 1 : 0);
-            by = (int8_t)(by4 < by5 - 1 && patch_tiles[n5][by4 + 1] > 0 ? 1 : 0);
-            n4 = by4 > 0 && patch_tiles[n5][by4 - 1] > 0 ? 1 : 0;
-            n3 = (by3 != 0 ? 1 : 0) + (by2 != 0 ? 1 : 0) + (by != 0 ? 1 : 0) + (n4 != 0 ? 1 : 0);
-            if (n3 > 2) { patch_tiles[n5][by4] = 44; continue; }
-            if (by2 != 0 && n4 != 0) { patch_tiles[n5][by4] = 45; continue; }
-            if (by2 != 0 && by != 0) { patch_tiles[n5][by4] = 46; continue; }
-            if (by3 != 0 && by != 0) { patch_tiles[n5][by4] = 47; continue; }
-            if (by3 != 0 && n4 != 0) { patch_tiles[n5][by4] = 48; continue; }
-            if ((by3 != 0 || by2 != 0) && by == 0 && n4 == 0) { patch_tiles[n5][by4] = 43; continue; }
-            if ((n4 == 0 && by == 0) || by3 != 0 || by2 != 0) continue;
-            patch_tiles[n5][by4] = 42;
+
+    for (int patch_x = 0; patch_x < patch_width; ++patch_x) {
+        for (int patch_y = 0; patch_y < patch_height; ++patch_y) {
+            if (patch_tiles[patch_x][patch_y] != terrain_patch::FirstSeed
+                && patch_tiles[patch_x][patch_y] != terrain_patch::SecondSeed)
+                continue;
+            const bool previous_row_present = patch_x > 0
+                && patch_tiles[patch_x - 1][patch_y] > 0;
+            const bool next_row_present = patch_x < patch_width - 1
+                && patch_tiles[patch_x + 1][patch_y] > 0;
+            const bool next_column_present = patch_y < patch_height - 1
+                && patch_tiles[patch_x][patch_y + 1] > 0;
+            const bool previous_column_present = patch_y > 0
+                && patch_tiles[patch_x][patch_y - 1] > 0;
+            const int present_neighbor_count =
+                (previous_row_present ? 1 : 0)
+                + (next_row_present ? 1 : 0)
+                + (next_column_present ? 1 : 0)
+                + (previous_column_present ? 1 : 0);
+            if (present_neighbor_count > 2) {
+                patch_tiles[patch_x][patch_y] =
+                    road_tile::kJunctionShape44;
+                continue;
+            }
+            if (next_row_present && previous_column_present) {
+                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape45;
+                continue;
+            }
+            if (next_row_present && next_column_present) {
+                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape46;
+                continue;
+            }
+            if (previous_row_present && next_column_present) {
+                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape47;
+                continue;
+            }
+            if (previous_row_present && previous_column_present) {
+                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape48;
+                continue;
+            }
+            if ((previous_row_present || next_row_present)
+                && !next_column_present && !previous_column_present) {
+                patch_tiles[patch_x][patch_y] = road_tile::kStraightShape43;
+                continue;
+            }
+            if ((!previous_column_present && !next_column_present)
+                || previous_row_present || next_row_present)
+                continue;
+            patch_tiles[patch_x][patch_y] = road_tile::kStraightShape42;
         }
     }
-    for (n5 = 0; n5 < n7; ++n5) {
-        for (by4 = 0; by4 < by5; ++by4) {
-            if (patch_tiles[n5][by4] != 0) continue;
-            by3 = 1;
-            by2 = (int8_t)(n5 > 0 ? patch_tiles[n5 - 1][by4] : 0);
-            n4 = n5 < n7 - 1 ? patch_tiles[n5 + 1][by4] : 0;
-            by = (int8_t)(by4 > 0 ? patch_tiles[n5][by4 - 1] : 0);
-            n3 = by4 < by5 - 1 ? patch_tiles[n5][by4 + 1] : 0;
-            if (by2 < 42 && n4 < 42 && by < 42 && n3 < 42) by3 = 0;
-            if (by2 == 44 || n4 == 44 || by == 44 || n3 == 44) by3 = 0;
-            if (by2 == 45 || by2 == 46 || by2 == 43) by3 = 0;
-            if (n4 == 47 || n4 == 48 || n4 == 43) by3 = 0;
-            if (by == 46 || by == 47 || by == 42) by3 = 0;
-            if (n3 == 45 || n3 == 48 || n3 == 42) by3 = 0;
-            if (by2 == 44) patch_tiles[n5][by4] = 43;
-            if (n4 == 44) patch_tiles[n5][by4] = 43;
-            if (by == 44) patch_tiles[n5][by4] = 42;
-            if (n3 == 44) patch_tiles[n5][by4] = 42;
-            if (by3 == 0) continue;
-            patch_tiles[n5][by4] = game->world.random_city_tile(game->rng);
+
+    for (int patch_x = 0; patch_x < patch_width; ++patch_x) {
+        for (int patch_y = 0; patch_y < patch_height; ++patch_y) {
+            if (patch_tiles[patch_x][patch_y] != 0) continue;
+            bool can_fill_hole = true;
+            const int8_t previous_row_tile = patch_x > 0
+                ? patch_tiles[patch_x - 1][patch_y] : 0;
+            const int8_t next_row_tile = patch_x < patch_width - 1
+                ? patch_tiles[patch_x + 1][patch_y] : 0;
+            const int8_t previous_column_tile = patch_y > 0
+                ? patch_tiles[patch_x][patch_y - 1] : 0;
+            const int8_t next_column_tile = patch_y < patch_height - 1
+                ? patch_tiles[patch_x][patch_y + 1] : 0;
+            if (previous_row_tile < road_tile::kStraightShape42
+                && next_row_tile < road_tile::kStraightShape42
+                && previous_column_tile < road_tile::kStraightShape42
+                && next_column_tile < road_tile::kStraightShape42)
+                can_fill_hole = false;
+            if (previous_row_tile == road_tile::kJunctionShape44
+                || next_row_tile == road_tile::kJunctionShape44
+                || previous_column_tile == road_tile::kJunctionShape44
+                || next_column_tile == road_tile::kJunctionShape44)
+                can_fill_hole = false;
+            if (previous_row_tile == road_tile::kCornerShape45
+                || previous_row_tile == road_tile::kCornerShape46
+                || previous_row_tile == road_tile::kStraightShape43)
+                can_fill_hole = false;
+            if (next_row_tile == road_tile::kCornerShape47
+                || next_row_tile == road_tile::kCornerShape48
+                || next_row_tile == road_tile::kStraightShape43)
+                can_fill_hole = false;
+            if (previous_column_tile == road_tile::kCornerShape46
+                || previous_column_tile == road_tile::kCornerShape47
+                || previous_column_tile == road_tile::kStraightShape42)
+                can_fill_hole = false;
+            if (next_column_tile == road_tile::kCornerShape45
+                || next_column_tile == road_tile::kCornerShape48
+                || next_column_tile == road_tile::kStraightShape42)
+                can_fill_hole = false;
+            if (previous_row_tile == road_tile::kJunctionShape44)
+                patch_tiles[patch_x][patch_y] = road_tile::kStraightShape43;
+            if (next_row_tile == road_tile::kJunctionShape44)
+                patch_tiles[patch_x][patch_y] = road_tile::kStraightShape43;
+            if (previous_column_tile == road_tile::kJunctionShape44)
+                patch_tiles[patch_x][patch_y] = road_tile::kStraightShape42;
+            if (next_column_tile == road_tile::kJunctionShape44)
+                patch_tiles[patch_x][patch_y] = road_tile::kStraightShape42;
+            if (!can_fill_hole) continue;
+            patch_tiles[patch_x][patch_y] = game->world.random_city_tile(game->rng);
         }
     }
-    n5 = -2;
-    for (by4 = 0; by4 < n7; ++by4) {
-        for (by3 = 0; by3 < by5; ++by3) {
-            if (n + by4 >= game->world.terrain.mapWidth || n2 + by3 >= game->world.terrain.mapHeight
-                || (patch_tiles[by4][by3] == 0 && (patch_tiles[by4][by3] != 0 || game->rng.next_int() % 3 >= 0))) continue;
-            if (n5 == -2 && (n5 = game->world.terrain.heightMap[n + by4][n2 + by3]) < 0) n5 = 0;
-            int64_t l = midp_current_time_millis();
-            while (n5 != game->world.terrain.heightMap[n + by4][n2 + by3]) {
-                game->smooth_tile_at(n + by4, n2 + by3, n5 > game->world.terrain.heightMap[n + by4][n2 + by3]);
-                if (midp_current_time_millis() - l <= 1000) continue;
-                game->build.trackBuildInProgress = true; return;
+
+    int8_t target_elevation = terrain_edit::kUninitializedElevation;
+    for (int patch_x = 0; patch_x < patch_width; ++patch_x) {
+        for (int patch_y = 0; patch_y < patch_height; ++patch_y) {
+            if (origin_x + patch_x >= game->world.terrain.mapWidth
+                || origin_y + patch_y >= game->world.terrain.mapHeight
+                || (patch_tiles[patch_x][patch_y] == 0
+                    && (patch_tiles[patch_x][patch_y] != 0
+                        || game->rng.next_int() % 3 >= 0)))
+                continue;
+            if (target_elevation == terrain_edit::kUninitializedElevation
+                && (target_elevation = game->world.terrain.heightMap[
+                        origin_x + patch_x][origin_y + patch_y]) < 0)
+                target_elevation = 0;
+            int64_t smoothing_start_time = midp_current_time_millis();
+            while (target_elevation
+                   != game->world.terrain.heightMap[origin_x + patch_x][origin_y + patch_y]) {
+                game->smooth_tile_at(
+                    origin_x + patch_x, origin_y + patch_y,
+                    target_elevation
+                        > game->world.terrain.heightMap[origin_x + patch_x][origin_y + patch_y]);
+                if (midp_current_time_millis() - smoothing_start_time
+                    <= terrain_patch::kSmoothingTimeoutMillis)
+                    continue;
+                game->build.trackBuildInProgress = true;
+                return;
             }
-            l = midp_current_time_millis();
-            while (n5 != game->world.terrain.heightMap[n + by4 + 1][n2 + by3]) {
-                game->smooth_tile_at(n + by4 + 1, n2 + by3, n5 > game->world.terrain.heightMap[n + by4 + 1][n2 + by3]);
-                if (midp_current_time_millis() - l <= 1000) continue;
-                game->build.trackBuildInProgress = true; return;
+            smoothing_start_time = midp_current_time_millis();
+            while (target_elevation
+                   != game->world.terrain.heightMap[origin_x + patch_x + 1][origin_y + patch_y]) {
+                game->smooth_tile_at(
+                    origin_x + patch_x + 1, origin_y + patch_y,
+                    target_elevation
+                        > game->world.terrain.heightMap[origin_x + patch_x + 1][origin_y + patch_y]);
+                if (midp_current_time_millis() - smoothing_start_time
+                    <= terrain_patch::kSmoothingTimeoutMillis)
+                    continue;
+                game->build.trackBuildInProgress = true;
+                return;
             }
-            l = midp_current_time_millis();
-            while (n5 != game->world.terrain.heightMap[n + by4][n2 + by3 + 1]) {
-                game->smooth_tile_at(n + by4, n2 + by3 + 1, n5 > game->world.terrain.heightMap[n + by4][n2 + by3 + 1]);
-                if (midp_current_time_millis() - l <= 1000) continue;
-                game->build.trackBuildInProgress = true; return;
+            smoothing_start_time = midp_current_time_millis();
+            while (target_elevation
+                   != game->world.terrain.heightMap[origin_x + patch_x][origin_y + patch_y + 1]) {
+                game->smooth_tile_at(
+                    origin_x + patch_x, origin_y + patch_y + 1,
+                    target_elevation
+                        > game->world.terrain.heightMap[origin_x + patch_x][origin_y + patch_y + 1]);
+                if (midp_current_time_millis() - smoothing_start_time
+                    <= terrain_patch::kSmoothingTimeoutMillis)
+                    continue;
+                game->build.trackBuildInProgress = true;
+                return;
             }
-            l = midp_current_time_millis();
-            while (n5 != game->world.terrain.heightMap[n + by4 + 1][n2 + by3 + 1]) {
-                game->smooth_tile_at(n + by4 + 1, n2 + by3 + 1, n5 > game->world.terrain.heightMap[n + by4 + 1][n2 + by3 + 1]);
-                if (midp_current_time_millis() - l <= 1000) continue;
-                game->build.trackBuildInProgress = true; return;
+            smoothing_start_time = midp_current_time_millis();
+            while (target_elevation
+                   != game->world.terrain.heightMap[origin_x + patch_x + 1][origin_y + patch_y + 1]) {
+                game->smooth_tile_at(
+                    origin_x + patch_x + 1, origin_y + patch_y + 1,
+                    target_elevation
+                        > game->world.terrain.heightMap[origin_x + patch_x + 1][origin_y + patch_y + 1]);
+                if (midp_current_time_millis() - smoothing_start_time
+                    <= terrain_patch::kSmoothingTimeoutMillis)
+                    continue;
+                game->build.trackBuildInProgress = true;
+                return;
             }
         }
     }
-    by4 = 0;
-    for (by3 = 0; by3 < n7; ++by3)
-        for (int8_t by6 = 0; by6 < by5; ++by6)
-            if (!(patch_tiles[by3][by6] > 40 || patch_tiles[by3][by6] < 34)) by4 = (int8_t)(by4 + 1);
-    by3 = game->register_map_train(by4, n + n7 / 2, n2 + by5 / 2);
-    for (int i = 0; i < n7; ++i) {
-        for (n4 = 0; n4 < by5; ++n4) {
-            if (n + i >= game->world.terrain.mapWidth || n2 + n4 >= game->world.terrain.mapHeight || patch_tiles[i][n4] == 0) continue;
-            game->world.terrain.tileMap[n + i][n2 + n4] = patch_tiles[i][n4];
-            game->world.trackMap[n + i][n2 + n4] = (int8_t)(0x80 | by3);
+
+    int32_t city_tile_count = 0;
+    for (int patch_x = 0; patch_x < patch_width; ++patch_x)
+        for (int patch_y = 0; patch_y < patch_height; ++patch_y)
+            if (patch_tiles[patch_x][patch_y] >= tile::BUILT_FIRST
+                && patch_tiles[patch_x][patch_y] <= tile::CITY_ZONE_LAST)
+                ++city_tile_count;
+    const int8_t train_slot = game->register_map_train(
+        city_tile_count, origin_x + patch_width / 2,
+        origin_y + patch_height / 2);
+    for (int patch_x = 0; patch_x < patch_width; ++patch_x) {
+        for (int patch_y = 0; patch_y < patch_height; ++patch_y) {
+            if (origin_x + patch_x >= game->world.terrain.mapWidth
+                || origin_y + patch_y >= game->world.terrain.mapHeight
+                || patch_tiles[patch_x][patch_y] == 0)
+                continue;
+            game->world.terrain.tileMap[origin_x + patch_x][origin_y + patch_y] =
+                patch_tiles[patch_x][patch_y];
+            game->world.trackMap[origin_x + patch_x][origin_y + patch_y] =
+                static_cast<int8_t>(terrain_patch::kCityOverlayFlag | train_slot);
         }
     }
 }
 
-void Game::place_terrain_feature(int32_t n) {
+void Game::place_terrain_feature(int32_t feature_id) {
     Game *game = this;
-    int n2, n3, n4, n5, n6, n7;
-    bool bl;
+    int tile_x, tile_y;
+    int feature_width, feature_height;
+    int clear_check_x, clear_check_y;
+    int8_t city_id;
+    bool area_is_clear;
     if (game->build.trackBuildInProgress) return;
-    int64_t l = midp_current_time_millis();
+    const int64_t placement_start_time = midp_current_time_millis();
     do {
-        bl = true;
-        n7 = abs(game->rng.next_int() % (game->world.terrain.mapWidth - 8)) + 4;
-        n6 = abs(game->rng.next_int() % (game->world.terrain.mapHeight - 8)) + 4;
-        n5 = game->rng.next_int() % 2 <= 0 ? 3 : 2;
-        n4 = game->rng.next_int() % 2 <= 0 ? 3 : 2;
-        if (n == 2) { n5 = 2; n4 = 2; }
-        for (n3 = n7 - 3; n3 < n7 + n5 + 3; ++n3) {
-            for (n2 = n6 - 3; n2 < n6 + n4 + 3; ++n2) {
-                if (game->world.terrain.tileMap[n3][n2] >= tile::BUILT_FIRST) bl = false;
-                if (game->world.terrain.tileElevation[n3][n2] != -1) continue;
-                bl = false;
+        area_is_clear = true;
+        tile_x = abs(game->rng.next_int() % (game->world.terrain.mapWidth
+                                             - feature_placement::kMapMargin))
+                 + feature_placement::kMapOffset;
+        tile_y = abs(game->rng.next_int() % (game->world.terrain.mapHeight
+                                             - feature_placement::kMapMargin))
+                 + feature_placement::kMapOffset;
+        feature_width = game->rng.next_int() % 2 <= 0
+            ? feature_placement::kLargeSize : feature_placement::kSmallSize;
+        feature_height = game->rng.next_int() % 2 <= 0
+            ? feature_placement::kLargeSize : feature_placement::kSmallSize;
+        if (feature_id == terrain_feature::IndustryGroup2Destination) {
+            feature_width = feature_placement::kSmallSize;
+            feature_height = feature_placement::kSmallSize;
+        }
+        for (clear_check_x = tile_x - feature_placement::kClearanceRadius;
+             clear_check_x < tile_x + feature_width + feature_placement::kClearanceRadius;
+             ++clear_check_x) {
+            for (clear_check_y = tile_y - feature_placement::kClearanceRadius;
+                 clear_check_y < tile_y + feature_height + feature_placement::kClearanceRadius;
+                 ++clear_check_y) {
+                if (game->world.terrain.tileMap[clear_check_x][clear_check_y]
+                    >= tile::BUILT_FIRST)
+                    area_is_clear = false;
+                if (game->world.terrain.tileElevation[clear_check_x][clear_check_y] != -1)
+                    continue;
+                area_is_clear = false;
             }
         }
-        if (midp_current_time_millis() - l <= 1500) continue;
+        if (midp_current_time_millis() - placement_start_time
+            <= feature_placement::kTimeoutMillis)
+            continue;
         game->build.trackBuildInProgress = true;
         break;
-    } while (!bl);
+    } while (!area_is_clear);
     if (game->build.trackBuildInProgress) return;
-    game->track_build_step(n7, n6, n5, n4);
-    n3 = game->add_city_entry(n);
-    switch (n) {
-        case 0:
-            if (n5 == 2 && n4 == 2) {
-                game->world.place_track_tile(n7, n6, 52, n3); game->world.place_track_tile(n7, n6 + 1, 52, n3);
-                game->world.place_track_tile(n7 + 1, n6, 51, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 50, n3);
+    game->track_build_step(tile_x, tile_y, feature_width, feature_height);
+    city_id = game->add_city_entry(feature_id);
+    switch (feature_id) {
+        case terrain_feature::IndustryGroup1Destination:
+            if (feature_width == feature_placement::kSmallSize
+                && feature_height == feature_placement::kSmallSize) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup1DestinationC, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1DestinationC, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup1DestinationB, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1DestinationA, city_id);
             }
-            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game->world.place_track_tile(n7, n6, 52, n3); game->world.place_track_tile(n7, n6 + 1, 52, n3);
-                game->world.place_track_tile(n7 + 1, n6, 51, n3); game->world.place_track_tile(n7 + 2, n6, 51, n3);
-                game->world.place_track_tile(n7 + 1, n6 + 1, 50, n3); game->world.place_track_tile(n7 + 2, n6 + 1, 50, n3);
+            if ((feature_width == feature_placement::kLargeSize
+                 && feature_height == feature_placement::kSmallSize)
+                || (feature_width == feature_placement::kLargeSize
+                    && feature_height == feature_placement::kLargeSize)) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup1DestinationC, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1DestinationC, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup1DestinationB, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y,
+                    terrain_feature_tile::IndustryGroup1DestinationB, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1DestinationA, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1DestinationA, city_id);
             }
-            if (n5 != 2 || n4 != 3) break;
-            game->world.place_track_tile(n7, n6, 52, n3); game->world.place_track_tile(n7 + 1, n6, 52, n3);
-            game->world.place_track_tile(n7, n6 + 1, 50, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 51, n3);
-            game->world.place_track_tile(n7, n6 + 2, 50, n3); game->world.place_track_tile(n7 + 1, n6 + 2, 51, n3);
+            if (feature_width != feature_placement::kSmallSize
+                || feature_height != feature_placement::kLargeSize)
+                break;
+            game->world.place_track_tile(tile_x, tile_y,
+                terrain_feature_tile::IndustryGroup1DestinationC, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y,
+                terrain_feature_tile::IndustryGroup1DestinationC, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 1,
+                terrain_feature_tile::IndustryGroup1DestinationA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                terrain_feature_tile::IndustryGroup1DestinationB, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 2,
+                terrain_feature_tile::IndustryGroup1DestinationA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 2,
+                terrain_feature_tile::IndustryGroup1DestinationB, city_id);
             break;
-        case 1:
-            if (n5 == 2 && n4 == 2) {
-                game->world.place_track_tile(n7, n6, 53, n3); game->world.place_track_tile(n7, n6 + 1, 53, n3);
-                game->world.place_track_tile(n7 + 1, n6, 55, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 54, n3);
+        case terrain_feature::IndustryGroup2Production:
+            if (feature_width == feature_placement::kSmallSize
+                && feature_height == feature_placement::kSmallSize) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup2ProductionA, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup2ProductionA, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup2ProductionC, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup2ProductionB, city_id);
             }
-            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game->world.place_track_tile(n7, n6, 53, n3); game->world.place_track_tile(n7, n6 + 1, 53, n3);
-                game->world.place_track_tile(n7 + 1, n6, 55, n3); game->world.place_track_tile(n7 + 2, n6, 55, n3);
-                game->world.place_track_tile(n7 + 1, n6 + 1, 54, n3); game->world.place_track_tile(n7 + 2, n6 + 1, 54, n3);
+            if ((feature_width == feature_placement::kLargeSize
+                 && feature_height == feature_placement::kSmallSize)
+                || (feature_width == feature_placement::kLargeSize
+                    && feature_height == feature_placement::kLargeSize)) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup2ProductionA, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup2ProductionA, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup2ProductionC, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y,
+                    terrain_feature_tile::IndustryGroup2ProductionC, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup2ProductionB, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup2ProductionB, city_id);
             }
-            if (n5 != 2 || n4 != 3) break;
-            game->world.place_track_tile(n7, n6, 53, n3); game->world.place_track_tile(n7 + 1, n6, 53, n3);
-            game->world.place_track_tile(n7, n6 + 1, 55, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 55, n3);
-            game->world.place_track_tile(n7, n6 + 2, 54, n3); game->world.place_track_tile(n7 + 1, n6 + 2, 54, n3);
+            if (feature_width != feature_placement::kSmallSize
+                || feature_height != feature_placement::kLargeSize)
+                break;
+            game->world.place_track_tile(tile_x, tile_y,
+                terrain_feature_tile::IndustryGroup2ProductionA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y,
+                terrain_feature_tile::IndustryGroup2ProductionA, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 1,
+                terrain_feature_tile::IndustryGroup2ProductionC, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                terrain_feature_tile::IndustryGroup2ProductionC, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 2,
+                terrain_feature_tile::IndustryGroup2ProductionB, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 2,
+                terrain_feature_tile::IndustryGroup2ProductionB, city_id);
             break;
-        case 2:
-            if (n5 != 2 || n4 != 2) break;
-            game->world.place_track_tile(n7, n6, 57 + abs(game->rng.next_int() % 2), n3);
-            game->world.place_track_tile(n7, n6 + 1, 56, n3);
-            game->world.place_track_tile(n7 + 1, n6, 57 + abs(game->rng.next_int() % 2), n3);
-            game->world.place_track_tile(n7 + 1, n6 + 1, 57 + abs(game->rng.next_int() % 2), n3);
+        case terrain_feature::IndustryGroup2Destination:
+            if (feature_width != feature_placement::kSmallSize
+                || feature_height != feature_placement::kSmallSize)
+                break;
+            game->world.place_track_tile(tile_x, tile_y,
+                terrain_feature_tile::IndustryGroup2DestinationB
+                    + abs(game->rng.next_int() % 2), city_id);
+            game->world.place_track_tile(tile_x, tile_y + 1,
+                terrain_feature_tile::IndustryGroup2DestinationA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y,
+                terrain_feature_tile::IndustryGroup2DestinationB
+                    + abs(game->rng.next_int() % 2), city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                terrain_feature_tile::IndustryGroup2DestinationB
+                    + abs(game->rng.next_int() % 2), city_id);
             break;
-        case 3:
-            for (n2 = n7; n2 < n7 + n5; ++n2)
-                for (int i = n6; i < n6 + n4; ++i)
-                    game->world.place_track_tile(n2, i, 59 + abs(game->rng.next_int() % 3), n3);
+        case terrain_feature::IndustryGroup3Production:
+            for (int feature_x = tile_x;
+                 feature_x < tile_x + feature_width; ++feature_x)
+                for (int feature_y = tile_y;
+                     feature_y < tile_y + feature_height; ++feature_y)
+                    game->world.place_track_tile(feature_x, feature_y,
+                        terrain_feature_tile::IndustryGroup3ProductionA
+                            + abs(game->rng.next_int() % 3), city_id);
             break;
-        case 4:
-            if (n5 == 2 && n4 == 2) {
-                game->world.place_track_tile(n7, n6, 62, n3); game->world.place_track_tile(n7, n6 + 1, 62, n3);
-                game->world.place_track_tile(n7 + 1, n6, 64, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 63, n3);
+        case terrain_feature::IndustryGroup3Destination:
+            if (feature_width == feature_placement::kSmallSize
+                && feature_height == feature_placement::kSmallSize) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup3DestinationC, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup3DestinationB, city_id);
             }
-            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game->world.place_track_tile(n7, n6, 62, n3); game->world.place_track_tile(n7, n6 + 1, 62, n3);
-                game->world.place_track_tile(n7 + 1, n6, 64, n3); game->world.place_track_tile(n7 + 2, n6, 64, n3);
-                game->world.place_track_tile(n7 + 1, n6 + 1, 62, n3); game->world.place_track_tile(n7 + 2, n6 + 1, 63, n3);
+            if ((feature_width == feature_placement::kLargeSize
+                 && feature_height == feature_placement::kSmallSize)
+                || (feature_width == feature_placement::kLargeSize
+                    && feature_height == feature_placement::kLargeSize)) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup3DestinationC, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y,
+                    terrain_feature_tile::IndustryGroup3DestinationC, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup3DestinationB, city_id);
             }
-            if (n5 != 2 || n4 != 3) break;
-            game->world.place_track_tile(n7, n6, 62, n3); game->world.place_track_tile(n7 + 1, n6, 63, n3);
-            game->world.place_track_tile(n7, n6 + 1, 62, n3); game->world.place_track_tile(n7 + 1, n6 + 1, 64, n3);
-            game->world.place_track_tile(n7, n6 + 2, 62, n3); game->world.place_track_tile(n7 + 1, n6 + 2, 64, n3);
+            if (feature_width != feature_placement::kSmallSize
+                || feature_height != feature_placement::kLargeSize)
+                break;
+            game->world.place_track_tile(tile_x, tile_y,
+                terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y,
+                terrain_feature_tile::IndustryGroup3DestinationB, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 1,
+                terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 1,
+                terrain_feature_tile::IndustryGroup3DestinationC, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 2,
+                terrain_feature_tile::IndustryGroup3DestinationA, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y + 2,
+                terrain_feature_tile::IndustryGroup3DestinationC, city_id);
             break;
-        case 5:
-            if (n5 == 2 && n4 == 2) {
-                game->world.place_track_tile(n7, n6, 65, n3); game->world.place_track_tile(n7 + 1, n6, 66, n3);
-                game->world.place_track_tile(n7, n6 + 1, 67, n3);
+        case terrain_feature::IndustryGroup1Production:
+            if (feature_width == feature_placement::kSmallSize
+                && feature_height == feature_placement::kSmallSize) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup1ProductionA, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup1ProductionB, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1ProductionC, city_id);
             }
-            if ((n5 == 3 && n4 == 2) || (n5 == 3 && n4 == 3)) {
-                game->world.place_track_tile(n7, n6, 65, n3); game->world.place_track_tile(n7 + 1, n6, 66, n3);
-                game->world.place_track_tile(n7 + 2, n6, 67, n3); game->world.place_track_tile(n7, n6 + 1, 68, n3);
+            if ((feature_width == feature_placement::kLargeSize
+                 && feature_height == feature_placement::kSmallSize)
+                || (feature_width == feature_placement::kLargeSize
+                    && feature_height == feature_placement::kLargeSize)) {
+                game->world.place_track_tile(tile_x, tile_y,
+                    terrain_feature_tile::IndustryGroup1ProductionA, city_id);
+                game->world.place_track_tile(tile_x + 1, tile_y,
+                    terrain_feature_tile::IndustryGroup1ProductionB, city_id);
+                game->world.place_track_tile(tile_x + 2, tile_y,
+                    terrain_feature_tile::IndustryGroup1ProductionC, city_id);
+                game->world.place_track_tile(tile_x, tile_y + 1,
+                    terrain_feature_tile::IndustryGroup1ProductionD, city_id);
             }
-            if (n5 != 2 || n4 != 3) break;
-            game->world.place_track_tile(n7, n6, 65, n3); game->world.place_track_tile(n7, n6 + 1, 66, n3);
-            game->world.place_track_tile(n7, n6 + 2, 67, n3); game->world.place_track_tile(n7 + 1, n6, 68, n3);
+            if (feature_width != feature_placement::kSmallSize
+                || feature_height != feature_placement::kLargeSize)
+                break;
+            game->world.place_track_tile(tile_x, tile_y,
+                terrain_feature_tile::IndustryGroup1ProductionA, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 1,
+                terrain_feature_tile::IndustryGroup1ProductionB, city_id);
+            game->world.place_track_tile(tile_x, tile_y + 2,
+                terrain_feature_tile::IndustryGroup1ProductionC, city_id);
+            game->world.place_track_tile(tile_x + 1, tile_y,
+                terrain_feature_tile::IndustryGroup1ProductionD, city_id);
             break;
     }
 }
@@ -430,8 +991,10 @@ void Game::initialize_map_generator() {
         game->world.mapGenStage = mapgen::STAGE_INIT;
         game->world.tilesGeneratedInStage = 0;
         game->world.totalTilesToGenerate = game->world.terrainRaiseStepCount + game->world.terrainLowerStepCount + game->world.mapGenColumns * (game->world.mapGenColumns - 1)
-            + game->world.mapGenRows + game->world.weightAccel2 + game->world.weightAccel + game->world.terrainFeatureStage6Count
-            + game->world.terrainFeatureStage7Count + game->world.weightAccel4 + game->world.weightAccel3 + 1;
+            + game->world.mapGenRows + game->world.featureStage0Count
+            + game->world.featureStage1Count + game->world.featureStage2Count
+            + game->world.featureStage3Count + game->world.featureStage4Count
+            + game->world.featureStage5Count + 1;
         game->world.mapGenTilesDone = 0;
 }
 
@@ -441,12 +1004,12 @@ void Game::advance_map_generation_stage() {
         if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainRaiseStepCount) { game->world.mapGenStage = mapgen::STAGE_LOWER_TERRAIN; game->world.tilesGeneratedInStage = 0; game->world.terrain.rebuild(game->build, false); }
         if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN && game->world.tilesGeneratedInStage == game->world.terrainLowerStepCount) { game->world.mapGenStage = mapgen::STAGE_PLACE_PATCHES; game->world.tilesGeneratedInStage = 0; game->world.terrain.rebuild(game->build, false); }
         if (game->world.mapGenStage == mapgen::STAGE_PLACE_PATCHES && game->world.tilesGeneratedInStage == game->world.mapGenColumns * (game->world.mapGenColumns - 1) + game->world.mapGenRows) { game->world.mapGenStage = mapgen::STAGE_FEATURE_0; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0 && game->world.tilesGeneratedInStage == game->world.weightAccel2) { game->world.mapGenStage = mapgen::STAGE_FEATURE_1; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1 && game->world.tilesGeneratedInStage == game->world.weightAccel) { game->world.mapGenStage = mapgen::STAGE_FEATURE_2; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_2 && game->world.tilesGeneratedInStage == game->world.terrainFeatureStage6Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_3; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_3 && game->world.tilesGeneratedInStage == game->world.terrainFeatureStage7Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_4; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4 && game->world.tilesGeneratedInStage == game->world.weightAccel4) { game->world.mapGenStage = mapgen::STAGE_FEATURE_5; game->world.tilesGeneratedInStage = 0; }
-        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5 && game->world.tilesGeneratedInStage == game->world.weightAccel3) { game->world.mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; game->world.tilesGeneratedInStage = 0; }
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_0 && game->world.tilesGeneratedInStage == game->world.featureStage0Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_1; game->world.tilesGeneratedInStage = 0; }
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_1 && game->world.tilesGeneratedInStage == game->world.featureStage1Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_2; game->world.tilesGeneratedInStage = 0; }
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_2 && game->world.tilesGeneratedInStage == game->world.featureStage2Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_3; game->world.tilesGeneratedInStage = 0; }
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_3 && game->world.tilesGeneratedInStage == game->world.featureStage3Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_4; game->world.tilesGeneratedInStage = 0; }
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_4 && game->world.tilesGeneratedInStage == game->world.featureStage4Count) { game->world.mapGenStage = mapgen::STAGE_FEATURE_5; game->world.tilesGeneratedInStage = 0; }
+        if (game->world.mapGenStage == mapgen::STAGE_FEATURE_5 && game->world.tilesGeneratedInStage == game->world.featureStage5Count) { game->world.mapGenStage = mapgen::STAGE_SCATTER_OBSTACLES; game->world.tilesGeneratedInStage = 0; }
 }
 
 void Game::generate_terrain_height_step() {
@@ -454,18 +1017,30 @@ void Game::generate_terrain_height_step() {
         if (game->world.mapGenStage == mapgen::STAGE_RAISE_TERRAIN) {
             int center_x = abs(game->rng.next_int() % game->world.terrain.mapWidth);
             int center_y = abs(game->rng.next_int() % game->world.terrain.mapHeight);
-            int width = abs(game->rng.next_int() % 20) + 1;
-            int height = abs(game->rng.next_int() % 20) + 1;
-            int elevation_step = abs(game->rng.next_int() % 2) + 1;
+            int width = abs(game->rng.next_int()
+                            % terrain_height_generation::kAreaSizeRandomRange)
+                        + terrain_height_generation::kMinimumAreaSize;
+            int height = abs(game->rng.next_int()
+                             % terrain_height_generation::kAreaSizeRandomRange)
+                         + terrain_height_generation::kMinimumAreaSize;
+            int elevation_step = abs(
+                game->rng.next_int()
+                % terrain_height_generation::kElevationStepRandomRange)
+                + terrain_height_generation::kFirstElevationStep;
             game->raise_terrain_area(center_x, center_y, width, height,
                                 elevation_step);
         }
         if (game->world.mapGenStage == mapgen::STAGE_LOWER_TERRAIN) {
             int center_x = abs(game->rng.next_int() % game->world.terrain.mapWidth);
             int center_y = abs(game->rng.next_int() % game->world.terrain.mapHeight);
-            int width = abs(game->rng.next_int() % 20) + 1;
-            int height = abs(game->rng.next_int() % 20) + 1;
-            game->lower_terrain_area(center_x, center_y, width, height, -1);
+            int width = abs(game->rng.next_int()
+                            % terrain_height_generation::kAreaSizeRandomRange)
+                        + terrain_height_generation::kMinimumAreaSize;
+            int height = abs(game->rng.next_int()
+                             % terrain_height_generation::kAreaSizeRandomRange)
+                         + terrain_height_generation::kMinimumAreaSize;
+            game->lower_terrain_area(center_x, center_y, width, height,
+                                     terrain_height_generation::kLoweringDelta);
         }
 }
 
@@ -532,68 +1107,90 @@ void Game::run_map_generation_step(int32_t mode) {
 }
 
 void World::pick_city_site(JavaRandom& random) {
-    int x = abs(random.next_int() % terrain.mapWidth);
-    int y = abs(random.next_int() % terrain.mapHeight);
+    const int candidate_x = abs(random.next_int() % terrain.mapWidth);
+    const int candidate_y = abs(random.next_int() % terrain.mapHeight);
     industryCategory = -1;
-    int tile = terrain.tileMap[x][y];
-    if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
-    int min_x = x - 2;
-    int min_y = y - 2;
-    int max_x = x + 2;
-    int max_y = y + 2;
-    if (min_x < 0) min_x = 0;
-    if (min_y < 0) min_y = 0;
-    if (max_x >= terrain.mapWidth) max_x = terrain.mapWidth - 1;
-    if (max_y >= terrain.mapHeight) max_y = terrain.mapHeight - 1;
-    for (int near_x = min_x;
-         near_x <= max_x && industryCategory <= 0; ++near_x) {
-        for (int near_y = min_y;
-             near_y <= max_y && industryCategory <= 0; ++near_y) {
-            tile = terrain.tileMap[near_x][near_y];
-            if (tile >= 34 && tile <= 40) industryCategory = 0;
-            if (tile >= 65 && tile <= 68) industryCategory = 1;
-            if (tile >= 53 && tile <= 55) industryCategory = 2;
-            if (tile >= 59 && tile <= 61) industryCategory = 3;
+    const int candidate_tile = terrain.tileMap[candidate_x][candidate_y];
+    if (candidate_tile != 0
+        && (candidate_tile < tile::SCENERY_FIRST
+            || candidate_tile > tile::SCENERY_LAST))
+        return;
+    int min_candidate_x = candidate_x - 2;
+    int min_candidate_y = candidate_y - 2;
+    int max_candidate_x = candidate_x + 2;
+    int max_candidate_y = candidate_y + 2;
+    if (min_candidate_x < 0) min_candidate_x = 0;
+    if (min_candidate_y < 0) min_candidate_y = 0;
+    if (max_candidate_x >= terrain.mapWidth) max_candidate_x = terrain.mapWidth - 1;
+    if (max_candidate_y >= terrain.mapHeight) max_candidate_y = terrain.mapHeight - 1;
+    for (int near_x = min_candidate_x;
+         near_x <= max_candidate_x && industryCategory <= 0; ++near_x) {
+        for (int near_y = min_candidate_y;
+             near_y <= max_candidate_y && industryCategory <= 0; ++near_y) {
+            const int nearby_tile = terrain.tileMap[near_x][near_y];
+            if (nearby_tile >= tile::BUILT_FIRST
+                && nearby_tile <= tile::CITY_ZONE_LAST)
+                industryCategory = 0;
+            if (nearby_tile >= industry_tile::Group1ProductionFirst
+                && nearby_tile <= industry_tile::Group1ProductionLast)
+                industryCategory = 1;
+            if (nearby_tile >= industry_tile::Group2ProductionFirst
+                && nearby_tile <= industry_tile::Group2ProductionLast)
+                industryCategory = 2;
+            if (nearby_tile >= industry_tile::Group3ProductionFirst
+                && nearby_tile <= industry_tile::Group3ProductionLast)
+                industryCategory = 3;
         }
     }
     if (industryCategory >= 0) {
-        cityStationX = x;
-        cityStationY = y;
+        cityStationX = candidate_x;
+        cityStationY = candidate_y;
     }
 }
 
 void World::pick_industry_site(JavaRandom& random) {
-    int x = abs(random.next_int() % terrain.mapWidth);
-    int y = abs(random.next_int() % terrain.mapHeight);
+    const int candidate_x = abs(random.next_int() % terrain.mapWidth);
+    const int candidate_y = abs(random.next_int() % terrain.mapHeight);
     industrySiteFound = false;
-    int tile = terrain.tileMap[x][y];
-    if (tile != 0 && (tile < tile::SCENERY_FIRST || tile > tile::SCENERY_LAST)) return;
-    int min_x = x - 2;
-    int min_y = y - 2;
-    int max_x = x + 2;
-    int max_y = y + 2;
-    if (min_x < 0) min_x = 0;
-    if (min_y < 0) min_y = 0;
-    if (max_x >= terrain.mapWidth) max_x = terrain.mapWidth - 1;
-    if (max_y >= terrain.mapHeight) max_y = terrain.mapHeight - 1;
-    for (int near_x = min_x;
-         near_x <= max_x && !industrySiteFound; ++near_x) {
-        for (int near_y = min_y;
-             near_y <= max_y && !industrySiteFound; ++near_y) {
-            tile = terrain.tileMap[near_x][near_y];
-            if (tile >= 34 && tile <= 40 && industryCategory == 0)
+    const int candidate_tile = terrain.tileMap[candidate_x][candidate_y];
+    if (candidate_tile != 0
+        && (candidate_tile < tile::SCENERY_FIRST
+            || candidate_tile > tile::SCENERY_LAST))
+        return;
+    int min_candidate_x = candidate_x - 2;
+    int min_candidate_y = candidate_y - 2;
+    int max_candidate_x = candidate_x + 2;
+    int max_candidate_y = candidate_y + 2;
+    if (min_candidate_x < 0) min_candidate_x = 0;
+    if (min_candidate_y < 0) min_candidate_y = 0;
+    if (max_candidate_x >= terrain.mapWidth) max_candidate_x = terrain.mapWidth - 1;
+    if (max_candidate_y >= terrain.mapHeight) max_candidate_y = terrain.mapHeight - 1;
+    for (int near_x = min_candidate_x;
+         near_x <= max_candidate_x && !industrySiteFound; ++near_x) {
+        for (int near_y = min_candidate_y;
+             near_y <= max_candidate_y && !industrySiteFound; ++near_y) {
+            const int nearby_tile = terrain.tileMap[near_x][near_y];
+            if (nearby_tile >= tile::BUILT_FIRST
+                && nearby_tile <= tile::CITY_ZONE_LAST
+                && industryCategory == 0)
                 industrySiteFound = true;
-            if (tile >= 62 && tile <= 64 && industryCategory == 1)
+            if (nearby_tile >= industry_tile::Group3DestinationFirst
+                && nearby_tile <= industry_tile::Group3DestinationLast
+                && industryCategory == 1)
                 industrySiteFound = true;
-            if (tile >= 50 && tile <= 52 && industryCategory == 2)
+            if (nearby_tile >= industry_tile::Group1DestinationFirst
+                && nearby_tile <= industry_tile::Group1DestinationLast
+                && industryCategory == 2)
                 industrySiteFound = true;
-            if (tile >= 56 && tile <= 58 && industryCategory == 3)
+            if (nearby_tile >= industry_tile::Group2DestinationFirst
+                && nearby_tile <= industry_tile::Group2DestinationLast
+                && industryCategory == 3)
                 industrySiteFound = true;
         }
     }
     if (industrySiteFound) {
-        industryStationX = x;
-        industryTileY = y;
+        industryStationX = candidate_x;
+        industryTileY = candidate_y;
     }
 }
 
@@ -601,14 +1198,14 @@ void Game::spawn_train_at(int32_t x, int32_t y) {
     Game* game = this;
     int engine_type = game->scenario.currentEra / 3;
     int wagon_count = game->build.selectionCost / 8000 + 1;
-    if (wagon_count > 5) wagon_count = 5;
-    int cargo_type = 2;
-    if (game->world.industryCategory == 1) cargo_type = 3;
-    if (game->world.industryCategory == 2) cargo_type = 4;
-    if (game->world.industryCategory == 3) cargo_type = 6;
+    if (wagon_count > kWagonOptionCount) wagon_count = kWagonOptionCount;
+    int cargo_type = wagon::PassengerMailCar;
+    if (game->world.industryCategory == 1) cargo_type = wagon::IndustryGroup1Car;
+    if (game->world.industryCategory == 2) cargo_type = wagon::IndustryGroup2CarA;
+    if (game->world.industryCategory == 3) cargo_type = wagon::IndustryGroup3CarA;
     int train = game->fleet.allocate_train_car(
         x, y, engine_type, game->scenario.currentEra,
-        game->world.terrain.tileMap[x][y] == 87 ? 0 : 2,
+        game->world.terrain.tileMap[x][y] == tile::VERTICAL_STATION ? 0 : 2,
         8 - game->scenario.currentEra);
     game->renderer.lastViewportCenterX = -1;
     for (int wagon = 0; wagon < wagon_count; ++wagon) {
@@ -629,36 +1226,36 @@ void World::auto_extend_track_station(int32_t x, int32_t y,
     bool track_up = y > 0 && trackMap[x][y - 1] == track::PRESENT;
     bool track_down = y < terrain.mapHeight - 1 && trackMap[x][y + 1] == track::PRESENT;
     if (track_left || track_right) {
-        terrain.tileMap[x][y] = 88;
+        terrain.tileMap[x][y] = tile::HORIZONTAL_STATION;
         trackMap[x][y] = (int8_t)track_piece_code;
         if (track_right && x > 1
             && can_extend_station_over(*this, x - 1, y)
             && can_extend_station_over(*this, x - 2, y)) {
-            terrain.tileMap[x][y] = 90;
-            terrain.tileMap[x - 1][y] = 88;
-            terrain.tileMap[x - 2][y] = 90;
+            terrain.tileMap[x][y] = tile::HORIZONTAL_TERMINAL;
+            terrain.tileMap[x - 1][y] = tile::HORIZONTAL_STATION;
+            terrain.tileMap[x - 2][y] = tile::HORIZONTAL_TERMINAL;
             trackMap[x - 1][y] = (int8_t)track_piece_code;
             trackMap[x - 2][y] = (int8_t)track_piece_code;
         }
         if (track_left && x < terrain.mapWidth - 2
             && can_extend_station_over(*this, x + 1, y)
             && can_extend_station_over(*this, x + 2, y)) {
-            terrain.tileMap[x][y] = 90;
-            terrain.tileMap[x + 1][y] = 88;
-            terrain.tileMap[x + 2][y] = 90;
+            terrain.tileMap[x][y] = tile::HORIZONTAL_TERMINAL;
+            terrain.tileMap[x + 1][y] = tile::HORIZONTAL_STATION;
+            terrain.tileMap[x + 2][y] = tile::HORIZONTAL_TERMINAL;
             trackMap[x + 1][y] = (int8_t)track_piece_code;
             trackMap[x + 2][y] = (int8_t)track_piece_code;
         }
     }
     if (track_up || track_down) {
-        terrain.tileMap[x][y] = 87;
+        terrain.tileMap[x][y] = tile::VERTICAL_STATION;
         trackMap[x][y] = (int8_t)track_piece_code;
         if (track_up && y > 1
             && can_extend_station_over(*this, x, y - 1)
             && can_extend_station_over(*this, x, y - 2)) {
-            terrain.tileMap[x][y] = 89;
-            terrain.tileMap[x][y - 1] = 87;
-            terrain.tileMap[x][y - 2] = 89;
+            terrain.tileMap[x][y] = tile::VERTICAL_TERMINAL;
+            terrain.tileMap[x][y - 1] = tile::VERTICAL_STATION;
+            terrain.tileMap[x][y - 2] = tile::VERTICAL_TERMINAL;
             trackMap[x][y - 1] = (int8_t)track_piece_code;
             trackMap[x][y - 2] = (int8_t)track_piece_code;
         }
@@ -666,9 +1263,9 @@ void World::auto_extend_track_station(int32_t x, int32_t y,
         if (track_up && y < terrain.mapHeight - 2
             && can_extend_station_over(*this, x, y + 1)
             && can_extend_station_over(*this, x, y + 2)) {
-            terrain.tileMap[x][y] = 89;
-            terrain.tileMap[x][y + 1] = 87;
-            terrain.tileMap[x][y + 2] = 89;
+            terrain.tileMap[x][y] = tile::VERTICAL_TERMINAL;
+            terrain.tileMap[x][y + 1] = tile::VERTICAL_STATION;
+            terrain.tileMap[x][y + 2] = tile::VERTICAL_TERMINAL;
             trackMap[x][y + 1] = (int8_t)track_piece_code;
             trackMap[x][y + 2] = (int8_t)track_piece_code;
         }
@@ -681,12 +1278,14 @@ void Game::place_cities_and_industry() {
     int industry_attempts = 0;
     do {
         game->world.pick_city_site(game->rng);
-    } while (++city_attempts != 50 && game->world.industryCategory == -1);
-    if (city_attempts >= 50) return;
+    } while (++city_attempts != feature_placement::kMaxPlacementAttempts
+             && game->world.industryCategory == -1);
+    if (city_attempts >= feature_placement::kMaxPlacementAttempts) return;
     do {
         game->world.pick_industry_site(game->rng);
-    } while (++industry_attempts != 50 && !game->world.industrySiteFound);
-    if (industry_attempts >= 50) return;
+    } while (++industry_attempts != feature_placement::kMaxPlacementAttempts
+             && !game->world.industrySiteFound);
+    if (industry_attempts >= feature_placement::kMaxPlacementAttempts) return;
 
     game->pathfinder.anchorX = game->world.cityStationX;
     game->pathfinder.anchorY = game->world.cityStationY;

@@ -1,7 +1,9 @@
 #include "support/record_store.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <fstream>
+#include <system_error>
 #include <utility>
 
 namespace filesystem = std::filesystem;
@@ -52,6 +54,14 @@ void RecordStore::load() {
         return;
     }
 
+    // On-disk counts and sizes are bounded by the real file size: a corrupt
+    // header must degrade to a partial load, not a huge allocation.
+    std::error_code size_error;
+    const auto file_size = filesystem::file_size(path_, size_error);
+    if (size_error) {
+        return;
+    }
+
     std::int32_t count = 0;
     std::int32_t next_id = 1;
     if (!read_i32(stream, count) || !read_i32(stream, next_id) || count < 0) {
@@ -62,6 +72,11 @@ void RecordStore::load() {
         std::int32_t id = 0;
         std::int32_t size = 0;
         if (!read_i32(stream, id) || !read_i32(stream, size) || size < 0) {
+            break;
+        }
+        const auto remaining = static_cast<std::int64_t>(file_size)
+                               - static_cast<std::int64_t>(stream.tellg());
+        if (static_cast<std::int64_t>(size) > remaining) {
             break;
         }
         std::vector<std::uint8_t> data(static_cast<std::size_t>(size));
@@ -76,6 +91,8 @@ void RecordStore::load() {
 void RecordStore::flush() const {
     std::ofstream stream(path_, std::ios::binary | std::ios::trunc);
     if (!stream) {
+        std::fprintf(stderr, "RecordStore: cannot write save file %s\n",
+                     path_.string().c_str());
         return;
     }
     write_i32(stream, static_cast<std::int32_t>(records_.size()));

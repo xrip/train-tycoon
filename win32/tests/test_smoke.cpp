@@ -11,6 +11,7 @@
 #include "support/input_queue.h"
 #include "support/resource_reader.h"
 #include "support/record_store.h"
+#include "text/text_catalog.h"
 
 #include <array>
 #include <cstdint>
@@ -32,7 +33,7 @@ Game* make_game() {
 }
 
 std::uint64_t save_state_digest(Game* game) {
-    GameTestAccess::save_codec(*game).walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_WRITE);
     StableDigest digest;
     digest.add_bytes(GameTestAccess::save_codec(*game).saveBuffer.data(),
                      static_cast<std::size_t>(GameTestAccess::save_codec(*game).snapshotSize));
@@ -118,8 +119,11 @@ TEST_CASE("fast: game initialization restores all non-zero defaults") {
     CHECK(GameTestAccess::day_tick_threshold(*game) == 50);
     CHECK(GameTestAccess::last_canvas_width(*game) == -1);
     CHECK(GameTestAccess::last_canvas_height(*game) == -1);
-    CHECK(GameTestAccess::fleet(*game).forwardTrackSteps[0][1] == 1);
-    CHECK(GameTestAccess::fleet(*game).reverseTrackSteps[5][11] == 1);
+    CHECK(GameTestAccess::fleet(*game).forwardTrackSteps[0].fallbackDirection == 1);
+    CHECK(GameTestAccess::fleet(*game).reverseTrackSteps[5]
+              .transitions[kTrackTransitionCount - 1]
+              .nextDirection
+          == 1);
     CHECK(GameTestAccess::assets(*game).trainSpriteDirectionTable[7][7] == 188);
     CHECK(GameTestAccess::scenario(*game).offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
     CHECK(GameTestAccess::scenario(*game).offerEffectSchedule[3][1] == -56);
@@ -130,9 +134,119 @@ TEST_CASE("fast: game initialization restores all non-zero defaults") {
     game = make_game();
 
     CHECK(GameTestAccess::economy(*game).money == 200000);
-    CHECK(GameTestAccess::fleet(*game).forwardTrackSteps[0][1] == 1);
+    CHECK(GameTestAccess::fleet(*game).forwardTrackSteps[0].fallbackDirection == 1);
     CHECK(GameTestAccess::scenario(*game).offerTypesByEffect[0] == std::vector<int8_t>{1, 3, 13});
     CHECK(GameTestAccess::renderer(*game).backbuffer != nullptr);
+    delete game;
+}
+
+TEST_CASE("fast: Free Game setup cycles all new size and count levels") {
+    Game* game = make_game();
+    Scenario& scenario = GameTestAccess::scenario(*game);
+
+    CHECK(scenario.freeGameMapSize == free_game_map_size::Small);
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 1);
+    CHECK(scenario.freeGameMapSize == free_game_map_size::Medium);
+    const auto medium_map_text =
+        GameTestAccess::resolve_dialog_value(*game, 4, 1);
+    REQUIRE(medium_map_text.has_value());
+    CHECK(*medium_map_text == catalog_codes(Text::medium));
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 1);
+    CHECK(scenario.freeGameMapSize == free_game_map_size::Large);
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 1);
+    CHECK(scenario.freeGameMapSize == free_game_map_size::Small);
+
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 4);
+    CHECK(scenario.freeGameTownLevel == free_game_town_level::Medium);
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 4);
+    CHECK(scenario.freeGameTownLevel == free_game_town_level::Lots);
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 4);
+    CHECK(scenario.freeGameTownLevel == free_game_town_level::Megapolis);
+    const auto megapolis_text =
+        GameTestAccess::resolve_dialog_value(*game, 4, 4);
+    REQUIRE(megapolis_text.has_value());
+    CHECK(*megapolis_text == catalog_codes(Text::megapolis));
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 4);
+    CHECK(scenario.freeGameTownLevel == free_game_town_level::Few);
+
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 5);
+    CHECK(scenario.freeGameIndustryLevel == free_game_industry_level::Medium);
+    const auto medium_industry_text =
+        GameTestAccess::resolve_dialog_value(*game, 4, 5);
+    REQUIRE(medium_industry_text.has_value());
+    CHECK(*medium_industry_text == catalog_codes(Text::medium));
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 5);
+    CHECK(scenario.freeGameIndustryLevel == free_game_industry_level::Lots);
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 5);
+    CHECK(scenario.freeGameIndustryLevel == free_game_industry_level::Few);
+
+    scenario.freeGameMapSize = free_game_map_size::Medium;
+    GameTestAccess::handle_build_menu_state(
+        *game, menu_screen::ScenarioSettings, 10);
+    CHECK(scenario.activeScenario == 1);
+    CHECK(GameTestAccess::state(*game) == GameState::GeneratingMap);
+
+    delete game;
+}
+
+TEST_CASE("full: Free Game medium settings use middle generation values") {
+    Game* game = make_game();
+    Scenario& scenario = GameTestAccess::scenario(*game);
+    scenario.activeScenario = 1;
+    scenario.freeGameMapSize = free_game_map_size::Medium;
+    scenario.freeGameTownLevel = free_game_town_level::Medium;
+    scenario.freeGameIndustryLevel = free_game_industry_level::Medium;
+
+    GameTestAccess::begin_map_generation(*game);
+
+    const World& world = GameTestAccess::world(*game);
+    CHECK(world.terrain.mapWidth == 105);
+    CHECK(world.terrain.mapHeight == 105);
+    CHECK(world.terrainRaiseStepCount == 40);
+    CHECK(world.terrainLowerStepCount == 20);
+    CHECK(world.initialObstacleCount == 2750);
+    CHECK(world.terrainPatchBaseSize == 8);
+    CHECK(world.mapGenColumns == 3);
+    CHECK(world.mapGenRows == 3);
+    CHECK(world.featureStage0Count == 3);
+    CHECK(world.featureStage1Count == 3);
+    CHECK(world.featureStage2Count == 3);
+    CHECK(world.featureStage3Count == 3);
+    CHECK(world.featureStage4Count == 3);
+    CHECK(world.featureStage5Count == 3);
+
+    delete game;
+}
+
+TEST_CASE("full: Free Game megapolis makes four large towns safely") {
+    Game* game = make_game();
+    Scenario& scenario = GameTestAccess::scenario(*game);
+    scenario.freeGameMapSize = free_game_map_size::Large;
+    scenario.freeGameTownLevel = free_game_town_level::Megapolis;
+    scenario.freeGameIndustryLevel = free_game_industry_level::Lots;
+
+    generate_scenario(game, 1);
+
+    const World& world = GameTestAccess::world(*game);
+    const UiController& ui = GameTestAccess::ui(*game);
+    CHECK(world.terrain.mapWidth == 130);
+    CHECK(world.terrainPatchBaseSize == 16);
+    CHECK(world.mapGenColumns == 2);
+    CHECK(world.mapGenRows == 2);
+    CHECK(ui.numSelectedTrains == 4);
+    for (int town = 0; town < ui.numSelectedTrains; ++town)
+        CHECK(world.zonePopulation[town] > 0);
+
     delete game;
 }
 
@@ -311,10 +425,10 @@ TEST_CASE("fast: train car records keep defaults, slots, and save fields") {
     last.stateCode = -7654321;
     last.previousRevenue = 456789;
 
-    GameTestAccess::save_codec(*game).walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_WRITE);
     first = TrainCar{};
     last = TrainCar{};
-    GameTestAccess::save_codec(*game).walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_READ);
 
     CHECK(first.x == 11);
     CHECK(first.direction == 2);
@@ -355,10 +469,10 @@ TEST_CASE("fast: service site records keep defaults, slots, and save fields") {
     last.y = 27;
     last.resourceStock[2] = 30000;
 
-    GameTestAccess::save_codec(*game).walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_WRITE);
     first = ServiceSite{};
     last = ServiceSite{};
-    GameTestAccess::save_codec(*game).walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_READ);
 
     CHECK(static_cast<uint8_t>(first.flags) == 0x83);
     CHECK(first.x == 14);
@@ -432,12 +546,39 @@ TEST_CASE("fast: fleet loading and unloading keeps fixed cargo values") {
     fleet.serviceSites[destination].unloadFlags = 2;
     fleet.trainCars[wagon].cargoAge = 30;
     Scenario scenario;
-    scenario.routeResourceFlags[3] = 1;
+    scenario.routeResourceFlags[delivery_progress_slot::IndustryGroup1] = 1;
     const UnloadResult result = fleet.unload_at_service_site(
         scenario, head, destination);
     CHECK(result.revenue == 1020);
-    CHECK(result.delivered[3] == 17);
+    CHECK(result.delivered[delivery_progress_slot::IndustryGroup1] == 17);
     CHECK(fleet.trainCars[wagon].energyCargoOrRemovalTicks == 0);
+}
+
+TEST_CASE("fast: passenger and mail unload fit the legacy result slots") {
+    Fleet fleet;
+    World world;
+    world.resize(8, 8);
+    const int head = fleet.allocate_train_car(3, 3, 0, 0, 0, 8);
+    const int wagon = fleet.append_car(head, wagon::PassengerMailCar);
+    const int source = fleet.allocate_service_site(2, 3, 3, false, false);
+    fleet.serviceSites[source].resourceStock[service_resource::Passengers] = 7;
+    fleet.serviceSites[source].resourceStock[service_resource::Mail] = 9;
+    fleet.serviceSites[source].loadFlags = static_cast<int8_t>(
+        service_resource::PASSENGER_FLAG | service_resource::MAIL_FLAG);
+    fleet.load_at_service_site(world, head, source, false);
+
+    const int destination = fleet.allocate_service_site(2, 5, 5, false, false);
+    fleet.serviceSites[destination].unloadFlags = static_cast<int8_t>(
+        service_resource::PASSENGER_FLAG | service_resource::MAIL_FLAG);
+    Scenario scenario;
+    scenario.routeResourceFlags[delivery_progress_slot::Passengers] = 1;
+    scenario.routeResourceFlags[delivery_progress_slot::Mail] = 1;
+    const UnloadResult result = fleet.unload_at_service_site(
+        scenario, head, destination);
+    CHECK(result.delivered[delivery_progress_slot::Passengers] == 7);
+    CHECK(result.delivered[delivery_progress_slot::Mail] == 9);
+    CHECK(fleet.trainCars[wagon].energyCargoOrRemovalTicks == 0);
+    CHECK(fleet.trainCars[wagon].secondaryCargoOrBaseEnergy == 0);
 }
 
 TEST_CASE("fast: train movement follows the fixed straight-track step") {
@@ -548,10 +689,10 @@ TEST_CASE("fast: city records keep defaults and save field positions") {
     last.stationRevenue = -30000;
     last.previousStationRevenue = 30000;
 
-    GameTestAccess::save_codec(*game).walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_WRITE);
     first = City{};
     last = City{};
-    GameTestAccess::save_codec(*game).walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_READ);
 
     CHECK(first.stationDirection == 5);
     CHECK(first.population == 71);
@@ -635,10 +776,10 @@ TEST_CASE("fast: offer records keep defaults and save field positions") {
     last.target = -7654321;
     last.effectAmount = 7654321;
 
-    GameTestAccess::save_codec(*game).walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_WRITE);
     first = Offer{};
     last = Offer{};
-    GameTestAccess::save_codec(*game).walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_READ);
 
     CHECK(first.objectiveType == 2);
     CHECK(first.issuedDay == 3);
@@ -704,7 +845,7 @@ TEST_CASE("fast: offer board schedules due dates with fixed random order") {
     CHECK(actual_random.next_int() == expected_random.next_int());
 }
 
-TEST_CASE("fast: offer board copies the summary slot and clears active data") {
+TEST_CASE("fast: offer board moves the summary slot and clears active data") {
     OfferBoard board;
     Offer& active = board.offers[2];
     active.objectiveType = 7;
@@ -720,8 +861,8 @@ TEST_CASE("fast: offer board copies the summary slot and clears active data") {
     active.effectValue = 17;
     active.effectAmount = 1800;
 
-    board.copy_to_summary_and_clear(2);
-    const Offer& summary = board.offers[5];
+    board.move_to_summary(2);
+    const Offer& summary = board.offers[kOfferSummaryRow];
     CHECK(summary.objectiveType == 7);
     CHECK(summary.issuedDay == 8);
     CHECK(summary.dueDay == 9);
@@ -750,12 +891,12 @@ TEST_CASE("fast: offer board adds progress only to matching active rows") {
     board.offers[0].progress = 10;
     board.offers[1].objectiveType = 14;
     board.offers[1].progress = 20;
-    board.offers[5].objectiveType = 13;
-    board.offers[5].progress = 30;
+    board.offers[kOfferSummaryRow].objectiveType = 13;
+    board.offers[kOfferSummaryRow].progress = 30;
     board.add_progress(13, 7);
     CHECK(board.offers[0].progress == 17);
     CHECK(board.offers[1].progress == 20);
-    CHECK(board.offers[5].progress == 30);
+    CHECK(board.offers[kOfferSummaryRow].progress == 30);
 }
 
 TEST_CASE("fast: economy spending and money history are owned rules") {
@@ -789,12 +930,12 @@ TEST_CASE("fast: UI controller owns key repeat timing") {
 
 TEST_CASE("fast: UI controller maps report graph values") {
     UiController ui;
-    ui.yearGraphValues[2] = 7;
-    ui.yearGraphMode = 0;
+    ui.graphBarHeights[2] = 7;
+    ui.graphSeries = 0;
     CHECK(ui.report_graph_value(34, 2) == 72);
     CHECK(ui.report_graph_value(34, 22) == 71);
     CHECK(ui.report_graph_value(34, 65) == 65);
-    ui.yearGraphMode = 1;
+    ui.graphSeries = 1;
     CHECK(ui.report_graph_value(34, 2) == 42);
     CHECK(ui.report_graph_value(34, 22) == 41);
     CHECK(ui.report_graph_value(34, 65) == 35);
@@ -964,17 +1105,17 @@ TEST_CASE("fast: build controller owns train cost calculation") {
     BuildController build;
     Economy economy;
     Scenario scenario;
-    economy.gWagonCost2 = 100;
-    economy.costGroupC3 = 30;
+    economy.trainCostSecondEra = 100;
+    economy.wagonOptionCostIndustryGroup2 = 30;
     scenario.difficultyPct = 50;
     build.wagonType = 1;
     build.wagonDiscountType = 1;
     for (int option = 0; option < kWagonOptionCount; ++option) {
         build.wagonOptionSlots[option] = -1;
-        build.wagonCountMatch[option] = -2;
+        build.matchingWagonOptions[option] = -2;
     }
     build.wagonOptionSlots[0] = 2;
-    build.wagonCountMatch[0] = 2;
+    build.matchingWagonOptions[0] = 2;
     build.compute_train_cost(economy, scenario);
     CHECK(build.unitCost == 65);
 }
@@ -1101,6 +1242,24 @@ TEST_CASE("fast: record store keeps record bytes and ids") {
     CHECK(store->record_count() == 0);
 }
 
+TEST_CASE("fast: record store rejects a corrupt size header") {
+    // The header claims one record of 1 GiB with no payload behind it. load()
+    // must bound the size by the real file size and skip the record, not try
+    // the allocation.
+    constexpr std::array<std::uint8_t, 16> corrupt_file{
+        1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0x00, 0x00, 0x00, 0x40,
+    };
+    {
+        std::ofstream file(RecordStore::path_for("CorruptStore"),
+                           std::ios::binary | std::ios::trunc);
+        file.write(reinterpret_cast<const char*>(corrupt_file.data()),
+                   static_cast<std::streamsize>(corrupt_file.size()));
+    }
+    std::unique_ptr<RecordStore> store = RecordStore::open("CorruptStore", false);
+    REQUIRE(store != nullptr);
+    CHECK(store->record_count() == 0);
+}
+
 TEST_CASE("fast: small path search") {
     Game* game = make_game();
     GameTestAccess::world(*game).resize(5, 5);
@@ -1108,7 +1267,7 @@ TEST_CASE("fast: small path search") {
     GameTestAccess::pathfinder(*game).anchorY = 2;
     GameTestAccess::pathfinder(*game).targetX = 3;
     GameTestAccess::pathfinder(*game).targetY = 2;
-    GameTestAccess::economy(*game).accel1 = 10;
+    GameTestAccess::economy(*game).accelerationEarly = 10;
 
     CHECK(GameTestAccess::pathfinder(*game).try_build_path(GameTestAccess::world(*game), GameTestAccess::build(*game),
                                           GameTestAccess::economy(*game)));
@@ -1196,10 +1355,10 @@ TEST_CASE("fast: terrain commits the build edit buffer") {
     BuildController build;
     build.selectionStartX = 3;
     build.selectionStartY = 4;
-    build.terrainEditBuffer.resize(10, 10);
+    build.terrainEditBuffer.resize(kTerrainEditGridSide, kTerrainEditGridSide);
     build.terrainEditBuffer[0][0] = 11;
     build.terrainEditBuffer[5][6] = -7;
-    build.terrainEditBuffer[9][9] = 23;
+    build.terrainEditBuffer[kTerrainEditGridSide - 1][kTerrainEditGridSide - 1] = 23;
 
     world.terrain.commit_edit(build);
 
@@ -1221,8 +1380,8 @@ TEST_CASE("fast: build controller takes a bounded terrain selection") {
     CHECK(build.terrainSmoothCost == 0);
 
     Economy economy;
-    economy.costOverhead = 3;
-    economy.costCrew = 4;
+    economy.overheadCost = 3;
+    economy.crewCost = 4;
     CHECK(build.adjust_terrain_point(terrain, economy, 16, 17, 1, true));
     CHECK(build.terrainEditBuffer[5][6] == 1);
     CHECK(build.terrainSmoothCost == 7);
@@ -1267,7 +1426,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     GameTestAccess::economy(*game).year = 1973;
     GameTestAccess::economy(*game).loanBalance = -7654321;
     GameTestAccess::renderer(*game).visibleTrains[0] = -1234;
-    GameTestAccess::save_codec(*game).walk(*game, 4);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_WRITE);
 
     const int plain_size = GameTestAccess::save_codec(*game).snapshotSize;
     REQUIRE(plain_size > 0);
@@ -1290,7 +1449,7 @@ TEST_CASE("fast: save buffer bytes and round trip") {
     GameTestAccess::economy(*game).year = 0;
     GameTestAccess::economy(*game).loanBalance = 0;
     GameTestAccess::renderer(*game).visibleTrains[0] = 0;
-    GameTestAccess::save_codec(*game).walk(*game, 5);
+    GameTestAccess::save_codec(*game).walk(*game, save::OP_MEMORY_READ);
     CHECK(GameTestAccess::economy(*game).money == 123456);
     CHECK(GameTestAccess::economy(*game).dayOfMonth == 17);
     CHECK(GameTestAccess::economy(*game).monthOfYear == 8);
@@ -1372,7 +1531,7 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     game->render(screen);
     StableDigest first_frame;
     first_frame.add_pixels(framebuffer, std::size(framebuffer));
-    CHECK(first_frame.value() == 17630569386893703870ULL);
+    CHECK(first_frame.value() == 3551171988763127126ULL);
 
     const int old_viewport_x = GameTestAccess::renderer(*game).camera.viewportCenterX;
     game->key_pressed(54);
@@ -1383,7 +1542,7 @@ TEST_CASE("full: scenario zero input and frames have fixed digests") {
     CHECK(GameTestAccess::renderer(*game).camera.viewportCenterX != old_viewport_x);
     StableDigest moved_frame;
     moved_frame.add_pixels(framebuffer, std::size(framebuffer));
-    CHECK(moved_frame.value() == 2245004776403447213ULL);
+    CHECK(moved_frame.value() == 10927439313109183097ULL);
 
     delete game;
 }
@@ -1576,29 +1735,722 @@ TEST_CASE("full: pointer right-drag pans the viewport (grab-the-map)") {
     delete game;
 }
 
-TEST_CASE("full: road PoC lays a route and drives a car on a generated map") {
+TEST_CASE("full: generated map derives a road layer from its city streets") {
     Game* game = make_game();
     generate_scenario(game, 0);
     REQUIRE(GameTestAccess::state(*game) == 30);
 
-    game->set_road_poc_enabled(true);
-    GameTestAccess::road_poc_tick(*game);  // first tick lazily lays the demo road
+    const World& world = GameTestAccess::world(*game);
+    const RoadNetwork& net = GameTestAccess::road_net(*game);
 
-    std::vector<RoadVehicle>& cars = GameTestAccess::road_cars(*game);
-    REQUIRE(cars.size() == 1);
-    REQUIRE(cars[0].active());
-    REQUIRE(cars[0].route.size() >= 3);  // real maps yield a long drivable route
+    // The road layer mirrors exactly the street tiles (codes 42..48) the map
+    // generator laid, and every road cell has a connected-component id.
+    int street_tiles = 0;
+    int road_cells = 0;
+    for (int x = 0; x < world.terrain.mapWidth; ++x) {
+        for (int y = 0; y < world.terrain.mapHeight; ++y) {
+            const int code = unsigned_byte(world.terrain.tileMap[x][y]);
+            const bool is_street = code >= 42 && code <= 48;
+            if (is_street) ++street_tiles;
+            const bool is_road = net.component_at(x, y) != kNoRoadComponent;
+            CHECK(is_road == is_street);  // derived layer == street tiles
+            if (is_road) ++road_cells;
+        }
+    }
+    CHECK(street_tiles > 0);            // towns really do have streets
+    CHECK(road_cells == street_tiles);
 
-    // The current segment connects two 4-connected tiles (squared step == 1).
-    const RoadPoint a = cars[0].from_tile();
-    const RoadPoint b = cars[0].to_tile();
-    CHECK((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) == 1);
+    delete game;
+}
 
-    // Driving one full tile advances the car to the next segment of the road.
-    const int segment0 = cars[0].segment;
-    for (int i = 0; i < RoadVehicle::kStepsPerTile; ++i)
-        GameTestAccess::road_poc_tick(*game);
-    CHECK(cars[0].segment == segment0 + 1);
+TEST_CASE("full: manual road placement writes a road tile and charges for it") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    const World& world = GameTestAccess::world(*game);
+
+    // Find any buildable ground tile away from the map edges.
+    int bx = -1, by = -1;
+    for (int x = 1; x < world.terrain.mapWidth - 1 && bx < 0; ++x)
+        for (int y = 1; y < world.terrain.mapHeight - 1 && bx < 0; ++y)
+            if (GameTestAccess::road_buildable(*game, x, y)) { bx = x; by = y; }
+    REQUIRE(bx >= 0);
+
+    const int money_before = GameTestAccess::economy(*game).money;
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)bx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)by;
+    REQUIRE(GameTestAccess::place_road_tile_at_cursor(*game));
+
+    CHECK(GameTestAccess::is_road_tile(*game, bx, by));                 // became a road tile
+    CHECK(GameTestAccess::road_net(*game).component_at(bx, by)
+          != kNoRoadComponent);  // and joined the road graph
+    CHECK(GameTestAccess::economy(*game).money == money_before - kRoadTileCost);
+
+    delete game;
+}
+
+TEST_CASE("full: auto-route lays a connected road and charges per new tile") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    const World& world = GameTestAccess::world(*game);
+
+    // Find a straight run of three buildable ground cells to route across.
+    int ax = -1, ay = -1;
+    for (int x = 1; x < world.terrain.mapWidth - 3 && ax < 0; ++x)
+        for (int y = 1; y < world.terrain.mapHeight - 1 && ax < 0; ++y)
+            if (GameTestAccess::road_buildable(*game, x, y)
+                && GameTestAccess::road_buildable(*game, x + 1, y)
+                && GameTestAccess::road_buildable(*game, x + 2, y)) { ax = x; ay = y; }
+    REQUIRE(ax >= 0);
+
+    const int money_before = GameTestAccess::economy(*game).money;
+    REQUIRE(GameTestAccess::auto_route_road(*game, ax, ay, ax + 2, ay));
+
+    // All three cells are now one connected road component.
+    CHECK(GameTestAccess::is_road_tile(*game, ax, ay));
+    CHECK(GameTestAccess::is_road_tile(*game, ax + 1, ay));
+    CHECK(GameTestAccess::is_road_tile(*game, ax + 2, ay));
+    CHECK(GameTestAccess::road_net(*game).same_component(RoadPoint{ax, ay},
+                                                         RoadPoint{ax + 2, ay}));
+    CHECK(GameTestAccess::economy(*game).money == money_before - 3 * kRoadTileCost);
+
+    delete game;
+}
+
+// --- Road-stop test helpers -------------------------------------------------
+// Road stops sit on cleared ground beside a street (not on it), so a test stop
+// is a buildable cell that touches a road. These helpers find such cells and
+// their bound town (the access road cell's connected component).
+namespace {
+struct RoadStopCell { int sx, sy, rx, ry, comp; };
+
+int road_stop_zone_neighbours(const World& world, int center_x, int center_y) {
+    int zone_neighbour_count = 0;
+    for (int tile_x = center_x - 3; tile_x <= center_x + 3; ++tile_x)
+        for (int tile_y = center_y - 3; tile_y <= center_y + 3; ++tile_y) {
+            if (!world.in_bounds(tile_x, tile_y)) continue;
+            const int tile_code =
+                unsigned_byte(world.terrain.tileMap[tile_x][tile_y]);
+            if (tile_code >= tile::BUILT_FIRST
+                && tile_code <= tile::CITY_ZONE_LAST
+                && (world.trackMap[tile_x][tile_y] & track_overlay::MASK)
+                       == track_overlay::JUNCTION)
+                ++zone_neighbour_count;
+        }
+    return zone_neighbour_count;
+}
+
+// Candidate stop cells: buildable ground touching a road. When min_zones > 0 the
+// cell must also have that many populated-zone neighbours so it can serve cargo.
+std::vector<RoadStopCell> road_stop_candidates(Game& game, int min_zones) {
+    const World& world = GameTestAccess::world(game);
+    std::vector<RoadStopCell> out;
+    for (int x = 0; x < world.terrain.mapWidth; ++x)
+        for (int y = 0; y < world.terrain.mapHeight; ++y) {
+            if (!GameTestAccess::road_stop_placeable(game, x, y)) continue;
+            const RoadPoint a = GameTestAccess::road_access_cell(game, x, y);
+            if (a.x < 0) continue;
+            if (min_zones > 0 && road_stop_zone_neighbours(world, x, y) < min_zones)
+                continue;
+            out.push_back({x, y, a.x, a.y,
+                           GameTestAccess::road_net(game).component_at(a.x, a.y)});
+        }
+    return out;
+}
+
+// Populate the zones around a stop cell so it produces passengers.
+void road_stop_seed_zones(Game& game, int cx, int cy, int pop) {
+    World& world = GameTestAccess::world(game);
+    for (int x = cx - 3; x <= cx + 3; ++x)
+        for (int y = cy - 3; y <= cy + 3; ++y) {
+            if (!world.in_bounds(x, y)) continue;
+            const int t = unsigned_byte(world.terrain.tileMap[x][y]);
+            if (t >= 34 && t <= 40)
+                world.zonePopulation[world.trackMap[x][y] & 0x3F] = (int16_t)pop;
+        }
+}
+
+// Pick two stop candidates in the SAME town whose access road cells differ and
+// whose stop cells are a few tiles apart, so a bus has a real loop to run.
+bool road_two_same_town_stops(Game& game, int min_zones,
+                              RoadStopCell& a, RoadStopCell& b) {
+    const std::vector<RoadStopCell> cands = road_stop_candidates(game, min_zones);
+    for (std::size_t i = 0; i < cands.size(); ++i)
+        for (std::size_t j = i + 1; j < cands.size(); ++j) {
+            if (cands[i].comp < 0 || cands[i].comp != cands[j].comp) continue;
+            if (cands[i].rx == cands[j].rx && cands[i].ry == cands[j].ry) continue;
+            if (std::abs(cands[i].sx - cands[j].sx)
+                    + std::abs(cands[i].sy - cands[j].sy) < 3)
+                continue;
+            a = cands[i];
+            b = cands[j];
+            return true;
+        }
+    return false;
+}
+}  // namespace
+
+TEST_CASE("full: buses and trucks take mixed cargo up to one shared capacity") {
+    Game* game = make_game();
+    ServiceSite& site = GameTestAccess::fleet(*game).serviceSites[0];
+    site.flags = static_cast<int8_t>(service_site::USED_SLOT
+                                     | kRoadStopSiteType);
+
+    RoadVehicle bus;
+    bus.carType = road_vehicle_type::Bus;
+    bus.capacity = kBusCapacity;
+    site.resourceStock[service_resource::Passengers] = 30;
+    site.resourceStock[service_resource::Mail] = 30;
+    site.resourceStock[service_resource::IndustryGroup1] = 30;
+    GameTestAccess::road_load_unload(*game, bus, 0);
+    CHECK(bus.total_cargo() == kBusCapacity);
+    CHECK(bus.cargo[service_resource::Passengers] == 20);
+    CHECK(bus.cargo[service_resource::Mail] == 20);
+    CHECK(bus.cargo[service_resource::IndustryGroup1] == 0);
+
+    for (int resource = 0; resource < kResourceTypeCount; ++resource)
+        site.resourceStock[resource] = 0;
+    site.unloadFlags = static_cast<int8_t>(service_resource::PASSENGER_FLAG
+                                           | service_resource::MAIL_FLAG);
+    const int bus_money_before = GameTestAccess::economy(*game).money;
+    GameTestAccess::road_load_unload(*game, bus, 0);
+    CHECK(bus.total_cargo() == 0);
+    CHECK(GameTestAccess::economy(*game).money
+          == bus_money_before + 20 * 3 + 20 * 8 - kRoadRunCost);
+
+    RoadVehicle truck;
+    truck.carType = road_vehicle_type::Truck;
+    truck.capacity = kTruckCapacity;
+    site.unloadFlags = 0;
+    site.resourceStock[service_resource::Passengers] = 30;
+    site.resourceStock[service_resource::Mail] = 30;
+    site.resourceStock[service_resource::IndustryGroup1] = 30;
+    site.resourceStock[service_resource::IndustryGroup2] = 30;
+    site.resourceStock[service_resource::IndustryGroup3] = 30;
+    GameTestAccess::road_load_unload(*game, truck, 0);
+    CHECK(truck.total_cargo() == kTruckCapacity);
+    CHECK(truck.cargo[service_resource::Passengers] == 0);
+    CHECK(truck.cargo[service_resource::Mail] == 0);
+    CHECK(truck.cargo[service_resource::IndustryGroup1] == 10);
+    CHECK(truck.cargo[service_resource::IndustryGroup2] == 10);
+    CHECK(truck.cargo[service_resource::IndustryGroup3] == 10);
+
+    delete game;
+}
+
+TEST_CASE("full: road stops use unique ground cells beside a road") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    const World& world = GameTestAccess::world(*game);
+
+    // Find an isolated open 5x3 area. The centre becomes one road cell; the two
+    // side cells would both bind to it.
+    int road_x = -1;
+    int road_y = -1;
+    for (int x = 2; x < world.terrain.mapWidth - 2 && road_x < 0; ++x) {
+        for (int y = 1; y < world.terrain.mapHeight - 1 && road_x < 0; ++y) {
+            bool open = true;
+            for (int scan_x = x - 2; scan_x <= x + 2; ++scan_x)
+                for (int scan_y = y - 1; scan_y <= y + 1; ++scan_y)
+                    open = open
+                        && world.is_placeable_terrain(scan_x, scan_y);
+            if (open) { road_x = x; road_y = y; }
+        }
+    }
+    REQUIRE(road_x >= 0);
+
+    UiController& ui = GameTestAccess::ui(*game);
+    ui.tileCursorX = static_cast<int8_t>(road_x);
+    ui.tileCursorY = static_cast<int8_t>(road_y);
+    REQUIRE(GameTestAccess::place_road_tile_at_cursor(*game));
+    CHECK_FALSE(GameTestAccess::road_stop_placeable(*game, road_x, road_y));
+
+    ui.tileCursorX = static_cast<int8_t>(road_x + 1);
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    CHECK(GameTestAccess::road_stop_at(*game, road_x + 1, road_y)
+          != kNoFleetSlot);
+    CHECK(unsigned_byte(GameTestAccess::world(*game).terrain.tileMap
+                            [road_x + 1][road_y])
+          == tile::VERTICAL_STATION);
+
+    // The other side has the same road access cell, so a second shelter there
+    // is refused instead of making a zero-length route.
+    ui.tileCursorX = static_cast<int8_t>(road_x - 1);
+    CHECK_FALSE(GameTestAccess::road_stop_placeable(*game, road_x - 1,
+                                                     road_y));
+    const int money_before = GameTestAccess::economy(*game).money;
+    CHECK_FALSE(GameTestAccess::place_road_stop_at_cursor(*game));
+    CHECK(GameTestAccess::economy(*game).money == money_before);
+
+    // A new road cannot be put under or on another side of this stop, because
+    // that would change the access cell used by its saved routes.
+    ui.tileCursorX = static_cast<int8_t>(road_x + 2);
+    CHECK_FALSE(GameTestAccess::road_buildable(*game, road_x + 2, road_y));
+    CHECK_FALSE(GameTestAccess::place_road_tile_at_cursor(*game));
+    ui.tileCursorX = static_cast<int8_t>(road_x + 1);
+    CHECK_FALSE(GameTestAccess::place_road_tile_at_cursor(*game));
+
+    delete game;
+}
+
+TEST_CASE("full: a road stop beside a zero-zone factory does not divide by zero") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    World& world = GameTestAccess::world(*game);
+
+    int factory_x = -1;
+    int factory_y = -1;
+    int stop_x = -1;
+    int stop_y = -1;
+    int road_x = -1;
+    int road_y = -1;
+    int stock_index = -1;
+    constexpr RoadPoint offsets[] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    for (int fx = 0; fx < world.terrain.mapWidth && factory_x < 0; ++fx) {
+        for (int fy = 0; fy < world.terrain.mapHeight && factory_x < 0; ++fy) {
+            const int tile_code = unsigned_byte(world.terrain.tileMap[fx][fy]);
+            int candidate_stock = -1;
+            if (tile_code >= industry_tile::Group1ProductionFirst
+                && tile_code <= industry_tile::Group1ProductionLast)
+                candidate_stock = service_resource::IndustryGroup1;
+            if (tile_code >= industry_tile::Group2ProductionFirst
+                && tile_code <= industry_tile::Group2ProductionLast)
+                candidate_stock = service_resource::IndustryGroup2;
+            if (tile_code >= industry_tile::Group3ProductionFirst
+                && tile_code <= industry_tile::Group3ProductionLast)
+                candidate_stock = service_resource::IndustryGroup3;
+            if (candidate_stock < 0) continue;
+
+            for (int sx = fx - 3; sx <= fx + 3 && factory_x < 0; ++sx) {
+                for (int sy = fy - 3; sy <= fy + 3 && factory_x < 0; ++sy) {
+                    if (!world.in_bounds(sx, sy)
+                        || !world.is_placeable_terrain(sx, sy))
+                        continue;
+                    for (RoadPoint offset : offsets) {
+                        const int rx = sx + offset.x;
+                        const int ry = sy + offset.y;
+                        if (!world.in_bounds(rx, ry)
+                            || !world.is_placeable_terrain(rx, ry))
+                            continue;
+                        factory_x = fx; factory_y = fy;
+                        stop_x = sx; stop_y = sy;
+                        road_x = rx; road_y = ry;
+                        stock_index = candidate_stock;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    REQUIRE(factory_x >= 0);
+
+    const int city_id = world.trackMap[factory_x][factory_y]
+                        & track::OWNER_MASK;
+    REQUIRE(city_id < kCitySlotCount);
+    world.cities[city_id].zoneTileCount = 0;
+    world.cities[city_id].population = 60;
+
+    UiController& ui = GameTestAccess::ui(*game);
+    ui.tileCursorX = static_cast<int8_t>(road_x);
+    ui.tileCursorY = static_cast<int8_t>(road_y);
+    REQUIRE(GameTestAccess::place_road_tile_at_cursor(*game));
+    ui.tileCursorX = static_cast<int8_t>(stop_x);
+    ui.tileCursorY = static_cast<int8_t>(stop_y);
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    const int stop_slot = GameTestAccess::road_stop_at(*game, stop_x, stop_y);
+    REQUIRE(stop_slot != kNoFleetSlot);
+
+    GameTestAccess::generate_site_cargo(*game);
+    CHECK(GameTestAccess::fleet(*game).serviceSites[stop_slot]
+              .resourceStock[stock_index] > 0);
+
+    delete game;
+}
+
+TEST_CASE("full: a road stop is a service site and collects city passengers") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    Fleet& fleet = GameTestAccess::fleet(*game);
+
+    // A stop sits on cleared ground beside a town street, with several zones in
+    // pickup range (3) so passengers are produced.
+    const std::vector<RoadStopCell> cands = road_stop_candidates(*game, 3);
+    REQUIRE(!cands.empty());
+    const RoadStopCell stop = cands.front();
+    const int sx = stop.sx, sy = stop.sy;
+    road_stop_seed_zones(*game, sx, sy, 50);
+
+    const int money_before = GameTestAccess::economy(*game).money;
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    CHECK(GameTestAccess::economy(*game).money == money_before - kRoadStopCost);
+
+    const int slot = fleet.find_service_site_at(sx, sy);
+    REQUIRE(slot != 5000);
+    CHECK((fleet.serviceSites[slot].flags & 7) == kRoadStopSiteType);  // typed as a road stop
+    CHECK((fleet.serviceSites[slot].flags & 0x80) != 0);               // and in use
+
+    for (int i = 0; i < 5; ++i) GameTestAccess::generate_site_cargo(*game);
+    CHECK((fleet.serviceSites[slot].unloadFlags & 1) != 0);   // accepts/serves passengers
+    CHECK(fleet.serviceSites[slot].resourceStock[0] > 0);     // and has collected some
+
+    delete game;
+}
+
+TEST_CASE("full: a city bus loops two stops and earns passenger fares") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+
+    // Two stops on cleared ground beside streets of the SAME town, a few tiles
+    // apart, each near enough zones to serve passengers.
+    RoadStopCell a{}, b{};
+    REQUIRE(road_two_same_town_stops(*game, 3, a, b));
+    road_stop_seed_zones(*game, a.sx, a.sy, 60);
+    road_stop_seed_zones(*game, b.sx, b.sy, 60);
+
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)a.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)a.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)b.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)b.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    const int first_stop = GameTestAccess::road_stop_at(*game, b.sx, b.sy);
+    REQUIRE(first_stop != kNoFleetSlot);
+
+    // Fill both stops with waiting passengers.
+    for (int i = 0; i < 8; ++i) GameTestAccess::generate_site_cargo(*game);
+
+    REQUIRE(GameTestAccess::buy_road_vehicle(*game, 2, first_stop));
+    std::vector<RoadVehicle>& buses = GameTestAccess::road_vehicles(*game);
+    REQUIRE(buses.size() == 1);
+    REQUIRE(buses[0].stopSites.size() == 2);
+    REQUIRE(buses[0].route.size() >= 2);
+    CHECK(buses[0].stopSites.front() == first_stop);
+    CHECK(buses[0].route.front().x == b.rx);
+    CHECK(buses[0].route.front().y == b.ry);
+
+    const int money_after_buy = GameTestAccess::economy(*game).money;
+    // Drive many sub-tile steps; refill the stops periodically the way the live
+    // sim does, so the route keeps carrying passengers rather than draining once.
+    for (int i = 0; i < 3000; ++i) {
+        if (i % 40 == 0) GameTestAccess::generate_site_cargo(*game);
+        GameTestAccess::update_road_vehicles(*game);
+    }
+
+    CHECK(buses[0].revenue > 0);                                  // it earned net of upkeep
+    CHECK(GameTestAccess::economy(*game).money > money_after_buy);  // fares reached the bank
+
+    // Removing a stop also removes a bus that can no longer have a route.
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)b.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)b.sy;
+    GameTestAccess::demolish_at_cursor(*game);
+    CHECK(GameTestAccess::road_stop_at(*game, b.sx, b.sy) == kNoFleetSlot);
+    CHECK(buses.empty());
+
+    delete game;
+}
+
+TEST_CASE("full: build-menu road tool lays a road on the cursor tile") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    const World& world = GameTestAccess::world(*game);
+    UiController& ui = GameTestAccess::ui(*game);
+
+    // The build submenu (mode 1) must carry the "lay road" tool (item id 7).
+    REQUIRE(ui.buildMenuItems.rows() > 1);
+    int road_index = -1;
+    for (int i = 0; i < (int)ui.buildMenuItems[6].size(); ++i)
+        if (ui.buildMenuItems[6][i] == 0) road_index = i;
+    REQUIRE(road_index >= 0);
+
+    int bx = -1, by = -1;
+    for (int x = 1; x < world.terrain.mapWidth - 1 && bx < 0; ++x)
+        for (int y = 1; y < world.terrain.mapHeight - 1 && bx < 0; ++y)
+            if (GameTestAccess::road_buildable(*game, x, y)) { bx = x; by = y; }
+    REQUIRE(bx >= 0);
+
+    ui.buildMenuMode = 6;
+    ui.buildMenuItemIndex = (int8_t)road_index;
+    ui.blockBuildMenu = false;
+    ui.tileCursorX = (int8_t)bx;
+    ui.tileCursorY = (int8_t)by;
+    const int money_before = GameTestAccess::economy(*game).money;
+
+    GameTestAccess::open_build_menu(*game);  // same call the map click makes
+
+    CHECK(GameTestAccess::is_road_tile(*game, bx, by));
+    CHECK(GameTestAccess::economy(*game).money == money_before - kRoadTileCost);
+
+    delete game;
+}
+
+TEST_CASE("full: road auto-route builds through a land slope") {
+    Game* game = make_game();
+    World& world = GameTestAccess::world(*game);
+    world.resize(5, 5);
+    GameTestAccess::road_net(*game).rebuild_from_tiles(world.terrain);
+    GameTestAccess::economy(*game).money = 1000000;
+
+    world.terrain.tileMap[2][2] = static_cast<int8_t>(tile::SLOPE_FIRST);
+    world.terrain.tileElevation[2][2] = 1;
+    REQUIRE(GameTestAccess::road_buildable(*game, 2, 2));
+    REQUIRE(GameTestAccess::auto_route_road(*game, 1, 2, 3, 2));
+
+    CHECK(GameTestAccess::is_road_tile(*game, 1, 2));
+    CHECK(GameTestAccess::is_road_tile(*game, 2, 2));
+    CHECK(GameTestAccess::is_road_tile(*game, 3, 2));
+    CHECK(world.terrain.tileElevation[2][2] == 1);
+
+    delete game;
+}
+
+TEST_CASE("full: road-stop buy dialog buys a bus or truck for the cursor network") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    UiController& ui = GameTestAccess::ui(*game);
+
+    // Two stops beside streets of the same town, a few tiles apart.
+    RoadStopCell a{}, b{};
+    REQUIRE(road_two_same_town_stops(*game, 0, a, b));
+    ui.tileCursorX = (int8_t)a.sx;
+    ui.tileCursorY = (int8_t)a.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    ui.tileCursorX = (int8_t)b.sx;
+    ui.tileCursorY = (int8_t)b.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    const int selected_stop = GameTestAccess::road_stop_at(*game, b.sx, b.sy);
+    REQUIRE(selected_stop != kNoFleetSlot);
+
+    // The road submenu (mode 6) must carry the "buy bus" tool (item id 3).
+    int buy_index = -1;
+    for (int i = 0; i < (int)ui.buildMenuItems[6].size(); ++i)
+        if (ui.buildMenuItems[6][i] == 3) buy_index = i;
+    REQUIRE(buy_index >= 0);
+
+    // Arming the tool and clicking a stop opens the buy dialog (sprite 100)
+    // with that exact stop captured for the dialog dispatch.
+    ui.buildMenuMode = 6;
+    ui.buildMenuItemIndex = (int8_t)buy_index;
+    ui.blockBuildMenu = false;
+
+    // A plain road cell is not a buy point.
+    ui.tileCursorX = (int8_t)a.rx;
+    ui.tileCursorY = (int8_t)a.ry;
+    GameTestAccess::open_build_menu(*game);
+    CHECK(GameTestAccess::state(*game) == GameState::Playing);
+    CHECK(GameTestAccess::road_vehicles(*game).empty());
+
+    ui.tileCursorX = (int8_t)b.sx;
+    ui.tileCursorY = (int8_t)b.sy;
+    GameTestAccess::open_build_menu(*game);
+
+    REQUIRE(GameTestAccess::ui(*game).transitionCode == 100);
+    REQUIRE(GameTestAccess::state(*game) == GameState::MenuOverlay);
+    REQUIRE(GameTestAccess::build(*game).roadStopCursor == selected_stop);
+
+    // Action 1 = buy bus (passengers, carType 2); the dialog then closes.
+    const int money_before_bus = GameTestAccess::economy(*game).money;
+    GameTestAccess::handle_build_menu_state(*game, 100, 1);
+    REQUIRE(GameTestAccess::road_vehicles(*game).size() == 1);
+    CHECK(GameTestAccess::road_vehicles(*game)[0].carType == 2);
+    CHECK(GameTestAccess::road_vehicles(*game)[0].stopSites.front()
+          == selected_stop);
+    CHECK(GameTestAccess::economy(*game).money == money_before_bus - kBusCost);
+    CHECK(GameTestAccess::state(*game) == GameState::Playing);
+
+    // Reopen and choose action 2 = buy truck (freight, carType 4).
+    GameTestAccess::open_build_menu(*game);
+    REQUIRE(GameTestAccess::ui(*game).transitionCode == 100);
+    const int money_before_truck = GameTestAccess::economy(*game).money;
+    GameTestAccess::handle_build_menu_state(*game, 100, 2);
+    REQUIRE(GameTestAccess::road_vehicles(*game).size() == 2);
+    CHECK(GameTestAccess::road_vehicles(*game)[1].carType == 4);
+    CHECK(GameTestAccess::economy(*game).money == money_before_truck - kTruckCost);
+
+    // Closing the dialog (the close X sends option -1) buys nothing.
+    GameTestAccess::open_build_menu(*game);
+    const std::size_t owned = GameTestAccess::road_vehicles(*game).size();
+    GameTestAccess::handle_build_menu_state(*game, 100, -1);
+    CHECK(GameTestAccess::road_vehicles(*game).size() == owned);
+    CHECK(GameTestAccess::state(*game) == GameState::Playing);
+
+    delete game;
+}
+
+TEST_CASE("full: road vehicles survive a save/load round-trip") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+
+    // Two stops beside streets of the same town, a few tiles apart.
+    RoadStopCell a{}, b{};
+    REQUIRE(road_two_same_town_stops(*game, 0, a, b));
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)a.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)a.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)b.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)b.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    const int first_stop = GameTestAccess::road_stop_at(*game, a.sx, a.sy);
+    REQUIRE(first_stop != kNoFleetSlot);
+    REQUIRE(GameTestAccess::buy_road_vehicle(*game, 2, first_stop));
+
+    const std::vector<int32_t> expected_stops =
+        GameTestAccess::road_vehicles(*game)[0].stopSites;
+    const int expected_type = GameTestAccess::road_vehicles(*game)[0].carType;
+    GameTestAccess::road_vehicles(*game)[0]
+        .cargo[service_resource::Passengers] = 11;
+    GameTestAccess::road_vehicles(*game)[0].cargo[service_resource::Mail] = 9;
+    const std::array<int, kResourceTypeCount> expected_cargo =
+        GameTestAccess::road_vehicles(*game)[0].cargo;
+
+    GameTestAccess::settings(*game).animationsDisabled = true;
+    GameTestAccess::settings(*game).selectionHidden = true;
+    GameTestAccess::save_codec(*game).load_slot(save::slot::Auxiliary,
+                                                 save::MODE_WRITE);
+    GameTestAccess::save_codec(*game).walk_settings(*game);
+    GameTestAccess::save_codec(*game).persist();
+    GameTestAccess::save_codec(*game).save_all(*game);
+    GameTestAccess::road_vehicles(*game).clear();  // wipe the in-memory fleet
+    GameTestAccess::settings(*game).animationsDisabled = false;
+    GameTestAccess::settings(*game).selectionHidden = false;
+    GameTestAccess::save_codec(*game).restore_all(*game);
+
+    // Saving road vehicles must not erase the settings record.
+    GameTestAccess::save_codec(*game).load_slot(save::slot::Auxiliary,
+                                                 save::MODE_READ);
+    GameTestAccess::save_codec(*game).walk_settings(*game);
+    CHECK(GameTestAccess::settings(*game).animationsDisabled);
+    CHECK(GameTestAccess::settings(*game).selectionHidden);
+
+    std::vector<RoadVehicle>& restored = GameTestAccess::road_vehicles(*game);
+    REQUIRE(restored.size() == 1);
+    CHECK(restored[0].carType == expected_type);
+    CHECK(restored[0].cargo == expected_cargo);
+    CHECK(restored[0].stopSites == expected_stops);
+    CHECK(restored[0].route.size() >= 2);           // route rebuilt from the stop list
+
+    // Version 1 stored one cargo amount and used the freight car type as its
+    // resource. Read it into the matching mixed-cargo counter.
+    SaveCodec& codec = GameTestAccess::save_codec(*game);
+    codec.saveBuffer.clear();
+    const auto write_int = [&codec](int32_t value) {
+        const uint32_t bits = static_cast<uint32_t>(value);
+        for (int shift = 0; shift < 32; shift += 8)
+            codec.saveBuffer.push_back(static_cast<int8_t>(bits >> shift));
+    };
+    write_int(0x52565431);                         // magic
+    write_int(1);                                  // old version
+    write_int(1);                                  // one vehicle
+    write_int(wagon::IndustryGroup2CarA);          // old truck/resource type
+    write_int(kTruckCapacity);
+    write_int(17);                                 // old single cargo amount
+    write_int(0);                                  // revenue
+    write_int(0);                                  // segment
+    write_int(0);                                  // phase
+    write_int(road_direction::PositiveX);
+    codec.saveBuffer.push_back(1);                 // forward
+    codec.saveBuffer.push_back(1);                 // loop
+    write_int(static_cast<int32_t>(expected_stops.size()));
+    for (int stop : expected_stops) write_int(stop);
+    codec.savePendingMode = save::MODE_READ;
+    codec.saveReadOffset = 0;
+    codec.snapshotSize = static_cast<int32_t>(codec.saveBuffer.size());
+    codec.snapshotLoaded = true;
+    codec.walk_road_vehicles(*game);
+
+    REQUIRE(GameTestAccess::road_vehicles(*game).size() == 1);
+    const RoadVehicle& migrated = GameTestAccess::road_vehicles(*game)[0];
+    CHECK(migrated.carType == road_vehicle_type::Truck);
+    CHECK(migrated.total_cargo() == 17);
+    CHECK(migrated.cargo[service_resource::IndustryGroup2] == 17);
+
+    delete game;
+}
+
+TEST_CASE("full: starting a new map clears old road vehicles") {
+    Game* game = make_game();
+    RoadVehicle vehicle;
+    vehicle.route = {RoadPoint{1, 1}, RoadPoint{2, 1}};
+    GameTestAccess::road_vehicles(*game).push_back(vehicle);
+    GameTestAccess::build(*game).roadStopCursor = 7;
+    GameTestAccess::build(*game).roadAutoAnchorX = 4;
+    GameTestAccess::build(*game).roadAutoAnchorY = 5;
+
+    GameTestAccess::begin_map_generation(*game);
+
+    CHECK(GameTestAccess::road_vehicles(*game).empty());
+    CHECK(GameTestAccess::road_net(*game).width == 0);
+    CHECK(GameTestAccess::build(*game).roadStopCursor == -1);
+    CHECK(GameTestAccess::build(*game).roadAutoAnchorX == -1);
+    CHECK(GameTestAccess::build(*game).roadAutoAnchorY == -1);
+
+    delete game;
+}
+
+TEST_CASE("full: a built road links two towns and one bus serves both") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    const RoadNetwork& net = GameTestAccess::road_net(*game);
+
+    // Stop cells beside streets, near passengers, tagged with their town. Among
+    // cross-town pairs (nearest first) pick one whose access road cells are
+    // reachable over land, so a road can connect them. Reachability is a dry-run
+    // BFS over existing road plus buildable ground -- what auto_route_road uses.
+    const std::vector<RoadStopCell> cells = road_stop_candidates(*game, 3);
+    const auto drivable = [&](int x, int y) {
+        return GameTestAccess::is_road_tile(*game, x, y)
+               || GameTestAccess::road_buildable(*game, x, y);
+    };
+    struct Pair { int i, j, d; };
+    std::vector<Pair> pairs;
+    for (std::size_t i = 0; i < cells.size(); ++i)
+        for (std::size_t j = i + 1; j < cells.size(); ++j)
+            if (cells[i].comp >= 0 && cells[i].comp != cells[j].comp)
+                pairs.push_back({(int)i, (int)j,
+                                 std::abs(cells[i].sx - cells[j].sx)
+                                     + std::abs(cells[i].sy - cells[j].sy)});
+    std::sort(pairs.begin(), pairs.end(),
+              [](const Pair& l, const Pair& r) { return l.d < r.d; });
+    int ia = -1, ib = -1;
+    for (const Pair& p : pairs) {
+        if (!net.plan_route(RoadPoint{cells[p.i].rx, cells[p.i].ry},
+                            RoadPoint{cells[p.j].rx, cells[p.j].ry}, drivable).empty()) {
+            ia = p.i; ib = p.j; break;
+        }
+    }
+    REQUIRE(ia >= 0);                                   // two towns joinable by road
+    const RoadStopCell a = cells[ia], b = cells[ib];
+    REQUIRE(a.comp != b.comp);                          // distinct towns before we build
+
+    // Drop a stop beside each town's street, then build a road joining the two
+    // access cells; the towns must merge into one network.
+    road_stop_seed_zones(*game, a.sx, a.sy, 60);
+    road_stop_seed_zones(*game, b.sx, b.sy, 60);
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)a.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)a.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+    GameTestAccess::ui(*game).tileCursorX = (int8_t)b.sx;
+    GameTestAccess::ui(*game).tileCursorY = (int8_t)b.sy;
+    REQUIRE(GameTestAccess::place_road_stop_at_cursor(*game));
+
+    REQUIRE(GameTestAccess::auto_route_road(*game, a.rx, a.ry, b.rx, b.ry));
+    REQUIRE(GameTestAccess::road_net(*game).same_component(RoadPoint{a.rx, a.ry},
+                                                           RoadPoint{b.rx, b.ry}));
+    for (int i = 0; i < 8; ++i) GameTestAccess::generate_site_cargo(*game);
+
+    const int first_stop = GameTestAccess::road_stop_at(*game, a.sx, a.sy);
+    REQUIRE(first_stop != kNoFleetSlot);
+    REQUIRE(GameTestAccess::buy_road_vehicle(*game, 2, first_stop));
+    std::vector<RoadVehicle>& buses = GameTestAccess::road_vehicles(*game);
+    REQUIRE(buses[0].stopSites.size() == 2);            // serves a stop in each town
+
+    const int money_after_buy = GameTestAccess::economy(*game).money;
+    for (int i = 0; i < 6000; ++i) {
+        if (i % 40 == 0) GameTestAccess::generate_site_cargo(*game);
+        GameTestAccess::update_road_vehicles(*game);
+    }
+    CHECK(buses[0].revenue > 0);
+    CHECK(GameTestAccess::economy(*game).money > money_after_buy);
 
     delete game;
 }

@@ -16,6 +16,16 @@
 
 #include "text/text_catalog.h"
 
+namespace dialog_header_flag {
+inline constexpr int CloseButton = 0x01;
+inline constexpr int Title = 0x02;
+}  // namespace dialog_header_flag
+
+namespace dialog_item_flag {
+inline constexpr int Border = 0x08;
+inline constexpr int Selectable = 0x10;
+}  // namespace dialog_item_flag
+
 // One content row: either static/dynamic text, or an image slot (image == true).
 struct DialogItem {
     int flags = 0;
@@ -26,7 +36,7 @@ struct DialogItem {
     int resource_id = 0;
     bool has_dynamic_value = false;    // text resolved at runtime (resolve_dialog_value)
     int value_id = 0;
-    int action_code = 0;               // selectable row (flags & 0x10)
+    int action_code = 0;               // selectable row (dialog_item_flag::Selectable)
     int sel_left = 0;
     int sel_top = 0;
     int sel_right = 0;

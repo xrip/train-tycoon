@@ -12,7 +12,8 @@ struct Economy;
 // Scenario owns the campaign scoring and milestone progression. The milestone
 // index/flag and thresholds are saved through the main codec; the best score
 // and the score/leaderboard tables are saved through the high-score store
-// (game/boot.cpp). scenarioMilestone and currentScenarioScore are runtime-only.
+// (game/boot.cpp). The Free Game fields and currentScenarioScore are
+// runtime-only.
 // Values and save byte order are unchanged.
 struct Scenario {
     bool complete_milestone_if_met(const Economy& economy);
@@ -20,7 +21,7 @@ struct Scenario {
 
     int32_t currentEra = 1;
 
-    int8_t scenarioMilestone = 0;
+    int8_t freeGameMapSize = free_game_map_size::Small;
     int8_t scenarioMilestoneIndex = 0;
     int32_t currentScenarioScore = 0;
     int32_t currentMilestoneScore = 0;
@@ -48,7 +49,7 @@ struct Scenario {
     // runtime-only. Saved offer records live in OfferBoard. Save byte order is
     // unchanged.
     int8_t offerRowIndex = 0;
-    int8_t duplicateRowState = 0;
+    int8_t offerFlowState = 0;  // offer_flow::State while a response overlay is open
     int32_t offerTypeTransitionCode = 0;
     int32_t offerEffectTransitionCode = 0;
     int8_t playerNameCursor = 0;
@@ -67,11 +68,11 @@ struct Scenario {
     // unchanged.
     int8_t scenarioBits = 0;
     int32_t activeScenario = 0;
-    int8_t difficultyA = 0;
-    int8_t difficultySlot = 0;
-    int8_t difficultyB = 0;
-    int8_t difficultyC = 0;
-    int32_t difficultyPct = 100;
+    int8_t financialDifficulty = 0;
+    int8_t aiDifficulty = 0;
+    int8_t freeGameTownLevel = free_game_town_level::Few;
+    int8_t freeGameIndustryLevel = free_game_industry_level::Few;
+    int32_t difficultyPct = percentage::kBase;
     int8_t difficultyCycle = 1;
     int32_t scenarioStepCompare = 1;
     int32_t scenarioStep = 0;

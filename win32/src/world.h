@@ -50,12 +50,12 @@ struct World {
     int32_t mapGenColumns = 0;
     int32_t mapGenRows = 0;
     int32_t terrainPatchBaseSize = 0;
-    int32_t terrainFeatureStage7Count = 0;
-    int32_t terrainFeatureStage6Count = 0;
-    int32_t weightAccel = 0;
-    int32_t weightAccel2 = 0;
-    int32_t weightAccel3 = 0;
-    int32_t weightAccel4 = 0;
+    int32_t featureStage3Count = 0;
+    int32_t featureStage2Count = 0;
+    int32_t featureStage1Count = 0;
+    int32_t featureStage0Count = 0;
+    int32_t featureStage5Count = 0;
+    int32_t featureStage4Count = 0;
     int32_t mapGenStage = 0;
     int32_t tilesGeneratedInStage = 0;
     int32_t totalTilesToGenerate = 0;
@@ -81,9 +81,9 @@ struct World {
     bool is_placeable_terrain(int32_t x, int32_t y) const;
     void place_track_tile(int32_t x, int32_t y, int32_t tile_code,
                           int32_t track_owner);
-    bool is_tile_buildable(int32_t x, int32_t y, int32_t type) const;
-    bool has_track_step(int32_t x, int32_t y, int32_t step_x,
-                        int32_t step_y, int32_t tile_code) const;
+    bool is_tile_buildable(int32_t x, int32_t y, int32_t build_type) const;
+    bool has_track_step(int32_t start_x, int32_t start_y, int32_t step_x,
+                        int32_t step_y, int32_t target_tile) const;
     void decay_construction_timers_quarterly(int32_t month);
     void advance_construction_timers(int32_t x, int32_t y, int32_t amount);
     void recount_zone_population();

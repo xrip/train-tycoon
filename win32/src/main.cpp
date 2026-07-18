@@ -105,9 +105,6 @@ int main(void) {
         return 1;
 
     Game game(std::make_unique<WinMmMusicPlayer>(), midp_current_time_millis());
-    // Opt-in road-transport proof of concept (see road.h). Off unless the env
-    // var is set, so normal play is byte-for-byte unchanged.
-    if (getenv("TRAIN_TYCOON_ROAD_POC")) game.set_road_poc_enabled(true);
     game.start(); // resource load + initial state (no thread spawn)
 
     Surface screen;

@@ -10,8 +10,8 @@
 extern "C" {
 #endif
 
-// Called from the MiniFB input hook. `vk` is a Win32 virtual-key code.
-void midp_input_on_key(int vk, bool down);
+// Called from the MiniFB input hook. `virtual_key` is a Win32 virtual-key code.
+void midp_input_on_key(int virtual_key, bool is_down);
 
 // Drain one queued event. Returns false when the queue is empty.
 bool midp_input_poll(int *keycode, bool *pressed);

@@ -6,43 +6,67 @@
 #include <stdio.h>
 #include <string.h>
 
-static std::vector<int8_t> make_font_bytes(const char *text,
-                                           bool money_prefix) {
-    int text_len = (int)strlen(text);
-    int offset = money_prefix ? 1 : 0;
-    std::vector<int8_t> bytes(static_cast<size_t>(text_len + offset));
-    if (money_prefix) bytes[0] = 24;
-    for (int i = 0; i < text_len; ++i) {
-        char ch = text[i];
-        if (ch >= '0' && ch <= '9') bytes[i + offset] = (int8_t)(ch - 47);
-        else if (ch == '.' || ch == ':') bytes[i + offset] = 11;
-        else if (ch == '-') bytes[i + offset] = 22;
+namespace {
+
+namespace header_display {
+constexpr int8_t kCurrencyPrefix = 24;
+constexpr int8_t kAsciiDigitOffset = 47;
+constexpr int8_t kPeriod = 11;
+constexpr int8_t kMinusSign = 22;
+constexpr int kThousandsGroupSize = 3;
+}  // namespace header_display
+
+}  // namespace
+
+static std::vector<int8_t> make_font_bytes(const char *text_value,
+                                           bool include_currency_prefix) {
+    const int text_length = static_cast<int>(strlen(text_value));
+    const int prefix_length = include_currency_prefix ? 1 : 0;
+    std::vector<int8_t> glyph_codes(
+        static_cast<size_t>(text_length + prefix_length));
+    if (include_currency_prefix) glyph_codes[0] = header_display::kCurrencyPrefix;
+    for (int character_index = 0; character_index < text_length; ++character_index) {
+        const char character = text_value[character_index];
+        if (character >= '0' && character <= '9')
+            glyph_codes[character_index + prefix_length] = static_cast<int8_t>(
+                character - header_display::kAsciiDigitOffset);
+        else if (character == '.' || character == ':')
+            glyph_codes[character_index + prefix_length] = header_display::kPeriod;
+        else if (character == '-')
+            glyph_codes[character_index + prefix_length] = header_display::kMinusSign;
     }
-    return bytes;
+    return glyph_codes;
 }
 
-static void format_money(int32_t value, char *out, int out_size) {
+static void format_money(int32_t value, char *out, int output_capacity) {
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
-    char digits[24];
-    snprintf(digits, sizeof(digits), "%lld", (long long)magnitude);
-    int digit_count = (int)strlen(digits);
-    int pos = 0;
-    if (value < 0 && pos < out_size - 1) out[pos++] = '-';
-    for (int i = 0; i < digit_count && pos < out_size - 1; ++i) {
-        if (i > 0 && (digit_count - i) % 3 == 0 && pos < out_size - 1)
-            out[pos++] = ':';
-        out[pos++] = digits[i];
+    char magnitude_text[24];
+    snprintf(magnitude_text, sizeof(magnitude_text), "%lld", (long long)magnitude);
+    const int digit_count = static_cast<int>(strlen(magnitude_text));
+    int output_index = 0;
+    if (value < 0 && output_index < output_capacity - 1)
+        out[output_index++] = '-';
+    for (int digit_index = 0;
+         digit_index < digit_count && output_index < output_capacity - 1;
+         ++digit_index) {
+        if (digit_index > 0
+            && (digit_count - digit_index) % header_display::kThousandsGroupSize == 0
+            && output_index < output_capacity - 1)
+            out[output_index++] = ':';
+        out[output_index++] = magnitude_text[digit_index];
     }
-    out[pos] = '\0';
+    out[output_index] = '\0';
 }
 
-int32_t Game::draw_menu_row(Surface& surface, int32_t sprite,
-                            int32_t item_index, int32_t x, bool spaced) {
+int32_t Game::draw_menu_row(Surface& surface, int32_t sprite_code,
+                            int32_t item_index, int32_t left_x, bool spaced) {
     Game *game = this;
     Surface *graphics = &surface;
-    game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, x, game->renderer.bottomBarY, 20);
-    if (game->ui.buildMenuItemIndex == item_index) game->ui.selectedMenuRowX = x;
-    return x + 15 + (spaced ? 3 : 0);
+    game->renderer.draw_sprite_quad(*graphics, game->assets, sprite_code,
+                                    left_x, game->renderer.bottomBarY, 20);
+    if (game->ui.buildMenuItemIndex == item_index)
+        game->ui.selectedMenuRowX = left_x;
+    return left_x + 15 + (spaced ? 3 : 0);
 }
 
 void Game::draw_header_bar(Surface& surface) {
@@ -105,65 +129,79 @@ void Game::paint_main(Surface& surface) {
     if (!game->ui.menuDirty) return;
     midp_set_color(game->renderer.backbuffer_surface, 0x606060);
     midp_fill_rect(game->renderer.backbuffer_surface, 0, game->renderer.bottomBarY, game->renderer.canvasWidth, 15);
-    int selected_x = unsigned_byte(game->ui.menuItemCode[game->ui.buildMenuMode]
-                                               [game->ui.buildMenuItemIndex]);
-    int scroll = selected_x + 15 - game->renderer.canvasWidth;
-    if (scroll < 0) scroll = 0;
+    int selected_item_x = unsigned_byte(
+        game->ui.menuItemCode[game->ui.buildMenuMode]
+                               [game->ui.buildMenuItemIndex]);
+    int menu_scroll = selected_item_x + 15 - game->renderer.canvasWidth;
+    if (menu_scroll < 0) menu_scroll = 0;
     int item_count = static_cast<int>(game->ui.buildMenuItems[game->ui.buildMenuMode].size());
     for (int item = 0; item < item_count; ++item) {
-        int x = unsigned_byte(game->ui.menuItemCode[game->ui.buildMenuMode][item]) - scroll;
-        int sprite = unsigned_byte(game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
-        game->renderer.draw_sprite_quad(*game->renderer.backbuffer_surface, game->assets, sprite, x, game->renderer.bottomBarY, 20);
+        const int item_x = unsigned_byte(
+            game->ui.menuItemCode[game->ui.buildMenuMode][item]) - menu_scroll;
+        const int item_sprite = unsigned_byte(
+            game->ui.menuTextIndex[game->ui.buildMenuMode][item]);
+        game->renderer.draw_sprite_quad(*game->renderer.backbuffer_surface,
+                                        game->assets, item_sprite, item_x,
+                                        game->renderer.bottomBarY, 20);
         if (item != game->ui.buildMenuItemIndex) continue;
         midp_set_color(game->renderer.backbuffer_surface, 0xFFFFFF);
-        midp_draw_rect(game->renderer.backbuffer_surface, x, game->renderer.bottomBarY, 14, 14);
-        midp_draw_rect(game->renderer.backbuffer_surface, x + 1, game->renderer.bottomBarY + 1, 12, 12);
+        midp_draw_rect(game->renderer.backbuffer_surface, item_x,
+                       game->renderer.bottomBarY, 14, 14);
+        midp_draw_rect(game->renderer.backbuffer_surface, item_x + 1,
+                       game->renderer.bottomBarY + 1, 12, 12);
     }
-    if (game->ui.buildMenuMode == 2) {
+    if (game->ui.buildMenuMode == build_menu::TrackBuildConfirm) {
         char cost_text[24];
         int64_t magnitude = game->build.selectionCost < 0
                             ? -(int64_t)game->build.selectionCost : game->build.selectionCost;
         snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
-        int text_len = (int)strlen(cost_text);
+        const int cost_text_length = static_cast<int>(strlen(cost_text));
         const std::vector<int8_t> currency_codes = game->assets.index_text_codes(10);
-        std::vector<int8_t> bytes(
-            static_cast<size_t>(text_len + 1) + currency_codes.size());
-        bytes[0] = 24;
-        for (int i = 0; i < text_len; ++i) bytes[i + 1] = (int8_t)(cost_text[i] - 47);
+        std::vector<int8_t> cost_codes(
+            static_cast<size_t>(cost_text_length + 1) + currency_codes.size());
+        cost_codes[0] = header_display::kCurrencyPrefix;
+        for (int digit_index = 0; digit_index < cost_text_length; ++digit_index)
+            cost_codes[digit_index + 1] = static_cast<int8_t>(
+                cost_text[digit_index] - header_display::kAsciiDigitOffset);
         std::copy(currency_codes.begin(), currency_codes.end(),
-                  bytes.begin() + text_len + 1);
-        game->renderer.draw_font_string(*game->renderer.backbuffer_surface, game->assets, 35, game->renderer.bottomBarY + 5, bytes, false);
+                  cost_codes.begin() + cost_text_length + 1);
+        game->renderer.draw_font_string(*game->renderer.backbuffer_surface, game->assets, 35, game->renderer.bottomBarY + 5, cost_codes, false);
     }
     game->ui.menuDirty = false;
 }
 
-int32_t Game::draw_number(Surface& surface, int32_t value, int32_t y) {
+int32_t Game::draw_number(Surface& surface, int32_t value, int32_t top_y) {
     Game *game = this;
     Surface *graphics = &surface;
     int64_t magnitude = value < 0 ? -(int64_t)value : value;
     char text[24];
     snprintf(text, sizeof(text), "%lld", (long long)magnitude);
     const auto bytes = make_font_bytes(text, true);
-    game->renderer.draw_text_box(*graphics, game->assets, game->renderer.canvasWidth, 15 + y, value < 0 ? 1 : 2, 4, bytes);
-    return y + 15;
+    game->renderer.draw_text_box(*graphics, game->assets,
+                                 game->renderer.canvasWidth, 15 + top_y,
+                                 value < 0 ? 1 : 2, 4, bytes);
+    return top_y + 15;
 }
 
 void Game::draw_money_ticker(Surface& surface) {
     Game *game = this;
     Surface *graphics = &surface;
     midp_set_color(graphics, 0xFF0000);
-    int y = 0;
-    if (game->ui.moneyTickerFrames[2] > 0) {
-        --game->ui.moneyTickerFrames[2];
-        y = game->draw_number(*graphics, game->economy.moneyHistory[2], y);
+    int next_y = 0;
+    if (game->ui.moneyTickerFrames[money_ticker::Oldest] > 0) {
+        --game->ui.moneyTickerFrames[money_ticker::Oldest];
+        next_y = game->draw_number(
+            *graphics, game->economy.moneyHistory[money_ticker::Oldest], next_y);
     }
-    if (game->ui.moneyTickerFrames[1] > 0) {
-        --game->ui.moneyTickerFrames[1];
-        y = game->draw_number(*graphics, game->economy.moneyHistory[1], y);
+    if (game->ui.moneyTickerFrames[money_ticker::Middle] > 0) {
+        --game->ui.moneyTickerFrames[money_ticker::Middle];
+        next_y = game->draw_number(
+            *graphics, game->economy.moneyHistory[money_ticker::Middle], next_y);
     }
-    if (game->ui.moneyTickerFrames[0] > 0) {
-        --game->ui.moneyTickerFrames[0];
-        game->draw_number(*graphics, game->economy.moneyHistory[0], y);
+    if (game->ui.moneyTickerFrames[money_ticker::Newest] > 0) {
+        --game->ui.moneyTickerFrames[money_ticker::Newest];
+        game->draw_number(
+            *graphics, game->economy.moneyHistory[money_ticker::Newest], next_y);
     }
 }
 
@@ -182,16 +220,29 @@ void Game::compute_iso_corners(int32_t x, int32_t y,
                                  int32_t *screen_x, int32_t *screen_y,
                                  bool viewport_relative) {
     Game *game = this;
-    int center_x = x * 16 + y * 16 + 16;
-    int center_y = game->world.terrain.mapHalfWidth - x * 8 + y * 8 + 8;
-    screen_x[0] = center_x - 16;
+    const int center_x = x * map_geometry::kTileWidthPixels
+                       + y * map_geometry::kTileWidthPixels
+                       + map_geometry::kTileWidthPixels;
+    const int center_y = game->world.terrain.mapHalfWidth
+                       - x * map_geometry::kTileHalfWidthPixels
+                       + y * map_geometry::kTileHalfWidthPixels
+                       + map_geometry::kTileHalfWidthPixels;
+    screen_x[0] = center_x - map_geometry::kTileWidthPixels;
     screen_x[1] = center_x;
     screen_x[2] = center_x;
-    screen_x[3] = center_x + 16;
-    screen_y[0] = center_y - 4 * game->world.terrain.heightMap[x][y];
-    screen_y[1] = center_y - 8 - 4 * game->world.terrain.heightMap[x + 1][y];
-    screen_y[2] = center_y + 8 - 4 * game->world.terrain.heightMap[x][y + 1];
-    screen_y[3] = center_y - 4 * game->world.terrain.heightMap[x + 1][y + 1];
+    screen_x[3] = center_x + map_geometry::kTileWidthPixels;
+    screen_y[0] = center_y
+                - map_geometry::kElevationPixelScale
+                  * game->world.terrain.heightMap[x][y];
+    screen_y[1] = center_y - map_geometry::kTileHalfWidthPixels
+                - map_geometry::kElevationPixelScale
+                  * game->world.terrain.heightMap[x + 1][y];
+    screen_y[2] = center_y + map_geometry::kTileHalfWidthPixels
+                - map_geometry::kElevationPixelScale
+                  * game->world.terrain.heightMap[x][y + 1];
+    screen_y[3] = center_y
+                - map_geometry::kElevationPixelScale
+                  * game->world.terrain.heightMap[x + 1][y + 1];
     if (viewport_relative) {
         for (int corner = 0; corner < 4; ++corner) {
             screen_x[corner] -= game->renderer.camera.viewportCenterX;
@@ -224,17 +275,21 @@ void Game::draw_build_menu_cursor(Surface& surface) {
     Game *game = this;
     Surface *graphics = &surface;
     if (game->ui.blockBuildMenu) return;
-    int action = game->ui.menuTransitionCode[game->ui.buildMenuMode][game->ui.buildMenuItemIndex];
-    if (action == 0) return;
-    if (action >= 1 && action <= 7) {
+    const int action_code =
+        game->ui.menuTransitionCode[game->ui.buildMenuMode]
+                                   [game->ui.buildMenuItemIndex];
+    if (action_code == build_menu::cursor_action::kNone) return;
+    if (action_code >= build_menu::cursor_action::kBuildTypeFirst
+        && action_code <= build_menu::cursor_action::kHorizontalTerminal) {
         bool buildable = game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY,
-                                            action - 1);
+                                            action_code - build_menu::cursor_action::kBuildTypeFirst);
         midp_set_color(graphics, buildable ? 0x00FF00 : 0xFF0000);
     }
-    if (action == 6 || action == 7) {
+    if (action_code == build_menu::cursor_action::kVerticalTerminal
+        || action_code == build_menu::cursor_action::kHorizontalTerminal) {
         int32_t quad_x[4];
         int32_t quad_y[4];
-        if (action == 6) {
+        if (action_code == build_menu::cursor_action::kVerticalTerminal) {
             if (game->ui.tileCursorY > 0) {
                 game->compute_iso_corners(game->ui.tileCursorX, game->ui.tileCursorY - 1,
                                             quad_x, quad_y, true);
@@ -258,41 +313,63 @@ void Game::draw_build_menu_cursor(Surface& surface) {
             }
         }
     }
-    if (action == 8)
+    if (action_code == build_menu::cursor_action::kPlaceableTerrain)
         midp_set_color(graphics,
                        game->world.is_placeable_terrain(game->ui.tileCursorX, game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
-    if (action == 9)
+    if (action_code == build_menu::cursor_action::kCityOrStation)
         midp_set_color(graphics,
                        game->world.is_city_or_station_tile(
                            game->fleet, game->ui.tileCursorX,
                            game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
-    if (action == 10) midp_set_color(graphics, 0xFFFFFF);
-    if (action == 11) {
+    if (action_code == build_menu::cursor_action::kNeutral)
+        midp_set_color(graphics, 0xFFFFFF);
+    if (action_code == build_menu::cursor_action::kCurve) {
         if (game->world.is_curve_tile(game->ui.tileCursorX,
                                       game->ui.tileCursorY)) {
-            int x = game->ui.tileCursorX;
-            int y = game->ui.tileCursorY;
-            int dx = 0;
-            int dy = 0;
-            if (game->world.terrain.tileMap[x][y] == 7) dy = -1;
-            if (game->world.terrain.tileMap[x][y] == 10) dy = 1;
-            if (game->world.terrain.tileMap[x][y] == 8) dx = -1;
-            if (game->world.terrain.tileMap[x][y] == 9) dx = 1;
+            int cursor_x = game->ui.tileCursorX;
+            int cursor_y = game->ui.tileCursorY;
+            int direction_x = 0;
+            int direction_y = 0;
+            if (game->world.terrain.tileMap[cursor_x][cursor_y] == tile::CURVE_UP) direction_y = -1;
+            if (game->world.terrain.tileMap[cursor_x][cursor_y] == tile::CURVE_DOWN) direction_y = 1;
+            if (game->world.terrain.tileMap[cursor_x][cursor_y] == tile::CURVE_LEFT) direction_x = -1;
+            if (game->world.terrain.tileMap[cursor_x][cursor_y] == tile::CURVE_RIGHT) direction_x = 1;
             midp_set_color(graphics, 0x00FF00);
             int32_t quad_x[4];
             int32_t quad_y[4];
-            while ((x += dx) >= 0 && (y += dy) >= 0
-                   && x < game->world.terrain.mapWidth && y < game->world.terrain.mapHeight) {
-                game->compute_iso_corners(x, y, quad_x, quad_y, true);
+            while ((cursor_x += direction_x) >= 0 && (cursor_y += direction_y) >= 0
+                   && cursor_x < game->world.terrain.mapWidth
+                   && cursor_y < game->world.terrain.mapHeight) {
+                game->compute_iso_corners(cursor_x, cursor_y, quad_x, quad_y, true);
                 draw_selection_quad(graphics, quad_x, quad_y);
-                if (game->world.terrain.tileMap[x][y] != 0 || game->world.trackMap[x][y] != 0) break;
+                if (game->world.terrain.tileMap[cursor_x][cursor_y] != 0
+                    || game->world.trackMap[cursor_x][cursor_y] != 0)
+                    break;
             }
         } else {
             midp_set_color(graphics, 0xFF0000);
         }
     }
+    if (action_code == build_menu::cursor_action::kRoadBuildable)
+        midp_set_color(graphics,
+                       game->road_buildable(game->ui.tileCursorX, game->ui.tileCursorY)
+                       ? 0x00FF00 : 0xFF0000);
+    if (action_code == build_menu::cursor_action::kRoadTile)
+        midp_set_color(graphics,
+                       game->is_road_tile(game->ui.tileCursorX, game->ui.tileCursorY)
+                       ? 0x00FF00 : 0xFF0000);
+    if (action_code == build_menu::cursor_action::kRoadStopBuildable)
+        midp_set_color(graphics,
+                       game->road_stop_placeable(game->ui.tileCursorX,
+                                                 game->ui.tileCursorY)
+                       ? 0x00FF00 : 0xFF0000);
+    if (action_code == build_menu::cursor_action::kRoadStop)
+        midp_set_color(graphics,
+                       game->road_stop_at(game->ui.tileCursorX,
+                                          game->ui.tileCursorY) != kNoFleetSlot
+                       ? 0x00FF00 : 0xFF0000);
     draw_selection_quad(graphics, game->build.selectionTileX,
                          game->build.selectionTileY);
 }
@@ -323,7 +400,7 @@ void Game::draw_build_menu_row(Surface& surface) {
                        menu_x + 10, menu_y + 22);
         return;
     }
-    if (game->ui.buildMenuMode == 1
+    if (game->ui.buildMenuMode == build_menu::RailTools
         && (game->ui.buildMenuItemIndex == 5 || game->ui.buildMenuItemIndex == 6))
         game->renderer.draw_sprite_quad(*graphics, game->assets, 249, game->ui.cursorScreenX - 2,
                           game->ui.cursorScreenY + 13, 20);
@@ -333,7 +410,9 @@ void Game::draw_build_menu_row(Surface& surface) {
                                                [game->ui.buildMenuItemIndex]);
         game->renderer.draw_sprite_quad(*graphics, game->assets, sprite, menu_x + 5, menu_y + 19, 20);
     }
-    if (game->ui.buildMenuMode != 3 || game->ui.buildMenuItemIndex >= 4) return;
+    if (game->ui.buildMenuMode != build_menu::StationTools
+        || game->ui.buildMenuItemIndex >= 4)
+        return;
     game->renderer.draw_sprite_quad(*graphics, game->assets, game->ui.buildMenuItemIndex + 230,
                       menu_x + 5, menu_y + 19, 20);
 
@@ -355,7 +434,8 @@ void Game::draw_build_menu_row(Surface& surface) {
             if (tile >= 50 && tile <= 55) has_type_50_55 = true;
             if (tile >= 56 && tile <= 61) has_type_56_61 = true;
             if (tile >= 62 && tile <= 68) has_type_62_68 = true;
-            if (tile >= 34 && tile <= 40) ++population_tiles;
+            if (tile >= city_zone_tile::First && tile <= city_zone_tile::Last)
+                ++population_tiles;
         }
     }
     int icon_x = 0;

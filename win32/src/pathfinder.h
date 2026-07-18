@@ -1,6 +1,7 @@
 // Scratch state for the track path search (see game/pathfinding.cpp).
 #ifndef PATHFINDER_H
 #define PATHFINDER_H
+#include <span>
 #include "support/grid.h"
 #include <cstdint>
 
@@ -30,16 +31,20 @@ struct Pathfinder {
 
     int16_t distance_min(const World& world, int32_t x, int32_t y,
                          int32_t current_min) const;
-    int32_t relax_cell(const World& world, int32_t x, int32_t y);
+    enum class RelaxationResult : int32_t {
+        ChangedOrBlocked = 0,
+        Stable = 1,
+        DestinationFound = 2,
+    };
+
+    RelaxationResult relax_cell(const World& world, int32_t x, int32_t y);
     void flood_fill(const World& world);
     bool find_step(const World& world, int32_t x, int32_t y,
                    int32_t current_distance);
     void clear_build_path_tile(const World& world, int32_t x, int32_t y);
     bool is_tile_match(const World& world, const BuildController& build,
                        bool connected, int32_t x, int32_t y,
-                       int32_t tile_a, int32_t tile_b, int32_t tile_c,
-                       int32_t tile_d, int32_t tile_e, int32_t tile_f,
-                       int32_t tile_g, int32_t tile_h,
+                       std::span<const int32_t> allowed_tile_codes,
                        bool high_owner) const;
     void validate_step(World& world, BuildController& build,
                        const Economy& economy);

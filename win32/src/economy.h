@@ -13,14 +13,15 @@ struct Economy {
     void push_money_history(int32_t amount);
     void calculate_period_profit();
     void compute_year_end_metrics();
+    int32_t train_cost_for_era(int32_t era) const;
 
     int32_t money = 200000;
     int32_t loanBalance = 0;
     int32_t loanCeiling = 600000;
     int8_t interestRate = 4;
-    int32_t dayOfMonth = 1;
-    int32_t monthOfYear = 1;
-    int32_t year = 1950;
+    int32_t dayOfMonth = game_calendar::kFirstDay;
+    int32_t monthOfYear = game_calendar::kFirstMonth;
+    int32_t year = game_calendar::kBaseYear;
     int32_t enterpriseTaxPct = 2;
 
     // Spending and revenue aggregates (lifetime and per-period totals).
@@ -46,35 +47,36 @@ struct Economy {
     int32_t yearCompanyValueHistory[kHistoryCount]{};
     int32_t decadeProfitHistory[kHistoryCount]{};
     int32_t altDecadeRevenueTotal[kHistoryCount]{};
-    int32_t moneyHistory[3]{};
+    int32_t moneyHistory[money_ticker::kSlotCount]{};
 
     // Era-scaled cost and train-performance model, loaded per scenario in map
-    // generation and nudged by the yearly random economy event. moneyBase* are
-    // the fare base; baseTrainSpeed/accel/brake are the two engine performance
-    // tiers; cost* and gWagonCost*/costGroupC* are the build and wagon prices.
+    // generation and nudged by the yearly random economy event. The two
+    // legacy money bases are kept as primary/secondary because their deeper
+    // fare rules are not yet proved; the Early/Late fields are the two engine
+    // performance tiers; the *Cost fields are build and wagon prices.
     // All saved as one consecutive block; save byte order is unchanged.
-    int32_t moneyBaseA = 0;
-    int32_t moneyBaseB = 0;
-    int32_t baseTrainSpeed = 0;
-    int32_t accel1 = 0;
-    int32_t brake1 = 0;
-    int32_t baseTrainSpeed2 = 0;
-    int32_t accel2 = 0;
-    int32_t costPower = 0;
-    int32_t costStruct = 0;
-    int32_t costOverhead = 0;
-    int32_t costMaintenance = 0;
-    int32_t costCrew = 0;
-    int32_t gWagonCost = 0;
-    int32_t gWagonCost2 = 0;
-    int32_t gWagonCost3 = 0;
-    int32_t gWagonCost4 = 0;
-    int32_t gWagonCost5 = 0;
-    int32_t gWagonCost6 = 0;
-    int32_t costGroupC1 = 0;
-    int32_t costGroupC2 = 0;
-    int32_t costGroupC3 = 0;
-    int32_t costGroupC4 = 0;
+    int32_t moneyBasePrimary = 0;
+    int32_t moneyBaseSecondary = 0;
+    int32_t baseTrainSpeedEarly = 0;
+    int32_t accelerationEarly = 0;
+    int32_t brakingEarly = 0;
+    int32_t baseTrainSpeedLate = 0;
+    int32_t accelerationLate = 0;
+    int32_t powerCost = 0;
+    int32_t structureCost = 0;
+    int32_t overheadCost = 0;
+    int32_t maintenanceCost = 0;
+    int32_t crewCost = 0;
+    int32_t trainCostFirstEra = 0;
+    int32_t trainCostSecondEra = 0;
+    int32_t trainCostThirdEra = 0;
+    int32_t trainCostFourthEra = 0;
+    int32_t trainCostFifthEra = 0;
+    int32_t trainCostSixthEra = 0;
+    int32_t wagonOptionCostPassengerMail = 0;
+    int32_t wagonOptionCostIndustryGroup1 = 0;
+    int32_t wagonOptionCostIndustryGroup2 = 0;
+    int32_t wagonOptionCostIndustryGroup3 = 0;
 
     // Period/decade financial report aggregates. The "WithCurrent" running
     // accumulators (and legacyDecadeMetric) are runtime-only and are not saved;
