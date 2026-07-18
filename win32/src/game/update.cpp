@@ -101,7 +101,8 @@ constexpr EconomyGenerationDefaults kEconomyGenerationDefaults = {
     4578, 5196, 4314, 5072,
 };
 
-constexpr int32_t kMegapolisPatchSizeIncrease = 6;
+constexpr int32_t kMegapolisPatchMapScaleNumerator = 3;
+constexpr int32_t kMegapolisPatchMapScaleDenominator = 10;
 
 int32_t middle_value(int32_t small, int32_t large) {
     return small + (large - small) / 2;
@@ -314,7 +315,10 @@ void Game::begin_map_generation() {
         if (game->scenario.freeGameTownLevel == free_game_town_level::Megapolis) {
             game->world.mapGenColumns = 2;
             game->world.mapGenRows = 2;
-            game->world.terrainPatchBaseSize += kMegapolisPatchSizeIncrease;
+            game->world.terrainPatchBaseSize =
+                game->world.terrain.mapWidth
+                * kMegapolisPatchMapScaleNumerator
+                / kMegapolisPatchMapScaleDenominator;
         }
         if (game->scenario.freeGameIndustryLevel
             == free_game_industry_level::Few)

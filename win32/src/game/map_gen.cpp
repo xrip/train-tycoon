@@ -1054,8 +1054,22 @@ void Game::generate_terrain_patch_step() {
                     if (game->world.tilesGeneratedInStage != game->world.mapGenColumns * column + row) continue;
                     int cellWidth = game->world.terrain.mapWidth / game->world.mapGenColumns;
                     int cellHeight = game->world.terrain.mapHeight / game->world.mapGenRows;
-                    int patchX = column * cellWidth + abs(game->rng.next_int() % (cellWidth / 2));
-                    int patchY = row * cellHeight + abs(game->rng.next_int() % (cellHeight / 2));
+                    int patchOffsetRangeX = cellWidth / 2;
+                    int patchOffsetRangeY = cellHeight / 2;
+                    if (game->scenario.freeGameTownLevel
+                        == free_game_town_level::Megapolis) {
+                        const int maximumPatchSize =
+                            game->world.terrainPatchBaseSize
+                            + terrain_patch::kPatchSizeRandomRange - 1;
+                        patchOffsetRangeX = cellWidth - maximumPatchSize + 1;
+                        patchOffsetRangeY = cellHeight - maximumPatchSize + 1;
+                        if (patchOffsetRangeX < 1) patchOffsetRangeX = 1;
+                        if (patchOffsetRangeY < 1) patchOffsetRangeY = 1;
+                    }
+                    int patchX = column * cellWidth
+                        + abs(game->rng.next_int() % patchOffsetRangeX);
+                    int patchY = row * cellHeight
+                        + abs(game->rng.next_int() % patchOffsetRangeY);
                     game->place_terrain_patch(patchX, patchY);
                     done = true;
                 }

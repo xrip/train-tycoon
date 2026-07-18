@@ -240,14 +240,73 @@ TEST_CASE("full: Free Game megapolis makes four large towns safely") {
     const World& world = GameTestAccess::world(*game);
     const UiController& ui = GameTestAccess::ui(*game);
     CHECK(world.terrain.mapWidth == 130);
-    CHECK(world.terrainPatchBaseSize == 16);
+    CHECK(world.terrainPatchBaseSize == 39);
     CHECK(world.mapGenColumns == 2);
     CHECK(world.mapGenRows == 2);
     CHECK(ui.numSelectedTrains == 4);
-    for (int town = 0; town < ui.numSelectedTrains; ++town)
+    const int cell_width = world.terrain.mapWidth / 2;
+    const int cell_height = world.terrain.mapHeight / 2;
+    for (int town = 0; town < ui.numSelectedTrains; ++town) {
         CHECK(world.zonePopulation[town] > 0);
+        int minimum_x = world.terrain.mapWidth;
+        int minimum_y = world.terrain.mapHeight;
+        int maximum_x = -1;
+        int maximum_y = -1;
+        for (int x = 0; x < world.terrain.mapWidth; ++x) {
+            for (int y = 0; y < world.terrain.mapHeight; ++y) {
+                if ((world.trackMap[x][y] & track_overlay::MASK)
+                        != track_overlay::JUNCTION
+                    || (world.trackMap[x][y] & track::OWNER_MASK) != town)
+                    continue;
+                if (x < minimum_x) minimum_x = x;
+                if (y < minimum_y) minimum_y = y;
+                if (x > maximum_x) maximum_x = x;
+                if (y > maximum_y) maximum_y = y;
+            }
+        }
+        REQUIRE(maximum_x >= minimum_x);
+        REQUIRE(maximum_y >= minimum_y);
+        CHECK(maximum_x - minimum_x + 1 >= 35);
+        CHECK(maximum_y - minimum_y + 1 >= 35);
+        const int town_column = town / 2;
+        const int town_row = town % 2;
+        CHECK(minimum_x >= town_column * cell_width);
+        CHECK(minimum_y >= town_row * cell_height);
+        CHECK(maximum_x < (town_column + 1) * cell_width);
+        CHECK(maximum_y < (town_row + 1) * cell_height);
+    }
 
     delete game;
+}
+
+TEST_CASE("full: Free Game megapolis size follows map size") {
+    struct MegapolisMapCase {
+        int8_t map_level;
+        int32_t active_scenario;
+        int32_t map_size;
+        int32_t patch_size;
+    };
+    constexpr MegapolisMapCase cases[] = {
+        {free_game_map_size::Small, 0, 80, 24},
+        {free_game_map_size::Medium, 1, 105, 31},
+        {free_game_map_size::Large, 1, 130, 39},
+    };
+
+    for (const MegapolisMapCase& test_case : cases) {
+        Game* game = make_game();
+        Scenario& scenario = GameTestAccess::scenario(*game);
+        scenario.activeScenario = test_case.active_scenario;
+        scenario.freeGameMapSize = test_case.map_level;
+        scenario.freeGameTownLevel = free_game_town_level::Megapolis;
+        scenario.freeGameIndustryLevel = free_game_industry_level::Lots;
+
+        GameTestAccess::begin_map_generation(*game);
+
+        const World& world = GameTestAccess::world(*game);
+        CHECK(world.terrain.mapWidth == test_case.map_size);
+        CHECK(world.terrainPatchBaseSize == test_case.patch_size);
+        delete game;
+    }
 }
 
 TEST_CASE("fast: Java random values") {
