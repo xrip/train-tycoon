@@ -19,6 +19,10 @@
 struct Assets {
     void open_sprite_stream(const char* resource_name);
     std::unique_ptr<Image> decode_png_from_sprite_stream();
+    // Decode one loose sprite PNG (resources/sprites/<index>.png). Stage 1a of
+    // the sprite_images.bin migration: sprites now load from loose PNG files
+    // instead of the legacy encoded stream.
+    std::unique_ptr<Image> load_sprite_png(int32_t index);
     void build_tile_draw_order(int32_t width, int32_t height);
 
     // Glyph codes for a sprite_image_map semantic index, from the text catalog
@@ -41,12 +45,12 @@ struct Assets {
     std::vector<int8_t> tileOffsetY;
     int32_t numActiveTileAnimations = 0;
 
-    // Loaded images and the sprite resource stream. font_images holds the six
-    // font pages; tile_sprites the decoded tile images; cycle_flag the animated
-    // cycle sprite. sprite_stream is the open packed-sprite reader; the load
-    // counter and cycle cursor track decoding/animation progress. All
-    // runtime-only. Resource read order is unchanged.
-    ResourceReader sprite_stream;
+    // Loaded images. font_images holds the six font pages; tile_sprites the
+    // decoded tile images; cycle_flag the animated cycle sprite. Sprites load
+    // from loose PNG files (resources/sprites/<index>.png); sprite_load_index
+    // is the consume counter that preserves the original stream read order.
+    // All runtime-only.
+    int32_t sprite_load_index = 0;
     std::unique_ptr<Image> font_images[kFontPageCount];
     std::vector<std::unique_ptr<Image>> tile_sprites;
     std::unique_ptr<Image> cycle_flag;

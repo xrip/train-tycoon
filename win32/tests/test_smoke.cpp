@@ -385,7 +385,6 @@ TEST_CASE("fast: plain resources have fixed digests") {
         std::uint64_t digest;
     };
     constexpr std::array expected_resources{
-        ExpectedResource{"sprite_images.bin", 7703144764765851560ULL},
         ExpectedResource{"tile_sprite_ids.bin", 11149815025433152475ULL},
         ExpectedResource{"sprite_image_map.bin", 13405639703315080894ULL},
         ExpectedResource{"packed_sprites.bin", 10914531412671063909ULL},

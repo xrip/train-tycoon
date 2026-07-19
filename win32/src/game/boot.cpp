@@ -6,58 +6,11 @@
 #include <string.h>
 #include <array>
 #include <utility>
+#include <cstdio>
 #include <vector>
 
 namespace {
 
-namespace resource_format {
-constexpr int32_t kIndexedImage = 1;
-constexpr int32_t kPngStream = 2;
-}  // namespace resource_format
-
-namespace png_format {
-constexpr int32_t kPaletteBytesPerColor = 3;
-constexpr int32_t kIndexedImageFixedByteCount = 69;
-constexpr int32_t kTransparencyChunkByteCount = 13;
-constexpr int32_t kSingleTransparencyEntry = 1;
-constexpr int32_t kIndexedColorType = 3;
-constexpr int32_t kByteMask = 0xFF;
-
-constexpr std::array<int8_t, 4> kSignaturePrefix = {
-    static_cast<int8_t>(0x89), 'P', 'N', 'G',
-};
-constexpr std::array<int8_t, 8> kSignature = {
-    static_cast<int8_t>(0x89), 'P', 'N', 'G', '\r', '\n', '\x1A', '\n',
-};
-constexpr std::array<int8_t, 4> kIhdrChunkType = {'I', 'H', 'D', 'R'};
-constexpr std::array<int8_t, 4> kPlteChunkType = {'P', 'L', 'T', 'E'};
-constexpr std::array<int8_t, 4> kTrnsChunkType = {'t', 'R', 'N', 'S'};
-constexpr std::array<int8_t, 4> kIdatChunkType = {'I', 'D', 'A', 'T'};
-constexpr std::array<int8_t, 4> kIendChunkType = {'I', 'E', 'N', 'D'};
-constexpr std::array<int8_t, 4> kIendCrc = {-82, 66, 96, -126};
-
-namespace indexed_offset {
-constexpr std::size_t kIhdrLengthLastByte = 11;
-constexpr std::size_t kIhdrType = 12;
-constexpr std::size_t kIhdrWidthLowByte = 18;
-constexpr std::size_t kIhdrHeightLowByte = 22;
-constexpr std::size_t kIhdrBitDepth = 24;
-constexpr std::size_t kIhdrColorType = 25;
-constexpr std::size_t kIhdrCrc = 29;
-constexpr std::size_t kPlteLengthHighByte = 35;
-constexpr std::size_t kPlteLengthLowByte = 36;
-constexpr std::size_t kPlteType = 37;
-constexpr std::size_t kPlteData = 41;
-}  // namespace indexed_offset
-
-template <std::size_t N>
-void write_bytes(std::vector<int8_t>& output,
-                 std::size_t offset,
-                 const std::array<int8_t, N>& bytes) {
-    for (std::size_t byte_index = 0; byte_index < bytes.size(); ++byte_index)
-        output[offset + byte_index] = bytes[byte_index];
-}
-}  // namespace png_format
 
 namespace state_work {
 constexpr int32_t kMapGenerationStart = 0;
@@ -85,11 +38,6 @@ constexpr int32_t kOddRowOffset = -1;
 
 }  // namespace
 
-static int read_u16_be(ResourceReader& resource) {
-    const int high_byte = resource.read_byte();
-    const int low_byte = resource.read_byte();
-    return high_byte * 256 + low_byte;
-}
 
 void Game::key_pressed(int32_t key_code) {
     Game* game = this;
@@ -110,102 +58,21 @@ void Game::reset_overlay_render_state() {
 }
 
 
-// public Image decodePngFromSpriteStream() -- rebuild a PNG from the stream
+// Sprites load from loose PNG files (resources/sprites/<index>.png). The consume
+// counter (sprite_load_index) preserves the original stream read order, so every
+// caller -- cycle flag, font pages, tile sprites -- receives the same image it
+// did from the legacy sprite_images.bin stream.
 std::unique_ptr<Image> Assets::decode_png_from_sprite_stream() {
-    std::vector<int8_t> png_bytes;
-    int png_byte_count = 0;
-    const int resource_format_code = sprite_stream.read_byte();
-    if (resource_format_code == resource_format::kPngStream) {
-        png_byte_count = read_u16_be(sprite_stream);
-        png_bytes.resize(static_cast<std::size_t>(png_byte_count));
-        png_format::write_bytes(png_bytes, 0, png_format::kSignaturePrefix);
-        for (int png_byte_index =
-                 static_cast<int>(png_format::kSignaturePrefix.size());
-             png_byte_index < png_byte_count; ++png_byte_index)
-            png_bytes[png_byte_index] =
-                (int8_t)sprite_stream.read_byte();
-    }
-    if (resource_format_code == resource_format::kIndexedImage) {
-        const int image_data_byte_count = read_u16_be(sprite_stream);
-        const int palette_byte_count = sprite_stream.read_byte()
-            * png_format::kPaletteBytesPerColor;
-        const int transparency_entry_count = sprite_stream.read_byte();
-        png_byte_count = image_data_byte_count + palette_byte_count
-            + png_format::kIndexedImageFixedByteCount
-            + transparency_entry_count * png_format::kTransparencyChunkByteCount;
-        png_bytes.resize(static_cast<std::size_t>(png_byte_count));
-        png_format::write_bytes(png_bytes, 0, png_format::kSignature);
-        png_format::write_bytes(
-            png_bytes, png_format::indexed_offset::kIhdrType,
-            png_format::kIhdrChunkType);
-        png_bytes[png_format::indexed_offset::kIhdrLengthLastByte] = 13;
-        png_bytes[png_format::indexed_offset::kIhdrWidthLowByte] =
-            (int8_t)sprite_stream.read_byte();
-        png_bytes[png_format::indexed_offset::kIhdrWidthLowByte + 1] =
-            (int8_t)sprite_stream.read_byte();
-        png_bytes[png_format::indexed_offset::kIhdrHeightLowByte] =
-            (int8_t)sprite_stream.read_byte();
-        png_bytes[png_format::indexed_offset::kIhdrHeightLowByte + 1] =
-            (int8_t)sprite_stream.read_byte();
-        png_bytes[png_format::indexed_offset::kIhdrBitDepth] =
-            (int8_t)sprite_stream.read_byte();
-        png_bytes[png_format::indexed_offset::kIhdrColorType] =
-            png_format::kIndexedColorType;
-        for (std::size_t crc_byte_offset = 0; crc_byte_offset < 4;
-             ++crc_byte_offset)
-            png_bytes[png_format::indexed_offset::kIhdrCrc + crc_byte_offset] =
-                (int8_t)sprite_stream.read_byte();
-        png_bytes[png_format::indexed_offset::kPlteLengthHighByte] =
-            (int8_t)(palette_byte_count >> 8 & png_format::kByteMask);
-        png_bytes[png_format::indexed_offset::kPlteLengthLowByte] =
-            (int8_t)(palette_byte_count & png_format::kByteMask);
-        png_format::write_bytes(
-            png_bytes, png_format::indexed_offset::kPlteType,
-            png_format::kPlteChunkType);
-        int write_index;
-        for (write_index = 0;
-             write_index < palette_byte_count + 4; ++write_index) {
-            png_bytes[png_format::indexed_offset::kPlteData + write_index] =
-                (int8_t)sprite_stream.read_byte();
-        }
-        write_index = static_cast<int>(
-            png_format::indexed_offset::kPlteData + palette_byte_count + 4);
-        if (transparency_entry_count == png_format::kSingleTransparencyEntry) {
-            write_index += 3;
-            png_bytes[write_index++] = 1;
-            png_format::write_bytes(
-                png_bytes, write_index, png_format::kTrnsChunkType);
-            write_index += static_cast<int>(png_format::kTrnsChunkType.size());
-            png_bytes[++write_index] = 64;
-            png_bytes[++write_index] = -26;
-            png_bytes[++write_index] = -40;
-            const int transparency_crc_offset = ++write_index;
-            ++write_index;
-            png_bytes[transparency_crc_offset] = 102;
-        }
-        write_index += 2;
-        png_bytes[write_index++] =
-            (int8_t)(image_data_byte_count >> 8 & png_format::kByteMask);
-        png_bytes[write_index++] =
-            (int8_t)(image_data_byte_count & png_format::kByteMask);
-        png_format::write_bytes(png_bytes, write_index,
-                                png_format::kIdatChunkType);
-        write_index += static_cast<int>(png_format::kIdatChunkType.size());
-        for (int image_data_index = 0;
-             image_data_index < image_data_byte_count + 4;
-             ++image_data_index)
-            png_bytes[write_index++] =
-                (int8_t)sprite_stream.read_byte();
-        write_index += 4;
-        png_format::write_bytes(png_bytes, write_index,
-                                png_format::kIendChunkType);
-        write_index += static_cast<int>(png_format::kIendChunkType.size());
-        png_format::write_bytes(png_bytes, write_index,
-                                png_format::kIendCrc);
-    }
-    if (png_bytes.empty()) return nullptr;
-    return Image::decode_png(std::span<const uint8_t>(
-        reinterpret_cast<const uint8_t*>(png_bytes.data()), png_bytes.size()));
+    return load_sprite_png(sprite_load_index++);
+}
+
+std::unique_ptr<Image> Assets::load_sprite_png(int32_t index) {
+    char resource_name[32];
+    std::snprintf(resource_name, sizeof(resource_name), "sprites/%03d.png", index);
+    const auto bytes = resources::read_all(resource_name);
+    if (!bytes) return nullptr;
+    return Image::decode_png(std::span<const std::uint8_t>(
+        bytes->data(), bytes->size()));
 }
 
 std::vector<int8_t> Assets::index_text_codes(int32_t semantic_index) const {
@@ -324,7 +191,7 @@ void Game::set_state(int32_t state) {
     game->ui.menuDirty = true;
     switch (state) {
         case GameState::BootSplash0:
-            game->assets.open_sprite_stream("sprite_images.bin");
+            game->assets.open_sprite_stream("sprites");  // loose PNGs in resources/sprites/
             // Dialog layout now lives in code (game/dialog_table.cpp); the old
             // packed_sprites.bin load is gone.
             game->loadingAnimationFrame = 0;

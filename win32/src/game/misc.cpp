@@ -21,7 +21,11 @@ void Renderer::draw_sprite_quad(Surface& surface, const Assets& assets,
 }
 
 void Assets::open_sprite_stream(const char *resource_name) {
-    sprite_stream = resources::open(resource_name);
+    // Sprites now load from loose PNG files (resources/sprites/<index>.png); this
+    // just (re)initialises the consume counter that preserves the original read
+    // order. The resource name is retained for call-site compatibility.
+    (void)resource_name;
+    sprite_load_index = 0;
 }
 
 bool Game::spend_money(int32_t amount) {
