@@ -151,23 +151,43 @@ void Game::paint_main(Surface& surface) {
                        game->renderer.bottomBarY + 1, 12, 12);
     }
     if (game->ui.buildMenuMode == build_menu::TrackBuildConfirm) {
-        char cost_text[24];
-        int64_t magnitude = game->build.selectionCost < 0
-                            ? -(int64_t)game->build.selectionCost : game->build.selectionCost;
-        snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
-        const int cost_text_length = static_cast<int>(strlen(cost_text));
-        const std::vector<int8_t> currency_codes = game->assets.index_text_codes(10);
-        std::vector<int8_t> cost_codes(
-            static_cast<size_t>(cost_text_length + 1) + currency_codes.size());
-        cost_codes[0] = header_display::kCurrencyPrefix;
-        for (int digit_index = 0; digit_index < cost_text_length; ++digit_index)
-            cost_codes[digit_index + 1] = static_cast<int8_t>(
-                cost_text[digit_index] - header_display::kAsciiDigitOffset);
-        std::copy(currency_codes.begin(), currency_codes.end(),
-                  cost_codes.begin() + cost_text_length + 1);
-        game->renderer.draw_font_string(*game->renderer.backbuffer_surface, game->assets, 35, game->renderer.bottomBarY + 5, cost_codes, false);
+        game->draw_bottom_bar_cost(*game->renderer.backbuffer_surface,
+                                   game->build.selectionCost, 35);
+    }
+    // Road auto-route: while the anchor is armed and a path is previewed,
+    // show its price after the last menu icon so the second click never pays
+    // blind.
+    if (game->ui.buildMenuMode == build_menu::RoadTools
+        && game->build.roadAutoAnchorX >= 0
+        && !game->build.roadPreviewPath.empty()) {
+        const int last_icon_x = unsigned_byte(
+            game->ui.menuItemCode[game->ui.buildMenuMode].back());
+        game->draw_bottom_bar_cost(*game->renderer.backbuffer_surface,
+                                   game->build.roadPreviewCost,
+                                   last_icon_x + 20);
     }
     game->ui.menuDirty = false;
+}
+
+void Game::draw_bottom_bar_cost(Surface& surface, int32_t cost,
+                                int32_t text_x) {
+    Game *game = this;
+    char cost_text[24];
+    int64_t magnitude = cost < 0 ? -(int64_t)cost : cost;
+    snprintf(cost_text, sizeof(cost_text), "%lld", (long long)magnitude);
+    const int cost_text_length = static_cast<int>(strlen(cost_text));
+    const std::vector<int8_t> currency_codes = game->assets.index_text_codes(10);
+    std::vector<int8_t> cost_codes(
+        static_cast<size_t>(cost_text_length + 1) + currency_codes.size());
+    cost_codes[0] = header_display::kCurrencyPrefix;
+    for (int digit_index = 0; digit_index < cost_text_length; ++digit_index)
+        cost_codes[digit_index + 1] = static_cast<int8_t>(
+            cost_text[digit_index] - header_display::kAsciiDigitOffset);
+    std::copy(currency_codes.begin(), currency_codes.end(),
+              cost_codes.begin() + cost_text_length + 1);
+    game->renderer.draw_font_string(surface, game->assets, text_x,
+                                    game->renderer.bottomBarY + 5, cost_codes,
+                                    false);
 }
 
 int32_t Game::draw_number(Surface& surface, int32_t value, int32_t top_y) {
@@ -279,6 +299,30 @@ void Game::draw_build_menu_cursor(Surface& surface) {
         game->ui.menuTransitionCode[game->ui.buildMenuMode]
                                    [game->ui.buildMenuItemIndex];
     if (action_code == build_menu::cursor_action::kNone) return;
+    // Road auto-route preview: with the anchor armed, mark the anchor and the
+    // path the second click would build (green when affordable, red when
+    // not). Drawn first so the cursor quad stays on top.
+    game->update_road_route_preview();
+    if (game->build.roadAutoAnchorX >= 0) {
+        int32_t quad_x[4];
+        int32_t quad_y[4];
+        midp_set_color(graphics, 0xFFFFFF);
+        game->compute_iso_corners(game->build.roadAutoAnchorX,
+                                  game->build.roadAutoAnchorY, quad_x, quad_y,
+                                  true);
+        draw_selection_quad(graphics, quad_x, quad_y);
+        if (!game->build.roadPreviewPath.empty()) {
+            midp_set_color(graphics,
+                           game->build.roadPreviewCost <= game->economy.money
+                               ? 0x00FF00
+                               : 0xFF0000);
+            for (const RoadPoint& point : game->build.roadPreviewPath) {
+                game->compute_iso_corners(point.x, point.y, quad_x, quad_y,
+                                          true);
+                draw_selection_quad(graphics, quad_x, quad_y);
+            }
+        }
+    }
     if (action_code >= build_menu::cursor_action::kBuildTypeFirst
         && action_code <= build_menu::cursor_action::kHorizontalTerminal) {
         bool buildable = game->world.is_tile_buildable(game->ui.tileCursorX, game->ui.tileCursorY,
@@ -322,6 +366,8 @@ void Game::draw_build_menu_cursor(Surface& surface) {
                        game->world.is_city_or_station_tile(
                            game->fleet, game->ui.tileCursorX,
                            game->ui.tileCursorY)
+                               || game->road_demolishable(game->ui.tileCursorX,
+                                                          game->ui.tileCursorY)
                        ? 0x00FF00 : 0xFF0000);
     if (action_code == build_menu::cursor_action::kNeutral)
         midp_set_color(graphics, 0xFFFFFF);

@@ -150,6 +150,7 @@ private:
     void draw_header_bar(Surface& surface);
     void draw_confirm_bar(Surface& surface);
     void paint_main(Surface& surface);
+    void draw_bottom_bar_cost(Surface& surface, int32_t cost, int32_t text_x);
     int32_t draw_number(Surface& surface, int32_t value, int32_t top_y);
     void draw_money_ticker(Surface& surface);
     void draw_confirm_dialog(Surface& surface);
@@ -197,16 +198,22 @@ private:
     // helpers keep the oriented codes and the derived roadNet caches in sync.
     bool is_road_tile(int32_t x, int32_t y) const;      // tileMap code in 42..48
     bool road_buildable(int32_t x, int32_t y) const;    // empty drivable ground a new road may sit on
+    bool road_demolishable(int32_t x, int32_t y) const; // player road with no stop beside it
     int32_t road_shape_code(int32_t x, int32_t y) const;  // oriented 42..48 from road neighbours
     void renormalize_road_cells(const std::vector<RoadPoint>& touched);
     bool place_road_tile_at_cursor();                   // manual: one tile under the cursor
+    std::vector<RoadPoint> plan_road_build_route(int32_t anchor_x, int32_t anchor_y,
+                                                 int32_t target_x, int32_t target_y) const;
+    int32_t road_build_route_cost(const std::vector<RoadPoint>& path) const;  // new tiles only
     bool auto_route_road(int32_t anchor_x, int32_t anchor_y,
                          int32_t target_x, int32_t target_y);  // auto: shortest drivable road
+    void update_road_route_preview();                   // refresh the shown path/cost for the armed anchor
     RoadPoint road_access_cell(int32_t x, int32_t y) const;  // adjacent road cell a stop binds to, {-1,-1} if none
     int32_t road_stop_at(int32_t x, int32_t y) const;         // exact road-stop slot, or kNoFleetSlot
     bool road_stop_placeable(int32_t x, int32_t y) const;     // clear ground, unique access cell
     bool place_road_stop_at_cursor();                   // drop a bus/truck stop on ground beside a road
     void remove_road_stop(int32_t stop_slot);            // remove stop and rebuild affected routes
+    void rebuild_road_vehicle_routes();                  // re-expand routes after a road edit, drop dead ones
 
     // Road vehicles (buses/trucks). See road.cpp. roadVehicles is the bus/truck
     // fleet; routes are closed loops through the road-stop sites of one town

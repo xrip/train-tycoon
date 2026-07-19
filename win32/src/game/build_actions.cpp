@@ -224,8 +224,9 @@ void Game::demolish_at_cursor() {
     int cursor_x = game->ui.tileCursorX;
     int cursor_y = game->ui.tileCursorY;
     if (game->ui.blockBuildMenu
-        || !game->world.is_city_or_station_tile(game->fleet, cursor_x,
-                                                cursor_y))
+        || (!game->world.is_city_or_station_tile(game->fleet, cursor_x,
+                                                 cursor_y)
+            && !game->road_demolishable(cursor_x, cursor_y)))
         return;
 
     game->build.backgroundCost = 0;
@@ -240,8 +241,20 @@ void Game::demolish_at_cursor() {
         return;
     }
     int tile_code = game->world.terrain.tileMap[cursor_x][cursor_y];
-    if (tile_code >= construction_tile::kFirst
-        && tile_code <= construction_tile::kLast) {
+    if (tile_code >= road_tile::kFirstShape
+        && tile_code <= road_tile::kLastShape) {
+        // Player road (city streets fail the road_demolishable gate above):
+        // queue the demolition, then fix the streets it joined and drop the
+        // bus/truck routes that can no longer run. The pending bit makes the
+        // cell read as non-road at once, so routing stops using it now while
+        // the queue animation plays.
+        game->build.queue_tile_change(game->world.terrain, game->economy,
+                                      cursor_x, cursor_y, true, false);
+        game->world.advance_construction_timers(cursor_x, cursor_y, -6);
+        game->renormalize_road_cells({RoadPoint{cursor_x, cursor_y}});
+        game->rebuild_road_vehicle_routes();
+    } else if (tile_code >= construction_tile::kFirst
+               && tile_code <= construction_tile::kLast) {
         game->world.advance_construction_timers(cursor_x, cursor_y, -3);
         tile_code = game->world.terrain.tileMap[cursor_x][cursor_y];
         if (tile_code == construction_tile::HorizontalA
@@ -784,17 +797,26 @@ void Game::open_build_menu() {
                 case build_menu::road_item::LayTile:  // lay one road tile on the drivable ground under the cursor
                     game->place_road_tile_at_cursor();
                     break;
-                case build_menu::road_item::AutoRoute:  // auto-route road: first click anchors, second click routes
+                case build_menu::road_item::AutoRoute:  // auto-route road: first click anchors, second click builds the previewed path
                     if (game->build.roadAutoAnchorX < 0) {
                         game->build.roadAutoAnchorX = game->ui.tileCursorX;
                         game->build.roadAutoAnchorY = game->ui.tileCursorY;
-                    } else {
-                        game->auto_route_road(game->build.roadAutoAnchorX,
-                                              game->build.roadAutoAnchorY,
-                                              game->ui.tileCursorX, game->ui.tileCursorY);
+                        game->ui.menuDirty = true;
+                    } else if (game->build.roadAutoAnchorX == game->ui.tileCursorX
+                               && game->build.roadAutoAnchorY == game->ui.tileCursorY) {
+                        // Clicking the anchor again cancels the pending route.
+                        game->build.roadAutoAnchorX = -1;
+                        game->build.roadAutoAnchorY = -1;
+                        game->ui.menuDirty = true;
+                    } else if (game->auto_route_road(game->build.roadAutoAnchorX,
+                                                     game->build.roadAutoAnchorY,
+                                                     game->ui.tileCursorX,
+                                                     game->ui.tileCursorY)) {
                         game->build.roadAutoAnchorX = -1;
                         game->build.roadAutoAnchorY = -1;
                     }
+                    // A failed target keeps the anchor: the preview shows no
+                    // path there, so the player can aim at another tile.
                     break;
                 case build_menu::road_item::PlaceStop:  // drop a bus/truck stop beside the road
                     game->place_road_stop_at_cursor();

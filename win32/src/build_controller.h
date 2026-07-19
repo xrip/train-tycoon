@@ -4,8 +4,10 @@
 #ifndef BUILD_CONTROLLER_H
 #define BUILD_CONTROLLER_H
 #include "game_constants.h"
+#include "road.h"
 #include "support/grid.h"
 #include <cstdint>
+#include <vector>
 
 struct Economy;
 struct Scenario;
@@ -102,6 +104,16 @@ struct BuildController {
     // pending route. Runtime-only; save byte order is unchanged.
     int32_t roadAutoAnchorX = -1;
     int32_t roadAutoAnchorY = -1;
+
+    // Road auto-route preview: the path and cost the second click would build,
+    // recomputed by update_road_route_preview only when the tile cursor moves
+    // (roadPreviewCursor tracks the last computed cursor). Drawn on the map and
+    // shown as a cost in the bottom bar so the player sees what they pay for.
+    // Runtime-only; save byte order is unchanged.
+    int32_t roadPreviewCursorX = -1;
+    int32_t roadPreviewCursorY = -1;
+    int32_t roadPreviewCost = 0;
+    std::vector<RoadPoint> roadPreviewPath;
 };
 
 #endif  // BUILD_CONTROLLER_H

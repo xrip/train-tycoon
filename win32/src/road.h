@@ -58,6 +58,8 @@ enum Id : int32_t {
 struct RoadPoint {
     int x = 0;
     int y = 0;
+
+    bool operator==(const RoadPoint&) const = default;
 };
 
 inline constexpr int kNoRoadComponent = -1;

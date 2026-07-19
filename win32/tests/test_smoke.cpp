@@ -2051,6 +2051,110 @@ TEST_CASE("full: road stops use unique ground cells beside a road") {
     delete game;
 }
 
+TEST_CASE("full: player roads can be demolished, city streets cannot") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    World& world = GameTestAccess::world(*game);
+    UiController& ui = GameTestAccess::ui(*game);
+
+    // Find an open 3x1 strip (with one cell of margin) and lay three road
+    // tiles in a row.
+    int road_x = -1;
+    int road_y = -1;
+    for (int x = 1; x < world.terrain.mapWidth - 3 && road_x < 0; ++x) {
+        for (int y = 1; y < world.terrain.mapHeight - 1 && road_x < 0; ++y) {
+            bool open = true;
+            for (int scan_x = x - 1; scan_x <= x + 3; ++scan_x)
+                for (int scan_y = y - 1; scan_y <= y + 1; ++scan_y)
+                    open = open
+                        && world.is_placeable_terrain(scan_x, scan_y);
+            if (open) { road_x = x; road_y = y; }
+        }
+    }
+    REQUIRE(road_x >= 0);
+    for (int dx = 0; dx < 3; ++dx) {
+        ui.tileCursorX = static_cast<int8_t>(road_x + dx);
+        ui.tileCursorY = static_cast<int8_t>(road_y);
+        REQUIRE(GameTestAccess::place_road_tile_at_cursor(*game));
+    }
+    const RoadNetwork& net = GameTestAccess::road_net(*game);
+    REQUIRE(net.component_at(road_x, road_y)
+            == net.component_at(road_x + 2, road_y));
+
+    // Demolish the middle tile: the pending bit takes it out of the road
+    // layer at once, so the row splits into two components immediately.
+    REQUIRE(GameTestAccess::road_demolishable(*game, road_x + 1, road_y));
+    ui.tileCursorX = static_cast<int8_t>(road_x + 1);
+    GameTestAccess::demolish_at_cursor(*game);
+    CHECK_FALSE(GameTestAccess::is_road_tile(*game, road_x + 1, road_y));
+    CHECK(net.component_at(road_x, road_y)
+          != net.component_at(road_x + 2, road_y));
+
+    // A city street (trackMap carries the city owner) is not demolishable.
+    int city_x = -1;
+    int city_y = -1;
+    for (int x = 0; x < world.terrain.mapWidth && city_x < 0; ++x)
+        for (int y = 0; y < world.terrain.mapHeight && city_x < 0; ++y)
+            if (GameTestAccess::is_road_tile(*game, x, y)
+                && world.trackMap[x][y] != 0) { city_x = x; city_y = y; }
+    REQUIRE(city_x >= 0);
+    CHECK_FALSE(GameTestAccess::road_demolishable(*game, city_x, city_y));
+    ui.tileCursorX = static_cast<int8_t>(city_x);
+    ui.tileCursorY = static_cast<int8_t>(city_y);
+    GameTestAccess::demolish_at_cursor(*game);
+    CHECK(GameTestAccess::is_road_tile(*game, city_x, city_y));
+
+    delete game;
+}
+
+TEST_CASE("full: road auto-route preview shows the path and cost before building") {
+    Game* game = make_game();
+    generate_scenario(game, 0);
+    World& world = GameTestAccess::world(*game);
+    UiController& ui = GameTestAccess::ui(*game);
+    BuildController& build = GameTestAccess::build(*game);
+
+    // Find an open 4x1 strip (with one cell of margin) for a straight route.
+    int road_x = -1;
+    int road_y = -1;
+    for (int x = 1; x < world.terrain.mapWidth - 4 && road_x < 0; ++x) {
+        for (int y = 1; y < world.terrain.mapHeight - 1 && road_x < 0; ++y) {
+            bool open = true;
+            for (int scan_x = x - 1; scan_x <= x + 4; ++scan_x)
+                for (int scan_y = y - 1; scan_y <= y + 1; ++scan_y)
+                    open = open
+                        && world.is_placeable_terrain(scan_x, scan_y);
+            if (open) { road_x = x; road_y = y; }
+        }
+    }
+    REQUIRE(road_x >= 0);
+
+    // Arm the anchor at one end and point the cursor at the other: the
+    // preview reports exactly what the second click would build.
+    build.roadAutoAnchorX = road_x;
+    build.roadAutoAnchorY = road_y;
+    ui.tileCursorX = static_cast<int8_t>(road_x + 3);
+    ui.tileCursorY = static_cast<int8_t>(road_y);
+    GameTestAccess::update_road_route_preview(*game);
+    REQUIRE(build.roadPreviewPath.size() == 4);
+    CHECK(build.roadPreviewCost == 4 * kRoadTileCost);
+
+    // The build charges what the preview showed.
+    const int money_before = GameTestAccess::economy(*game).money;
+    REQUIRE(GameTestAccess::auto_route_road(*game, road_x, road_y,
+                                            road_x + 3, road_y));
+    CHECK(GameTestAccess::economy(*game).money
+          == money_before - build.roadPreviewCost);
+
+    // Clearing the anchor clears the preview.
+    build.roadAutoAnchorX = -1;
+    build.roadAutoAnchorY = -1;
+    GameTestAccess::update_road_route_preview(*game);
+    CHECK(build.roadPreviewPath.empty());
+
+    delete game;
+}
+
 TEST_CASE("full: a road stop beside a zero-zone factory does not divide by zero") {
     Game* game = make_game();
     generate_scenario(game, 0);

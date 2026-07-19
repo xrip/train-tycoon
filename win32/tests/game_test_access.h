@@ -77,6 +77,12 @@ struct GameTestAccess {
     static bool road_buildable(const Game& game, int x, int y) {
         return game.road_buildable(x, y);
     }
+    static bool road_demolishable(const Game& game, int x, int y) {
+        return game.road_demolishable(x, y);
+    }
+    static void update_road_route_preview(Game& game) {
+        game.update_road_route_preview();
+    }
     static bool place_road_tile_at_cursor(Game& game) {
         return game.place_road_tile_at_cursor();
     }

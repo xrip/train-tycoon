@@ -44,7 +44,7 @@ TEST_CASE("fast: city growth does not claim unowned player roads") {
     random.set_seed(1234);
 
     for (int attempt = 0; attempt < 200; ++attempt)
-        CHECK_FALSE(world.pick_valid_forest_tile(random));
+        CHECK_FALSE(world.grow_city_street(random));
 
     for (int x = 0; x < 7; ++x)
         for (int y = 0; y < 7; ++y)
@@ -103,6 +103,103 @@ TEST_CASE("fast: point-to-point route rejects off-map endpoints") {
 
     CHECK(net.plan_route(RoadPoint{-1, 0}, RoadPoint{1, 0}, passable).empty());
     CHECK(net.plan_route(RoadPoint{0, 0}, RoadPoint{4, 0}, passable).empty());
+}
+
+TEST_CASE("fast: shared road shape rule follows the linked neighbours") {
+    CHECK(road_shape_from_neighbors(true, true, false, false)
+          == road_tile::kStraightShape43);
+    CHECK(road_shape_from_neighbors(false, false, true, true)
+          == road_tile::kStraightShape42);
+    CHECK(road_shape_from_neighbors(true, false, false, false)
+          == road_tile::kStraightShape43);  // stub along x
+    CHECK(road_shape_from_neighbors(false, false, true, false)
+          == road_tile::kStraightShape42);  // stub along y
+    CHECK(road_shape_from_neighbors(false, false, false, false)
+          == road_tile::kStraightShape42);
+    CHECK(road_shape_from_neighbors(false, true, true, false)
+          == road_tile::kCornerShape45);
+    CHECK(road_shape_from_neighbors(false, true, false, true)
+          == road_tile::kCornerShape46);
+    CHECK(road_shape_from_neighbors(true, false, false, true)
+          == road_tile::kCornerShape47);
+    CHECK(road_shape_from_neighbors(true, false, true, false)
+          == road_tile::kCornerShape48);
+    CHECK(road_shape_from_neighbors(true, true, true, false)
+          == road_tile::kJunctionShape44);
+    CHECK(road_shape_from_neighbors(true, true, true, true)
+          == road_tile::kJunctionShape44);
+}
+
+TEST_CASE("fast: city growth re-orients the streets it joins") {
+    World world;
+    world.resize(7, 7);
+    const int8_t city_owned =
+        static_cast<int8_t>(track_overlay::JUNCTION | 0);
+    // Two horizontal streets linked by junctions. The only cells a new street
+    // can grow into are the gaps in the middle row, and each gap touches the
+    // straight above and below -- so a growth must turn those straights into
+    // junctions.
+    for (int x = 1; x <= 5; ++x) {
+        world.terrain.tileMap[x][2] = road_tile::kStraightShape43;
+        world.terrain.tileMap[x][4] = road_tile::kStraightShape43;
+        world.trackMap[x][2] = city_owned;
+        world.trackMap[x][4] = city_owned;
+    }
+    for (int x = 1; x <= 5; x += 2) {
+        world.terrain.tileMap[x][3] = road_tile::kJunctionShape44;
+        world.trackMap[x][3] = city_owned;
+    }
+    JavaRandom random;
+    random.set_seed(1234);
+
+    bool grew = false;
+    for (int attempt = 0; attempt < 500 && !grew; ++attempt) {
+        int8_t before[7][7];
+        for (int x = 0; x < 7; ++x)
+            for (int y = 0; y < 7; ++y)
+                before[x][y] = world.terrain.tileMap[x][y];
+        if (!world.grow_city_street(random)) continue;
+        grew = true;
+
+        const auto is_road = [&world](int x, int y) {
+            if (x < 0 || y < 0 || x >= 7 || y >= 7) return false;
+            const int code = world.terrain.tileMap[x][y];
+            return code >= road_tile::kFirstShape
+                   && code <= road_tile::kLastShape;
+        };
+        // Find the new street cell (was not a road before the growth).
+        int new_x = -1;
+        int new_y = -1;
+        for (int x = 0; x < 7 && new_x < 0; ++x)
+            for (int y = 0; y < 7 && new_x < 0; ++y) {
+                const int old_code = before[x][y];
+                const bool was_road = old_code >= road_tile::kFirstShape
+                                      && old_code <= road_tile::kLastShape;
+                if (is_road(x, y) && !was_road) { new_x = x; new_y = y; }
+            }
+        REQUIRE(new_x >= 0);
+
+        // Every street the new cell touches now follows the shared shape
+        // rule, and at least one of them actually changed shape.
+        int reoriented = 0;
+        const int neighbor_x[4] = {new_x - 1, new_x + 1, new_x, new_x};
+        const int neighbor_y[4] = {new_y, new_y, new_y - 1, new_y + 1};
+        for (int direction = 0; direction < 4; ++direction) {
+            const int cell_x = neighbor_x[direction];
+            const int cell_y = neighbor_y[direction];
+            if (!is_road(cell_x, cell_y)) continue;
+            CHECK(world.terrain.tileMap[cell_x][cell_y]
+                  == road_shape_from_neighbors(
+                         is_road(cell_x - 1, cell_y),
+                         is_road(cell_x + 1, cell_y),
+                         is_road(cell_x, cell_y - 1),
+                         is_road(cell_x, cell_y + 1)));
+            if (world.terrain.tileMap[cell_x][cell_y] != before[cell_x][cell_y])
+                ++reoriented;
+        }
+        CHECK(reoriented > 0);
+    }
+    REQUIRE(grew);
 }
 
 TEST_CASE("fast: road vehicle steps tile-to-tile and ping-pongs") {

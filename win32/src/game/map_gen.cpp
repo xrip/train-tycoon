@@ -562,36 +562,14 @@ void Game::place_terrain_patch(int32_t origin_x, int32_t origin_y) {
                 + (next_row_present ? 1 : 0)
                 + (next_column_present ? 1 : 0)
                 + (previous_column_present ? 1 : 0);
-            if (present_neighbor_count > 2) {
-                patch_tiles[patch_x][patch_y] =
-                    road_tile::kJunctionShape44;
-                continue;
-            }
-            if (next_row_present && previous_column_present) {
-                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape45;
-                continue;
-            }
-            if (next_row_present && next_column_present) {
-                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape46;
-                continue;
-            }
-            if (previous_row_present && next_column_present) {
-                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape47;
-                continue;
-            }
-            if (previous_row_present && previous_column_present) {
-                patch_tiles[patch_x][patch_y] = road_tile::kCornerShape48;
-                continue;
-            }
-            if ((previous_row_present || next_row_present)
-                && !next_column_present && !previous_column_present) {
-                patch_tiles[patch_x][patch_y] = road_tile::kStraightShape43;
-                continue;
-            }
-            if ((!previous_column_present && !next_column_present)
-                || previous_row_present || next_row_present)
-                continue;
-            patch_tiles[patch_x][patch_y] = road_tile::kStraightShape42;
+            // Isolated seeds keep their marker; every connected cell gets the
+            // shared road-shape rule (the same one the road editor writes).
+            if (present_neighbor_count == 0) continue;
+            patch_tiles[patch_x][patch_y] = static_cast<int8_t>(
+                road_shape_from_neighbors(previous_row_present,
+                                          next_row_present,
+                                          previous_column_present,
+                                          next_column_present));
         }
     }
 

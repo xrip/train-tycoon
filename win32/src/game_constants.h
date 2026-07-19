@@ -806,6 +806,23 @@ inline constexpr int32_t kCornerShape48 = 48;
 inline constexpr int32_t kLastShape = kCornerShape48;
 }  // namespace road_tile
 
+// The oriented street shape (42..48) for a road cell from its 4 road
+// neighbours: a junction for 3+ links, a corner for a bend, a straight along
+// the linked axis, and 42 for a stub. This is the single rule shared by map
+// generation, city growth, and the player road tools.
+inline constexpr int32_t road_shape_from_neighbors(bool left, bool right,
+                                                   bool up, bool down) {
+    const int neighbor_count = (left ? 1 : 0) + (right ? 1 : 0)
+        + (up ? 1 : 0) + (down ? 1 : 0);
+    if (neighbor_count > 2) return road_tile::kJunctionShape44;
+    if (right && up) return road_tile::kCornerShape45;
+    if (right && down) return road_tile::kCornerShape46;
+    if (left && down) return road_tile::kCornerShape47;
+    if (left && up) return road_tile::kCornerShape48;
+    if ((left || right) && !up && !down) return road_tile::kStraightShape43;
+    return road_tile::kStraightShape42;
+}
+
 // Neutral tile ranges used by the six generated industry groups. The numeric
 // data proves the groups and their source/destination ranges, but not real
 // commodity names.

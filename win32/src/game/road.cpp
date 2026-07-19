@@ -244,30 +244,13 @@ bool Game::road_buildable(int32_t x, int32_t y) const {
 }
 
 // Pick the oriented street shape (42..48) for a road cell from its 4 road
-// neighbours -- the same rule map-gen uses for city streets and the PoC used at
-// draw time, but written into tileMap so the normal renderer shows it.
+// neighbours -- the shared rule (road_shape_from_neighbors) that map-gen and
+// city growth also use, written into tileMap so the normal renderer shows it.
 int32_t Game::road_shape_code(int32_t x, int32_t y) const {
-    const bool has_left_neighbor = is_road_tile(x - 1, y);
-    const bool has_right_neighbor = is_road_tile(x + 1, y);
-    const bool has_upper_neighbor = is_road_tile(x, y - 1);
-    const bool has_lower_neighbor = is_road_tile(x, y + 1);
-    const int neighbor_count = (has_left_neighbor ? 1 : 0)
-        + (has_right_neighbor ? 1 : 0)
-        + (has_upper_neighbor ? 1 : 0)
-        + (has_lower_neighbor ? 1 : 0);
-    if (neighbor_count > 2) return road_tile::kJunctionShape44; // junction / crossing
-    if (has_right_neighbor && has_upper_neighbor)
-        return road_tile::kCornerShape45;                       // corner: +x, -y
-    if (has_right_neighbor && has_lower_neighbor)
-        return road_tile::kCornerShape46;                       // corner: +x, +y
-    if (has_left_neighbor && has_lower_neighbor)
-        return road_tile::kCornerShape47;                       // corner: -x, +y
-    if (has_left_neighbor && has_upper_neighbor)
-        return road_tile::kCornerShape48;                       // corner: -x, -y
-    if ((has_left_neighbor || has_right_neighbor)
-        && !has_upper_neighbor && !has_lower_neighbor)
-        return road_tile::kStraightShape43;                     // straight along x
-    return road_tile::kStraightShape42;                         // straight along y / stub
+    return road_shape_from_neighbors(is_road_tile(x - 1, y),
+                                     is_road_tile(x + 1, y),
+                                     is_road_tile(x, y - 1),
+                                     is_road_tile(x, y + 1));
 }
 
 // Re-orient the touched road cells and their road neighbours (so a newly-laid
@@ -299,35 +282,72 @@ bool Game::place_road_tile_at_cursor() {
     return true;
 }
 
-bool Game::auto_route_road(int32_t anchor_x, int32_t anchor_y,
-                           int32_t target_x, int32_t target_y) {
-    // Route over drivable ground and any existing road, so the path threads
-    // through a town's streets for free and only pays for new tiles.
+// Route a would-be road over drivable ground and any existing road, so the
+// path threads through a town's streets for free and only new tiles cost.
+// Shared by auto_route_road (the build) and update_road_route_preview (the
+// shown-before-paying path).
+std::vector<RoadPoint> Game::plan_road_build_route(
+    int32_t anchor_x, int32_t anchor_y, int32_t target_x,
+    int32_t target_y) const {
     const auto passable = [this](int x, int y) {
         return is_road_tile(x, y) || road_buildable(x, y);
     };
-    const std::vector<RoadPoint> path =
-        roadNet.plan_route(RoadPoint{anchor_x, anchor_y},
-                           RoadPoint{target_x, target_y}, passable);
-    if (path.size() < 2) return false;
+    return roadNet.plan_route(RoadPoint{anchor_x, anchor_y},
+                              RoadPoint{target_x, target_y}, passable);
+}
 
+int32_t Game::road_build_route_cost(const std::vector<RoadPoint>& path) const {
     int new_tiles = 0;
     for (const RoadPoint& p : path)
         if (!is_road_tile(p.x, p.y)) ++new_tiles;
-    const int cost = new_tiles * kRoadTileCost;
-    if (cost > economy.money) {
-        enter_out_of_money_state();
-        return false;
-    }
+    return new_tiles * kRoadTileCost;
+}
+
+bool Game::auto_route_road(int32_t anchor_x, int32_t anchor_y,
+                           int32_t target_x, int32_t target_y) {
+    const std::vector<RoadPoint> path =
+        plan_road_build_route(anchor_x, anchor_y, target_x, target_y);
+    if (path.size() < 2) return false;
+
+    const int cost = road_build_route_cost(path);
+    if (!spend_money(cost)) return false;
     for (const RoadPoint& p : path)
         if (!is_road_tile(p.x, p.y))
             world.terrain.tileMap[p.x][p.y] = road_tile::kStraightShape42;
-    economy.money -= cost;
-    economy.totalSpent += cost;
-    record_money_change(-cost);
     offerBoard.add_progress(offer_objective::Objective13, cost);
     renormalize_road_cells(path);
     return true;
+}
+
+// Recompute the cached auto-route preview (path + cost) when the anchor is
+// armed and the tile cursor moved. draw_build_menu_cursor shows the path and
+// the bottom bar shows the cost, so the second click never pays blind.
+void Game::update_road_route_preview() {
+    if (build.roadAutoAnchorX < 0) {
+        if (!build.roadPreviewPath.empty()) {
+            build.roadPreviewPath.clear();
+            build.roadPreviewCost = 0;
+            build.roadPreviewCursorX = -1;
+            build.roadPreviewCursorY = -1;
+            ui.menuDirty = true;  // drop the cost text from the bottom bar
+        }
+        return;
+    }
+    if (build.roadPreviewCursorX == ui.tileCursorX
+        && build.roadPreviewCursorY == ui.tileCursorY)
+        return;  // cache still fresh
+    build.roadPreviewCursorX = ui.tileCursorX;
+    build.roadPreviewCursorY = ui.tileCursorY;
+    build.roadPreviewPath =
+        plan_road_build_route(build.roadAutoAnchorX, build.roadAutoAnchorY,
+                              ui.tileCursorX, ui.tileCursorY);
+    if (build.roadPreviewPath.size() < 2) {
+        build.roadPreviewPath.clear();
+        build.roadPreviewCost = 0;
+    } else {
+        build.roadPreviewCost = road_build_route_cost(build.roadPreviewPath);
+    }
+    ui.menuDirty = true;  // bottom-bar cost text follows the cursor
 }
 
 // The adjacent road cell a stop at (x, y) binds to: the first of the four
@@ -360,6 +380,19 @@ int32_t Game::road_stop_at(int32_t x, int32_t y) const {
             return service_slot;
     }
     return kNoFleetSlot;
+}
+
+// A player-laid road cell may be demolished; a city street may not (its
+// trackMap carries the city owner code, player roads leave it 0). Cells
+// touching a road stop stay locked -- the same guard road_buildable uses --
+// so a stop's access cell can never move out from under its routes.
+bool Game::road_demolishable(int32_t x, int32_t y) const {
+    if (!is_road_tile(x, y)) return false;
+    if (world.trackMap[x][y] != 0) return false;  // city-owned street
+    for (const RoadPoint offset : kOrthogonalOffsets)
+        if (road_stop_at(x + offset.x, y + offset.y) != kNoFleetSlot)
+            return false;
+    return true;
 }
 
 bool Game::road_stop_placeable(int32_t x, int32_t y) const {
@@ -420,14 +453,24 @@ void Game::remove_road_stop(int32_t stop_slot) {
         return;
     site.flags = 0;
 
-    for (RoadVehicle& vehicle : roadVehicles) {
-        const std::size_t old_stop_count = vehicle.stopSites.size();
+    for (RoadVehicle& vehicle : roadVehicles)
         vehicle.stopSites.erase(
             std::remove(vehicle.stopSites.begin(), vehicle.stopSites.end(),
                         stop_slot),
             vehicle.stopSites.end());
-        if (vehicle.stopSites.size() == old_stop_count) continue;
-        vehicle.route = expand_road_route(vehicle.stopSites, vehicle.loop);
+    rebuild_road_vehicle_routes();
+}
+
+// Re-expand every vehicle's tile route from its stop list after the road
+// layer changed (a stop removed, a road tile demolished). Vehicles whose
+// expanded route is unchanged keep their position; vehicles that can no
+// longer run (a stop lost its road or the network split) are dropped.
+void Game::rebuild_road_vehicle_routes() {
+    for (RoadVehicle& vehicle : roadVehicles) {
+        std::vector<RoadPoint> route =
+            expand_road_route(vehicle.stopSites, vehicle.loop);
+        if (route == vehicle.route) continue;  // unaffected by the edit
+        vehicle.route = std::move(route);
         vehicle.segment = 0;
         vehicle.phase = 0;
         vehicle.forward = true;
@@ -584,10 +627,7 @@ bool Game::buy_road_vehicle(int32_t car_type, int32_t first_stop) {
     if (route.size() < 2) return false;
 
     const int price = car_type == road_vehicle_type::Bus ? kBusCost : kTruckCost;
-    if (economy.money < price) {
-        enter_out_of_money_state();
-        return false;
-    }
+    if (!spend_money(price)) return false;
     RoadVehicle vehicle;
     vehicle.carType = car_type;
     vehicle.capacity = car_type == road_vehicle_type::Bus
@@ -597,11 +637,6 @@ bool Game::buy_road_vehicle(int32_t car_type, int32_t first_stop) {
     vehicle.route = std::move(route);
     vehicle.stopSites = stops;
     roadVehicles.push_back(std::move(vehicle));
-
-    economy.money -= price;
-    economy.totalSpent += price;
-    record_money_change(-price);
-    renderer.lastViewportCenterX = -1;
     return true;
 }
 

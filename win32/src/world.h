@@ -100,7 +100,7 @@ struct World {
     int8_t random_city_tile(JavaRandom& random) const;
     void place_city_tile(JavaRandom& random, int32_t x, int32_t y,
                          int32_t owner);
-    bool pick_valid_forest_tile(JavaRandom& random);
+    bool grow_city_street(JavaRandom& random);
 };
 
 #endif  // WORLD_H

@@ -410,7 +410,7 @@ void World::place_city_tile(JavaRandom& random, int32_t tile_x, int32_t tile_y,
     }
 }
 
-bool World::pick_valid_forest_tile(JavaRandom& random) {
+bool World::grow_city_street(JavaRandom& random) {
     int tile_x = std::abs(random.next_int() % (terrain.mapWidth - 2)) + 1;
     int tile_y = std::abs(random.next_int() % (terrain.mapHeight - 2)) + 1;
     if (terrain.tileMap[tile_x][tile_y] != 0
@@ -437,17 +437,19 @@ bool World::pick_valid_forest_tile(JavaRandom& random) {
     int owner_code = track_owner_code & track::OWNER_MASK;
     if (owner_code < 0 || owner_code >= kCitySlotCount) return false;
 
-    if ((has_left_road && has_right_road && has_up_road) || (has_left_road && has_right_road && has_down_road)
-        || (has_left_road && has_up_road && has_down_road) || (has_right_road && has_up_road && has_down_road)) {
-        terrain.tileMap[tile_x][tile_y] = road_tile::kJunctionShape44;
-    } else if (has_left_road && has_up_road) {
-        terrain.tileMap[tile_x][tile_y] = road_tile::kCornerShape48;
-    } else if (has_left_road && has_down_road) {
-        terrain.tileMap[tile_x][tile_y] = road_tile::kCornerShape47;
-    } else if (has_right_road && has_up_road) {
-        terrain.tileMap[tile_x][tile_y] = road_tile::kCornerShape45;
-    } else if (has_right_road && has_down_road) {
-        terrain.tileMap[tile_x][tile_y] = road_tile::kCornerShape46;
+    const int road_neighbor_count = (has_left_road ? 1 : 0)
+        + (has_right_road ? 1 : 0) + (has_up_road ? 1 : 0)
+        + (has_down_road ? 1 : 0);
+    const int32_t deterministic_shape = road_shape_from_neighbors(
+        has_left_road, has_right_road, has_up_road, has_down_road);
+    if (road_neighbor_count > 2
+        || (deterministic_shape >= road_tile::kCornerShape45
+            && deterministic_shape <= road_tile::kCornerShape48)) {
+        // Junctions and bends follow the shared shape rule; single and
+        // straight links get a random chance of a corner/junction instead,
+        // so grown cities look organic rather than gridded.
+        terrain.tileMap[tile_x][tile_y] =
+            static_cast<int8_t>(deterministic_shape);
     } else {
         int shape_roll = std::abs(random.next_int() % 13);
         if (shape_roll == 12) {
@@ -499,6 +501,28 @@ bool World::pick_valid_forest_tile(JavaRandom& random) {
             break;
     }
     trackMap[tile_x][tile_y] = (int8_t)track_owner_code;
+    // Re-orient the streets this cell joins: a straight that gained a branch
+    // becomes a corner or junction. The new cell keeps its growth shape (it may
+    // be a random junction); only the pre-existing neighbours are updated, with
+    // the same shared rule the road editor and map generator use.
+    const auto is_street = [this](int x, int y) {
+        if (x < 0 || y < 0 || x >= terrain.mapWidth || y >= terrain.mapHeight)
+            return false;
+        const int code = unsigned_byte(terrain.tileMap[x][y]);
+        return code >= road_tile::kFirstShape && code <= road_tile::kLastShape;
+    };
+    const int neighbor_x[4] = {tile_x - 1, tile_x + 1, tile_x, tile_x};
+    const int neighbor_y[4] = {tile_y, tile_y, tile_y - 1, tile_y + 1};
+    for (int direction = 0; direction < 4; ++direction) {
+        const int cell_x = neighbor_x[direction];
+        const int cell_y = neighbor_y[direction];
+        if (!is_street(cell_x, cell_y)) continue;
+        terrain.tileMap[cell_x][cell_y] = static_cast<int8_t>(
+            road_shape_from_neighbors(is_street(cell_x - 1, cell_y),
+                                      is_street(cell_x + 1, cell_y),
+                                      is_street(cell_x, cell_y - 1),
+                                      is_street(cell_x, cell_y + 1)));
+    }
     return true;
 }
 
@@ -940,6 +964,12 @@ void Game::apply_queued_tile_changes() {
         if (game->world.terrain.tileQueueVisualOnly[queue_slot]) continue;
         if (tile_code >= tile::SCENERY_FIRST && tile_code <= tile::SCENERY_LAST)
             game->world.terrain.tileMap[tile_x][tile_y] = tile_change::kEmptyTileCode;
+        // Player road tiles clear through the same queue (city streets never
+        // reach it: demolish_at_cursor gates them out via road_demolishable).
+        if (tile_code >= road_tile::kFirstShape && tile_code <= road_tile::kLastShape) {
+            game->world.terrain.tileMap[tile_x][tile_y] = tile_change::kEmptyTileCode;
+            game->renderer.lastViewportCenterX = -1;
+        }
         if ((tile_code >= tile::TRACK_FIRST
              && tile_code <= tile_change::kTrackBeforeCrossingLast)
             || (tile_code >= tile::VERTICAL_STATION
@@ -1131,10 +1161,10 @@ void Game::advance_game_day() {
         game->charge_train_running_costs();
         game->check_scenario_milestone();
         if (game->scenario.aiExpansionEnabled) {
-            int forestFound = 0;
+            int streetGrew = 0;
             for (int attempt = 0; attempt < 30; ++attempt)
-                forestFound = forestFound || game->world.pick_valid_forest_tile(game->rng);
-            if (forestFound) {
+                streetGrew = streetGrew || game->world.grow_city_street(game->rng);
+            if (streetGrew) {
                 game->world.recount_zone_population();
                 game->roadNet.rebuild_from_tiles(game->world.terrain);
                 game->renderer.lastViewportCenterX = -1;
