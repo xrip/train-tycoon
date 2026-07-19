@@ -56,6 +56,8 @@ constexpr int32_t kConstructionOverlayOffsetY = -3;
 
 constexpr int32_t kTileOverlayFlag = 0x80;
 constexpr int32_t kVisibleTrainMarker = 1;
+constexpr uint8_t kRoadVehicleMarker = 1;
+constexpr uint8_t kRoadShelterMarker = 2;
 constexpr int32_t kNoConstructionCountdown = -1;
 }  // namespace
 
@@ -204,6 +206,49 @@ void Game::render_map(Surface& surface) {
                             + train_y - game->renderer.viewportY0] =
             kVisibleTrainMarker;
     }
+    // Road vehicles and old road-stop shelters join the tile sweep at their
+    // tile (a vehicle at its depth_tile()), so they get the same map depth as
+    // trains: buildings south of them are drawn later and cover them.
+    std::vector<uint8_t> road_draw_tiles(
+        static_cast<std::size_t>(visible_width * visible_height), 0);
+    std::vector<int32_t> visible_road_vehicles;
+    for (int32_t vehicle_index = 0;
+         vehicle_index < static_cast<int32_t>(game->roadVehicles.size());
+         ++vehicle_index) {
+        const RoadVehicle& vehicle = game->roadVehicles[vehicle_index];
+        if (!vehicle.active()) continue;
+        const RoadPoint depth = vehicle.depth_tile();
+        if (depth.x < game->renderer.viewportX0
+            || depth.y < game->renderer.viewportY0
+            || depth.x > game->renderer.viewportX1
+            || depth.y > game->renderer.viewportY1)
+            continue;
+        visible_road_vehicles.push_back(vehicle_index);
+        road_draw_tiles[(depth.x - game->renderer.viewportX0) * visible_height
+                        + depth.y - game->renderer.viewportY0] |=
+            kRoadVehicleMarker;
+    }
+    for (int service_slot = 0; service_slot < kServiceVehicleSlotCount;
+         ++service_slot) {
+        const ServiceSite& site = game->fleet.serviceSites[service_slot];
+        if ((site.flags & service_site::USED_SLOT) == 0
+            || (site.flags & service_site::TYPE_MASK) != kRoadStopSiteType)
+            continue;
+        const int stop_x = unsigned_byte(site.x);
+        const int stop_y = unsigned_byte(site.y);
+        if (!game->world.in_bounds(stop_x, stop_y)
+            || unsigned_byte(game->world.terrain.tileMap[stop_x][stop_y])
+                   == tile::VERTICAL_STATION)
+            continue;  // new stops are tile code 87, drawn in map depth already
+        if (stop_x < game->renderer.viewportX0
+            || stop_y < game->renderer.viewportY0
+            || stop_x > game->renderer.viewportX1
+            || stop_y > game->renderer.viewportY1)
+            continue;
+        road_draw_tiles[(stop_x - game->renderer.viewportX0) * visible_height
+                        + stop_y - game->renderer.viewportY0] |=
+            kRoadShelterMarker;
+    }
     for (int draw_index = 0;
          draw_index < game->assets.numActiveTileAnimations; ++draw_index) {
         const int map_x = origin_tile_x + game->assets.tileOffsetX[draw_index];
@@ -307,6 +352,21 @@ void Game::render_map(Surface& surface) {
                                           game->fleet, visible_train_slot);
             }
         }
+        const uint8_t road_marker =
+            road_draw_tiles[(map_x - game->renderer.viewportX0) * visible_height
+                            + map_y - game->renderer.viewportY0];
+        if ((road_marker & kRoadVehicleMarker) != 0) {
+            for (const int32_t vehicle_index : visible_road_vehicles) {
+                const RoadVehicle& vehicle =
+                    game->roadVehicles[vehicle_index];
+                if (!vehicle.active()) continue;
+                const RoadPoint depth = vehicle.depth_tile();
+                if (depth.x != map_x || depth.y != map_y) continue;
+                game->draw_road_vehicle(*graphics, vehicle);
+            }
+        }
+        if ((road_marker & kRoadShelterMarker) != 0)
+            game->draw_road_stop_shelter(*graphics, map_x, map_y);
         if (raw_tile_code < kTileOverlayFlag) continue;
         const int overlay_draw_x = map_y * map_render_geometry::kTileWidth
             + map_x * map_render_geometry::kTileWidth
@@ -373,7 +433,6 @@ void Game::render_map(Surface& surface) {
         }
     }
     game->draw_build_menu_row(*graphics);
-    game->render_road_vehicles(*graphics);
     midp_set_clip(graphics, 0, 0, game->renderer.canvasWidth,
                   game->renderer.canvasHeight);
     game->draw_confirm_dialog(*graphics);

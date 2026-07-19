@@ -117,6 +117,13 @@ struct RoadVehicle {
     // The tile the car is leaving / heading toward this segment.
     RoadPoint from_tile() const;
     RoadPoint to_tile() const;
+
+    // The tile whose map-draw slot the sprite is drawn at: the tile the car is
+    // closest to. Drawing at that tile's slot (like trains) lets buildings
+    // south of the car cover it instead of the car driving over them.
+    RoadPoint depth_tile() const {
+        return phase >= kStepsPerTile / 2 ? to_tile() : from_tile();
+    }
 };
 
 // The road layer: one byte per cell (0 = none, 1 = road), exactly the shape of

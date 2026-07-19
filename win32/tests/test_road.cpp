@@ -225,6 +225,32 @@ TEST_CASE("fast: road vehicle steps tile-to-tile and ping-pongs") {
     CHECK(car.to_tile().x == 1);
 }
 
+TEST_CASE("fast: road vehicle depth tile follows the closest tile") {
+    RoadVehicle car;
+    car.route = {RoadPoint{0, 0}, RoadPoint{1, 0}, RoadPoint{2, 0}};
+    REQUIRE(car.active());
+
+    // Near the start of a segment the sprite draws at the from-tile's slot;
+    // past the half-tile it moves to the to-tile's slot, so buildings south
+    // of the sprite occlude it in the map sweep.
+    car.phase = 0;
+    CHECK(car.depth_tile().x == 0);
+    car.phase = RoadVehicle::kStepsPerTile / 2 - 1;
+    CHECK(car.depth_tile().x == 0);
+    car.phase = RoadVehicle::kStepsPerTile / 2;
+    CHECK(car.depth_tile().x == 1);
+    car.phase = RoadVehicle::kStepsPerTile - 1;
+    CHECK(car.depth_tile().x == 1);
+
+    // Ping-ponging back, from/to swap, so the depth tile follows the car.
+    car.forward = false;
+    car.segment = 1;
+    car.phase = 0;
+    CHECK(car.depth_tile().x == 2);
+    car.phase = RoadVehicle::kStepsPerTile / 2;
+    CHECK(car.depth_tile().x == 1);
+}
+
 TEST_CASE("fast: road vehicle rejects an invalid saved segment") {
     RoadVehicle car;
     car.route = {RoadPoint{0, 0}, RoadPoint{1, 0}};

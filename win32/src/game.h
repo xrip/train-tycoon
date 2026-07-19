@@ -227,7 +227,14 @@ private:
     bool buy_road_vehicle(int32_t car_type, int32_t first_stop);
     void road_load_unload(RoadVehicle& vehicle, int32_t site);
     void update_road_vehicles();
-    void render_road_vehicles(Surface& surface);
+    // Map-depth drawing: render_map calls these from the tile sweep (vehicles
+    // at their depth_tile(), shelters at their own tile) so buildings south of
+    // them occlude them, exactly like trains.
+    void road_tile_screen(int32_t tile_x, int32_t tile_y,
+                          int32_t& screen_x, int32_t& screen_y) const;
+    void draw_road_vehicle(Surface& surface, const RoadVehicle& vehicle) const;
+    void draw_road_stop_shelter(Surface& surface, int32_t stop_x,
+                                int32_t stop_y) const;
 
     bool stopRequested = false;
     int32_t simSpeed = 1;

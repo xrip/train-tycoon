@@ -705,88 +705,83 @@ void Game::update_road_vehicles() {
     }
 }
 
-void Game::render_road_vehicles(Surface& surface) {
-    Game* game = this;
-    Surface* graphics = &surface;
-    const auto tile_screen = [game](int tile_x, int tile_y,
-                                    int& screen_x, int& screen_y) {
-        screen_x = tile_y * 16 + tile_x * 16 + 16
-                   - game->renderer.camera.viewportCenterX;
-        screen_y = game->world.terrain.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16
-             - game->renderer.camera.viewportCenterY
-             - 4 * game->world.terrain.tileElevation[tile_x][tile_y] + 15;
-    };
+// Screen position of a road tile's centre, matching how Renderer::draw_train
+// anchors train sprites (viewport-relative).
+void Game::road_tile_screen(int32_t tile_x, int32_t tile_y,
+                            int32_t& screen_x, int32_t& screen_y) const {
+    screen_x = tile_y * 16 + tile_x * 16 + 16
+               - renderer.camera.viewportCenterX;
+    screen_y = world.terrain.mapHalfWidth - tile_x * 8 + tile_y * 8 + 16
+               - renderer.camera.viewportCenterY
+               - 4 * world.terrain.tileElevation[tile_x][tile_y] + 15;
+}
 
-    // New stops use tile code 87 and are drawn in normal map depth. Keep this
-    // late draw only for old road-stop saves whose shelter cell was left empty.
-    for (int service_slot = 0;
-         service_slot < kServiceVehicleSlotCount; ++service_slot) {
-        const ServiceSite& site = game->fleet.serviceSites[service_slot];
-        if ((site.flags & service_site::USED_SLOT) == 0
-            || (site.flags & service_site::TYPE_MASK) != kRoadStopSiteType)
-            continue;
-        const int stop_x = unsigned_byte(site.x);
-        const int stop_y = unsigned_byte(site.y);
-        if (!game->world.in_bounds(stop_x, stop_y)) continue;
-        if (unsigned_byte(game->world.terrain.tileMap[stop_x][stop_y])
-            == tile::VERTICAL_STATION)
-            continue;
-        int stop_screen_x = 0;
-        int stop_screen_y = 0;
-        tile_screen(stop_x, stop_y, stop_screen_x, stop_screen_y);
-        const int tile_sprite_index =
-            unsigned_byte(game->assets.tileSpriteIndex[tile::VERTICAL_STATION]);
-        if (tile_sprite_index < static_cast<int>(game->assets.tile_sprites.size())
-            && game->assets.tile_sprites[tile_sprite_index])
-            midp_draw_image(graphics,
-                            game->assets.tile_sprites[tile_sprite_index].get(),
-                            stop_screen_x, stop_screen_y, 33);
-    }
+// Legacy shelter blit for old road-stop saves whose shelter cell was left
+// empty (new stops use tile code 87 and are drawn in normal map depth).
+// render_map calls this from the tile sweep at the shelter's own tile, so
+// city buildings south of the shelter cover it like any other building.
+void Game::draw_road_stop_shelter(Surface& surface, int32_t stop_x,
+                                  int32_t stop_y) const {
+    int stop_screen_x = 0;
+    int stop_screen_y = 0;
+    road_tile_screen(stop_x, stop_y, stop_screen_x, stop_screen_y);
+    const int tile_sprite_index =
+        unsigned_byte(assets.tileSpriteIndex[tile::VERTICAL_STATION]);
+    if (tile_sprite_index < static_cast<int>(assets.tile_sprites.size())
+        && assets.tile_sprites[tile_sprite_index])
+        midp_draw_image(&surface,
+                        assets.tile_sprites[tile_sprite_index].get(),
+                        stop_screen_x, stop_screen_y, 33);
+}
 
-    // Vehicles reuse the rail wagon sprites: pick the carType's direction row and
-    // blit the facing sprite at the phase-interpolated position between tiles.
-    for (const RoadVehicle& vehicle : game->roadVehicles) {
-        if (!vehicle.active()) continue;
-        const RoadPoint from_point = vehicle.from_tile();
-        const RoadPoint to_point = vehicle.to_tile();
-        if (!game->world.in_bounds(from_point.x, from_point.y)
-            || !game->world.in_bounds(to_point.x, to_point.y)
-            || vehicle.phase < 0
-            || vehicle.phase >= RoadVehicle::kStepsPerTile)
-            continue;
-        const int road_direction =
-            road_direction_between(from_point, to_point);
-        if (road_direction < 0
-            || vehicle.carType < 0
-            || vehicle.carType >= kTrainSpriteTypeCount)
-            continue;
-        int from_screen_x = 0;
-        int from_screen_y = 0;
-        int to_screen_x = 0;
-        int to_screen_y = 0;
-        tile_screen(from_point.x, from_point.y, from_screen_x, from_screen_y);
-        tile_screen(to_point.x, to_point.y, to_screen_x, to_screen_y);
-        const int screen_x = from_screen_x
-                             + (to_screen_x - from_screen_x) * vehicle.phase
-                                   / RoadVehicle::kStepsPerTile;
-        const int screen_y = from_screen_y
-                             + (to_screen_y - from_screen_y) * vehicle.phase
-                                   / RoadVehicle::kStepsPerTile;
-        // trainSpriteDirectionTable has 8 sprite slots per car; a train picks
-        // slots 1/5/3/7 for travel in the +x/-x/+y/-y map directions
-        // (see Renderer::draw_train). Reuse the same slots so a bus/truck faces
-        // the way it moves instead of showing an unrelated (vertical) sprite.
-        const int sprite_code = game->assets.trainSpriteDirectionTable
-                                    [vehicle.carType]
-                                    [kTrainSpriteSlotByRoadDirection[road_direction]];
-        if (sprite_code < 0 || sprite_code >= kTileSpriteCodeCount) continue;
-        const int sprite_index =
-            unsigned_byte(game->assets.tileSpriteIndex[sprite_code]);
-        if (sprite_index >= static_cast<int>(game->assets.tile_sprites.size())
-            || !game->assets.tile_sprites[sprite_index])
-            continue;
-        const RoadPoint anchor = kSpriteAnchorByRoadDirection[road_direction];
-        midp_draw_image(graphics, game->assets.tile_sprites[sprite_index].get(),
-                        screen_x + anchor.x, screen_y + anchor.y, 33);
-    }
+// One bus/truck: reuse the rail wagon sprites -- pick the carType's direction
+// row and blit the facing sprite at the phase-interpolated position between
+// the two tiles it is between. render_map calls this from the tile sweep at
+// the vehicle's depth_tile(), so buildings south of the vehicle cover it
+// instead of the vehicle driving over them (the same depth rule trains get).
+void Game::draw_road_vehicle(Surface& surface,
+                             const RoadVehicle& vehicle) const {
+    if (!vehicle.active()) return;
+    const RoadPoint from_point = vehicle.from_tile();
+    const RoadPoint to_point = vehicle.to_tile();
+    if (!world.in_bounds(from_point.x, from_point.y)
+        || !world.in_bounds(to_point.x, to_point.y)
+        || vehicle.phase < 0
+        || vehicle.phase >= RoadVehicle::kStepsPerTile)
+        return;
+    const int road_direction =
+        road_direction_between(from_point, to_point);
+    if (road_direction < 0
+        || vehicle.carType < 0
+        || vehicle.carType >= kTrainSpriteTypeCount)
+        return;
+    int from_screen_x = 0;
+    int from_screen_y = 0;
+    int to_screen_x = 0;
+    int to_screen_y = 0;
+    road_tile_screen(from_point.x, from_point.y, from_screen_x,
+                     from_screen_y);
+    road_tile_screen(to_point.x, to_point.y, to_screen_x, to_screen_y);
+    const int screen_x = from_screen_x
+                         + (to_screen_x - from_screen_x) * vehicle.phase
+                               / RoadVehicle::kStepsPerTile;
+    const int screen_y = from_screen_y
+                         + (to_screen_y - from_screen_y) * vehicle.phase
+                               / RoadVehicle::kStepsPerTile;
+    // trainSpriteDirectionTable has 8 sprite slots per car; a train picks
+    // slots 1/5/3/7 for travel in the +x/-x/+y/-y map directions
+    // (see Renderer::draw_train). Reuse the same slots so a bus/truck faces
+    // the way it moves instead of showing an unrelated (vertical) sprite.
+    const int sprite_code = assets.trainSpriteDirectionTable
+                                [vehicle.carType]
+                                [kTrainSpriteSlotByRoadDirection[road_direction]];
+    if (sprite_code < 0 || sprite_code >= kTileSpriteCodeCount) return;
+    const int sprite_index =
+        unsigned_byte(assets.tileSpriteIndex[sprite_code]);
+    if (sprite_index >= static_cast<int>(assets.tile_sprites.size())
+        || !assets.tile_sprites[sprite_index])
+        return;
+    const RoadPoint anchor = kSpriteAnchorByRoadDirection[road_direction];
+    midp_draw_image(&surface, assets.tile_sprites[sprite_index].get(),
+                    screen_x + anchor.x, screen_y + anchor.y, 33);
 }
