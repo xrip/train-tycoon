@@ -25,6 +25,13 @@ struct Assets {
     // (falls back to the loaded sprite_image_map row if the index is unbound).
     std::vector<int8_t> index_text_codes(int32_t semantic_index) const;
 
+    // Y offset for the raised-track pieces (codes 77..80), from the slots they
+    // share with the slope codes in tileSpriteYOffsetByCode.
+    int8_t raised_track_y_offset(int32_t tile_code) const {
+        return tileSpriteYOffsetByCode[track_turn_tile::kFirstYOffsetSlot
+                                       + tile_code - track_turn_tile::VariantA];
+    }
+
     std::vector<int8_t> spriteIndexTable;
     Grid<int8_t> spriteBitmapTable;
     int8_t tileSpriteIndex[kTileSpriteCodeCount]{};

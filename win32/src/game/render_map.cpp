@@ -131,9 +131,7 @@ void Game::redraw_static_map_if_needed(int32_t origin_x, int32_t origin_y) {
             if (tile_code >= construction_tile_sprite::kFirstCode
                 && tile_code <= construction_tile_sprite::kLastYOffsetCode) {
                 midp_draw_image(backbuffer, game->assets.tile_sprites[game->assets.tileSpriteIndex[tile_code]].get(),
-                                draw_x, draw_y + game->assets.tileSpriteYOffsetByCode[
-                                    tile_code - construction_tile_sprite::kFirstCode
-                                    - tile::SLOPE_FIRST],
+                                draw_x, draw_y + game->assets.raised_track_y_offset(tile_code),
                                 map_render_geometry::kTileImageAnchorFlags);
             }
             if (tile_code >= construction_tile_sprite::kLastYOffsetCode

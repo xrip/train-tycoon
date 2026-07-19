@@ -473,6 +473,9 @@ enum Id : int32_t {
     VariantC = 79,
     VariantD = 80,
 };
+// The four raised-track pieces reuse y-offset table slots 18..21 (the original
+// game indexes tileSpriteYOffsetByCode[code - 59]).
+inline constexpr int32_t kFirstYOffsetSlot = 18;
 }  // namespace track_turn_tile
 
 // Neutral tile roles used by path finding and the track-piece builder. The

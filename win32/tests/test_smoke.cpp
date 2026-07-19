@@ -1553,6 +1553,23 @@ TEST_CASE("fast: game music rules use a silent output") {
     delete game;
 }
 
+TEST_CASE("fast: raised-track tiles reuse slope y-offset slots 18..21") {
+    // Regression: a rename once indexed tileSpriteYOffsetByCode with
+    // code - 77 - 3, reading out of bounds for codes 77..79 and the wrong slot
+    // for 80. The original game reads slots 18..21 (index code - 59).
+    Assets assets;
+    for (int i = 0; i < kTileYOffsetCount; ++i)
+        assets.tileSpriteYOffsetByCode[i] = static_cast<int8_t>(i + 1);
+    CHECK(assets.raised_track_y_offset(track_turn_tile::VariantA)
+          == assets.tileSpriteYOffsetByCode[18]);
+    CHECK(assets.raised_track_y_offset(track_turn_tile::VariantB)
+          == assets.tileSpriteYOffsetByCode[19]);
+    CHECK(assets.raised_track_y_offset(track_turn_tile::VariantC)
+          == assets.tileSpriteYOffsetByCode[20]);
+    CHECK(assets.raised_track_y_offset(track_turn_tile::VariantD)
+          == assets.tileSpriteYOffsetByCode[21]);
+}
+
 TEST_CASE("full: all scenario maps have fixed digests") {
     constexpr std::array<std::uint64_t, 13> expected{
         4307122233410706396ULL,
